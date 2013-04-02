@@ -1,6 +1,5 @@
 from __future__ import division
 import numpy as np
-import random as rd
 import math
     
 # Generate N x D matrix of extended FAST samples (Saltelli 1999)
@@ -15,7 +14,7 @@ def sample(N, D, M = 4):
     else:
         omega[1:] = np.arange(D-1) % m + 1
 
-    # Discretization of the frequency (?) space, s
+    # Discretization of the frequency space, s
     s = (2 * math.pi / N) * np.arange(N)
     
     # Transformation to get points in the X space
