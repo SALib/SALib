@@ -13,7 +13,8 @@ np.random.seed(seed)
 rd.seed(seed)
 
 # Read in parameter range file and generate samples
-pf = read_param_file('SGParams.txt')
+param_file = './SALib/test_functions/Sobol_G_Params.txt'
+pf = read_param_file(param_file)
 param_values = fast_sampler.sample(500, pf['num_vars'])
 scale_samples(param_values, pf['bounds'])
 
@@ -23,4 +24,4 @@ np.savetxt("SGOutput.txt", Y, delimiter=' ')
 
 # Perform FAST analysis on model output
 # Specify column of the output file to analyze (zero-indexed)
-extended_fast.analyze('SGParams.txt', 'SGOutput.txt', column = 0)
+extended_fast.analyze(param_file, 'SGOutput.txt', column = 0)

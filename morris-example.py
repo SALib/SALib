@@ -13,7 +13,8 @@ np.random.seed(seed)
 rd.seed(seed)
 
 # Read in parameter range file and generate samples
-pf = read_param_file('SGParams.txt')
+param_file = './SALib/test_functions/Sobol_G_Params.txt'
+pf = read_param_file(param_file)
 param_values = morris_oat.sample(20, pf['num_vars'], 10, 5)
 scale_samples(param_values, pf['bounds'])
 
@@ -26,4 +27,4 @@ np.savetxt("SGOutput.txt", Y, delimiter=' ')
 
 # Perform Morris analysis using both model input and output
 # Specify column of the output file to analyze (zero-indexed)
-morris.analyze('SGParams.txt', 'SGInput.txt', 'SGOutput.txt', column = 0)
+morris.analyze(param_file, 'SGInput.txt', 'SGOutput.txt', column = 0)

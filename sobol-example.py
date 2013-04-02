@@ -14,7 +14,8 @@ np.random.seed(seed)
 rd.seed(seed)
 
 # Read the parameter range file and generate samples
-pf = read_param_file('SGParams.txt')
+param_file = './SALib/test_functions/Sobol_G_Params.txt'
+pf = read_param_file(param_file)
 param_values = saltelli.sample(10, pf['num_vars'])#, calc_second_order = False)
 scale_samples(param_values, pf['bounds'])
 
@@ -25,4 +26,4 @@ np.savetxt("SGOutput.txt", Y, delimiter=' ')
 
 # Perform the sensitivity analysis using the model output
 # Specify which column of the output file to analyze (zero-indexed)
-sobol.analyze('SGParams.txt', 'SGOutput.txt', column = 0)#, calc_second_order = False)
+sobol.analyze(param_file, 'SGOutput.txt', column = 0)#, calc_second_order = False)
