@@ -11,7 +11,7 @@ python -B -m SALib.sample \
 	   -p ./SALib/test_functions/Sobol_G_Params.txt \
 	   -o my_samples_file.txt \
 	   --delimiter=' ' \
-	   --precision 8
+	   --precision=8 \
 
 # Options:
 # -p, --paramfile: Your parameter range file (3 columns: parameter name, lower bound, upper bound)
@@ -36,4 +36,11 @@ python -B -m SALib.sample \
 #						  Comma-delimited: --delimiter=','
 #						  Tab-delimited: --delimiter=$'\t'
 #
-# --precision (optional): Digits of precision in the output file. Default = 8.
+# --precision (optional): Digits of precision in the output file. Default is 8.
+#
+# --saltelli-max-order (optional): Maximum order of indices to calculate. Only applies for -m saltelli. Choose 1 or 2, default is 2. 
+#								   Choosing 1 will reduce total model runs from N(2D + 2) to N(D + 2)
+#
+# --morris-num-levels (optional): Number of levels in the OAT sampling. Only applies for -m morris. Default is 10.
+#
+# --morris-grid-jump (optional): Grid jump size in the OAT sampling. Only applies for -m morris. Default is 5.

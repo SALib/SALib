@@ -13,7 +13,11 @@ parser.add_argument('-o', '--output', type=str, required=True, help='Output File
 parser.add_argument('-s', '--seed', type=int, required=False, default=1, help='Random Seed')
 parser.add_argument('--delimiter', type=str, required=False, default=' ', help='Column delimiter')
 parser.add_argument('--precision', type=int, required=False, default=8, help='Output floating-point precision')
+parser.add_argument('--saltelli-max-order', type=int, required=False, default=2, choices=[1, 2], help='Maximum order of sensitivity indices to calculate (Saltelli only)')
+parser.add_argument('--morris-num-levels', type=int, required=False, default=10, help='Number of grid levels (Morris only)')
+parser.add_argument('--morris-grid-jump', type=int, required=False, default=5, help='Grid jump size (Morris only)')
 args = parser.parse_args()
+
 
 np.random.seed(args.seed)
 rd.seed(args.seed)
@@ -27,7 +31,10 @@ elif args.method == 'normal':
 elif args.method == 'latin':
     param_values = latin_hypercube.sample(args.samples, pf['num_vars'])
 elif args.method == 'saltelli':
-    param_values = saltelli.sample(args.samples, pf['num_vars'])
+    if args.saltelli_max_order == 2:
+        param_values = saltelli.sample(args.samples, pf['num_vars'], calc_second_order = True)
+    else:
+        param_values = saltelli.sample(args.samples, pf['num_vars'], calc_second_order = False)
 elif args.method == 'morris':
     param_values = morris_oat.sample(args.samples, pf['num_vars'])
 elif args.method == 'fast':
