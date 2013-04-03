@@ -26,7 +26,7 @@ param_values = saltelli.sample(10, pf['num_vars'], calc_second_order = True)
 # param_values = morris_oat.sample(20, pf['num_vars'], num_levels = 10, grid_jump = 5)
 # param_values = fast_sampler.sample(500, pf['num_vars'])
 
-# Samples are given in range [0, 1] by default. Rescale them to your parameter bounds.
+# Samples are given in range [0, 1] by default. Rescale them to your parameter bounds. (If using normal distributions, use "scale_samples_normal" instead)
 scale_samples(param_values, pf['bounds'])
 
 # For Method of Morris, save the parameter values in a file (they are needed in the analysis)
