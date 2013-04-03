@@ -1,12 +1,12 @@
-from SALib import read_param_file
-from SALib.sample import saltelli, morris_oat, fast_sampler, scale_samples
-from SALib.test_functions import Sobol_G
+from SALib.sample import saltelli, morris_oat, fast_sampler
 from SALib.analyze import sobol, morris, extended_fast
+from SALib.test_functions import Sobol_G
+from SALib.util import scale_samples, read_param_file
 import numpy as np
 import random as rd
 
 # Example: Run Sobol, Morris, or FAST on a test function (Sobol G Function)
-# Second order indices are optional, turned on by default
+# The parameters shown for each method are also the default values if omitted
 
 # Set random seed
 seed = 1

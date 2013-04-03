@@ -1,5 +1,5 @@
 from __future__ import division
-from .. import *
+from ..util import read_param_file
 from sys import exit
 import numpy as np
 import math
