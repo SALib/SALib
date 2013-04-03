@@ -31,10 +31,8 @@ elif args.method == 'normal':
 elif args.method == 'latin':
     param_values = latin_hypercube.sample(args.samples, pf['num_vars'])
 elif args.method == 'saltelli':
-    if args.saltelli_max_order == 2:
-        param_values = saltelli.sample(args.samples, pf['num_vars'], calc_second_order = True)
-    else:
-        param_values = saltelli.sample(args.samples, pf['num_vars'], calc_second_order = False)
+    calc_second_order = (args.saltelli_max_order == 2)
+    param_values = saltelli.sample(args.samples, pf['num_vars'], calc_second_order)
 elif args.method == 'morris':
     param_values = morris_oat.sample(args.samples, pf['num_vars'])
 elif args.method == 'fast':

@@ -5,10 +5,10 @@ import numpy as np
 import math
 
 # Perform Sobol Analysis on file of model results
-def analyze(pfile, output_file, column = 0, num_resamples = 1000, calc_second_order = True):
+def analyze(pfile, output_file, column = 0, calc_second_order = True, num_resamples = 1000, delim = ' '):
     
     param_file = read_param_file(pfile)
-    Y = np.loadtxt(output_file)
+    Y = np.loadtxt(output_file, delimiter = delim)
     
     if Y.ndim > 1:
         Y = Y[:, column]

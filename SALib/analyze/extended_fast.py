@@ -5,10 +5,10 @@ import numpy as np
 import math
 
 # Perform FAST Analysis on file of model results
-def analyze(pfile, output_file, M = 4, column = 0, num_resamples = 1000):
+def analyze(pfile, output_file, column = 0, M = 4, num_resamples = 1000, delim = ' '):
     
     param_file = read_param_file(pfile)
-    Y = np.loadtxt(output_file)
+    Y = np.loadtxt(output_file, delimiter = delim)
     D = param_file['num_vars']
     
     if Y.ndim > 1:

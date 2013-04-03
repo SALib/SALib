@@ -4,11 +4,11 @@ from sys import exit
 import numpy as np
 
 # Perform Morris Analysis on file of model results
-def analyze(pfile, input_file, output_file, column = 0, num_resamples = 1000):
+def analyze(pfile, input_file, output_file, column = 0, delim = ' '):
     
     param_file = read_param_file(pfile)
-    Y = np.loadtxt(output_file)
-    X = np.loadtxt(input_file)
+    Y = np.loadtxt(output_file, delimiter = delim)
+    X = np.loadtxt(input_file, delimiter = delim)
     
     if Y.ndim > 1:
         Y = Y[:, column]
@@ -49,19 +49,19 @@ def analyze(pfile, input_file, output_file, column = 0, num_resamples = 1000):
         print "%s %f %f %f" % (param_file['names'][j], mu, sigma, mu_star)
         
 
-def compute_mu_star_confidence(ee, N, num_resamples):
-    
-    ee_resampled = np.empty([N])
-    mu_star_resampled  = np.empty([num_resamples])
-    
-    for i in range(num_resamples):
-        for j in range(N):
-            
-            index = np.random.randint(0, N)
-            ee_resampled[j] = ee[index]
-        
-        mu_star_resampled[i] = np.average(np.abs(ee_resampled))
-    
-    return 1.96 * mu_star_resampled.std(ddof=1)
+#def compute_mu_star_confidence(ee, N, num_resamples):
+#    
+#    ee_resampled = np.empty([N])
+#    mu_star_resampled  = np.empty([num_resamples])
+#    
+#    for i in range(num_resamples):
+#        for j in range(N):
+#            
+#            index = np.random.randint(0, N)
+#            ee_resampled[j] = ee[index]
+#        
+#        mu_star_resampled[i] = np.average(np.abs(ee_resampled))
+#    
+#    return 1.96 * mu_star_resampled.std(ddof=1)
     
         

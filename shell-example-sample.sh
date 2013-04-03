@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Generate sensitivity analysis samples from the command line
-# To run: ./sample-example.sh
+# To run: ./shell-example-sample.sh
 # Note that "python -m" runs the __main__ module in the SALib.sample package
 # The -B flag prevents the interpreter from compiling bytecode (.pyc files)
 
