@@ -1,9 +1,8 @@
 import numpy as np
 import random as rd
 import argparse
-from .. import read_param_file
+from ..util import read_param_file, scale_samples
 import uniform, normal, latin_hypercube, saltelli, morris_oat, fast_sampler
-from . import scale_samples
 
 parser = argparse.ArgumentParser(description='Create parameter samples for sensitivity analysis')
 

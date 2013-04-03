@@ -3,12 +3,13 @@
 # Generate sensitivity analysis samples from the command line
 # To run: ./sample-example.sh
 # Note that "python -m" runs the __main__ module in the SALib.sample package
+# The -B flag prevents the interpreter from compiling bytecode (.pyc files)
 
-python -m SALib.sample \
+python -B -m SALib.sample \
 	   -m saltelli \
 	   -n 100 \
 	   -p ./SALib/test_functions/Sobol_G_Params.txt \
-	   -o my_output_file.txt \
+	   -o my_samples_file.txt \
 	   --delimiter=' ' \
 	   --precision 8
 

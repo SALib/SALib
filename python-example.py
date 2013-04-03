@@ -1,3 +1,7 @@
+# Optional - turn off bytecode (.pyc files)
+import sys
+sys.dont_write_bytecode = True
+
 from SALib.sample import saltelli, morris_oat, fast_sampler
 from SALib.analyze import sobol, morris, extended_fast
 from SALib.test_functions import Sobol_G
