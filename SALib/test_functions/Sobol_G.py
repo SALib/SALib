@@ -1,6 +1,14 @@
 from __future__ import division
 import numpy as np
 
+# Non-monotonic Sobol G Function (8 parameters)
+# First-order indices:
+# x1: 0.7165
+# x2: 0.1791
+# x3: 0.0237
+# x4: 0.0072
+# x5-x8: 0.0001
+
 num_vars = 8
 lower_bounds = [0, 0, 0, 0, 0, 0, 0, 0]
 upper_bounds = [1, 1, 1, 1, 1, 1, 1, 1]

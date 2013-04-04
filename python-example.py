@@ -12,13 +12,13 @@ import random as rd
 # Example: Run Sobol, Morris, or FAST on a test function (Sobol G Function)
 # The parameters shown for each method are also the default values if omitted
 
-# Set random seed
+# Set random seed (does not affect quasi-random Sobol sampling)
 seed = 1
 np.random.seed(seed)
 rd.seed(seed)
 
 # Read the parameter range file and generate samples
-param_file = './SALib/test_functions/Sobol_G_Params.txt'
+param_file = './SALib/test_functions/params/Sobol_G.txt'
 pf = read_param_file(param_file)
 
 # Generate samples (choose method here)

@@ -8,7 +8,7 @@
 python -B -m SALib.sample \
 	   -m saltelli \
 	   -n 100 \
-	   -p ./SALib/test_functions/Sobol_G_Params.txt \
+	   -p ./SALib/test_functions/params/Sobol_G.txt \
 	   -o my_samples_file.txt \
 	   --delimiter=' ' \
 	   --precision=8 \
