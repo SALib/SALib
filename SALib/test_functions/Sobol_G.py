@@ -9,10 +9,6 @@ import numpy as np
 # x4: 0.0072
 # x5-x8: 0.0001
 
-num_vars = 8
-lower_bounds = [0, 0, 0, 0, 0, 0, 0, 0]
-upper_bounds = [1, 1, 1, 1, 1, 1, 1, 1]
-
 def evaluate(values):
     a = [0, 1, 4.5, 9, 99, 99, 99, 99]
     Y = np.empty([values.shape[0]])
