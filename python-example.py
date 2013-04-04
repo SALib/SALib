@@ -31,7 +31,7 @@ scale_samples(param_values, pf['bounds'])
 
 # For Method of Morris, save the parameter values in a file (they are needed in the analysis)
 # FAST and Sobol do not require this step, unless you want to save samples to input into an external model
-# np.savetxt('SGInput.txt', param_values, delimiter=' ')
+np.savetxt('SGInput.txt', param_values, delimiter=' ')
 
 # Run the "model" and save the output in a text file
 # This will happen offline for external models
