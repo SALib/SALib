@@ -27,10 +27,12 @@ python -B -m SALib.sample \
 #				 Latin: N
 #				 Saltelli: N(2D + 2) if calculating second-order indices (default) or N(D + 2) otherwise.						
 #				 Morris: N(D + 1)
-#				 FAST: ND
+#				 FAST: ND ; must choose N > 4M^2 (N > 64 under default settings)
 #
-# -o, --output: File to output your samples into
+# -o, --output: File to output your samples into.
 #
+# -s, --seed: Random seed (optional). Will only affect results for Method of Morris.
+# 
 # --delimiter (optional): Output file delimiter. Common choices:
 #						  Space-delimited (default): --delimiter=' '
 #						  Comma-delimited: --delimiter=','
@@ -40,6 +42,7 @@ python -B -m SALib.sample \
 #
 # --saltelli-max-order (optional): Maximum order of indices to calculate. Only applies for -m saltelli. Choose 1 or 2, default is 2. 
 #								   Choosing 1 will reduce total model runs from N(2D + 2) to N(D + 2)
+#								   Must use the same value (either 1 or 2) for both sampling and analysis.
 #
 # --morris-num-levels (optional): Number of levels in the OAT sampling. Only applies for -m morris. Default is 10.
 #
