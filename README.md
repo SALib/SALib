@@ -20,7 +20,7 @@ There are two ways to run the library: as a decoupled process from the command l
 
 For most applications, it will be helpful to run three separate processes: sampling, evaluation, and analysis. This approach is strongly recommended for users whose applications do not require modifications to the sampling/analysis routines. Steps:
 
-1. Perform sampling (see `shell-example-sample.sh` for an example). Choose a method and a number of samples, along with other important options as shown in the file.
+Step 1: Perform sampling (see `shell-example-sample.sh` for an example). Choose a method and a number of samples, along with other important options as shown in the file.
 ```
 python -B -m SALib.sample \
 	   -m saltelli \
@@ -67,9 +67,9 @@ Note that `python -m` runs the `__main__` module in the `SALib.sample` package. 
 The parameter samples will be saved in the file specified by the `-o` flag. The file will contain `D` columns, one for each parameter.
 
 
-2. Perform model evaluations using the file of samples. This occurs independently of this library, other than the fact that you can specify a delimiter during sampling which might simplify the process of reading the parameter samples into your model. Save model output(s) of interest to a file and proceed.
+Step 2: Perform model evaluations using the file of samples. This occurs independently of this library, other than the fact that you can specify a delimiter during sampling which might simplify the process of reading the parameter samples into your model. Save model output(s) of interest to a file and proceed.
 
-3. Perform analysis of the model output (see `shell-analyze-sample.sh` for an example). The analysis routines return measures of parameter sensitivity. It will print to the terminal by default; you may want to redirect output to a file using the `>` operator.
+Step 3: Perform analysis of the model output (see `shell-analyze-sample.sh` for an example). The analysis routines return measures of parameter sensitivity. It will print to the terminal by default; you may want to redirect output to a file using the `>` operator.
 ```
 python -B -m SALib.analyze \
 	   -m sobol \
