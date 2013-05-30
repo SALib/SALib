@@ -7,7 +7,7 @@
 
 python -B -m SALib.analyze \
 	   -m sobol \
-	   -p ./SALib/test_functions/Sobol_G_Params.txt \
+	   -p ./SALib/test_functions/params/Sobol_G.txt \
 	   -Y SGOutput.txt \
 	   -c 0 \
 
@@ -17,9 +17,7 @@ python -B -m SALib.analyze \
 # Options:
 # -p, --paramfile: Your parameter range file (3 columns: parameter name, lower bound, upper bound)
 #
-# -m, --method: Choose one of {uniform, normal, latin, saltelli, morris, fast}
-#				All methods except "normal" assume the ranges are (lower bound, upper bound)
-#				"normal" assumes the ranges are (mean, standard deviation)
+# -m, --method: Choose one of {sobol, morris, fast}. Must correspond to the method chosen during sampling.
 #
 # -Y, --model-output-file: File of model output values to analyze
 #
