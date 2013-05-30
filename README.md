@@ -19,7 +19,7 @@ There are two ways to run the library: as a decoupled process from the command l
 
 For most applications, it will be helpful to run three separate processes: sampling, evaluation, and analysis. This approach is strongly recommended for users whose applications do not require modifications to the sampling/analysis routines. Steps:
 
-**Step 1**: Perform sampling (see `shell-example-sample.sh` for an example). Choose a method and a number of samples, along with other important options as shown in the file.
+**Step 1:** Perform sampling (see `shell-example-sample.sh` for an example). Choose a method and a number of samples, along with other important options as shown in the file.
 ```
 python -B -m SALib.sample \
 	   -m saltelli \
@@ -36,7 +36,7 @@ Note that `python -m` runs the `__main__` module in the `SALib.sample` package. 
 
 * `-m, --method`: Required. Choose one of `{uniform, normal, latin, saltelli, morris, fast}`. All methods except `normal` assume the ranges are (lower bound, upper bound); `normal` assumes the ranges are (mean, standard deviation). The methods `saltelli`, `morris`, and `fast` correspond to the analysis methods `sobol`, `morris`, and `fast`, respectively. 
 
-* `-n, --samples`: Sample size (required). The sample sizes generated for each method are as follows (where `D` is the number of parameters):
+* `-n, --samples`: Sample size (required). The sample sizes generated for each method are as follows (where `D` is the number of parameters and `N` is the sample size):
 	* Uniform: `N`
 	* Normal: `N`
 	* Latin: `N`
@@ -55,7 +55,7 @@ Note that `python -m` runs the `__main__` module in the `SALib.sample` package. 
 
 * `--precision`: Digits of precision in the output file (optional). Default is 8.
 
-* `--saltelli-max-order`: Maximum order of indices to calculate (optional). Only applies for `-m saltelli`. Choose 1 or 2 (default 2). 
+* `--saltelli-max-order`: Maximum order of indices to calculate (optional). Only applies for `-m saltelli`. Choose 1 or 2 (default is 2). 
 	* Choosing 1 will reduce total model runs from `N(2D + 2)` to `N(D + 2)`
 	* Must use the same value (either 1 or 2) for both sampling and analysis.
 
@@ -66,9 +66,9 @@ Note that `python -m` runs the `__main__` module in the `SALib.sample` package. 
 The parameter samples will be saved in the file specified by the `-o` flag. The file will contain `D` columns, one for each parameter.
 
 
-**Step 2**: Perform model evaluations using the file of samples. This occurs independently of this library, other than the fact that you can specify a delimiter during sampling which might simplify the process of reading the parameter samples into your model. Save model output(s) of interest to a file and proceed.
+**Step 2:** Perform model evaluations using the file of samples. This occurs independently of this library, other than the fact that you can specify a delimiter during sampling which might simplify the process of reading the parameter samples into your model. Save model output(s) of interest to a file and proceed.
 
-**Step 3**: Perform analysis of the model output (see `shell-analyze-sample.sh` for an example). The analysis routines return measures of parameter sensitivity. It will print to the terminal by default; you may want to redirect output to a file using the `>` operator.
+**Step 3:** Perform analysis of the model output (see `shell-analyze-sample.sh` for an example). The analysis routines return measures of parameter sensitivity. It will print to the terminal by default; you may want to redirect output to a file using the `>` operator.
 ```
 python -B -m SALib.analyze \
 	   -m sobol \
@@ -91,7 +91,7 @@ Options:
 	* Comma-delimited: `--delimiter=','`
 	* Tab-delimited: `--delimiter=$'\t'`
 
-* `--sobol-max-order`: Maximum order of indices to calculate (optional). Only applies for `-m sobol`. Choose 1 or 2, default is 2. *This must match the value chosen during sampling*.
+* `--sobol-max-order`: Maximum order of indices to calculate (optional). Only applies for `-m sobol`. Choose 1 or 2 (default is 2). *This must match the value chosen during sampling*.
 
 * `-X, --morris-model-input`: Required for Method of Morris only. File of model input values (parameter samples).
 
