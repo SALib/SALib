@@ -1,7 +1,6 @@
 Sensitivity Analysis Library
-============================
-Python implementations of Sobol, Method of Morris, and FAST methods
-----------------------------
+===============================
+###Python implementations of Sobol, Method of Morris, and FAST methods
 
 This library provides sampling and analysis routines for commonly used sensitivity analysis methods. These are typically applied in model diagnostics to understand the effects of model parameters on outputs of interest. Requires [NumPy](http://www.numpy.org/).
 
@@ -20,7 +19,7 @@ There are two ways to run the library: as a decoupled process from the command l
 
 For most applications, it will be helpful to run three separate processes: sampling, evaluation, and analysis. This approach is strongly recommended for users whose applications do not require modifications to the sampling/analysis routines. Steps:
 
-Step 1: Perform sampling (see `shell-example-sample.sh` for an example). Choose a method and a number of samples, along with other important options as shown in the file.
+**Step 1**: Perform sampling (see `shell-example-sample.sh` for an example). Choose a method and a number of samples, along with other important options as shown in the file.
 ```
 python -B -m SALib.sample \
 	   -m saltelli \
@@ -56,7 +55,7 @@ Note that `python -m` runs the `__main__` module in the `SALib.sample` package. 
 
 * `--precision`: Digits of precision in the output file (optional). Default is 8.
 
-* `--saltelli-max-order`: Maximum order of indices to calculate (optional). Only applies for -m saltelli. Choose 1 or 2. Default is 2. 
+* `--saltelli-max-order`: Maximum order of indices to calculate (optional). Only applies for `-m saltelli`. Choose 1 or 2 (default 2). 
 	* Choosing 1 will reduce total model runs from `N(2D + 2)` to `N(D + 2)`
 	* Must use the same value (either 1 or 2) for both sampling and analysis.
 
@@ -67,9 +66,9 @@ Note that `python -m` runs the `__main__` module in the `SALib.sample` package. 
 The parameter samples will be saved in the file specified by the `-o` flag. The file will contain `D` columns, one for each parameter.
 
 
-Step 2: Perform model evaluations using the file of samples. This occurs independently of this library, other than the fact that you can specify a delimiter during sampling which might simplify the process of reading the parameter samples into your model. Save model output(s) of interest to a file and proceed.
+**Step 2**: Perform model evaluations using the file of samples. This occurs independently of this library, other than the fact that you can specify a delimiter during sampling which might simplify the process of reading the parameter samples into your model. Save model output(s) of interest to a file and proceed.
 
-Step 3: Perform analysis of the model output (see `shell-analyze-sample.sh` for an example). The analysis routines return measures of parameter sensitivity. It will print to the terminal by default; you may want to redirect output to a file using the `>` operator.
+**Step 3**: Perform analysis of the model output (see `shell-analyze-sample.sh` for an example). The analysis routines return measures of parameter sensitivity. It will print to the terminal by default; you may want to redirect output to a file using the `>` operator.
 ```
 python -B -m SALib.analyze \
 	   -m sobol \
@@ -81,7 +80,7 @@ python -B -m SALib.analyze \
 Options:
 * `-p, --paramfile`: Required. Your parameter range file (3 columns: parameter name, lower bound, upper bound).
 
-* `-m, --method`: Required. Choose one of `{sobol, morris, fast}`. Must correspond to the method chosen during sampling.
+* `-m, --method`: Required. Choose one of `{sobol, morris, fast}`. *Must correspond to the method chosen during sampling*.
 
 * `-Y, --model-output-file`: Required. File of model output values to analyze.
 
@@ -92,7 +91,7 @@ Options:
 	* Comma-delimited: `--delimiter=','`
 	* Tab-delimited: `--delimiter=$'\t'`
 
-* `--sobol-max-order`: Maximum order of indices to calculate (optional). Only applies for `-m sobol`. Choose 1 or 2, default is 2. This must match the value chosen during sampling.
+* `--sobol-max-order`: Maximum order of indices to calculate (optional). Only applies for `-m sobol`. Choose 1 or 2, default is 2. *This must match the value chosen during sampling*.
 
 * `-X, --morris-model-input`: Required for Method of Morris only. File of model input values (parameter samples).
 
@@ -102,6 +101,7 @@ Options:
 ### Python Interface
 The library can also be used directly from a Python script. This approach has more of a learning curve and is only recommended for users who need to customize sampling and/or analysis processes for their applications. Refer to `python-example.py` for an example of how each of the methods are invoked from Python.
 
+### License
 Copyright (C) 2013 Jon Herman, Patrick Reed and others. Licensed under the GNU Lesser General Public License.
 
 The Sensitivity Analysis Library is free software: you can redistribute it and/or modify
