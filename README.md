@@ -1,6 +1,5 @@
-Sensitivity Analysis Library
-===============================
-###Python implementations of Sobol, Method of Morris, and FAST methods
+##Sensitivity Analysis Library
+####Python implementations of Sobol, Method of Morris, and FAST sensitivity analysis methods
 
 This library provides sampling and analysis routines for commonly used sensitivity analysis methods. These are typically applied in model diagnostics to understand the effects of model parameters on outputs of interest. Requires [NumPy](http://www.numpy.org/).
 
@@ -84,7 +83,7 @@ Options:
 
 * `-Y, --model-output-file`: Required. File of model output values to analyze.
 
-* `-c, --column`: Column of model output file to analyze (optional). If the file only has one column, this argument will be ignored.
+* `-c, --column`: Column of model output file to analyze (optional, default is zero). If the file only has one column, this argument will be ignored.
 
 * `--delimiter`: Model output file delimiter (optional). Common choices:
 	* Space-delimited (default): `--delimiter=' '`
