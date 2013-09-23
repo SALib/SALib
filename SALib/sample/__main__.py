@@ -34,7 +34,7 @@ elif args.method == 'saltelli':
     calc_second_order = (args.saltelli_max_order == 2)
     param_values = saltelli.sample(args.samples, pf['num_vars'], calc_second_order)
 elif args.method == 'morris':
-    param_values = morris_oat.sample(args.samples, pf['num_vars'])
+    param_values = morris_oat.sample(args.samples, pf['num_vars'], args.morris_num_levels, args.morris_grid_jump)
 elif args.method == 'fast':
     param_values = fast_sampler.sample(args.samples, pf['num_vars'])
 
