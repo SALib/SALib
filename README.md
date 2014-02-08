@@ -45,7 +45,7 @@ Note that `python -m` runs the `__main__` module in the `SALib.sample` package. 
 
 * `-o, --output`: File to output your samples into (required).
 
-* `-s, --seed`: Random seed (optional). Will only affect results for Method of Morris.
+* `-s, --seed`: Random seed (optional). Will not affect Sobol method as it uses quasi-random sampling.
  
 * `--delimiter`: Output file delimiter (optional). Common choices:
 	* Space-delimited (default): `--delimiter=' '`
