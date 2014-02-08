@@ -31,7 +31,7 @@ def sample(N, D, M = 4):
         phi = 2*math.pi*np.random.rand()
         
         for j in range(D):
-            g = 0.5 + (1/math.pi) * np.arcsin(np.sin(omega2[j] * s))
+            g = 0.5 + (1/math.pi) * np.arcsin(np.sin(omega2[j] * s) + phi)
             X[l,j] = g
         
     return X
