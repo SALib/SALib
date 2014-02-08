@@ -4,7 +4,7 @@ from sys import exit
 import numpy as np
 
 # Perform Morris Analysis on file of model results
-def analyze(pfile, input_file, output_file, column = 0, delim = ' '):
+def analyze(pfile, input_file, output_file, column = 0, delim = ' ', num_resamples = 1000):
     
     param_file = read_param_file(pfile)
     Y = np.loadtxt(output_file, delimiter = delim)
@@ -39,29 +39,29 @@ def analyze(pfile, input_file, output_file, column = 0, delim = ' '):
         ee[i,:] = np.linalg.solve((X[j2,:] - X[j1,:]), Y[j2] - Y[j1]) 
     
     # Output the Mu, Mu*, and Sigma Values
-    print "Parameter Mu Sigma Mu_Star"
+    print "Parameter Mu Sigma Mu_Star Mu_Star_Conf"
     for j in range(D):
         mu = np.average(ee[:,j])
         mu_star = np.average(np.abs(ee[:,j]))
         sigma = np.std(ee[:,j])
-        # mu_star_conf = compute_mu_star_confidence(ee[:,j], N, num_resamples)
+        mu_star_conf = compute_mu_star_confidence(ee[:,j], N, num_resamples)
         
-        print "%s %f %f %f" % (param_file['names'][j], mu, sigma, mu_star)
+        print "%s %f %f %f %f" % (param_file['names'][j], mu, sigma, mu_star, mu_star_conf)
         
 
-#def compute_mu_star_confidence(ee, N, num_resamples):
-#    
-#    ee_resampled = np.empty([N])
-#    mu_star_resampled  = np.empty([num_resamples])
-#    
-#    for i in range(num_resamples):
-#        for j in range(N):
-#            
-#            index = np.random.randint(0, N)
-#            ee_resampled[j] = ee[index]
-#        
-#        mu_star_resampled[i] = np.average(np.abs(ee_resampled))
-#    
-#    return 1.96 * mu_star_resampled.std(ddof=1)
+def compute_mu_star_confidence(ee, N, num_resamples):
+   
+   ee_resampled = np.empty([N])
+   mu_star_resampled  = np.empty([num_resamples])
+   
+   for i in range(num_resamples):
+       for j in range(N):
+           
+           index = np.random.randint(0, N)
+           ee_resampled[j] = ee[index]
+       
+       mu_star_resampled[i] = np.average(np.abs(ee_resampled))
+   
+   return 1.96 * mu_star_resampled.std(ddof=1)
     
         
