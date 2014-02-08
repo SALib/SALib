@@ -26,6 +26,9 @@ def sample(N, D, M = 4):
         idx = range(i) + range(i+1,D)
         omega2[idx] = omega[1:]
         l = range(i*N, (i+1)*N)
+
+        # random phase shift on [0, 2pi) following Saltelli et al. Technometrics 1999
+        phi = 2*math.pi*np.random.rand()
         
         for j in range(D):
             g = 0.5 + (1/math.pi) * np.arcsin(np.sin(omega2[j] * s))
