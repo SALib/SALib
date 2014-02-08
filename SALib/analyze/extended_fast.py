@@ -54,37 +54,3 @@ def compute_total_order(outputs, N, omega):
     V = 2*np.sum(Sp)
     Dt = 2*sum(Sp[range(int(omega/2))])
     return (1 - Dt/V)
-    
-#def compute_first_order_confidence(outputs, N, M, omega, num_resamples):
-#    
-#    output_resample = np.empty([N])
-#    s  = np.empty([num_resamples])
-#    
-#    for i in range(num_resamples):
-#        for j in range(N):
-#            
-#            index = np.random.randint(0, N)
-#            output_resample[j] = outputs[index]
-#            
-#        s[i] = compute_first_order(output_resample, N, M, omega)
-#    
-#    return 1.96 * s.mean()#std(ddof=1)
-#
-#def compute_total_order_confidence(a0, a1, a2, N, num_resamples):
-#    
-#    b0 = np.empty([N])
-#    b1 = np.empty([N])
-#    b2 = np.empty([N])
-#    s  = np.empty([num_resamples])
-#    
-#    for i in range(num_resamples):
-#        for j in range(N):
-#            
-#            index = np.random.randint(0, N)
-#            b0[j] = a0[index]
-#            b1[j] = a1[index]
-#            b2[j] = a2[index]
-#        
-#        s[i] = compute_total_order(b0, b1, b2, N)
-#    
-#    return 1.96 * s.std(ddof=1)
