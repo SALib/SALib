@@ -9,6 +9,8 @@ def analyze(pfile, output_file, column = 0, calc_second_order = True, num_resamp
     
     param_file = read_param_file(pfile)
     Y = np.loadtxt(output_file, delimiter = delim)
+
+    if len(Y.shape) == 1: Y = Y.reshape((len(Y),1))
     
     if Y.ndim > 1:
         Y = Y[:, column]
