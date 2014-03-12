@@ -17,7 +17,7 @@ def read_param_file(filename):
 		bounds = []
 		num_vars = 0
 		
-		for row in [line.split() for line in file]:
+		for row in [line.split() for line in file if not line.strip().startswith('#')]:
 			num_vars += 1
 			names.append(row[0])
 			bounds.append([float(row[1]), float(row[2])])

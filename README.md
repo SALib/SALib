@@ -10,7 +10,7 @@ P2 0.0 5.0
 ...etc.
 ```
 
-If the parameters are to be sampled with normal distributions, the lines in the parameter file should read (name, mean, standard deviation). None of the three methods uses normal sampling, but it is included for other user-defined applications.
+If the parameters are to be sampled with normal distributions, the lines in the parameter file should read (name, mean, standard deviation). None of the three methods uses normal sampling, but it is included for other user-defined applications. Note that lines beginning with `#` will be treated as comments and ignored (thanks to [Dan Hyams](https://github.com/dhyams)).
 
 There are two ways to run the library: as a decoupled process from the command line, or from a Python script.
 
