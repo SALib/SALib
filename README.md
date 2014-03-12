@@ -58,9 +58,9 @@ Note that `python -m` runs the `__main__` module in the `SALib.sample` package. 
 	* Choosing 1 will reduce total model runs from `N(2D + 2)` to `N(D + 2)`
 	* Must use the same value (either 1 or 2) for both sampling and analysis.
 
-* `--morris-num-levels`: Number of levels in the OAT sampling (optional). Only applies for `-m morris`. Default is 10.
+* `--morris-num-levels`: Number of levels in the OAT sampling (optional). The range of each variable will be discretized into this many levels. Only applies for `-m morris`. Default is 10.
 
-* `--morris-grid-jump`: Grid jump size in the OAT sampling (optional). Only applies for `-m morris`. Default is 5.
+* `--morris-grid-jump`: Grid jump size in the OAT sampling (optional). Each variable will be perturbed by this number of levels during each trajectory. Only applies for `-m morris`. Default is 5.
 
 The parameter samples will be saved in the file specified by the `-o` flag. The file will contain `D` columns, one for each parameter.
 
