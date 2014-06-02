@@ -2,7 +2,7 @@ from __future__ import division
 import numpy as np
 import random as rd
     
-# Generate N x (D + 1) matrix of Morris samples (OAT)
+# Generate N(D + 1) x D matrix of Morris samples (OAT)
 def sample(N, D, num_levels, grid_jump):
     
     # orientation matrix B: lower triangular (1) + upper triangular (-1)

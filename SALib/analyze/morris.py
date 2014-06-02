@@ -4,7 +4,9 @@ from sys import exit
 import numpy as np
 
 # Perform Morris Analysis on file of model results
-def analyze(pfile, input_file, output_file, column = 0, delim = ' ', num_resamples = 1000):
+#returns a dictionary with keys equal to the parameter labels and values of numpy arrays containing
+#Mu Sigma Mu_Star Mu_Star_Conf in that order.
+def analyze(pfile, input_file, output_file, column = 0, delim = ' ', num_resamples = 1000,conf_level=0.95):
     
     param_file = read_param_file(pfile)
     Y = np.loadtxt(output_file, delimiter = delim)
@@ -42,29 +44,42 @@ def analyze(pfile, input_file, output_file, column = 0, delim = ' ', num_resampl
         ee[i,:] = np.linalg.solve((X[j2,:] - X[j1,:]), Y[j2] - Y[j1]) 
     
     # Output the Mu, Mu*, and Sigma Values
+    sens={}
     print "Parameter Mu Sigma Mu_Star Mu_Star_Conf"
     for j in range(D):
         mu = np.average(ee[:,j])
         mu_star = np.average(np.abs(ee[:,j]))
         sigma = np.std(ee[:,j])
-        mu_star_conf = compute_mu_star_confidence(ee[:,j], N, num_resamples)
+        mu_star_conf = compute_mu_star_confidence(ee[:,j], N, num_resamples,conf_level)
         
         print "%s %f %f %f %f" % (param_file['names'][j], mu, sigma, mu_star, mu_star_conf)
+        sens[param_file['names'][j]]=np.r_[mu,sigma,mu_star,mu_star_conf]
+
+    return sens
         
 
-def compute_mu_star_confidence(ee, N, num_resamples):
+def compute_mu_star_confidence(ee, N, num_resamples,conf_level):
+
+    if conf_level==0.99:
+        zcrit=2.575
+    elif conf_level==0.98:
+        zcrit=2.33
+    elif conf_level==0.95:
+        zcrit=1.96
+    elif conf_level==0.90:
+        zcrit=1.645
    
-   ee_resampled = np.empty([N])
-   mu_star_resampled  = np.empty([num_resamples])
-   
-   for i in range(num_resamples):
+    ee_resampled = np.empty([N])
+    mu_star_resampled  = np.empty([num_resamples])
+
+    for i in range(num_resamples):
        for j in range(N):
            
            index = np.random.randint(0, N)
            ee_resampled[j] = ee[index]
        
        mu_star_resampled[i] = np.average(np.abs(ee_resampled))
-   
-   return 1.96 * mu_star_resampled.std(ddof=1)
+
+    return zcrit * mu_star_resampled.std(ddof=1)
     
         
