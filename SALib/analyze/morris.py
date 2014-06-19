@@ -68,6 +68,8 @@ def compute_mu_star_confidence(ee, N, num_resamples,conf_level):
         zcrit=1.96
     elif conf_level==0.90:
         zcrit=1.645
+    else:
+        raise Exception("Confidence level can be .9, .95, .98, .99")
    
     ee_resampled = np.empty([N])
     mu_star_resampled  = np.empty([num_resamples])
