@@ -2,11 +2,13 @@ from __future__ import division
 from ..util import read_param_file
 from sys import exit
 import numpy as np
+from scipy.stats import norm
 
 # Perform Morris Analysis on file of model results
-#returns a dictionary with keys equal to the parameter labels and values of numpy arrays containing
-#Mu Sigma Mu_Star Mu_Star_Conf in that order.
-def analyze(pfile, input_file, output_file, column = 0, delim = ' ', num_resamples = 1000,conf_level=0.95):
+# Returns a dictionary with keys 'mu', 'mu_star', 'sigma', and 'mu_star_conf'
+# Where each entry is a list of size D (the number of parameters)
+# Containing the indices in the same order as the parameter file
+def analyze(pfile, input_file, output_file, column = 0, delim = ' ', num_resamples = 1000, conf_level = 0.95):
     
     param_file = read_param_file(pfile)
     Y = np.loadtxt(output_file, delimiter = delim)
@@ -43,33 +45,22 @@ def analyze(pfile, input_file, output_file, column = 0, delim = ' ', num_resampl
         # Each parameter has one EE per trajectory, because it is only changed once in each trajectory
         ee[i,:] = np.linalg.solve((X[j2,:] - X[j1,:]), Y[j2] - Y[j1]) 
     
-    # Output the Mu, Mu*, and Sigma Values
-    sens={}
+    # Output the Mu, Mu*, and Sigma Values. Also return them in case this is being called from Python
+    Si = dict((k, [None]*D) for k in ['mu','mu_star','sigma','mu_star_conf'])
     print "Parameter Mu Sigma Mu_Star Mu_Star_Conf"
+
     for j in range(D):
-        mu = np.average(ee[:,j])
-        mu_star = np.average(np.abs(ee[:,j]))
-        sigma = np.std(ee[:,j])
-        mu_star_conf = compute_mu_star_confidence(ee[:,j], N, num_resamples,conf_level)
+        Si['mu'][j] = np.average(ee[:,j])
+        Si['mu_star'][j] = np.average(np.abs(ee[:,j]))
+        Si['sigma'][j] = np.std(ee[:,j])
+        Si['mu_star_conf'][j] = compute_mu_star_confidence(ee[:,j], N, num_resamples, conf_level)
         
-        print "%s %f %f %f %f" % (param_file['names'][j], mu, sigma, mu_star, mu_star_conf)
-        sens[param_file['names'][j]]=np.r_[mu,sigma,mu_star,mu_star_conf]
+        print "%s %f %f %f %f" % (param_file['names'][j], Si['mu'][j], Si['sigma'][j], Si['mu_star'][j], Si['mu_star_conf'][j])
 
-    return sens
+    return Si
         
 
-def compute_mu_star_confidence(ee, N, num_resamples,conf_level):
-
-    if conf_level==0.99:
-        zcrit=2.575
-    elif conf_level==0.98:
-        zcrit=2.33
-    elif conf_level==0.95:
-        zcrit=1.96
-    elif conf_level==0.90:
-        zcrit=1.645
-    else:
-        raise Exception("Confidence level can be .9, .95, .98, .99")
+def compute_mu_star_confidence(ee, N, num_resamples, conf_level):
    
     ee_resampled = np.empty([N])
     mu_star_resampled  = np.empty([num_resamples])
@@ -82,6 +73,4 @@ def compute_mu_star_confidence(ee, N, num_resamples,conf_level):
        
        mu_star_resampled[i] = np.average(np.abs(ee_resampled))
 
-    return zcrit * mu_star_resampled.std(ddof=1)
-    
-        
+    return norm.ppf(conf_level) * mu_star_resampled.std(ddof=1)
