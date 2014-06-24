@@ -98,10 +98,10 @@ Options:
 
 
 ### Python Interface
-The library can also be used directly from a Python script. This approach has more of a learning curve and is only recommended for users who need to customize sampling and/or analysis processes for their applications. Refer to `python-example.py` for an example of how each of the methods are invoked from Python.
+The library can also be used directly from a Python script. This approach has more of a learning curve and is only recommended for users who need to customize sampling and/or analysis processes for their applications. Refer to `python-example.py` for an example of how each of the methods are invoked from Python. The sample requires matplotlib.
 
 ### License
-Copyright (C) 2013 Jon Herman, Patrick Reed and others. Licensed under the GNU Lesser General Public License.
+Copyright (C) 2013 Jon Herman, Patrick Reed, Fernando Rios and others. Licensed under the GNU Lesser General Public License.
 
 The Sensitivity Analysis Library is free software: you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
