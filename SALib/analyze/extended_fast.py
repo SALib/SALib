@@ -5,6 +5,9 @@ import numpy as np
 import math
 
 # Perform FAST Analysis on file of model results
+# Returns a dictionary with keys 'S1' and 'ST'
+# Where each entry is a list of size D (the number of parameters)
+# Containing the indices in the same order as the parameter file
 def analyze(pfile, output_file, column = 0, M = 4, num_resamples = 1000, delim = ' '):
     
     param_file = read_param_file(pfile)
@@ -38,11 +41,13 @@ def analyze(pfile, output_file, column = 0, M = 4, num_resamples = 1000, delim =
     
     # Calculate and Output the First and Total Order Values
     print "Parameter First Total"
+    Si = dict((k, [None]*D) for k in ['S1','ST'])
     for i in range(D):
         l = range(i*N, (i+1)*N)
-        first = compute_first_order(Y[l], N, M, omega[0])
-        total = compute_total_order(Y[l], N, omega[0])        
-        print "%s %f %f" % (param_file['names'][i], first, total)
+        Si['S1'][i] = compute_first_order(Y[l], N, M, omega[0])
+        Si['ST'][i] = compute_total_order(Y[l], N, omega[0])        
+        print "%s %f %f" % (param_file['names'][i], Si['S1'][i], Si['ST'][i])
+    return Si
     
 def compute_first_order(outputs, N, M, omega):
     f = np.fft.fft(outputs)
