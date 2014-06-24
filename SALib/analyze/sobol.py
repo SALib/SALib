@@ -3,9 +3,10 @@ from ..util import read_param_file
 from sys import exit
 import numpy as np
 import math
+from scipy.stats import norm
 
 # Perform Sobol Analysis on file of model results
-def analyze(pfile, output_file, column = 0, calc_second_order = True, num_resamples = 1000, delim = ' '):
+def analyze(pfile, output_file, column = 0, calc_second_order = True, num_resamples = 1000, delim = ' ', conf_level = 0.95):
     
     param_file = read_param_file(pfile)
     Y = np.loadtxt(output_file, delimiter = delim)
@@ -73,9 +74,9 @@ def analyze(pfile, output_file, column = 0, calc_second_order = True, num_resamp
             a2[i] = B[i]
             
         S1 = compute_first_order(a0, a1, a2, N)
-        S1c = compute_first_order_confidence(a0, a1, a2, N, num_resamples)
+        S1c = compute_first_order_confidence(a0, a1, a2, N, num_resamples, conf_level)
         ST = compute_total_order(a0, a1, a2, N)
-        STc = compute_total_order_confidence(a0, a1, a2, N, num_resamples)
+        STc = compute_total_order_confidence(a0, a1, a2, N, num_resamples, conf_level)
         
         print "%s %f %f %f %f" % (param_file['names'][j], S1, S1c, ST, STc)
     
@@ -100,7 +101,7 @@ def analyze(pfile, output_file, column = 0, calc_second_order = True, num_resamp
                     a4[i] = B[i]
                     
                 S2 = compute_second_order(a0, a1, a2, a3, a4, N)
-                S2c = compute_second_order_confidence(a0, a1, a2, a3, a4, N, num_resamples)
+                S2c = compute_second_order_confidence(a0, a1, a2, a3, a4, N, num_resamples, conf_level)
                 
                 print "%s %s %f %f" % (param_file['names'][j], param_file['names'][k], S2, S2c)                        
                 
@@ -128,6 +129,10 @@ def compute_first_order_confidence(a0, a1, a2, N, num_resamples):
     b1 = np.empty([N])
     b2 = np.empty([N])
     s  = np.empty([num_resamples])
+
+    if conf_level < 0 or conf_level > 1:    
+        print "Error: Confidence level must be between 0-1."
+        exit() 
     
     for i in range(num_resamples):
         for j in range(N):
@@ -139,7 +144,7 @@ def compute_first_order_confidence(a0, a1, a2, N, num_resamples):
         
         s[i] = compute_first_order(b0, b1, b2, N)
     
-    return 1.96 * s.std(ddof=1)
+    return norm.ppf(0.5 + conf_level/2) * s.std(ddof=1)
 
 def compute_total_order(a0, a1, a2, N):
     
@@ -163,6 +168,10 @@ def compute_total_order_confidence(a0, a1, a2, N, num_resamples):
     b1 = np.empty([N])
     b2 = np.empty([N])
     s  = np.empty([num_resamples])
+
+    if conf_level < 0 or conf_level > 1:    
+        print "Error: Confidence level must be between 0-1."
+        exit() 
     
     for i in range(num_resamples):
         for j in range(N):
@@ -174,7 +183,7 @@ def compute_total_order_confidence(a0, a1, a2, N, num_resamples):
         
         s[i] = compute_total_order(b0, b1, b2, N)
     
-    return 1.96 * s.std(ddof=1)
+    return norm.ppf(0.5 + conf_level/2) * s.std(ddof=1)
 
 def compute_second_order(a0, a1, a2, a3, a4, N):
     
@@ -208,6 +217,10 @@ def compute_second_order_confidence(a0, a1, a2, a3, a4, N, num_resamples):
     b3 = np.empty([N])
     b4 = np.empty([N])
     s  = np.empty([num_resamples])
+
+    if conf_level < 0 or conf_level > 1:    
+        print "Error: Confidence level must be between 0-1."
+        exit() 
     
     for i in range(num_resamples):
         for j in range(N):
@@ -221,4 +234,4 @@ def compute_second_order_confidence(a0, a1, a2, a3, a4, N, num_resamples):
         
         s[i] = compute_second_order(b0, b1, b2, b3, b4, N)
     
-    return 1.96 * s.std(ddof=1)
+    return norm.ppf(0.5 + conf_level/2) * s.std(ddof=1)
