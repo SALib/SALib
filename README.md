@@ -1,13 +1,15 @@
 ###Sensitivity Analysis Library (SALib)
 
-This library provides Python implementations of sampling and analysis routines for commonly used sensitivity analysis methods. These are typically applied in systems modeling to calculate the effects of model parameters (or other uncertain variables) on outputs of interest. Requires [NumPy](http://www.numpy.org/).
+This library provides Python implementations of sampling and analysis routines for commonly used sensitivity analysis methods. These are typically applied in systems modeling to calculate the effects of model parameters (or other uncertain variables) on outputs of interest. 
 
-Methods included:
+**Requirements:** [NumPy](http://www.numpy.org/), [SciPy](http://www.scipy.org/)
+
+**Methods included:**
 * Sobol Sensitivity Analysis ([Sobol 2001](http://www.sciencedirect.com/science/article/pii/S0378475400002706), [Saltelli 2002](http://www.sciencedirect.com/science/article/pii/S0010465502002801), [Saltelli et al. 2008](http://www.wiley.com/WileyCDA/WileyTitle/productCd-0470059974.html))
 * Method of Morris ([Morris 1991](http://www.tandfonline.com/doi/abs/10.1080/00401706.1991.10484804), [Campolongo et al. 2007](http://www.sciencedirect.com/science/article/pii/S1364815206002805))
 * Fourier Amplitude Sensitivity Test (FAST) ([Cukier et al. 1973](http://scitation.aip.org/content/aip/journal/jcp/59/8/10.1063/1.1680571), [Saltelli et al. 1999](http://amstat.tandfonline.com/doi/abs/10.1080/00401706.1999.10485594))
 
-Contributors: [Jon Herman](https://github.com/jdherman), [Matt Woodruff](https://github.com/matthewjwoodruff), [Fernando Rios](https://github.com/zoidy), [Dan Hyams](https://github.com/dhyams)
+**Contributors:** [Jon Herman](https://github.com/jdherman), [Matt Woodruff](https://github.com/matthewjwoodruff), [Fernando Rios](https://github.com/zoidy), [Dan Hyams](https://github.com/dhyams)
 
 To get started, create a file describing the sampling ranges for the parameters in the model. Parameter files should be created with 3 columns, name, lower bound, and upper bound, e.g.:
 ```
@@ -106,7 +108,7 @@ Options:
 #### Python Interface
 The library can also be used directly from a Python script. This approach has more of a learning curve and is only recommended for users who need to customize sampling and/or analysis processes for their applications. Refer to `python-example.py` for an example of how each of the methods are invoked from Python. The sample requires matplotlib.
 
-### License
+#### License
 Copyright (C) 2013-2014 Jon Herman and others. Licensed under the GNU Lesser General Public License.
 
 The Sensitivity Analysis Library is free software: you can redistribute it and/or modify

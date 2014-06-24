@@ -41,25 +41,17 @@ np.savetxt("SGOutput.txt", Y, delimiter=' ')
 # Perform the sensitivity analysis using the model output
 # Specify which column of the output file to analyze (zero-indexed)
 #sobol.analyze(param_file, 'SGOutput.txt', column = 0, calc_second_order = True)
-data=morris.analyze(param_file, 'SGInput.txt', 'SGOutput.txt', column = 0,conf_level=0.95)
+Si = morris.analyze(param_file, 'SGInput.txt', 'SGOutput.txt', column = 0, conf_level=0.95)
 # extended_fast.analyze(param_file, 'SGOutput.txt', column = 0)
 
 #Plot the indices. Morris method only (for now)
-mu=[]
-mu_star=[]
-mu_star_conf=[]
-sigma=[]
-name=[]
-for key,val in data.iteritems():
-    mu.append(val[0])
-    sigma.append(val[1])
-    mu_star.append(val[2])
-    mu_star_conf.append(val[3])
-    name.append(key)
 
 plt.figure()
-plt.plot(mu_star,sigma,'ok')
+plt.plot(Si['mu_star'], Si['sigma'], 'ok')
 plt.xlabel('mu*')
 plt.ylabel('sigma')
-for i, label in enumerate(name):
-   plt.text (mu_star[i]+0.04, sigma[i]+0.02, label )
+
+for i in xrange(len(pf['names'])):
+   plt.text(Si['mu_star'][i]+0.04, Si['sigma'][i]+0.02, pf['names'][i])
+
+plt.show()
