@@ -65,6 +65,10 @@ def compute_mu_star_confidence(ee, N, num_resamples, conf_level):
     ee_resampled = np.empty([N])
     mu_star_resampled  = np.empty([num_resamples])
 
+    if conf_level < 0 or conf_level > 1:    
+        print "Error: Confidence level must be between 0-1."
+        exit()  
+
     for i in range(num_resamples):
        for j in range(N):
            
@@ -73,4 +77,4 @@ def compute_mu_star_confidence(ee, N, num_resamples, conf_level):
        
        mu_star_resampled[i] = np.average(np.abs(ee_resampled))
 
-    return norm.ppf(conf_level) * mu_star_resampled.std(ddof=1)
+    return norm.ppf(0.5 + conf_level/2) * mu_star_resampled.std(ddof=1)

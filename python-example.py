@@ -10,7 +10,7 @@ import numpy as np, matplotlib.pyplot as plt
 import random as rd
 
 # Example: Run Sobol, Morris, or FAST on a test function (Sobol G Function)
-# The parameters shown for each method are also the default values if omitted
+# The settings shown for each method are also the default values if omitted
 
 # Set random seed (does not affect quasi-random Sobol sampling)
 seed = 1
@@ -41,7 +41,7 @@ np.savetxt("SGOutput.txt", Y, delimiter=' ')
 # Perform the sensitivity analysis using the model output
 # Specify which column of the output file to analyze (zero-indexed)
 #sobol.analyze(param_file, 'SGOutput.txt', column = 0, calc_second_order = True)
-Si = morris.analyze(param_file, 'SGInput.txt', 'SGOutput.txt', column = 0, conf_level=0.95)
+Si = morris.analyze(param_file, 'SGInput.txt', 'SGOutput.txt', column = 0, conf_level = 0.95)
 # extended_fast.analyze(param_file, 'SGOutput.txt', column = 0)
 
 #Plot the indices. Morris method only (for now)
