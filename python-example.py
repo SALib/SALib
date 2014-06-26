@@ -4,7 +4,7 @@ sys.dont_write_bytecode = True
 
 from SALib.sample import saltelli, morris_oat, fast_sampler
 from SALib.analyze import sobol, morris, extended_fast
-from SALib.test_functions import Sobol_G
+from SALib.test_functions import Sobol_G, Ishigami
 from SALib.util import scale_samples, read_param_file
 import numpy as np
 import random as rd
@@ -18,13 +18,13 @@ np.random.seed(seed)
 rd.seed(seed)
 
 # Read the parameter range file and generate samples
-param_file = './SALib/test_functions/params/Sobol_G.txt'
+param_file = './SALib/test_functions/params/Ishigami.txt'
 pf = read_param_file(param_file)
 
 # Generate samples (choose method here)
 param_values = saltelli.sample(100, pf['num_vars'], calc_second_order = True)
 # param_values = morris_oat.sample(100, pf['num_vars'], num_levels = 10, grid_jump = 5)
-# param_values = fast_sampler.sample(100, pf['num_vars'])
+# param_values = fast_sampler.sample(2048, pf['num_vars'])
 
 # Samples are given in range [0, 1] by default. Rescale them to your parameter bounds. (If using normal distributions, use "scale_samples_normal" instead)
 scale_samples(param_values, pf['bounds'])
@@ -35,7 +35,7 @@ scale_samples(param_values, pf['bounds'])
 
 # Run the "model" and save the output in a text file
 # This will happen offline for external models
-Y = Sobol_G.evaluate(param_values)
+Y = Ishigami.evaluate(param_values)
 np.savetxt("SGOutput.txt", Y, delimiter=' ')
 
 # Perform the sensitivity analysis using the model output
