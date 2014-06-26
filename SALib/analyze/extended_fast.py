@@ -38,7 +38,7 @@ def analyze(pfile, output_file, column = 0, M = 4, num_resamples = 1000, delim =
         omega[1:] = np.floor(np.linspace(1, m, D-1)) 
     else:
         omega[1:] = np.arange(D-1) % m + 1
-    
+
     # Calculate and Output the First and Total Order Values
     print "Parameter First Total"
     Si = dict((k, [None]*D) for k in ['S1','ST'])
@@ -53,7 +53,7 @@ def compute_first_order(outputs, N, M, omega):
     f = np.fft.fft(outputs)
     Sp = np.power(np.absolute(f[range(1,int(N/2))]) / N, 2)
     V = 2*np.sum(Sp)
-    D1 = 2*np.sum(Sp[list(np.arange(1,M)*int(omega) - 1)])
+    D1 = 2*np.sum(Sp[list(np.arange(1,M+1)*int(omega) - 1)])
     return D1/V
 
 def compute_total_order(outputs, N, omega):
