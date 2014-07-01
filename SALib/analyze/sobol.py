@@ -2,7 +2,6 @@ from __future__ import division
 from ..util import read_param_file
 from sys import exit
 import numpy as np
-import math
 from scipy.stats import norm
 
 # Perform Sobol Analysis on file of model results
