@@ -12,13 +12,7 @@ from scipy.stats import norm
 def analyze(pfile, output_file, column = 0, calc_second_order = True, num_resamples = 1000, delim = ' ', conf_level = 0.95):
     
     param_file = read_param_file(pfile)
-    Y = np.loadtxt(output_file, delimiter = delim)
-
-    if len(Y.shape) == 1: Y = Y.reshape((len(Y),1))
-    
-    if Y.ndim > 1:
-        Y = Y[:, column]
-    
+    Y = np.loadtxt(output_file, delimiter=delim, usecols=(column,), ndmin=2)
     D = param_file['num_vars']
 
     if calc_second_order:
@@ -41,7 +35,7 @@ def analyze(pfile, output_file, column = 0, calc_second_order = True, num_resamp
                 (You have calc_second_order set to false.)
               """
             exit()
-            
+
     if conf_level < 0 or conf_level > 1:    
         print "Error: Confidence level must be between 0-1."
         exit() 
@@ -71,11 +65,9 @@ def analyze(pfile, output_file, column = 0, calc_second_order = True, num_resamp
     # First order (+conf.) and Total order (+conf.)
     Si = dict((k, [None]*D) for k in ['S1','S1_conf','ST','ST_conf'])
     print "Parameter First_Order First_Order_Conf Total_Order Total_Order_Conf"
+    a0, a1, a2 = [np.empty([N]) for _ in xrange(3)]
+
     for j in range(D):
-        a0 = np.empty([N])
-        a1 = np.empty([N])
-        a2 = np.empty([N])
-        
         for i in range(N):
             a0[i] = A[i]
             a1[i] = C_A[i][j]
@@ -90,16 +82,11 @@ def analyze(pfile, output_file, column = 0, calc_second_order = True, num_resamp
     
     # Second order (+conf.)
     if calc_second_order:
-        
         print "\nParameter_1 Parameter_2 Second_Order Second_Order_Conf"
+        a0, a1, a2, a3, a4 = [np.empty([N]) for _ in xrange(5)]
         
         for j in range(D):
             for k in range(j+1, D):
-                a0 = np.empty([N])
-                a1 = np.empty([N])
-                a2 = np.empty([N])
-                a3 = np.empty([N])
-                a4 = np.empty([N])
                 
                 for i in range(N):
                     a0[i] = A[i]

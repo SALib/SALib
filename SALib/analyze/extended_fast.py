@@ -11,14 +11,8 @@ import math
 def analyze(pfile, output_file, column = 0, M = 4, num_resamples = 1000, delim = ' '):
     
     param_file = read_param_file(pfile)
-    Y = np.loadtxt(output_file, delimiter = delim)
-
-    if len(Y.shape) == 1: Y = Y.reshape((len(Y),1))
-
+    Y = np.loadtxt(output_file, delimiter=delim, usecols=(column,), ndmin=2)
     D = param_file['num_vars']
-    
-    if Y.ndim > 1:
-        Y = Y[:, column]
     
     if Y.size % (D) == 0:
         N = int(Y.size / D)
