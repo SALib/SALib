@@ -1,6 +1,6 @@
 ###Sensitivity Analysis Library (SALib)
 
-This library provides Python implementations of sampling and analysis routines for commonly used sensitivity analysis methods. These are typically applied in systems modeling to calculate the effects of model parameters (or other uncertain variables) on outputs of interest. 
+Python implementations of commonly used sensitivity analysis methods. Useful in systems modeling to calculate the effects of model inputs or exogenous factors on outputs of interest. 
 
 **Requirements:** [NumPy](http://www.numpy.org/), [SciPy](http://www.scipy.org/)
 
@@ -11,6 +11,8 @@ This library provides Python implementations of sampling and analysis routines f
 
 **Contributors:** [Jon Herman](https://github.com/jdherman), [Matt Woodruff](https://github.com/matthewjwoodruff), [Fernando Rios](https://github.com/zoidy), [Dan Hyams](https://github.com/dhyams)
 
+#### Create a parameter file
+
 To get started, create a file describing the sampling ranges for the parameters in the model. Parameter files should be created with 3 columns, name, lower bound, and upper bound, e.g.:
 ```
 P1 0.0 1.0
@@ -18,59 +20,38 @@ P2 0.0 5.0
 ...etc.
 ```
 
-If the parameters are to be sampled with normal distributions, the lines in the parameter file should read (name, mean, standard deviation). None of the three methods uses normal sampling, but it is included for other user-defined applications. Note that lines beginning with `#` will be treated as comments and ignored.
+Note that lines beginning with `#` will be treated as comments and ignored.
 
-There are two ways to run the library: as a decoupled process from the command line, or from a Python script.
+#### Generate sample
 
-#### Command-Line Interface
-
-For most applications, it will be helpful to run three separate processes: sampling, evaluation, and analysis. This approach is strongly recommended for users whose applications do not require modifications to the sampling/analysis routines. Steps:
-
-**Step 1:** Perform sampling (see `shell-example-sample.sh` for an example). Choose a method and a number of samples, along with other important options as shown in the file.
+From the **command line**:
 ```
-python -B -m SALib.sample \
-	   -m saltelli \
-	   -n 100 \
-	   -p ./SALib/test_functions/params/Sobol_G.txt \
-	   -o my_samples_file.txt \
-	   --delimiter=' ' \
-	   --precision=8 \
+python -m SALib.sample.saltelli \
+     -n 1000 \
+     -p ./SALib/test_functions/params/Ishigami.txt \
+     -o model_input.txt \
 ```
 
-Note that `python -m` runs the `__main__` module in the `SALib.sample` package. The `-B` flag prevents the interpreter from compiling bytecode (`.pyc` files). Options include:
+Other methods include `SALib.sample.morris_oat` and `SALib.sample.fast_sampler`. For an explanation of all command line options, [see the examples here](https://github.com/jdherman/SALib/tree/master/examples). 
 
-* `-p, --paramfile`: Required. Your parameter range file (3 columns: parameter name, lower bound, upper bound).
+Or, generate samples **from Python**:
+```python
+from SALib.sample import saltelli
+from SALib.analyze import sobol
+from SALib.test_functions import Ishigami
+import numpy as np
 
-* `-m, --method`: Required. Choose one of `{uniform, normal, latin, saltelli, morris, fast}`. All methods except `normal` assume the ranges are (lower bound, upper bound); `normal` assumes the ranges are (mean, standard deviation). The methods `saltelli`, `morris`, and `fast` correspond to the analysis methods `sobol`, `morris`, and `fast`, respectively. 
+# Read the parameter range file and generate samples
+param_file = '../../SALib/test_functions/params/Ishigami.txt'
 
-* `-n, --samples`: Sample size (required). The sample sizes generated for each method are as follows (where `D` is the number of parameters and `N` is the sample size):
-	* Uniform: `N`
-	* Normal: `N`
-	* Latin: `N`
-	* Saltelli: `N(2D + 2)` if calculating second-order indices (default) or `N(D + 2)` otherwise.						
-	* Morris: `N(D + 1)`
-	* FAST: `ND` ; must choose `N > 4M^2` (`N > 64` under default settings)
+# Generate samples
+param_values = saltelli.sample(1000, param_file, calc_second_order = True)
+np.savetxt('model_input.txt', param_values, delimiter=' ')
+```
 
-* `-o, --output`: File to output your samples into (required).
+Either way, this will create a file of sampled input values in `model_input.txt`.
 
-* `-s, --seed`: Random seed (optional). Will not affect Sobol method as it uses quasi-random sampling.
- 
-* `--delimiter`: Output file delimiter (optional). Common choices:
-	* Space-delimited (default): `--delimiter=' '`
-	* Comma-delimited: `--delimiter=','`
-	* Tab-delimited: `--delimiter=$'\t'`
 
-* `--precision`: Digits of precision in the output file (optional). Default is 8.
-
-* `--saltelli-max-order`: Maximum order of indices to calculate (optional). Only applies for `-m saltelli`. Choose 1 or 2 (default is 2). 
-	* Choosing 1 will reduce total model runs from `N(2D + 2)` to `N(D + 2)`
-	* Must use the same value (either 1 or 2) for both sampling and analysis.
-
-* `--morris-num-levels`: Number of levels in the OAT sampling (optional). The range of each variable will be discretized into this many levels. Only applies for `-m morris`. Default is 10.
-
-* `--morris-grid-jump`: Grid jump size in the OAT sampling (optional). Each variable will be perturbed by this number of levels during each trajectory. Only applies for `-m morris`. Default is 5.
-
-The parameter samples will be saved in the file specified by the `-o` flag. The file will contain `D` columns, one for each parameter.
 
 
 **Step 2:** Perform model evaluations using the file of samples. This occurs independently of this library, other than the fact that you can specify a delimiter during sampling which might simplify the process of reading the parameter samples into your model. Save model output(s) of interest to a file and proceed.
@@ -107,6 +88,16 @@ Options:
 
 #### Python Interface
 The library can also be used directly from a Python script. This approach has more of a learning curve and is only recommended for users who need to customize sampling and/or analysis processes for their applications. Refer to `python-example.py` for an example of how each of the methods are invoked from Python. Sensitivity indices are printed to the command line but can also be returned in a dictionary.
+
+
+
+
+
+
+
+https://github.com/jdherman/SALib/tree/feature/cleanup-structure/examples
+
+
 
 #### License
 Copyright (C) 2013-2014 Jon Herman and others. Licensed under the GNU Lesser General Public License.

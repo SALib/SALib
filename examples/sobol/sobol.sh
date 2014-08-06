@@ -3,11 +3,11 @@
 # Example: generating samples from the command line
 cd ../../ # hack
 python -m SALib.sample.saltelli \
-	   -n 1000 \
-	   -p ./SALib/test_functions/params/Ishigami.txt \
-	   -o model_input.txt \
-	   --delimiter=' ' \
-	   --precision=8 \
+     -n 1000 \
+     -p ./SALib/test_functions/params/Ishigami.txt \
+     -o model_input.txt \
+     --delimiter=' ' \
+     --precision=8 \
      --max-order=2
 
 # Options:
