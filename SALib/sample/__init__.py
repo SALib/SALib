@@ -1,7 +1,6 @@
 import morris_oat
-import uniform
-import normal
 import sobol
-import latin_hypercube
+import saltelli
+import latin
 import fast_sampler
-__all__ = ["uniform", "normal", "latin_hypercube", "saltelli", "morris_oat", "fast_sampler"]
+__all__ = ["latin", "saltelli", "sobol" "morris_oat", "fast_sampler"]

@@ -44,7 +44,7 @@ import os
 # Generate N x D matrix of Sobol sequence samples
 def sample(N, D):
     
-    directions = read_directions_file('joe-kuo-6.21000')
+    directions = read_directions_file('joe-kuo-6.21000.txt')
     scale = 31
     result = np.empty([N, D])
     
