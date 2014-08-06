@@ -1,14 +1,10 @@
-__all__ = ["scale_samples", "scale_samples_normal", "read_param_file"]
+__all__ = ["scale_samples", "read_param_file"]
 
 # Rescale samples from [0, 1] to [lower, upper]
 def scale_samples(params, bounds):
     for i, b in enumerate(bounds):
         params[:,i] = params[:,i] * (b[1] - b[0]) + b[0]
 
-# Rescale standard normal samples to [mu, sigma]
-def scale_samples_normal(params, bounds):
-    for i, b in enumerate(bounds):
-        params[:,i] = params[:,i] * b[1] + b[0]
         
 def read_param_file(filename):
 	
