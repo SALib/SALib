@@ -79,7 +79,7 @@ Si = sobol.analyze(param_file, 'model_output.txt', column = 0, print_to_console=
 Check out the [examples](https://github.com/jdherman/SALib/tree/master/examples) for a full description of command line and keyword options for all of the methods.
 
 
-#### License
+### License
 Copyright (C) 2013-2014 Jon Herman and others. Licensed under the GNU Lesser General Public License.
 
 The Sensitivity Analysis Library is free software: you can redistribute it and/or modify
