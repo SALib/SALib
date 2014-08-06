@@ -14,6 +14,7 @@ def analyze(pfile, input_file, output_file, column = 0, delim = ' ', num_resampl
     param_file = read_param_file(pfile)
     Y = np.loadtxt(output_file, delimiter=delim, usecols=(column,))
     X = np.loadtxt(input_file, delimiter=delim, ndmin=2)
+    if len(X.shape) == 1: X = X.reshape((len(X),1))
 
     D = param_file['num_vars']
     
