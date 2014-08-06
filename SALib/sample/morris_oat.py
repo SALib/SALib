@@ -47,11 +47,11 @@ def sample(N, param_file, num_levels, grid_jump):
 if __name__ == "__main__":
 
     parser = common_args.create()
-    parser.add_argument('--morris-num-levels', type=int, required=False, default=10, help='Number of grid levels (Morris only)')
-    parser.add_argument('--morris-grid-jump', type=int, required=False, default=5, help='Grid jump size (Morris only)')
+    parser.add_argument('--num-levels', type=int, required=False, default=10, help='Number of grid levels (Morris only)')
+    parser.add_argument('--grid-jump', type=int, required=False, default=5, help='Grid jump size (Morris only)')
     args = parser.parse_args()
 
     np.random.seed(args.seed)
     rd.seed(args.seed)
-    param_values = sample(args.samples, args.paramfile, num_levels=args.morris_num_levels, grid_jump=args.morris_grid_jump)
+    param_values = sample(args.samples, args.paramfile, num_levels=args.num_levels, grid_jump=args.grid_jump)
     np.savetxt(args.output, param_values, delimiter=args.delimiter, fmt='%.' + str(args.precision) + 'e')

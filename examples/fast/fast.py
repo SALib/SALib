@@ -10,7 +10,7 @@ import numpy as np
 param_file = '../../SALib/test_functions/params/Ishigami.txt'
 
 # Generate samples
-param_values = fast_sampler.sample(2048, param_file)
+param_values = fast_sampler.sample(1000, param_file)
 
 # Run the "model" and save the output in a text file
 # This will happen offline for external models
@@ -19,6 +19,6 @@ np.savetxt("model_output.txt", Y, delimiter=' ')
 
 # Perform the sensitivity analysis using the model output
 # Specify which column of the output file to analyze (zero-indexed)
-Si = extended_fast.analyze(param_file, 'model_output.txt', column = 0)
+Si = extended_fast.analyze(param_file, 'model_output.txt', column = 0, console=False)
 #Returns a dictionary with keys 'S1' and 'ST'
 # e.g. Si['S1'] contains the first-order index for each parameter, in the same order as the parameter file

@@ -66,9 +66,9 @@ def sample(N, param_file, calc_second_order = True):
 if __name__ == "__main__":
 
     parser = common_args.create()
-    parser.add_argument('--saltelli-max-order', type=int, required=False, default=2, choices=[1, 2], help='Maximum order of sensitivity indices to calculate')
+    parser.add_argument('--max-order', type=int, required=False, default=2, choices=[1, 2], help='Maximum order of sensitivity indices to calculate')
     args = parser.parse_args()
 
     np.random.seed(args.seed)
-    param_values = sample(args.samples, args.paramfile, calc_second_order=(args.saltelli_max_order == 2))
+    param_values = sample(args.samples, args.paramfile, calc_second_order=(args.max_order == 2))
     np.savetxt(args.output, param_values, delimiter=args.delimiter, fmt='%.' + str(args.precision) + 'e')
