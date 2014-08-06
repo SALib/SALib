@@ -1,4 +1,4 @@
-###Sensitivity Analysis Library (SALib)
+##Sensitivity Analysis Library (SALib)
 
 Python implementations of commonly used sensitivity analysis methods. Useful in systems modeling to calculate the effects of model inputs or exogenous factors on outputs of interest. 
 
@@ -11,20 +11,20 @@ Python implementations of commonly used sensitivity analysis methods. Useful in 
 
 **Contributors:** [Jon Herman](https://github.com/jdherman), [Matt Woodruff](https://github.com/matthewjwoodruff), [Fernando Rios](https://github.com/zoidy), [Dan Hyams](https://github.com/dhyams)
 
-#### Create a parameter file
+### Create a parameter file
 
-To get started, create a file describing the sampling ranges for the parameters in the model. Parameter files should be created with 3 columns, name, lower bound, and upper bound, e.g.:
+To get started, create a file describing the sampling ranges for the parameters in the model. Parameter files should be created with 3 columns: `[name, lower bound, upper bound]`:
 ```
 P1 0.0 1.0
 P2 0.0 5.0
 ...etc.
 ```
 
-Note that lines beginning with `#` will be treated as comments and ignored.
+Lines beginning with `#` will be treated as comments and ignored.
 
-#### Generate sample
+### Generate samples
 
-From the **command line**:
+From the command line:
 ```
 python -m SALib.sample.saltelli \
      -n 1000 \
@@ -34,69 +34,49 @@ python -m SALib.sample.saltelli \
 
 Other methods include `SALib.sample.morris_oat` and `SALib.sample.fast_sampler`. For an explanation of all command line options, [see the examples here](https://github.com/jdherman/SALib/tree/master/examples). 
 
-Or, generate samples **from Python**:
+Or, generate samples from Python:
 ```python
 from SALib.sample import saltelli
-from SALib.analyze import sobol
-from SALib.test_functions import Ishigami
 import numpy as np
 
-# Read the parameter range file and generate samples
 param_file = '../../SALib/test_functions/params/Ishigami.txt'
-
-# Generate samples
 param_values = saltelli.sample(1000, param_file, calc_second_order = True)
 np.savetxt('model_input.txt', param_values, delimiter=' ')
 ```
 
 Either way, this will create a file of sampled input values in `model_input.txt`.
 
+### Run model
+Here's an example of running a test function in Python, but this will usually be a user-defined model, maybe even in another language. Just save the outputs.
 
-
-
-**Step 2:** Perform model evaluations using the file of samples. This occurs independently of this library, other than the fact that you can specify a delimiter during sampling which might simplify the process of reading the parameter samples into your model. Save model output(s) of interest to a file and proceed.
-
-**Step 3:** Perform analysis of the model output (see `shell-analyze-sample.sh` for an example). The analysis routines return measures of parameter sensitivity. It will print to the terminal by default; you may want to redirect output to a file using the `>` operator.
+```python
+from SALib.test_functions import Ishigami
+Y = Ishigami.evaluate(param_values)
+np.savetxt('model_output.txt', Y, delimiter=' ')
 ```
-python -B -m SALib.analyze \
-	   -m sobol \
-	   -p ./SALib/test_functions/params/Sobol_G.txt \
-	   -Y SGOutput.txt \
-	   -c 0 \
+
+### Analyze model output
+
+From the command line:
 ```
-	   
-Options:
-* `-p, --paramfile`: Required. Your parameter range file (3 columns: parameter name, lower bound, upper bound).
+python -m SALib.analyze.sobol \
+     -p ./SALib/test_functions/params/Ishigami.txt \
+     -Y model_output.txt \
+     -c 0 \
+```
 
-* `-m, --method`: Required. Choose one of `{sobol, morris, fast}`. *Must correspond to the method chosen during sampling*.
+This will print indices and confidence intervals to the command line. You can redirect to a file using the `>` operator.
 
-* `-Y, --model-output-file`: Required. File of model output values to analyze.
-
-* `-c, --column`: Column of model output file to analyze (optional, default is zero). If the file only has one column, this argument will be ignored.
-
-* `--delimiter`: Model output file delimiter (optional). Common choices:
-	* Space-delimited (default): `--delimiter=' '`
-	* Comma-delimited: `--delimiter=','`
-	* Tab-delimited: `--delimiter=$'\t'`
-
-* `--sobol-max-order`: Maximum order of indices to calculate (optional). Only applies for `-m sobol`. Choose 1 or 2 (default is 2). *This must match the value chosen during sampling*.
-
-* `-X, --morris-model-input`: Required for Method of Morris only. File of model input values (parameter samples).
-
-* `-r, --sobol-bootstrap-resamples`: Number of bootstrap resamples used to calculate confidence intervals on Sobol indices (optional).
-
-
-#### Python Interface
-The library can also be used directly from a Python script. This approach has more of a learning curve and is only recommended for users who need to customize sampling and/or analysis processes for their applications. Refer to `python-example.py` for an example of how each of the methods are invoked from Python. Sensitivity indices are printed to the command line but can also be returned in a dictionary.
-
-
-
-
-
-
-
-https://github.com/jdherman/SALib/tree/feature/cleanup-structure/examples
-
+Or, from Python:
+```python
+from SALib.analyze import sobol
+import numpy as np
+Si = sobol.analyze(param_file, 'model_output.txt', column = 0, print_to_console=False)
+# Returns a dictionary with keys 'S1', 'S1_conf', 'ST', and 'ST_conf'
+# e.g. Si['S1'] contains the first-order index for each parameter, in the same order as the parameter file
+```
+	  
+Check out the [examples](https://github.com/jdherman/SALib/tree/master/examples) for a full description of command line and keyword options for all of the methods.
 
 
 #### License
