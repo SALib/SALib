@@ -11,7 +11,7 @@ import math
 def analyze(pfile, output_file, column = 0, M = 4, num_resamples = 1000, delim = ' '):
     
     param_file = read_param_file(pfile)
-    Y = np.loadtxt(output_file, delimiter=delim, usecols=(column,), ndmin=2)
+    Y = np.loadtxt(output_file, delimiter=delim, usecols=(column,))
     D = param_file['num_vars']
     
     if Y.size % (D) == 0:
