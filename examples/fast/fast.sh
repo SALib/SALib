@@ -14,15 +14,11 @@ python -m SALib.sample.fast_sampler \
 # -p, --paramfile: Your parameter range file (3 columns: parameter name, lower bound, upper bound)
 #
 # -n, --samples: Sample size. 
-#				 Number of model runs is N(2D + 2) if calculating second-order indices (default) 
-#        or N(D + 2) otherwise.
+#				 Number of model runs is ND ; must choose N > 4M^2 (N > 64 under default settings)
 #
 # -o, --output: File to output your samples into.
 # 
-# --delimiter (optional): Output file delimiter. Common choices:
-#						  Space-delimited (default): --delimiter=' '
-#						  Comma-delimited: --delimiter=','
-#						  Tab-delimited: --delimiter=$'\t'
+# --delimiter (optional): Output file delimiter.
 #
 # --precision (optional): Digits of precision in the output file. Default is 8.
 #

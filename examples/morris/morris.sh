@@ -15,8 +15,7 @@ python -m SALib.sample.morris_oat \
 # -p, --paramfile: Your parameter range file (3 columns: parameter name, lower bound, upper bound)
 #
 # -n, --samples: Sample size. 
-#				 Number of model runs is N(2D + 2) if calculating second-order indices (default) 
-#        or N(D + 2) otherwise.
+#				 Number of model runs is N(D + 1)
 #
 # -o, --output: File to output your samples into.
 # 
