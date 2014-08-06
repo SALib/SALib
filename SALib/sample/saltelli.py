@@ -1,6 +1,5 @@
 from __future__ import division
 import numpy as np
-import random as rd
 import sobol_sequence
 from ..util import scale_samples, read_param_file
 import common_args
@@ -71,7 +70,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     np.random.seed(args.seed)
-    rd.seed(args.seed)
-    pf = read_param_file(args.paramfile)
     param_values = sample(args.samples, args.paramfile, calc_second_order=(args.saltelli_max_order == 2))
     np.savetxt(args.output, param_values, delimiter=args.delimiter, fmt='%.' + str(args.precision) + 'e')

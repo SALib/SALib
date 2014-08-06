@@ -1,10 +1,15 @@
 from __future__ import division
 import numpy as np
 import random as rd
+from ..util import scale_samples, read_param_file
+import common_args
     
 # Generate N(D + 1) x D matrix of Morris samples (OAT)
-def sample(N, D, num_levels, grid_jump):
+def sample(N, param_file, num_levels, grid_jump):
     
+    pf = read_param_file(param_file)
+    D = pf['num_vars']
+
     # orientation matrix B: lower triangular (1) + upper triangular (-1)
     B = np.tril(np.ones([D+1, D], dtype=int), -1) + np.triu(-1*np.ones([D+1,D], dtype=int))
     
@@ -35,5 +40,18 @@ def sample(N, D, num_levels, grid_jump):
         delta_diag = np.diag([delta for _ in range(D)])
         
         X[index_list,:] = 0.5*(np.mat(B)*np.mat(P)*np.mat(DM) + 1) * np.mat(delta_diag) + np.mat(x_base)
-        
+    
+    scale_samples(X, pf['bounds'])
     return X
+
+if __name__ == "__main__":
+
+    parser = common_args.create()
+    parser.add_argument('--morris-num-levels', type=int, required=False, default=10, help='Number of grid levels (Morris only)')
+    parser.add_argument('--morris-grid-jump', type=int, required=False, default=5, help='Grid jump size (Morris only)')
+    args = parser.parse_args()
+
+    np.random.seed(args.seed)
+    rd.seed(args.seed)
+    param_values = sample(args.samples, args.paramfile, num_levels=args.morris_num_levels, grid_jump=args.morris_grid_jump)
+    np.savetxt(args.output, param_values, delimiter=args.delimiter, fmt='%.' + str(args.precision) + 'e')

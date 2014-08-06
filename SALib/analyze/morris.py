@@ -11,9 +11,9 @@ from scipy.stats import norm
 def analyze(pfile, input_file, output_file, column = 0, delim = ' ', num_resamples = 1000, conf_level = 0.95):
     
     param_file = read_param_file(pfile)
-    Y = np.loadtxt(output_file, delimiter=delim, usecols=(column,), ndmin=2)
+    Y = np.loadtxt(output_file, delimiter=delim, usecols=(column,))
     X = np.loadtxt(input_file, delimiter=delim, ndmin=2)
-    
+
     D = param_file['num_vars']
     
     if Y.size % (D+1) == 0:    
@@ -34,7 +34,7 @@ def analyze(pfile, input_file, output_file, column = 0, delim = ' ', num_resampl
         j = np.arange(D+1) + i*(D + 1)
         j1 = j[0:D]
         j2 = j[1:D+1]
-        
+
         # The elementary effect is (change in output)/(change in input)
         # Each parameter has one EE per trajectory, because it is only changed once in each trajectory
         ee[i,:] = np.linalg.solve((X[j2,:] - X[j1,:]), Y[j2] - Y[j1]) 
