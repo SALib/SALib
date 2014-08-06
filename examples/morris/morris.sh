@@ -19,10 +19,7 @@ python -m SALib.sample.morris_oat \
 #
 # -o, --output: File to output your samples into.
 # 
-# --delimiter (optional): Output file delimiter. Common choices:
-#						  Space-delimited (default): --delimiter=' '
-#						  Comma-delimited: --delimiter=','
-#						  Tab-delimited: --delimiter=$'\t'
+# --delimiter (optional): Output file delimiter.
 #
 # --precision (optional): Digits of precision in the output file. Default is 8.
 #
