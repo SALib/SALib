@@ -3,12 +3,13 @@ from ..util import read_param_file
 from sys import exit
 import numpy as np
 from scipy.stats import norm
+import common_args
 
 # Perform Sobol Analysis on file of model results
 # Returns a dictionary with keys 'S1', 'S1_conf', 'ST', and 'ST_conf'
 # Where each entry is a list of size D (the number of parameters)
 # Containing the indices in the same order as the parameter file
-def analyze(pfile, output_file, column = 0, calc_second_order = True, num_resamples = 1000, delim = ' ', conf_level = 0.95):
+def analyze(pfile, output_file, column = 0, calc_second_order = True, num_resamples = 1000, delim = ' ', conf_level = 0.95, print_to_console=False):
     
     param_file = read_param_file(pfile)
     Y = np.loadtxt(output_file, delimiter=delim, usecols=(column,), ndmin=2)
@@ -63,7 +64,8 @@ def analyze(pfile, output_file, column = 0, calc_second_order = True, num_resamp
     
     # First order (+conf.) and Total order (+conf.)
     Si = dict((k, [None]*D) for k in ['S1','S1_conf','ST','ST_conf'])
-    print "Parameter First_Order First_Order_Conf Total_Order Total_Order_Conf"
+    if print_to_console:
+        print "Parameter First_Order First_Order_Conf Total_Order Total_Order_Conf"
     a0, a1, a2 = [np.empty([N]) for _ in xrange(3)]
 
     for j in range(D):
@@ -77,11 +79,13 @@ def analyze(pfile, output_file, column = 0, calc_second_order = True, num_resamp
         Si['ST'][j] = compute_total_order(a0, a1, a2, N)
         Si['ST_conf'][j] = compute_total_order_confidence(a0, a1, a2, N, num_resamples, conf_level)
         
-        print "%s %f %f %f %f" % (param_file['names'][j], Si['S1'][j], Si['S1_conf'][j], Si['ST'][j], Si['ST_conf'][j])
+        if print_to_console:
+            print "%s %f %f %f %f" % (param_file['names'][j], Si['S1'][j], Si['S1_conf'][j], Si['ST'][j], Si['ST_conf'][j])
     
     # Second order (+conf.)
     if calc_second_order:
-        print "\nParameter_1 Parameter_2 Second_Order Second_Order_Conf"
+        if print_to_console:
+            print "\nParameter_1 Parameter_2 Second_Order Second_Order_Conf"
         a0, a1, a2, a3, a4 = [np.empty([N]) for _ in xrange(5)]
         
         for j in range(D):
@@ -97,7 +101,8 @@ def analyze(pfile, output_file, column = 0, calc_second_order = True, num_resamp
                 S2 = compute_second_order(a0, a1, a2, a3, a4, N)
                 S2c = compute_second_order_confidence(a0, a1, a2, a3, a4, N, num_resamples, conf_level)
                 
-                print "%s %s %f %f" % (param_file['names'][j], param_file['names'][k], S2, S2c)                        
+                if print_to_console:
+                    print "%s %s %f %f" % (param_file['names'][j], param_file['names'][k], S2, S2c)                        
     
     return Si            
         
@@ -169,3 +174,12 @@ def compute_second_order_confidence(a0, a1, a2, a3, a4, N, num_resamples, conf_l
         s[i] = compute_second_order(a0[r], a1[r], a2[r], a3[r], a4[r], N)
     
     return norm.ppf(0.5 + conf_level/2) * s.std(ddof=1)
+
+if __name__ == "__main__":
+
+    parser = common_args.create()
+    parser.add_argument('--max-order', type=int, required=False, default=2, choices=[1, 2], help='Maximum order of sensitivity indices to calculate')
+    parser.add_argument('-r', '--resamples', type=int, required=False, default=1000, help='Number of bootstrap resamples for Sobol confidence intervals')
+    args = parser.parse_args()
+
+    analyze(args.paramfile, args.model_output_file, args.column, (args.max_order == 2), num_resamples = args.resamples, delim = args.delimiter, print_to_console=True)

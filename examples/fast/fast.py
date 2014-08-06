@@ -2,7 +2,7 @@ import sys
 sys.path.append('../..')
 
 from SALib.sample import fast_sampler
-from SALib.analyze import extended_fast
+from SALib.analyze import fast
 from SALib.test_functions import Ishigami
 import numpy as np
 
@@ -19,6 +19,6 @@ np.savetxt("model_output.txt", Y, delimiter=' ')
 
 # Perform the sensitivity analysis using the model output
 # Specify which column of the output file to analyze (zero-indexed)
-Si = extended_fast.analyze(param_file, 'model_output.txt', column = 0, console=False)
+Si = fast.analyze(param_file, 'model_output.txt', column = 0, print_to_console=False)
 #Returns a dictionary with keys 'S1' and 'ST'
 # e.g. Si['S1'] contains the first-order index for each parameter, in the same order as the parameter file

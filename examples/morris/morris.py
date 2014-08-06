@@ -22,6 +22,6 @@ np.savetxt("model_output.txt", Y, delimiter=' ')
 
 # Perform the sensitivity analysis using the model output
 # Specify which column of the output file to analyze (zero-indexed)
-Si = morris.analyze(param_file, 'model_input.txt', 'model_output.txt', column = 0, conf_level = 0.95, console=False)
+Si = morris.analyze(param_file, 'model_input.txt', 'model_output.txt', column = 0, conf_level = 0.95, print_to_console=False)
 # Returns a dictionary with keys 'mu', 'mu_star', 'sigma', and 'mu_star_conf'
 # e.g. Si['mu_star'] contains the mu* value for each parameter, in the same order as the parameter file
