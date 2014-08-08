@@ -33,7 +33,7 @@ def analyze(pfile, output_file, column = 0, calc_second_order = True, num_resamp
 
     A = Y[0:Y.size:step]
     B =  Y[(step-1):Y.size:step]
-    for j in range(D):
+    for j in xrange(D):
         AB[:,j] = Y[(j+1):Y.size:step]
         if calc_second_order: BA[:,j] = Y[(j+1+D):Y.size:step]
     
@@ -42,11 +42,11 @@ def analyze(pfile, output_file, column = 0, calc_second_order = True, num_resamp
     S = dict((k, np.empty(D)) for k in keys)
     if print_to_console: print "Parameter %s %s %s %s" % keys
 
-    for j in range(D):
-        S['S1'][j] = compute_first_order(A, AB[:,j], B)
-        S['S1_conf'][j] = compute_first_order_confidence(A, AB[:,j], B, N, num_resamples, conf_level)
-        S['ST'][j] = compute_total_order(A, AB[:,j], B, N)
-        S['ST_conf'][j] = compute_total_order_confidence(A, AB[:,j], B, N, num_resamples, conf_level)
+    for j in xrange(D):
+        S['S1'][j] = first_order(A, AB[:,j], B)
+        S['S1_conf'][j] = first_order_confidence(A, AB[:,j], B, num_resamples, conf_level)
+        S['ST'][j] = total_order(A, AB[:,j], B)
+        S['ST_conf'][j] = total_order_confidence(A, AB[:,j], B, num_resamples, conf_level)
         
         if print_to_console:
             print "%s %f %f %f %f" % (param_file['names'][j], S['S1'][j], S['S1_conf'][j], S['ST'][j], S['ST_conf'][j])
@@ -59,52 +59,39 @@ def analyze(pfile, output_file, column = 0, calc_second_order = True, num_resamp
         
         for j in range(D):
             for k in range(j+1, D):     
-                S['S2'] = compute_second_order(A, BA[:,j], AB[:,k], AB[:,j], B, N)
-                S['S2_conf'] = compute_second_order_confidence(A, BA[:,j], AB[:,k], AB[:,j], B, N, num_resamples, conf_level)
+                S['S2'] = second_order(A, BA[:,j], AB[:,k], AB[:,j], B, N)
+                S['S2_conf'] = second_order_confidence(A, BA[:,j], AB[:,k], AB[:,j], B, N, num_resamples, conf_level)
                 
                 if print_to_console:
                     print "%s %s %f %f" % (param_file['names'][j], param_file['names'][k], S['S2'], S['S2_conf'])                        
     
     return S            
         
-def compute_first_order(A, AB, B):
+def first_order(A, AB, B):
     # First order estimator following Saltelli et al. 2010 CPC, normalized by sample variance
     return np.mean(B*(AB-A))/np.var(np.r_[A,B])
 
-def compute_first_order_confidence(a0, a1, a2, N, num_resamples, conf_level):
-    
-    s  = np.empty([num_resamples])
-    
-    for i in range(num_resamples):        
-        r = np.random.randint(N, size=N)        
-        s[i] = compute_first_order(a0[r], a1[r], a2[r])
+def first_order_confidence(A, AB, B, num_resamples, conf_level):
+    s  = np.empty(num_resamples)
+    for i in xrange(num_resamples):        
+        r = np.random.randint(len(A), size=len(A))        
+        s[i] = first_order(A[r], AB[r], B[r])
     
     return norm.ppf(0.5 + conf_level/2) * s.std(ddof=1)
 
-def compute_total_order(a0, a1, a2, N):
-    
-    c = np.average(a0)
-    EY2 = np.mean(a0-c)**2
-    V = np.sum((a0-c)**2)/(N-1) - EY2
-    U = np.sum((a0-c)*(a1-c))/(N-1)
+def total_order(A, AB, B):
+    # Total order estimator following Saltelli et al. 2010 CPC, normalized by sample variance
+    return 0.5*np.mean((A-AB)**2)/np.var(np.r_[A,B])
 
-    return (1 - (U-EY2) / V)
-
-def compute_total_order_confidence(a0, a1, a2, N, num_resamples, conf_level):
-    
-    s  = np.empty([num_resamples])
-
-    if conf_level < 0 or conf_level > 1:    
-        print "Error: Confidence level must be between 0-1."
-        exit() 
-    
-    for i in range(num_resamples):
-        r = np.random.randint(N, size=N)  
-        s[i] = compute_total_order(a0[r], a1[r], a2[r], N)
+def total_order_confidence(A, AB, B, num_resamples, conf_level):
+    s  = np.empty(num_resamples)    
+    for i in xrange(num_resamples):
+        r = np.random.randint(len(A), size=len(A))  
+        s[i] = total_order(A[r], AB[r], B[r])
     
     return norm.ppf(0.5 + conf_level/2) * s.std(ddof=1)
 
-def compute_second_order(a0, a1, a2, a3, a4, N):
+def second_order(a0, a1, a2, a3, a4, N):
     
     c = np.average(a0)    
     EY = np.mean((a0-c)*(a4-c))
@@ -117,17 +104,13 @@ def compute_second_order(a0, a1, a2, a3, a4, N):
     
     return (Vij - Vi - Vj) / V
 
-def compute_second_order_confidence(a0, a1, a2, a3, a4, N, num_resamples, conf_level):
+def second_order_confidence(a0, a1, a2, a3, a4, N, num_resamples, conf_level):
     
     s  = np.empty([num_resamples])
-
-    if conf_level < 0 or conf_level > 1:    
-        print "Error: Confidence level must be between 0-1."
-        exit() 
     
     for i in range(num_resamples):
         r = np.random.randint(N, size=N)
-        s[i] = compute_second_order(a0[r], a1[r], a2[r], a3[r], a4[r], N)
+        s[i] = second_order(a0[r], a1[r], a2[r], a3[r], a4[r], N)
     
     return norm.ppf(0.5 + conf_level/2) * s.std(ddof=1)
 
