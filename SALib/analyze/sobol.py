@@ -53,17 +53,17 @@ def analyze(pfile, output_file, column = 0, calc_second_order = True, num_resamp
     
     # Second order (+conf.)
     if calc_second_order:
-        S['S2'] = np.empty((D,D))
-        S['S2_conf'] = np.empty((D,D))
+        S['S2'] = np.empty((D,D)); S['S2'][:] = np.nan
+        S['S2_conf'] = np.empty((D,D)); S['S2_conf'][:] = np.nan
         if print_to_console: print "\nParameter_1 Parameter_2 S2 S2_conf"
         
         for j in range(D):
             for k in range(j+1, D):     
-                S['S2'] = second_order(A, BA[:,j], AB[:,k], AB[:,j], B)
-                S['S2_conf'] = second_order_confidence(A, BA[:,j], AB[:,k], AB[:,j], B, num_resamples, conf_level)
+                S['S2'][j,k] = second_order(A, AB[:,j], AB[:,k], BA[:,j], B)
+                S['S2_conf'][j,k] = second_order_confidence(A, AB[:,j], AB[:,k], BA[:,j], B, num_resamples, conf_level)
                 
                 if print_to_console:
-                    print "%s %s %f %f" % (param_file['names'][j], param_file['names'][k], S['S2'], S['S2_conf'])                        
+                    print "%s %s %f %f" % (param_file['names'][j], param_file['names'][k], S['S2'][j,k], S['S2_conf'][j,k])                        
     
     return S            
         
@@ -91,33 +91,28 @@ def total_order_confidence(A, AB, B, num_resamples, conf_level):
     
     return norm.ppf(0.5 + conf_level/2) * s.std(ddof=1)
 
-def second_order(a0, a1, a2, a3, a4):
+def second_order(A, ABj, ABk, BAj, B):
+    # Second order estimator following Saltelli 2002
+    V = np.var(np.r_[A,B])
+    Vjk = np.mean(BAj*ABk - A*B)
+    Sj = first_order(A,ABj,B)
+    Sk = first_order(A,ABk,B)
     
-    N = len(a0)
-    c = np.average(a0)    
-    EY = np.mean((a0-c)*(a4-c))
-    EY2 = np.mean((a1-c)*(a3-c))
-    
-    V = np.sum((a1-c)**2)/(N-1) - np.mean(a1-c)**2
-    Vij = np.sum((a1-c)*(a2-c))/(N-1) - EY2
-    Vi = np.sum((a2-c)*(a4-c))/(N-1) - EY
-    Vj = np.sum((a3-c)*(a4-c))/(N-1) - EY2
-    
-    return (Vij - Vi - Vj) / V
+    return Vjk/V - Sj - Sk
 
-def second_order_confidence(a0, a1, a2, a3, a4, num_resamples, conf_level):
+def second_order_confidence(A, ABj, ABk, BAj, B, num_resamples, conf_level):
     s  = np.empty(num_resamples)
     for i in xrange(num_resamples):
-        r = np.random.randint(len(a0), size=len(a0))
-        s[i] = second_order(a0[r], a1[r], a2[r], a3[r], a4[r])
+        r = np.random.randint(len(A), size=len(A))
+        s[i] = second_order(A[r], ABj[r], ABk[r], BAj[r], B[r])
     
     return norm.ppf(0.5 + conf_level/2) * s.std(ddof=1)
 
 if __name__ == "__main__":
-
     parser = common_args.create()
     parser.add_argument('--max-order', type=int, required=False, default=2, choices=[1, 2], help='Maximum order of sensitivity indices to calculate')
     parser.add_argument('-r', '--resamples', type=int, required=False, default=1000, help='Number of bootstrap resamples for Sobol confidence intervals')
     args = parser.parse_args()
 
-    analyze(args.paramfile, args.model_output_file, args.column, (args.max_order == 2), num_resamples = args.resamples, delim = args.delimiter, print_to_console=True)
+    analyze(args.paramfile, args.model_output_file, args.column, (args.max_order == 2), 
+        num_resamples = args.resamples, delim = args.delimiter, print_to_console=True)
