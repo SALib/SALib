@@ -59,8 +59,8 @@ def analyze(pfile, output_file, column = 0, calc_second_order = True, num_resamp
         
         for j in range(D):
             for k in range(j+1, D):     
-                S['S2'] = second_order(A, BA[:,j], AB[:,k], AB[:,j], B, N)
-                S['S2_conf'] = second_order_confidence(A, BA[:,j], AB[:,k], AB[:,j], B, N, num_resamples, conf_level)
+                S['S2'] = second_order(A, BA[:,j], AB[:,k], AB[:,j], B)
+                S['S2_conf'] = second_order_confidence(A, BA[:,j], AB[:,k], AB[:,j], B, num_resamples, conf_level)
                 
                 if print_to_console:
                     print "%s %s %f %f" % (param_file['names'][j], param_file['names'][k], S['S2'], S['S2_conf'])                        
@@ -91,8 +91,9 @@ def total_order_confidence(A, AB, B, num_resamples, conf_level):
     
     return norm.ppf(0.5 + conf_level/2) * s.std(ddof=1)
 
-def second_order(a0, a1, a2, a3, a4, N):
+def second_order(a0, a1, a2, a3, a4):
     
+    N = len(a0)
     c = np.average(a0)    
     EY = np.mean((a0-c)*(a4-c))
     EY2 = np.mean((a1-c)*(a3-c))
@@ -104,13 +105,11 @@ def second_order(a0, a1, a2, a3, a4, N):
     
     return (Vij - Vi - Vj) / V
 
-def second_order_confidence(a0, a1, a2, a3, a4, N, num_resamples, conf_level):
-    
-    s  = np.empty([num_resamples])
-    
-    for i in range(num_resamples):
-        r = np.random.randint(N, size=N)
-        s[i] = second_order(a0[r], a1[r], a2[r], a3[r], a4[r], N)
+def second_order_confidence(a0, a1, a2, a3, a4, num_resamples, conf_level):
+    s  = np.empty(num_resamples)
+    for i in xrange(num_resamples):
+        r = np.random.randint(len(a0), size=len(a0))
+        s[i] = second_order(a0[r], a1[r], a2[r], a3[r], a4[r])
     
     return norm.ppf(0.5 + conf_level/2) * s.std(ddof=1)
 
