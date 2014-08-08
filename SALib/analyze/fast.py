@@ -3,22 +3,21 @@ from ..util import read_param_file
 from sys import exit
 import numpy as np
 import math
+import common_args
 
 # Perform FAST Analysis on file of model results
 # Returns a dictionary with keys 'S1' and 'ST'
 # Where each entry is a list of size D (the number of parameters)
 # Containing the indices in the same order as the parameter file
+<<<<<<< HEAD:SALib/analyze/extended_fast.py
 def analyze(pfile, output_file, column = 0, M = 4, num_resamples = 1000, delim = ' '):
+=======
+def analyze(pfile, output_file, column = 0, M = 4, delim = ' ', print_to_console=False):
+>>>>>>> 1faf68b7a8c74f7b3ed79a1b17414c64943cb6a9:SALib/analyze/fast.py
     
     param_file = read_param_file(pfile)
-    Y = np.loadtxt(output_file, delimiter = delim)
-
-    if len(Y.shape) == 1: Y = Y.reshape((len(Y),1))
-
+    Y = np.loadtxt(output_file, delimiter=delim, usecols=(column,))
     D = param_file['num_vars']
-    
-    if Y.ndim > 1:
-        Y = Y[:, column]
     
     if Y.size % (D) == 0:
         N = int(Y.size / D)
@@ -40,13 +39,23 @@ def analyze(pfile, output_file, column = 0, M = 4, num_resamples = 1000, delim =
         omega[1:] = np.arange(D-1) % m + 1
 
     # Calculate and Output the First and Total Order Values
+<<<<<<< HEAD:SALib/analyze/extended_fast.py
     print "Parameter First Total"
+=======
+    if print_to_console:
+        print "Parameter First Total"
+>>>>>>> 1faf68b7a8c74f7b3ed79a1b17414c64943cb6a9:SALib/analyze/fast.py
     Si = dict((k, [None]*D) for k in ['S1','ST'])
     for i in range(D):
         l = range(i*N, (i+1)*N)
         Si['S1'][i] = compute_first_order(Y[l], N, M, omega[0])
         Si['ST'][i] = compute_total_order(Y[l], N, omega[0])        
+<<<<<<< HEAD:SALib/analyze/extended_fast.py
         print "%s %f %f" % (param_file['names'][i], Si['S1'][i], Si['ST'][i])
+=======
+        if print_to_console:
+            print "%s %f %f" % (param_file['names'][i], Si['S1'][i], Si['ST'][i])
+>>>>>>> 1faf68b7a8c74f7b3ed79a1b17414c64943cb6a9:SALib/analyze/fast.py
     return Si
     
 def compute_first_order(outputs, N, M, omega):
@@ -62,3 +71,9 @@ def compute_total_order(outputs, N, omega):
     V = 2*np.sum(Sp)
     Dt = 2*sum(Sp[range(int(omega/2))])
     return (1 - Dt/V)
+
+if __name__ == "__main__":
+
+    parser = common_args.create()
+    args = parser.parse_args()
+    analyze(args.paramfile, args.model_output_file, args.column, delim = args.delimiter, print_to_console=True)

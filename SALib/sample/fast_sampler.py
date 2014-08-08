@@ -1,10 +1,15 @@
 from __future__ import division
 import numpy as np
 import math
-    
+from ..util import scale_samples, read_param_file
+import common_args
+
 # Generate N x D matrix of extended FAST samples (Saltelli 1999)
-def sample(N, D, M = 4):
+def sample(N, param_file, M = 4):
     
+    pf = read_param_file(param_file)
+    D = pf['num_vars']
+
     omega = np.empty([D])
     omega[0] = math.floor((N - 1) / (2 * M))
     m = math.floor(omega[0] / (2 * M))
@@ -34,4 +39,15 @@ def sample(N, D, M = 4):
             g = 0.5 + (1/math.pi) * np.arcsin(np.sin(omega2[j] * s + phi))
             X[l,j] = g
         
+    scale_samples(X, pf['bounds'])
     return X
+
+if __name__ == "__main__":
+
+    parser = common_args.create()
+    parser.add_argument('-M', type=int, required=False, default=4, help='M coefficient, default 4')
+    args = parser.parse_args()
+
+    np.random.seed(args.seed)
+    param_values = sample(args.samples, args.paramfile, M=args.M)
+    np.savetxt(args.output, param_values, delimiter=args.delimiter, fmt='%.' + str(args.precision) + 'e')
