@@ -43,7 +43,7 @@ def analyze(pfile, output_file, column = 0, calc_second_order = True, num_resamp
     if print_to_console: print "Parameter %s %s %s %s" % keys
 
     for j in range(D):
-        S['S1'][j] = compute_first_order(A, AB[:,j], B, N)
+        S['S1'][j] = compute_first_order(A, AB[:,j], B)
         S['S1_conf'][j] = compute_first_order_confidence(A, AB[:,j], B, N, num_resamples, conf_level)
         S['ST'][j] = compute_total_order(A, AB[:,j], B, N)
         S['ST_conf'][j] = compute_total_order_confidence(A, AB[:,j], B, N, num_resamples, conf_level)
@@ -58,8 +58,7 @@ def analyze(pfile, output_file, column = 0, calc_second_order = True, num_resamp
         if print_to_console: print "\nParameter_1 Parameter_2 S2 S2_conf"
         
         for j in range(D):
-            for k in range(j+1, D):
-                    
+            for k in range(j+1, D):     
                 S['S2'] = compute_second_order(A, BA[:,j], AB[:,k], AB[:,j], B, N)
                 S['S2_conf'] = compute_second_order_confidence(A, BA[:,j], AB[:,k], AB[:,j], B, N, num_resamples, conf_level)
                 
@@ -68,14 +67,9 @@ def analyze(pfile, output_file, column = 0, calc_second_order = True, num_resamp
     
     return S            
         
-def compute_first_order(a0, a1, a2, N):
-
-    c = np.mean(a0)
-    EY2 = np.mean((a0-c)*(a2-c))
-    V = np.sum((a2-c)**2)/(N-1) - np.mean(a2-c)**2
-    U = np.sum((a1-c)*(a2-c))/(N-1)
-
-    return (U - EY2) / V
+def compute_first_order(A, AB, B):
+    # First order estimator following Saltelli et al. 2010 CPC, normalized by sample variance
+    return np.mean(B*(AB-A))/np.var(np.r_[A,B])
 
 def compute_first_order_confidence(a0, a1, a2, N, num_resamples, conf_level):
     
@@ -83,7 +77,7 @@ def compute_first_order_confidence(a0, a1, a2, N, num_resamples, conf_level):
     
     for i in range(num_resamples):        
         r = np.random.randint(N, size=N)        
-        s[i] = compute_first_order(a0[r], a1[r], a2[r], N)
+        s[i] = compute_first_order(a0[r], a1[r], a2[r])
     
     return norm.ppf(0.5 + conf_level/2) * s.std(ddof=1)
 
