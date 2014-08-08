@@ -1,21 +1,6 @@
-<<<<<<< HEAD
-###Sensitivity Analysis Library (SALib)
-
-This library provides Python implementations of sampling and analysis routines for commonly used sensitivity analysis methods. These are typically applied in systems modeling to calculate the effects of model parameters (or other uncertain variables) on outputs of interest. 
-
-**Requirements:** [NumPy](http://www.numpy.org/), [SciPy](http://www.scipy.org/)
-
-**Methods included:**
-* Sobol Sensitivity Analysis ([Sobol 2001](http://www.sciencedirect.com/science/article/pii/S0378475400002706), [Saltelli 2002](http://www.sciencedirect.com/science/article/pii/S0010465502002801), [Saltelli et al. 2008](http://www.wiley.com/WileyCDA/WileyTitle/productCd-0470059974.html))
-* Method of Morris ([Morris 1991](http://www.tandfonline.com/doi/abs/10.1080/00401706.1991.10484804), [Campolongo et al. 2007](http://www.sciencedirect.com/science/article/pii/S1364815206002805))
-* Fourier Amplitude Sensitivity Test (FAST) ([Cukier et al. 1973](http://scitation.aip.org/content/aip/journal/jcp/59/8/10.1063/1.1680571), [Saltelli et al. 1999](http://amstat.tandfonline.com/doi/abs/10.1080/00401706.1999.10485594))
-
-**Contributors:** [Jon Herman](https://github.com/jdherman), [Matt Woodruff](https://github.com/matthewjwoodruff), [Fernando Rios](https://github.com/zoidy), [Dan Hyams](https://github.com/dhyams)
-=======
 ##Sensitivity Analysis Library (SALib)
 
 Python implementations of commonly used sensitivity analysis methods. Useful in systems modeling to calculate the effects of model inputs or exogenous factors on outputs of interest. 
->>>>>>> 1faf68b7a8c74f7b3ed79a1b17414c64943cb6a9
 
 **Requirements:** [NumPy](http://www.numpy.org/), [SciPy](http://www.scipy.org/)
 
@@ -35,15 +20,8 @@ P2 0.0 5.0
 ...etc.
 ```
 
-<<<<<<< HEAD
-If the parameters are to be sampled with normal distributions, the lines in the parameter file should read (name, mean, standard deviation). None of the three methods uses normal sampling, but it is included for other user-defined applications. Note that lines beginning with `#` will be treated as comments and ignored.
-
-There are two ways to run the library: as a decoupled process from the command line, or from a Python script.
-
 #### Command-Line Interface
-=======
 Lines beginning with `#` will be treated as comments and ignored.
->>>>>>> 1faf68b7a8c74f7b3ed79a1b17414c64943cb6a9
 
 ### Generate samples
 
@@ -100,13 +78,6 @@ Si = sobol.analyze(param_file, 'model_output.txt', column = 0, print_to_console=
 ```
 	  
 Check out the [examples](https://github.com/jdherman/SALib/tree/master/examples) for a full description of command line and keyword options for all of the methods.
-
-<<<<<<< HEAD
-#### Python Interface
-The library can also be used directly from a Python script. This approach has more of a learning curve and is only recommended for users who need to customize sampling and/or analysis processes for their applications. Refer to `python-example.py` for an example of how each of the methods are invoked from Python. Sensitivity indices are printed to the command line but can also be returned in a dictionary.
-
-#### License
-=======
 
 ### License
 >>>>>>> 1faf68b7a8c74f7b3ed79a1b17414c64943cb6a9

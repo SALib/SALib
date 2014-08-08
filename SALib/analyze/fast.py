@@ -9,11 +9,7 @@ import common_args
 # Returns a dictionary with keys 'S1' and 'ST'
 # Where each entry is a list of size D (the number of parameters)
 # Containing the indices in the same order as the parameter file
-<<<<<<< HEAD:SALib/analyze/extended_fast.py
-def analyze(pfile, output_file, column = 0, M = 4, num_resamples = 1000, delim = ' '):
-=======
 def analyze(pfile, output_file, column = 0, M = 4, delim = ' ', print_to_console=False):
->>>>>>> 1faf68b7a8c74f7b3ed79a1b17414c64943cb6a9:SALib/analyze/fast.py
     
     param_file = read_param_file(pfile)
     Y = np.loadtxt(output_file, delimiter=delim, usecols=(column,))
@@ -39,23 +35,15 @@ def analyze(pfile, output_file, column = 0, M = 4, delim = ' ', print_to_console
         omega[1:] = np.arange(D-1) % m + 1
 
     # Calculate and Output the First and Total Order Values
-<<<<<<< HEAD:SALib/analyze/extended_fast.py
-    print "Parameter First Total"
-=======
     if print_to_console:
         print "Parameter First Total"
->>>>>>> 1faf68b7a8c74f7b3ed79a1b17414c64943cb6a9:SALib/analyze/fast.py
     Si = dict((k, [None]*D) for k in ['S1','ST'])
     for i in range(D):
         l = range(i*N, (i+1)*N)
         Si['S1'][i] = compute_first_order(Y[l], N, M, omega[0])
         Si['ST'][i] = compute_total_order(Y[l], N, omega[0])        
-<<<<<<< HEAD:SALib/analyze/extended_fast.py
-        print "%s %f %f" % (param_file['names'][i], Si['S1'][i], Si['ST'][i])
-=======
         if print_to_console:
             print "%s %f %f" % (param_file['names'][i], Si['S1'][i], Si['ST'][i])
->>>>>>> 1faf68b7a8c74f7b3ed79a1b17414c64943cb6a9:SALib/analyze/fast.py
     return Si
     
 def compute_first_order(outputs, N, M, omega):
