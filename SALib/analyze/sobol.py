@@ -28,13 +28,11 @@ def analyze(pfile, output_file, column = 0, calc_second_order = True, num_resamp
     A = np.empty(N)
     B = np.empty(N)
     AB = np.empty((N,D))
-    step = D+2
-    if calc_second_order:
-        BA = np.empty((N,D))
-        step = 2*D+2
+    BA = np.empty((N,D)) if calc_second_order else None
+    step = 2*D+2 if calc_second_order else D+2
 
     A = Y[0:Y.size:step]
-    B =  Y[(D+1):Y.size:step] if not calc_second_order else Y[(2*D+1):Y.size:step]
+    B =  Y[(step-1):Y.size:step]
     for j in range(D):
         AB[:,j] = Y[(j+1):Y.size:step]
         if calc_second_order: BA[:,j] = Y[(j+1+D):Y.size:step]
@@ -55,17 +53,18 @@ def analyze(pfile, output_file, column = 0, calc_second_order = True, num_resamp
     
     # Second order (+conf.)
     if calc_second_order:
-        if print_to_console:
-            print "\nParameter_1 Parameter_2 Second_Order Second_Order_Conf"
+        S['S2'] = np.empty((D,D))
+        S['S2_conf'] = np.empty((D,D))
+        if print_to_console: print "\nParameter_1 Parameter_2 S2 S2_conf"
         
         for j in range(D):
             for k in range(j+1, D):
                     
-                S2 = compute_second_order(A, BA[:,j], AB[:,k], AB[:,j], B, N)
-                S2c = compute_second_order_confidence(A, BA[:,j], AB[:,k], AB[:,j], B, N, num_resamples, conf_level)
+                S['S2'] = compute_second_order(A, BA[:,j], AB[:,k], AB[:,j], B, N)
+                S['S2_conf'] = compute_second_order_confidence(A, BA[:,j], AB[:,k], AB[:,j], B, N, num_resamples, conf_level)
                 
                 if print_to_console:
-                    print "%s %s %f %f" % (param_file['names'][j], param_file['names'][k], S2, S2c)                        
+                    print "%s %s %f %f" % (param_file['names'][j], param_file['names'][k], S['S2'], S['S2_conf'])                        
     
     return S            
         
