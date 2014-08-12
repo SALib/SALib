@@ -16,6 +16,8 @@ python -m SALib.analyze.delta \
 #
 # -Y, --model-output-file: File of model output values to analyze
 #
+# -X, --model-input-file: File of model input values (parameter samples).
+#
 # -c, --column (optional): Column of model output file to analyze. 
 #                If the file only has one column, this argument will be ignored.
 #
