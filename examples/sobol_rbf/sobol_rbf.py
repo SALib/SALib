@@ -17,7 +17,7 @@ param_file = '../../SALib/test_functions/params/Ishigami.txt'
 # containing the indices in the same order as the parameter file
 
 Si = sobol_rbf.analyze(param_file, 'model_input.txt', 'model_output.txt', 
-  N_rbf=100000, n_folds = 10, column = 0, print_to_console=False,)
+  N_rbf=100000, n_folds = 10, column = 0, print_to_console=False)
 
 # There is another option called training_sample which specifies the number of subsampled
 # observations to use for training the metamodel. By default, all points are used.

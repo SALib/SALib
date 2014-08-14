@@ -14,7 +14,7 @@ from sklearn.preprocessing import MinMaxScaler
 # 'R2_fullset' is the R^2 value when the metamodel is applied to all observed data,
 # and the other entries are lists of size D (the number of parameters)
 # containing the indices in the same order as the parameter file
-def analyze(pfile, input_file, output_file, N_rbf=100000, column = 0, n_folds = 10,
+def analyze(pfile, input_file, output_file, N_rbf=10000, column = 0, n_folds = 10,
             delim = ' ', print_to_console=False, training_sample=None):
     
     param_file = read_param_file(pfile)
@@ -42,9 +42,10 @@ def analyze(pfile, input_file, output_file, N_rbf=100000, column = 0, n_folds = 
     X_rbf = mms.transform(X_rbf)
     y_rbf = reg.predict(X_rbf)
     
-
     np.savetxt("y_rbf.txt", y_rbf, delimiter=' ')
 
+    # not using the bootstrap intervals here. For large enough N, they will go to zero.
+    # (this doesn't mean the indices are accurate -- check the metamodel R^2)
     S = sobol.analyze(pfile, "y_rbf.txt", print_to_console=False, num_resamples=2)
     S.pop("S1_conf", None)
     S.pop("ST_conf", None)
@@ -69,7 +70,7 @@ def analyze(pfile, input_file, output_file, N_rbf=100000, column = 0, n_folds = 
 if __name__ == "__main__":
     parser = common_args.create()
     parser.add_argument('-X', '--model-input-file', type=str, required=True, default=None, help='Model input file')
-    parser.add_argument('-N', '--N-rbf', type=int, required=False, default=100000, help='Number of sample points on the RBF surface')
+    parser.add_argument('-N', '--N-rbf', type=int, required=False, default=10000, help='Number of sample points on the RBF surface')
     parser.add_argument('-k', '--n-folds', type=int, required=False, default=10, help='Number of folds in SVR cross-validation')
     parser.add_argument('-t', '--training-sample', type=int, required=False, default=None, help='Subsample size to train SVR. Default uses all points in dataset.')
 
