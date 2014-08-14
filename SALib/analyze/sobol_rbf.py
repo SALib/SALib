@@ -15,24 +15,23 @@ from sklearn.preprocessing import MinMaxScaler
 # and the other entries are lists of size D (the number of parameters)
 # containing the indices in the same order as the parameter file
 def analyze(pfile, input_file, output_file, N_rbf=100000, column = 0, n_folds = 10,
-            delim = ' ', print_to_console=False, training_sample=None, rescale=False):
+            delim = ' ', print_to_console=False, training_sample=None):
     
     param_file = read_param_file(pfile)
     y = np.loadtxt(output_file, delimiter=delim, usecols=(column,))
     X = np.loadtxt(input_file, delimiter=delim, ndmin=2)
     if len(X.shape) == 1: X = X.reshape((len(X),1))
     D = param_file['num_vars']
-
-    if rescale:
-        mms = MinMaxScaler()
-        X = mms.fit_transform(X)
+    mms = MinMaxScaler()
+    X = mms.fit_transform(X)
 
     # Cross-validation to choose C and epsilon parameters
-    C_range = [0.1, 1, 10, 100]
-    eps_range = [0.01, 0.1, 0.2, 0.5]
-    param_grid = dict(epsilon=eps_range, C=C_range)
-    reg = GridSearchCV(svm.SVR(), param_grid=param_grid, cv=10)
-    
+    C_range = [0.01, 0.1, 1, 10, 100]
+    gamma_range = [0.001, 0.1, 1, 10]
+    eps_range = [0.01, 0.1, 1]
+    param_grid = dict(C=C_range, gamma=gamma_range, epsilon=eps_range)
+    reg = GridSearchCV(svm.SVR(), param_grid=param_grid, cv=n_folds)
+
     if training_sample is None: reg.fit(X, y) # will be very slow for large N
     else: 
         if training_sample > y.size: raise ValueError("training_sample is greater than size of dataset.")
@@ -40,8 +39,9 @@ def analyze(pfile, input_file, output_file, N_rbf=100000, column = 0, n_folds = 
         reg.fit(X[ix,:], y[ix])
 
     X_rbf = saltelli.sample(N_rbf, pfile)
-    if rescale: X_rbf = mms.transform(X_rbf)
+    X_rbf = mms.transform(X_rbf)
     y_rbf = reg.predict(X_rbf)
+    
 
     np.savetxt("y_rbf.txt", y_rbf, delimiter=' ')
 
@@ -72,10 +72,8 @@ if __name__ == "__main__":
     parser.add_argument('-N', '--N-rbf', type=int, required=False, default=100000, help='Number of sample points on the RBF surface')
     parser.add_argument('-k', '--n-folds', type=int, required=False, default=10, help='Number of folds in SVR cross-validation')
     parser.add_argument('-t', '--training-sample', type=int, required=False, default=None, help='Subsample size to train SVR. Default uses all points in dataset.')
-    parser.add_argument('--rescale', dest='rescale', action='store_true')
-    parser.set_defaults(rescale=False)
 
     args = parser.parse_args()
     analyze(args.paramfile, args.model_input_file, args.model_output_file, args.N_rbf, args.column, 
         delim=args.delimiter, n_folds=args.n_folds, print_to_console=True, 
-        training_sample=args.training_sample, rescale=args.rescale)
+        training_sample=args.training_sample)

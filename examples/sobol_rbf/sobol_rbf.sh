@@ -14,8 +14,8 @@ python -m SALib.analyze.sobol_rbf \
      -p ./SALib/test_functions/params/Ishigami.txt \
      -X model_input.txt \
      -Y model_output.txt \
-     -N 100000 \
-     -k 10 \
+     -N 10000 \
+     -k 5 \
      -c 0 \
 
 # Options:
@@ -39,8 +39,3 @@ python -m SALib.analyze.sobol_rbf \
 # -t, --training_sample (optional): Number of randomly subsampled observations to use
 #     for training the metamodel. Default uses all observations, which can be slow.
 #
-# --rescale (optional): Turns on rescaling features to (0,1) range. Default false.
-#     Results are very sensitive to scaling. If inputs (features) are on different scales,
-#     you may want to use --rescale. If they are already on similar scales, you might
-#     get better results with rescale=False. This is the case for the Ishigami function.
-
