@@ -45,7 +45,7 @@ def analyze(pfile, input_file, output_file, column = 0, delim = ' ', num_resampl
     for j in xrange(D):
         lb = param_file['bounds'][j][0]
         ub = param_file['bounds'][j][1]
-        ee[:,j] /= (ub-lb)
+        ee[:,j] *= (ub-lb)
     
     # Output the Mu, Mu*, and Sigma Values. Also return them in case this is being called from Python
     Si = dict((k, [None]*D) for k in ['mu','mu_star','sigma','mu_star_conf'])
