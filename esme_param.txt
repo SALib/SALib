@@ -1,0 +1,6 @@
+#CCGT 400 1200
+#CCGT_with_CCS 600 1600
+#Offshore_Wind 800 1200
+#Onshore_Wind 400 1000
+Test1 0 1
+Test2 0 1
