@@ -1,5 +1,6 @@
+
 from nose.tools import assert_almost_equal, assert_equal
-from esme import compute_distance, compute_distance_matrix, \
+from ..esme import compute_distance, compute_distance_matrix, \
     find_most_distant, find_maximum
 import numpy as np
 
@@ -31,7 +32,7 @@ def test_compute_distance_matrix():
     expected[3, :] = [6.89, 6.18, 6.57, 0, 0, 0]
     expected[4, :] = [6.18, 5.31, 5.41, 5.5, 0, 0]
     expected[5, :] = [7.52, 5.99, 5.52, 7.31, 5.77, 0]
-    np.testing.assert_allclose(output, expected, 2)
+    np.testing.assert_allclose(output, expected, rtol=1e-2)
 
 
 def setUp():
@@ -62,6 +63,13 @@ def test_combo_from_find_most_distant():
 
 
 def test_scores_from_find_most_distant():
+    '''
+    Checks whether array of scores from (6 4) is correct.
+
+    Data is derived from Saltelli et al. 2008,
+    in the solution to exercise 3a, Chapter 3, page 134.
+
+    '''
     sample_inputs = setUp()
     N = 6
     num_params = 2
@@ -70,4 +78,5 @@ def test_scores_from_find_most_distant():
     expected = np.array([15.022, 13.871, 14.815, 14.582, 16.178, 14.912, 15.055, 16.410,
                 15.685, 16.098, 14.049, 15.146, 14.333, 14.807, 14.825],
                 dtype=np.float32)
-    np.testing.assert_allclose(output, expected, 3)
+
+    np.testing.assert_allclose(output, expected, rtol=1e-1, atol=1e-2)

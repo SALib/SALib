@@ -1,8 +1,49 @@
-from SALib.sample import morris_oat
 import numpy as np
+import random as rd
 from math import factorial
 from itertools import combinations
-from SALib.util import read_param_file
+from util import scale_samples, read_param_file
+
+
+# Generate N(D + 1) x D matrix of Morris samples (OAT)
+def sample(N, param_file, num_levels, grid_jump):
+
+    pf = read_param_file(param_file)
+    D = pf['num_vars']
+
+    # orientation matrix B: lower triangular (1) + upper triangular (-1)
+    B = np.tril(np.ones([D+1, D], dtype=int), -1) + np.triu(-1*np.ones([D+1,D], dtype=int))
+
+    # grid step delta, and final sample matrix X
+    delta = grid_jump / (num_levels - 1)
+    X = np.empty([N*(D+1), D])
+
+    # Create N trajectories. Each trajectory contains D+1 parameter sets.
+    # (Starts at a base point, and then changes one parameter at a time)
+    for j in range(N):
+
+        # directions matrix DM - diagonal matrix of either +1 or -1
+        DM = np.diag([rd.choice([-1,1]) for _ in range(D)])
+
+        # permutation matrix P
+        perm = np.random.permutation(D)
+        P = np.zeros([D,D])
+        for i in range(D):
+            P[i, perm[i]] = 1
+
+        # starting point for this trajectory
+        x_base = np.empty([D+1, D])
+        for i in range(D):
+            x_base[:,i] = (rd.choice(np.arange(num_levels - grid_jump))) / (num_levels - 1)
+
+        # Indices to be assigned to X, corresponding to this trajectory
+        index_list = np.arange(D+1) + j*(D + 1)
+        delta_diag = np.diag([delta for _ in range(D)])
+
+        X[index_list,:] = 0.5*(np.mat(B)*np.mat(P)*np.mat(DM) + 1) * np.mat(delta_diag) + np.mat(x_base)
+
+    scale_samples(X, pf['bounds'])
+    return X
 
 
 def compute_distance(m, l, num_params):
@@ -71,10 +112,17 @@ def find_most_distant(input_sample, N, num_params, k_choices):
     combos = [t for t in combinations(range(N), k_choices)]
 
     for counter, t in enumerate(combos):
-        for k in combinations(t, 2):
-            output[counter] += np.square(distance_matrix[k[1], k[0]])
+        output[counter] = reduce(add,
+                                 map(lambda x:
+                                        np.square(distance_matrix[x[1], x[0]]),
+                                     combinations(t, 2))
+                                )
     scores = np.sqrt(output)
     return scores, combos
+
+
+def add(x,y):
+    return x + y
 
 
 def find_maximum(scores, combinations):
@@ -86,13 +134,13 @@ def find_maximum(scores, combinations):
 if __name__ == "__main__":
     param_file = 'esme_param.txt'
     pf = read_param_file(param_file)
-    N = 50
+    N = 100
     num_params = pf['num_vars']
-    k_choices = 6
+    k_choices = 10
     p_levels = 4
     grid_step = 2
     # Generates N(D + 1) x D matrix of samples
-    input_data = morris_oat.sample(N,
+    input_data = sample(N,
                                    param_file,
                                    num_levels=p_levels,
                                    grid_jump=grid_step)
