@@ -69,7 +69,7 @@ def find_most_distant(input_sample, N, num_params, k_choices):
     output = np.zeros((number_of_combinations, number_of_pairings),
                       dtype=np.float32)
 
-    # Generate a list of all the possible combinationations
+    # Generate a list of all the possible combinations
     combos = [t for t in combinations(range(N), k_choices)]
 
     for counter, t in enumerate(combos):

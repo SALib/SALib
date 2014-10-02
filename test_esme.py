@@ -46,6 +46,11 @@ def setUp():
 
 
 def test_combo_from_find_most_distant():
+    '''
+    Tests whether the correct combination is picked from the fixture drawn
+    from Saltelli et al. 2008, in the solution to exercise 3a,
+    Chapter 3, page 134.
+    '''
     sample_inputs = setUp()
     N = 6
     num_params = 2
