@@ -13,15 +13,15 @@ def compute_distance(m, l):
     if np.shape(m) != np.shape(l):
         raise ValueError("Input matrices are different sizes")
 
-    output = np.zeros([np.size(m, 0), np.size(m, 0), np.size(m, 1)],
+    output = np.zeros([np.size(m, 0), np.size(m, 0)],
                       dtype=np.float32)
 
     for i in range(0, 3):
         for j in range(0, 3):
             for z in range(0, 2):
-                output[i, j, z] = np.square(m[i, z] - l[j, z])
+                output[i, j] += np.square(m[i, z] - l[j, z])
 
-    distance = np.array(np.sum(np.sqrt(np.sum(output, 2)), (0, 1)),
+    distance = np.array(np.sum(np.sqrt(output), (0, 1)),
                         dtype=np.float32)
 
     return distance
@@ -66,16 +66,16 @@ def find_most_distant(input_sample, N, num_params, k_choices):
     number_of_combinations = num_combinations(N, k_choices)
     number_of_pairings = num_combinations(k_choices, 2)
 
-    output = np.zeros((number_of_combinations, number_of_pairings),
+    output = np.zeros((number_of_combinations),
                       dtype=np.float32)
 
     # Generate a list of all the possible combinations
     combos = [t for t in combinations(range(N), k_choices)]
 
     for counter, t in enumerate(combos):
-        for counter2, k in enumerate(combinations(t, 2)):
-            output[counter, counter2] = np.square(distance_matrix[k[1], k[0]])
-    scores = np.sqrt(np.sum(output, 1))
+        for k in combinations(t, 2):
+            output[counter] += np.square(distance_matrix[k[1], k[0]])
+    scores = np.sqrt(output)
     return scores, combos
 
 
