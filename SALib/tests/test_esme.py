@@ -1,8 +1,9 @@
 
 from nose.tools import assert_almost_equal, assert_equal
 from ..esme import compute_distance, compute_distance_matrix, \
-    find_most_distant, find_maximum
+    find_most_distant, find_maximum#, Map
 import numpy as np
+from itertools import combinations
 
 
 def test_distance():
@@ -80,3 +81,25 @@ def test_scores_from_find_most_distant():
                 dtype=np.float32)
 
     np.testing.assert_allclose(output, expected, rtol=1e-1, atol=1e-2)
+
+
+#def test_Map():
+#    '''
+#
+#    '''
+#    sample_inputs = setUp()
+#    N = 6
+#    num_params = 2
+#    k_choices = 4
+#    distance_matrix = np.array(compute_distance_matrix(sample_inputs,
+#                                                    N,
+#                                                    num_params), dtype=np.float32)
+#
+#    combos = [t for t in combinations(range(N), k_choices)]
+#    output = np.zeros(15, dtype=np.float32)
+#    expected = np.array([15.022, 13.871, 14.815, 14.582, 16.178, 14.912, 15.055, 16.410,
+#                        15.685, 16.098, 14.049, 15.146, 14.333, 14.807, 14.825],
+#                        dtype=np.float32)
+#    for counter, combo in enumerate(combos):
+#        output[counter] = Map(distance_matrix, combo)
+#    np.testing.assert_allclose(output, expected, rtol=1e-1, atol=1e-3)

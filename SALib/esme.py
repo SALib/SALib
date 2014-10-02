@@ -3,7 +3,7 @@ import random as rd
 from math import factorial
 from itertools import combinations
 from util import scale_samples, read_param_file
-
+from multiprocessing import Pool, Array
 
 # Generate N(D + 1) x D matrix of Morris samples (OAT)
 def sample(N, param_file, num_levels, grid_jump):
@@ -96,33 +96,61 @@ def find_most_distant(input_sample, N, num_params, k_choices):
     '''
 
     # First compute the distance matrix for each possible pairing
-    # of trajectories
-    distance_matrix = np.array(compute_distance_matrix(input_sample,
+    # of trajectories and store in a shared-memory array
+    distance_matrix = compute_distance_matrix(input_sample,
                                                        N,
-                                                       num_params),
-                               dtype=np.float32)
+                                                       num_params)
 
-    # Now iterate through each possible combination to (N choose k_choices)
+    # Now evaluate the (N choose k_choices) possible combinations
     number_of_combinations = num_combinations(N, k_choices)
-
+    # Initialise the output array
     output = np.zeros((number_of_combinations),
                       dtype=np.float32)
 
     # Generate a list of all the possible combinations
     combos = [t for t in combinations(range(N), k_choices)]
 
-    for counter, t in enumerate(combos):
-        output[counter] = reduce(add,
-                                 map(lambda x:
-                                        np.square(distance_matrix[x[1], x[0]]),
-                                     combinations(t, 2))
-                                )
-    scores = np.sqrt(output)
-    return scores, combos
+    def Map(one_combination):
 
+        def square(x):
+            return np.square(distance_matrix[x[1], x[0]])
+
+        return np.sqrt(reduce(add, map(square, combinations(one_combination, 2))))
+
+    output = np.array(map(Map, combos), dtype=np.float32)
+
+    return output, combos
+    #for counter, t in enumerate(combos):
+    #    output[counter] = reduce(add,
+    #                             map(lambda x:
+    #                                    np.square(distance_matrix[x[1], x[0]]),
+    #                                 combinations(t, 2))
+    #                            )
 
 def add(x,y):
     return x + y
+
+class optimised_trajectories(object):
+
+
+
+    def __init__(self, N, param_file, num_levels, grid_jump):
+        self.N = N
+        self.param_file = param_file
+
+        pf = read_param_file(param_file)
+        self.num_params = pf['num_vars']
+
+        self.num_levels = num_levels
+        self.grid_jump = grid_jump
+
+        self.k_choices = k_choices
+        self.sample_inputs = self.sample(self.N, self.param_file, self.num_levels, self.grid_jump)
+        self.distance_matrix = \
+            np.array(compute_distance_matrix(self.sample_inputs,
+                                             self.N,
+                                             self.num_params), dtype=np.float32)
+
 
 
 def find_maximum(scores, combinations):
@@ -134,9 +162,9 @@ def find_maximum(scores, combinations):
 if __name__ == "__main__":
     param_file = 'esme_param.txt'
     pf = read_param_file(param_file)
-    N = 100
+    N = 6
     num_params = pf['num_vars']
-    k_choices = 10
+    k_choices = 4
     p_levels = 4
     grid_step = 2
     # Generates N(D + 1) x D matrix of samples
