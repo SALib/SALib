@@ -5,7 +5,7 @@ from itertools import combinations
 from SALib.util import read_param_file
 
 
-def compute_distance(m, l):
+def compute_distance(m, l, num_params):
     '''
     Computes the distance between two trajectories
     '''
@@ -13,15 +13,14 @@ def compute_distance(m, l):
     if np.shape(m) != np.shape(l):
         raise ValueError("Input matrices are different sizes")
 
-    output = np.zeros([np.size(m, 0), np.size(m, 0), np.size(m, 1)],
+    output = np.zeros([np.size(m, 0), np.size(m, 0)],
                       dtype=np.float32)
 
-    for i in range(0, 3):
-        for j in range(0, 3):
-            for z in range(0, 2):
-                output[i, j, z] = np.square(m[i, z] - l[j, z])
+    for i in range(0, num_params+1):
+        for j in range(0, num_params+1):
+            output[i, j] = np.sum(np.square(np.subtract(m[i, :], l[j, :])))
 
-    distance = np.array(np.sum(np.sqrt(np.sum(output, 2)), (0, 1)),
+    distance = np.array(np.sum(np.sqrt(output), (0, 1)),
                         dtype=np.float32)
 
     return distance
@@ -45,7 +44,7 @@ def compute_distance_matrix(input_sample, N, num_params):
         for k in range(j + 1, N):
             input_1 = input_sample[index_list[j]]
             input_2 = input_sample[index_list[k]]
-            distance_matrix[k, j] = compute_distance(input_1, input_2)
+            distance_matrix[k, j] = compute_distance(input_1, input_2, num_params)
     return distance_matrix
 
 
@@ -64,18 +63,17 @@ def find_most_distant(input_sample, N, num_params, k_choices):
 
     # Now iterate through each possible combination to (N choose k_choices)
     number_of_combinations = num_combinations(N, k_choices)
-    number_of_pairings = num_combinations(k_choices, 2)
 
-    output = np.zeros((number_of_combinations, number_of_pairings),
+    output = np.zeros((number_of_combinations),
                       dtype=np.float32)
 
     # Generate a list of all the possible combinations
     combos = [t for t in combinations(range(N), k_choices)]
 
     for counter, t in enumerate(combos):
-        for counter2, k in enumerate(combinations(t, 2)):
-            output[counter, counter2] = np.square(distance_matrix[k[1], k[0]])
-    scores = np.sqrt(np.sum(output, 1))
+        for k in combinations(t, 2):
+            output[counter] += np.square(distance_matrix[k[1], k[0]])
+    scores = np.sqrt(output)
     return scores, combos
 
 
@@ -88,9 +86,9 @@ def find_maximum(scores, combinations):
 if __name__ == "__main__":
     param_file = 'esme_param.txt'
     pf = read_param_file(param_file)
-    N = 100
+    N = 50
     num_params = pf['num_vars']
-    k_choices = 4
+    k_choices = 6
     p_levels = 4
     grid_step = 2
     # Generates N(D + 1) x D matrix of samples
@@ -98,4 +96,5 @@ if __name__ == "__main__":
                                    param_file,
                                    num_levels=p_levels,
                                    grid_jump=grid_step)
-    print find_most_distant(input_data, N, num_params, k_choices)
+    scores, combos = find_most_distant(input_data, N, num_params, k_choices)
+    print find_maximum(scores, combos)
