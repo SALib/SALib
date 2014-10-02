@@ -2,3 +2,5 @@
 model_input.txt
 model_output.txt
 y_rbf.txt
+dist
+*.egg-info
