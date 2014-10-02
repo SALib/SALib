@@ -7,7 +7,7 @@ import numpy as np
 def test_distance():
     input_1 = np.matrix([[0, 1/3.], [0, 1.], [2/3., 1.]], dtype=np.float32)
     input_3 = np.matrix([[2/3., 0], [2/3., 2/3.], [0, 2/3.]], dtype=np.float32)
-    output = compute_distance(input_1, input_3)
+    output = compute_distance(input_1, input_3, 2)
     assert_almost_equal(output, 6.18, places=2)
 
 
@@ -15,7 +15,7 @@ def test_distance_fail_with_difference_size_ip():
     input_1 = np.matrix([[0, 1/3.], [0, 1.]], dtype=np.float32)
     input_3 = np.matrix([[2/3., 0], [2/3., 2/3.], [0, 2/3.]], dtype=np.float32)
     try:
-        compute_distance(input_1, input_3)
+        compute_distance(input_1, input_3, 2)
     except:
         pass
     else:
