@@ -1,25 +1,25 @@
 from nose.tools import assert_almost_equal, assert_equal
 from esme import compute_distance, compute_distance_matrix, \
-    find_most_distant
+    find_most_distant, find_maximum
 import numpy as np
 
 
 def test_distance():
-    input_1 = np.matrix([[0, 1/3.], [0, 1.], [2/3., 1.]], dtype=np.float16)
-    input_3 = np.matrix([[2/3., 0], [2/3., 2/3.], [0, 2/3.]], dtype=np.float16)
+    input_1 = np.matrix([[0, 1/3.], [0, 1.], [2/3., 1.]], dtype=np.float32)
+    input_3 = np.matrix([[2/3., 0], [2/3., 2/3.], [0, 2/3.]], dtype=np.float32)
     output = compute_distance(input_1, input_3)
     assert_almost_equal(output, 6.18, places=2)
 
 
 def test_distance_fail_with_difference_size_ip():
-    input_1 = np.matrix([[0, 1/3.], [0, 1.], [2/3., 1.]], dtype=np.float16)
-    input_3 = np.matrix([[2/3., 0], [2/3., 2/3.], [0, 2/3.]], dtype=np.float16)
+    input_1 = np.matrix([[0, 1/3.], [0, 1.]], dtype=np.float32)
+    input_3 = np.matrix([[2/3., 0], [2/3., 2/3.], [0, 2/3.]], dtype=np.float32)
     try:
         compute_distance(input_1, input_3)
     except:
         pass
     else:
-        raise AssertionError("Difference size matrices did not trigger error")
+        raise AssertionError("Different size matrices did not trigger error")
 
 
 def test_compute_distance_matrix():
@@ -31,7 +31,7 @@ def test_compute_distance_matrix():
     expected[3, :] = [6.89, 6.18, 6.57, 0, 0, 0]
     expected[4, :] = [6.18, 5.31, 5.41, 5.5, 0, 0]
     expected[5, :] = [7.52, 5.99, 5.52, 7.31, 5.77, 0]
-    np.testing.assert_array_almost_equal(output, expected, 2)
+    np.testing.assert_allclose(output, expected, 2)
 
 
 def setUp():
@@ -45,11 +45,24 @@ def setUp():
                           input_6])
 
 
-def test_find_most_distant():
+def test_combo_from_find_most_distant():
     sample_inputs = setUp()
     N = 6
     num_params = 2
     k_choices = 4
-    output = find_most_distant(sample_inputs, N, num_params, k_choices)
+    scores, combinations = find_most_distant(sample_inputs, N, num_params, k_choices)
+    output = find_maximum(scores, combinations)
     expected = (0, 2, 3, 5)
     assert_equal(output, expected)
+
+
+def test_scores_from_find_most_distant():
+    sample_inputs = setUp()
+    N = 6
+    num_params = 2
+    k_choices = 4
+    output, discard = find_most_distant(sample_inputs, N, num_params, k_choices)
+    expected = np.array([15.022, 13.871, 14.815, 14.582, 16.178, 14.912, 15.055, 16.410,
+                15.685, 16.098, 14.049, 15.146, 14.333, 14.807, 14.825],
+                dtype=np.float32)
+    np.testing.assert_allclose(output, expected, 3)

@@ -14,7 +14,7 @@ def compute_distance(m, l):
         raise ValueError("Input matrices are different sizes")
 
     output = np.zeros([np.size(m, 0), np.size(m, 0), np.size(m, 1)],
-                      dtype=np.float16)
+                      dtype=np.float32)
 
     for i in range(0, 3):
         for j in range(0, 3):
@@ -22,7 +22,7 @@ def compute_distance(m, l):
                 output[i, j, z] = np.square(m[i, z] - l[j, z])
 
     distance = np.array(np.sum(np.sqrt(np.sum(output, 2)), (0, 1)),
-                        dtype=np.float16)
+                        dtype=np.float32)
 
     return distance
 
@@ -36,7 +36,7 @@ def num_combinations(n, k):
 
 def compute_distance_matrix(input_sample, N, num_params):
     index_list = []
-    distance_matrix = np.zeros((N, N), dtype=np.float16)
+    distance_matrix = np.zeros((N, N), dtype=np.float32)
 
     for j in range(N):
         index_list.append(np.arange(num_params + 1) + j * (num_params + 1))
@@ -60,14 +60,14 @@ def find_most_distant(input_sample, N, num_params, k_choices):
     distance_matrix = np.array(compute_distance_matrix(input_sample,
                                                        N,
                                                        num_params),
-                               dtype=np.float16)
+                               dtype=np.float32)
 
     # Now iterate through each possible combination to (N choose k_choices)
     number_of_combinations = num_combinations(N, k_choices)
     number_of_pairings = num_combinations(k_choices, 2)
 
     output = np.zeros((number_of_combinations, number_of_pairings),
-                      dtype=np.float16)
+                      dtype=np.float32)
 
     # Generate a list of all the possible combinationations
     combos = [t for t in combinations(range(N), k_choices)]
@@ -76,9 +76,13 @@ def find_most_distant(input_sample, N, num_params, k_choices):
         for counter2, k in enumerate(combinations(t, 2)):
             output[counter, counter2] = np.square(distance_matrix[k[1], k[0]])
     scores = np.sqrt(np.sum(output, 1))
+    return scores, combos
+
+
+def find_maximum(scores, combinations):
     index_of_maximum = scores.argmax()
     print scores[index_of_maximum]
-    return combos[index_of_maximum]
+    return combinations[index_of_maximum]
 
 
 if __name__ == "__main__":
