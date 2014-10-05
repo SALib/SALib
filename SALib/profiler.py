@@ -44,26 +44,18 @@ def sample(N, param_file, num_levels, grid_jump):
 pr = cProfile.Profile()
 pr.enable()
 
-
-
-
-
 param_file = 'esme_param.txt'
 pf = read_param_file(param_file)
-N = 50
+N = 30
 num_params = pf['num_vars']
-k_choices = 4
+bounds = pf['bounds']
+k_choices = 5
 p_levels = 4
 grid_step = 2
 # Generates N(D + 1) x D matrix of samples
-input_data = sample(N,
-                                param_file,
-                                num_levels=p_levels,
-                                grid_jump=grid_step)
-scores, combos = find_most_distant(input_data, N, num_params, k_choices)
-print find_maximum(scores, combos)
+input_sample = morris_sample(N, num_params, bounds, p_levels, grid_step)
 
-
+optimal_model_input = find_optimimum_trajectories(input_sample, N, num_params, k_choices)
 
 pr.disable()
 s = StringIO.StringIO()
