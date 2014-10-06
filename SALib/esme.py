@@ -5,7 +5,7 @@ from math import factorial
 from itertools import combinations
 from util import scale_samples, read_param_file
 from sample import common_args
-
+from scipy.spatial.distance import cdist
 
 def morris_sample(N, num_params, bounds, num_levels, grid_jump):
     '''
@@ -64,15 +64,33 @@ def compute_distance(m, l, num_params):
     if np.shape(m) != np.shape(l):
         raise ValueError("Input matrices are different sizes")
 
-    output = np.zeros([np.size(m, 0), np.size(m, 0)],
-                      dtype=np.float32)
+    #output = np.zeros([np.size(m, 0), np.size(m, 0)],
+    #                  dtype=np.float32)
 
-    for i in range(0, num_params+1):
-        for j in range(0, num_params+1):
-            output[i, j] = np.sum(np.square(np.subtract(m[i, :], l[j, :])))
+    #for i in range(0, num_params+1):
+    #    for j in range(0, num_params+1):
+    #        output[i, j] = np.sum(np.square(np.subtract(m[i, :], l[j, :])))
 
-    distance = np.array(np.sum(np.sqrt(output), (0, 1)),
-                        dtype=np.float32)
+    #distance = np.array(np.sum(np.sqrt(output), (0, 1)),
+                        #dtype=np.float32)
+    #delta = m-l
+    #distance = np.dot(delta, delta)
+    #distance = np.sqrt(distance)
+
+    # Create two vectors containing the rows in m repeated, with different
+    # rows in l
+#    a = np.repeat(l, np.size(l,0),0)
+#
+#    b = np.repeat(l, np.size(m,0),1)
+#    b = np.reshape(b, (np.size(m,0) * np.size(m,0), np.size(m,1)), 'F')
+
+    #print "a: \n", a
+    #print "b: \n", b
+    #delta = a-b
+    #print delta
+    #distance = np.sqrt(np.einsum('ij, ij', delta, delta))
+
+    distance = np.sum(cdist(m, l))
 
     return distance
 
@@ -121,21 +139,24 @@ def find_most_distant(input_sample, N, num_params, k_choices):
     # Generate a list of all the possible combinations
     combos = [t for t in combinations(range(N), k_choices)]
 
-    def Map(one_combination):
+    def get_distances(one_combination):
+
+        list_of_pairs = combinations(one_combination, 2)
+
+        return [distance_matrix[x[1], x[0]] for x in list_of_pairs]
+
+    def Map(distances):
         '''
         Get a list of the pair-combinations from 'one_combination'
 
         and return the spread, from the sum of absolute distance
         of each combination
         '''
-
-        list_of_pairs = combinations(one_combination, 2)
-
-        distances = [distance_matrix[x[1], x[0]] for x in list_of_pairs]
-
         return np.sqrt(np.einsum('i,i', distances, distances))
 
-    output = np.array(map(Map, combos), dtype=np.float32)
+    all_distances = [get_distances(x) for x in combos]
+
+    output = np.array(map(Map, all_distances), dtype=np.float32)
 
     return output, combos
 
@@ -206,6 +227,8 @@ if __name__ == "__main__":
     parser = common_args.create()
     parser.add_argument('--num-levels', type=int, required=False, default=4, help='Number of grid levels (Morris only)')
     parser.add_argument('--grid-jump', type=int, required=False, default=2, help='Grid jump size (Morris only)')
+    parser.add_argument('--k-choices', type=int, required=False, default=4, help='Number of choices (optimised trajectory)')
+
     args = parser.parse_args()
 
 
@@ -215,11 +238,10 @@ if __name__ == "__main__":
 
     param_file = args.paramfile
     pf = read_param_file(param_file)
-    N = 6
+    N = 100
     num_params = pf['num_vars']
     bounds = pf['bounds']
-    print bounds
-    k_choices = 4
+    k_choices = args.k_choices
     p_levels = int(args.num_levels)
     grid_step = int(args.grid_jump)
     # Generates N(D + 1) x D matrix of samples
@@ -228,9 +250,7 @@ if __name__ == "__main__":
                         bounds,
                         num_levels=p_levels,
                         grid_jump=grid_step)
-    print input_data
     model_data = find_optimimum_trajectories(input_data, N, num_params, k_choices)
-    print model_data
     np.savetxt(args.output, model_data, delimiter=' ')
 
     #np.savetxt(args.output, model_data, delimiter=args.delimiter, fmt='%.' + str(args.precision) + 'e')
