@@ -30,7 +30,7 @@ def analyze(pfile, input_file, output_file, column = 0, delim = ' ', num_resampl
     ee = np.empty([N, D])
     
     # For each of the N trajectories
-    for i in range(N):
+    for i in xrange(N):
         
         # Set up the indices corresponding to this trajectory
         j = np.arange(D+1) + i*(D + 1)
@@ -39,7 +39,13 @@ def analyze(pfile, input_file, output_file, column = 0, delim = ' ', num_resampl
 
         # The elementary effect is (change in output)/(change in input)
         # Each parameter has one EE per trajectory, because it is only changed once in each trajectory
-        ee[i,:] = np.linalg.solve((X[j2,:] - X[j1,:]), Y[j2] - Y[j1]) 
+        ee[i,:] = np.linalg.solve(X[j2,:]-X[j1,:], Y[j2]-Y[j1])
+
+    # Rescale elementary effects so that the delta step is in the quantile space [0,1]
+    for j in xrange(D):
+        lb = param_file['bounds'][j][0]
+        ub = param_file['bounds'][j][1]
+        ee[:,j] *= (ub-lb)
     
     # Output the Mu, Mu*, and Sigma Values. Also return them in case this is being called from Python
     Si = dict((k, [None]*D) for k in ['mu','mu_star','sigma','mu_star_conf'])
