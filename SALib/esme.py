@@ -90,7 +90,7 @@ def compute_distance(m, l, num_params):
     #print delta
     #distance = np.sqrt(np.einsum('ij, ij', delta, delta))
 
-    distance = np.sum(cdist(m, l))
+    distance = np.array(np.sum(cdist(m, l)), dtype=np.float16)
 
     return distance
 
@@ -104,7 +104,7 @@ def num_combinations(n, k):
 
 def compute_distance_matrix(input_sample, N, num_params):
     index_list = []
-    distance_matrix = np.zeros((N, N), dtype=np.float32)
+    distance_matrix = np.zeros((N, N), dtype=np.float16)
 
     for j in range(N):
         index_list.append(np.arange(num_params + 1) + j * (num_params + 1))
@@ -134,30 +134,17 @@ def find_most_distant(input_sample, N, num_params, k_choices):
     number_of_combinations = num_combinations(N, k_choices)
     # Initialise the output array
     output = np.zeros((number_of_combinations),
-                      dtype=np.float32)
+                      dtype=np.float16)
 
     # Generate a list of all the possible combinations
-    combos = [t for t in combinations(range(N), k_choices)]
+    #combos = [t for t in combinations(range(N), k_choices)]
+    combos = np.array([x for x in combinations(range(N),k_choices)])
 
-    def get_distances(one_combination):
+    combo_list = np.array([[y for y in combinations(x,2)] for x in combos])
 
-        list_of_pairs = combinations(one_combination, 2)
+    all_distances = distance_matrix[[combo_list[:,:,1], combo_list[:,:,0]]]
 
-        return [distance_matrix[x[1], x[0]] for x in list_of_pairs]
-
-    def Map(distances):
-        '''
-        Get a list of the pair-combinations from 'one_combination'
-
-        and return the spread, from the sum of absolute distance
-        of each combination
-        '''
-        return np.sqrt(np.einsum('i,i', distances, distances))
-
-    all_distances = [get_distances(x) for x in combos]
-
-    output = np.array(map(Map, all_distances), dtype=np.float32)
-
+    output = np.sqrt(np.einsum('ij,ij->i', all_distances, all_distances))
     return output, combos
 
 
@@ -238,7 +225,7 @@ if __name__ == "__main__":
 
     param_file = args.paramfile
     pf = read_param_file(param_file)
-    N = 100
+    N = args.samples
     num_params = pf['num_vars']
     bounds = pf['bounds']
     k_choices = args.k_choices

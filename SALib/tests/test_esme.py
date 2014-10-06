@@ -70,8 +70,8 @@ def test_combo_from_find_most_distant():
     k_choices = 4
     scores, combinations = find_most_distant(sample_inputs, N, num_params, k_choices)
     output = find_maximum(scores, combinations)
-    expected = (0, 2, 3, 5) #trajectories 1, 3, 4, 6
-    assert_equal(output, expected)
+    expected = [0, 2, 3, 5]#trajectories 1, 3, 4, 6
+    np.testing.assert_equal(output, expected)
 
 
 def test_scores_from_find_most_distant():
