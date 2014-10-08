@@ -39,7 +39,13 @@ def analyze(pfile, input_file, output_file, column = 0, delim = ' ', num_resampl
 
         # The elementary effect is (change in output)/(change in input)
         # Each parameter has one EE per trajectory, because it is only changed once in each trajectory
-        ee[i,:] = np.linalg.solve(X[j2,:]-X[j1,:], Y[j2]-Y[j1])
+        #ee[i,:] = np.linalg.solve(X[j2,:]-X[j1,:], Y[j2]-Y[j1])
+        #use this instead. The above doesn't work if the matrix is singular (ie. if a parameter is 'constant')
+        for k in j1:
+            delta_in=X[k+1,:]-X[k,:]
+            col=np.nonzero(delta_in)[0]
+            ee[i,col]=(Y[k+1]-Y[k])/(X[k+1,col]-X[k,col])
+            
 
     # Rescale elementary effects so that the delta step is in the quantile space [0,1]
     for j in xrange(D):
