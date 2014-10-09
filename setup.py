@@ -22,7 +22,6 @@ setup(
     author_email="jdherman8@gmail.com",
     license=open('LICENSE.md').read(),
     install_requires=[
-        "docopt",
         "numpy",
         "scipy",
         "scikit-learn",
