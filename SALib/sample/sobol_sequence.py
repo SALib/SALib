@@ -49,13 +49,13 @@ def sample(N, D):
     result = np.empty([N, D])
 
     if D > len(directions) + 1:
-        print "Error in Sobol sequence: not enough dimensions"
+        print("Error in Sobol sequence: not enough dimensions")
         exit()
 
     L = int(math.ceil(math.log(N) / math.log(2)))
 
     if L > scale:
-        print "Error in Sobol sequence: not enough bits"
+        print("Error in Sobol sequence: not enough bits")
         exit()
 
     for i in range(D):

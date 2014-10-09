@@ -1,4 +1,5 @@
 from __future__ import division
+from __future__ import print_function
 from ..util import read_param_file
 from sys import exit
 import numpy as np
@@ -17,21 +18,21 @@ def analyze(pfile, input_file, output_file, column = 0, delim = ' ', num_resampl
     if len(X.shape) == 1: X = X.reshape((len(X),1))
 
     D = param_file['num_vars']
-    
+
     if Y.size % (D+1) == 0:    
         N = int(Y.size / (D + 1))
     else:
-        print """
+        print("""
                 Error: Number of samples in model output file must be a multiple of (D+1), 
                 where D is the number of parameters in your parameter file.
-              """
-        exit()            
-    
+              """)
+        exit()
+
     ee = np.empty([N, D])
-    
+
     # For each of the N trajectories
-    for i in xrange(N):
-        
+    for i in range(N):
+
         # Set up the indices corresponding to this trajectory
         j = np.arange(D+1) + i*(D + 1)
         j1 = j[0:D]
@@ -42,27 +43,27 @@ def analyze(pfile, input_file, output_file, column = 0, delim = ' ', num_resampl
         ee[i,:] = np.linalg.solve(X[j2,:]-X[j1,:], Y[j2]-Y[j1])
 
     # Rescale elementary effects so that the delta step is in the quantile space [0,1]
-    for j in xrange(D):
+    for j in range(D):
         lb = param_file['bounds'][j][0]
         ub = param_file['bounds'][j][1]
         ee[:,j] *= (ub-lb)
-    
+
     # Output the Mu, Mu*, and Sigma Values. Also return them in case this is being called from Python
     Si = dict((k, [None]*D) for k in ['mu','mu_star','sigma','mu_star_conf'])
     if print_to_console:
-        print "Parameter Mu Sigma Mu_Star Mu_Star_Conf"
+        print("Parameter Mu Sigma Mu_Star Mu_Star_Conf")
 
     for j in range(D):
         Si['mu'][j] = np.average(ee[:,j])
         Si['mu_star'][j] = np.average(np.abs(ee[:,j]))
         Si['sigma'][j] = np.std(ee[:,j])
         Si['mu_star_conf'][j] = compute_mu_star_confidence(ee[:,j], N, num_resamples, conf_level)
-        
+
         if print_to_console:
-            print "%s %f %f %f %f" % (param_file['names'][j], Si['mu'][j], Si['sigma'][j], Si['mu_star'][j], Si['mu_star_conf'][j])
+            print("%s %f %f %f %f" % (param_file['names'][j], Si['mu'][j], Si['sigma'][j], Si['mu_star'][j], Si['mu_star_conf'][j]))
 
     return Si
-        
+
 
 def compute_mu_star_confidence(ee, N, num_resamples, conf_level):
    
@@ -70,7 +71,7 @@ def compute_mu_star_confidence(ee, N, num_resamples, conf_level):
     mu_star_resampled  = np.empty([num_resamples])
 
     if conf_level < 0 or conf_level > 1:    
-        print "Error: Confidence level must be between 0-1."
+        print("Error: Confidence level must be between 0-1.")
         exit()  
 
     for i in range(num_resamples):

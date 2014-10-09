@@ -1,4 +1,5 @@
 from __future__ import division
+from __future__ import print_function
 import numpy as np
 from scipy.stats import norm
 from ..util import read_param_file
@@ -33,47 +34,47 @@ def analyze(pfile, output_file, column = 0, calc_second_order = True, num_resamp
 
     A = Y[0:Y.size:step]
     B =  Y[(step-1):Y.size:step]
-    for j in xrange(D):
+    for j in range(D):
         AB[:,j] = Y[(j+1):Y.size:step]
         if calc_second_order: BA[:,j] = Y[(j+1+D):Y.size:step]
     
     # First order (+conf.) and Total order (+conf.)
     keys = ('S1','S1_conf','ST','ST_conf')
     S = dict((k, np.empty(D)) for k in keys)
-    if print_to_console: print "Parameter %s %s %s %s" % keys
+    if print_to_console: print("Parameter %s %s %s %s" % keys)
 
-    for j in xrange(D):
+    for j in range(D):
         S['S1'][j] = first_order(A, AB[:,j], B)
         S['S1_conf'][j] = first_order_confidence(A, AB[:,j], B, num_resamples, conf_level)
         S['ST'][j] = total_order(A, AB[:,j], B)
         S['ST_conf'][j] = total_order_confidence(A, AB[:,j], B, num_resamples, conf_level)
-        
+
         if print_to_console:
-            print "%s %f %f %f %f" % (param_file['names'][j], S['S1'][j], S['S1_conf'][j], S['ST'][j], S['ST_conf'][j])
-    
+            print("%s %f %f %f %f" % (param_file['names'][j], S['S1'][j], S['S1_conf'][j], S['ST'][j], S['ST_conf'][j]))
+
     # Second order (+conf.)
     if calc_second_order:
         S['S2'] = np.empty((D,D)); S['S2'][:] = np.nan
         S['S2_conf'] = np.empty((D,D)); S['S2_conf'][:] = np.nan
-        if print_to_console: print "\nParameter_1 Parameter_2 S2 S2_conf"
-        
+        if print_to_console: print("\nParameter_1 Parameter_2 S2 S2_conf")
+
         for j in range(D):
-            for k in range(j+1, D):     
+            for k in range(j+1, D):
                 S['S2'][j,k] = second_order(A, AB[:,j], AB[:,k], BA[:,j], B)
                 S['S2_conf'][j,k] = second_order_confidence(A, AB[:,j], AB[:,k], BA[:,j], B, num_resamples, conf_level)
-                
+
                 if print_to_console:
-                    print "%s %s %f %f" % (param_file['names'][j], param_file['names'][k], S['S2'][j,k], S['S2_conf'][j,k])                        
-    
-    return S            
-        
+                    print("%s %s %f %f" % (param_file['names'][j], param_file['names'][k], S['S2'][j,k], S['S2_conf'][j,k]))
+
+    return S
+
 def first_order(A, AB, B):
     # First order estimator following Saltelli et al. 2010 CPC, normalized by sample variance
     return np.mean(B*(AB-A))/np.var(np.r_[A,B])
 
 def first_order_confidence(A, AB, B, num_resamples, conf_level):
     s  = np.empty(num_resamples)
-    for i in xrange(num_resamples):        
+    for i in range(num_resamples):        
         r = np.random.randint(len(A), size=len(A))        
         s[i] = first_order(A[r], AB[r], B[r])
     
@@ -85,7 +86,7 @@ def total_order(A, AB, B):
 
 def total_order_confidence(A, AB, B, num_resamples, conf_level):
     s  = np.empty(num_resamples)    
-    for i in xrange(num_resamples):
+    for i in range(num_resamples):
         r = np.random.randint(len(A), size=len(A))  
         s[i] = total_order(A[r], AB[r], B[r])
     
@@ -102,7 +103,7 @@ def second_order(A, ABj, ABk, BAj, B):
 
 def second_order_confidence(A, ABj, ABk, BAj, B, num_resamples, conf_level):
     s  = np.empty(num_resamples)
-    for i in xrange(num_resamples):
+    for i in range(num_resamples):
         r = np.random.randint(len(A), size=len(A))
         s[i] = second_order(A[r], ABj[r], ABk[r], BAj[r], B[r])
     

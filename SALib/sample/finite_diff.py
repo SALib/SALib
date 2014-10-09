@@ -21,13 +21,13 @@ def sample(N, param_file, delta = 0.01):
     
     index = 0
     
-    for i in xrange(skip_values, N + skip_values):
+    for i in range(skip_values, N + skip_values):
         
         # Copy the initial point
         dgsm_sequence[index,:] = base_sequence[i,:]
         index += 1
 
-        for j in xrange(D):
+        for j in range(D):
             temp = np.zeros(D)
             temp[j] = base_sequence[i,j]*delta
             dgsm_sequence[index,:] = base_sequence[i,:] + temp

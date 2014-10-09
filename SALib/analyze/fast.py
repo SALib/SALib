@@ -1,4 +1,5 @@
 from __future__ import division
+from __future__ import print_function
 from ..util import read_param_file
 from sys import exit
 import numpy as np
@@ -18,10 +19,10 @@ def analyze(pfile, output_file, column = 0, M = 4, delim = ' ', print_to_console
     if Y.size % (D) == 0:
         N = int(Y.size / D)
     else:
-        print """
+        print("""
             Error: Number of samples in model output file must be a multiple of D, 
             where D is the number of parameters in your parameter file.
-          """
+          """)
         exit()
     
     # Recreate the vector omega used in the sampling
@@ -36,14 +37,14 @@ def analyze(pfile, output_file, column = 0, M = 4, delim = ' ', print_to_console
 
     # Calculate and Output the First and Total Order Values
     if print_to_console:
-        print "Parameter First Total"
+        print("Parameter First Total")
     Si = dict((k, [None]*D) for k in ['S1','ST'])
     for i in range(D):
         l = range(i*N, (i+1)*N)
         Si['S1'][i] = compute_first_order(Y[l], N, M, omega[0])
         Si['ST'][i] = compute_total_order(Y[l], N, omega[0])        
         if print_to_console:
-            print "%s %f %f" % (param_file['names'][i], Si['S1'][i], Si['ST'][i])
+            print("%s %f %f" % (param_file['names'][i], Si['S1'][i], Si['ST'][i]))
     return Si
     
 def compute_first_order(outputs, N, M, omega):
