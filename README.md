@@ -4,6 +4,8 @@ Python implementations of commonly used sensitivity analysis methods. Useful in 
 
 **Requirements:** [NumPy](http://www.numpy.org/), [SciPy](http://www.scipy.org/)
 
+**Installation:** `pip install SALib` or `python setup.py install`
+
 **Methods included:**
 * Sobol Sensitivity Analysis ([Sobol 2001](http://www.sciencedirect.com/science/article/pii/S0378475400002706), [Saltelli 2002](http://www.sciencedirect.com/science/article/pii/S0010465502002801), [Saltelli et al. 2010](http://www.sciencedirect.com/science/article/pii/S0010465509003087))
 * Method of Morris ([Morris 1991](http://www.tandfonline.com/doi/abs/10.1080/00401706.1991.10484804), [Campolongo et al. 2007](http://www.sciencedirect.com/science/article/pii/S1364815206002805))
