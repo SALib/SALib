@@ -1,4 +1,5 @@
 from __future__ import division
+from __future__ import print_function
 import numpy as np
 from ..util import read_param_file
 from ..sample import saltelli
@@ -16,7 +17,7 @@ from sklearn.preprocessing import MinMaxScaler
 # containing the indices in the same order as the parameter file
 def analyze(pfile, input_file, output_file, N_rbf=10000, column = 0, n_folds = 10,
             delim = ' ', print_to_console=False, training_sample=None):
-    
+
     param_file = read_param_file(pfile)
     y = np.loadtxt(output_file, delimiter=delim, usecols=(column,))
     X = np.loadtxt(input_file, delimiter=delim, ndmin=2)
@@ -41,7 +42,7 @@ def analyze(pfile, input_file, output_file, N_rbf=10000, column = 0, n_folds = 1
     X_rbf = saltelli.sample(N_rbf, pfile)
     X_rbf = mms.transform(X_rbf)
     y_rbf = reg.predict(X_rbf)
-    
+
     np.savetxt("y_rbf.txt", y_rbf, delimiter=' ')
 
     # not using the bootstrap intervals here. For large enough N, they will go to zero.
@@ -54,16 +55,16 @@ def analyze(pfile, input_file, output_file, N_rbf=10000, column = 0, n_folds = 1
     S["R2_fullset"] = reg.score(X,y)
 
     if print_to_console:
-        print "# Cross-Validation Mean R^2: %f" % S["R2_cv"]
-        print "# Full dataset R^2: %f" % S["R2_fullset"]
-        print "\nParameter S1 ST"
-        for j in xrange(D):        
-            print "%s %f %f" % (param_file['names'][j], S['S1'][j], S['ST'][j])
+        print("# Cross-Validation Mean R^2: %f" % S["R2_cv"])
+        print("# Full dataset R^2: %f" % S["R2_fullset"])
+        print("\nParameter S1 ST")
+        for j in range(D):
+            print("%s %f %f" % (param_file['names'][j], S['S1'][j], S['ST'][j]))
 
-        print "\nParameter_1 Parameter_2 S2"
-        for j in xrange(D):
-            for k in range(j+1, D):     
-                print "%s %s %f" % (param_file['names'][j], param_file['names'][k], S['S2'][j,k])                        
+        print("\nParameter_1 Parameter_2 S2")
+        for j in range(D):
+            for k in range(j+1, D):
+                print("%s %s %f" % (param_file['names'][j], param_file['names'][k], S['S2'][j,k]))
     
     return S
 

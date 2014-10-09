@@ -1,4 +1,5 @@
 from __future__ import division
+from __future__ import print_function
 import numpy as np
 from scipy.stats import norm
 from ..util import read_param_file
@@ -22,7 +23,7 @@ def analyze(pfile, input_file, output_file, column = 0, num_resamples = 1000,
     else: raise RuntimeError("Incorrect number of samples in model output file.")  
 
     if conf_level < 0 or conf_level > 1: raise RuntimeError("Confidence level must be between 0-1.")
-    
+
     base = np.empty(N)
     X_base = np.empty((N,D))
     perturbed = np.empty((N,D))
@@ -31,24 +32,24 @@ def analyze(pfile, input_file, output_file, column = 0, num_resamples = 1000,
 
     base = Y[0:Y.size:step]
     X_base = X[0:Y.size:step,:]
-    for j in xrange(D):
+    for j in range(D):
         perturbed[:,j] = Y[(j+1):Y.size:step]
         X_perturbed[:,j] = X[(j+1):Y.size:step,j]
-    
+
     # First order (+conf.) and Total order (+conf.)
     keys = ('vi', 'vi_std', 'dgsm', 'dgsm_conf')
     S = dict((k, np.empty(D)) for k in keys)
-    if print_to_console: print "Parameter %s %s %s %s" % keys
+    if print_to_console: print("Parameter %s %s %s %s" % keys)
 
-    for j in xrange(D):
+    for j in range(D):
         S['vi'][j], S['vi_std'][j] = calc_vi(base, perturbed[:,j], X_perturbed[:,j]-X_base[:,j])
         S['dgsm'][j], S['dgsm_conf'][j] = calc_dgsm(base, perturbed[:,j], X_perturbed[:,j]-X_base[:,j], pf['bounds'][j], num_resamples, conf_level)
-        
+
         if print_to_console:
-            print "%s %f %f %f %f" % (pf['names'][j], S['vi'][j], S['vi_std'][j], S['dgsm'][j], S['dgsm_conf'][j])
-        
-    return S            
-        
+            print("%s %f %f %f %f" % (pf['names'][j], S['vi'][j], S['vi_std'][j], S['dgsm'][j], S['dgsm_conf'][j]))
+
+    return S
+
 def calc_vi(base, perturbed, x_delta):
     # v_i sensitivity measure following Sobol and Kucherenko (2009)
     # For comparison, Morris mu* < sqrt(v_i)
@@ -65,7 +66,7 @@ def calc_dgsm(base, perturbed, x_delta, bounds, num_resamples, conf_level):
     dgsm = vi*(bounds[1]-bounds[0])**2/(D*np.pi**2)
 
     s = np.empty(num_resamples)
-    for i in xrange(num_resamples):        
+    for i in range(num_resamples):        
         r = np.random.randint(len(base), size=len(base))        
         s[i], _ = calc_vi(base[r], perturbed[r], x_delta[r])
 

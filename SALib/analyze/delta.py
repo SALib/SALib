@@ -1,4 +1,5 @@
 from __future__ import division
+from __future__ import print_function
 import numpy as np
 from scipy.stats import norm, gaussian_kde, rankdata
 from ..util import read_param_file
@@ -28,14 +29,14 @@ def analyze(pfile, input_file, output_file, column = 0, calc_second_order = True
 
     keys = ('delta', 'delta_conf', 'S1', 'S1_conf')
     S = dict((k, np.zeros(D)) for k in keys)
-    if print_to_console: print "Parameter %s %s %s %s" % keys
+    if print_to_console: print("Parameter %s %s %s %s" % keys)
     
-    for i in xrange(D):
+    for i in range(D):
         S['delta'][i], S['delta_conf'][i] = bias_reduced_delta(Y, Ygrid, X[:,i], m, num_resamples, conf_level)
         S['S1'][i] = sobol_first(Y, X[:,i], m)
         S['S1_conf'][i] = sobol_first_conf(Y, X[:,i], m, num_resamples, conf_level)
         if print_to_console:
-            print "%s %f %f %f %f" % (param_file['names'][i], S['delta'][i], S['delta_conf'][i], S['S1'][i], S['S1_conf'][i])
+            print("%s %f %f %f %f" % (param_file['names'][i], S['delta'][i], S['delta_conf'][i], S['S1'][i], S['S1_conf'][i]))
     
     return S       
 
@@ -46,7 +47,7 @@ def calc_delta(Y, Ygrid, X, m):
     xr = rankdata(X, method='ordinal')
     
     d_hat = 0
-    for j in xrange(len(m)-1):
+    for j in range(len(m)-1):
         ix = np.where((xr > m[j]) & (xr <= m[j+1]))[0]
         nm = len(ix)
         fyc = gaussian_kde(Y[ix], bw_method='silverman')(Ygrid)
@@ -59,7 +60,7 @@ def bias_reduced_delta(Y, Ygrid, X, m, num_resamples, conf_level):
     d  = np.empty(num_resamples)
     d_hat = calc_delta(Y, Ygrid, X, m)
 
-    for i in xrange(num_resamples):        
+    for i in range(num_resamples):        
         r = np.random.randint(len(Y), size=len(Y))        
         d[i] = calc_delta(Y[r], Ygrid, X[r], m)
 
@@ -70,7 +71,7 @@ def sobol_first(Y, X, m):
     xr = rankdata(X, method='ordinal')
     Vi = 0
     N = len(Y)
-    for j in xrange(len(m)-1):
+    for j in range(len(m)-1):
         ix = np.where((xr > m[j]) & (xr <= m[j+1]))[0]
         nm = len(ix)
         Vi += (nm/N)*(Y[ix].mean() - Y.mean())**2
@@ -79,7 +80,7 @@ def sobol_first(Y, X, m):
 def sobol_first_conf(Y, X, m, num_resamples, conf_level):
     s = np.empty(num_resamples)
 
-    for i in xrange(num_resamples):
+    for i in range(num_resamples):
         r = np.random.randint(len(Y), size=len(Y))
         s[i] = sobol_first(Y[r], X[r], m)
 
