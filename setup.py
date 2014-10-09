@@ -19,7 +19,7 @@ setup(
     version="0.1",
     packages=packages,
     author="Jon Herman",
-    author_email="jdh366@cornell.edu",
+    author_email="jdherman8@gmail.com",
     license=open('LICENSE.md').read(),
     install_requires=[
         "docopt",
