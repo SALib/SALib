@@ -1,8 +1,8 @@
 
 from nose.tools import assert_almost_equal, assert_equal
 from ..esme import compute_distance, compute_distance_matrix, \
-    find_most_distant, find_maximum, find_optimimum_trajectories, \
-    morris_sample#, Map
+    find_most_distant, find_maximum, find_optimum_trajectories, \
+    morris_sample
 from ..sample.morris_oat import sample
 from ..util import read_param_file
 import numpy as np
@@ -68,9 +68,9 @@ def test_combo_from_find_most_distant():
     N = 6
     num_params = 2
     k_choices = 4
-    scores, combinations = find_most_distant(sample_inputs, N, num_params, k_choices)
-    output = find_maximum(scores, combinations)
-    expected = [0, 2, 3, 5]#trajectories 1, 3, 4, 6
+    scores = find_most_distant(sample_inputs, N, num_params, k_choices)
+    output = find_maximum(scores, N, k_choices)
+    expected = [0, 2, 3, 5]    # trajectories 1, 3, 4, 6
     np.testing.assert_equal(output, expected)
 
 
@@ -86,7 +86,7 @@ def test_scores_from_find_most_distant():
     N = 6
     num_params = 2
     k_choices = 4
-    output, discard = find_most_distant(sample_inputs, N, num_params, k_choices)
+    output = find_most_distant(sample_inputs, N, num_params, k_choices)
     expected = np.array([15.022, 13.871, 14.815, 14.582, 16.178, 14.912, 15.055, 16.410,
                 15.685, 16.098, 14.049, 15.146, 14.333, 14.807, 14.825],
                 dtype=np.float32)
@@ -106,7 +106,7 @@ def test_find_optimum_trajectories():
     N = 6
     num_params = 2
     k_choices = 4
-    output = find_optimimum_trajectories(input_sample, N, num_params, k_choices)
+    output = find_optimum_trajectories(input_sample, N, num_params, k_choices)
     expected = np.concatenate([input_1, input_3, input_4, input_6])
     np.testing.assert_equal(output, expected)
 
@@ -120,9 +120,6 @@ def test_readfile():
     assert_equal(pf['num_vars'], 2)
     assert_equal(pf['names'], ['Test1', 'Test2'])
 
-
-#def test_scalefile():
-#    pass
 
 def test_morris_sample():
 
@@ -147,23 +144,3 @@ def test_morris_sample():
                grid_jump=grid_step)
 
     np.testing.assert_allclose(np.average(a),np.average(b),rtol=10e-02,atol=10e-02)
-#def test_Map():
-#    '''
-#
-#    '''
-    #sample_inputs = setUp()
-    #N = 6
-    #num_params = 2
-    #k_choices = 4
-    #distance_matrix = np.array(compute_distance_matrix(sample_inputs,
-    #                                                N,
-    #                                                num_params), dtype=np.float32)
-#
-#    combos = [t for t in combinations(range(N), k_choices)]
-#    output = np.zeros(15, dtype=np.float32)
-#    expected = np.array([15.022, 13.871, 14.815, 14.582, 16.178, 14.912, 15.055, 16.410,
-#                        15.685, 16.098, 14.049, 15.146, 14.333, 14.807, 14.825],
-#                        dtype=np.float32)
-#    for counter, combo in enumerate(combos):
-#        output[counter] = Map(distance_matrix, combo)
-#    np.testing.assert_allclose(output, expected, rtol=1e-1, atol=1e-3)

@@ -2,10 +2,15 @@ from __future__ import division
 import numpy as np
 import random as rd
 from math import factorial
-from itertools import combinations
+from itertools import combinations, islice
 from util import scale_samples, read_param_file
 from sample import common_args
 from scipy.spatial.distance import cdist
+from sys import exit
+from scipy.stats import norm
+
+
+import multiprocessing as mp
 
 def morris_sample(N, num_params, bounds, num_levels, grid_jump):
     '''
@@ -64,32 +69,6 @@ def compute_distance(m, l, num_params):
     if np.shape(m) != np.shape(l):
         raise ValueError("Input matrices are different sizes")
 
-    #output = np.zeros([np.size(m, 0), np.size(m, 0)],
-    #                  dtype=np.float32)
-
-    #for i in range(0, num_params+1):
-    #    for j in range(0, num_params+1):
-    #        output[i, j] = np.sum(np.square(np.subtract(m[i, :], l[j, :])))
-
-    #distance = np.array(np.sum(np.sqrt(output), (0, 1)),
-                        #dtype=np.float32)
-    #delta = m-l
-    #distance = np.dot(delta, delta)
-    #distance = np.sqrt(distance)
-
-    # Create two vectors containing the rows in m repeated, with different
-    # rows in l
-#    a = np.repeat(l, np.size(l,0),0)
-#
-#    b = np.repeat(l, np.size(m,0),1)
-#    b = np.reshape(b, (np.size(m,0) * np.size(m,0), np.size(m,1)), 'F')
-
-    #print "a: \n", a
-    #print "b: \n", b
-    #delta = a-b
-    #print delta
-    #distance = np.sqrt(np.einsum('ij, ij', delta, delta))
-
     distance = np.array(np.sum(cdist(m, l)), dtype=np.float16)
 
     return distance
@@ -99,7 +78,7 @@ def num_combinations(n, k):
     numerator = factorial(n)
     denominator = (factorial(k) * factorial(n - k))
     answer = numerator / denominator
-    return answer
+    return long(answer)
 
 
 def compute_distance_matrix(input_sample, N, num_params):
@@ -110,8 +89,8 @@ def compute_distance_matrix(input_sample, N, num_params):
         index_list.append(np.arange(num_params + 1) + j * (num_params + 1))
 
     for j in range(N):
+        input_1 = input_sample[index_list[j]]
         for k in range(j + 1, N):
-            input_1 = input_sample[index_list[j]]
             input_2 = input_sample[index_list[k]]
             distance_matrix[k, j] = compute_distance(input_1, input_2,
                                                      num_params)
@@ -133,43 +112,76 @@ def find_most_distant(input_sample, N, num_params, k_choices):
     # Now evaluate the (N choose k_choices) possible combinations
     number_of_combinations = num_combinations(N, k_choices)
     # Initialise the output array
-    output = np.zeros((number_of_combinations),
-                      dtype=np.float16)
 
+    chunk = int(1e6)
+    if chunk > number_of_combinations:
+        chunk = number_of_combinations
+
+    counter = 0
     # Generate a list of all the possible combinations
-    #combos = [t for t in combinations(range(N), k_choices)]
-    combos = np.array([x for x in combinations(range(N),k_choices)])
+    #combos = np.array([x for x in combinations(range(N),k_choices)])
+    combo_gen = combinations(range(N),k_choices)
+    scores = np.empty(number_of_combinations,dtype=np.float16)
+    pairwise = np.array([y for y in combinations(range(k_choices),2)])
 
-    combo_list = np.array([[y for y in combinations(x,2)] for x in combos])
+    for combos in grouper(chunk, combo_gen):
+        scores[(counter*chunk):((counter+1)*chunk)] = mappable(combos, pairwise, distance_matrix)
+        counter += 1
+    return scores
 
+
+def mappable(combos, pairwise, distance_matrix):
+    import numpy as np
+    #combo_list = np.array([[[y[x[0]], y[x[1]]] for x in pairwise] for y in combos])
+    combos = np.array(combos)
+    combo_list = combos[:,pairwise[:,]]
     all_distances = distance_matrix[[combo_list[:,:,1], combo_list[:,:,0]]]
+    new_scores = np.sqrt(np.einsum('ij,ij->i', all_distances, all_distances))
+    return new_scores
 
-    output = np.sqrt(np.einsum('ij,ij->i', all_distances, all_distances))
-    return output, combos
 
-
-def find_maximum(scores, combinations):
+def find_maximum(scores, N, k_choices):
 
     if type(scores) != np.ndarray:
         raise TypeError("Scores input is not a numpy array")
 
     index_of_maximum = scores.argmax()
-    print scores[index_of_maximum]
-    return combinations[index_of_maximum]
+    maximum_combo = nth(combinations(range(N), k_choices), index_of_maximum)
+    return maximum_combo
 
 
-def find_optimimum_trajectories(input_sample, N, num_params, k_choices):
+def grouper(n, iterable):
+    it = iter(iterable)
+    while True:
+       chunk = tuple(islice(it, n))
+       if not chunk:
+           return
+       yield chunk
 
-    scores, combinations = find_most_distant(input_sample,
-                                             N,
-                                             num_params,
-                                             k_choices)
+
+def take(n, iterable):
+    "Return first n items of the iterable as a list"
+    return list(islice(iterable, n))
+
+
+def nth(iterable, n, default=None):
+    "Returns the nth item or a default value"
+    return next(islice(iterable, n, None), default)
+
+
+def find_optimum_trajectories(input_sample, N, num_params, k_choices):
+
+    scores = find_most_distant(input_sample,
+                               N,
+                               num_params,
+                               k_choices)
+
     index_of_maximum = scores.argmax()
     index_list = []
     for j in range(N):
         index_list.append(np.arange(num_params + 1) + j * (num_params + 1))
 
-    maximum_combo = combinations[index_of_maximum]
+    maximum_combo = nth(combinations(range(N), k_choices), index_of_maximum)
     output = np.zeros((np.size(maximum_combo) * (num_params + 1), num_params))
     for counter, x in enumerate(maximum_combo):
         output[index_list[counter]] = np.array(input_sample[index_list[x]])
@@ -207,7 +219,6 @@ class OptimisedTrajectories(object):
                                                         self.k_choices)
 
 
-
 if __name__ == "__main__":
 
 
@@ -237,7 +248,7 @@ if __name__ == "__main__":
                         bounds,
                         num_levels=p_levels,
                         grid_jump=grid_step)
-    model_data = find_optimimum_trajectories(input_data, N, num_params, k_choices)
+    model_data = find_optimum_trajectories(input_data, N, num_params, k_choices)
     np.savetxt(args.output, model_data, delimiter=' ')
 
     #np.savetxt(args.output, model_data, delimiter=args.delimiter, fmt='%.' + str(args.precision) + 'e')
