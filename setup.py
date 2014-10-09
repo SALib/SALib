@@ -15,7 +15,7 @@ for dirpath, dirnames, filenames in os.walk('SALib'):
         packages.append(pkg)
 
 setup(
-    name='salib',
+    name='SALib',
     version="0.1",
     packages=packages,
     author="Jon Herman",
