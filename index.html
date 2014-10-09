@@ -1,0 +1,160 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>SALib by jdherman</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>SALib</h1>
+        <p>Sensitivity Analysis Library in Python (Numpy). Contains Sobol, Morris, and FAST methods.</p>
+
+        <p class="view"><a href="https://github.com/jdherman/SALib">View the Project on GitHub <small>jdherman/SALib</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/jdherman/SALib/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/jdherman/SALib/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/jdherman/SALib">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h2>
+<a name="sensitivity-analysis-library-salib" class="anchor" href="#sensitivity-analysis-library-salib"><span class="octicon octicon-link"></span></a>Sensitivity Analysis Library (SALib)</h2>
+
+<p>Python implementations of commonly used sensitivity analysis methods. Useful in systems modeling to calculate the effects of model inputs or exogenous factors on outputs of interest. </p>
+
+<p><strong>Requirements:</strong> <a href="http://www.numpy.org/">NumPy</a>, <a href="http://www.scipy.org/">SciPy</a></p>
+
+<p><strong>Installation:</strong> <code>pip install SALib</code> or <code>python setup.py install</code></p>
+
+<p><strong>Methods included:</strong></p>
+
+<ul>
+<li>Sobol Sensitivity Analysis (<a href="http://www.sciencedirect.com/science/article/pii/S0378475400002706">Sobol 2001</a>, <a href="http://www.sciencedirect.com/science/article/pii/S0010465502002801">Saltelli 2002</a>, <a href="http://www.sciencedirect.com/science/article/pii/S0010465509003087">Saltelli et al. 2010</a>)</li>
+<li>Method of Morris (<a href="http://www.tandfonline.com/doi/abs/10.1080/00401706.1991.10484804">Morris 1991</a>, <a href="http://www.sciencedirect.com/science/article/pii/S1364815206002805">Campolongo et al. 2007</a>)</li>
+<li>Fourier Amplitude Sensitivity Test (FAST) (<a href="http://scitation.aip.org/content/aip/journal/jcp/59/8/10.1063/1.1680571">Cukier et al. 1973</a>, <a href="http://amstat.tandfonline.com/doi/abs/10.1080/00401706.1999.10485594">Saltelli et al. 1999</a>)</li>
+<li>Delta Moment-Independent Measure (<a href="http://www.sciencedirect.com/science/article/pii/S0951832006000883">Borgonovo 2007</a>, <a href="http://www.sciencedirect.com/science/article/pii/S0377221712008995">Plischke et al. 2013</a>)</li>
+<li>Derivative-based Global Sensitivity Measure (DGSM) (<a href="http://www.sciencedirect.com/science/article/pii/S0378475409000354">Sobol and Kucherenko 2009</a>)</li>
+<li>Metamodel-based Sobol Analysis (experimental). Uses RBF support vector regression from <code>scikit-learn</code>.</li>
+</ul>
+
+<p><strong>Contributors:</strong> <a href="https://github.com/jdherman">Jon Herman</a>, <a href="https://github.com/matthewjwoodruff">Matt Woodruff</a>, <a href="https://github.com/cmutel">Chris Mutel</a>, <a href="https://github.com/zoidy">Fernando Rios</a>, <a href="https://github.com/dhyams">Dan Hyams</a></p>
+
+<h3>
+<a name="create-a-parameter-file" class="anchor" href="#create-a-parameter-file"><span class="octicon octicon-link"></span></a>Create a parameter file</h3>
+
+<p>To get started, create a file describing the sampling ranges for the parameters in the model. Parameter files should be created with 3 columns: <code>[name, lower bound, upper bound]</code>:</p>
+
+<pre><code>P1 0.0 1.0
+P2 0.0 5.0
+...etc.
+</code></pre>
+
+<p>Lines beginning with <code>#</code> will be treated as comments and ignored.</p>
+
+<h3>
+<a name="generate-samples" class="anchor" href="#generate-samples"><span class="octicon octicon-link"></span></a>Generate samples</h3>
+
+<p>From the command line:</p>
+
+<pre><code>python -m SALib.sample.saltelli \
+     -n 1000 \
+     -p ./SALib/test_functions/params/Ishigami.txt \
+     -o model_input.txt \
+</code></pre>
+
+<p>Other methods include <code>SALib.sample.morris_oat</code> and <code>SALib.sample.fast_sampler</code>. For an explanation of all command line options, <a href="https://github.com/jdherman/SALib/tree/master/examples">see the examples here</a>. </p>
+
+<p>Or, generate samples from Python:</p>
+
+<div class="highlight highlight-python"><pre><span class="kn">from</span> <span class="nn">SALib.sample</span> <span class="kn">import</span> <span class="n">saltelli</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="n">param_file</span> <span class="o">=</span> <span class="s">'../../SALib/test_functions/params/Ishigami.txt'</span>
+<span class="n">param_values</span> <span class="o">=</span> <span class="n">saltelli</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="n">param_file</span><span class="p">,</span> <span class="n">calc_second_order</span> <span class="o">=</span> <span class="bp">True</span><span class="p">)</span>
+<span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="s">'model_input.txt'</span><span class="p">,</span> <span class="n">param_values</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s">' '</span><span class="p">)</span>
+</pre></div>
+
+<p>Either way, this will create a file of sampled input values in <code>model_input.txt</code>.</p>
+
+<h3>
+<a name="run-model" class="anchor" href="#run-model"><span class="octicon octicon-link"></span></a>Run model</h3>
+
+<p>Here's an example of running a test function in Python, but this will usually be a user-defined model, maybe even in another language. Just save the outputs.</p>
+
+<div class="highlight highlight-python"><pre><span class="kn">from</span> <span class="nn">SALib.test_functions</span> <span class="kn">import</span> <span class="n">Ishigami</span>
+<span class="n">Y</span> <span class="o">=</span> <span class="n">Ishigami</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">param_values</span><span class="p">)</span>
+<span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="s">'model_output.txt'</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s">' '</span><span class="p">)</span>
+</pre></div>
+
+<h3>
+<a name="analyze-model-output" class="anchor" href="#analyze-model-output"><span class="octicon octicon-link"></span></a>Analyze model output</h3>
+
+<p>From the command line:</p>
+
+<pre><code>python -m SALib.analyze.sobol \
+     -p ./SALib/test_functions/params/Ishigami.txt \
+     -Y model_output.txt \
+     -c 0 \
+</code></pre>
+
+<p>This will print indices and confidence intervals to the command line. You can redirect to a file using the <code>&gt;</code> operator.</p>
+
+<p>Or, from Python:</p>
+
+<div class="highlight highlight-python"><pre><span class="kn">from</span> <span class="nn">SALib.analyze</span> <span class="kn">import</span> <span class="n">sobol</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="n">Si</span> <span class="o">=</span> <span class="n">sobol</span><span class="o">.</span><span class="n">analyze</span><span class="p">(</span><span class="n">param_file</span><span class="p">,</span> <span class="s">'model_output.txt'</span><span class="p">,</span> <span class="n">column</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">print_to_console</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="c"># Returns a dictionary with keys 'S1', 'S1_conf', 'ST', and 'ST_conf'</span>
+<span class="c"># e.g. Si['S1'] contains the first-order index for each parameter, in the same order as the parameter file</span>
+</pre></div>
+
+<p>Check out the <a href="https://github.com/jdherman/SALib/tree/master/examples">examples</a> for a full description of command line and keyword options for all of the methods.</p>
+
+<h3>
+<a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>License</h3>
+
+<p>Copyright (C) 2013-2014 Jon Herman and others. Licensed under the GNU Lesser General Public License.</p>
+
+<p>The Sensitivity Analysis Library is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.</p>
+
+<p>The Sensitivity Analysis Library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.</p>
+
+<p>You should have received a copy of the GNU Lesser General Public License
+along with the Sensitivity Analysis Library.  If not, see <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>.</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/jdherman">jdherman</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-10257113-9");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+  </body>
+</html>
