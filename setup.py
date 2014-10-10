@@ -28,7 +28,8 @@ setup(
     ],
     url="https://github.com/jdherman/SALib",
     long_description=open('README.md').read(),
-    description=('Tools for sensitivity analysis. Contains Sobol, Morris, and FAST methods.'),
+    description=(
+        'Tools for sensitivity analysis. Contains Sobol, Morris, and FAST methods.'),
     # entry_points = {
     #     'console_scripts': [
     #         'salib = SALib.bin.salib:main',

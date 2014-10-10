@@ -9,12 +9,13 @@ import math
 # x3: 0.0
 
 
-def evaluate(values): 
+def evaluate(values):
     Y = np.empty([values.shape[0]])
     A = 7
     B = 0.1
-    
+
     for i, X in enumerate(values):
-        Y[i] = math.sin(X[0]) + A*math.pow(math.sin(X[1]), 2) + B*math.pow(X[2], 4)*math.sin(X[0])
-        
+        Y[i] = math.sin(X[0]) + A * math.pow(math.sin(X[1]), 2) + \
+            B * math.pow(X[2], 4) * math.sin(X[0])
+
     return Y
