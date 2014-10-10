@@ -6,10 +6,13 @@ from util import read_param_file
 from sample import common_args
 #set up parallel processes, start ipcluster from command line prior!
 from IPython.parallel import Client
-import mylib
-
 from esme import morris_sample, num_combinations, \
-                 compute_distance_matrix, nth, grouper\
+                 compute_distance_matrix, nth, grouper
+
+import sys
+sys.path[0] = '/Users/will2/repository/SALib/SALib/'
+
+import mylib
 
 
 def pl_find_most_distant(input_sample, N, num_params, k_choices):
@@ -84,11 +87,16 @@ if __name__ == "__main__":
     rd.seed(args.seed)
 
 
+    rc=Client()
+    dview=rc[:]
+
+
     param_file = args.paramfile
     pf = read_param_file(param_file)
     N = args.samples
     num_params = pf['num_vars']
     bounds = pf['bounds']
+
 
     k_choices = args.k_choices
     p_levels = int(args.num_levels)
@@ -100,53 +108,49 @@ if __name__ == "__main__":
                                num_levels=p_levels,
                                grid_jump=grid_step)
 
-    # First compute the distance matrix for each possible pairing
-    # of trajectories and store in a shared-memory array
 
-    # Now evaluate the (N choose k_choices) possible combinations
     number_of_combinations = num_combinations(N, k_choices)
-    # Initialise the output array
 
     chunk = int(1e6)
     if chunk > number_of_combinations:
         chunk = int(number_of_combinations)
+    counter = 0
 
     # Generate a list of all the possible combinations
-    #combos = np.array([x for x in combinations(range(N),k_choices)])
     combo_gen = combinations(range(N),k_choices)
-    scores = np.empty(number_of_combinations,dtype=np.float32)
-
-    rc=Client()
-    dview=rc[:]
-
-    #...do stuff to get iterable_of_a and b,c,d....
+    scores = np.zeros(number_of_combinations,dtype=np.float32)
 
     distance_matrix = compute_distance_matrix(input_data,
                                               N,
                                               num_params)
 
-    function = lambda combos: mylib.pl_mappable(combos, k_choices, distance_matrix)
+    function = lambda x: mylib.pl_mappable(x, k_choices, distance_matrix)
 
     mydict=dict(k_choices=k_choices,
                 distance_matrix=distance_matrix)
 
     dview.push(mydict)
-    dview.sync_imports('import numpy as np')
-    dview.execute('import mylib')
-    scores = dview.map_sync(function, [x for x in grouper(chunk, combo_gen)])
-    scores = np.array(scores)
 
-    index_of_maximum = find_index_of_maximum(scores)
+    dview.sync_imports('import sys')
+
+    dview.execute('sys.path[0] = ''/Users/will2/repository/SALib/SALib''')
+    dview.execute('import mylib')
+
+    for combos in grouper(chunk, combo_gen):
+        chunkette = len(combos)
+        scores[(counter*chunk):((counter*chunk)+chunkette)] = dview.map_sync(function, combos)
+        counter += 1
+
+    index_of_maximum = np.argmax(scores, 0)
 
     index_list = []
     for j in range(N):
         index_list.append(np.arange(num_params + 1) + j * (num_params + 1))
 
     maximum_combo = nth(combinations(range(N), k_choices), index_of_maximum)
+
     output = np.zeros((np.size(maximum_combo) * (num_params + 1), num_params))
     for counter, x in enumerate(maximum_combo):
         output[index_list[counter]] = np.array(input_data[index_list[x]])
 
-    np.savetxt(args.output, output, delimiter=' ')
-
-    #np.savetxt(args.output, model_data, delimiter=args.delimiter, fmt='%.' + str(args.precision) + 'e')
+    np.savetxt(args.output, output, delimiter=args.delimiter, fmt='%.' + str(args.precision) + 'e')

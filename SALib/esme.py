@@ -6,11 +6,7 @@ from itertools import combinations, islice
 from util import scale_samples, read_param_file
 from sample import common_args
 from scipy.spatial.distance import cdist
-from sys import exit
-from scipy.stats import norm
 
-
-import multiprocessing as mp
 
 def morris_sample(N, num_params, bounds, num_levels, grid_jump):
     '''
@@ -69,7 +65,7 @@ def compute_distance(m, l, num_params):
     if np.shape(m) != np.shape(l):
         raise ValueError("Input matrices are different sizes")
 
-    distance = np.array(np.sum(cdist(m, l)), dtype=np.float16)
+    distance = np.array(np.sum(cdist(m, l)), dtype=np.float32)
 
     return distance
 
@@ -83,7 +79,7 @@ def num_combinations(n, k):
 
 def compute_distance_matrix(input_sample, N, num_params):
     index_list = []
-    distance_matrix = np.zeros((N, N), dtype=np.float16)
+    distance_matrix = np.zeros((N, N), dtype=np.float32)
 
     for j in range(N):
         index_list.append(np.arange(num_params + 1) + j * (num_params + 1))
@@ -121,7 +117,8 @@ def find_most_distant(input_sample, N, num_params, k_choices):
     # Generate a list of all the possible combinations
     #combos = np.array([x for x in combinations(range(N),k_choices)])
     combo_gen = combinations(range(N),k_choices)
-    scores = np.empty(number_of_combinations,dtype=np.float16)
+    scores = np.empty(number_of_combinations,dtype=np.float32)
+    # Generate the pairwise indices once
     pairwise = np.array([y for y in combinations(range(k_choices),2)])
 
     for combos in grouper(chunk, combo_gen):
@@ -131,9 +128,24 @@ def find_most_distant(input_sample, N, num_params, k_choices):
 
 
 def mappable(combos, pairwise, distance_matrix):
+    '''
+    Obtains scores from the distance_matrix for each pairwise combination
+    held in the combos array
+    '''
     import numpy as np
-    #combo_list = np.array([[[y[x[0]], y[x[1]]] for x in pairwise] for y in combos])
     combos = np.array(combos)
+    # Create a list of all pairwise combination for each combo in combos
+    combo_list = combos[:,pairwise[:,]]
+    all_distances = distance_matrix[[combo_list[:,:,1], combo_list[:,:,0]]]
+    new_scores = np.sqrt(np.einsum('ij,ij->i', all_distances, all_distances))
+    return new_scores
+
+
+def pl_mappable(combos):
+    import numpy as np
+    pairwise = np.array([y for y in combinations(range(k_choices),2)])
+    combos = np.array(combos)
+    # Create a list of all pairwise combination for each combo in combos
     combo_list = combos[:,pairwise[:,]]
     all_distances = distance_matrix[[combo_list[:,:,1], combo_list[:,:,0]]]
     new_scores = np.sqrt(np.einsum('ij,ij->i', all_distances, all_distances))
@@ -248,6 +260,10 @@ if __name__ == "__main__":
                         bounds,
                         num_levels=p_levels,
                         grid_jump=grid_step)
+    distance_matrix = compute_distance_matrix(input_data,
+                                              N,
+                                              num_params)
+
     model_data = find_optimum_trajectories(input_data, N, num_params, k_choices)
     np.savetxt(args.output, model_data, delimiter=' ')
 
