@@ -64,29 +64,29 @@ def sample(N, D):
     for i in range(D):
         V = np.empty(L + 1, dtype=long)
 
-        if i==0:
-            for j in range(1, L+1):
-                V[j] = 1 << (scale - j) # all m's = 1
+        if i == 0:
+            for j in range(1, L + 1):
+                V[j] = 1 << (scale - j)  # all m's = 1
         else:
-            m = np.array(directions[i-1], dtype=int)
+            m = np.array(directions[i - 1], dtype=int)
             a = m[0]
             s = len(m) - 1
 
             # The following code discards the first row of the ``m`` array
             # Because it has floating point errors, e.g. values of 2.24e-314
             if L <= s:
-                for j in range(1, L+1):
+                for j in range(1, L + 1):
                     V[j] = m[j] << (scale - j)
             else:
-                for j in range(1, s+1):
+                for j in range(1, s + 1):
                     V[j] = m[j] << (scale - j)
-                for j in range(s+1, L+1):
-                    V[j] = V[j-s] ^ (V[j-s] >> s)
+                for j in range(s + 1, L + 1):
+                    V[j] = V[j - s] ^ (V[j - s] >> s)
                     for k in range(1, s):
                         V[j] ^= ((a >> (s - 1 - k)) & 1) * V[j - k]
 
         X = long(0)
-        for j in range(1,N):
+        for j in range(1, N):
             X ^= V[index_of_least_significant_zero_bit(j - 1)]
             result[j][i] = float(X / math.pow(2, scale))
 
@@ -101,20 +101,21 @@ def index_of_least_significant_zero_bit(value):
 
     return index
 
+
 def read_directions_file(filepath):
     """Read in Kuo and Joe's direction file format for Sobol sequence points."""
 
     with open(filepath) as f:
         directions = []
 
-        next(f) # skip header line
+        next(f)  # skip header line
 
         for row in [line.split() for line in f]:
-            s = int(row[1]) # parse s
+            s = int(row[1])  # parse s
             d = np.empty(s + 1, dtype=int)
-            d[0] = int(row[2]) # parse a
+            d[0] = int(row[2])  # parse a
 
-            d[1:] = [int(i) for i in row[3:]] # parse the m_i values
+            d[1:] = [int(i) for i in row[3:]]  # parse the m_i values
 
             directions.append(d)
 
