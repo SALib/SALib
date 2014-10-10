@@ -4,7 +4,7 @@ from ..util import read_param_file
 from sys import exit
 import numpy as np
 from scipy.stats import norm
-import common_args
+from . import common_args
 
 # Perform Morris Analysis on file of model results
 # Returns a dictionary with keys 'mu', 'mu_star', 'sigma', and 'mu_star_conf'

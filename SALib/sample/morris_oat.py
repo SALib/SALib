@@ -2,7 +2,7 @@ from __future__ import division
 import numpy as np
 import random as rd
 from ..util import scale_samples, read_param_file
-import common_args
+from . import common_args
     
 # Generate N(D + 1) x D matrix of Morris samples (OAT)
 def sample(N, param_file, num_levels, grid_jump):

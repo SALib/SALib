@@ -12,4 +12,4 @@ param_file = '../../SALib/test_functions/params/Ishigami.txt'
 # Specify which column of the output file to analyze (zero-indexed)
 Si = delta.analyze(param_file, 'model_input.txt', 'model_output.txt', column = 0, num_resamples=10, conf_level = 0.95, print_to_console=False)
 # Returns a dictionary with keys 'delta', 'delta_conf', 'S1', 'S1_conf'
-print Si['delta']
+print(str(Si['delta']))

@@ -3,7 +3,8 @@ from __future__ import print_function
 import numpy as np
 from ..util import read_param_file
 from ..sample import saltelli
-import common_args, sobol
+from . import common_args
+from . import sobol
 from sklearn import svm
 from sklearn.grid_search import GridSearchCV
 from sklearn.preprocessing import MinMaxScaler
