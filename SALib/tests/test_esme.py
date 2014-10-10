@@ -1,12 +1,10 @@
-
 from nose.tools import assert_almost_equal, assert_equal
 from ..esme import compute_distance, compute_distance_matrix, \
     find_most_distant, find_maximum, find_optimum_trajectories, \
-    morris_sample
+    morris_sample, pl_find_most_distant
 from ..sample.morris_oat import sample
 from ..util import read_param_file
 import numpy as np
-#from itertools import combinations
 
 
 def test_distance():
@@ -36,7 +34,7 @@ def test_compute_distance_matrix():
 
     for an input of six trajectories and two parameters
     '''
-    sample_inputs = setUp()
+    sample_inputs = setup()
     output = compute_distance_matrix(sample_inputs, 6, 2)
     expected = np.zeros((6, 6), dtype=np.float32)
     expected[1, :] = [5.50, 0, 0, 0, 0, 0]
@@ -47,7 +45,7 @@ def test_compute_distance_matrix():
     np.testing.assert_allclose(output, expected, rtol=1e-2)
 
 
-def setUp():
+def setup():
     input_2 = [[0, 1/3.], [2/3., 1/3.], [2/3., 1.]]
     input_1 = [[0, 1/3.], [0, 1.], [2/3., 1.]]
     input_3 = [[2/3., 0], [2/3., 2/3.], [0, 2/3.]]
@@ -57,14 +55,13 @@ def setUp():
     return np.concatenate([input_1, input_2, input_3, input_4, input_5,
                           input_6])
 
-
 def test_combo_from_find_most_distant():
     '''
     Tests whether the correct combination is picked from the fixture drawn
     from Saltelli et al. 2008, in the solution to exercise 3a,
     Chapter 3, page 134.
     '''
-    sample_inputs = setUp()
+    sample_inputs = setup()
     N = 6
     num_params = 2
     k_choices = 4
@@ -82,7 +79,7 @@ def test_scores_from_find_most_distant():
     in the solution to exercise 3a, Chapter 3, page 134.
 
     '''
-    sample_inputs = setUp()
+    sample_inputs = setup()
     N = 6
     num_params = 2
     k_choices = 4
