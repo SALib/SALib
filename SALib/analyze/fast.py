@@ -4,7 +4,7 @@ from ..util import read_param_file
 from sys import exit
 import numpy as np
 import math
-import common_args
+from . import common_args
 
 # Perform FAST Analysis on file of model results
 # Returns a dictionary with keys 'S1' and 'ST'

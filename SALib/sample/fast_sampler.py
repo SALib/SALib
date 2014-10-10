@@ -2,7 +2,7 @@ from __future__ import division
 import numpy as np
 import math
 from ..util import scale_samples, read_param_file
-import common_args
+from . import common_args
 
 # Generate N x D matrix of extended FAST samples (Saltelli 1999)
 def sample(N, param_file, M = 4):
@@ -28,7 +28,7 @@ def sample(N, param_file, M = 4):
     
     for i in range(D):
         omega2[i] = omega[0]
-        idx = range(i) + range(i+1,D)
+        idx = list(range(i)) + list(range(i+1,D))
         omega2[idx] = omega[1:]
         l = range(i*N, (i+1)*N)
 

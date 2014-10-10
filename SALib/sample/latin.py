@@ -1,6 +1,6 @@
 from __future__ import division
 import numpy as np
-import common_args
+from . import common_args
 from ..util import scale_samples, read_param_file
 
 # Generate N x D matrix of latin hypercube samples

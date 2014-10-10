@@ -3,7 +3,7 @@ from __future__ import print_function
 import numpy as np
 from scipy.stats import norm
 from ..util import read_param_file
-import common_args
+from . import common_args
 
 # Perform Sobol Analysis on file of model results
 # Returns a dictionary with keys 'S1', 'S1_conf', 'ST', and 'ST_conf'

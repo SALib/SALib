@@ -4,7 +4,10 @@ from sys import exit
 import math
 import numpy as np
 import os
+import sys
 
+if sys.version_info[0] > 2:
+    long = int
 
 #==============================================================================
 # The following code is based on the Sobol sequence generator by Frances

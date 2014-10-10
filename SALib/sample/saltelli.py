@@ -1,8 +1,8 @@
 from __future__ import division
 import numpy as np
-import sobol_sequence
+from . import sobol_sequence
 from ..util import scale_samples, read_param_file
-import common_args
+from . import common_args
     
 # Generate matrix of Saltelli samples
 # Size N x (2D + 2) if calc_second_order is True (default)
