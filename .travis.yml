@@ -9,3 +9,5 @@ before_install:
   - sudo apt-get install python-numpy python-scipy 
   - pip install scikit-learn
 script: nosetests test --verbose
+notifications:
+  email: false
