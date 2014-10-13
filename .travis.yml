@@ -1,11 +1,6 @@
 # Travis config for jdherman/SALib
 language: python
 python:
-  - "2.6"
-  - "2.7"
-  - "3.2"
-  - "3.3"
-virtualenv:
   - "2.6_with_system_site_packages"
   - "2.7_with_system_site_packages"
   - "3.2_with_system_site_packages"
