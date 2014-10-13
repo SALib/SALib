@@ -7,8 +7,8 @@ python:
   - "pypy"
 virtualenv:
   system_site_packages: true
-  SITE_PKG_DIR=$VIRTUAL_ENV/lib/python$TRAVIS_PYTHON_VERSION/site-packages
-  rm -f $VIRTUAL_ENV/lib/python$TRAVIS_PYTHON_VERSION/no-global-site-packages.txt 
+  - SITE_PKG_DIR=$VIRTUAL_ENV/lib/python$TRAVIS_PYTHON_VERSION/site-packages
+  - rm -f $VIRTUAL_ENV/lib/python$TRAVIS_PYTHON_VERSION/no-global-site-packages.txt 
 before_install:
   - sudo apt-get install python-numpy python-scipy 
   - pip install scikit-learn
