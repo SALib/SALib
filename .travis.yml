@@ -4,11 +4,12 @@ python:
   - "2.7"
   - "3.2"
   - "3.3"
-  # does not have headers provided, please ask https://launchpad.net/~pypy/+archive/ppa
-  # maintainers to fix their pypy-dev package.
   - "pypy"
 # command to install dependencies
-install:
-  - pip install numpy scipy scikit-learn
+virtualenv:
+  system_site_packages: true
+before_install:
+  - sudo apt-get install python-numpy python-scipy 
+  - pip install scikit-learn
 # command to run tests
 script: nosetests test --verbose
