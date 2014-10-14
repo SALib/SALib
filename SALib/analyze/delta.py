@@ -5,11 +5,10 @@ from scipy.stats import norm, gaussian_kde, rankdata
 from ..util import read_param_file
 from . import common_args
 
-# Perform Sobol Analysis on file of model results
-# Returns a dictionary with keys 'S1', 'S1_conf', 'ST', and 'ST_conf'
+# Perform Delta moment-independent Analysis on file of model results
+# Returns a dictionary with keys 'delta', 'delta_conf', 'S1', and 'S1_conf'
 # Where each entry is a list of size D (the number of parameters)
 # Containing the indices in the same order as the parameter file
-
 
 def analyze(pfile, input_file, output_file, column=0, calc_second_order=True, num_resamples=10,
             delim=' ', conf_level=0.95, print_to_console=False):
@@ -50,7 +49,6 @@ def analyze(pfile, input_file, output_file, column=0, calc_second_order=True, nu
 
 # Plischke et al. 2013 estimator (eqn 26) for d_hat
 
-
 def calc_delta(Y, Ygrid, X, m):
     N = len(Y)
     fy = gaussian_kde(Y, bw_method='silverman')(Ygrid)
@@ -66,7 +64,6 @@ def calc_delta(Y, Ygrid, X, m):
     return d_hat
 
 # Plischke et al. 2013 bias reduction technique (eqn 30)
-
 
 def bias_reduced_delta(Y, Ygrid, X, m, num_resamples, conf_level):
     d = np.empty(num_resamples)
