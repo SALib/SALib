@@ -1,7 +1,7 @@
 from nose.tools import assert_almost_equal, assert_equal
 from ..esme import compute_distance, compute_distance_matrix, \
     find_most_distant, find_maximum, find_optimum_trajectories, \
-    morris_sample, pl_find_most_distant
+    morris_sample
 from ..sample.morris_oat import sample
 from ..util import read_param_file
 import numpy as np

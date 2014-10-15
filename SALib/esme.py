@@ -8,7 +8,7 @@ from sample import common_args
 from scipy.spatial.distance import cdist
 
 
-def morris_sample(N, num_params, bounds, num_levels, grid_jump):
+def morris_sample(N, num_params, bounds, num_levels, grid_jump, seed=19284982948):
     '''
     Generates N('num_params' + 1) x 'num_params' matrix of Morris samples (OAT)
     '''
@@ -21,6 +21,9 @@ def morris_sample(N, num_params, bounds, num_levels, grid_jump):
         TypeError("bounds should be a list")
 
     D = num_params
+
+    np.random.seed(seed)
+    rd.seed(seed)
 
     # orientation matrix B: lower triangular (1) + upper triangular (-1)
     B = np.tril(np.ones([D+1, D], dtype=np.int), -1) + np.triu(-1*np.ones([D+1,D], dtype=np.int))
@@ -240,7 +243,6 @@ if __name__ == "__main__":
     parser.add_argument('--k-choices', type=int, required=False, default=4, help='Number of choices (optimised trajectory)')
 
     args = parser.parse_args()
-
 
     np.random.seed(args.seed)
     rd.seed(args.seed)
