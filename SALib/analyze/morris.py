@@ -31,7 +31,7 @@ def analyze(pfile, input_file, output_file, column=0, delim=' ', num_resamples=1
               """)
         exit()
 
-    ee = np.empty([N, D])
+    ee = np.zeros((N,D))
 
     # For each of the N trajectories
     for i in range(N):
@@ -44,7 +44,13 @@ def analyze(pfile, input_file, output_file, column=0, delim=' ', num_resamples=1
         # The elementary effect is (change in output)/(change in input)
         # Each parameter has one EE per trajectory, because it is only changed
         # once in each trajectory
-        ee[i, :] = np.linalg.solve(X[j2,:]-X[j1,:], Y[j2]-Y[j1])
+        try:
+            ee[i, :] = np.linalg.solve(X[j2,:]-X[j1,:], Y[j2]-Y[j1])
+        except np.linalg.linalg.LinAlgError:
+            for k in j1:
+                delta = X[k+1,:] - X[k,:]
+                col = np.nonzero(delta)[0]
+                ee[i,col] = (Y[k+1] - Y[k]) / (X[k+1,col] - X[k,col])
 
     # Rescale elementary effects so that the delta step is in the quantile
     # space [0,1]
