@@ -2,3 +2,10 @@
 model_input.txt
 model_output.txt
 y_rbf.txt
+SALib/test_traj.txt
+
+*.log
+
+*.mps
+
+*.lp
