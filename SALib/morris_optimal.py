@@ -3,61 +3,9 @@ import numpy as np
 import random as rd
 from math import factorial
 from itertools import combinations, islice
-from util import scale_samples, read_param_file
+from util import read_param_file
 from sample import common_args
 from scipy.spatial.distance import cdist
-
-
-def morris_sample(N, num_params, bounds, num_levels, grid_jump, seed=19284982948):
-    '''
-    Generates N('num_params' + 1) x 'num_params' matrix of Morris samples (OAT)
-    '''
-
-    if num_params < 1:
-        raise ValueError("num_params must be greater than or equal to 1")
-    if N < 1:
-        raise ValueError("N should be greater than 0")
-    if type(bounds) != "list":
-        TypeError("bounds should be a list")
-
-    D = num_params
-
-    np.random.seed(seed)
-    rd.seed(seed)
-
-    # orientation matrix B: lower triangular (1) + upper triangular (-1)
-    B = np.tril(np.ones([D+1, D], dtype=np.int), -1) + np.triu(-1*np.ones([D+1,D], dtype=np.int))
-
-    # grid step delta, and final sample matrix X
-    delta = grid_jump / (num_levels - 1)
-    X = np.empty([N*(D+1), D], dtype=np.float32)
-
-    # Create N trajectories. Each trajectory contains D+1 parameter sets.
-    # (Starts at a base point, and then changes one parameter at a time)
-    for j in range(N):
-
-        # directions matrix DM - diagonal matrix of either +1 or -1
-        DM = np.diag([rd.choice([-1,1]) for _ in range(D)])
-
-        # permutation matrix P
-        perm = np.random.permutation(D)
-        P = np.zeros([D,D], dtype=np.float32)
-        for i in range(D):
-            P[i, perm[i]] = 1
-
-        # starting point for this trajectory
-        x_base = np.empty([D+1, D], dtype=np.float32)
-        for i in range(D):
-            x_base[:,i] = (rd.choice(np.arange(num_levels - grid_jump))) / (num_levels - 1)
-
-        # Indices to be assigned to X, corresponding to this trajectory
-        index_list = np.arange(D+1) + j*(D + 1)
-        delta_diag = np.diag([delta for _ in range(D)])
-
-        X[index_list,:] = 0.5*(np.mat(B)*np.mat(P)*np.mat(DM) + 1) * np.mat(delta_diag) + np.mat(x_base)
-
-    scale_samples(X, bounds)
-    return X
 
 
 def compute_distance(m, l, num_params):
@@ -144,17 +92,6 @@ def mappable(combos, pairwise, distance_matrix):
     return new_scores
 
 
-def pl_mappable(combos):
-    import numpy as np
-    pairwise = np.array([y for y in combinations(range(k_choices),2)])
-    combos = np.array(combos)
-    # Create a list of all pairwise combination for each combo in combos
-    combo_list = combos[:,pairwise[:,]]
-    all_distances = distance_matrix[[combo_list[:,:,1], combo_list[:,:,0]]]
-    new_scores = np.sqrt(np.einsum('ij,ij->i', all_distances, all_distances))
-    return new_scores
-
-
 def find_maximum(scores, N, k_choices):
 
     if type(scores) != np.ndarray:
@@ -203,50 +140,19 @@ def find_optimum_trajectories(input_sample, N, num_params, k_choices):
     return output
 
 
-class OptimisedTrajectories(object):
-
-    def __init__(self, N, param_file, num_levels, grid_jump):
-        self.N = N
-        self.param_file = param_file
-
-        pf = read_param_file(param_file)
-        self.num_params = pf['num_vars']
-        self.bounds = pf['bounds']
-
-        self.num_levels = num_levels
-        self.grid_jump = grid_jump
-
-        self.k_choices = k_choices
-        self.sample_inputs = self.morris_sample(self.N,
-                                         self.num_params,
-                                         self.bounds,
-                                         self.num_levels,
-                                         self.grid_jump)
-        self.distance_matrix = \
-            np.array(compute_distance_matrix(self.sample_inputs,
-                                             self.N,
-                                             self.num_params), dtype=np.float32)
-
-        self.optimised_inputs = \
-                        self.find_optimimum_trajectories(self.sample_inputs,
-                                                        self.N,
-                                                        self.num_params,
-                                                        self.k_choices)
-
-
 if __name__ == "__main__":
 
 
     parser = common_args.create()
     parser.add_argument('--num-levels', type=int, required=False, default=4, help='Number of grid levels (Morris only)')
     parser.add_argument('--grid-jump', type=int, required=False, default=2, help='Grid jump size (Morris only)')
-    parser.add_argument('--k-choices', type=int, required=False, default=4, help='Number of choices (optimised trajectory)')
+    parser.add_argument('--k-choices', type=int, required=False, default=4, help='Number of trajectories (optimal trajectories)')
+    parser.add_argument('-X', '--input-file', type=str, required=True, default=None, help='Model input file')
 
     args = parser.parse_args()
 
     np.random.seed(args.seed)
     rd.seed(args.seed)
-
 
     param_file = args.paramfile
     pf = read_param_file(param_file)
@@ -256,17 +162,9 @@ if __name__ == "__main__":
     k_choices = args.k_choices
     p_levels = int(args.num_levels)
     grid_step = int(args.grid_jump)
-    # Generates N(D + 1) x D matrix of samples
-    input_data = morris_sample(N,
-                        num_params,
-                        bounds,
-                        num_levels=p_levels,
-                        grid_jump=grid_step)
-    distance_matrix = compute_distance_matrix(input_data,
-                                              N,
-                                              num_params)
 
-    model_data = find_optimum_trajectories(input_data, N, num_params, k_choices)
-    np.savetxt(args.output, model_data, delimiter=' ')
+    X = np.loadtxt(args.input_file, delimiter=args.delim, ndmin=2)
 
-    #np.savetxt(args.output, model_data, delimiter=args.delimiter, fmt='%.' + str(args.precision) + 'e')
+    model_data = find_optimum_trajectories(X, N, num_params, k_choices)
+
+    np.savetxt(args.output, model_data, delimiter=args.delimiter, fmt='%.' + str(args.precision) + 'e')

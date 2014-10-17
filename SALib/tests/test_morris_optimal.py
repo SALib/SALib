@@ -1,8 +1,6 @@
 from nose.tools import assert_almost_equal, assert_equal
-from ..esme import compute_distance, compute_distance_matrix, \
-    find_most_distant, find_maximum, find_optimum_trajectories, \
-    morris_sample
-from ..sample.morris_oat import sample
+from ..morris_optimal_brute import compute_distance, compute_distance_matrix, \
+    find_most_distant, find_maximum, find_optimum_trajectories
 from ..util import read_param_file
 import numpy as np
 
@@ -116,28 +114,3 @@ def test_readfile():
     assert_equal(pf['bounds'], [[0, 100], [5, 51]])
     assert_equal(pf['num_vars'], 2)
     assert_equal(pf['names'], ['Test1', 'Test2'])
-
-
-def test_morris_sample():
-
-    param_file = 'tests/test_params.txt'
-    pf = read_param_file(param_file)
-    num_params = pf['num_vars']
-    bounds = pf['bounds']
-    N = 500
-    p_levels = 4
-    grid_step = 2
-
-    a =  morris_sample(N,
-                       num_params,
-                       bounds,
-                       num_levels=p_levels,
-                       grid_jump=grid_step
-                       )
-
-    b = sample(N,
-               param_file,
-               num_levels=p_levels,
-               grid_jump=grid_step)
-
-    np.testing.assert_allclose(np.average(a),np.average(b),rtol=10e-02,atol=10e-02)
