@@ -6,9 +6,8 @@ python:
   - "3.2_with_system_site_packages"
   #- "3.3_with_system_site_packages"
 before_install:
-  - echo $TRAVIS_PYTHON_VERSION
-  - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then sudo apt-get install python-numpy python-scipy; fi
-  - if [[ $TRAVIS_PYTHON_VERSION == 3.2 ]]; then sudo apt-get install python3-numpy python3-scipy; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == "2.7_with_system_site_packages" ]]; then sudo apt-get install python-numpy python-scipy; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == "3.2_with_system_site_packages" ]]; then sudo apt-get install python3-numpy python3-scipy; fi
   - pip install scikit-learn
 install:
   - python setup.py install
