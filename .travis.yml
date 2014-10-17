@@ -6,7 +6,8 @@ python:
   - "3.2_with_system_site_packages"
   #- "3.3_with_system_site_packages"
 before_install:
-  - sudo apt-get install python-numpy python-scipy python-sklearn
+  - sudo apt-get install python-numpy python-scipy
+  - pip install scikit-learn
 install:
   - python setup.py install
 script: cd SALib; nosetests tests --verbose
