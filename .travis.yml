@@ -8,6 +8,8 @@ python:
 before_install:
   - sudo apt-get install python-numpy python-scipy 
   - pip install scikit-learn
-script: nosetests test --verbose
+install:
+  - python setup.py install
+script: nosetests SALib/tests --verbose
 notifications:
   email: false
