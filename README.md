@@ -16,7 +16,7 @@ Python implementations of commonly used sensitivity analysis methods. Useful in 
 * Derivative-based Global Sensitivity Measure (DGSM) ([Sobol and Kucherenko 2009](http://www.sciencedirect.com/science/article/pii/S0378475409000354))
 * Metamodel-based Sobol Analysis (experimental). Uses RBF support vector regression from `scikit-learn`.
 
-**Contributors:** [Jon Herman](https://github.com/jdherman), [Matt Woodruff](https://github.com/matthewjwoodruff), [Chris Mutel](https://github.com/cmutel), [Fernando Rios](https://github.com/zoidy), [Dan Hyams](https://github.com/dhyams), [xantares](https://github.com/xantares)
+**Contributors:** [Jon Herman](https://github.com/jdherman), [Matt Woodruff](https://github.com/matthewjwoodruff), [Chris Mutel](https://github.com/cmutel), [Will Usher](https://github.com/willu47), [Fernando Rios](https://github.com/zoidy), [Dan Hyams](https://github.com/dhyams), [xantares](https://github.com/xantares)
 
 ### Create a parameter file
 
