@@ -3,8 +3,8 @@ import numpy as np
 import random as rd
 from math import factorial
 from itertools import combinations, islice
-from util import read_param_file
-from sample import common_args
+from ..util import read_param_file
+import common_args
 from scipy.spatial.distance import cdist
 
 
