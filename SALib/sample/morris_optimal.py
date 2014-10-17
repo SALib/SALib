@@ -50,7 +50,7 @@ def find_most_distant(input_sample, N, num_params, k_choices):
                                               num_params)
 
     # Now evaluate the (N choose k_choices) possible combinations
-    number_of_combinations = nchoosek(N, k_choices)
+    number_of_combinations = int(nchoosek(N, k_choices))
     # Initialise the output array
 
     chunk = int(1e6)
