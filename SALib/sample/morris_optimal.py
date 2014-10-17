@@ -1,11 +1,11 @@
 from __future__ import division
 import numpy as np
 import random as rd
-from math import factorial
 from itertools import combinations, islice
 from ..util import read_param_file
 from . import common_args
 from scipy.spatial.distance import cdist
+from scipy.misc import comb as nchoosek
 
 
 def compute_distance(m, l, num_params):
@@ -19,13 +19,6 @@ def compute_distance(m, l, num_params):
     distance = np.array(np.sum(cdist(m, l)), dtype=np.float32)
 
     return distance
-
-
-def num_combinations(n, k):
-    numerator = factorial(n)
-    denominator = (factorial(k) * factorial(n - k))
-    answer = numerator / denominator
-    return long(answer)
 
 
 def compute_distance_matrix(input_sample, N, num_params):
@@ -57,7 +50,7 @@ def find_most_distant(input_sample, N, num_params, k_choices):
                                               num_params)
 
     # Now evaluate the (N choose k_choices) possible combinations
-    number_of_combinations = num_combinations(N, k_choices)
+    number_of_combinations = nchoosek(N, k_choices)
     # Initialise the output array
 
     chunk = int(1e6)
