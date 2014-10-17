@@ -60,10 +60,10 @@ def find_most_distant(input_sample, N, num_params, k_choices):
     counter = 0
     # Generate a list of all the possible combinations
     #combos = np.array([x for x in combinations(range(N),k_choices)])
-    combo_gen = combinations(range(N),k_choices)
+    combo_gen = combinations(list(range(N)),k_choices)
     scores = np.empty(number_of_combinations,dtype=np.float32)
     # Generate the pairwise indices once
-    pairwise = np.array([y for y in combinations(range(k_choices),2)])
+    pairwise = np.array([y for y in combinations(list(range(k_choices)),2)])
 
     for combos in grouper(chunk, combo_gen):
         scores[(counter*chunk):((counter+1)*chunk)] = mappable(combos, pairwise, distance_matrix)
@@ -91,7 +91,7 @@ def find_maximum(scores, N, k_choices):
         raise TypeError("Scores input is not a numpy array")
 
     index_of_maximum = scores.argmax()
-    maximum_combo = nth(combinations(range(N), k_choices), index_of_maximum)
+    maximum_combo = nth(combinations(list(range(N)), k_choices), index_of_maximum)
     return maximum_combo
 
 
@@ -126,7 +126,7 @@ def find_optimum_trajectories(input_sample, N, num_params, k_choices):
     for j in range(N):
         index_list.append(np.arange(num_params + 1) + j * (num_params + 1))
 
-    maximum_combo = nth(combinations(range(N), k_choices), index_of_maximum)
+    maximum_combo = nth(combinations(list(range(N)), k_choices), index_of_maximum)
     output = np.zeros((np.size(maximum_combo) * (num_params + 1), num_params))
     for counter, x in enumerate(maximum_combo):
         output[index_list[counter]] = np.array(input_sample[index_list[x]])
