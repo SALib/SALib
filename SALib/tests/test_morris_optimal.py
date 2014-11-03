@@ -115,3 +115,12 @@ def test_readfile():
     assert_equal(pf['bounds'], [[0, 100], [5, 51]])
     assert_equal(pf['num_vars'], 2)
     assert_equal(pf['names'], ['Test1', 'Test2'])
+
+
+def test_find_maximum():
+    scores = np.array(range(15))
+    k_choices = 4
+    N = 6
+    output = find_maximum(scores, N, k_choices)
+    expected = (2, 3, 4, 5)
+    assert_equal(output, expected)
