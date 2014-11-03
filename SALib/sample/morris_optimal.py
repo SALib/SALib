@@ -44,16 +44,18 @@ def find_most_distant(input_sample, N, num_params, k_choices):
     'N' trajectories contained in 'input_sample'
     '''
 
+    # Now evaluate the (N choose k_choices) possible combinations
+    if nchoosek(N, k_choices) >= sys.maxsize:
+        raise ValueError("Number of combinations is too large")
+    number_of_combinations = int(nchoosek(N, k_choices))
+
     # First compute the distance matrix for each possible pairing
     # of trajectories and store in a shared-memory array
     distance_matrix = compute_distance_matrix(input_sample,
                                               N,
                                               num_params)
 
-    # Now evaluate the (N choose k_choices) possible combinations
-    number_of_combinations = int(nchoosek(N, k_choices))
-    if number_of_combinations >= sys.maxsize:
-        raise ValueError("Number of combinations is too large")
+
     # Initialise the output array
 
     chunk = int(1e6)
