@@ -6,6 +6,7 @@ from ..util import read_param_file
 from . import common_args
 from scipy.spatial.distance import cdist
 from scipy.misc import comb as nchoosek
+import sys
 
 
 def compute_distance(m, l, num_params):
@@ -51,6 +52,8 @@ def find_most_distant(input_sample, N, num_params, k_choices):
 
     # Now evaluate the (N choose k_choices) possible combinations
     number_of_combinations = int(nchoosek(N, k_choices))
+    if number_of_combinations >= sys.maxsize:
+        raise ValueError("Number of combinations is too large")
     # Initialise the output array
 
     chunk = int(1e6)
@@ -90,8 +93,8 @@ def find_maximum(scores, N, k_choices):
     if type(scores) != np.ndarray:
         raise TypeError("Scores input is not a numpy array")
 
-    index_of_maximum = scores.argmax()
-    maximum_combo = nth(combinations(list(range(N)), k_choices), index_of_maximum)
+    index_of_maximum = int(scores.argmax())
+    maximum_combo = nth(combinations(list(range(N)), k_choices), index_of_maximum, None)
     return maximum_combo
 
 
@@ -111,6 +114,10 @@ def take(n, iterable):
 
 def nth(iterable, n, default=None):
     "Returns the nth item or a default value"
+
+    if type(n) != int:
+        raise TypeError("n is not an integer")
+
     return next(islice(iterable, n, None), default)
 
 
@@ -121,12 +128,11 @@ def find_optimum_trajectories(input_sample, N, num_params, k_choices):
                                num_params,
                                k_choices)
 
-    index_of_maximum = scores.argmax()
     index_list = []
     for j in range(N):
         index_list.append(np.arange(num_params + 1) + j * (num_params + 1))
 
-    maximum_combo = nth(combinations(list(range(N)), k_choices), index_of_maximum)
+    maximum_combo = find_maximum(scores, N, k_choices)
     output = np.zeros((np.size(maximum_combo) * (num_params + 1), num_params))
     for counter, x in enumerate(maximum_combo):
         output[index_list[counter]] = np.array(input_sample[index_list[x]])
