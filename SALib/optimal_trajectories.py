@@ -3,8 +3,9 @@ import esme as mo
 from sample import common_args
 import numpy as np
 import random as rd
-from util import scale_samples, read_param_file
+from util import read_param_file
 from scipy.misc import comb as nchoosek
+import re
 
 '''
 Run using
@@ -29,30 +30,10 @@ def model(N, k_choices, distance_matrix):
         y[i] = m.addVar(vtype="B", obj=0, name="y[%s]" % i)
         for j in range(i+1, N):
             x[i,j] = m.addVar(vtype="B", obj=1.0, name="x[%s,%s]" % (i, j))
-    m.update()
 
     m.setObjective(quicksum([x[i, j] * dm[j][i] for i in I for j in range(i+1,N)]))
 
     m.addConstr(quicksum([x[i, j] for i in I for j in range(i+1,N)]) == nchoosek(k_choices, 2), "All")
-
-    for i in I:
-        for j in range(i + 1, N - 1):
-            for k in range(j + 1, N):
-                m.addConstr( x[j, k] + 1 >= (x[i, j] + x[i, k]),
-                            "Equiv[%s%s]<-[%s%s]&[%s%s]"%(j, k, i, j, i, k))
-                m.addConstr( x[i, k] + 1 >= (x[i, j] + x[j, k]),
-                            "Equiv[%s%s]<-[%s%s]&[%s%s]"%(i, k, i, j, j, k))
-                m.addConstr( x[i, j] + 1 >= (x[i, k] + x[j, k]),
-                            "Equiv[%s%s]<-[%s%s]&[%s%s]"%(i, k, i, j, j, k))
-
-    m.update()
-    # Use triangles through pairs of (x[i,j], x[i,k]) forcing a third x[j,k]
-    for i in I:
-        for j in range(i+1, N-1):
-            for k in range(j+1, N):
-                m.addConstr(x[j, k] + 1 >= (x[i, j] + x[i, k]), "Equiv[%s,%s]<-[%s,%s]&[%s,%s]"%(j,k,i,j,i,k))
-                m.addConstr(x[i, k] + 1 >= (x[i, j] + x[j, k]), "Equiv[%s,%s]<-[%s,%s]&[%s,%s]"%(i,k,i,j,j,k))
-                m.addConstr(x[i, j] + 1 >= (x[i, k] + x[j, k]), "Equiv[%s,%s]<-[%s,%s]&[%s,%s]"%(i,j,i,k,j,k))
 
     # Finally, each combination may only appear three times in the combination list
     for i in I:
@@ -104,20 +85,18 @@ if __name__ == "__main__":
     m = model(N, k_choices, distance_matrix)
     m.params.MIPFocus=1 # Focus on feasibility over optimality
 
-    # m.write("file.lp")
+    #m.write("model.lp")
     m.ModelSense = GRB.MAXIMIZE
     m.optimize()
     if m.Status == GRB.OPTIMAL:
         print m.objval
-
-    import re
 
     variables = list(m.getVars())
     x_vars = []
     for v in variables:
         if (v.X > 0 ) & (v.VarName[0] == 'x'):
                 x_vars.append(v.VarName)
-    b = [re.findall("\d",str(v)) for v in x_vars]
+    b = [re.findall("\d{1,}",str(v)) for v in x_vars]
     maximum_combo = set([int(y) for z in b for y in z])
 
     index_list = []
