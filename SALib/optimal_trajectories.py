@@ -6,15 +6,11 @@ import random as rd
 from util import read_param_file
 from scipy.misc import comb as nchoosek
 import re
+from datetime import datetime as dt
 
 '''
 Run using
-optimal_trajectories.py -n=10
-                        -p=esme_param.txt
-                        -o=test_op.txt
-                        -s=12892
-                        --num-levels=4
-                        --grid-jump=2
+optimal_trajectories.py -n=10 -p=esme_param.txt -o=test_op.txt -s=12892 --num-levels=4 --grid-jump=2 --k-choices=4
 
 '''
 
@@ -51,6 +47,9 @@ def model(N, k_choices, distance_matrix):
     m.update()
     return m
 
+
+def timestamp():
+    return dt.strftime(dt.now(),"%d%m%y%H%M%s")
 
 if __name__ == "__main__":
 
@@ -109,4 +108,5 @@ if __name__ == "__main__":
     output = np.zeros((len(maximum_combo) * (num_params + 1), num_params))
     for counter, x in enumerate(maximum_combo):
         output[index_list[counter]] = np.array(input_data[index_list[x]])
-    np.savetxt(args.output, output, delimiter=' ')
+    filename = args.output + "_v%s_l%s_gs%s_k%s_N%s_%s.txt" % (num_params, p_levels, grid_step, k_choices, N, timestamp())
+    np.savetxt(filename, output, delimiter=' ')
