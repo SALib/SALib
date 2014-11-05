@@ -21,7 +21,7 @@ optimal_trajectories.py -n=10
 def model(N, k_choices, distance_matrix):
     m = Model("distance1")
     I = range(N)
-    big_M = 1e3
+    big_M = k_choices + 1
 
     dm=distance_matrix**2
 
@@ -30,6 +30,7 @@ def model(N, k_choices, distance_matrix):
         y[i] = m.addVar(vtype="B", obj=0, name="y[%s]" % i)
         for j in range(i+1, N):
             x[i,j] = m.addVar(vtype="B", obj=1.0, name="x[%s,%s]" % (i, j))
+    m.update()
 
     m.setObjective(quicksum([x[i, j] * dm[j][i] for i in I for j in range(i+1,N)]))
 
@@ -37,14 +38,14 @@ def model(N, k_choices, distance_matrix):
 
     # Finally, each combination may only appear three times in the combination list
     for i in I:
-        m.addConstr( quicksum(x[i, j] for j in range(i+1,N)) + quicksum(x[k, i] for k in range(0,i)),
+        m.addConstr(quicksum(x[i, j] for j in range(i+1,N)) + quicksum(x[k, i] for k in range(0,i)) - (y[i] * big_M),
                     '<=',
-                    (k_choices - 1) + (y[i] * big_M),
-                    "Only three[%s]"%i)
-        m.addConstr( quicksum(x[i, j] for j in range(i+1,N)) + quicksum(x[k, i] for k in range(0,i)) + (y[i] * big_M),
+                    (k_choices - 1),
+                    "a:Only k-1 scores in any row/column for %s" % i)
+        m.addConstr(quicksum(x[i, j] for j in range(i+1,N)) + quicksum(x[k, i] for k in range(0,i)) + (y[i] * big_M),
                     '>=',
                     (k_choices - 1),
-                    "Only three[%s]"%i)
+                    "b:Only k-1 scores in any row/column for %s" % i)
 
     m.addConstr( quicksum( y[i] for i in I ), "==", N - k_choices, name="Only %s hold" % (N-k_choices))
     m.update()
@@ -77,13 +78,15 @@ if __name__ == "__main__":
                         num_params,
                         bounds,
                         num_levels=p_levels,
-                        grid_jump=grid_step)
+                        grid_jump=grid_step,
+                        seed=args.seed)
     distance_matrix = mo.compute_distance_matrix(input_data,
                                               N,
                                               num_params)
 
     m = model(N, k_choices, distance_matrix)
     m.params.MIPFocus=1 # Focus on feasibility over optimality
+    m.params.IntFeasTol=min(0.1,1./(k_choices+1))
 
     #m.write("model.lp")
     m.ModelSense = GRB.MAXIMIZE
@@ -98,7 +101,7 @@ if __name__ == "__main__":
                 x_vars.append(v.VarName)
     b = [re.findall("\d{1,}",str(v)) for v in x_vars]
     maximum_combo = set([int(y) for z in b for y in z])
-
+    print maximum_combo
     index_list = []
     for j in range(N):
         index_list.append(np.arange(num_params + 1) + j * (num_params + 1))
