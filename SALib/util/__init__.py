@@ -57,7 +57,6 @@ def read_group_file(filename):
         a numpy matrix of factor group membership
     '''
     output = []
-    num_groups = 0
 
     with open(filename) as csvfile:
         dialect = csv.Sniffer().sniff(csvfile.read(8192))
