@@ -9,6 +9,9 @@ SALib/test_traj.txt
 /SALib.egg*
 /dist/
 
+# Windows specific
+/build/*
+
 # Gurobi related files
 *.txt
 *.lp
