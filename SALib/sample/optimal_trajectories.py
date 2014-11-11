@@ -1,9 +1,11 @@
+from __future__ import division
 from gurobipy import *
-import esme as mo
-from sample import common_args
+import morris_optimal, morris_oat
+from morris_optimal import compile_output
+import common_args
 import numpy as np
 import random as rd
-from util import read_param_file
+from ..util import read_param_file
 from scipy.misc import comb as nchoosek
 import re
 from datetime import datetime as dt
@@ -48,40 +50,16 @@ def model(N, k_choices, distance_matrix):
     return m
 
 
-def timestamp():
-    return dt.strftime(dt.now(),"%d%m%y%H%M%S")
+def return_max_combo(input_data, N, param_file, p_levels, grid_step, k_choices, param_delim=" "):
 
-if __name__ == "__main__":
-
-    parser = common_args.create()
-    parser.add_argument('--num-levels', type=int, required=False, default=4, help='Number of grid levels (Morris only)')
-    parser.add_argument('-g','--grid-jump', type=int, required=False, default=2, help='Grid jump size (Morris only)')
-    parser.add_argument('-k', '--k-choices', type=int, required=False, default=4, help='Number of desired optimised trajectories')
-
-    args = parser.parse_args()
-
-    np.random.seed(args.seed)
-    rd.seed(args.seed)
-
-
-    param_file = args.paramfile
-    pf = read_param_file(param_file,",")
-    N = args.samples
+    pf = read_param_file(param_file,param_delim)
     num_params = pf['num_vars']
-    bounds = pf['bounds']
-    k_choices = args.k_choices
-    p_levels = int(args.num_levels)
-    grid_step = int(args.grid_jump)
-    # Generates N(D + 1) x D matrix of samples
-    input_data = mo.morris_sample(N,
-                        num_params,
-                        bounds,
-                        num_levels=p_levels,
-                        grid_jump=grid_step,
-                        seed=args.seed)
-    distance_matrix = mo.compute_distance_matrix(input_data,
-                                              N,
-                                              num_params)
+
+    print N, num_params
+
+    distance_matrix = morris_optimal.compute_distance_matrix(input_data,
+                                                             N,
+                                                             num_params)
 
     m = model(N, k_choices, distance_matrix)
     #m.params.MIPFocus=1 # Focus on feasibility over optimality
@@ -91,7 +69,7 @@ if __name__ == "__main__":
     m.ModelSense = GRB.MAXIMIZE
     m.optimize()
     if m.Status == GRB.OPTIMAL:
-        print m.objval
+        print(m.objval)
 
     variables = list(m.getVars())
     x_vars = []
@@ -100,16 +78,80 @@ if __name__ == "__main__":
                 x_vars.append(v.VarName)
     b = [re.findall("\d{1,}",str(v)) for v in x_vars]
     maximum_combo = set([int(y) for z in b for y in z])
-    print maximum_combo
-    index_list = []
-    for j in range(N):
-        index_list.append(np.arange(num_params + 1) + j * (num_params + 1))
+    return tuple(maximum_combo)
 
-    output = np.zeros((len(maximum_combo) * (num_params + 1), num_params))
-    for counter, x in enumerate(maximum_combo):
-        output[index_list[counter]] = np.array(input_data[index_list[x]])
+
+def optimised_trajectories(input_sample,
+                           N,
+                           param_file,
+                           p_levels,
+                           grid_step,
+                           k_choices,
+                           param_delim=" "):
+    """
+    """
+    pf = read_param_file(param_file,param_delim)
+    num_params = pf['num_vars']
+
+    maximum_combo = return_max_combo(input_sample,
+                                     N,
+                                     param_file,
+                                     p_levels,
+                                     grid_step,
+                                     k_choices,
+                                     param_delim)
+
+    output = compile_output(input_sample,
+                            N,
+                            num_params,
+                            k_choices,
+                            maximum_combo)
+    return output
+
+
+def timestamp():
+    return dt.strftime(dt.now(),"%d%m%y%H%M%S")
+
+
+if __name__ == "__main__":
+
+    parser = common_args.create()
+    parser.add_argument('--num-levels', type=int, required=False, default=4, help='Number of grid levels (Morris only)')
+    parser.add_argument('-g','--grid-jump', type=int, required=False, default=2, help='Grid jump size (Morris only)')
+    parser.add_argument('-k', '--k-choices', type=int, required=False, default=4, help='Number of desired optimised trajectories')
+    parser.add_argument('-pd','--p-delim', type=str, require=False, default=" ", help='Delimeter for parameter file')
+
+    args = parser.parse_args()
+
+    np.random.seed(args.seed)
+    rd.seed(args.seed)
+
+    param_file = args.paramfile
+    param_delim = args.p_delim
+    pf = read_param_file(param_file,param_delim)
+    N = args.samples
+    num_params = pf['num_vars']
+    bounds = pf['bounds']
+    k_choices = args.k_choices
+    p_levels = int(args.num_levels)
+    grid_step = int(args.grid_jump)
+
+    input_sample = morris_oat.sample(N,
+                                     param_file,
+                                     num_levels=p_levels,
+                                     grid_jump=grid_step)
+
+    output = optimised_trajectories(input_sample,
+                                    N,
+                                    param_file,
+                                    p_levels,
+                                    grid_step,
+                                    k_choices,
+                                    param_delim)
+
+
     filename = args.output + "_v%s_l%s_gs%s_k%s_N%s_%s.txt" % (num_params, p_levels, grid_step, k_choices, N, timestamp())
     if (len(list(maximum_combo)) == k_choices) & (m.status == GRB.OPTIMAL):
-        np.savetxt(filename, output, delimiter=',')
+        np.savetxt(filename, output, delimiter=args.delim)
     else:
         raise RuntimeError("Solution not legal, so file not saved")

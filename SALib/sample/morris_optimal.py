@@ -123,22 +123,41 @@ def nth(iterable, n, default=None):
     return next(islice(iterable, n, None), default)
 
 
+def make_index_list(N, num_params):
+    index_list = []
+    for j in range(N):
+        index_list.append(np.arange(num_params + 1) + j * (num_params + 1))
+    return index_list
+
+
+def compile_output(input_sample, N, num_params, k_choices, maximum_combo):
+
+    index_list = make_index_list(N, num_params)
+
+    output = np.zeros((len(maximum_combo) * (num_params + 1), num_params))
+
+    for counter, x in enumerate(maximum_combo):
+        output[index_list[counter]] = np.array(input_sample[index_list[x]])
+    return output
+
+
 def find_optimum_trajectories(input_sample, N, num_params, k_choices):
+
+    maximum_combo = find_optimum_combination(input_sample, N, num_params, k_choices)
+
+    return compile_output(input_sample, N, num_params, k_choices, maximum_combo)
+
+
+def find_optimum_combination(input_sample, N, num_params, k_choices):
 
     scores = find_most_distant(input_sample,
                                N,
                                num_params,
                                k_choices)
 
-    index_list = []
-    for j in range(N):
-        index_list.append(np.arange(num_params + 1) + j * (num_params + 1))
-
     maximum_combo = find_maximum(scores, N, k_choices)
-    output = np.zeros((np.size(maximum_combo) * (num_params + 1), num_params))
-    for counter, x in enumerate(maximum_combo):
-        output[index_list[counter]] = np.array(input_sample[index_list[x]])
-    return output
+
+    return maximum_combo
 
 
 if __name__ == "__main__":

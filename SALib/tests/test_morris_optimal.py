@@ -109,7 +109,7 @@ def test_find_optimum_trajectories():
 
 def test_readfile():
 
-    filename = "tests/test_params.txt"
+    filename = "SALib/tests/test_params.txt"
     pf = read_param_file(filename)
 
     assert_equal(pf['bounds'], [[0, 100], [5, 51]])
