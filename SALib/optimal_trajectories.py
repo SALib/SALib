@@ -49,14 +49,14 @@ def model(N, k_choices, distance_matrix):
 
 
 def timestamp():
-    return dt.strftime(dt.now(),"%d%m%y%H%M%s")
+    return dt.strftime(dt.now(),"%d%m%y%H%M%S")
 
 if __name__ == "__main__":
 
     parser = common_args.create()
     parser.add_argument('--num-levels', type=int, required=False, default=4, help='Number of grid levels (Morris only)')
-    parser.add_argument('--grid-jump', type=int, required=False, default=2, help='Grid jump size (Morris only)')
-    parser.add_argument('--k-choices', type=int, required=False, default=4, help='Number of choices (optimised trajectory)')
+    parser.add_argument('-g','--grid-jump', type=int, required=False, default=2, help='Grid jump size (Morris only)')
+    parser.add_argument('-k', '--k-choices', type=int, required=False, default=4, help='Number of desired optimised trajectories')
 
     args = parser.parse_args()
 
@@ -65,7 +65,7 @@ if __name__ == "__main__":
 
 
     param_file = args.paramfile
-    pf = read_param_file(param_file)
+    pf = read_param_file(param_file,",")
     N = args.samples
     num_params = pf['num_vars']
     bounds = pf['bounds']
@@ -84,7 +84,7 @@ if __name__ == "__main__":
                                               num_params)
 
     m = model(N, k_choices, distance_matrix)
-    m.params.MIPFocus=1 # Focus on feasibility over optimality
+    #m.params.MIPFocus=1 # Focus on feasibility over optimality
     m.params.IntFeasTol=min(0.1,1./(k_choices+1))
 
     #m.write("model.lp")
@@ -109,4 +109,7 @@ if __name__ == "__main__":
     for counter, x in enumerate(maximum_combo):
         output[index_list[counter]] = np.array(input_data[index_list[x]])
     filename = args.output + "_v%s_l%s_gs%s_k%s_N%s_%s.txt" % (num_params, p_levels, grid_step, k_choices, N, timestamp())
-    np.savetxt(filename, output, delimiter=' ')
+    if (len(list(maximum_combo)) == k_choices) & (m.status == GRB.OPTIMAL):
+        np.savetxt(filename, output, delimiter=',')
+    else:
+        raise RuntimeError("Solution not legal, so file not saved")
