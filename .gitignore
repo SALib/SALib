@@ -5,15 +5,20 @@ model_output.txt
 y_rbf.txt
 SALib/test_traj.txt
 /SALib.egg*
+
+tests/*.txt
+
+/build/
 /dist/
 
 # Windows specific
 /build/*
+
+.coveralls.yml
+.coverage
 
 # Gurobi related files
 *.txt
 *.lp
 *.mps
 *.log
-
-tests/*.txt
