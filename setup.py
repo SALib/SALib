@@ -1,26 +1,29 @@
-from setuptools import setup
-import os
+from setuptools import setup, find_packages
+from setuptools.command.test import test as TestCommand
 
-packages = []
-root_dir = os.path.dirname(__file__)
-if root_dir:
-    os.chdir(root_dir)
 
-for dirpath, dirnames, filenames in os.walk('SALib'):
-    # Ignore dirnames that start with '.'
-    if '__init__.py' in filenames:
-        pkg = dirpath.replace(os.path.sep, '.')
-        if os.path.altsep:
-            pkg = pkg.replace(os.path.altsep, '.')
-        packages.append(pkg)
+class NoseTestCommand(TestCommand):
+
+    def finalize_options(self):
+        TestCommand.finalize_options(self)
+        self.test_args = []
+        self.test_suite = True
+
+    def run_tests(self):
+        # Run nose ensuring that argv simulates running nosetests directly
+        import nose
+        nose.run_exit(argv=['nosetests'])
+
 
 setup(
     name='SALib',
     version="0.1",
-    packages=packages,
+    packages=find_packages(),
     author="Jon Herman",
     author_email="jdherman8@gmail.com",
     license=open('LICENSE.md').read(),
+    tests_require=['nose'],
+    cmdclass={'test': NoseTestCommand},
     install_requires=[
         "numpy",
         "scipy",
