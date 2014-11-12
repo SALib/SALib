@@ -18,7 +18,7 @@ class NoseTestCommand(TestCommand):
 setup(
     name='SALib',
     version="0.1",
-    packages=find_packages(),
+    packages=find_packages(exclude=["*tests*"]),
     author="Jon Herman",
     author_email="jdherman8@gmail.com",
     license=open('LICENSE.md').read(),
