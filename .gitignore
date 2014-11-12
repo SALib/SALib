@@ -18,3 +18,4 @@ SALib/test_traj.txt
 *.mps
 *.log
 
+tests/*.txt
