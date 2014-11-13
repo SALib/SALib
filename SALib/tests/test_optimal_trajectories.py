@@ -8,6 +8,7 @@ from numpy.testing import assert_equal
 from .test_util import setup_function
 from ..sample.morris import Morris
 from ..util import read_param_file
+from numpy.testing import assert_equal
 
 
 @with_setup(setup_function())
@@ -38,7 +39,6 @@ def test_optimal_combinations():
                                         num_params,
                                         k_choices)
     assert_equal(actual, desired)
-
 
 
 @with_setup(setup_function())
@@ -79,6 +79,7 @@ def test_raise_error_if_k_gt_N():
     p_levels = 4
     grid_step = p_levels / 2
     k_choices = 6
+
     morris_sample = Morris(param_file, N, p_levels, grid_step)
     input_sample = morris_sample.get_input_sample_unscaled()
 
@@ -88,3 +89,4 @@ def test_raise_error_if_k_gt_N():
                                     p_levels,
                                     grid_step,
                                     k_choices)
+
