@@ -3,8 +3,9 @@ from ..sample.optimal_trajectories import return_max_combo, \
 from ..sample.morris_oat import sample
 from ..sample.morris_optimal import find_optimum_combination, \
                                     find_optimum_trajectories
-from numpy.testing import assert_equal
 from ..util import read_param_file
+from nose.tools import raises
+from numpy.testing import assert_equal
 
 
 def test_optimal_combinations():
@@ -65,3 +66,25 @@ def test_optimised_trajectories():
                                          k_choices)
 
     assert_equal(actual, desired)
+
+@raises(ValueError)
+def test_raise_error_if_k_gt_N():
+    """
+    Check that an error is raised if `k_choices` is greater than (or equal to) `N`
+    """
+    N = 4
+    param_file = "SALib/tests/test_params.txt"
+    p_levels = 4
+    grid_step = p_levels / 2
+    k_choices = 6
+    input_sample = sample(N,
+                          param_file,
+                          num_levels=p_levels,
+                          grid_jump=grid_step)
+
+    optimised_trajectories(input_sample,
+                                    N,
+                                    param_file,
+                                    p_levels,
+                                    grid_step,
+                                    k_choices)
