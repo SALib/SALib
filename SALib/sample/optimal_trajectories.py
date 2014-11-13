@@ -17,6 +17,10 @@ optimal_trajectories.py -n=10 -p=esme_param.txt -o=test_op.txt -s=12892 --num-le
 '''
 
 def model(N, k_choices, distance_matrix):
+    
+    if k_choices >= N:
+        raise ValueError("k_choices must be less than N")
+    
     m = Model("distance1")
     I = range(N)
     big_M = k_choices + 1
@@ -54,8 +58,6 @@ def return_max_combo(input_data, N, param_file, p_levels, grid_step, k_choices, 
 
     pf = read_param_file(param_file,param_delim)
     num_params = pf['num_vars']
-
-    print N, num_params
 
     distance_matrix = morris_optimal.compute_distance_matrix(input_data,
                                                              N,
@@ -119,7 +121,7 @@ if __name__ == "__main__":
     parser.add_argument('--num-levels', type=int, required=False, default=4, help='Number of grid levels (Morris only)')
     parser.add_argument('-g','--grid-jump', type=int, required=False, default=2, help='Grid jump size (Morris only)')
     parser.add_argument('-k', '--k-choices', type=int, required=False, default=4, help='Number of desired optimised trajectories')
-    parser.add_argument('-pd','--p-delim', type=str, require=False, default=" ", help='Delimeter for parameter file')
+    parser.add_argument('-pd','--p-delim', type=str, required=False, default=" ", help='Delimeter for parameter file')
 
     args = parser.parse_args()
 
