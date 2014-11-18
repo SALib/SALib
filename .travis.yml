@@ -27,6 +27,6 @@ install:
 script:
   - coverage run --source=SALib setup.py test
 after_success:
-  - if [[ $ENV == python=2.7* ]]; then coveralls; fi
+  - coveralls
 notifications:
   email: false
