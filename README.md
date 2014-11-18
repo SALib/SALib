@@ -8,6 +8,8 @@ Python implementations of commonly used sensitivity analysis methods. Useful in 
 
 **Build Status:** [![Build Status](https://travis-ci.org/jdherman/SALib.svg?branch=master)](https://travis-ci.org/jdherman/SALib) (tests currently only cover installation. Tests for functionality needed!)
 
+**Test Coverage:** [![Coverage Status](https://img.shields.io/coveralls/jdherman/SALib.svg)](https://coveralls.io/r/jdherman/SALib)
+
 **Methods included:**
 * Sobol Sensitivity Analysis ([Sobol 2001](http://www.sciencedirect.com/science/article/pii/S0378475400002706), [Saltelli 2002](http://www.sciencedirect.com/science/article/pii/S0010465502002801), [Saltelli et al. 2010](http://www.sciencedirect.com/science/article/pii/S0010465509003087))
 * Method of Morris ([Morris 1991](http://www.tandfonline.com/doi/abs/10.1080/00401706.1991.10484804), [Campolongo et al. 2007](http://www.sciencedirect.com/science/article/pii/S1364815206002805))

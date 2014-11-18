@@ -1,4 +1,5 @@
 from nose.tools import assert_almost_equal, assert_equal
+from nose import with_setup
 from ..sample.morris_optimal import compute_distance, compute_distance_matrix, \
     find_most_distant, find_maximum, find_optimum_trajectories
 from ..util import read_param_file
@@ -107,9 +108,17 @@ def test_find_optimum_trajectories():
     np.testing.assert_equal(output, expected)
 
 
+def setup_function():
+    filename = "SALib/tests/test_params.txt"
+    with open(filename, "w") as ofile:
+         ofile.write("Test1 0.0 100.0\n")
+         ofile.write("Test2 5.0 51.0\n")
+
+
+@with_setup(setup_function)
 def test_readfile():
 
-    filename = "tests/test_params.txt"
+    filename = "SALib/tests/test_params.txt"
     pf = read_param_file(filename)
 
     assert_equal(pf['bounds'], [[0, 100], [5, 51]])
@@ -124,6 +133,7 @@ def test_find_maximum():
     output = find_maximum(scores, N, k_choices)
     expected = (2, 3, 4, 5)
     assert_equal(output, expected)
+
 
 def test_catch_combos_too_large():
     N = 1e6
