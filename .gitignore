@@ -7,3 +7,4 @@ y_rbf.txt
 tests/*.txt
 /build/
 /dist/
+*.log
