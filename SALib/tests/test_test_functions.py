@@ -37,7 +37,7 @@ def test_Sobol_G_raises_error_if_values_lt_zero():
     Tests that a value error is raised if the Sobol G function is called with
     values less than zero.
     """
-    evaluate(np.array([0, -1, -.02, 1, 1, -01, -0, -12]))
+    evaluate(np.array([0, -1, -.02, 1, 1, -0.1, -0, -12]))
 
 
 @raises(TypeError)
