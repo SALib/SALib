@@ -28,7 +28,7 @@ def test_Sobol_G_raises_error_if_values_gt_one():
     Tests that a value error is raised if the Sobol G function is called with
     values greater than one
     """
-    evaluate(np.array([0, 1, .02, 23, 39, 01, 0, 12]))
+    evaluate(np.array([0, 1, .02, 0.23, 1.234, 0.02848848, 0, 0.78]))
 
 
 @raises(ValueError)
