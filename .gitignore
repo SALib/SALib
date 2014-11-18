@@ -8,3 +8,6 @@ tests/*.txt
 /build/
 /dist/
 *.log
+.coveralls.yml
+
+.coverage
