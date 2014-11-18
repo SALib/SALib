@@ -2,19 +2,24 @@
 language: python
 python:
   #- "2.6_with_system_site_packages"
-  - "2.7_with_system_site_packages"
-  - "3.2_with_system_site_packages"
+#  - "2.7_with_system_site_packages"
+ # - "3.2_with_system_site_packages"
   #- "3.3_with_system_site_packages"
+   - "2.7"
+   - "3.3"
 before_install:
-  - if [[ $TRAVIS_PYTHON_VERSION == "2.7_with_system_site_packages" ]]; then sudo apt-get install python-numpy python-scipy; fi
-  - if [[ $TRAVIS_PYTHON_VERSION == "3.2_with_system_site_packages" ]]; then sudo apt-get install python3-numpy python3-scipy; fi
+#  - if [[ $TRAVIS_PYTHON_VERSION == "2.7_with_system_site_packages" ]]; then sudo apt-get install python-numpy python-scipy; fi
+#  - if [[ $TRAVIS_PYTHON_VERSION == "3.2_with_system_site_packages" ]]; then sudo apt-get install python3-numpy python3-scipy; fi
   - pip install scikit-learn
+  - pip install numpy scipy
 install:
   - python setup.py install
   - pip install coveralls
 script:
   - coverage run —source=SALib setup.py test
 after_success:
-  coveralls
+    - if [[ $ENV == python=2.7* ]]; then
+          coveralls;
+      fi
 notifications:
   email: false
