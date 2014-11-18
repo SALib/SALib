@@ -6,7 +6,9 @@ Python implementations of commonly used sensitivity analysis methods. Useful in 
 
 **Installation:** `pip install SALib` or `python setup.py install`
 
-**Build Status:** [![Build Status](https://travis-ci.org/jdherman/SALib.svg?branch=master)](https://travis-ci.org/jdherman/SALib) (tests currently only cover installation. Tests for functionality needed!)
+**Build Status:** [![Build Status](https://travis-ci.org/willu47/SALib.svg?branch=master)](https://travis-ci.org/willu47/SALib) (tests currently only cover installation. Tests for functionality needed!)
+
+**Test Coverage:** [![Coverage Status](https://img.shields.io/coveralls/willu47/SALib.svg)](https://coveralls.io/r/willu47/SALib)
 
 **Methods included:**
 * Sobol Sensitivity Analysis ([Sobol 2001](http://www.sciencedirect.com/science/article/pii/S0378475400002706), [Saltelli 2002](http://www.sciencedirect.com/science/article/pii/S0010465502002801), [Saltelli et al. 2010](http://www.sciencedirect.com/science/article/pii/S0010465509003087))
