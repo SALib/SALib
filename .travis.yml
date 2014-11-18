@@ -11,7 +11,10 @@ before_install:
   - pip install scikit-learn
 install:
   - python setup.py install
+  - pip install coveralls
 script:
-  - python setup.py test
+  - coverage run —source=SALib setup.py test
+after_success:
+  coveralls
 notifications:
   email: false
