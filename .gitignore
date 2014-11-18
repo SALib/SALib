@@ -1,11 +1,9 @@
 *.egg-info
 *.pyc
-dist
 model_input.txt
 model_output.txt
 y_rbf.txt
 SALib/test_traj.txt
-/build/
 /SALib.egg*
 /dist/
 
