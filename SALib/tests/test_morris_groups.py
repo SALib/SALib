@@ -1,6 +1,7 @@
 from __future__ import division
 from numpy.testing import assert_equal
 from nose import with_setup
+from nose.tools import raises
 from ..sample.morris_groups import sample, \
                                    generate_P_star,\
                                    generate_x_star, \
@@ -47,14 +48,12 @@ def test_compute_delta():
     np.testing.assert_almost_equal(output, desired, decimal=2)
 
 
-@with_setup(setup_function)
 def test_sample():
     N = 6
-    param_file = "SALib/tests/test_params.txt"
     num_levels = 4
     grid_jump = 2
     G = np.array([[1,0],[0,1]])
-    output = sample(N, G, param_file, num_levels, grid_jump)
+    output = sample(N, G, num_levels, grid_jump)
     if np.any((output > 1) | (output < 0)):
         raise AssertionError("Bound not working")
     assert_equal(output.shape[0], N*3)
@@ -95,3 +94,12 @@ def test_compute_B_star():
 
     output = compute_B_star(J, x_star, delta, B, G, P_star, D_star)
     assert_equal(output, desired)
+
+
+@raises(ValueError)
+def test_sample_fails_with_no_G_matrix():
+    N = 6
+    num_levels = 4
+    grid_jump = 2
+    G = None
+    sample(N, G, num_levels, grid_jump)
