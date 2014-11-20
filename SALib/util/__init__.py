@@ -1,4 +1,5 @@
 __all__ = ["scale_samples", "read_param_file"]
+import csv
 
 # Rescale samples from [0, 1] to [lower, upper]
 
@@ -10,12 +11,16 @@ def scale_samples(params, bounds):
 
 def read_param_file(filename):
 
-    with open(filename, "r") as file:
-        names = []
-        bounds = []
-        num_vars = 0
 
-        for row in [line.split() for line in file if not line.strip().startswith('#')]:
+    names = []
+    bounds = []
+    num_vars = 0
+
+    with open(filename, 'rb') as csvfile:
+        dialect = csv.Sniffer().sniff(csvfile.read(1024))
+        csvfile.seek(0)
+        reader = csv.reader(csvfile, dialect)
+        for row in reader:
             num_vars += 1
             names.append(row[0])
             bounds.append([float(row[1]), float(row[2])])

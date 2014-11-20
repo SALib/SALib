@@ -99,8 +99,8 @@ def test_find_optimum_trajectories():
     input_4 = [[1/3., 1.], [1., 1.], [1, 1/3.]]
     input_5 = [[1/3., 1.], [1/3., 1/3.], [1, 1/3.]]
     input_6 = [[1/3., 2/3.], [1/3., 0], [1., 0]]
-    input_sample = np.concatenate([input_1, input_2, input_3, input_4, input_5,
-                          input_6])
+    input_sample = np.concatenate([input_1, input_2, input_3,
+                                   input_4, input_5, input_6])
     N = 6
     num_params = 2
     k_choices = 4
@@ -114,17 +114,6 @@ def setup_function():
     with open(filename, "w") as ofile:
          ofile.write("Test1 0.0 100.0\n")
          ofile.write("Test2 5.0 51.0\n")
-
-
-@with_setup(setup_function)
-def test_readfile():
-
-    filename = "SALib/tests/test_params.txt"
-    pf = read_param_file(filename)
-
-    assert_equal(pf['bounds'], [[0, 100], [5, 51]])
-    assert_equal(pf['num_vars'], 2)
-    assert_equal(pf['names'], ['Test1', 'Test2'])
 
 
 def test_find_maximum():
