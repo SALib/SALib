@@ -8,7 +8,7 @@ from ..util import read_param_file, scale_samples
 
 class Sample(object):
     '''
-    A template class, of which all of the sample methods derive.
+    A template class, which all of the sample classes inherit.
     '''
 
     def __init__(self, parameter_file, samples):
@@ -22,12 +22,32 @@ class Sample(object):
 
 
     def save_data(self, output, delimiter, precision):
+        '''
+        Saves the data to a file for input into a model
+        '''
+
+        data_to_save = self.get_input_sample_scaled()
 
         np.savetxt(output,
-                   self.output_sample,
+                   data_to_save,
                    delimiter=delimiter,
-                   fmt='%.' + str(precision) + 'e'
-                   )
+                   fmt='%.' + str(precision) + 'e')
+
+
+    def get_input_sample_unscaled(self):
+        '''
+        Returns the unscaled (according to the bounds from the parameter file)
+        data as a numpy array
+        '''
+        return self.output_sample
+
+
+    def get_input_sample_scaled(self):
+        '''
+        Returns the scaled (according to the bounds from the parameter file)
+        data as a numpy array
+        '''
+        return scale_samples(self.output_sample, self.bounds)
 
 
 class Morris(Sample):
@@ -86,6 +106,8 @@ class Morris(Sample):
             self.create_sample_with_groups()
 
 
+
+
     def create_sample(self):
 
         if self.optimal_trajectories is None:
@@ -107,7 +129,6 @@ class Morris(Sample):
                                                          self.num_vars,
                                                          self.optimal_trajectories)
 
-        scale_samples(optimal_sample, self.bounds)
         self.output_sample = optimal_sample
 
 
