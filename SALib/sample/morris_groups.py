@@ -40,7 +40,7 @@ def generate_trajectory(G, num_levels, grid_jump):
     return B_star
 
 
-def sample(N, G, param_file, num_levels, grid_jump):
+def sample(N, G, num_levels, grid_jump):
     '''
     Returns an N(g+1)-by-k array of N trajectories;
     where g is the number of groups and k is the number of factors
@@ -48,10 +48,12 @@ def sample(N, G, param_file, num_levels, grid_jump):
     Arguments:
       N            number of trajectories
       G            a k-by-g matrix which denotes factor membership of groups
-      param_file   string denoting path of parameter file
       num_levels   integer describing number of levels
       grid_jump    recommended to be equal to p / (2(p-1)) where p is num_levels
     '''
+
+    if G is None:
+        raise ValueError("Please define the matrix G.")
 
     k = G.shape[0]
     g = G.shape[1]

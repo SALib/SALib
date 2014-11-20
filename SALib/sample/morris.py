@@ -3,7 +3,7 @@ import numpy as np
 import random as rd
 from . import common_args
 from ..sample import morris_oat, morris_groups, morris_optimal
-from ..util import read_param_file
+from ..util import read_param_file, scale_samples
 
 class Sample(object):
 
@@ -49,11 +49,11 @@ class Morris(Sample):
             if self.optimal_trajectories >= self.samples:
                 raise ValueError("The number of optimal trajectories \
                                   should be less than the number of samples.")
-            elif self.optimal_trajectores >= 4:
+            elif self.optimal_trajectories > 4:
                 raise ValueError("Running optimal trajectories greater than  \
                                   values of 4 can take a long time.")
 
-        if self.group == None:
+        if self.group is None:
 
             self.create_sample()
 
@@ -67,39 +67,37 @@ class Morris(Sample):
                                                self.parameter_file,
                                                self.num_levels,
                                                self.grid_jump)
-        if self.optimal_trajectories:
+        if self.optimal_trajectories is not None:
             self.output_sample = \
                 morris_optimal.find_optimum_trajectories(self.output_sample,
                                                          self.samples,
                                                          self.num_vars,
-                                                         self.optimal_trajectories
-                                                         )
+                                                         self.optimal_trajectories)
 
 
     def create_sample_with_groups(self):
         self.output_sample = morris_groups.sample(self.samples,
                                                   self.group,
-                                                  self.parameter_file,
                                                   self.num_levels,
                                                   self.grid_jump)
-        if self.optimal_trajectories:
+        if self.optimal_trajectories is not None:
             self.output_sample = \
                 morris_optimal.find_optimum_trajectories(self.output_sample,
                                                          self.samples,
                                                          self.num_vars,
-                                                         self.optimal_trajectories
-                                                         )
+                                                         self.optimal_trajectories)
+        scale_samples(self.output_sample, self.bounds)
 
 
     def debug(self):
-        print self.parameter_file
-        print self.samples
-        print self.num_levels
-        print self.grid_jump
-        print self.num_vars
-        print self.bounds
-        print self.group
-        print self.optimal_trajectories
+        print "Parameter File: %s" % self.parameter_file
+        print "Number of samples: %s" % self.samples
+        print "Number of levels: %s" % self.num_levels
+        print "Grid step: %s" % self.grid_jump
+        print "Number of variables: %s" % self.num_vars
+        print "Parameter bounds: %s" % self.bounds
+        print "Group: %s" % self.group
+        print "Number of req trajectories: %s" % self.optimal_trajectories
 
 
 if __name__ == "__main__":
@@ -111,7 +109,7 @@ if __name__ == "__main__":
                         default=2, help='Grid jump size (Morris only)')
     parser.add_argument('--opt', type=int, required=False,
                         default=4, help='Number of optimal trajectories (Morris only)')
-    parser.add_argument('--group', type=str, required=False,
+    parser.add_argument('--group', type=str, required=False, default=None,
                        help='File path to grouping file (Morris only)')
     args = parser.parse_args()
 
@@ -119,7 +117,7 @@ if __name__ == "__main__":
     rd.seed(args.seed)
 
     sample = Morris(args.paramfile, args.samples, args.num_levels, \
-                    args.grid_jump, args.opt, args.group)
+                    args.grid_jump, args.group, args.opt)
     sample.debug()
     #sample.create_sample()
 
