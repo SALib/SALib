@@ -1,15 +1,12 @@
 from __future__ import division
 from numpy.testing import assert_equal
-from nose import with_setup
 from nose.tools import raises
 from ..sample.morris_groups import sample, \
                                    generate_P_star,\
-                                   generate_x_star, \
                                    compute_B_star, \
                                    compute_delta, \
                                    generate_trajectory
 import numpy as np
-from .test_morris_optimal import setup_function
 
 
 def test_generate_P_star():
@@ -24,20 +21,6 @@ def test_generate_P_star():
             raise AssertionError("Not legal P along axis 0")
         elif np.any(np.sum(output, 1) != np.ones(i)):
             raise AssertionError("Not legal P along axis 1")
-
-
-#def test_generate_x_star_legal():
-#    '''
-#    '''
-#    k = 2
-#    num_levels = 4
-#    grid_step = 2
-#
-#    output = generate_x_star(k, num_levels, grid_step)
-#    possible = np.array([0.,1./3])
-#    if np.all(np.isclose(output, possible,atol=10^-3)) == False:
-#        print output
-#        raise AssertionError("Illegal x_star generated")
 
 
 def test_compute_delta():
