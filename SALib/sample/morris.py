@@ -5,12 +5,18 @@ from . import common_args
 from ..sample import morris_oat, morris_groups, morris_optimal
 from ..util import read_param_file, scale_samples
 
-class Sample(object):
 
+class Sample(object):
+    '''
+    A template class, of which all of the sample methods derive.
+    '''
 
     def __init__(self, parameter_file, samples):
 
         self.parameter_file = parameter_file
+        pf = read_param_file(self.parameter_file)
+        self.num_vars = pf['num_vars']
+        self.bounds = pf['bounds']
         self.samples = samples
         self.output_sample = None
 
@@ -25,6 +31,27 @@ class Sample(object):
 
 
 class Morris(Sample):
+    '''
+    A class which implements three variants of Morris' sampling for
+    elementary effects:
+            - vanilla Morris
+            - optimised trajectories (Campolongo's enhancements from 2007)
+            - groups with optimised trajectories (again Campolongo 2007)
+
+    At present, optimised trajectories is implemented using a brute-force
+    approach, which can be very slow, especially if you require more than four
+    trajectories.  Note that the number of factors makes little difference,
+    but the ratio between number of factors and the sample size results in an
+    exponentially increasing number of scores that must be computed to find
+    the optimal combination of trajectories.
+
+    I suggest going no higher than 4 from a pool of 100 samples.
+
+    Suggested enhancements:
+        - a parallel brute force method (incomplete)
+        - a combinatorial optimisation approach (completed, but dependencies are
+          not open-source)
+    '''
 
 
     def __init__(self, parameter_file, samples, num_levels, grid_jump, \
@@ -46,7 +73,7 @@ class Morris(Sample):
             if self.optimal_trajectories >= self.samples:
                 raise ValueError("The number of optimal trajectories should be less than the number of samples.")
             elif self.optimal_trajectories > 4:
-                raise ValueError("Running optimal trajectories greater than values of 4 can take a long time.")
+                raise ValueError("Running optimal trajectories greater than values of 10 will take a long time.")
             elif self.optimal_trajectories <= 1:
                 raise ValueError("The number of optimal trajectories must be set to 2 or more.")
 
