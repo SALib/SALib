@@ -125,6 +125,9 @@ def nth(iterable, n, default=None):
 
 def find_optimum_trajectories(input_sample, N, num_params, k_choices):
 
+    if np.any((input_sample < 0) | (input_sample > 1)):
+        raise ValueError("Input sample must be scaled between 0 and 1")
+
     scores = find_most_distant(input_sample,
                                N,
                                num_params,
