@@ -151,14 +151,10 @@ def test_catch_combos_too_large():
                              combinations exceeded system size")
 
 
-@with_setup(setup_function)
 @raises(ValueError)
 def test_catch_inputs_not_in_zero_one_range():
-    filename = "SALib/tests/test_params.txt"
-    num_levels = 4
-    grid_jump = 2
     num_params = 2
     k_choices = 4
     N = 10
-    input_sample = sample(N, filename, num_levels, grid_jump)
+    input_sample = setup() * 10
     find_optimum_trajectories(input_sample, N, num_params, k_choices)
