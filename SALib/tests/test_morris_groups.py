@@ -52,7 +52,7 @@ def test_sample():
     N = 6
     num_levels = 4
     grid_jump = 2
-    G = np.array([[1,0],[0,1]])
+    G = np.matrix([[1,0],[0,1]])
     output = sample(N, G, num_levels, grid_jump)
     if np.any((output > 1) | (output < 0)):
         raise AssertionError("Bound not working")
@@ -102,4 +102,13 @@ def test_sample_fails_with_no_G_matrix():
     num_levels = 4
     grid_jump = 2
     G = None
+    sample(N, G, num_levels, grid_jump)
+
+
+@raises(TypeError)
+def test_sample_fails_with_wrong_G_matrix():
+    N = 6
+    num_levels = 4
+    grid_jump = 2
+    G = list[1,2,3,4]
     sample(N, G, num_levels, grid_jump)

@@ -54,6 +54,8 @@ def sample(N, G, num_levels, grid_jump):
 
     if G is None:
         raise ValueError("Please define the matrix G.")
+    if type(G) is not np.matrixlib.defmatrix.matrix:
+       raise TypeError("Matrix G should be formatted as a numpy matrix")
 
     k = G.shape[0]
     g = G.shape[1]
