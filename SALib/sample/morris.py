@@ -5,7 +5,6 @@ from . import common_args
 from . sample import Sample
 from ..sample import morris_oat, morris_groups, morris_optimal
 from ..util import read_param_file, scale_samples, read_group_file
-from collections import Iterable
 
 
 class Morris(Sample):
@@ -68,6 +67,7 @@ class Morris(Sample):
             self.create_sample_with_groups()
 
 
+<<<<<<< HEAD
     def flatten(self, l):
         for el in l:
             if isinstance(el, Iterable) and not isinstance(el, str):
@@ -107,6 +107,8 @@ class Morris(Sample):
 
         # ... and compile the numpy matrix
         return np.matrix(output)
+=======
+>>>>>>> Added raw data methods to the Sample class.
 
 
     def create_sample(self):
