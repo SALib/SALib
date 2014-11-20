@@ -1,7 +1,8 @@
-from nose.tools import assert_almost_equal, assert_equal
+from nose.tools import assert_almost_equal, assert_equal, raises
 from nose import with_setup
 from ..sample.morris_optimal import compute_distance, compute_distance_matrix, \
     find_most_distant, find_maximum, find_optimum_trajectories
+from ..sample.morris_oat import sample
 from ..util import read_param_file
 import numpy as np
 
@@ -148,3 +149,16 @@ def test_catch_combos_too_large():
     else:
         raise AssertionError("Test did not fail when number of \
                              combinations exceeded system size")
+
+
+@with_setup(setup_function)
+@raises(ValueError)
+def test_catch_inputs_not_in_zero_one_range():
+    filename = "SALib/tests/test_params.txt"
+    num_levels = 4
+    grid_jump = 2
+    num_params = 2
+    k_choices = 4
+    N = 10
+    input_sample = sample(N, filename, num_levels, grid_jump)
+    find_optimum_trajectories(input_sample, N, num_params, k_choices)
