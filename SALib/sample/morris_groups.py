@@ -1,8 +1,6 @@
 from __future__ import division
 import numpy as np
 import random as rd
-from ..util import scale_samples, read_param_file
-from . import common_args
 
 
 def generate_trajectory(G, num_levels, grid_jump):
@@ -44,11 +42,12 @@ def generate_trajectory(G, num_levels, grid_jump):
 
 def sample(N, G, param_file, num_levels, grid_jump):
     '''
-    Returns a single trajectory
+    Returns an N(g+1)-by-k array of N trajectories;
+    where g is the number of groups and k is the number of factors
 
     Arguments:
       N            number of trajectories
-      G            a k-by-g matrix which notes factor membership of groups
+      G            a k-by-g matrix which denotes factor membership of groups
       param_file   string denoting path of parameter file
       num_levels   integer describing number of levels
       grid_jump    recommended to be equal to p / (2(p-1)) where p is num_levels
