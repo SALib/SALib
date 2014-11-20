@@ -46,6 +46,6 @@ def test_Sobol_G_raises_error_if_values_not_numpy_array():
     Tests that a type error is raised if the Sobol G function is called with
     values argument not as a numpy array.
     """
-    fixture = [list(range(8)), str(01234567)]
+    fixture = [list(range(8)), str(12345678)]
     for x in fixture:
         evaluate(x)
