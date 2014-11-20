@@ -109,13 +109,6 @@ def test_find_optimum_trajectories():
     np.testing.assert_equal(output, expected)
 
 
-def setup_function():
-    filename = "SALib/tests/test_params.txt"
-    with open(filename, "w") as ofile:
-         ofile.write("Test1 0.0 100.0\n")
-         ofile.write("Test2 5.0 51.0\n")
-
-
 def test_find_maximum():
     scores = np.array(range(15))
     k_choices = 4
