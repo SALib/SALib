@@ -8,7 +8,7 @@ from ..sample.morris_groups import sample, \
                                    compute_delta, \
                                    generate_trajectory
 import numpy as np
-from test_morris_optimal import setup_function
+from .test_morris_optimal import setup_function
 
 
 def test_generate_P_star():
@@ -55,7 +55,6 @@ def test_sample():
     grid_jump = 2
     G = np.array([[1,0],[0,1]])
     output = sample(N, G, param_file, num_levels, grid_jump)
-    print output
     if np.any((output > 1) | (output < 0)):
         raise AssertionError("Bound not working")
     assert_equal(output.shape[0], N*3)
