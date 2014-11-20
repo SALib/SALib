@@ -1,12 +1,12 @@
 from ..sample.optimal_trajectories import return_max_combo, \
                                           optimised_trajectories
-from ..sample.morris_oat import sample
 from ..sample.morris_optimal import find_optimum_combination, \
                                     find_optimum_trajectories
 from ..util import read_param_file
-from nose.tools import raises
+from nose.tools import raises, with_setup
 from numpy.testing import assert_equal
-
+from .test_morris_optimal import setup_function
+from ..sample.morris import Morris
 
 def test_optimal_combinations():
     """
@@ -21,10 +21,8 @@ def test_optimal_combinations():
     p_levels = 4
     grid_step = p_levels / 2
     k_choices = 4
-    input_sample = sample(N,
-                          param_file,
-                          num_levels=p_levels,
-                          grid_jump=grid_step)
+    morris_sample = Morris(param_file, N, p_levels, grid_step)
+    input_sample = morris_sample.get_input_sample_unscaled()
 
     actual = return_max_combo(input_sample,
                               N,
@@ -40,6 +38,7 @@ def test_optimal_combinations():
     assert_equal(actual, desired)
 
 
+@with_setup(setup_function())
 def test_optimised_trajectories():
     N = 6
     param_file = "SALib/tests/test_params.txt"
@@ -48,10 +47,8 @@ def test_optimised_trajectories():
     p_levels = 4
     grid_step = p_levels / 2
     k_choices = 4
-    input_sample = sample(N,
-                          param_file,
-                          num_levels=p_levels,
-                          grid_jump=grid_step)
+    morris_sample = Morris(param_file, N, p_levels, grid_step)
+    input_sample = morris_sample.get_input_sample_unscaled()
 
     actual = optimised_trajectories(input_sample,
                                     N,
@@ -67,6 +64,8 @@ def test_optimised_trajectories():
 
     assert_equal(actual, desired)
 
+
+@with_setup(setup_function())
 @raises(ValueError)
 def test_raise_error_if_k_gt_N():
     """
@@ -77,10 +76,8 @@ def test_raise_error_if_k_gt_N():
     p_levels = 4
     grid_step = p_levels / 2
     k_choices = 6
-    input_sample = sample(N,
-                          param_file,
-                          num_levels=p_levels,
-                          grid_jump=grid_step)
+    morris_sample = Morris(param_file, N, p_levels, grid_step)
+    input_sample = morris_sample.get_input_sample_unscaled()
 
     optimised_trajectories(input_sample,
                                     N,
