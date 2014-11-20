@@ -16,7 +16,7 @@ def read_param_file(filename):
     bounds = []
     num_vars = 0
 
-    with open(filename, 'rb') as csvfile:
+    with open(filename) as csvfile:
         dialect = csv.Sniffer().sniff(csvfile.read(1024))
         csvfile.seek(0)
         reader = csv.reader(csvfile, dialect)
