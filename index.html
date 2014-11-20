@@ -31,13 +31,15 @@
       </header>
       <section>
         <h2>
-<a name="sensitivity-analysis-library-salib" class="anchor" href="#sensitivity-analysis-library-salib"><span class="octicon octicon-link"></span></a>Sensitivity Analysis Library (SALib)</h2>
+<a id="sensitivity-analysis-library-salib" class="anchor" href="#sensitivity-analysis-library-salib" aria-hidden="true"><span class="octicon octicon-link"></span></a>Sensitivity Analysis Library (SALib)</h2>
 
 <p>Python implementations of commonly used sensitivity analysis methods. Useful in systems modeling to calculate the effects of model inputs or exogenous factors on outputs of interest. </p>
 
-<p><strong>Requirements:</strong> <a href="http://www.numpy.org/">NumPy</a>, <a href="http://www.scipy.org/">SciPy</a></p>
+<p><strong>Requirements:</strong> <a href="http://www.numpy.org/">NumPy</a>, <a href="http://www.scipy.org/">SciPy</a>, <a href="http://scikit-learn.org">Scikit-learn</a></p>
 
 <p><strong>Installation:</strong> <code>pip install SALib</code> or <code>python setup.py install</code></p>
+
+<p><strong>Build Status:</strong> <a href="https://travis-ci.org/jdherman/SALib"><img src="https://travis-ci.org/jdherman/SALib.svg?branch=master" alt="Build Status"></a>    <strong>Test Coverage:</strong> <a href="https://coveralls.io/r/jdherman/SALib"><img src="https://img.shields.io/coveralls/jdherman/SALib.svg" alt="Coverage Status"></a></p>
 
 <p><strong>Methods included:</strong></p>
 
@@ -50,10 +52,10 @@
 <li>Metamodel-based Sobol Analysis (experimental). Uses RBF support vector regression from <code>scikit-learn</code>.</li>
 </ul>
 
-<p><strong>Contributors:</strong> <a href="https://github.com/jdherman">Jon Herman</a>, <a href="https://github.com/matthewjwoodruff">Matt Woodruff</a>, <a href="https://github.com/cmutel">Chris Mutel</a>, <a href="https://github.com/zoidy">Fernando Rios</a>, <a href="https://github.com/dhyams">Dan Hyams</a></p>
+<p><strong>Contributors:</strong> <a href="https://github.com/jdherman">Jon Herman</a>, <a href="https://github.com/cmutel">Chris Mutel</a>, <a href="https://github.com/willu47">Will Usher</a>, <a href="https://github.com/matthewjwoodruff">Matt Woodruff</a>, <a href="https://github.com/zoidy">Fernando Rios</a>, <a href="https://github.com/dhyams">Dan Hyams</a>, <a href="https://github.com/xantares">xantares</a></p>
 
 <h3>
-<a name="create-a-parameter-file" class="anchor" href="#create-a-parameter-file"><span class="octicon octicon-link"></span></a>Create a parameter file</h3>
+<a id="create-a-parameter-file" class="anchor" href="#create-a-parameter-file" aria-hidden="true"><span class="octicon octicon-link"></span></a>Create a parameter file</h3>
 
 <p>To get started, create a file describing the sampling ranges for the parameters in the model. Parameter files should be created with 3 columns: <code>[name, lower bound, upper bound]</code>:</p>
 
@@ -65,7 +67,7 @@ P2 0.0 5.0
 <p>Lines beginning with <code>#</code> will be treated as comments and ignored.</p>
 
 <h3>
-<a name="generate-samples" class="anchor" href="#generate-samples"><span class="octicon octicon-link"></span></a>Generate samples</h3>
+<a id="generate-samples" class="anchor" href="#generate-samples" aria-hidden="true"><span class="octicon octicon-link"></span></a>Generate samples</h3>
 
 <p>From the command line:</p>
 
@@ -79,28 +81,26 @@ P2 0.0 5.0
 
 <p>Or, generate samples from Python:</p>
 
-<div class="highlight highlight-python"><pre><span class="kn">from</span> <span class="nn">SALib.sample</span> <span class="kn">import</span> <span class="n">saltelli</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<div class="highlight highlight-python"><pre><span class="pl-k">from</span> SALib.sample <span class="pl-k">import</span> saltelli
+<span class="pl-k">import</span> numpy <span class="pl-k">as</span> np
 
-<span class="n">param_file</span> <span class="o">=</span> <span class="s">'../../SALib/test_functions/params/Ishigami.txt'</span>
-<span class="n">param_values</span> <span class="o">=</span> <span class="n">saltelli</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="n">param_file</span><span class="p">,</span> <span class="n">calc_second_order</span> <span class="o">=</span> <span class="bp">True</span><span class="p">)</span>
-<span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="s">'model_input.txt'</span><span class="p">,</span> <span class="n">param_values</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s">' '</span><span class="p">)</span>
-</pre></div>
+param_file <span class="pl-k">=</span> <span class="pl-s1"><span class="pl-pds">'</span>../../SALib/test_functions/params/Ishigami.txt<span class="pl-pds">'</span></span>
+param_values <span class="pl-k">=</span> saltelli.sample(<span class="pl-c1">1000</span>, param_file, <span class="pl-vpf">calc_second_order</span> <span class="pl-k">=</span> <span class="pl-c1">True</span>)
+np.savetxt(<span class="pl-s1"><span class="pl-pds">'</span>model_input.txt<span class="pl-pds">'</span></span>, param_values, <span class="pl-vpf">delimiter</span><span class="pl-k">=</span><span class="pl-s1"><span class="pl-pds">'</span> <span class="pl-pds">'</span></span>)</pre></div>
 
 <p>Either way, this will create a file of sampled input values in <code>model_input.txt</code>.</p>
 
 <h3>
-<a name="run-model" class="anchor" href="#run-model"><span class="octicon octicon-link"></span></a>Run model</h3>
+<a id="run-model" class="anchor" href="#run-model" aria-hidden="true"><span class="octicon octicon-link"></span></a>Run model</h3>
 
 <p>Here's an example of running a test function in Python, but this will usually be a user-defined model, maybe even in another language. Just save the outputs.</p>
 
-<div class="highlight highlight-python"><pre><span class="kn">from</span> <span class="nn">SALib.test_functions</span> <span class="kn">import</span> <span class="n">Ishigami</span>
-<span class="n">Y</span> <span class="o">=</span> <span class="n">Ishigami</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">param_values</span><span class="p">)</span>
-<span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="s">'model_output.txt'</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s">' '</span><span class="p">)</span>
-</pre></div>
+<div class="highlight highlight-python"><pre><span class="pl-k">from</span> SALib.test_functions <span class="pl-k">import</span> Ishigami
+Y <span class="pl-k">=</span> Ishigami.evaluate(param_values)
+np.savetxt(<span class="pl-s1"><span class="pl-pds">'</span>model_output.txt<span class="pl-pds">'</span></span>, Y, <span class="pl-vpf">delimiter</span><span class="pl-k">=</span><span class="pl-s1"><span class="pl-pds">'</span> <span class="pl-pds">'</span></span>)</pre></div>
 
 <h3>
-<a name="analyze-model-output" class="anchor" href="#analyze-model-output"><span class="octicon octicon-link"></span></a>Analyze model output</h3>
+<a id="analyze-model-output" class="anchor" href="#analyze-model-output" aria-hidden="true"><span class="octicon octicon-link"></span></a>Analyze model output</h3>
 
 <p>From the command line:</p>
 
@@ -114,17 +114,16 @@ P2 0.0 5.0
 
 <p>Or, from Python:</p>
 
-<div class="highlight highlight-python"><pre><span class="kn">from</span> <span class="nn">SALib.analyze</span> <span class="kn">import</span> <span class="n">sobol</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-<span class="n">Si</span> <span class="o">=</span> <span class="n">sobol</span><span class="o">.</span><span class="n">analyze</span><span class="p">(</span><span class="n">param_file</span><span class="p">,</span> <span class="s">'model_output.txt'</span><span class="p">,</span> <span class="n">column</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">print_to_console</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
-<span class="c"># Returns a dictionary with keys 'S1', 'S1_conf', 'ST', and 'ST_conf'</span>
-<span class="c"># e.g. Si['S1'] contains the first-order index for each parameter, in the same order as the parameter file</span>
-</pre></div>
+<div class="highlight highlight-python"><pre><span class="pl-k">from</span> SALib.analyze <span class="pl-k">import</span> sobol
+<span class="pl-k">import</span> numpy <span class="pl-k">as</span> np
+Si <span class="pl-k">=</span> sobol.analyze(param_file, <span class="pl-s1"><span class="pl-pds">'</span>model_output.txt<span class="pl-pds">'</span></span>, <span class="pl-vpf">column</span> <span class="pl-k">=</span> <span class="pl-c1">0</span>, <span class="pl-vpf">print_to_console</span><span class="pl-k">=</span><span class="pl-c1">False</span>)
+<span class="pl-c"># Returns a dictionary with keys 'S1', 'S1_conf', 'ST', and 'ST_conf'</span>
+<span class="pl-c"># e.g. Si['S1'] contains the first-order index for each parameter, in the same order as the parameter file</span></pre></div>
 
 <p>Check out the <a href="https://github.com/jdherman/SALib/tree/master/examples">examples</a> for a full description of command line and keyword options for all of the methods.</p>
 
 <h3>
-<a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>License</h3>
+<a id="license" class="anchor" href="#license" aria-hidden="true"><span class="octicon octicon-link"></span></a>License</h3>
 
 <p>Copyright (C) 2013-2014 Jon Herman and others. Licensed under the GNU Lesser General Public License.</p>
 
