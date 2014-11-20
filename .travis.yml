@@ -25,7 +25,7 @@ install:
   - python setup.py install
   - pip install coveralls
 script:
-  - coverage run --source=SALib —-omit=test_* setup.py test
+  - coverage run --source=SALib setup.py test
 after_success:
   - coveralls
 notifications:
