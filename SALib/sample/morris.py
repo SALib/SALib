@@ -38,20 +38,17 @@ class Morris(Sample):
         self.num_vars = pf['num_vars']
         self.bounds = pf['bounds']
         self.group = group
-
         self.optimal_trajectories = optimal_trajectories
-
-        self.debug()
 
         if self.optimal_trajectories != None:
             # Check to ensure that fewer optimal trajectories than samples are
             # requested, otherwise ignore
             if self.optimal_trajectories >= self.samples:
-                raise ValueError("The number of optimal trajectories \
-                                  should be less than the number of samples.")
+                raise ValueError("The number of optimal trajectories should be less than the number of samples.")
             elif self.optimal_trajectories > 4:
-                raise ValueError("Running optimal trajectories greater than  \
-                                  values of 4 can take a long time.")
+                raise ValueError("Running optimal trajectories greater than values of 4 can take a long time.")
+            elif self.optimal_trajectories <= 1:
+                raise ValueError("The number of optimal trajectories must be set to 2 or more.")
 
         if self.group is None:
 
@@ -63,16 +60,28 @@ class Morris(Sample):
 
 
     def create_sample(self):
-        self.output_sample = morris_oat.sample(self.samples,
+
+        if self.optimal_trajectories is None:
+
+            optimal_sample = morris_oat.sample(self.samples,
                                                self.parameter_file,
                                                self.num_levels,
                                                self.grid_jump)
-        if self.optimal_trajectories is not None:
-            self.output_sample = \
-                morris_optimal.find_optimum_trajectories(self.output_sample,
+
+        else:
+
+            sample = morris_oat.sample(self.samples,
+                                       self.parameter_file,
+                                       self.num_levels,
+                                       self.grid_jump)
+            optimal_sample = \
+                morris_optimal.find_optimum_trajectories(sample,
                                                          self.samples,
                                                          self.num_vars,
                                                          self.optimal_trajectories)
+
+        scale_samples(optimal_sample, self.bounds)
+        self.output_sample = optimal_sample
 
 
     def create_sample_with_groups(self):
@@ -103,12 +112,12 @@ class Morris(Sample):
 if __name__ == "__main__":
 
     parser = common_args.create()
-    parser.add_argument('--num-levels', type=int, required=False,
+    parser.add_argument('-l','--levels', type=int, required=False,
                         default=4, help='Number of grid levels (Morris only)')
     parser.add_argument('--grid-jump', type=int, required=False,
                         default=2, help='Grid jump size (Morris only)')
-    parser.add_argument('--opt', type=int, required=False,
-                        default=4, help='Number of optimal trajectories (Morris only)')
+    parser.add_argument('-k','--k-optimal', type=int, required=False,
+                        default=None, help='Number of optimal trajectories (Morris only)')
     parser.add_argument('--group', type=str, required=False, default=None,
                        help='File path to grouping file (Morris only)')
     args = parser.parse_args()
@@ -116,9 +125,7 @@ if __name__ == "__main__":
     np.random.seed(args.seed)
     rd.seed(args.seed)
 
-    sample = Morris(args.paramfile, args.samples, args.num_levels, \
-                    args.grid_jump, args.group, args.opt)
-    sample.debug()
-    #sample.create_sample()
+    sample = Morris(args.paramfile, args.samples, args.levels, \
+                    args.grid_jump, args.group, args.k_optimal)
 
-    #sample.save_data(args.output, delimiter=args.delimiter, precision=args.precision)
+    sample.save_data(args.output, delimiter=args.delimiter, precision=args.precision)
