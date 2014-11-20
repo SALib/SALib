@@ -7,8 +7,9 @@ from . import common_args
 
 def generate_trajectory(G, num_levels, grid_jump):
     '''
-    Returns a single trajectory of size (g+1)-by-g
-    where g is the number of groups, implied by the dimensions of G
+    Returns a single trajectory of size (g+1)-by-k
+    where g is the number of groups,
+    and k is the number of factors, both implied by the dimensions of G
 
     Arguments:
       G            a k-by-g matrix which notes factor membership of groups
@@ -35,7 +36,7 @@ def generate_trajectory(G, num_levels, grid_jump):
 
     x_star = np.asmatrix(generate_x_star(k, num_levels, grid_jump))
 
-    # Matrix B* - size (g + 1) * g
+    # Matrix B* - size (g + 1) * k
     B_star = compute_B_star(J, x_star, delta, B, G, P_star, D_star)
 
     return B_star
@@ -56,9 +57,8 @@ def sample(N, G, param_file, num_levels, grid_jump):
     k = G.shape[0]
     g = G.shape[1]
     sample = np.empty((N*(g + 1), k))
-    sample = np.array([generate_trajectory(G, num_levels, grid_jump) for n in range(N)]).reshape((N*(g + 1), k))
-
-    return sample
+    sample = np.array([generate_trajectory(G, num_levels, grid_jump) for n in range(N)])
+    return sample.reshape((N*(g + 1), k))
 
 
 def compute_B_star(J, x_star, delta, B, G, P_star, D_star):
