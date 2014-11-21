@@ -111,9 +111,18 @@ def optimised_trajectories(input_sample,
     return output
 
 
-def timestamp():
-    return dt.strftime(dt.now(),"%d%m%y%H%M%S")
-
+def timestamp(num_params,p_levels,grid_step,k_choices,N):
+    """
+    Returns a uniform timestamp with parameter values for file identification
+    """
+    string = "_v%s_l%s_gs%s_k%s_N%s_%s.txt" % (num_params, 
+                                                p_levels,
+                                                grid_step, 
+                                                k_choices,
+                                                N, 
+                                                dt.strftime(dt.now(),"%d%m%y%H%M%S"))
+    return string
+    
 
 if __name__ == "__main__":
 
