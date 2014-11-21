@@ -50,6 +50,6 @@ def read_group_file(filename):
                 num_groups += 1
                 groups.append(int(column))
         groups = np.array(groups).reshape(num_vars, num_groups)
-        print num_vars, num_groups
+
     return {'names': names, 'groups': np.asmatrix(groups), \
             'num_vars': num_vars, 'num_groups': num_groups}
