@@ -5,7 +5,7 @@ from ..sample.morris_optimal import find_optimum_combination, \
 from ..util import read_param_file
 from nose.tools import raises, with_setup
 from numpy.testing import assert_equal
-from .test_morris_optimal import setup_function
+from .test_util import setup_function
 from ..sample.morris import Morris
 
 def test_optimal_combinations():
