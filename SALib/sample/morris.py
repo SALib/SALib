@@ -132,14 +132,14 @@ class Morris(Sample):
 
 
     def debug(self):
-        print "Parameter File: %s" % self.parameter_file
-        print "Number of samples: %s" % self.samples
-        print "Number of levels: %s" % self.num_levels
-        print "Grid step: %s" % self.grid_jump
-        print "Number of variables: %s" % self.num_vars
-        print "Parameter bounds: %s" % self.bounds
-        print "Group: %s" % self.group
-        print "Number of req trajectories: %s" % self.optimal_trajectories
+        print("Parameter File: %s" % self.parameter_file)
+        print("Number of samples: %s" % self.samples)
+        print("Number of levels: %s" % self.num_levels)
+        print("Grid step: %s" % self.grid_jump)
+        print("Number of variables: %s" % self.num_vars)
+        print("Parameter bounds: %s" % self.bounds)
+        print("Group: %s" % self.group)
+        print("Number of req trajectories: %s" % self.optimal_trajectories)
 
 
 if __name__ == "__main__":
