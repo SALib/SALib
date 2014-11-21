@@ -3,7 +3,7 @@ import numpy as np
 import random as rd
 from . import common_args
 from ..sample import morris_oat, morris_groups, morris_optimal
-from ..util import read_param_file, scale_samples
+from ..util import read_param_file, scale_samples, read_group_file
 
 
 class Sample(object):
@@ -17,6 +17,7 @@ class Sample(object):
         pf = read_param_file(self.parameter_file)
         self.num_vars = pf['num_vars']
         self.bounds = pf['bounds']
+        self.parameter_names = pf['names']
         self.samples = samples
         self.output_sample = None
 
@@ -28,6 +29,9 @@ class Sample(object):
                    delimiter=delimiter,
                    fmt='%.' + str(precision) + 'e'
                    )
+
+    def parameter_names(self):
+        return self.names
 
 
 class Morris(Sample):
@@ -64,7 +68,9 @@ class Morris(Sample):
         pf = read_param_file(self.parameter_file)
         self.num_vars = pf['num_vars']
         self.bounds = pf['bounds']
-        self.group = group
+        self.parameter_names = pf['names']
+        gf = read_group_file(group)
+        self.groups = gf['groups']
         self.optimal_trajectories = optimal_trajectories
 
         if self.optimal_trajectories != None:
@@ -77,7 +83,7 @@ class Morris(Sample):
             elif self.optimal_trajectories <= 1:
                 raise ValueError("The number of optimal trajectories must be set to 2 or more.")
 
-        if self.group is None:
+        if self.groups is None:
 
             self.create_sample()
 
@@ -113,7 +119,7 @@ class Morris(Sample):
 
     def create_sample_with_groups(self):
         self.output_sample = morris_groups.sample(self.samples,
-                                                  self.group,
+                                                  self.groups,
                                                   self.num_levels,
                                                   self.grid_jump)
         if self.optimal_trajectories is not None:
