@@ -1,5 +1,5 @@
 from __future__ import division
-from numpy.testing import assert_equal
+from numpy.testing import assert_equal, assert_allclose
 from nose.tools import raises, with_setup
 from ..util import read_param_file, scale_samples, read_group_file
 import os
@@ -81,9 +81,6 @@ def test_tab_readfile_with_whitespace():
     assert_equal(pf['names'], ['Test 1', 'Test 2'])
 
 
-def test_scale_samples():
-    pass
-
 @with_setup(setup_group_file)
 def test_read_groupfile():
     '''
@@ -95,3 +92,38 @@ def test_read_groupfile():
 
     assert_equal(gf['names'], ["Test 1", "Test 2", "Test 3"])
     assert_equal(gf['groups'], np.matrix('1,0;0,1;0,1'))
+
+
+# Test scale samples
+def test_scale_samples():
+    '''
+    Simple test to ensure that samples are correctly scaled
+    '''
+
+    params = np.arange(0,1.1,0.1).repeat(2).reshape((11,2))
+
+    bounds = [[10,20],[-10,10]]
+
+    desired = np.array([np.arange(10,21,1), np.arange(-10,12,2)],dtype=np.float).T
+    scale_samples(params, bounds)
+    assert_allclose(params, desired, atol=1e-03, rtol=1e-03)
+
+
+@raises(ValueError)
+def test_scale_samples_upper_lt_lower():
+    '''
+    Raise ValueError if upper bound lower than lower bound
+    '''
+    params = np.array([[0, 0],[0.1,0.1],[0.2,0.2]])
+    bounds = [[10,9],[-10,10]]
+    scale_samples(params, bounds)
+
+
+@raises(ValueError)
+def test_scale_samples_upper_eq_lower():
+    '''
+    Raise ValueError if upper bound lower equal to lower bound
+    '''
+    params = np.array([[0, 0],[0.1,0.1],[0.2,0.2]])
+    bounds = [[10,10],[-10,10]]
+    scale_samples(params, bounds)
