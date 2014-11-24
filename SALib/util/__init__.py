@@ -4,8 +4,31 @@ import numpy as np
 
 # Rescale samples from [0, 1] to [lower, upper]
 def scale_samples(params, bounds):
-    for i, b in enumerate(bounds):
-        params[:, i] = params[:, i] * (b[1] - b[0]) + b[0]
+    '''
+    Rescales samples in 0-to-1 range to arbitrary bounds.
+
+    Arguments:
+        bounds - list of lists of dimensions num_params-by-2
+        params - numpy array of dimensions num_params-by-N, where N is the number
+        of samples
+    '''
+    # Check bounds are legal (upper bound is greater than lower bound)
+    b = np.array(bounds)
+    lower_bounds = b[:,0]
+    upper_bounds = b[:,1]
+
+    if np.any(lower_bounds >= upper_bounds):
+        raise ValueError("Bounds are not legal")
+
+    # This scales the samples in-place, by using the optional output
+    # argument for the numpy ufunctions
+    # The calculation is equivalent to:
+    #   sample * (upper_bound - lower_bound) + lower_bound
+    np.add(np.multiply(params,
+                      (upper_bounds - lower_bounds),
+                      out=params), \
+           lower_bounds,
+           out=params)
 
 
 def read_param_file(filename):
