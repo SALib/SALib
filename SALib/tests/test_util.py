@@ -1,6 +1,6 @@
 from __future__ import division
 from numpy.testing import assert_equal, assert_allclose
-from nose.tools import raises, with_setup
+from nose.tools import raises, with_setup, eq_
 from ..util import read_param_file, scale_samples, read_group_file
 import os
 import numpy as np
@@ -28,15 +28,16 @@ def setup_tab_param_file_with_whitespace_in_names():
 
 
 def setup_group_file():
-    filename = "SALib/tests/test_group_file.txt"
+    filename = "SALib/tests/test_group_file.csv"
     with open(filename, "w") as ofile:
-         ofile.write("Group 1,Test 1\n")
-         ofile.write("Group 2,Test 2, Test 3\n")
+         ofile.write("'Group 1','Test 1'\n")
+         ofile.write("'Group 2','Test 2','Test 3'\n")
 
 
 def teardown():
     [os.remove("SALib/tests/%s" % f) for f in os.listdir("SALib/tests/") if f.endswith(".txt")]
-
+    [os.remove("SALib/tests/%s" % f) for f in os.listdir("SALib/tests/") if f.endswith(".csv")]
+    [os.remove("SALib/tests/%s" % f) for f in os.listdir("SALib/tests/") if f.endswith(".tab")]
 
 @with_setup(setup_function, teardown)
 def test_readfile():
@@ -85,13 +86,15 @@ def test_read_groupfile():
     '''
     Tests that a group file is read correctly
     '''
-    group_file = "SALib/tests/test_group_file.txt"
+    group_file = "SALib/tests/test_group_file.csv"
 
     gf = read_group_file(group_file)
 
-    assert_equal(gf['names'], ["Test 1", "Test 2", "Test 3"])
-    assert_equal(gf['groups'], np.matrix('1,0;0,1;0,1'))
+    desired = [['Group 1', ['Test 1']],['Group 2', ['Test 2', 'Test 3']]]
+    actual = gf['groups']
+    print actual
 
+    eq_(actual, desired)
 
 # Test scale samples
 def test_scale_samples():

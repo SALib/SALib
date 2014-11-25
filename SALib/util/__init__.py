@@ -56,23 +56,13 @@ def read_group_file(filename):
         a list of names of the variables
         a numpy matrix of factor group membership
     '''
-    names = []
-    groups = []
-    num_vars = 0
+    output = []
     num_groups = 0
 
     with open(filename) as csvfile:
-        dialect = csv.Sniffer().sniff(csvfile.read(1024))
+        dialect = csv.Sniffer().sniff(csvfile.read(8192))
         csvfile.seek(0)
         reader = csv.reader(csvfile, dialect)
         for row in reader:
-            num_vars += 1
-            names.append(row[0])
-            num_groups = 0
-            for column in row[1:]:
-                num_groups += 1
-                groups.append(int(column))
-        groups = np.array(groups).reshape(num_vars, num_groups)
-
-    return {'names': names, 'groups': np.asmatrix(groups), \
-            'num_vars': num_vars, 'num_groups': num_groups}
+          output.append([row[0], row[1:]])
+    return {'groups': output}
