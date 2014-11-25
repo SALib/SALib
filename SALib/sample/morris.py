@@ -22,7 +22,7 @@ class Sample(object):
         self.output_sample = None
 
 
-    def save_data(self, output, delimiter, precision):
+    def save_data(self, output, delimiter=' ', precision=8):
         '''
         Saves the data to a file for input into a model
         '''
@@ -48,7 +48,10 @@ class Sample(object):
         Returns the scaled (according to the bounds from the parameter file)
         data as a numpy array
         '''
-        return scale_samples(self.output_sample, self.bounds)
+        scaled_samples = self.output_sample.copy()
+        scale_samples(scaled_samples, self.bounds)
+        return scaled_samples
+
 
     def parameter_names(self):
         return self.names
@@ -89,8 +92,11 @@ class Morris(Sample):
         self.num_vars = pf['num_vars']
         self.bounds = pf['bounds']
         self.parameter_names = pf['names']
-        gf = read_group_file(group)
-        self.groups = gf['groups']
+        if not group == None:
+          gf = read_group_file(group)
+          self.groups = gf['groups']
+        else:
+          self.groups = None
         self.optimal_trajectories = optimal_trajectories
 
         if self.optimal_trajectories != None:
@@ -110,7 +116,6 @@ class Morris(Sample):
         else:
 
             self.create_sample_with_groups()
-
 
 
 
@@ -150,6 +155,7 @@ class Morris(Sample):
                                                          self.num_vars,
                                                          self.optimal_trajectories)
         scale_samples(self.output_sample, self.bounds)
+
 
 
     def debug(self):
