@@ -70,7 +70,7 @@ class Morris(Sample):
 
     def flatten(self, l):
         for el in l:
-            if isinstance(el, Iterable) and not isinstance(el, basestring):
+            if isinstance(el, Iterable) and not isinstance(el, str):
                 for sub in self.flatten(el):
                     yield sub
             else:
