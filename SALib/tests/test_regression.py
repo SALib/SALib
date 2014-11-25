@@ -1,7 +1,7 @@
 from __future__ import division
 from numpy.testing import assert_equal, assert_allclose
 from nose.tools import raises, with_setup
-from .test_util import setup_group_file
+from .test_util import setup_group_file, teardown
 import numpy as np
 import sys
 
@@ -10,6 +10,7 @@ from ..analyze import morris
 from ..test_functions import Ishigami
 
 
+@with_setup(setup_group_file, teardown)
 def test_regression_morris_vanilla():
 
     param_file = 'SALib/test_functions/params/Ishigami.txt'
@@ -25,6 +26,7 @@ def test_regression_morris_vanilla():
     assert_allclose(Si['mu_star'], [8.1, 2.2, 5.4], atol=0, rtol=1e-1)
 
 
+@with_setup(setup_group_file, teardown)
 def test_regression_morris_groups():
 
     param_file = 'SALib/test_functions/params/Ishigami.txt'
@@ -41,6 +43,7 @@ def test_regression_morris_groups():
     assert_allclose(Si['mu_star'], [8.1, 2.2, 5.4], rtol=1e-1)
 
 
+@with_setup(setup_group_file, teardown)
 def test_regression_morris_optimal():
 
     param_file = 'SALib/test_functions/params/Ishigami.txt'
