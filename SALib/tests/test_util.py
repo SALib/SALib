@@ -92,7 +92,6 @@ def test_read_groupfile():
 
     desired = [['Group 1', ['Test 1']],['Group 2', ['Test 2', 'Test 3']]]
     actual = gf['groups']
-    print actual
 
     eq_(actual, desired)
 
