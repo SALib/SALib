@@ -1,0 +1,56 @@
+from __future__ import division
+from numpy.testing import assert_equal, assert_allclose
+from nose.tools import raises, with_setup
+from .test_util import setup_group_file
+import numpy as np
+import sys
+
+from ..sample.morris import Morris
+from ..analyze import morris
+from ..test_functions import Ishigami
+
+
+def test_regression_morris_vanilla():
+
+    param_file = 'SALib/test_functions/params/Ishigami.txt'
+    param_values = Morris(param_file, samples=1000, num_levels=10, grid_jump=5, \
+                          group_file=None, \
+                          optimal_trajectories=None)
+    param_values.save_data('model_input.txt')
+    online_model_values = param_values.get_input_sample_scaled()
+    Y = Ishigami.evaluate(online_model_values)
+    np.savetxt("model_output.txt", Y, delimiter=' ')
+    Si = morris.analyze(param_file, 'model_input.txt', 'model_output.txt',
+                        column=0, conf_level=0.95, print_to_console=False)
+    assert_allclose(Si['mu_star'], [8.1, 2.2, 5.4], atol=0, rtol=1e-1)
+
+
+def test_regression_morris_groups():
+
+    param_file = 'SALib/test_functions/params/Ishigami.txt'
+    group_file = 'SALib/test_functions/groups/Ishigami.txt'
+    param_values = Morris(param_file, samples=1000, num_levels=10, grid_jump=5, \
+                          group_file=group_file, \
+                          optimal_trajectories=None)
+    param_values.save_data('model_input_groups.txt')
+    online_model_values = param_values.get_input_sample_scaled()
+    Y = Ishigami.evaluate(online_model_values)
+    np.savetxt("model_output_groups.txt", Y, delimiter=' ')
+    Si = morris.analyze(param_file, 'model_input_groups.txt', 'model_output_groups.txt',
+                        column=0, conf_level=0.95, print_to_console=False)
+    assert_allclose(Si['mu_star'], [8.1, 2.2, 5.4], rtol=1e-1)
+
+
+def test_regression_morris_optimal():
+
+    param_file = 'SALib/test_functions/params/Ishigami.txt'
+    param_values = Morris(param_file, samples=50, num_levels=4, grid_jump=2, \
+                          group_file=None, \
+                          optimal_trajectories=9)
+    param_values.save_data('model_input_groups.txt')
+    online_model_values = param_values.get_input_sample_scaled()
+    Y = Ishigami.evaluate(online_model_values)
+    np.savetxt("model_output_groups.txt", Y, delimiter=' ')
+    Si = morris.analyze(param_file, 'model_input_groups.txt', 'model_output_groups.txt',
+                        column=0, conf_level=0.95, print_to_console=False)
+    assert_allclose(Si['mu_star'], [8.1, 2.2, 5.4], rtol=1)
