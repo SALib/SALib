@@ -92,7 +92,7 @@ class Morris(Sample):
         self.num_vars = pf['num_vars']
         self.bounds = pf['bounds']
         self.parameter_names = pf['names']
-        if not group == None:
+        if group:
           gf = read_group_file(group)
           self.groups = gf['groups']
         else:
@@ -165,8 +165,10 @@ class Morris(Sample):
         print("Grid step: %s" % self.grid_jump)
         print("Number of variables: %s" % self.num_vars)
         print("Parameter bounds: %s" % self.bounds)
-        print("Group: %s" % self.group)
-        print("Number of req trajectories: %s" % self.optimal_trajectories)
+        if self.groups:
+          print("Group: %s" % self.groups)
+        if self.optimal_trajectories:
+          print("Number of req trajectories: %s" % self.optimal_trajectories)
 
 
 if __name__ == "__main__":
