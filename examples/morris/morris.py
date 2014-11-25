@@ -11,13 +11,11 @@ param_file = '../../SALib/test_functions/params/Ishigami.txt'
 
 # Generate samples
 param_values = Morris(param_file, samples=1000, num_levels=10, grid_jump=5, \
-                      group=None, \
+                      group_file=None, \
                       optimal_trajectories=None)
 
 # Save the parameter values in a file (they are needed in the analysis)
 param_values.save_data('model_input.txt')
-
-param_values.debug()
 
 # Run the "model" and save the output in a text file
 # This will happen offline for external models
@@ -33,4 +31,4 @@ Si = morris.analyze(param_file, 'model_input.txt', 'model_output.txt',
 # Returns a dictionary with keys 'mu', 'mu_star', 'sigma', and 'mu_star_conf'
 # e.g. Si['mu_star'] contains the mu* value for each parameter, in the
 # same order as the parameter file
-print(Si)
+print(Si['mu_star'])
