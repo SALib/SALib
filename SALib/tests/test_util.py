@@ -30,9 +30,8 @@ def setup_tab_param_file_with_whitespace_in_names():
 def setup_group_file():
     filename = "SALib/tests/test_group_file.txt"
     with open(filename, "w") as ofile:
-         ofile.write("Test 1,1,0\n")
-         ofile.write("Test 2,0,1\n")
-         ofile.write("Test 3,0,1\n")
+         ofile.write("Group 1,Test 1\n")
+         ofile.write("Group 2,Test 2, Test 3\n")
 
 
 def teardown():
