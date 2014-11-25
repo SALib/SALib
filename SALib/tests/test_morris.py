@@ -81,3 +81,30 @@ def test_get_input_sample_scaled_works():
 
     actual_unscaled = sample.get_input_sample_unscaled()
     assert_allclose(actual_unscaled, desired_unscaled)
+
+
+@with_setup(setup)
+def test_debug():
+    '''
+    Tests that the debug method of the Morris class does not fail
+    when group and optimal_trajectories are equal to None.
+    '''
+    parameter_file = "SALib/tests/test_param_file.txt"
+
+    samples = 10
+    num_levels = 4
+    grid_jump = 2
+
+    sample = Morris(parameter_file, samples, num_levels, grid_jump, \
+                    group=None, optimal_trajectories=None)
+
+    desired = \
+    '''Parameter File: SALib/tests/test_param_file.txt\n
+    Number of samples: 10\n
+    Number of levels: 4\n
+    Grid step: 2\n
+    Number of variables: 3\n
+    Parameter bounds: [[0.0, 1.0], [0.0, 1.0], [0.0, 1.0]]'''
+
+    #assert_equal(sample.debug(), desired)
+    sample.debug()
