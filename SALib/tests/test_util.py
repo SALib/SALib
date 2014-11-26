@@ -27,6 +27,14 @@ def setup_tab_param_file_with_whitespace_in_names():
          ofile.write("Test 2\t5.0\t51.0\n")
 
 
+def setup_csv_param_file_with_whitespace_in_names_comments():
+    filename = "SALib/tests/test_params_csv_whitespace_comments.txt"
+    with open(filename, "w") as ofile:
+         ofile.write("# Here is a comment\n")
+         ofile.write("'Test 1',0.0,100.0\n")
+         ofile.write("'Test 2',5.0,51.0\n")
+
+
 def setup_group_file():
     filename = "SALib/tests/test_group_file.csv"
     with open(filename, "w") as ofile:
@@ -81,6 +89,22 @@ def test_tab_readfile_with_whitespace():
     assert_equal(pf['names'], ['Test 1', 'Test 2'])
 
 
+@with_setup(setup_csv_param_file_with_whitespace_in_names_comments, teardown)
+def test_csv_readfile_with_comments():
+    '''
+    '''
+
+    filename = "SALib/tests/test_params_csv_whitespace_comments.txt"
+
+    pf = read_param_file(filename)
+
+    print(pf['bounds'], pf['num_vars'], pf['names'])
+
+    assert_equal(pf['bounds'], [[0, 100], [5, 51]])
+    assert_equal(pf['num_vars'], 2)
+    assert_equal(pf['names'], ['Test 1', 'Test 2'])
+
+
 @with_setup(setup_group_file)
 def test_read_groupfile():
     '''
@@ -94,6 +118,7 @@ def test_read_groupfile():
     actual = gf['groups']
 
     eq_(actual, desired)
+
 
 # Test scale samples
 def test_scale_samples():

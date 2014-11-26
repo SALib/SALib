@@ -39,13 +39,16 @@ def read_param_file(filename):
     num_vars = 0
 
     with open(filename) as csvfile:
-        dialect = csv.Sniffer().sniff(csvfile.read(1024))
+        dialect = csv.Sniffer().sniff(csvfile.read(16384))
         csvfile.seek(0)
         reader = csv.reader(csvfile, dialect)
         for row in reader:
-            num_vars += 1
-            names.append(row[0])
-            bounds.append([float(row[1]), float(row[2])])
+            if row[0].strip().startswith('#'):
+                pass
+            else:
+                num_vars += 1
+                names.append(row[0])
+                bounds.append([float(row[1]), float(row[2])])
 
     return {'names': names, 'bounds': bounds, 'num_vars': num_vars}
 
@@ -59,9 +62,13 @@ def read_group_file(filename):
     output = []
 
     with open(filename) as csvfile:
-        dialect = csv.Sniffer().sniff(csvfile.read(8192))
+        dialect = csv.Sniffer().sniff(csvfile.read(16384))
         csvfile.seek(0)
         reader = csv.reader(csvfile, dialect)
         for row in reader:
-          output.append([row[0], row[1:]])
+          if row[0].strip().startswith('#'):
+              pass
+          else:
+              output.append([row[0], row[1:]])
     return {'groups': output}
+
