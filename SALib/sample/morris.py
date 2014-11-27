@@ -3,8 +3,9 @@ import numpy as np
 import random as rd
 from . import common_args
 from . sample import Sample
-from ..sample import morris_oat, morris_groups, morris_optimal
-from ..util import read_param_file, scale_samples, read_group_file
+from ..sample import morris_oat, morris_groups, morris_optimal, optimal_trajectories
+from ..util import read_param_file, read_group_file
+from collections import Iterable
 
 
 class Morris(Sample):
@@ -48,7 +49,7 @@ class Morris(Sample):
           self.groups = None
         self.optimal_trajectories = optimal_trajectories
 
-        if self.optimal_trajectories != None:
+        if self.optimal_trajectories is not None:
             # Check to ensure that fewer optimal trajectories than samples are
             # requested, otherwise ignore
             if self.optimal_trajectories >= self.samples:
@@ -67,7 +68,6 @@ class Morris(Sample):
             self.create_sample_with_groups()
 
 
-<<<<<<< HEAD
     def flatten(self, l):
         for el in l:
             if isinstance(el, Iterable) and not isinstance(el, str):
@@ -107,32 +107,35 @@ class Morris(Sample):
 
         # ... and compile the numpy matrix
         return np.matrix(output)
-=======
->>>>>>> Added raw data methods to the Sample class.
 
 
     def create_sample(self):
 
         if self.optimal_trajectories is None:
-
+    
             optimal_sample = morris_oat.sample(self.samples,
                                                self.parameter_file,
                                                self.num_levels,
                                                self.grid_jump)
 
-        else:
+        elif self.optimal_trajectories is not None:
 
             sample = morris_oat.sample(self.samples,
                                        self.parameter_file,
                                        self.num_levels,
                                        self.grid_jump)
             optimal_sample = \
-                morris_optimal.find_optimum_trajectories(sample,
+                optimal_trajectories.optimised_trajectories(sample,
                                                          self.samples,
-                                                         self.num_vars,
+                                                         self.parameter_file,
+                                                         self.num_levels,
+                                                         self.grid_jump,
                                                          self.optimal_trajectories)
+        else:
+            raise RuntimeError("Failed")
 
         self.output_sample = optimal_sample
+        
 
 
     def create_sample_with_groups(self):
@@ -143,9 +146,11 @@ class Morris(Sample):
                                                   self.grid_jump)
         if self.optimal_trajectories is not None:
             self.output_sample = \
-                morris_optimal.find_optimum_trajectories(self.output_sample,
+                optimal_trajectories.optimised_trajectories(sample,
                                                          self.samples,
-                                                         self.num_vars,
+                                                         self.parameter_file,
+                                                         self.num_levels,
+                                                         self.grid_jump,
                                                          self.optimal_trajectories)
 
 
