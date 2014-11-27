@@ -1,6 +1,6 @@
 ##Sensitivity Analysis Library (SALib)
 
-Python implementations of commonly used sensitivity analysis methods. Useful in systems modeling to calculate the effects of model inputs or exogenous factors on outputs of interest. 
+Python implementations of commonly used sensitivity analysis methods. Useful in systems modeling to calculate the effects of model inputs or exogenous factors on outputs of interest.
 
 **Requirements:** [NumPy](http://www.numpy.org/), [SciPy](http://www.scipy.org/), [Scikit-learn](http://scikit-learn.org)
 
@@ -10,7 +10,7 @@ Python implementations of commonly used sensitivity analysis methods. Useful in 
 
 **Methods included:**
 * Sobol Sensitivity Analysis ([Sobol 2001](http://www.sciencedirect.com/science/article/pii/S0378475400002706), [Saltelli 2002](http://www.sciencedirect.com/science/article/pii/S0010465502002801), [Saltelli et al. 2010](http://www.sciencedirect.com/science/article/pii/S0010465509003087))
-* Method of Morris ([Morris 1991](http://www.tandfonline.com/doi/abs/10.1080/00401706.1991.10484804), [Campolongo et al. 2007](http://www.sciencedirect.com/science/article/pii/S1364815206002805))
+* Method of Morris, including groups and optimal trajectories ([Morris 1991](http://www.tandfonline.com/doi/abs/10.1080/00401706.1991.10484804), [Campolongo et al. 2007](http://www.sciencedirect.com/science/article/pii/S1364815206002805))
 * Fourier Amplitude Sensitivity Test (FAST) ([Cukier et al. 1973](http://scitation.aip.org/content/aip/journal/jcp/59/8/10.1063/1.1680571), [Saltelli et al. 1999](http://amstat.tandfonline.com/doi/abs/10.1080/00401706.1999.10485594))
 * Delta Moment-Independent Measure ([Borgonovo 2007](http://www.sciencedirect.com/science/article/pii/S0951832006000883), [Plischke et al. 2013](http://www.sciencedirect.com/science/article/pii/S0377221712008995))
 * Derivative-based Global Sensitivity Measure (DGSM) ([Sobol and Kucherenko 2009](http://www.sciencedirect.com/science/article/pii/S0378475409000354))
@@ -29,6 +29,18 @@ P2 0.0 5.0
 
 Lines beginning with `#` will be treated as comments and ignored.
 
+### Create a group file (if using Morris)
+
+Create a file describing the grouping of parameters in the model.
+Group files should be created with row equal to the number of groups desired.
+```
+Group 1,P1,P2,P3
+Group 2,P4,P5
+Group 3,P6
+...etc.
+```
+
+
 ### Generate samples
 
 From the command line:
@@ -39,7 +51,7 @@ python -m SALib.sample.saltelli \
      -o model_input.txt \
 ```
 
-Other methods include `SALib.sample.morris_oat` and `SALib.sample.fast_sampler`. For an explanation of all command line options, [see the examples here](https://github.com/jdherman/SALib/tree/master/examples). 
+Other methods include `SALib.sample.morris` and `SALib.sample.fast_sampler`. For an explanation of all command line options, [see the examples here](https://github.com/jdherman/SALib/tree/master/examples).
 
 Or, generate samples from Python:
 ```python
@@ -82,7 +94,7 @@ Si = sobol.analyze(param_file, 'model_output.txt', column = 0, print_to_console=
 # Returns a dictionary with keys 'S1', 'S1_conf', 'ST', and 'ST_conf'
 # e.g. Si['S1'] contains the first-order index for each parameter, in the same order as the parameter file
 ```
-	  
+
 Check out the [examples](https://github.com/jdherman/SALib/tree/master/examples) for a full description of command line and keyword options for all of the methods.
 
 
