@@ -25,6 +25,8 @@ def model(N, k_choices, distance_matrix):
     I = range(N)
     big_M = k_choices + 1
 
+    distance_matrix = distance_matrix / distance_matrix.max()
+
     dm=distance_matrix**2
 
     y,x = {},{}
@@ -66,6 +68,8 @@ def return_max_combo(input_data, N, param_file, p_levels, grid_step, k_choices, 
     m = model(N, k_choices, distance_matrix)
     #m.params.MIPFocus=1 # Focus on feasibility over optimality
     m.params.IntFeasTol=min(0.1,1./(k_choices+1))
+    m.params.Threads=20
+    m.params.NumericFocus=1
 
     #m.write("model.lp")
     m.ModelSense = GRB.MAXIMIZE
@@ -88,8 +92,7 @@ def optimised_trajectories(input_sample,
                            param_file,
                            p_levels,
                            grid_step,
-                           k_choices,
-                           param_delim=" "):
+                           k_choices):
     """
     """
     pf = read_param_file(param_file)
@@ -100,8 +103,7 @@ def optimised_trajectories(input_sample,
                                      param_file,
                                      p_levels,
                                      grid_step,
-                                     k_choices,
-                                     param_delim)
+                                     k_choices)
 
     output = compile_output(input_sample,
                             N,
