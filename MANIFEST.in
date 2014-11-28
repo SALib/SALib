@@ -4,3 +4,5 @@ include SALib/*.py
 include SALib/*/*.txt
 include examples/*.py
 include examples/*/*.sh
+include versioneer.py
+include SALib/_version.py
