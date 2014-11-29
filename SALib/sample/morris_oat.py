@@ -47,7 +47,7 @@ def sample(N, param_file, num_levels, grid_jump):
             (np.mat(B) * np.mat(P) * np.mat(DM) + 1) * \
             np.mat(delta_diag) + np.mat(x_base)
 
-    scale_samples(X, pf['bounds'])
+    #scale_samples(X, pf['bounds'])
     return X
 
 if __name__ == "__main__":
