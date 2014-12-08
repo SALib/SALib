@@ -124,6 +124,7 @@ def nth(iterable, n, default=None):
 
 
 def make_index_list(N, num_params):
+
     index_list = []
     for j in range(N):
         index_list.append(np.arange(num_params + 1) + j * (num_params + 1))
@@ -131,10 +132,20 @@ def make_index_list(N, num_params):
 
 
 def compile_output(input_sample, N, num_params, k_choices, maximum_combo):
+    
+    if np.any((input_sample < 0) | (input_sample > 1)):
+        raise ValueError("Input sample must be scaled between 0 and 1")
 
+    scores = find_most_distant(input_sample,
+                               N,
+                               num_params,
+                               k_choices)   
+    
     index_list = make_index_list(N, num_params)
 
     output = np.zeros((len(maximum_combo) * (num_params + 1), num_params))
+    maximum_combo = find_maximum(scores, N, k_choices)
+    output = np.zeros((np.size(maximum_combo) * (num_params + 1), num_params))
 
     for counter, x in enumerate(maximum_combo):
         output[index_list[counter]] = np.array(input_sample[index_list[x]])

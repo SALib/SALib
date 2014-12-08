@@ -71,4 +71,3 @@ def read_group_file(filename):
           else:
               output.append([row[0], row[1:]])
     return {'groups': output}
-

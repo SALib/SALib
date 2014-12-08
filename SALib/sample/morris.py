@@ -3,7 +3,7 @@ import numpy as np
 import random as rd
 from . import common_args
 from . sample import Sample
-from ..sample import morris_oat, morris_groups, morris_optimal, optimal_trajectories
+from ..sample import morris_oat, morris_groups, optimal_trajectories
 from ..util import read_param_file, read_group_file
 from collections import Iterable
 
@@ -112,7 +112,7 @@ class Morris(Sample):
     def create_sample(self):
 
         if self.optimal_trajectories is None:
-    
+
             optimal_sample = morris_oat.sample(self.samples,
                                                self.parameter_file,
                                                self.num_levels,
@@ -136,7 +136,6 @@ class Morris(Sample):
 
         self.output_sample = optimal_sample
         
-
 
     def create_sample_with_groups(self):
 

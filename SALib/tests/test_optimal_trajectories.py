@@ -7,9 +7,6 @@ from nose.tools import raises, with_setup
 from numpy.testing import assert_equal
 from .test_util import setup_function
 from ..sample.morris import Morris
-from ..util import read_param_file
-from numpy.testing import assert_equal
-
 
 @with_setup(setup_function())
 def test_optimal_combinations():
@@ -20,6 +17,7 @@ def test_optimal_combinations():
     """
     N = 6
     param_file = "SALib/tests/test_params.txt"
+    pf = read_param_file(param_file)
     num_params = pf['num_vars']
     p_levels = 4
     grid_step = p_levels / 2
