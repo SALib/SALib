@@ -108,7 +108,6 @@ def optimised_trajectories(input_sample,
     output = compile_output(input_sample,
                             N,
                             num_params,
-                            k_choices,
                             maximum_combo)
     return output
 

@@ -131,20 +131,12 @@ def make_index_list(N, num_params):
     return index_list
 
 
-def compile_output(input_sample, N, num_params, k_choices, maximum_combo):
+def compile_output(input_sample, N, num_params, maximum_combo):
     
     if np.any((input_sample < 0) | (input_sample > 1)):
         raise ValueError("Input sample must be scaled between 0 and 1")
-
-    scores = find_most_distant(input_sample,
-                               N,
-                               num_params,
-                               k_choices)   
     
     index_list = make_index_list(N, num_params)
-
-    output = np.zeros((len(maximum_combo) * (num_params + 1), num_params))
-    maximum_combo = find_maximum(scores, N, k_choices)
     output = np.zeros((np.size(maximum_combo) * (num_params + 1), num_params))
 
     for counter, x in enumerate(maximum_combo):
@@ -154,17 +146,15 @@ def compile_output(input_sample, N, num_params, k_choices, maximum_combo):
 
 def find_optimum_trajectories(input_sample, N, num_params, k_choices):
 
-
     if np.any((input_sample < 0) | (input_sample > 1)):
         raise ValueError("Input sample must be scaled between 0 and 1")
 
     maximum_combo = find_optimum_combination(input_sample, N, num_params, k_choices)
 
-    return compile_output(input_sample, N, num_params, k_choices, maximum_combo)
+    return compile_output(input_sample, N, num_params, maximum_combo)
 
 
 def find_optimum_combination(input_sample, N, num_params, k_choices):
-
 
     scores = find_most_distant(input_sample,
                                N,
