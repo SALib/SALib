@@ -69,7 +69,7 @@ def return_max_combo(input_data, N, param_file, p_levels, grid_step, k_choices, 
     #m.params.MIPFocus=1 # Focus on feasibility over optimality
     m.params.IntFeasTol=min(0.1,1./(k_choices+1))
     m.params.Threads=20
-    m.params.NumericFocus=1
+    m.params.MIPGap=0.03
 
     #m.write("model.lp")
     m.ModelSense = GRB.MAXIMIZE
