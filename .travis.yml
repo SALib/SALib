@@ -23,7 +23,7 @@ before_install:
   - chmod +x miniconda.sh
   - ./miniconda.sh -b
   - export PATH=/home/travis/anaconda/bin:$PATH
-  - conda update -q conda
+  - conda update --yes conda
 
 install:
   - conda create -n testenv --yes $DEPS numpy==NUMPY_VERSION pip python=$TRAVIS_PYTHON_VERSION
