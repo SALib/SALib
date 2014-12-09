@@ -8,11 +8,11 @@ python:
 - "3.4"
 
 env: 
- - DEPS = "numpy scipy scikit-learn"
- - DEPS = "numpy-1.6.0 scipy scikit-learn"
- - DEPS = "numpy-1.7.0 scipy scikit-learn"
- - DEPS = "numpy-1.8.0 scipy scikit-learn"
- - DEPS = "numpy-1.9.0 scipy scikit-learn"
+ - DEPS="numpy scipy scikit-learn"
+ - DEPS="numpy-1.6.0 scipy scikit-learn"
+ - DEPS="numpy-1.7.0 scipy scikit-learn"
+ - DEPS="numpy-1.8.0 scipy scikit-learn"
+ - DEPS="numpy-1.9.0 scipy scikit-learn"
 
 install:
  - sudo apt-get update
