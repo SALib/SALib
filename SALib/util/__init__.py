@@ -31,11 +31,12 @@ def scale_samples(params, bounds):
            out=params)
 
 
-def read_param_file(filename):
+def read_param_file(filename, groups=False):
 
 
     names = []
     bounds = []
+    group_list = []
     num_vars = 0
 
     with open(filename) as csvfile:
@@ -49,8 +50,13 @@ def read_param_file(filename):
                 num_vars += 1
                 names.append(row[0])
                 bounds.append([float(row[1]), float(row[2])])
+                if groups:
+                    if row[3] == '':
+                        group_list.append(row[0])
+                    else:
+                        group_list.append(row[3])
 
-    return {'names': names, 'bounds': bounds, 'num_vars': num_vars}
+    return {'names': names, 'bounds': bounds, 'num_vars': num_vars, 'groups': group_list}
 
 
 def read_group_file(filename):
