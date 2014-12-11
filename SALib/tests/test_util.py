@@ -11,6 +11,22 @@ def setup_function():
     with open(filename, "w") as ofile:
          ofile.write("Test1 0.0 100.0\n")
          ofile.write("Test2 5.0 51.0\n")
+         
+
+def setup_param_file_with_groups():
+    filename = "SALib/tests/test_params_with_groups.txt"
+    with open(filename, "w") as ofile:
+         ofile.write("Test1 0.0 1.0 group1\n")
+         ofile.write("Test2 5.0 51.0 group2\n")
+         ofile.write("Test3 0.1 1.0 group2\n")
+
+
+def setup_param_file_with_partial_groups_defined():
+    filename = "SALib/tests/test_params_with_partial_groups.txt"
+    with open(filename, "w") as ofile:
+         ofile.write("Test1,0.0,1.0,\n")
+         ofile.write("Test2,5.0,51.0,group2\n")
+         ofile.write("Test3,0.1,1.0,group2\n")
 
 
 def setup_csv_param_file_with_whitespace_in_names():
@@ -153,3 +169,43 @@ def test_scale_samples_upper_eq_lower():
     params = np.array([[0, 0],[0.1,0.1],[0.2,0.2]])
     bounds = [[10,10],[-10,10]]
     scale_samples(params, bounds)
+
+
+@with_setup(setup_param_file_with_groups)
+def test_param_file_groups():
+    '''
+    '''
+    filename = "SALib/tests/test_params_with_groups.txt"
+    pf = read_param_file(filename,groups=True)
+    
+    desired = ['group1','group2','group2']
+    actual = pf['groups']
+    eq_(actual, desired)
+    
+    desired = [[0.0, 1.0],[5.0,51.0],[0.1,1.0]]
+    actual = pf['bounds']
+    eq_(actual, desired)
+    
+    desired = ['Test1','Test2','Test3']
+    actual = pf['names']
+    eq_(actual, desired)
+    
+    
+@with_setup(setup_param_file_with_partial_groups_defined)
+def test_param_file_with_partial_groups():
+    '''
+    '''
+    filename = "SALib/tests/test_params_with_partial_groups.txt"
+    pf = read_param_file(filename,groups=True)
+    
+    desired = ['Test1','group2','group2']
+    actual = pf['groups']
+    eq_(actual, desired)
+    
+    desired = [[0.0, 1.0],[5.0,51.0],[0.1,1.0]]
+    actual = pf['bounds']
+    eq_(actual, desired)
+    
+    desired = ['Test1','Test2','Test3']
+    actual = pf['names']
+    eq_(actual, desired)  
