@@ -9,6 +9,7 @@ from ..util import read_param_file
 from scipy.misc import comb as nchoosek
 import re
 from datetime import datetime as dt
+from collections import OrderedDict
 
 '''
 Run using
@@ -56,20 +57,24 @@ def model(N, k_choices, distance_matrix):
     return m
 
 
-def return_max_combo(input_data, N, param_file, p_levels, grid_step, k_choices, param_delim=" "):
+def return_max_combo(input_data, N, param_file, p_levels, grid_step, k_choices, groups=None, param_delim=None):
 
-    pf = read_param_file(param_file)
+    pf = read_param_file(param_file,groups,param_delim)
     num_params = pf['num_vars']
-
+    
+    if groups is not None:
+       num_params = groups
+       
     distance_matrix = morris_optimal.compute_distance_matrix(input_data,
                                                              N,
-                                                             num_params)
+                                                             num_params,
+                                                             groups)
 
     m = model(N, k_choices, distance_matrix)
     #m.params.MIPFocus=1 # Focus on feasibility over optimality
     m.params.IntFeasTol=min(0.1,1./(k_choices+1))
     m.params.Threads=20
-    m.params.MIPGap=0.03
+    #m.params.MIPGap=0.03
 
     #m.write("model.lp")
     m.ModelSense = GRB.MAXIMIZE
@@ -92,23 +97,38 @@ def optimised_trajectories(input_sample,
                            param_file,
                            p_levels,
                            grid_step,
-                           k_choices):
+                           k_choices,
+                           group=False, 
+                           delimiter=None):
     """
     """
-    pf = read_param_file(param_file)
+    pf = read_param_file(param_file, group, delimiter)
     num_params = pf['num_vars']
+    
+    group_list = pf['groups']
+    unique_group_names = list(OrderedDict.fromkeys(group_list))
+    number_of_groups = len(unique_group_names)
+    
+    if number_of_groups > 0 & number_of_groups < num_params:
+        print("Changed number of parameters to number of groups")
+        groups = number_of_groups
+    else:
+        groups = None
 
     maximum_combo = return_max_combo(input_sample,
                                      N,
                                      param_file,
                                      p_levels,
                                      grid_step,
-                                     k_choices)
+                                     k_choices,
+                                     groups,
+                                     delimiter)
 
     output = compile_output(input_sample,
                             N,
                             num_params,
-                            maximum_combo)
+                            maximum_combo,
+                            groups=groups)
     return output
 
 
