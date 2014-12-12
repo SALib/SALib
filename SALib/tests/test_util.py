@@ -29,6 +29,14 @@ def setup_param_file_with_partial_groups_defined():
          ofile.write("Test3,0.1,1.0,group2\n")
 
 
+def setup_param_file_with_no_groups_defined():
+    filename = "SALib/tests/test_params_with_no_groups.txt"
+    with open(filename, "w") as ofile:
+         ofile.write("Test1,0.0,1.0\n")
+         ofile.write("Test2,5.0,51.0\n")
+         ofile.write("Test3,0.1,1.0\n")
+
+
 def setup_csv_param_file_with_whitespace_in_names():
     filename = "SALib/tests/test_params_csv_whitespace.txt"
     with open(filename, "w") as ofile:
@@ -121,7 +129,7 @@ def test_csv_readfile_with_comments():
     assert_equal(pf['names'], ['Test 1', 'Test 2'])
 
 
-@with_setup(setup_group_file)
+@with_setup(setup_group_file, teardown)
 def test_read_groupfile():
     '''
     Tests that a group file is read correctly
@@ -171,12 +179,12 @@ def test_scale_samples_upper_eq_lower():
     scale_samples(params, bounds)
 
 
-@with_setup(setup_param_file_with_groups)
+@with_setup(setup_param_file_with_groups, teardown)
 def test_param_file_groups():
     '''
     '''
     filename = "SALib/tests/test_params_with_groups.txt"
-    pf = read_param_file(filename,groups=True)
+    pf = read_param_file(filename, True)
     
     desired = ['group1','group2','group2']
     actual = pf['groups']
@@ -196,7 +204,7 @@ def test_param_file_with_partial_groups():
     '''
     '''
     filename = "SALib/tests/test_params_with_partial_groups.txt"
-    pf = read_param_file(filename,groups=True)
+    pf = read_param_file(filename, True)
     
     desired = ['Test1','group2','group2']
     actual = pf['groups']
@@ -209,3 +217,57 @@ def test_param_file_with_partial_groups():
     desired = ['Test1','Test2','Test3']
     actual = pf['names']
     eq_(actual, desired)  
+    
+
+@with_setup(setup_param_file_with_no_groups_defined, teardown)
+def test_param_file_with_no_groups():
+    '''
+    '''
+    filename = "SALib/tests/test_params_with_no_groups.txt"
+    pf = read_param_file(filename, True)
+    
+    desired = ['Test1','Test2','Test3']
+    actual = pf['groups']
+    eq_(actual, desired)
+    
+    desired = [[0.0, 1.0],[5.0,51.0],[0.1,1.0]]
+    actual = pf['bounds']
+    eq_(actual, desired)
+    
+    desired = ['Test1','Test2','Test3']
+    actual = pf['names']
+    eq_(actual, desired)
+ 
+ 
+def setup_complex_parameter_file_with_groups():
+    filename = "SALib/tests/test_params_complex.txt"
+    with open(filename, "w") as ofile:
+        ofile.write("u_ProductIndices_Simulated.Petrol.Resource Cost.Reference Case;0.86;1.86;Liquid Fuel Resource Cost\n")
+        ofile.write("u_ProductIndices_Simulated.Coal.Resource Cost.Reference Case;0.64;1.64;Coal Resource Cost\n")
+        ofile.write("u_ProductIndices_Simulated.Dry Waste.Resource Cost.Reference Case;0.5;1.5;Dry Waste Resource Cost\n")
+        ofile.write("u_ProductIndices_Simulated.Diesel.Resource Cost.Reference Case;0.87;1.87;Liquid Fuels Resource Cost\n")
+ 
+ 
+@with_setup(setup_complex_parameter_file_with_groups, teardown)
+def test_complex_param_file_with_groups():
+    filename = "SALib/tests/test_params_complex.txt"
+    pf = read_param_file(filename, True,delimiter=';')
+
+    desired = ['u_ProductIndices_Simulated.Petrol.Resource Cost.Reference Case',
+               'u_ProductIndices_Simulated.Coal.Resource Cost.Reference Case',
+               'u_ProductIndices_Simulated.Dry Waste.Resource Cost.Reference Case',
+               'u_ProductIndices_Simulated.Diesel.Resource Cost.Reference Case']
+    actual = pf['names']
+    assert_equal(actual, desired)
+    
+    desired = [[0.86, 1.86],[0.64,1.64],[0.5,1.5],[0.87,1.87]]
+    actual = pf['bounds']
+    assert_equal(actual, desired)
+    
+    desired = ['Liquid Fuel Resource Cost',
+               'Coal Resource Cost',
+               'Dry Waste Resource Cost',
+               'Liquid Fuels Resource Cost']
+    actual = pf['groups']
+    assert_equal(actual, desired)              
+          
