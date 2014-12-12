@@ -5,7 +5,7 @@ from . import common_args
 from . sample import Sample
 from ..sample import morris_oat, morris_groups, optimal_trajectories
 from ..util import read_param_file, read_group_file
-from collections import Iterable
+from collections import Iterable, OrderedDict
 
 
 class Morris(Sample):
@@ -39,14 +39,15 @@ class Morris(Sample):
         self.samples = samples
         self.num_levels = num_levels
         self.grid_jump = grid_jump
-        pf = read_param_file(self.parameter_file)
+        pf = read_param_file(self.parameter_file, True)
         self.num_vars = pf['num_vars']
         self.bounds = pf['bounds']
         self.parameter_names = pf['names']
-        if group_file:
-          self.groups = self.compute_groups(group_file)
-        else:
-          self.groups = None
+        groups_from_parameter_file = pf['groups']
+        if len(groups_from_parameter_file) > 0:
+            self.groups, self.group_names = self.compute_groups_from_parameter_file(groups_from_parameter_file)
+        if group_file is not None:
+            self.groups, self.group_names = self.compute_groups(group_file)
         self.optimal_trajectories = optimal_trajectories
 
         if self.optimal_trajectories is not None:
@@ -54,8 +55,8 @@ class Morris(Sample):
             # requested, otherwise ignore
             if self.optimal_trajectories >= self.samples:
                 raise ValueError("The number of optimal trajectories should be less than the number of samples.")
-            elif self.optimal_trajectories > 10:
-                raise ValueError("Running optimal trajectories greater than values of 10 will take a long time.")
+            #elif self.optimal_trajectories > 10:
+            #    raise ValueError("Running optimal trajectories greater than values of 10 will take a long time.")
             elif self.optimal_trajectories <= 1:
                 raise ValueError("The number of optimal trajectories must be set to 2 or more.")
 
@@ -97,7 +98,7 @@ class Morris(Sample):
         # Compute the index of each parameter name and store in a dictionary
         indices = dict([(x,i) for (i,x) in enumerate(actual_names)])
 
-        output = np.zeros((self.num_vars, len(group_names)))
+        output = np.zeros((self.num_vars, len(group_names)), dtype=np.int)
 
         # Get the data from the group file...
         for row, group in enumerate(param_names_from_gf):
@@ -106,9 +107,25 @@ class Morris(Sample):
                 output[column,row] = 1
 
         # ... and compile the numpy matrix
-        return np.matrix(output)
+        return np.matrix(output, dtype=np.int), group_names
 
-
+    
+    def compute_groups_from_parameter_file(self, group_list):
+        # Get a unique set of the group names
+        unique_group_names = list(OrderedDict.fromkeys(group_list))
+        number_of_groups = len(unique_group_names)
+    
+        indices = dict([(x,i) for (i,x) in enumerate(unique_group_names)])
+    
+        output = np.zeros((self.num_vars, number_of_groups), dtype=np.int)
+        
+        for parameter_row, group_membership in enumerate(group_list):
+            group_index = indices[group_membership]
+            output[parameter_row, group_index] = 1          
+        
+        return np.matrix(output), unique_group_names
+        
+    
     def create_sample(self):
 
         if self.optimal_trajectories is None:
@@ -138,19 +155,26 @@ class Morris(Sample):
         
 
     def create_sample_with_groups(self):
+        if self.optimal_trajectories is None:
+            self.output_sample = morris_groups.sample(self.samples,
+                                                    self.groups,
+                                                    self.num_levels,
+                                                    self.grid_jump)
+        elif self.optimal_trajectories is not None:
+            sample = morris_groups.sample(self.samples,
+                                          self.groups,
+                                          self.num_levels,
+                                          self.grid_jump)
 
-        self.output_sample = morris_groups.sample(self.samples,
-                                                  self.groups,
-                                                  self.num_levels,
-                                                  self.grid_jump)
-        if self.optimal_trajectories is not None:
             self.output_sample = \
                 optimal_trajectories.optimised_trajectories(sample,
                                                          self.samples,
                                                          self.parameter_file,
                                                          self.num_levels,
                                                          self.grid_jump,
-                                                         self.optimal_trajectories)
+                                                         self.optimal_trajectories,
+                                                         True,
+                                                         None)
 
 
     def debug(self):
@@ -161,9 +185,10 @@ class Morris(Sample):
         print("Number of variables: %s" % self.num_vars)
         print("Parameter bounds: %s" % self.bounds)
         if self.groups is not None:
-          print("Group: %s" % self.groups)
+            print("Group: %s" % self.groups)
+            print(self.groups.shape)
         if self.optimal_trajectories is not None:
-          print("Number of req trajectories: %s" % self.optimal_trajectories)
+            print("Number of req trajectories: %s" % self.optimal_trajectories)
 
 
 if __name__ == "__main__":
