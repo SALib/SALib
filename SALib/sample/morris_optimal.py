@@ -9,7 +9,21 @@ from scipy.misc import comb as nchoosek
 import sys
 
 
-def compute_distance(m, l, num_params):
+def check_input_sample(input_sample, num_params, N):
+    '''
+    Checks input sample is:
+        - the correct size
+        - values between 0 and 1
+    '''
+    if input_sample.shape[0] != (num_params + 1) * N:
+        raise ValueError("Input sample does not match number of parameters or groups")
+    if type(input_sample) != np.ndarray:
+        raise TypeError("Input sample is not an numpy array")
+    if np.any((input_sample < 0) | (input_sample > 1)):
+        raise ValueError("Input sample must be scaled between 0 and 1")
+
+
+def compute_distance(m, l):
     '''
     Computes the distance between two trajectories
     '''
@@ -22,19 +36,20 @@ def compute_distance(m, l, num_params):
     return distance
 
 
-def compute_distance_matrix(input_sample, N, num_params):
-    index_list = []
-    distance_matrix = np.zeros((N, N), dtype=np.float32)
+def compute_distance_matrix(input_sample, N, num_params, groups=None):
 
-    for j in range(N):
-        index_list.append(np.arange(num_params + 1) + j * (num_params + 1))
+    if groups:
+        check_input_sample(input_sample, groups, N)
+    else:
+        check_input_sample(input_sample, num_params, N)
+    index_list = make_index_list(N, num_params, groups)
+    distance_matrix = np.zeros((N, N), dtype=np.float32)
 
     for j in range(N):
         input_1 = input_sample[index_list[j]]
         for k in range(j + 1, N):
             input_2 = input_sample[index_list[k]]
-            distance_matrix[k, j] = compute_distance(input_1, input_2,
-                                                     num_params)
+            distance_matrix[k, j] = compute_distance(input_1, input_2)
     return distance_matrix
 
 
@@ -123,22 +138,28 @@ def nth(iterable, n, default=None):
     return next(islice(iterable, n, None), default)
 
 
-def make_index_list(N, num_params):
+def make_index_list(N, num_params, groups=None):
+
+    if groups == None:
+        groups = num_params
 
     index_list = []
     for j in range(N):
-        index_list.append(np.arange(num_params + 1) + j * (num_params + 1))
+        index_list.append(np.arange(groups + 1) + j * (groups + 1))
     return index_list
 
 
-def compile_output(input_sample, N, num_params, maximum_combo):
-    
+def compile_output(input_sample, N, num_params, maximum_combo, groups=None):
+  
     if np.any((input_sample < 0) | (input_sample > 1)):
-        raise ValueError("Input sample must be scaled between 0 and 1")
-    
-    index_list = make_index_list(N, num_params)
-    output = np.zeros((np.size(maximum_combo) * (num_params + 1), num_params))
-
+        raise ValueError("Input sample must be scaled between 0 and 1")  
+        
+    if groups == None:
+        groups = num_params 
+        
+    index_list = make_index_list(N, num_params, groups)
+            
+    output = np.zeros((np.size(maximum_combo) * (groups + 1), num_params))
     for counter, x in enumerate(maximum_combo):
         output[index_list[counter]] = np.array(input_sample[index_list[x]])
     return output
