@@ -1,10 +1,11 @@
-from nose.tools import assert_almost_equal, assert_equal, raises
+from nose.tools import assert_almost_equal, raises
 from nose import with_setup
 from ..sample.morris_optimal import compute_distance, compute_distance_matrix, \
-    find_most_distant, find_maximum, find_optimum_trajectories
+    find_most_distant, find_maximum, find_optimum_trajectories, make_index_list
 from ..sample.morris_oat import sample
 from ..util import read_param_file
 import numpy as np
+from numpy.testing import assert_equal
 
 
 def setup():
@@ -24,7 +25,7 @@ def test_distance():
     '''
     input_1 = np.matrix([[0, 1/3.], [0, 1.], [2/3., 1.]], dtype=np.float32)
     input_3 = np.matrix([[2/3., 0], [2/3., 2/3.], [0, 2/3.]], dtype=np.float32)
-    output = compute_distance(input_1, input_3, 2)
+    output = compute_distance(input_1, input_3)
     assert_almost_equal(output, 6.18, places=2)
 
 
@@ -140,3 +141,21 @@ def test_catch_inputs_not_in_zero_one_range():
     N = 10
     input_sample = setup() * 10
     find_optimum_trajectories(input_sample, N, num_params, k_choices)
+
+
+def test_make_index_list():
+    N = 4
+    num_params = 2
+    groups = None
+    actual = make_index_list(N, num_params, groups)
+    desired = [np.array([0,1,2]),np.array([3,4,5]),np.array([6,7,8]),np.array([9,10,11])]
+    assert_equal(desired, actual)
+    
+
+def test_make_index_list_with_groups():
+    N = 4
+    num_params = 3
+    groups = 2
+    actual = make_index_list(N, num_params, groups)
+    desired = [np.array([0,1,2]),np.array([3,4,5]),np.array([6,7,8]),np.array([9,10,11])]
+    assert_equal(desired, actual)
