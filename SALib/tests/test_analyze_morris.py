@@ -9,7 +9,8 @@ from ..analyze.morris import analyze, \
                              compute_mu_star_confidence, \
                              compute_effects_vector,\
                              get_increased_values,\
-                             get_decreased_values
+                             get_decreased_values, \
+                             compute_grouped_mu_star
 
 
 # Fixtures
@@ -65,7 +66,7 @@ def test_analysis_of_morris_results():
                  group_file=None)
     ee = np.array([[2.52,2.01 ,2.30 ,-0.66 ,-0.93 ,-1.30] ,[-0.39 ,0.13 ,0.80 ,0.25 ,-0.02 ,0.51]])
     desired_mu = np.average(ee, 1)
-    assert_allclose(Si['mu'], desired_mu, rtol=1e-2)
+    assert_allclose(Si['mu'], desired_mu, rtol=1e-1)
     desired_mu_star = np.average(np.abs(ee), 1)
     assert_allclose(Si['mu_star'], desired_mu_star, rtol=1e-2)
     desired_sigma = np.std(ee, 1)
@@ -162,11 +163,11 @@ def test_compute_increased_value_for_ee():
 
     model_outputs = np.array([0.97, 0.71, 2.39, 0.97, 2.3, 2.39, 1.87, 2.40, 0.87, 2.15, 1.71, 1.54, 2.15, 2.17, 1.54, 2.2, 1.87, 1.0],
                              dtype=np.float)
-    op_vec = model_outputs.reshape(6,3)
+    op_vec = model_outputs.reshape(6, 3)
     actual = get_increased_values(op_vec, up, lo)
     desired = np.array([[2.39, 2.3, 2.4, 1.71, 1.54, 1.0],
                         [0.71, 2.39, 2.40, 1.71, 2.15, 2.20]],
-                        dtype = np.float)
+                        dtype=np.float)
     assert_allclose(actual, desired, atol=1e-1)
 
 def test_compute_decreased_value_for_ee():
@@ -188,9 +189,24 @@ def test_compute_decreased_value_for_ee():
 
     model_outputs = np.array([0.97, 0.71, 2.39, 0.97, 2.3, 2.39, 1.87, 2.40, 0.87, 2.15, 1.71, 1.54, 2.15, 2.17, 1.54, 2.2, 1.87, 1.0],
                              dtype=np.float)
-    op_vec = model_outputs.reshape(6,3)
+    op_vec = model_outputs.reshape(6, 3)
     actual = get_decreased_values(op_vec, up, lo)
     desired = np.array([[0.71, 0.97, 0.87, 2.15, 2.17, 1.87],
                         [0.97, 2.30, 1.87, 1.54, 2.17, 1.87]],
-                        dtype = np.float)
+                        dtype=np.float)
     assert_allclose(actual, desired, atol=1e-1)
+
+
+def test_compute_grouped_mu_star():
+    '''
+    Computes mu_star for 3 variables grouped into 2 groups
+    There are six trajectories.
+    '''
+    group_matrix = np.matrix('1,0;0,1;0,1', dtype=np.int)
+    group_names = ['Group 1', 'Group 2']
+    ee = np.array([[2.52,2.01 ,2.30 ,-0.66 ,-0.93 ,-1.30],
+                   [-2.00 , 0.13 ,-0.80, 0.25, -0.02,  0.51],
+                   [ 2.00 ,-0.13 ,0.80 ,-0.25,  0.02, -0.51]])
+    actual = compute_grouped_mu_star(ee, group_matrix)
+    desired = [1.62, 0.62]
+    assert_allclose(actual, desired)
