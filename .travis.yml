@@ -2,17 +2,16 @@
 language: python
 
 python:
-#- "2.6"
+- "2.6"
 - "2.7"
 - "3.3"
 - "3.4"
 
 env: 
- - DEPS="numpy scipy scikit-learn"
- - DEPS="numpy=1.6.0 scipy scikit-learn"
  - DEPS="numpy=1.7.0 scipy scikit-learn"
  - DEPS="numpy=1.8.0 scipy scikit-learn"
  - DEPS="numpy=1.9.0 scipy scikit-learn"
+ - DEPS="numpy scipy scikit-learn"
 
 install:
  - sudo apt-get update
@@ -31,7 +30,11 @@ install:
 
 
   # Replace dep1 dep2 ... with your dependencies
- - conda create -q -n testenv python=$TRAVIS_PYTHON_VERSION $DEPS pip
+ - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+     conda create -q -n testenv python=$TRAVIS_PYTHON_VERSION $DEPS pip;
+   else
+     conda create -q -n testenv python=$TRAVIS_PYTHON_VERSION $DEPS pip;
+   fi
  - source activate testenv
  - python setup.py install
  - pip install coveralls
