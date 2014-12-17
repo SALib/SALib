@@ -26,31 +26,41 @@ def scale_samples(params, bounds):
     #   sample * (upper_bound - lower_bound) + lower_bound
     np.add(np.multiply(params,
                       (upper_bounds - lower_bounds),
-                      out=params), \
-           lower_bounds,
-           out=params)
+                       out=params),
+                       lower_bounds,
+                       out=params)
 
 
-def read_param_file(filename):
+def read_param_file(filename, param_file_contains_groups=False, delimiter=None):
 
 
     names = []
     bounds = []
+    group_list = []
     num_vars = 0
+    fieldnames = ['name','lower_bound', 'upper_bound', 'group']
 
     with open(filename) as csvfile:
-        dialect = csv.Sniffer().sniff(csvfile.read(16384))
+        dialect = csv.Sniffer().sniff(csvfile.read(1024),delimiters=delimiter)
         csvfile.seek(0)
-        reader = csv.reader(csvfile, dialect)
+        reader = csv.DictReader(csvfile, fieldnames=fieldnames, dialect=dialect)
         for row in reader:
-            if row[0].strip().startswith('#'):
+            if row['name'].strip().startswith('#'):
                 pass
             else:
                 num_vars += 1
-                names.append(row[0])
-                bounds.append([float(row[1]), float(row[2])])
-
-    return {'names': names, 'bounds': bounds, 'num_vars': num_vars}
+                names.append(row['name'])
+                bounds.append([float(row['lower_bound']), float(row['upper_bound'])])
+                if param_file_contains_groups == True:
+                    # If the fourth column does not contain a group name, use
+                    # the parameter name
+                    if row['group'] == None:
+                        group_list.append(row['name'])
+                    elif row['group'] == '':
+                        group_list.append(row['name'])
+                    else:
+                        group_list.append(row['group'])
+    return {'names': names, 'bounds': bounds, 'num_vars': num_vars, 'groups': group_list}
 
 
 def read_group_file(filename):
@@ -60,7 +70,6 @@ def read_group_file(filename):
         a numpy matrix of factor group membership
     '''
     output = []
-    num_groups = 0
 
     with open(filename) as csvfile:
         dialect = csv.Sniffer().sniff(csvfile.read(16384))
