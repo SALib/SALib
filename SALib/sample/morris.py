@@ -58,11 +58,12 @@ class Morris(Sample):
     def __init__(self, parameter_file, samples, num_levels, grid_jump, \
                  group_file=None, optimal_trajectories=None):
 
+        self.groups = None
         self.parameter_file = parameter_file
         self.samples = samples
         self.num_levels = num_levels
         self.grid_jump = grid_jump
-        pf = read_param_file(self.parameter_file)
+        pf = read_param_file(self.parameter_file, True)
         self.num_vars = pf['num_vars']
         self.bounds = pf['bounds']
         self.parameter_names = pf['names']
