@@ -14,15 +14,15 @@ env:
 install:
  - sudo apt-get update
  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-     wget http://repo.continuum.io/miniconda/Miniconda-3.4.2-Linux-x86_64.sh -O miniconda.sh;
+     wget http://repo.continuum.io/miniconda/Miniconda-3.6.3-Linux-x86_64.sh -O miniconda.sh;
    else
-     wget http://repo.continuum.io/miniconda/Miniconda3-3.4.2-Linux-x86_64.sh -O miniconda.sh;
+     wget http://repo.continuum.io/miniconda/Miniconda3-3.6.3-Linux-x86_64.sh -O miniconda.sh;
    fi
  - bash miniconda.sh -b -p $HOME/miniconda
  - export PATH="$HOME/miniconda/bin:$PATH"
  - hash -r
  - conda config --set always_yes yes --set changeps1 no
- - conda update -q conda
+ - conda update -q conda --no-deps
   # Useful for debugging any issues with conda
  - conda info -a
 
