@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import division
-from numpy.testing import assert_equal, assert_allclose
+from numpy.testing import assert_allclose
 from nose.tools import raises, with_setup, eq_
 from .test_util import setup_group_file
 import numpy as np
 
-from ..analyze.morris import analyze, compute_elementary_effect, \
+from ..analyze.morris import analyze, \
                              compute_mu_star_confidence, \
                              compute_effects_vector,\
                              get_increased_values,\
