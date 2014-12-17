@@ -2,10 +2,8 @@
 language: python
 
 python:
-- "2.6"
 - "2.7"
 - "3.3"
-- "3.4"
 
 env: 
  - DEPS="numpy=1.7.0 scipy scikit-learn"
@@ -28,13 +26,8 @@ install:
   # Useful for debugging any issues with conda
  - conda info -a
 
-
   # Replace dep1 dep2 ... with your dependencies
- - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-     conda create -q -n testenv python=$TRAVIS_PYTHON_VERSION $DEPS pip;
-   else
-     conda create -q -n testenv python=$TRAVIS_PYTHON_VERSION $DEPS pip;
-   fi
+ - conda create -q -n testenv python=$TRAVIS_PYTHON_VERSION $DEPS pip
  - source activate testenv
  - python setup.py install
  - pip install coveralls
