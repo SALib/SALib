@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import division
-from numpy.testing import assert_allclose
+from numpy.testing import assert_allclose, assert_equal
 from nose.tools import raises, with_setup, eq_
 from .test_util import setup_group_file
 import numpy as np
@@ -64,14 +64,16 @@ def test_analysis_of_morris_results():
                  conf_level=0.95,
                  print_to_console=False,
                  group_file=None)
-    ee = np.array([[2.52,2.01 ,2.30 ,-0.66 ,-0.93 ,-1.30] ,[-0.39 ,0.13 ,0.80 ,0.25 ,-0.02 ,0.51]])
+    ee = np.array([[ 2.52, 2.01, 2.30, -0.66, -0.93, -1.30],
+                   [-0.39, 0.13, 0.80,  0.25, -0.02,  0.51]])
     desired_mu = np.average(ee, 1)
     assert_allclose(Si['mu'], desired_mu, rtol=1e-1)
     desired_mu_star = np.average(np.abs(ee), 1)
     assert_allclose(Si['mu_star'], desired_mu_star, rtol=1e-2)
     desired_sigma = np.std(ee, 1)
     assert_allclose(Si['sigma'], desired_sigma, rtol=1e-2)
-
+    desired_names = ['Test 1', 'Test 2']
+    assert_equal(Si['names'], desired_names)
 
 def test_number_results_incorrect():
     pass
@@ -203,10 +205,10 @@ def test_compute_grouped_mu_star():
     There are six trajectories.
     '''
     group_matrix = np.matrix('1,0;0,1;0,1', dtype=np.int)
-    group_names = ['Group 1', 'Group 2']
-    ee = np.array([[2.52,2.01 ,2.30 ,-0.66 ,-0.93 ,-1.30],
-                   [-2.00 , 0.13 ,-0.80, 0.25, -0.02,  0.51],
-                   [ 2.00 ,-0.13 ,0.80 ,-0.25,  0.02, -0.51]])
-    actual = compute_grouped_mu_star(ee, group_matrix)
-    desired = [1.62, 0.62]
-    assert_allclose(actual, desired)
+    ee = np.array([[ 2.52,  2.01,  2.30, -0.66, -0.93, -1.30],
+                   [-2.00,  0.13, -0.80,  0.25, -0.02,  0.51],
+                   [ 2.00, -0.13,  0.80, -0.25,  0.02, -0.51]])
+    mu_star = np.average(np.abs(ee), 1)
+    actual = compute_grouped_mu_star(mu_star, group_matrix)
+    desired = np.array([1.62, 0.62], dtype=np.float)
+    assert_allclose(actual, desired, rtol=1e-1)

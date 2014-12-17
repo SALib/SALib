@@ -1,7 +1,7 @@
 from __future__ import division
 from numpy.testing import assert_equal, assert_allclose
-from nose.tools import raises, with_setup
-from ..sample.morris import Morris
+from nose.tools import with_setup, eq_
+from ..sample.morris import Morris, compute_groups_from_parameter_file
 from .test_util import setup_group_file
 import numpy as np
 
@@ -15,6 +15,14 @@ def setup_param_file():
          ofile.write("Test 1,0,1.0\n")
          ofile.write("Test 2,0,1.0\n")
          ofile.write("Test 3,0,1.0\n")
+
+
+def setup_param_file_with_groups():
+    filename = "SALib/tests/test_param_file_w_groups.txt"
+    with open(filename, "w") as ofile:
+         ofile.write("Test 1,0,1.0,Group 1\n")
+         ofile.write("Test 2,0,1.0,Group 1\n")
+         ofile.write("Test 3,0,1.0,Group 2\n")
 
 
 def setup():
@@ -38,7 +46,37 @@ def test_group_file_read():
                  group_file=group_file, optimal_trajectories=None)
 
     assert_equal(sample.parameter_names, ["Test 1", "Test 2", "Test 3"])
-    assert_equal(sample.groups, np.matrix('1,0;0,1;0,1'))
+    assert_equal(sample.groups, np.matrix('1,0;0,1;0,1', dtype=np.int))
+    assert_equal(sample.group_names, ['Group 1', 'Group 2'])
+
+
+def test_compute_groups_from_parameter_file():
+    '''
+    Tests that a group file is read correctly
+    '''
+    actual_matrix, actual_unique_names = \
+        compute_groups_from_parameter_file(['Group 1', 'Group 2', 'Group 2'], 3)
+
+    assert_equal(actual_matrix, np.matrix('1,0;0,1;0,1', dtype=np.int))
+    assert_equal(actual_unique_names, ['Group 1', 'Group 2'])
+
+
+@with_setup(setup_param_file_with_groups)
+def test_group_in_param_file_read():
+    '''
+    Tests that groups in a parameter file are read correctly
+    '''
+    parameter_file = "SALib/tests/test_param_file_w_groups.txt"
+
+    samples = 10
+    num_levels = 4
+    grid_jump = 2
+
+    sample = Morris(parameter_file, samples, num_levels, grid_jump, \
+                 group_file=None, optimal_trajectories=None)
+    assert_equal(sample.parameter_names, ["Test 1", "Test 2", "Test 3"])
+    assert_equal(sample.groups, np.matrix('1,0;1,0;0,1', dtype=np.int))
+    assert_equal(sample.group_names, ['Group 1', 'Group 2'])
 
 
 @with_setup(setup)
@@ -101,3 +139,27 @@ def test_debug():
 
     #assert_equal(sample.debug(), desired)
     sample.debug()
+
+
+@with_setup(setup_param_file_with_groups)
+def test_compute_groups_from_parameter_file_class():
+
+    samples = 10
+    num_levels = 4
+    grid_jump = 2
+
+    parameter_file = "SALib/tests/test_param_file_w_groups.txt"
+
+    sample = Morris(parameter_file, samples, num_levels, grid_jump, \
+                    group_file=None, optimal_trajectories=None)
+
+    eq_(sample.parameter_file, parameter_file)
+    eq_(sample.samples, 10)
+    eq_(sample.num_levels, 4)
+    eq_(sample.grid_jump, 2)
+    eq_(sample.num_vars, 3)
+    eq_(sample.bounds, [[0.0, 1.0], [0.0, 1.0], [0.0, 1.0]])
+    eq_(sample.parameter_names, ["Test 1", "Test 2", "Test 3"])
+    assert_equal(sample.groups, np.matrix('1,0;1,0;0,1', dtype=np.int))
+    eq_(sample.group_names, ['Group 1', 'Group 2'])
+    eq_(sample.optimal_trajectories, None)
