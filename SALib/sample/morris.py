@@ -4,8 +4,31 @@ import random as rd
 from . import common_args
 from . sample import Sample
 from ..sample import morris_oat, morris_groups, morris_optimal
-from ..util import read_param_file, scale_samples, read_group_file
-from collections import Iterable
+from ..util import read_param_file, read_group_file
+from collections import Iterable, OrderedDict
+
+
+def compute_groups_from_parameter_file(group_list, num_vars):
+    '''
+    Computes a k-by-g matrix which notes factor membership of groups
+    where:
+        k is the number of variables
+        g is the number of groups
+    Also returns a g-length list of unique group_names
+    '''
+    # Get a unique set of the group names
+    unique_group_names = list(OrderedDict.fromkeys(group_list))
+    number_of_groups = len(unique_group_names)
+
+    indices = dict([(x,i) for (i,x) in enumerate(unique_group_names)])
+
+    output = np.zeros((num_vars, number_of_groups), dtype=np.int)
+
+    for parameter_row, group_membership in enumerate(group_list):
+        group_index = indices[group_membership]
+        output[parameter_row, group_index] = 1
+
+    return np.matrix(output), unique_group_names
 
 
 class Morris(Sample):
@@ -43,10 +66,11 @@ class Morris(Sample):
         self.num_vars = pf['num_vars']
         self.bounds = pf['bounds']
         self.parameter_names = pf['names']
-        if group_file:
-          self.groups = self.compute_groups(group_file)
-        else:
-          self.groups = None
+        groups_from_parameter_file = pf['groups']
+        if len(groups_from_parameter_file) > 0:
+            self.groups, self.group_names = compute_groups_from_parameter_file(groups_from_parameter_file, self.num_vars)
+        if group_file is not None:
+            self.groups, self.group_names = self.compute_groups(group_file)
         self.optimal_trajectories = optimal_trajectories
 
         if self.optimal_trajectories != None:
@@ -106,7 +130,7 @@ class Morris(Sample):
                 output[column,row] = 1
 
         # ... and compile the numpy matrix
-        return np.matrix(output)
+        return np.matrix(output, dtype=np.int), group_names
 
 
     def create_sample(self):
