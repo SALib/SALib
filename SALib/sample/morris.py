@@ -70,6 +70,9 @@ class Morris(Sample):
         groups_from_parameter_file = pf['groups']
         if len(groups_from_parameter_file) > 0:
             self.groups, self.group_names = compute_groups_from_parameter_file(groups_from_parameter_file, self.num_vars)
+            if np.all(self.groups == np.eye(self.num_vars)):
+                self.groups = None
+                self.group_names = None
         if group_file is not None:
             self.groups, self.group_names = self.compute_groups(group_file)
         self.optimal_trajectories = optimal_trajectories

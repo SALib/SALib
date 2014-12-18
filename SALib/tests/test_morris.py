@@ -1,13 +1,14 @@
 from __future__ import division
 from numpy.testing import assert_equal, assert_allclose
-from nose.tools import with_setup, eq_
+from nose.tools import with_setup, eq_, raises
 from ..sample.morris import Morris, compute_groups_from_parameter_file
 from .test_util import setup_group_file
 import numpy as np
 
 
-def test_get_input_sample_unscaled():
+def teardown():
     pass
+
 
 def setup_param_file():
     filename = "SALib/tests/test_param_file.txt"
@@ -162,4 +163,71 @@ def test_compute_groups_from_parameter_file_class():
     eq_(sample.parameter_names, ["Test 1", "Test 2", "Test 3"])
     assert_equal(sample.groups, np.matrix('1,0;1,0;0,1', dtype=np.int))
     eq_(sample.group_names, ['Group 1', 'Group 2'])
+    eq_(sample.optimal_trajectories, None)
+
+
+@raises(ValueError)
+@with_setup(setup, teardown)
+def test_optimal_trajectories_lt_samples():
+
+    parameter_file = "SALib/tests/test_param_file.txt"
+
+    samples = 10
+    num_levels = 4
+    grid_jump = 2
+
+    Morris(parameter_file, samples, num_levels, grid_jump, \
+           group_file=None, optimal_trajectories=samples)
+
+@raises(ValueError)
+@with_setup(setup, teardown)
+def test_optimal_trajectories_lt_10():
+
+    parameter_file = "SALib/tests/test_param_file.txt"
+
+    samples = 10
+    num_levels = 4
+    grid_jump = 2
+    optimal_trajectories = 11
+
+    Morris(parameter_file, samples, num_levels, grid_jump, \
+           group_file=None, optimal_trajectories=optimal_trajectories)
+
+@raises(ValueError)
+@with_setup(setup, teardown)
+def test_optimal_trajectories_gte_one():
+
+    parameter_file = "SALib/tests/test_param_file.txt"
+
+    samples = 10
+    num_levels = 4
+    grid_jump = 2
+    optimal_trajectories = 1
+
+    Morris(parameter_file, samples, num_levels, grid_jump, \
+           group_file=None, optimal_trajectories=optimal_trajectories)
+
+
+@with_setup(setup, teardown)
+def test_morris_sample_no_groups_no_optimal_trajectories():
+
+    parameter_file = "SALib/tests/test_param_file.txt"
+
+    samples = 10
+    num_levels = 4
+    grid_jump = 2
+
+
+    sample = Morris(parameter_file, samples, num_levels, grid_jump, \
+                    group_file=None, optimal_trajectories=None)
+
+    eq_(sample.parameter_file, parameter_file)
+    eq_(sample.samples, samples)
+    eq_(sample.num_levels, num_levels)
+    eq_(sample.grid_jump, grid_jump)
+    eq_(sample.num_vars, 3)
+    eq_(sample.bounds, [[0.0, 1.0], [0.0, 1.0], [0.0, 1.0]])
+    eq_(sample.parameter_names, ["Test 1", "Test 2", "Test 3"])
+    eq_(sample.groups, None)
+    eq_(sample.group_names, None)
     eq_(sample.optimal_trajectories, None)
