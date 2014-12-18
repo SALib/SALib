@@ -20,9 +20,11 @@ def analyze(pfile,
             num_resamples=1000,
             conf_level=0.95,
             print_to_console=False,
-            group_file=None,
             grid_jump=2,
             num_levels=4):
+
+    # Assume that there are no groups
+    groups = None
 
     delta = grid_jump / (num_levels - 1)
 
@@ -68,9 +70,9 @@ def analyze(pfile,
             print("%s %f %f %f %f" % (param_file['names'][j], Si['mu'][j], Si[
                   'sigma'][j], Si['mu_star'][j], Si['mu_star_conf'][j]))
 
-    if group_file is None:
+    if groups is None:
         return Si
-    elif group_file is not None:
+    elif groups is not None:
         # if there are groups, then the elementary effects returned need to be
         # computed over the groups of variables, rather than the individual variables
         Si_grouped = dict((k, [None] * num_vars)

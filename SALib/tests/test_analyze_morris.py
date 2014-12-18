@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import division
 from numpy.testing import assert_allclose, assert_equal
-from nose.tools import raises, with_setup, eq_
-from .test_util import setup_group_file
+from nose.tools import raises, with_setup
 import numpy as np
 
 from ..analyze.morris import analyze, \
@@ -62,8 +61,7 @@ def test_analysis_of_morris_results():
                  delim=' ',
                  num_resamples=1000,
                  conf_level=0.95,
-                 print_to_console=False,
-                 group_file=None)
+                 print_to_console=False)
     ee = np.array([[ 2.52, 2.01, 2.30, -0.66, -0.93, -1.30],
                    [-0.39, 0.13, 0.80,  0.25, -0.02,  0.51]])
     desired_mu = np.average(ee, 1)
