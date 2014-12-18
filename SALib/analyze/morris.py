@@ -5,8 +5,6 @@ from sys import exit
 import numpy as np
 from scipy.stats import norm
 from . import common_args
-from collections import OrderedDict
-from ..sample.morris import compute_groups_from_parameter_file
 
 # Perform Morris Analysis on file of model results
 # Returns a dictionary with keys 'mu', 'mu_star', 'sigma', and 'mu_star_conf'
@@ -38,9 +36,8 @@ def analyze(pfile,
 
     if (Y.size % (num_vars + 1) == 0):
         num_trajectories = int(Y.size / (num_vars + 1))
-    elif group_file is not None:
-        group_list = param_file['groups']
-        groups, unique_group_names = compute_groups_from_parameter_file(group_list, num_vars)
+    elif param_file['groups'] is not None:
+        groups, unique_group_names = param_file['groups']
         number_of_groups = len(unique_group_names)
         num_trajectories = int(Y.size / (number_of_groups + 1))
     else:

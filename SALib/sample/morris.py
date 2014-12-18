@@ -5,30 +5,7 @@ from . import common_args
 from . sample import Sample
 from ..sample import morris_oat, morris_groups, morris_optimal
 from ..util import read_param_file, read_group_file
-from collections import Iterable, OrderedDict
-
-
-def compute_groups_from_parameter_file(group_list, num_vars):
-    '''
-    Computes a k-by-g matrix which notes factor membership of groups
-    where:
-        k is the number of variables
-        g is the number of groups
-    Also returns a g-length list of unique group_names
-    '''
-    # Get a unique set of the group names
-    unique_group_names = list(OrderedDict.fromkeys(group_list))
-    number_of_groups = len(unique_group_names)
-
-    indices = dict([(x,i) for (i,x) in enumerate(unique_group_names)])
-
-    output = np.zeros((num_vars, number_of_groups), dtype=np.int)
-
-    for parameter_row, group_membership in enumerate(group_list):
-        group_index = indices[group_membership]
-        output[parameter_row, group_index] = 1
-
-    return np.matrix(output), unique_group_names
+from collections import Iterable
 
 
 class Morris(Sample):
@@ -59,6 +36,7 @@ class Morris(Sample):
                  group_file=None, optimal_trajectories=None):
 
         self.groups = None
+        self.group_names = None
         self.parameter_file = parameter_file
         self.samples = samples
         self.num_levels = num_levels
@@ -67,13 +45,9 @@ class Morris(Sample):
         self.num_vars = pf['num_vars']
         self.bounds = pf['bounds']
         self.parameter_names = pf['names']
-        groups_from_parameter_file = pf['groups']
-        if len(groups_from_parameter_file) > 0:
-            self.groups, self.group_names = compute_groups_from_parameter_file(groups_from_parameter_file, self.num_vars)
-            if np.all(self.groups == np.eye(self.num_vars)):
-                self.groups = None
-                self.group_names = None
-        if group_file is not None:
+        if pf['groups'] is not None:
+            self.groups, self.group_names = pf['groups']
+        if (group_file is not None) & (self.groups is None):
             self.groups, self.group_names = self.compute_groups(group_file)
         self.optimal_trajectories = optimal_trajectories
 

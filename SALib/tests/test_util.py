@@ -1,7 +1,8 @@
 from __future__ import division
 from numpy.testing import assert_equal, assert_allclose
 from nose.tools import raises, with_setup, eq_
-from ..util import read_param_file, scale_samples, read_group_file
+from ..util import read_param_file, scale_samples, read_group_file, \
+                   compute_groups_from_parameter_file
 import os
 import numpy as np
 
@@ -153,3 +154,14 @@ def test_scale_samples_upper_eq_lower():
     params = np.array([[0, 0],[0.1,0.1],[0.2,0.2]])
     bounds = [[10,10],[-10,10]]
     scale_samples(params, bounds)
+
+
+def test_compute_groups_from_parameter_file():
+    '''
+    Tests that a group file is read correctly
+    '''
+    actual_matrix, actual_unique_names = \
+        compute_groups_from_parameter_file(['Group 1', 'Group 2', 'Group 2'], 3)
+
+    assert_equal(actual_matrix, np.matrix('1,0;0,1;0,1', dtype=np.int))
+    assert_equal(actual_unique_names, ['Group 1', 'Group 2'])

@@ -1,7 +1,7 @@
 from __future__ import division
 from numpy.testing import assert_equal, assert_allclose
 from nose.tools import with_setup, eq_, raises
-from ..sample.morris import Morris, compute_groups_from_parameter_file
+from ..sample.morris import Morris
 from .test_util import setup_group_file
 import numpy as np
 
@@ -51,15 +51,7 @@ def test_group_file_read():
     assert_equal(sample.group_names, ['Group 1', 'Group 2'])
 
 
-def test_compute_groups_from_parameter_file():
-    '''
-    Tests that a group file is read correctly
-    '''
-    actual_matrix, actual_unique_names = \
-        compute_groups_from_parameter_file(['Group 1', 'Group 2', 'Group 2'], 3)
 
-    assert_equal(actual_matrix, np.matrix('1,0;0,1;0,1', dtype=np.int))
-    assert_equal(actual_unique_names, ['Group 1', 'Group 2'])
 
 
 @with_setup(setup_param_file_with_groups)
