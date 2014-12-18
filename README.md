@@ -29,16 +29,18 @@ P2 0.0 5.0
 
 Lines beginning with `#` will be treated as comments and ignored.
 
-### Create a group file (if using Morris)
+### Or if using Morris, create a parameter file with groups
 
 Create a file describing the grouping of parameters in the model.
 Group files should be created with row equal to the number of groups desired.
 ```
-Group 1,P1,P2,P3
-Group 2,P4,P5
-Group 3,P6
+#Parameter,Lower Bound, Upper Bound, Group Name
+P 1,0.0,1.0,Group 1
+P 2,0.0,5.0,Group 2
+P 3,0.0,5.0,Group 3
 ...etc.
 ```
+You can use delimiters if you wish to include whitespace in your parameter or group names.
 
 
 ### Generate samples

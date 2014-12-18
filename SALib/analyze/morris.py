@@ -36,7 +36,7 @@ def analyze(pfile,
 
     num_vars = param_file['num_vars']
 
-    if (Y.size % (num_vars + 1) == 0):
+    if (param_file['groups'] is None) & (Y.size % (num_vars + 1) == 0):
         num_trajectories = int(Y.size / (num_vars + 1))
     elif param_file['groups'] is not None:
         groups, unique_group_names = param_file['groups']
@@ -44,7 +44,7 @@ def analyze(pfile,
         num_trajectories = int(Y.size / (number_of_groups + 1))
     else:
         raise ValueError("""Number of samples in model output file must be a multiple of (D+1), \
-                            where D is the number of parameters in your parameter file. \
+                            where D is the number of parameters (or groups) in your parameter file. \
                          """)
     ee = np.zeros((num_vars, num_trajectories))
     ee = compute_effects_vector(X, Y, Y.size / num_trajectories, delta)
@@ -53,24 +53,21 @@ def analyze(pfile,
     # being called from Python
     Si = dict((k, [None] * num_vars)
               for k in ['names', 'mu', 'mu_star', 'sigma', 'mu_star_conf'])
-    if print_to_console:
-        print("Parameter Mu Sigma Mu_Star Mu_Star_Conf")
-
     Si['mu'] = np.average(ee, 1)
     Si['mu_star'] = np.average(np.abs(ee), 1)
     Si['sigma'] = np.std(ee, 1)
-
     Si['names'] = param_file['names']
 
     for j in range(num_vars):
         Si['mu_star_conf'][j] = compute_mu_star_confidence(
             ee[j, :], num_trajectories, num_resamples, conf_level)
 
-        if print_to_console:
-            print("%s %f %f %f %f" % (param_file['names'][j], Si['mu'][j], Si[
-                  'sigma'][j], Si['mu_star'][j], Si['mu_star_conf'][j]))
-
     if groups is None:
+        if print_to_console:
+            print("Parameter Mu Sigma Mu_Star Mu_Star_Conf")
+            for j in range(num_vars):
+                print("%s %f %f %f %f" % (param_file['names'][j], Si['mu'][j], Si[
+                    'sigma'][j], Si['mu_star'][j], Si['mu_star_conf'][j]))
         return Si
     elif groups is not None:
         # if there are groups, then the elementary effects returned need to be
@@ -78,8 +75,18 @@ def analyze(pfile,
         Si_grouped = dict((k, [None] * num_vars)
                 for k in ['mu_star', 'mu_star_conf'])
         Si_grouped['mu_star'] = compute_grouped_mu_star(Si['mu_star'], groups)
-        Si_grouped['mu_star_conf'] = compute_grouped_mu_star(Si['mu_star_conf'], groups)
+        Si_grouped['mu_star_conf'] = compute_grouped_mu_star(Si['mu_star_conf'],
+                                                             groups)
         Si_grouped['names'] = unique_group_names
+
+        if print_to_console:
+            print("Parameter Mu_Star Mu_Star_Conf")
+            for j in list(range(number_of_groups)):
+                print("%s %f %f" % (Si_grouped['names'][j],
+                                    Si_grouped['mu_star'][j],
+                                    Si_grouped['mu_star_conf'][j]))
+
+
         return Si_grouped
     else:
         raise RuntimeError("Could determine which parameters should be returned")
@@ -189,7 +196,11 @@ if __name__ == "__main__":
                         required=True, default=None, help='Model input file')
     parser.add_argument('-r', '--resamples', type=int, required=False, default=1000,
                         help='Number of bootstrap resamples for Sobol confidence intervals')
-
+    parser.add_argument('-l','--levels', type=int, required=False,
+                        default=4, help='Number of grid levels (Morris only)')
+    parser.add_argument('--grid-jump', type=int, required=False,
+                        default=2, help='Grid jump size (Morris only)')
     args = parser.parse_args()
     analyze(args.paramfile, args.model_input_file, args.model_output_file, args.column,
-            delim=args.delimiter, num_resamples=args.resamples, print_to_console=True)
+            delim=args.delimiter, num_resamples=args.resamples, print_to_console=True,
+            num_levels=args.levels, grid_jump=args.grid_jump)
