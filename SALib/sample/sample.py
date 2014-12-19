@@ -1,10 +1,6 @@
 from __future__ import division
 import numpy as np
-import random as rd
-from . import common_args
-from ..sample import morris_oat, morris_groups, morris_optimal
-from ..util import read_param_file, scale_samples, read_group_file
-from collections import Iterable
+from ..util import read_param_file, scale_samples
 
 class Sample(object):
     '''
