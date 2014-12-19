@@ -82,33 +82,14 @@ def read_param_file(filename, param_file_contains_groups=False, delimiter=None):
     return {'names': names, 'bounds': bounds, 'num_vars': num_vars, 'groups': group_tuple}
 
 
-def read_group_file(filename):
-    '''
-    Reads in a group file and returns a dictionary containing
-        a list of names of the variables
-        a numpy matrix of factor group membership
-    '''
-    output = []
-
-    with open(filename) as csvfile:
-        dialect = csv.Sniffer().sniff(csvfile.read(16384))
-        csvfile.seek(0)
-        reader = csv.reader(csvfile, dialect)
-        for row in reader:
-          if row[0].strip().startswith('#'):
-              pass
-          else:
-              output.append([row[0], row[1:]])
-    return {'groups': output}
-
-
 def compute_groups_from_parameter_file(group_list, num_vars):
     '''
     Computes a k-by-g matrix which notes factor membership of groups
     where:
-        k is the number of variables
+        k is the number of variables (factors)
         g is the number of groups
-    Also returns a g-length list of unique group_names
+    Also returns a g-length list of unique group_names whose positions
+    correspond to the order of groups in the k-by-g matrix
     '''
     # Get a unique set of the group names
     unique_group_names = list(OrderedDict.fromkeys(group_list))
