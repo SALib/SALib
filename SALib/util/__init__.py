@@ -15,8 +15,8 @@ def scale_samples(params, bounds):
     '''
     # Check bounds are legal (upper bound is greater than lower bound)
     b = np.array(bounds)
-    lower_bounds = b[:,0]
-    upper_bounds = b[:,1]
+    lower_bounds = b[:, 0]
+    upper_bounds = b[:, 1]
 
     if np.any(lower_bounds >= upper_bounds):
         raise ValueError("Bounds are not legal")
@@ -26,10 +26,10 @@ def scale_samples(params, bounds):
     # The calculation is equivalent to:
     #   sample * (upper_bound - lower_bound) + lower_bound
     np.add(np.multiply(params,
-                      (upper_bounds - lower_bounds),
+                       (upper_bounds - lower_bounds),
                        out=params),
-                       lower_bounds,
-                       out=params)
+           lower_bounds,
+           out=params)
 
 
 def read_param_file(filename, param_file_contains_groups=False, delimiter=None):
@@ -52,16 +52,18 @@ def read_param_file(filename, param_file_contains_groups=False, delimiter=None):
     fieldnames = ['name', 'lower_bound', 'upper_bound', 'group']
 
     with open(filename) as csvfile:
-        dialect = csv.Sniffer().sniff(csvfile.read(1024),delimiters=delimiter)
+        dialect = csv.Sniffer().sniff(csvfile.read(1024), delimiters=delimiter)
         csvfile.seek(0)
-        reader = csv.DictReader(csvfile, fieldnames=fieldnames, dialect=dialect)
+        reader = csv.DictReader(
+            csvfile, fieldnames=fieldnames, dialect=dialect)
         for row in reader:
             if row['name'].strip().startswith('#'):
                 pass
             else:
                 num_vars += 1
                 names.append(row['name'])
-                bounds.append([float(row['lower_bound']), float(row['upper_bound'])])
+                bounds.append(
+                    [float(row['lower_bound']), float(row['upper_bound'])])
                 if param_file_contains_groups == True:
                     # If the fourth column does not contain a group name, use
                     # the parameter name
@@ -72,7 +74,8 @@ def read_param_file(filename, param_file_contains_groups=False, delimiter=None):
                     else:
                         group_list.append(row['group'])
 
-        group_matrix, group_names = compute_groups_from_parameter_file(group_list, num_vars)
+        group_matrix, group_names = compute_groups_from_parameter_file(
+            group_list, num_vars)
 
         if np.all(group_matrix == np.eye(num_vars)):
             group_tuple = None
@@ -95,7 +98,7 @@ def compute_groups_from_parameter_file(group_list, num_vars):
     unique_group_names = list(OrderedDict.fromkeys(group_list))
     number_of_groups = len(unique_group_names)
 
-    indices = dict([(x,i) for (i,x) in enumerate(unique_group_names)])
+    indices = dict([(x, i) for (i, x) in enumerate(unique_group_names)])
 
     output = np.zeros((num_vars, number_of_groups), dtype=np.int)
 
