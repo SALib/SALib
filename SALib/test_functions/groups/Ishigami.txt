@@ -1,3 +1,0 @@
-'Group1',x1
-'Group2',x2
-'Group3',x3

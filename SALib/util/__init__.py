@@ -1,21 +1,22 @@
 __all__ = ["scale_samples", "read_param_file"]
 import csv
 import numpy as np
+from collections import OrderedDict
 
-# Rescale samples from [0, 1] to [lower, upper]
+
 def scale_samples(params, bounds):
     '''
     Rescales samples in 0-to-1 range to arbitrary bounds.
 
     Arguments:
         bounds - list of lists of dimensions num_params-by-2
-        params - numpy array of dimensions num_params-by-N, where N is the number
-        of samples
+        params - numpy array of dimensions num_params-by-N,
+        where N is the number of samples
     '''
     # Check bounds are legal (upper bound is greater than lower bound)
     b = np.array(bounds)
-    lower_bounds = b[:,0]
-    upper_bounds = b[:,1]
+    lower_bounds = b[:, 0]
+    upper_bounds = b[:, 1]
 
     if np.any(lower_bounds >= upper_bounds):
         raise ValueError("Bounds are not legal")
@@ -25,50 +26,88 @@ def scale_samples(params, bounds):
     # The calculation is equivalent to:
     #   sample * (upper_bound - lower_bound) + lower_bound
     np.add(np.multiply(params,
-                      (upper_bounds - lower_bounds),
-                      out=params), \
+                       (upper_bounds - lower_bounds),
+                       out=params),
            lower_bounds,
            out=params)
 
 
-def read_param_file(filename):
-
-
+def read_param_file(filename, param_file_contains_groups=False,
+                    delimiter=None):
+    '''
+    Reads a parameter file of format:
+        Param1,0,1,Group1
+        Param2,0,1,Group2
+        Param3,0,1,Group3
+    And returns a dictionary containing:
+        - names - the names of the parameters
+        - bounds - a list of lists of lower and upper bounds
+        - num_vars - a scalar indicating the number of variables
+                     (the length of names)
+        - groups - a tuple containing i) a group matrix assigning parameters to
+                   groups
+                                      ii) a list of unique group names
+    '''
     names = []
     bounds = []
+    group_list = []
     num_vars = 0
+    fieldnames = ['name', 'lower_bound', 'upper_bound', 'group']
 
     with open(filename) as csvfile:
-        dialect = csv.Sniffer().sniff(csvfile.read(16384))
+        dialect = csv.Sniffer().sniff(csvfile.read(1024), delimiters=delimiter)
         csvfile.seek(0)
-        reader = csv.reader(csvfile, dialect)
+        reader = csv.DictReader(
+            csvfile, fieldnames=fieldnames, dialect=dialect)
         for row in reader:
-            if row[0].strip().startswith('#'):
+            if row['name'].strip().startswith('#'):
                 pass
             else:
                 num_vars += 1
-                names.append(row[0])
-                bounds.append([float(row[1]), float(row[2])])
+                names.append(row['name'])
+                bounds.append(
+                    [float(row['lower_bound']), float(row['upper_bound'])])
+                if param_file_contains_groups is True:
+                    # If the fourth column does not contain a group name, use
+                    # the parameter name
+                    if row['group'] is None:
+                        group_list.append(row['name'])
+                    elif row['group'] == '':
+                        group_list.append(row['name'])
+                    else:
+                        group_list.append(row['group'])
 
-    return {'names': names, 'bounds': bounds, 'num_vars': num_vars}
+        group_matrix, group_names = compute_groups_from_parameter_file(
+            group_list, num_vars)
+
+        if np.all(group_matrix == np.eye(num_vars)):
+            group_tuple = None
+        else:
+            group_tuple = (group_matrix, group_names)
+
+    return {'names': names, 'bounds': bounds, 'num_vars': num_vars,
+            'groups': group_tuple}
 
 
-def read_group_file(filename):
+def compute_groups_from_parameter_file(group_list, num_vars):
     '''
-    Reads in a group file and returns a dictionary containing
-        a list of names of the variables
-        a numpy matrix of factor group membership
+    Computes a k-by-g matrix which notes factor membership of groups
+    where:
+        k is the number of variables (factors)
+        g is the number of groups
+    Also returns a g-length list of unique group_names whose positions
+    correspond to the order of groups in the k-by-g matrix
     '''
-    output = []
-    num_groups = 0
+    # Get a unique set of the group names
+    unique_group_names = list(OrderedDict.fromkeys(group_list))
+    number_of_groups = len(unique_group_names)
 
-    with open(filename) as csvfile:
-        dialect = csv.Sniffer().sniff(csvfile.read(16384))
-        csvfile.seek(0)
-        reader = csv.reader(csvfile, dialect)
-        for row in reader:
-          if row[0].strip().startswith('#'):
-              pass
-          else:
-              output.append([row[0], row[1:]])
-    return {'groups': output}
+    indices = dict([(x, i) for (i, x) in enumerate(unique_group_names)])
+
+    output = np.zeros((num_vars, number_of_groups), dtype=np.int)
+
+    for parameter_row, group_membership in enumerate(group_list):
+        group_index = indices[group_membership]
+        output[parameter_row, group_index] = 1
+
+    return np.matrix(output), unique_group_names

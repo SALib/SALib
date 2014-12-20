@@ -1,7 +1,8 @@
 from __future__ import division
 from numpy.testing import assert_equal, assert_allclose
-from nose.tools import raises, with_setup, eq_
-from ..util import read_param_file, scale_samples, read_group_file
+from nose.tools import raises, with_setup
+from ..util import read_param_file, scale_samples, \
+                   compute_groups_from_parameter_file
 import os
 import numpy as np
 
@@ -35,17 +36,11 @@ def setup_csv_param_file_with_whitespace_in_names_comments():
          ofile.write("'Test 2',5.0,51.0\n")
 
 
-def setup_group_file():
-    filename = "SALib/tests/test_group_file.csv"
-    with open(filename, "w") as ofile:
-         ofile.write("'Group 1','Test 1'\n")
-         ofile.write("'Group 2','Test 2','Test 3'\n")
-
-
 def teardown():
     [os.remove("SALib/tests/%s" % f) for f in os.listdir("SALib/tests/") if f.endswith(".txt")]
     [os.remove("SALib/tests/%s" % f) for f in os.listdir("SALib/tests/") if f.endswith(".csv")]
     [os.remove("SALib/tests/%s" % f) for f in os.listdir("SALib/tests/") if f.endswith(".tab")]
+
 
 @with_setup(setup_function, teardown)
 def test_readfile():
@@ -105,21 +100,6 @@ def test_csv_readfile_with_comments():
     assert_equal(pf['names'], ['Test 1', 'Test 2'])
 
 
-@with_setup(setup_group_file)
-def test_read_groupfile():
-    '''
-    Tests that a group file is read correctly
-    '''
-    group_file = "SALib/tests/test_group_file.csv"
-
-    gf = read_group_file(group_file)
-
-    desired = [['Group 1', ['Test 1']],['Group 2', ['Test 2', 'Test 3']]]
-    actual = gf['groups']
-
-    eq_(actual, desired)
-
-
 # Test scale samples
 def test_scale_samples():
     '''
@@ -153,3 +133,14 @@ def test_scale_samples_upper_eq_lower():
     params = np.array([[0, 0],[0.1,0.1],[0.2,0.2]])
     bounds = [[10,10],[-10,10]]
     scale_samples(params, bounds)
+
+
+def test_compute_groups_from_parameter_file():
+    '''
+    Tests that a group file is read correctly
+    '''
+    actual_matrix, actual_unique_names = \
+        compute_groups_from_parameter_file(['Group 1', 'Group 2', 'Group 2'], 3)
+
+    assert_equal(actual_matrix, np.matrix('1,0;0,1;0,1', dtype=np.int))
+    assert_equal(actual_unique_names, ['Group 1', 'Group 2'])

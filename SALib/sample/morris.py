@@ -4,7 +4,7 @@ import random as rd
 from . import common_args
 from . sample import Sample
 from ..sample import morris_oat, morris_groups, morris_optimal
-from ..util import read_param_file, scale_samples, read_group_file
+from ..util import read_param_file
 from collections import Iterable
 
 
@@ -32,21 +32,22 @@ class Morris(Sample):
     '''
 
 
-    def __init__(self, parameter_file, samples, num_levels, grid_jump, \
-                 group_file=None, optimal_trajectories=None):
+    def __init__(self, parameter_file, samples, \
+                 num_levels, grid_jump, \
+                 optimal_trajectories=None):
 
+        self.groups = None
+        self.group_names = None
         self.parameter_file = parameter_file
         self.samples = samples
         self.num_levels = num_levels
         self.grid_jump = grid_jump
-        pf = read_param_file(self.parameter_file)
+        pf = read_param_file(self.parameter_file, True)
         self.num_vars = pf['num_vars']
         self.bounds = pf['bounds']
         self.parameter_names = pf['names']
-        if group_file:
-          self.groups = self.compute_groups(group_file)
-        else:
-          self.groups = None
+        if pf['groups'] is not None:
+            self.groups, self.group_names = pf['groups']
         self.optimal_trajectories = optimal_trajectories
 
         if self.optimal_trajectories != None:
@@ -75,38 +76,6 @@ class Morris(Sample):
                     yield sub
             else:
                 yield el
-
-
-    def compute_groups(self, group_file):
-        gf = read_group_file(group_file)
-
-        data = gf['groups']
-
-        group_names = [g[0] for g in data]
-        param_names_from_gf = [g[1] for g in data]
-        param_names_to_check = [x for x in self.flatten(param_names_from_gf)]
-
-        actual_names = self.parameter_names
-
-        # Check parameter names in the group file match those from the parameter file
-        if not all([x in actual_names for x in param_names_to_check]):
-            print("Actual names: ", actual_names)
-            print("Names from group file: ", [x for x in param_names_to_check])
-            raise ValueError("The parameter names from the group file do not match those from the parameter file")
-
-        # Compute the index of each parameter name and store in a dictionary
-        indices = dict([(x,i) for (i,x) in enumerate(actual_names)])
-
-        output = np.zeros((self.num_vars, len(group_names)))
-
-        # Get the data from the group file...
-        for row, group in enumerate(param_names_from_gf):
-            for param in group:
-                column = indices[param]
-                output[column,row] = 1
-
-        # ... and compile the numpy matrix
-        return np.matrix(output)
 
 
     def create_sample(self):
