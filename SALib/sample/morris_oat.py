@@ -47,21 +47,23 @@ def sample(N, param_file, num_levels, grid_jump):
             (np.mat(B) * np.mat(P) * np.mat(DM) + 1) * \
             np.mat(delta_diag) + np.mat(x_base)
 
-    #scale_samples(X, pf['bounds'])
     return X
 
 if __name__ == "__main__":
 
     parser = common_args.create()
-    parser.add_argument('--num-levels', type=int, required=False,
+    parser.add_argument('-l', type=int, required=False,
                         default=10, help='Number of grid levels (Morris only)')
     parser.add_argument('--grid-jump', type=int, required=False,
                         default=5, help='Grid jump size (Morris only)')
     args = parser.parse_args()
 
+    pf = read_param_file(args.paramfile)
     np.random.seed(args.seed)
     rd.seed(args.seed)
     param_values = sample(args.samples, args.paramfile,
-                          num_levels=args.num_levels, grid_jump=args.grid_jump)
+                          num_levels=args.l, grid_jump=args.grid_jump)
+    scale_samples(param_values, pf['bounds'])
+
     np.savetxt(args.output, param_values, delimiter=args.delimiter,
                fmt='%.' + str(args.precision) + 'e')

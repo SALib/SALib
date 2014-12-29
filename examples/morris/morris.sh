@@ -2,7 +2,7 @@
 
 # Example: generating samples from the command line
 cd ../../ # hack
-python -m SALib.sample.morris \
+python -m SALib.sample.morris_oat \
        -n 100 \
        -p ./SALib/test_functions/params/Ishigami.txt \
        -o model_input.txt \
@@ -45,8 +45,8 @@ python -m SALib.analyze.morris \
        -Y model_output.txt \
        -c 0 \
        -X model_input.txt \
-       -r 1000
-       -l 10 \
+       -r 1000 \
+       -l=10 \
        --grid-jump=5
 
 # Options:
