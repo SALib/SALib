@@ -3,8 +3,7 @@ import numpy as np
 import random as rd
 from . import common_args
 from . sample import Sample
-from ..sample import morris_oat, morris_groups, morris_optimal
-from ..util import read_param_file
+from ..sample import morris_groups, morris_optimal
 from collections import Iterable
 
 
@@ -71,26 +70,17 @@ class Morris(Sample):
 
     def create_sample(self):
 
-        if self.optimal_trajectories is None:
+        sample = self.sample_oat()
 
-            optimal_sample = morris_oat.sample(self.samples,
-                                               self.parameter_file,
-                                               self.num_levels,
-                                               self.grid_jump)
+        if self.optimal_trajectories is not None:
 
-        else:
-
-            sample = morris_oat.sample(self.samples,
-                                       self.parameter_file,
-                                       self.num_levels,
-                                       self.grid_jump)
-            optimal_sample = \
+            sample = \
                 morris_optimal.find_optimum_trajectories(sample,
                                                          self.samples,
                                                          self.num_vars,
                                                          self.optimal_trajectories)
 
-        self.output_sample = optimal_sample
+        self.output_sample = sample
 
 
     def create_sample_with_groups(self):
@@ -105,6 +95,48 @@ class Morris(Sample):
                                                          self.samples,
                                                          self.num_vars,
                                                          self.optimal_trajectories)
+
+    def sample_oat(self):
+
+        D = self.num_vars
+        N = self.samples
+
+        # orientation matrix B: lower triangular (1) + upper triangular (-1)
+        B = np.tril(np.ones([D + 1, D], dtype=int), -1) + \
+            np.triu(-1 * np.ones([D + 1, D], dtype=int))
+
+        # grid step delta, and final sample matrix X
+        delta = self.grid_jump / (self.num_levels - 1)
+        X = np.empty([N * (D + 1), D])
+
+        # Create N trajectories. Each trajectory contains D+1 parameter sets.
+        # (Starts at a base point, and then changes one parameter at a time)
+        for j in range(N):
+
+            # directions matrix DM - diagonal matrix of either +1 or -1
+            DM = np.diag([rd.choice([-1, 1]) for _ in range(D)])
+
+            # permutation matrix P
+            perm = np.random.permutation(D)
+            P = np.zeros([D, D])
+            for i in range(D):
+                P[i, perm[i]] = 1
+
+            # starting point for this trajectory
+            x_base = np.empty([D + 1, D])
+            for i in range(D):
+                x_base[:, i] = (
+                    rd.choice(np.arange(self.num_levels - self.grid_jump))) / (self.num_levels - 1)
+
+            # Indices to be assigned to X, corresponding to this trajectory
+            index_list = np.arange(D + 1) + j * (D + 1)
+            delta_diag = np.diag([delta for _ in range(D)])
+
+            X[index_list, :] = 0.5 * \
+                (np.mat(B) * np.mat(P) * np.mat(DM) + 1) * \
+                np.mat(delta_diag) + np.mat(x_base)
+
+        return X
 
 
     def debug(self):
