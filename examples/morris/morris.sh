@@ -2,13 +2,13 @@
 
 # Example: generating samples from the command line
 cd ../../ # hack
-python -m SALib.sample.morris_oat \
+python -m SALib.sample.morris \
        -n 100 \
        -p ./SALib/test_functions/params/Ishigami.txt \
        -o model_input.txt \
        --delimiter=' ' \
        --precision=8 \
-       -l=10 \
+       --levels=10 \
        --grid-jump=5
 
 # Options:

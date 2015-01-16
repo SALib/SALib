@@ -171,6 +171,6 @@ if __name__ == "__main__":
     rd.seed(args.seed)
 
     sample = Morris(args.paramfile, args.samples, args.levels, \
-                    args.grid_jump, args.group, args.k_optimal)
+                    args.grid_jump, args.k_optimal)
 
     sample.save_data(args.output, delimiter=args.delimiter, precision=args.precision)
