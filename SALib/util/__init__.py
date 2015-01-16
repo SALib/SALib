@@ -32,8 +32,7 @@ def scale_samples(params, bounds):
            out=params)
 
 
-def read_param_file(filename, param_file_contains_groups=False,
-                    delimiter=None):
+def read_param_file(filename, delimiter=None):
     '''
     Reads a parameter file of format:
         Param1,0,1,Group1
@@ -67,15 +66,13 @@ def read_param_file(filename, param_file_contains_groups=False,
                 names.append(row['name'])
                 bounds.append(
                     [float(row['lower_bound']), float(row['upper_bound'])])
-                if param_file_contains_groups is True:
-                    # If the fourth column does not contain a group name, use
-                    # the parameter name
-                    if row['group'] is None:
-                        group_list.append(row['name'])
-                    elif row['group'] == '':
-                        group_list.append(row['name'])
-                    else:
-                        group_list.append(row['group'])
+
+                # If the fourth column does not contain a group name, use
+                # the parameter name
+                if row['group'] is None:
+                    group_list.append(row['name'])
+                else:
+                    group_list.append(row['group'])
 
         group_matrix, group_names = compute_groups_from_parameter_file(
             group_list, num_vars)

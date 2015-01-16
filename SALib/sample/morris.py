@@ -36,18 +36,9 @@ class Morris(Sample):
                  num_levels, grid_jump, \
                  optimal_trajectories=None):
 
-        self.groups = None
-        self.group_names = None
-        self.parameter_file = parameter_file
-        self.samples = samples
+        Sample.__init__(self, parameter_file, samples)
         self.num_levels = num_levels
-        self.grid_jump = grid_jump
-        pf = read_param_file(self.parameter_file, True)
-        self.num_vars = pf['num_vars']
-        self.bounds = pf['bounds']
-        self.parameter_names = pf['names']
-        if pf['groups'] is not None:
-            self.groups, self.group_names = pf['groups']
+        self.grid_jump = grid_jump        
         self.optimal_trajectories = optimal_trajectories
 
         if self.optimal_trajectories != None:
@@ -57,7 +48,7 @@ class Morris(Sample):
                 raise ValueError("The number of optimal trajectories should be less than the number of samples.")
             elif self.optimal_trajectories > 10:
                 raise ValueError("Running optimal trajectories greater than values of 10 will take a long time.")
-            elif self.optimal_trajectories <= 1:
+            elif self.optimal_trajectories < 2:
                 raise ValueError("The number of optimal trajectories must be set to 2 or more.")
 
         if self.groups is None:

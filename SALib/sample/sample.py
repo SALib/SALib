@@ -16,6 +16,10 @@ class Sample(object):
         self.parameter_names = pf['names']
         self.samples = samples
         self.output_sample = None
+        if pf['groups'] is not None:
+            self.groups, self.group_names = pf['groups']
+        else:
+            self.groups, self.group_names = [None, None]
 
 
     def save_data(self, output, delimiter=' ', precision=8):

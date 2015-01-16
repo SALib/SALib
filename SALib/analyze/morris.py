@@ -28,7 +28,7 @@ def analyze(pfile,
 
     delta = grid_jump / (num_levels - 1)
 
-    param_file = read_param_file(pfile,True)
+    param_file = read_param_file(pfile)
     Y = np.loadtxt(output_file, delimiter=delim, usecols=(column,))
     X = np.loadtxt(input_file, delimiter=delim, ndmin=2)
     if len(X.shape) == 1:

@@ -11,7 +11,6 @@ param_file = '../../SALib/test_functions/params/Ishigami.txt'
 
 # Generate samples
 param_values = Morris(param_file, samples=1000, num_levels=10, grid_jump=5, \
-                      group_file=None, \
                       optimal_trajectories=None)
 
 # Save the parameter values in a file (they are needed in the analysis)
