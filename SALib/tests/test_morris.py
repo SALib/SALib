@@ -49,7 +49,7 @@ def test_group_in_param_file_read():
 
 
 @with_setup(setup)
-def test_get_input_sample_scaled_works():
+def test_get_inputs_works():
     '''
     Tests that both the scaled and unscaled methods of the Sample
     class, inherited into the Morris class work correctly.
@@ -73,13 +73,13 @@ def test_get_input_sample_scaled_works():
     desired_scaled = np.array([np.arange(10,21,1), np.arange(-10,12,2)],dtype=np.float).T
     desired_unscaled = np.arange(0,1.1,0.1).repeat(2).reshape((11,2))
 
-    actual_unscaled = sample.get_input_sample_unscaled()
+    actual_unscaled = sample.get_inputs_unscaled()
     assert_allclose(actual_unscaled, desired_unscaled)
 
-    actual_scaled = sample.get_input_sample_scaled()
+    actual_scaled = sample.get_inputs()
     assert_allclose(actual_scaled, desired_scaled)
 
-    actual_unscaled = sample.get_input_sample_unscaled()
+    actual_unscaled = sample.get_inputs_unscaled()
     assert_allclose(actual_unscaled, desired_unscaled)
 
 

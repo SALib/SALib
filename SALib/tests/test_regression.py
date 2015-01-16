@@ -19,7 +19,7 @@ def test_regression_morris_vanilla():
 
     param_values.save_data('model_input.txt')
 
-    online_model_values = param_values.get_input_sample_scaled()
+    online_model_values = param_values.get_inputs()
 
     Y = Ishigami.evaluate(online_model_values)
     np.savetxt("model_output.txt", Y, delimiter=' ')
@@ -41,7 +41,7 @@ def test_regression_morris_groups():
 
     param_values.save_data('model_input_groups.txt')
 
-    online_model_values = param_values.get_input_sample_scaled()
+    online_model_values = param_values.get_inputs()
 
     Y = Ishigami.evaluate(online_model_values)
     np.savetxt("model_output_groups.txt", Y, delimiter=' ')
@@ -67,7 +67,7 @@ def test_regression_morris_optimal():
 
     param_values.save_data('model_input_groups.txt')
 
-    online_model_values = param_values.get_input_sample_scaled()
+    online_model_values = param_values.get_inputs()
 
     Y = Ishigami.evaluate(online_model_values)
 

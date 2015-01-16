@@ -27,7 +27,7 @@ class Sample(object):
         Saves the data to a file for input into a model
         '''
 
-        data_to_save = self.get_input_sample_scaled()
+        data_to_save = self.get_inputs()
 
         np.savetxt(output,
                    data_to_save,
@@ -35,15 +35,7 @@ class Sample(object):
                    fmt='%.' + str(precision) + 'e')
 
 
-    def get_input_sample_unscaled(self):
-        '''
-        Returns the unscaled (according to the bounds from the parameter file)
-        data as a numpy array
-        '''
-        return self.output_sample
-
-
-    def get_input_sample_scaled(self):
+    def get_inputs(self):
         '''
         Returns the scaled (according to the bounds from the parameter file)
         data as a numpy array
@@ -51,6 +43,14 @@ class Sample(object):
         scaled_samples = self.output_sample.copy()
         scale_samples(scaled_samples, self.bounds)
         return scaled_samples
+
+
+    def get_inputs_unscaled(self):
+        '''
+        Returns the unscaled (according to the bounds from the parameter file)
+        data as a numpy array
+        '''
+        return self.output_sample
 
 
     def parameter_names(self):

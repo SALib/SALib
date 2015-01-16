@@ -13,18 +13,17 @@ param_file = '../../SALib/test_functions/params/Ishigami.txt'
 # param_file = '../../SALib/test_functions/params/Ishigami_groups.txt'
 
 # Generate samples
-param_values = Morris(param_file, samples=10000, num_levels=10, grid_jump=5, \
+sample = Morris(param_file, samples=10000, num_levels=10, grid_jump=5, \
                       optimal_trajectories=None)
 
 # To use optimized trajectories (brute force method), give an integer value for optimal_trajectories
 
 # Save the parameter values in a file (they are needed in the analysis)
-param_values.save_data('model_input.txt')
+sample.save_data('model_input.txt')
 
 # Run the "model" and save the output in a text file
 # This will happen offline for external models
-online_model_values = param_values.get_input_sample_scaled()
-Y = Ishigami.evaluate(online_model_values)
+Y = Ishigami.evaluate(sample.get_inputs())
 np.savetxt("model_output.txt", Y, delimiter=' ')
 
 # Perform the sensitivity analysis using the model output
