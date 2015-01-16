@@ -136,6 +136,20 @@ def test_compute_groups_from_parameter_file_class():
 
 @raises(ValueError)
 @with_setup(setup, teardown)
+def test_grid_jump_lt_num_levels():
+
+    parameter_file = "SALib/tests/test_param_file.txt"
+
+    samples = 10
+    num_levels = 4
+    grid_jump = 4
+
+    Morris(parameter_file, samples, num_levels, grid_jump, \
+           optimal_trajectories=samples)
+
+
+@raises(ValueError)
+@with_setup(setup, teardown)
 def test_optimal_trajectories_lt_samples():
 
     parameter_file = "SALib/tests/test_param_file.txt"

@@ -39,6 +39,9 @@ class Morris(Sample):
         self.grid_jump = grid_jump        
         self.optimal_trajectories = optimal_trajectories
 
+        if self.grid_jump >= self.num_levels:
+            raise ValueError("grid_jump must be less than num_levels")
+
         if self.groups is None:
             sample = self.sample_oat()
         else:
