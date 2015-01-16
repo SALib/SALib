@@ -3,8 +3,8 @@ import numpy as np
 import random as rd
 from . import common_args
 from . sample import Sample
-from ..sample import morris_groups, morris_optimal
-from collections import Iterable
+from ..sample import morris_optimal
+from ..util import morris_trajectories as mt
 
 
 class Morris(Sample):
@@ -51,50 +51,18 @@ class Morris(Sample):
                 raise ValueError("The number of optimal trajectories must be set to 2 or more.")
 
         if self.groups is None:
-
-            self.create_sample()
-
+            sample = self.sample_oat()
         else:
-
-            self.create_sample_with_groups()
-
-
-    def flatten(self, l):
-        for el in l:
-            if isinstance(el, Iterable) and not isinstance(el, str):
-                for sub in self.flatten(el):
-                    yield sub
-            else:
-                yield el
-
-
-    def create_sample(self):
-
-        sample = self.sample_oat()
+            sample = self.sample_groups()
 
         if self.optimal_trajectories is not None:
-
             sample = \
                 morris_optimal.find_optimum_trajectories(sample,
                                                          self.samples,
                                                          self.num_vars,
                                                          self.optimal_trajectories)
-
         self.output_sample = sample
 
-
-    def create_sample_with_groups(self):
-
-        self.output_sample = morris_groups.sample(self.samples,
-                                                  self.groups,
-                                                  self.num_levels,
-                                                  self.grid_jump)
-        if self.optimal_trajectories is not None:
-            self.output_sample = \
-                morris_optimal.find_optimum_trajectories(self.output_sample,
-                                                         self.samples,
-                                                         self.num_vars,
-                                                         self.optimal_trajectories)
 
     def sample_oat(self):
 
@@ -137,6 +105,25 @@ class Morris(Sample):
                 np.mat(delta_diag) + np.mat(x_base)
 
         return X
+
+    def sample_groups(self):
+        '''
+        Returns an N(g+1)-by-k array of N trajectories;
+        where g is the number of groups and k is the number of factors
+        '''
+        N = self.samples
+        G = self.groups
+
+        if G is None:
+            raise ValueError("Please define the matrix G.")
+        if type(G) is not np.matrixlib.defmatrix.matrix:
+           raise TypeError("Matrix G should be formatted as a numpy matrix")
+
+        k = G.shape[0]
+        g = G.shape[1]
+        sample = np.empty((N*(g + 1), k))
+        sample = np.array([mt.generate_trajectory(G, self.num_levels, self.grid_jump) for n in range(N)])
+        return sample.reshape((N*(g + 1), k))
 
 
     def debug(self):

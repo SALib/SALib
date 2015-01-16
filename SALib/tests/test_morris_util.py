@@ -1,11 +1,9 @@
 from __future__ import division
 from numpy.testing import assert_equal
-from nose.tools import raises
-from ..sample.morris_groups import sample, \
-                                   generate_P_star,\
-                                   compute_B_star, \
-                                   compute_delta, \
-                                   generate_trajectory
+from ..util.morris_trajectories import generate_P_star,\
+                                       compute_B_star, \
+                                       compute_delta, \
+                                       generate_trajectory
 import numpy as np
 
 
@@ -29,18 +27,6 @@ def test_compute_delta():
     desired = np.array([1.00, 0.75, 0.66, 0.62,
                         0.60, 0.58, 0.57, 0.56])
     np.testing.assert_almost_equal(output, desired, decimal=2)
-
-
-def test_sample():
-    N = 6
-    num_levels = 4
-    grid_jump = 2
-    G = np.matrix([[1,0],[0,1]])
-    output = sample(N, G, num_levels, grid_jump)
-    if np.any((output > 1) | (output < 0)):
-        raise AssertionError("Bound not working")
-    assert_equal(output.shape[0], N*3)
-    assert_equal(output.shape[1], 2)
 
 
 def test_generate_trajectory():
@@ -78,20 +64,3 @@ def test_compute_B_star():
     output = compute_B_star(J, x_star, delta, B, G, P_star, D_star)
     assert_equal(output, desired)
 
-
-@raises(ValueError)
-def test_sample_fails_with_no_G_matrix():
-    N = 6
-    num_levels = 4
-    grid_jump = 2
-    G = None
-    sample(N, G, num_levels, grid_jump)
-
-
-@raises(TypeError)
-def test_sample_fails_with_wrong_G_matrix():
-    N = 6
-    num_levels = 4
-    grid_jump = 2
-    G = list[1,2,3,4]
-    sample(N, G, num_levels, grid_jump)

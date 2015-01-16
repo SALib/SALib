@@ -2,6 +2,10 @@ from __future__ import division
 import numpy as np
 import random as rd
 
+'''
+Helper functions for Morris trajectories
+(Generating group samples, and optimizing trajectory distances)
+'''
 
 def generate_trajectory(G, num_levels, grid_jump):
     '''
@@ -38,30 +42,6 @@ def generate_trajectory(G, num_levels, grid_jump):
     B_star = compute_B_star(J, x_star, delta, B, G, P_star, D_star)
 
     return B_star
-
-
-def sample(N, G, num_levels, grid_jump):
-    '''
-    Returns an N(g+1)-by-k array of N trajectories;
-    where g is the number of groups and k is the number of factors
-
-    Arguments:
-      N            number of trajectories
-      G            a k-by-g matrix which denotes factor membership of groups
-      num_levels   integer describing number of levels
-      grid_jump    recommended to be equal to p / (2(p-1)) where p is num_levels
-    '''
-
-    if G is None:
-        raise ValueError("Please define the matrix G.")
-    if type(G) is not np.matrixlib.defmatrix.matrix:
-       raise TypeError("Matrix G should be formatted as a numpy matrix")
-
-    k = G.shape[0]
-    g = G.shape[1]
-    sample = np.empty((N*(g + 1), k))
-    sample = np.array([generate_trajectory(G, num_levels, grid_jump) for n in range(N)])
-    return sample.reshape((N*(g + 1), k))
 
 
 def compute_B_star(J, x_star, delta, B, G, P_star, D_star):
