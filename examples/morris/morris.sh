@@ -15,7 +15,7 @@ python -m SALib.sample.morris_oat \
 # -p, --paramfile: Your parameter range file
 #                  (3 columns: parameter name,
 #                              lower bound,
-#                              upper bound)
+#                              upper bound) with an optional 4th "group" column for Morris only
 #
 # -n, --samples: Sample size.
 #				 Number of model runs is N(D + 1)
@@ -26,13 +26,16 @@ python -m SALib.sample.morris_oat \
 #
 # --precision (optional): Digits of precision in the output file. Default is 8.
 #
-# -l (optional): Number of levels in the OAT sampling.
+# -l, --levels (optional): Number of levels in the OAT sampling.
 #                The range of each variable will be discretized into this many levels.
-#                Default is 10.
+#                Default is 4.
 #
 # --grid-jump (optional): Grid jump size in the OAT sampling.
 #                         Each variable will be perturbed by this number of levels
-#                         during each trajectory. Default is 5.
+#                         during each trajectory. Default is 2.
+#
+# -k, --k-optimal (optional): Number of optimal trajectories. 
+#                             Default behavior uses vanilla OAT if --k-optimal is not specified
 
 # Run the model using the inputs sampled above, and save outputs
 python -c "from SALib.test_functions import Ishigami; import numpy as np; np.savetxt('model_output.txt', Ishigami.evaluate(np.loadtxt('model_input.txt')))"

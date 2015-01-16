@@ -162,8 +162,6 @@ if __name__ == "__main__":
                         default=2, help='Grid jump size (Morris only)')
     parser.add_argument('-k','--k-optimal', type=int, required=False,
                         default=None, help='Number of optimal trajectories (Morris only)')
-    parser.add_argument('--group', type=str, required=False, default=None,
-                       help='File path to grouping file (Morris only)')
     args = parser.parse_args()
 
     np.random.seed(args.seed)
