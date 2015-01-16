@@ -3,8 +3,7 @@ import numpy as np
 import random as rd
 from . import common_args
 from . sample import Sample
-from ..sample import morris_optimal
-from ..util import morris_trajectories as mt
+from . morris_util import *
 
 
 class Morris(Sample):
@@ -40,27 +39,21 @@ class Morris(Sample):
         self.grid_jump = grid_jump        
         self.optimal_trajectories = optimal_trajectories
 
-        if self.optimal_trajectories != None:
-            # Check to ensure that fewer optimal trajectories than samples are
-            # requested, otherwise ignore
-            if self.optimal_trajectories >= self.samples:
-                raise ValueError("The number of optimal trajectories should be less than the number of samples.")
-            elif self.optimal_trajectories > 10:
-                raise ValueError("Running optimal trajectories greater than values of 10 will take a long time.")
-            elif self.optimal_trajectories < 2:
-                raise ValueError("The number of optimal trajectories must be set to 2 or more.")
-
         if self.groups is None:
             sample = self.sample_oat()
         else:
             sample = self.sample_groups()
 
         if self.optimal_trajectories is not None:
-            sample = \
-                morris_optimal.find_optimum_trajectories(sample,
-                                                         self.samples,
-                                                         self.num_vars,
-                                                         self.optimal_trajectories)
+            if self.optimal_trajectories >= self.samples:
+                raise ValueError("The number of optimal trajectories should be less than the number of samples.")
+            elif self.optimal_trajectories > 10:
+                raise ValueError("Running optimal trajectories greater than values of 10 will take a long time.")
+            elif self.optimal_trajectories < 2:
+                raise ValueError("The number of optimal trajectories must be set to 2 or more.")
+            else:
+                sample = self.optimize_trajectories(sample)
+
         self.output_sample = sample
 
 
@@ -122,8 +115,29 @@ class Morris(Sample):
         k = G.shape[0]
         g = G.shape[1]
         sample = np.empty((N*(g + 1), k))
-        sample = np.array([mt.generate_trajectory(G, self.num_levels, self.grid_jump) for n in range(N)])
+        sample = np.array([generate_trajectory(G, self.num_levels, self.grid_jump) for n in range(N)])
         return sample.reshape((N*(g + 1), k))
+
+
+    def optimize_trajectories(self, input_sample):
+
+        N = self.samples
+        k_choices = self.optimal_trajectories
+
+        if np.any((input_sample < 0) | (input_sample > 1)):
+            raise ValueError("Input sample must be scaled between 0 and 1")
+
+        scores = find_most_distant(input_sample, N, self.num_vars, k_choices)
+
+        index_list = []
+        for j in range(N):
+            index_list.append(np.arange(self.num_vars + 1) + j * (self.num_vars + 1))
+
+        maximum_combo = find_maximum(scores, N, k_choices)
+        output = np.zeros((np.size(maximum_combo) * (self.num_vars + 1), self.num_vars))
+        for counter, x in enumerate(maximum_combo):
+            output[index_list[counter]] = np.array(input_sample[index_list[x]])
+        return output
 
 
     def debug(self):

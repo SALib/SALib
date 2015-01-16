@@ -199,3 +199,34 @@ def test_morris_sample_no_groups_no_optimal_trajectories():
     eq_(sample.groups, None)
     eq_(sample.group_names, None)
     eq_(sample.optimal_trajectories, None)
+
+
+
+# Old tests for find_optimal_trajectories function
+# This is now inside the Morris class (Morris.optimize_trajectories)
+# How to test?
+
+# def test_find_optimum_trajectories():
+#     input_1 = [[0, 1/3.], [0, 1.], [2/3., 1.]]
+#     input_2 = [[0, 1/3.], [2/3., 1/3.], [2/3., 1.]]
+#     input_3 = [[2/3., 0], [2/3., 2/3.], [0, 2/3.]]
+#     input_4 = [[1/3., 1.], [1., 1.], [1, 1/3.]]
+#     input_5 = [[1/3., 1.], [1/3., 1/3.], [1, 1/3.]]
+#     input_6 = [[1/3., 2/3.], [1/3., 0], [1., 0]]
+#     input_sample = np.concatenate([input_1, input_2, input_3,
+#                                    input_4, input_5, input_6])
+#     N = 6
+#     num_params = 2
+#     k_choices = 4
+#     output = find_optimum_trajectories(input_sample, N, num_params, k_choices)
+#     expected = np.concatenate([input_1, input_3, input_4, input_6])
+#     np.testing.assert_equal(output, expected)
+
+
+# @raises(ValueError)
+# def test_catch_inputs_not_in_zero_one_range():
+#     num_params = 2
+#     k_choices = 4
+#     N = 10
+#     input_sample = setup() * 10
+#     find_optimum_trajectories(input_sample, N, num_params, k_choices)
