@@ -24,7 +24,7 @@ problem = read_param_file(param_file)
 # param_file = '../../SALib/test_functions/params/Ishigami_groups.txt'
 
 # Generate samples
-param_values = sample(problem, samples=10000, num_levels=10, grid_jump=5, \
+param_values = sample(problem, N=10000, num_levels=10, grid_jump=5, \
                       optimal_trajectories=None)
 
 # To use optimized trajectories (brute force method), give an integer value for optimal_trajectories

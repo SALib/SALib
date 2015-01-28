@@ -28,7 +28,7 @@ Suggested enhancements:
 '''
 
 
-def sample(problem, samples, num_levels, grid_jump, optimal_trajectories=None):
+def sample(problem, N, num_levels, grid_jump, optimal_trajectories=None):
 
     # sample init goes here
 
@@ -36,28 +36,27 @@ def sample(problem, samples, num_levels, grid_jump, optimal_trajectories=None):
         raise ValueError("grid_jump must be less than num_levels")
 
     if problem['groups'] is None:
-        sample = sample_oat(problem, samples, num_levels, grid_jump)
+        sample = sample_oat(problem, N, num_levels, grid_jump)
     else:
-        sample = sample_groups(problem, samples, num_levels, grid_jump)
+        sample = sample_groups(problem, N, num_levels, grid_jump)
 
     if optimal_trajectories is not None:
-        if optimal_trajectories >= samples:
+        if optimal_trajectories >= N:
             raise ValueError("The number of optimal trajectories should be less than the number of samples.")
         elif optimal_trajectories > 10:
             raise ValueError("Running optimal trajectories greater than values of 10 will take a long time.")
         elif optimal_trajectories < 2:
             raise ValueError("The number of optimal trajectories must be set to 2 or more.")
         else:
-            sample = optimize_trajectories(sample)
+            sample = optimize_trajectories(problem, sample, N, optimal_trajectories)
 
     scale_samples(sample, problem['bounds'])
     return sample
 
 
-def sample_oat(problem, samples, num_levels, grid_jump):
+def sample_oat(problem, N, num_levels, grid_jump):
 
     D = problem['num_vars']
-    N = samples
 
     # orientation matrix B: lower triangular (1) + upper triangular (-1)
     B = np.tril(np.ones([D + 1, D], dtype=int), -1) + \
@@ -96,12 +95,11 @@ def sample_oat(problem, samples, num_levels, grid_jump):
 
     return X
 
-def sample_groups(problem, samples, num_levels, grid_jump):
+def sample_groups(problem, N, num_levels, grid_jump):
     '''
     Returns an N(g+1)-by-k array of N trajectories;
     where g is the number of groups and k is the number of factors
     '''
-    N = samples
     G, group_names = problem['groups']
 
     if G is None:
@@ -116,9 +114,8 @@ def sample_groups(problem, samples, num_levels, grid_jump):
     return sample.reshape((N*(g + 1), k))
 
 
-def optimize_trajectories(problem, input_sample, optimal_trajectories):
+def optimize_trajectories(problem, input_sample, N, optimal_trajectories):
 
-    N = samples
     D = problem['num_vars']
     k_choices = optimal_trajectories
 

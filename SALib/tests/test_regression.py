@@ -5,23 +5,23 @@ from .test_util import teardown
 import numpy as np
 import sys
 
-from ..sample.morris import Morris
+from ..sample.morris import sample
 from ..analyze import morris
 from ..test_functions import Ishigami
+from ..util import read_param_file
 
 
 def test_regression_morris_vanilla():
 
-    param_file = 'SALib/test_functions/params/Ishigami.txt'
-    param_values = Morris(param_file, samples=5000, \
+    param_file ='SALib/test_functions/params/Ishigami.txt'
+    problem = read_param_file(param_file)
+    param_values = sample(problem=problem, N=5000, \
                           num_levels=10, grid_jump=5, \
                           optimal_trajectories=None)
 
-    param_values.save_data('model_input.txt')
+    np.savetxt('model_input.txt', param_values, delimiter=' ')
 
-    online_model_values = param_values.get_inputs()
-
-    Y = Ishigami.evaluate(online_model_values)
+    Y = Ishigami.evaluate(param_values)
     np.savetxt("model_output.txt", Y, delimiter=' ')
 
     Si = morris.analyze(param_file, 'model_input.txt', 'model_output.txt',
@@ -34,16 +34,15 @@ def test_regression_morris_vanilla():
 def test_regression_morris_groups():
 
     param_file = 'SALib/test_functions/params/Ishigami_groups.txt'
+    problem = read_param_file(param_file)
 
-    param_values = Morris(param_file, samples=5000, \
+    param_values = sample(problem=problem, N=5000, \
                           num_levels=10, grid_jump=5, \
                           optimal_trajectories=None)
 
-    param_values.save_data('model_input_groups.txt')
+    np.savetxt('model_input_groups.txt', param_values, delimiter=' ')
 
-    online_model_values = param_values.get_inputs()
-
-    Y = Ishigami.evaluate(online_model_values)
+    Y = Ishigami.evaluate(param_values)
     np.savetxt("model_output_groups.txt", Y, delimiter=' ')
 
     Si = morris.analyze(param_file, 'model_input_groups.txt', 'model_output_groups.txt',
@@ -61,15 +60,14 @@ def test_regression_morris_optimal():
     due to the coarse nature of the num_levels and grid_jump.
     '''
     param_file = 'SALib/test_functions/params/Ishigami.txt'
-    param_values = Morris(param_file, samples=20, \
+    problem = read_param_file(param_file)
+    param_values = sample(problem=problem, N=20, \
                           num_levels=4, grid_jump=2, \
                           optimal_trajectories=9)
 
-    param_values.save_data('model_input_groups.txt')
+    np.savetxt('model_input_groups.txt', param_values, delimiter=' ')
 
-    online_model_values = param_values.get_inputs()
-
-    Y = Ishigami.evaluate(online_model_values)
+    Y = Ishigami.evaluate(param_values)
 
     np.savetxt("model_output_groups.txt", Y, delimiter=' ')
 

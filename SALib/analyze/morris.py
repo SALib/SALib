@@ -47,7 +47,7 @@ def analyze(pfile,
                             where D is the number of parameters (or groups) in your parameter file. \
                          """)
     ee = np.zeros((num_vars, num_trajectories))
-    ee = compute_effects_vector(X, Y, Y.size / num_trajectories, delta)
+    ee = compute_effects_vector(X, Y, int(Y.size / num_trajectories), delta)
 
     # Output the Mu, Mu*, and Sigma Values. Also return them in case this is
     # being called from Python

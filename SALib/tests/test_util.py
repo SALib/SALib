@@ -1,7 +1,7 @@
 from __future__ import division
 from numpy.testing import assert_equal, assert_allclose
 from nose.tools import raises, with_setup
-from ..util import read_param_file, scale_samples, \
+from ..util import read_param_file, scale_samples, unscale_samples, \
                    compute_groups_from_parameter_file
 import os
 import numpy as np
@@ -112,6 +112,17 @@ def test_scale_samples():
 
     desired = np.array([np.arange(10,21,1), np.arange(-10,12,2)],dtype=np.float).T
     scale_samples(params, bounds)
+    assert_allclose(params, desired, atol=1e-03, rtol=1e-03)
+
+def test_unscale_samples():
+    '''
+    Simple test to unscale samples back to [0,1] range
+    '''
+    params = np.array([np.arange(10,21,1), np.arange(-10,12,2)],dtype=np.float).T
+    bounds = [[10,20],[-10,10]]
+
+    desired = np.arange(0,1.1,0.1).repeat(2).reshape((11,2))
+    unscale_samples(params, bounds)
     assert_allclose(params, desired, atol=1e-03, rtol=1e-03)
 
 

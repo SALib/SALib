@@ -31,6 +31,30 @@ def scale_samples(params, bounds):
            lower_bounds,
            out=params)
 
+def unscale_samples(params, bounds):
+    '''
+    Rescales samples from arbitrary bounds back to [0,1] range.
+
+    Arguments:
+        bounds - list of lists of dimensions num_params-by-2
+        params - numpy array of dimensions num_params-by-N,
+        where N is the number of samples
+    '''
+    # Check bounds are legal (upper bound is greater than lower bound)
+    b = np.array(bounds)
+    lower_bounds = b[:, 0]
+    upper_bounds = b[:, 1]
+
+    if np.any(lower_bounds >= upper_bounds):
+        raise ValueError("Bounds are not legal")
+
+    # This scales the samples in-place, by using the optional output
+    # argument for the numpy ufunctions
+    # The calculation is equivalent to:
+    #   (sample - lower_bound) / (upper_bound - lower_bound)
+    np.divide(np.subtract(params, lower_bounds, out=params),
+              np.subtract(upper_bounds, lower_bounds),
+              out=params)
 
 def read_param_file(filename, delimiter=None):
     '''
