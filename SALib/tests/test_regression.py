@@ -88,7 +88,8 @@ def test_regression_morris_optimal():
 
 def test_regression_sobol():
     param_file = 'SALib/test_functions/params/Ishigami.txt'
-    param_values = saltelli.sample(10000, param_file, calc_second_order=True)
+    problem = read_param_file(param_file)
+    param_values = saltelli.sample(problem, 10000, calc_second_order=True)
 
     Y = Ishigami.evaluate(param_values)
     np.savetxt('model_output.txt', Y, delimiter=' ')
@@ -103,7 +104,8 @@ def test_regression_sobol():
 
 def test_regression_fast():
     param_file = 'SALib/test_functions/params/Ishigami.txt'
-    param_values = fast_sampler.sample(1000, param_file)
+    problem = read_param_file(param_file)
+    param_values = fast_sampler.sample(problem, 10000)
 
     Y = Ishigami.evaluate(param_values)
     np.savetxt("model_output.txt", Y, delimiter=' ')
@@ -115,7 +117,8 @@ def test_regression_fast():
 
 def test_regression_dgsm():
     param_file = 'SALib/test_functions/params/Ishigami.txt'
-    param_values = finite_diff.sample(10000, param_file, delta=0.001)
+    problem = read_param_file(param_file)
+    param_values = finite_diff.sample(problem, 10000, delta=0.001)
 
     np.savetxt('model_input.txt', param_values, delimiter=' ')
     Y = Ishigami.evaluate(param_values)
@@ -129,7 +132,8 @@ def test_regression_dgsm():
 
 def test_regression_delta():
     param_file = 'SALib/test_functions/params/Ishigami.txt'
-    param_values = latin.sample(10000, param_file)
+    problem = read_param_file(param_file)
+    param_values = latin.sample(problem, 10000)
 
     np.savetxt('model_input.txt', param_values, delimiter=' ')
     Y = Ishigami.evaluate(param_values)

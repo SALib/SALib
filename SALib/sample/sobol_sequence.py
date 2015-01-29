@@ -1,9 +1,7 @@
 from __future__ import division
 from .directions import directions
-from sys import exit
 import math
 import numpy as np
-import os
 import sys
 
 if sys.version_info[0] > 2:
@@ -52,14 +50,12 @@ def sample(N, D):
     result = np.empty([N, D])
 
     if D > len(directions) + 1:
-        print("Error in Sobol sequence: not enough dimensions")
-        exit()
+        raise ValueError("Error in Sobol sequence: not enough dimensions")
 
     L = int(math.ceil(math.log(N) / math.log(2)))
 
     if L > scale:
-        print("Error in Sobol sequence: not enough bits")
-        exit()
+        raise ValueError("Error in Sobol sequence: not enough bits")
 
     for i in range(D):
         V = np.empty(L + 1, dtype=long)
@@ -100,23 +96,3 @@ def index_of_least_significant_zero_bit(value):
         index += 1
 
     return index
-
-
-def read_directions_file(filepath):
-    """Read in Kuo and Joe's direction file format for Sobol sequence points."""
-
-    with open(filepath) as f:
-        directions = []
-
-        next(f)  # skip header line
-
-        for row in [line.split() for line in f]:
-            s = int(row[1])  # parse s
-            d = np.empty(s + 1, dtype=int)
-            d[0] = int(row[2])  # parse a
-
-            d[1:] = [int(i) for i in row[3:]]  # parse the m_i values
-
-            directions.append(d)
-
-    return np.array(directions)
