@@ -2,131 +2,137 @@ from __future__ import division
 import numpy as np
 import random as rd
 from . import common_args
-from . sample import Sample
-from ..sample import morris_oat, morris_groups, morris_optimal
-from ..util import read_param_file
-from collections import Iterable
+from . morris_util import *
+from ..util import scale_samples, read_param_file
+
+'''
+Three variants of Morris' sampling for
+elementary effects:
+        - vanilla Morris
+        - optimised trajectories (Campolongo's enhancements from 2007)
+        - groups with optimised trajectories (again Campolongo 2007)
+
+At present, optimised trajectories is implemented using a brute-force
+approach, which can be very slow, especially if you require more than four
+trajectories.  Note that the number of factors makes little difference,
+but the ratio between number of optimal trajectories and the sample size
+results in an exponentially increasing number of scores that must be
+computed to find the optimal combination of trajectories.
+
+I suggest going no higher than 4 from a pool of 100 samples.
+
+Suggested enhancements:
+    - a parallel brute force method (incomplete)
+    - a combinatorial optimisation approach (completed, but dependencies are
+      not open-source)
+'''
 
 
-class Morris(Sample):
-    '''
-    A class which implements three variants of Morris' sampling for
-    elementary effects:
-            - vanilla Morris
-            - optimised trajectories (Campolongo's enhancements from 2007)
-            - groups with optimised trajectories (again Campolongo 2007)
+def sample(problem, N, num_levels, grid_jump, optimal_trajectories=None):
 
-    At present, optimised trajectories is implemented using a brute-force
-    approach, which can be very slow, especially if you require more than four
-    trajectories.  Note that the number of factors makes little difference,
-    but the ratio between number of optimal trajectories and the sample size
-    results in an exponentially increasing number of scores that must be
-    computed to find the optimal combination of trajectories.
+    # sample init goes here
 
-    I suggest going no higher than 4 from a pool of 100 samples.
+    if grid_jump >= num_levels:
+        raise ValueError("grid_jump must be less than num_levels")
 
-    Suggested enhancements:
-        - a parallel brute force method (incomplete)
-        - a combinatorial optimisation approach (completed, but dependencies are
-          not open-source)
-    '''
+    if problem['groups'] is None:
+        sample = sample_oat(problem, N, num_levels, grid_jump)
+    else:
+        sample = sample_groups(problem, N, num_levels, grid_jump)
 
-
-    def __init__(self, parameter_file, samples, \
-                 num_levels, grid_jump, \
-                 optimal_trajectories=None):
-
-        self.groups = None
-        self.group_names = None
-        self.parameter_file = parameter_file
-        self.samples = samples
-        self.num_levels = num_levels
-        self.grid_jump = grid_jump
-        pf = read_param_file(self.parameter_file, True)
-        self.num_vars = pf['num_vars']
-        self.bounds = pf['bounds']
-        self.parameter_names = pf['names']
-        if pf['groups'] is not None:
-            self.groups, self.group_names = pf['groups']
-        self.optimal_trajectories = optimal_trajectories
-
-        if self.optimal_trajectories != None:
-            # Check to ensure that fewer optimal trajectories than samples are
-            # requested, otherwise ignore
-            if self.optimal_trajectories >= self.samples:
-                raise ValueError("The number of optimal trajectories should be less than the number of samples.")
-            elif self.optimal_trajectories > 10:
-                raise ValueError("Running optimal trajectories greater than values of 10 will take a long time.")
-            elif self.optimal_trajectories <= 1:
-                raise ValueError("The number of optimal trajectories must be set to 2 or more.")
-
-        if self.groups is None:
-
-            self.create_sample()
-
+    if optimal_trajectories is not None:
+        if optimal_trajectories >= N:
+            raise ValueError("The number of optimal trajectories should be less than the number of samples.")
+        elif optimal_trajectories > 10:
+            raise ValueError("Running optimal trajectories greater than values of 10 will take a long time.")
+        elif optimal_trajectories < 2:
+            raise ValueError("The number of optimal trajectories must be set to 2 or more.")
         else:
+            sample = optimize_trajectories(problem, sample, N, optimal_trajectories)
 
-            self.create_sample_with_groups()
-
-
-    def flatten(self, l):
-        for el in l:
-            if isinstance(el, Iterable) and not isinstance(el, str):
-                for sub in self.flatten(el):
-                    yield sub
-            else:
-                yield el
+    scale_samples(sample, problem['bounds'])
+    return sample
 
 
-    def create_sample(self):
+def sample_oat(problem, N, num_levels, grid_jump):
 
-        if self.optimal_trajectories is None:
+    D = problem['num_vars']
 
-            optimal_sample = morris_oat.sample(self.samples,
-                                               self.parameter_file,
-                                               self.num_levels,
-                                               self.grid_jump)
+    # orientation matrix B: lower triangular (1) + upper triangular (-1)
+    B = np.tril(np.ones([D + 1, D], dtype=int), -1) + \
+        np.triu(-1 * np.ones([D + 1, D], dtype=int))
 
-        else:
+    # grid step delta, and final sample matrix X
+    delta = grid_jump / (num_levels - 1)
+    X = np.empty([N * (D + 1), D])
 
-            sample = morris_oat.sample(self.samples,
-                                       self.parameter_file,
-                                       self.num_levels,
-                                       self.grid_jump)
-            optimal_sample = \
-                morris_optimal.find_optimum_trajectories(sample,
-                                                         self.samples,
-                                                         self.num_vars,
-                                                         self.optimal_trajectories)
+    # Create N trajectories. Each trajectory contains D+1 parameter sets.
+    # (Starts at a base point, and then changes one parameter at a time)
+    for j in range(N):
 
-        self.output_sample = optimal_sample
+        # directions matrix DM - diagonal matrix of either +1 or -1
+        DM = np.diag([rd.choice([-1, 1]) for _ in range(D)])
+
+        # permutation matrix P
+        perm = np.random.permutation(D)
+        P = np.zeros([D, D])
+        for i in range(D):
+            P[i, perm[i]] = 1
+
+        # starting point for this trajectory
+        x_base = np.empty([D + 1, D])
+        for i in range(D):
+            x_base[:, i] = (
+                rd.choice(np.arange(num_levels - grid_jump))) / (num_levels - 1)
+
+        # Indices to be assigned to X, corresponding to this trajectory
+        index_list = np.arange(D + 1) + j * (D + 1)
+        delta_diag = np.diag([delta for _ in range(D)])
+
+        X[index_list, :] = 0.5 * \
+            (np.mat(B) * np.mat(P) * np.mat(DM) + 1) * \
+            np.mat(delta_diag) + np.mat(x_base)
+
+    return X
+
+def sample_groups(problem, N, num_levels, grid_jump):
+    '''
+    Returns an N(g+1)-by-k array of N trajectories;
+    where g is the number of groups and k is the number of factors
+    '''
+    G, group_names = problem['groups']
+
+    if G is None:
+        raise ValueError("Please define the matrix G.")
+    if type(G) is not np.matrixlib.defmatrix.matrix:
+       raise TypeError("Matrix G should be formatted as a numpy matrix")
+
+    k = G.shape[0]
+    g = G.shape[1]
+    sample = np.empty((N*(g + 1), k))
+    sample = np.array([generate_trajectory(G, num_levels, grid_jump) for n in range(N)])
+    return sample.reshape((N*(g + 1), k))
 
 
-    def create_sample_with_groups(self):
+def optimize_trajectories(problem, input_sample, N, optimal_trajectories):
 
-        self.output_sample = morris_groups.sample(self.samples,
-                                                  self.groups,
-                                                  self.num_levels,
-                                                  self.grid_jump)
-        if self.optimal_trajectories is not None:
-            self.output_sample = \
-                morris_optimal.find_optimum_trajectories(self.output_sample,
-                                                         self.samples,
-                                                         self.num_vars,
-                                                         self.optimal_trajectories)
+    D = problem['num_vars']
+    k_choices = optimal_trajectories
 
+    if np.any((input_sample < 0) | (input_sample > 1)):
+        raise ValueError("Input sample must be scaled between 0 and 1")
 
-    def debug(self):
-        print("Parameter File: %s" % self.parameter_file)
-        print("Number of samples: %s" % self.samples)
-        print("Number of levels: %s" % self.num_levels)
-        print("Grid step: %s" % self.grid_jump)
-        print("Number of variables: %s" % self.num_vars)
-        print("Parameter bounds: %s" % self.bounds)
-        if self.groups is not None:
-          print("Group: %s" % self.groups)
-        if self.optimal_trajectories is not None:
-          print("Number of req trajectories: %s" % self.optimal_trajectories)
+    scores = find_most_distant(input_sample, N, D, k_choices)
+
+    index_list = []
+    for j in range(N):
+        index_list.append(np.arange(D + 1) + j * (D + 1))
+
+    maximum_combo = find_maximum(scores, N, k_choices)
+    output = np.zeros((np.size(maximum_combo) * (D + 1), D))
+    for counter, x in enumerate(maximum_combo):
+        output[index_list[counter]] = np.array(input_sample[index_list[x]])
+    return output
 
 
 if __name__ == "__main__":
@@ -138,14 +144,14 @@ if __name__ == "__main__":
                         default=2, help='Grid jump size (Morris only)')
     parser.add_argument('-k','--k-optimal', type=int, required=False,
                         default=None, help='Number of optimal trajectories (Morris only)')
-    parser.add_argument('--group', type=str, required=False, default=None,
-                       help='File path to grouping file (Morris only)')
     args = parser.parse_args()
 
     np.random.seed(args.seed)
     rd.seed(args.seed)
 
-    sample = Morris(args.paramfile, args.samples, args.levels, \
-                    args.grid_jump, args.group, args.k_optimal)
+    problem = read_param_file(args.paramfile)
+    param_values = sample(problem, args.samples, args.levels, \
+                    args.grid_jump, args.k_optimal)
 
-    sample.save_data(args.output, delimiter=args.delimiter, precision=args.precision)
+    np.savetxt(args.output, param_values, delimiter=args.delimiter,
+               fmt='%.' + str(args.precision) + 'e')

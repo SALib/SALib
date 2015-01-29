@@ -20,25 +20,22 @@ Python implementations of commonly used sensitivity analysis methods. Useful in 
 
 ### Create a parameter file
 
-To get started, create a file describing the sampling ranges for the parameters in the model. Parameter files should be created with 3 columns: `[name, lower bound, upper bound]`:
+To get started, create a file describing the sampling ranges for the parameters in the model. Parameter files should be created with 3 columns:
 ```
+# name lower_bound upper_bound
 P1 0.0 1.0
 P2 0.0 5.0
 ...etc.
 ```
-Lines beginning with `#` will be treated as comments and ignored.
-
-### Or if using Morris... 
-
-You can create a parameter file with groups.
+Lines beginning with `#` will be treated as comments and ignored. The Morris method also supports groups of input factors, which can be specified with a fourth column:
 ```
-#Parameter,Lower Bound, Upper Bound, Group Name
-P 1,0.0,1.0,Group 1
-P 2,0.0,5.0,Group 2
-P 3,0.0,5.0,Group 3
+# name lower_bound upper_bound group_name
+P1 0.0 1.0 Group_1
+P2 0.0 5.0 Group_2
+P3 0.0 5.0 Group_2
 ...etc.
 ```
-You can use delimiters if you wish to include whitespace in your parameter or group names.
+Parameter files can also be comma-delimited if your parameter names or group names contain spaces. This should be detected automatically.
 
 ### Generate samples
 
@@ -50,7 +47,7 @@ python -m SALib.sample.saltelli \
      -o model_input.txt \
 ```
 
-Other methods include `SALib.sample.morris` and `SALib.sample.fast_sampler`. For an explanation of all command line options, [see the examples here](https://github.com/jdherman/SALib/tree/master/examples).
+Other methods include `SALib.sample.morris` and `SALib.sample.fast_sampler`. For an explanation of all command line options for each method, [see the examples here](https://github.com/jdherman/SALib/tree/master/examples).
 
 Or, generate samples from Python:
 ```python
@@ -94,7 +91,7 @@ Si = sobol.analyze(param_file, 'model_output.txt', column = 0, print_to_console=
 # e.g. Si['S1'] contains the first-order index for each parameter, in the same order as the parameter file
 ```
 
-Check out the [examples](https://github.com/jdherman/SALib/tree/master/examples) for a full description of command line and keyword options for all of the methods.
+Check out the [examples](https://github.com/jdherman/SALib/tree/master/examples) for a full description of options for each method.
 
 
 ### License

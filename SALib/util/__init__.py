@@ -31,9 +31,32 @@ def scale_samples(params, bounds):
            lower_bounds,
            out=params)
 
+def unscale_samples(params, bounds):
+    '''
+    Rescales samples from arbitrary bounds back to [0,1] range.
 
-def read_param_file(filename, param_file_contains_groups=False,
-                    delimiter=None):
+    Arguments:
+        bounds - list of lists of dimensions num_params-by-2
+        params - numpy array of dimensions num_params-by-N,
+        where N is the number of samples
+    '''
+    # Check bounds are legal (upper bound is greater than lower bound)
+    b = np.array(bounds)
+    lower_bounds = b[:, 0]
+    upper_bounds = b[:, 1]
+
+    if np.any(lower_bounds >= upper_bounds):
+        raise ValueError("Bounds are not legal")
+
+    # This scales the samples in-place, by using the optional output
+    # argument for the numpy ufunctions
+    # The calculation is equivalent to:
+    #   (sample - lower_bound) / (upper_bound - lower_bound)
+    np.divide(np.subtract(params, lower_bounds, out=params),
+              np.subtract(upper_bounds, lower_bounds),
+              out=params)
+
+def read_param_file(filename, delimiter=None):
     '''
     Reads a parameter file of format:
         Param1,0,1,Group1
@@ -67,15 +90,13 @@ def read_param_file(filename, param_file_contains_groups=False,
                 names.append(row['name'])
                 bounds.append(
                     [float(row['lower_bound']), float(row['upper_bound'])])
-                if param_file_contains_groups is True:
-                    # If the fourth column does not contain a group name, use
-                    # the parameter name
-                    if row['group'] is None:
-                        group_list.append(row['name'])
-                    elif row['group'] == '':
-                        group_list.append(row['name'])
-                    else:
-                        group_list.append(row['group'])
+
+                # If the fourth column does not contain a group name, use
+                # the parameter name
+                if row['group'] is None:
+                    group_list.append(row['name'])
+                else:
+                    group_list.append(row['group'])
 
         group_matrix, group_names = compute_groups_from_parameter_file(
             group_list, num_vars)

@@ -2,11 +2,86 @@ from __future__ import division
 import numpy as np
 import random as rd
 from itertools import combinations, islice
-from ..util import read_param_file
-from . import common_args
 from scipy.spatial.distance import cdist
 from scipy.misc import comb as nchoosek
 import sys
+
+'''
+Helper functions for Morris trajectories
+(Generating group samples, and optimizing trajectory distances)
+'''
+
+def generate_trajectory(G, num_levels, grid_jump):
+    '''
+    Returns a single trajectory of size (g+1)-by-k
+    where g is the number of groups,
+    and k is the number of factors, both implied by the dimensions of G
+
+    Arguments:
+      G            a k-by-g matrix which notes factor membership of groups
+      num_levels   integer describing number of levels
+      grid_jump    recommended to be equal to p / (2(p-1)) where p is num_levels
+    '''
+
+    delta = compute_delta(num_levels)
+
+    # Infer number of groups g and number of params k from matrix G
+    k = G.shape[0]
+    g = G.shape[1]
+
+    # Matrix B - size (g + 1) * g -  lower triangular matrix
+    B = np.matrix(np.tril(np.ones([g + 1, g], dtype=int), -1))
+
+    P_star = np.asmatrix(generate_P_star(g))
+
+    # Matrix J - a (g+1)-by-k matrix of ones
+    J = np.matrix(np.ones((g+1, k)))
+
+    # Matrix D* - k-by-k matrix which decribes whether factors move up or down
+    D_star = np.diag([rd.choice([-1, 1]) for _ in range(k)])
+
+    x_star = np.asmatrix(generate_x_star(k, num_levels, grid_jump))
+
+    # Matrix B* - size (g + 1) * k
+    B_star = compute_B_star(J, x_star, delta, B, G, P_star, D_star)
+
+    return B_star
+
+
+def compute_B_star(J, x_star, delta, B, G, P_star, D_star):
+    B_star = J[:,0] * x_star + \
+             (delta / 2) *  (( 2 * B * (G * P_star).T - J) \
+             * D_star + J)
+    return B_star
+
+
+def generate_P_star(g):
+    '''
+    Matrix P* - size (g-by-g) - describes order in which groups move
+    '''
+    P_star = np.eye(g,g)
+    np.random.shuffle(P_star)
+    return P_star
+
+
+def generate_x_star(k, num_levels, grid_step):
+    '''
+    Generate an 1-by-k array to represent initial position for EE
+    This should be a randomly generated array in the p level grid :math:\omega
+    '''
+    x_star = np.empty(k)
+
+    delta = compute_delta(num_levels)
+    bound = 1 - delta
+    grid = np.linspace(0,bound,grid_step)
+
+    for i in range(k):
+        x_star[i] = rd.choice(grid)
+    return x_star
+
+
+def compute_delta(num_levels):
+    return float(num_levels) / (2 * (num_levels - 1))
 
 
 def compute_distance(m, l, num_params):
@@ -121,54 +196,3 @@ def nth(iterable, n, default=None):
         raise TypeError("n is not an integer")
 
     return next(islice(iterable, n, None), default)
-
-
-def find_optimum_trajectories(input_sample, N, num_params, k_choices):
-
-    if np.any((input_sample < 0) | (input_sample > 1)):
-        raise ValueError("Input sample must be scaled between 0 and 1")
-
-    scores = find_most_distant(input_sample,
-                               N,
-                               num_params,
-                               k_choices)
-
-    index_list = []
-    for j in range(N):
-        index_list.append(np.arange(num_params + 1) + j * (num_params + 1))
-
-    maximum_combo = find_maximum(scores, N, k_choices)
-    output = np.zeros((np.size(maximum_combo) * (num_params + 1), num_params))
-    for counter, x in enumerate(maximum_combo):
-        output[index_list[counter]] = np.array(input_sample[index_list[x]])
-    return output
-
-
-if __name__ == "__main__":
-
-
-    parser = common_args.create()
-    parser.add_argument('--num-levels', type=int, required=False, default=4, help='Number of grid levels (Morris only)')
-    parser.add_argument('--grid-jump', type=int, required=False, default=2, help='Grid jump size (Morris only)')
-    parser.add_argument('--k-choices', type=int, required=False, default=4, help='Number of trajectories (optimal trajectories)')
-    parser.add_argument('-X', '--input-file', type=str, required=True, default=None, help='Model input file')
-
-    args = parser.parse_args()
-
-    np.random.seed(args.seed)
-    rd.seed(args.seed)
-
-    param_file = args.paramfile
-    pf = read_param_file(param_file)
-    N = args.samples
-    num_params = pf['num_vars']
-    bounds = pf['bounds']
-    k_choices = args.k_choices
-    p_levels = int(args.num_levels)
-    grid_step = int(args.grid_jump)
-
-    X = np.loadtxt(args.input_file, delimiter=args.delim, ndmin=2)
-
-    model_data = find_optimum_trajectories(X, N, num_params, k_choices)
-
-    np.savetxt(args.output, model_data, delimiter=args.delimiter, fmt='%.' + str(args.precision) + 'e')
