@@ -53,17 +53,17 @@ def analyze(pfile, output_file, column=0, M=4, delim=' ', print_to_console=False
 
 def compute_first_order(outputs, N, M, omega):
     f = np.fft.fft(outputs)
-    Sp = np.power(np.absolute(f[range(1, int(N / 2))]) / N, 2)
+    Sp = np.power(np.absolute(f[np.arange(1, int(N / 2))]) / N, 2)
     V = 2 * np.sum(Sp)
-    D1 = 2 * np.sum(Sp[list(np.arange(1, M + 1) * int(omega) - 1)])
+    D1 = 2 * np.sum(Sp[np.arange(1, M + 1) * int(omega) - 1])
     return D1 / V
 
 
 def compute_total_order(outputs, N, omega):
     f = np.fft.fft(outputs)
-    Sp = np.power(np.absolute(f[range(1, int(N / 2))]) / N, 2)
+    Sp = np.power(np.absolute(f[np.arange(1, int(N / 2))]) / N, 2)
     V = 2 * np.sum(Sp)
-    Dt = 2 * sum(Sp[range(int(omega / 2))])
+    Dt = 2 * sum(Sp[np.arange(int(omega / 2))])
     return (1 - Dt / V)
 
 if __name__ == "__main__":
