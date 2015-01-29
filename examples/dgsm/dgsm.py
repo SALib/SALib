@@ -23,7 +23,7 @@ np.savetxt('model_output.txt', Y, delimiter=' ')
 # Perform the sensitivity analysis using the model output
 # Specify which column of the output file to analyze (zero-indexed)
 Si = dgsm.analyze(param_file, 'model_input.txt', 'model_output.txt',
-                  column=0, conf_level=0.95, print_to_console=False)
+                  column=0, conf_level=0.95, print_to_console=True)
 # Returns a dictionary with keys 'vi', 'vi_std', 'dgsm', and 'dgsm_conf'
 # e.g. Si['vi'] contains the sensitivity measure for each parameter, in
 # the same order as the parameter file
