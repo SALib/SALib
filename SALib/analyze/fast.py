@@ -42,7 +42,7 @@ def analyze(pfile, output_file, column=0, M=4, delim=' ', print_to_console=False
         print("Parameter First Total")
     Si = dict((k, [None] * D) for k in ['S1', 'ST'])
     for i in range(D):
-        l = range(i * N, (i + 1) * N)
+        l = np.arange(i * N, (i + 1) * N)
         Si['S1'][i] = compute_first_order(Y[l], N, M, omega[0])
         Si['ST'][i] = compute_total_order(Y[l], N, omega[0])
         if print_to_console:

@@ -108,7 +108,7 @@ def test_regression_fast():
     Y = Ishigami.evaluate(param_values)
     np.savetxt("model_output.txt", Y, delimiter=' ')
 
-    Si = fast.analyze(param_file, 'model_output.txt', column=0, print_to_console=True)
+    Si = fast.analyze(param_file, 'model_output.txt', column=0, print_to_console=False)
     assert_allclose(Si['S1'], [0.31, 0.44, 0.00], atol=5e-2, rtol=1e-1)
     assert_allclose(Si['ST'], [0.55, 0.44, 0.24], atol=5e-2, rtol=1e-1)
 
