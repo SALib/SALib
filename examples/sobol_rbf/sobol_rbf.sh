@@ -15,7 +15,7 @@ python -m SALib.analyze.sobol_rbf \
      -X model_input.txt \
      -Y model_output.txt \
      -N 10000 \
-     -k 5 \
+     -k 2 \
      -c 0 \
 
 # Options:
