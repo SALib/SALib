@@ -18,15 +18,10 @@ from sklearn.preprocessing import MinMaxScaler
 # containing the indices in the same order as the parameter file
 
 
-def analyze(pfile, input_file, output_file, N_rbf=10000, column=0, n_folds=10,
-            delim=' ', print_to_console=False, training_sample=None):
+def analyze(problem, X, y, N_rbf=10000, n_folds=10,
+            print_to_console=False, training_sample=None):
 
-    param_file = read_param_file(pfile)
-    y = np.loadtxt(output_file, delimiter=delim, usecols=(column,))
-    X = np.loadtxt(input_file, delimiter=delim, ndmin=2)
-    if len(X.shape) == 1:
-        X = X.reshape((len(X), 1))
-    D = param_file['num_vars']
+    D = problem['num_vars']
     mms = MinMaxScaler()
     X = mms.fit_transform(X)
 
@@ -46,16 +41,13 @@ def analyze(pfile, input_file, output_file, N_rbf=10000, column=0, n_folds=10,
         ix = np.random.randint(y.size, size=training_sample)
         reg.fit(X[ix, :], y[ix])
 
-    X_rbf = saltelli.sample(N_rbf, pfile)
+    X_rbf = saltelli.sample(problem, N_rbf)
     X_rbf = mms.transform(X_rbf)
     y_rbf = reg.predict(X_rbf)
 
-    np.savetxt("y_rbf.txt", y_rbf, delimiter=' ')
-
     # not using the bootstrap intervals here. For large enough N, they will go to zero.
     # (this doesn't mean the indices are accurate -- check the metamodel R^2)
-    S = sobol.analyze(
-        pfile, "y_rbf.txt", print_to_console=False, num_resamples=2)
+    S = sobol.analyze(problem, y_rbf, print_to_console=False, num_resamples=2)
     S.pop("S1_conf", None)
     S.pop("ST_conf", None)
     S.pop("S2_conf", None)
@@ -68,13 +60,13 @@ def analyze(pfile, input_file, output_file, N_rbf=10000, column=0, n_folds=10,
         print("\nParameter S1 ST")
         for j in range(D):
             print("%s %f %f" %
-                  (param_file['names'][j], S['S1'][j], S['ST'][j]))
+                  (problem['names'][j], S['S1'][j], S['ST'][j]))
 
         print("\nParameter_1 Parameter_2 S2")
         for j in range(D):
             for k in range(j + 1, D):
                 print(
-                    "%s %s %f" % (param_file['names'][j], param_file['names'][k], S['S2'][j, k]))
+                    "%s %s %f" % (problem['names'][j], problem['names'][k], S['S2'][j, k]))
 
     return S
 
@@ -90,6 +82,11 @@ if __name__ == "__main__":
                         help='Subsample size to train SVR. Default uses all points in dataset.')
 
     args = parser.parse_args()
-    analyze(args.paramfile, args.model_input_file, args.model_output_file, args.N_rbf, args.column,
-            delim=args.delimiter, n_folds=args.n_folds, print_to_console=True,
+    problem = read_param_file(args.paramfile)
+    y = np.loadtxt(args.model_output_file, delimiter=args.delimiter, usecols=(args.column,))
+    X = np.loadtxt(args.model_input_file, delimiter=args.delimiter, ndmin=2)
+    if len(X.shape) == 1:
+        X = X.reshape((len(X), 1))
+
+    analyze(problem, X, y, args.N_rbf, n_folds=args.n_folds, print_to_console=True,
             training_sample=args.training_sample)

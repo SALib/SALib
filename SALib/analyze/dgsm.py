@@ -11,15 +11,10 @@ from . import common_args
 # Containing the indices in the same order as the parameter file
 
 
-def analyze(pfile, input_file, output_file, column=0, num_resamples=1000,
-            delim=' ', conf_level=0.95, print_to_console=False):
+def analyze(problem, X, Y, num_resamples=1000,
+            conf_level=0.95, print_to_console=False):
 
-    pf = read_param_file(pfile)
-    Y = np.loadtxt(output_file, delimiter=delim, usecols=(column,))
-    D = pf['num_vars']
-    X = np.loadtxt(input_file, delimiter=delim, ndmin=2)
-    if len(X.shape) == 1:
-        X = X.reshape((len(X), 1))
+    D = problem['num_vars']
 
     if Y.size % (D + 1) == 0:
         N = int(Y.size / (D + 1))
@@ -51,11 +46,11 @@ def analyze(pfile, input_file, output_file, column=0, num_resamples=1000,
         S['vi'][j], S['vi_std'][j] = calc_vi(
             base, perturbed[:, j], X_perturbed[:, j] - X_base[:, j])
         S['dgsm'][j], S['dgsm_conf'][j] = calc_dgsm(base, perturbed[:, j], X_perturbed[
-                                                    :, j] - X_base[:, j], pf['bounds'][j], num_resamples, conf_level)
+                                                    :, j] - X_base[:, j], problem['bounds'][j], num_resamples, conf_level)
 
         if print_to_console:
             print("%s %f %f %f %f" % (
-                pf['names'][j], S['vi'][j], S['vi_std'][j], S['dgsm'][j], S['dgsm_conf'][j]))
+                problem['names'][j], S['vi'][j], S['vi_std'][j], S['dgsm'][j], S['dgsm_conf'][j]))
 
     return S
 
@@ -90,6 +85,11 @@ if __name__ == "__main__":
     parser.add_argument('-r', '--resamples', type=int, required=False, default=1000,
                         help='Number of bootstrap resamples for Sobol confidence intervals')
     args = parser.parse_args()
+    problem = read_param_file(args.paramfile)
 
-    analyze(args.paramfile, args.model_input_file, args.model_output_file, args.column,
-            num_resamples=args.resamples, delim=args.delimiter, print_to_console=True)
+    Y = np.loadtxt(args.model_output_file, delimiter=args.delimiter, usecols=(args.column,))
+    X = np.loadtxt(args.model_input_file, delimiter=args.delimiter, ndmin=2)
+    if len(X.shape) == 1:
+        X = X.reshape((len(X), 1))
+
+    analyze(problem, X, Y, num_resamples=args.resamples, print_to_console=True)
