@@ -27,13 +27,10 @@ def test_regression_morris_vanilla():
                           num_levels=10, grid_jump=5, \
                           optimal_trajectories=None)
 
-    np.savetxt('model_input.txt', param_values, delimiter=' ')
-
     Y = Ishigami.evaluate(param_values)
-    np.savetxt("model_output.txt", Y, delimiter=' ')
 
-    Si = morris.analyze(param_file, 'model_input.txt', 'model_output.txt',
-                        column=0, conf_level=0.95, print_to_console=False,
+    Si = morris.analyze(problem, param_values, Y,
+                        conf_level=0.95, print_to_console=False,
                         num_levels=10, grid_jump=5)
 
     assert_allclose(Si['mu_star'], [8.1, 2.2, 5.4], atol=0, rtol=5e-1)
@@ -48,13 +45,10 @@ def test_regression_morris_groups():
                           num_levels=10, grid_jump=5, \
                           optimal_trajectories=None)
 
-    np.savetxt('model_input_groups.txt', param_values, delimiter=' ')
-
     Y = Ishigami.evaluate(param_values)
-    np.savetxt("model_output_groups.txt", Y, delimiter=' ')
 
-    Si = morris.analyze(param_file, 'model_input_groups.txt', 'model_output_groups.txt',
-                        column=0, conf_level=0.95, print_to_console=False,
+    Si = morris.analyze(problem, param_values, Y,
+                        conf_level=0.95, print_to_console=False,
                         num_levels=10, grid_jump=5)
 
     assert_allclose(Si['mu_star'], [7.87, 6.26], rtol=5e-1)
@@ -73,14 +67,10 @@ def test_regression_morris_optimal():
                           num_levels=4, grid_jump=2, \
                           optimal_trajectories=9)
 
-    np.savetxt('model_input_groups.txt', param_values, delimiter=' ')
-
     Y = Ishigami.evaluate(param_values)
 
-    np.savetxt("model_output_groups.txt", Y, delimiter=' ')
-
-    Si = morris.analyze(param_file, 'model_input_groups.txt', 'model_output_groups.txt',
-                        column=0, conf_level=0.95, print_to_console=False,
+    Si = morris.analyze(problem, param_values, Y,
+                        conf_level=0.95, print_to_console=False,
                         num_levels=4, grid_jump=2)
 
     assert_allclose(Si['mu_star'], [8.1, 2.2, 5.4], rtol=10)

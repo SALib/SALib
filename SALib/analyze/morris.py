@@ -1,7 +1,6 @@
 from __future__ import division
 from __future__ import print_function
 from ..util import read_param_file
-from sys import exit
 import numpy as np
 from scipy.stats import norm
 from . import common_args
@@ -11,12 +10,7 @@ from . import common_args
 # Where each entry is a list of size num_vars (the number of parameters)
 # Containing the indices in the same order as the parameter file
 
-
-def analyze(pfile,
-            input_file,
-            output_file,
-            column=0,
-            delim=' ',
+def analyze(problem, X, Y,
             num_resamples=1000,
             conf_level=0.95,
             print_to_console=False,
@@ -28,18 +22,12 @@ def analyze(pfile,
 
     delta = grid_jump / (num_levels - 1)
 
-    param_file = read_param_file(pfile)
-    Y = np.loadtxt(output_file, delimiter=delim, usecols=(column,))
-    X = np.loadtxt(input_file, delimiter=delim, ndmin=2)
-    if len(X.shape) == 1:
-        X = X.reshape((len(X), 1))
+    num_vars = problem['num_vars']
 
-    num_vars = param_file['num_vars']
-
-    if (param_file['groups'] is None) & (Y.size % (num_vars + 1) == 0):
+    if (problem['groups'] is None) & (Y.size % (num_vars + 1) == 0):
         num_trajectories = int(Y.size / (num_vars + 1))
-    elif param_file['groups'] is not None:
-        groups, unique_group_names = param_file['groups']
+    elif problem['groups'] is not None:
+        groups, unique_group_names = problem['groups']
         number_of_groups = len(unique_group_names)
         num_trajectories = int(Y.size / (number_of_groups + 1))
     else:
@@ -56,7 +44,7 @@ def analyze(pfile,
     Si['mu'] = np.average(ee, 1)
     Si['mu_star'] = np.average(np.abs(ee), 1)
     Si['sigma'] = np.std(ee, 1)
-    Si['names'] = param_file['names']
+    Si['names'] = problem['names']
 
     for j in range(num_vars):
         Si['mu_star_conf'][j] = compute_mu_star_confidence(
@@ -66,7 +54,7 @@ def analyze(pfile,
         if print_to_console:
             print("Parameter Mu Sigma Mu_Star Mu_Star_Conf")
             for j in range(num_vars):
-                print("%s %f %f %f %f" % (param_file['names'][j], Si['mu'][j], Si[
+                print("%s %f %f %f %f" % (problem['names'][j], Si['mu'][j], Si[
                     'sigma'][j], Si['mu_star'][j], Si['mu_star_conf'][j]))
         return Si
     elif groups is not None:
@@ -86,10 +74,9 @@ def analyze(pfile,
                                     Si_grouped['mu_star'][j],
                                     Si_grouped['mu_star_conf'][j]))
 
-
         return Si_grouped
     else:
-        raise RuntimeError("Could determine which parameters should be returned")
+        raise RuntimeError("Could not determine which parameters should be returned")
 
 
 def compute_grouped_mu_star(mu_star_ungrouped, group_matrix):
@@ -100,6 +87,7 @@ def compute_grouped_mu_star(mu_star_ungrouped, group_matrix):
     return mu_star_grouped.T
 
 
+# This function is not being used right now, in favor of the vectorized version below
 def compute_elementary_effect(X, Y, j1, j2):
     # The elementary effect is (change in output)/(change in input)
     # Each parameter has one EE per trajectory, because it is only changed
@@ -201,6 +189,13 @@ if __name__ == "__main__":
     parser.add_argument('--grid-jump', type=int, required=False,
                         default=2, help='Grid jump size (Morris only)')
     args = parser.parse_args()
-    analyze(args.paramfile, args.model_input_file, args.model_output_file, args.column,
-            delim=args.delimiter, num_resamples=args.resamples, print_to_console=True,
+
+    problem = read_param_file(args.paramfile)
+
+    Y = np.loadtxt(args.model_output_file, delimiter=args.delimiter, usecols=(args.column,))
+    X = np.loadtxt(args.model_input_file, delimiter=args.delimiter, ndmin=2)
+    if len(X.shape) == 1:
+        X = X.reshape((len(X), 1))
+
+    analyze(problem, X, Y, num_resamples=args.resamples, print_to_console=True,
             num_levels=args.levels, grid_jump=args.grid_jump)
