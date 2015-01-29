@@ -33,7 +33,7 @@ install:
  - python setup.py install
  - pip install coveralls
 script:
- - coverage run --source=SALib setup.py test
+ - coverage run --source=SALib --omit=SALib/_version.py setup.py test
 after_success:
  - coveralls
 notifications:
