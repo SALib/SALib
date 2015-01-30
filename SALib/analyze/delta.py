@@ -10,16 +10,10 @@ from . import common_args
 # Where each entry is a list of size D (the number of parameters)
 # Containing the indices in the same order as the parameter file
 
-def analyze(pfile, input_file, output_file, column=0, calc_second_order=True, num_resamples=10,
-            delim=' ', conf_level=0.95, print_to_console=False):
+def analyze(problem, X, Y, calc_second_order=True, num_resamples=10,
+            conf_level=0.95, print_to_console=False):
 
-    param_file = read_param_file(pfile)
-    Y = np.loadtxt(output_file, delimiter=delim, usecols=(column,))
-    X = np.loadtxt(input_file, delimiter=delim, ndmin=2)
-    if len(X.shape) == 1:
-        X = X.reshape((len(X), 1))
-
-    D = param_file['num_vars']
+    D = problem['num_vars']
     N = Y.size
 
     if conf_level < 0 or conf_level > 1:
@@ -42,7 +36,7 @@ def analyze(pfile, input_file, output_file, column=0, calc_second_order=True, nu
         S['S1_conf'][i] = sobol_first_conf(
             Y, X[:, i], m, num_resamples, conf_level)
         if print_to_console:
-            print("%s %f %f %f %f" % (param_file['names'][i], S['delta'][
+            print("%s %f %f %f %f" % (problem['names'][i], S['delta'][
                   i], S['delta_conf'][i], S['S1'][i], S['S1_conf'][i]))
 
     return S
@@ -105,6 +99,10 @@ if __name__ == "__main__":
                         help='Number of bootstrap resamples for Sobol confidence intervals')
     args = parser.parse_args()
 
-    args = parser.parse_args()
-    analyze(args.paramfile, args.model_input_file, args.model_output_file, args.column,
-            delim=args.delimiter, num_resamples=args.resamples, print_to_console=True)
+    problem = read_param_file(args.paramfile)
+    Y = np.loadtxt(args.model_output_file, delimiter=args.delimiter, usecols=(args.column,))
+    X = np.loadtxt(args.model_input_file, delimiter=args.delimiter, ndmin=2)
+    if len(X.shape) == 1:
+        X = X.reshape((len(X), 1))
+
+    analyze(problem, X, Y, num_resamples=args.resamples, print_to_console=True)

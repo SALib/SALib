@@ -12,11 +12,9 @@ from . import common_args
 # Containing the indices in the same order as the parameter file
 
 
-def analyze(pfile, output_file, column=0, M=4, delim=' ', print_to_console=False):
+def analyze(problem, Y, M=4, print_to_console=False):
 
-    param_file = read_param_file(pfile)
-    Y = np.loadtxt(output_file, delimiter=delim, usecols=(column,))
-    D = param_file['num_vars']
+    D = problem['num_vars']
 
     if Y.size % (D) == 0:
         N = int(Y.size / D)
@@ -47,7 +45,7 @@ def analyze(pfile, output_file, column=0, M=4, delim=' ', print_to_console=False
         Si['ST'][i] = compute_total_order(Y[l], N, omega[0])
         if print_to_console:
             print("%s %f %f" %
-                  (param_file['names'][i], Si['S1'][i], Si['ST'][i]))
+                  (problem['names'][i], Si['S1'][i], Si['ST'][i]))
     return Si
 
 
@@ -70,5 +68,7 @@ if __name__ == "__main__":
 
     parser = common_args.create()
     args = parser.parse_args()
-    analyze(args.paramfile, args.model_output_file, args.column,
-            delim=args.delimiter, print_to_console=True)
+    problem = read_param_file(args.paramfile)
+    Y = np.loadtxt(args.model_output_file, delimiter=args.delimiter, usecols=(args.column,))
+
+    analyze(problem, Y, print_to_console=True)

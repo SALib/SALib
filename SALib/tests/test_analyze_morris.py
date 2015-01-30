@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import division
 from numpy.testing import assert_allclose, assert_equal
-from nose.tools import raises, with_setup
+from nose.tools import raises
 import numpy as np
 
 from ..analyze.morris import analyze, \
@@ -12,54 +12,27 @@ from ..analyze.morris import analyze, \
     compute_grouped_mu_star
 
 
-# Fixtures
-def setup_results():
-    filename = "SALib/tests/test_results.txt"
-    results = np.array([0.97, 0.71, 2.39, 0.97, 2.3, 2.39, 1.87, 2.40, 0.87, 2.15, 1.71, 1.54, 2.15, 2.17, 1.54, 2.2, 1.87, 1.0],
-                       dtype=np.float)
-    np.savetxt(filename, results)
+def test_analysis_of_morris_results():
 
-
-def setup_parameter_file():
-    filename = "SALib/tests/test_param_file.txt"
-    with open(filename, "w") as ofile:
-        ofile.write("Test 1,0,1.0\n")
-        ofile.write("Test 2,0,1.0\n")
-
-
-def setup_input_file():
-    filename = "SALib/tests/model_inputs.txt"
-    model_inputs = np.array([[0, 1. / 3], [0, 1],       [2. / 3, 1],
+    model_input = np.array([[0, 1. / 3], [0, 1],       [2. / 3, 1],
                              [0, 1. / 3],   [2. / 3, 1. / 3], [2. / 3, 1],
                              [2. / 3, 0],   [2. / 3, 2. / 3], [0, 2. / 3],
                              [1. / 3, 1],   [1, 1],       [1, 1. / 3],
                              [1. / 3, 1],   [1. / 3, 1. / 3], [1, 1. / 3],
                              [1. / 3, 2. / 3], [1. / 3, 0],   [1, 0]],
                             dtype=np.float)
-    np.savetxt(filename, model_inputs)
 
+    model_output = np.array([0.97, 0.71, 2.39, 0.97, 2.3, 2.39, 1.87, 2.40, 0.87, 2.15, 1.71, 1.54, 2.15, 2.17, 1.54, 2.2, 1.87, 1.0],
+                       dtype=np.float)
 
-def setup():
-    setup_parameter_file()
-    setup_input_file()
-    setup_results()
+    problem = {
+     'num_vars': 2, 
+     'names': ['Test 1', 'Test 2'], 
+     'groups': None, 
+     'bounds': [[0.0, 1.0], [0.0, 1.0]]
+    }
 
-
-def teardown():
-    pass
-
-
-@with_setup(setup, teardown)
-def test_analysis_of_morris_results():
-    output_file = "SALib/tests/test_results.txt"
-    pfile = "SALib/tests/test_param_file.txt"
-    input_file = "SALib/tests/model_inputs.txt"
-
-    Si = analyze(pfile,
-                 input_file,
-                 output_file,
-                 column=0,
-                 delim=' ',
+    Si = analyze(problem, model_input, model_output,
                  num_resamples=1000,
                  conf_level=0.95,
                  print_to_console=False)
@@ -73,15 +46,6 @@ def test_analysis_of_morris_results():
     assert_allclose(Si['sigma'], desired_sigma, rtol=1e-2)
     desired_names = ['Test 1', 'Test 2']
     assert_equal(Si['names'], desired_names)
-
-
-def test_number_results_incorrect():
-    pass
-
-
-#@raises(ValueError)
-# def test_if_column_does_not_exist():
-#    pass
 
 
 @raises(ValueError)

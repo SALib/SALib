@@ -27,13 +27,10 @@ def test_regression_morris_vanilla():
                           num_levels=10, grid_jump=5, \
                           optimal_trajectories=None)
 
-    np.savetxt('model_input.txt', param_values, delimiter=' ')
-
     Y = Ishigami.evaluate(param_values)
-    np.savetxt("model_output.txt", Y, delimiter=' ')
 
-    Si = morris.analyze(param_file, 'model_input.txt', 'model_output.txt',
-                        column=0, conf_level=0.95, print_to_console=False,
+    Si = morris.analyze(problem, param_values, Y,
+                        conf_level=0.95, print_to_console=False,
                         num_levels=10, grid_jump=5)
 
     assert_allclose(Si['mu_star'], [8.1, 2.2, 5.4], atol=0, rtol=5e-1)
@@ -48,13 +45,10 @@ def test_regression_morris_groups():
                           num_levels=10, grid_jump=5, \
                           optimal_trajectories=None)
 
-    np.savetxt('model_input_groups.txt', param_values, delimiter=' ')
-
     Y = Ishigami.evaluate(param_values)
-    np.savetxt("model_output_groups.txt", Y, delimiter=' ')
 
-    Si = morris.analyze(param_file, 'model_input_groups.txt', 'model_output_groups.txt',
-                        column=0, conf_level=0.95, print_to_console=False,
+    Si = morris.analyze(problem, param_values, Y,
+                        conf_level=0.95, print_to_console=False,
                         num_levels=10, grid_jump=5)
 
     assert_allclose(Si['mu_star'], [7.87, 6.26], rtol=5e-1)
@@ -73,14 +67,10 @@ def test_regression_morris_optimal():
                           num_levels=4, grid_jump=2, \
                           optimal_trajectories=9)
 
-    np.savetxt('model_input_groups.txt', param_values, delimiter=' ')
-
     Y = Ishigami.evaluate(param_values)
 
-    np.savetxt("model_output_groups.txt", Y, delimiter=' ')
-
-    Si = morris.analyze(param_file, 'model_input_groups.txt', 'model_output_groups.txt',
-                        column=0, conf_level=0.95, print_to_console=False,
+    Si = morris.analyze(problem, param_values, Y,
+                        conf_level=0.95, print_to_console=False,
                         num_levels=4, grid_jump=2)
 
     assert_allclose(Si['mu_star'], [8.1, 2.2, 5.4], rtol=10)
@@ -88,12 +78,12 @@ def test_regression_morris_optimal():
 
 def test_regression_sobol():
     param_file = 'SALib/test_functions/params/Ishigami.txt'
-    param_values = saltelli.sample(10000, param_file, calc_second_order=True)
+    problem = read_param_file(param_file)
+    param_values = saltelli.sample(problem, 10000, calc_second_order=True)
 
     Y = Ishigami.evaluate(param_values)
-    np.savetxt('model_output.txt', Y, delimiter=' ')
 
-    Si = sobol.analyze(param_file, 'model_output.txt', column=0,
+    Si = sobol.analyze(problem, Y,
                        calc_second_order=True, conf_level=0.95, print_to_console=False)
 
     assert_allclose(Si['S1'], [0.31, 0.44, 0.00], atol=5e-2, rtol=1e-1)
@@ -103,40 +93,38 @@ def test_regression_sobol():
 
 def test_regression_fast():
     param_file = 'SALib/test_functions/params/Ishigami.txt'
-    param_values = fast_sampler.sample(1000, param_file)
+    problem = read_param_file(param_file)
+    param_values = fast_sampler.sample(problem, 10000)
 
     Y = Ishigami.evaluate(param_values)
-    np.savetxt("model_output.txt", Y, delimiter=' ')
 
-    Si = fast.analyze(param_file, 'model_output.txt', column=0, print_to_console=False)
+    Si = fast.analyze(problem, Y, print_to_console=False)
     assert_allclose(Si['S1'], [0.31, 0.44, 0.00], atol=5e-2, rtol=1e-1)
     assert_allclose(Si['ST'], [0.55, 0.44, 0.24], atol=5e-2, rtol=1e-1)
 
 
 def test_regression_dgsm():
     param_file = 'SALib/test_functions/params/Ishigami.txt'
-    param_values = finite_diff.sample(10000, param_file, delta=0.001)
+    problem = read_param_file(param_file)
+    param_values = finite_diff.sample(problem, 10000, delta=0.001)
 
-    np.savetxt('model_input.txt', param_values, delimiter=' ')
     Y = Ishigami.evaluate(param_values)
-    np.savetxt('model_output.txt', Y, delimiter=' ')
 
-    Si = dgsm.analyze(param_file, 'model_input.txt', 'model_output.txt',
-                      column=0, conf_level=0.95, print_to_console=False)
+    Si = dgsm.analyze(problem, param_values, Y,
+                      conf_level=0.95, print_to_console=False)
 
     assert_allclose(Si['dgsm'], [2.229, 7.066, 3.180], atol=5e-2, rtol=1e-1)
 
 
 def test_regression_delta():
     param_file = 'SALib/test_functions/params/Ishigami.txt'
-    param_values = latin.sample(10000, param_file)
+    problem = read_param_file(param_file)
+    param_values = latin.sample(problem, 10000)
 
-    np.savetxt('model_input.txt', param_values, delimiter=' ')
     Y = Ishigami.evaluate(param_values)
-    np.savetxt('model_output.txt', Y, delimiter=' ')
 
-    Si = delta.analyze(param_file, 'model_input.txt', 'model_output.txt',
-                   column=0, num_resamples=10, conf_level=0.95, print_to_console=True)
+    Si = delta.analyze(problem, param_values, Y,
+                    num_resamples=10, conf_level=0.95, print_to_console=True)
 
     assert_allclose(Si['delta'], [0.210, 0.358, 0.155], atol=5e-2, rtol=1e-1)
     assert_allclose(Si['S1'], [0.31, 0.44, 0.00], atol=5e-2, rtol=1e-1)

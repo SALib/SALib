@@ -6,10 +6,9 @@ from ..util import scale_samples, read_param_file
 # Generate N x D matrix of latin hypercube samples
 
 
-def sample(N, param_file):
+def sample(problem, N):
 
-    pf = read_param_file(param_file)
-    D = pf['num_vars']
+    D = problem['num_vars']
 
     result = np.empty([N, D])
     temp = np.empty([N])
@@ -26,7 +25,7 @@ def sample(N, param_file):
         for j in range(N):
             result[j, i] = temp[j]
 
-    scale_samples(result, pf['bounds'])
+    scale_samples(result, problem['bounds'])
     return result
 
 if __name__ == "__main__":
@@ -35,6 +34,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     np.random.seed(args.seed)
-    param_values = sample(args.samples, args.paramfile)
+    problem = read_param_file(args.paramfile)
+
+    param_values = sample(problem, args.samples)
     np.savetxt(args.output, param_values, delimiter=args.delimiter,
                fmt='%.' + str(args.precision) + 'e')

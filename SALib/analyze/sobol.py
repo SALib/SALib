@@ -11,12 +11,10 @@ from . import common_args
 # Containing the indices in the same order as the parameter file
 
 
-def analyze(pfile, output_file, column=0, calc_second_order=True, num_resamples=1000,
-            delim=' ', conf_level=0.95, print_to_console=False):
+def analyze(problem, Y, calc_second_order=True, num_resamples=1000,
+            conf_level=0.95, print_to_console=False):
 
-    param_file = read_param_file(pfile)
-    Y = np.loadtxt(output_file, delimiter=delim, usecols=(column,))
-    D = param_file['num_vars']
+    D = problem['num_vars']
 
     if calc_second_order and Y.size % (2 * D + 2) == 0:
         N = int(Y.size / (2 * D + 2))
@@ -58,7 +56,7 @@ def analyze(pfile, output_file, column=0, calc_second_order=True, num_resamples=
             A, AB[:, j], B, num_resamples, conf_level)
 
         if print_to_console:
-            print("%s %f %f %f %f" % (param_file['names'][j], S['S1'][
+            print("%s %f %f %f %f" % (problem['names'][j], S['S1'][
                   j], S['S1_conf'][j], S['ST'][j], S['ST_conf'][j]))
 
     # Second order (+conf.)
@@ -78,7 +76,7 @@ def analyze(pfile, output_file, column=0, calc_second_order=True, num_resamples=
                     A, AB[:, j], AB[:, k], BA[:, j], B, num_resamples, conf_level)
 
                 if print_to_console:
-                    print("%s %s %f %f" % (param_file['names'][j], param_file[
+                    print("%s %s %f %f" % (problem['names'][j], problem[
                           'names'][k], S['S2'][j, k], S['S2_conf'][j, k]))
 
     return S
@@ -140,5 +138,8 @@ if __name__ == "__main__":
                         help='Number of bootstrap resamples for Sobol confidence intervals')
     args = parser.parse_args()
 
-    analyze(args.paramfile, args.model_output_file, args.column, (args.max_order == 2),
-            num_resamples=args.resamples, delim=args.delimiter, print_to_console=True)
+    problem = read_param_file(args.paramfile)
+    Y = np.loadtxt(args.model_output_file, delimiter=args.delimiter, usecols=(args.column,))
+
+    analyze(problem, Y, (args.max_order == 2),
+            num_resamples=args.resamples, print_to_console=True)

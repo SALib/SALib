@@ -7,11 +7,9 @@ from . import common_args
 # Generate matrix of samples for derivative-based global sensitivity measure (dgsm)
 # start from a QMC (sobol) sequence and finite difference with delta % steps
 
+def sample(problem, N, delta=0.01):
 
-def sample(N, param_file, delta=0.01):
-
-    pf = read_param_file(param_file)
-    D = pf['num_vars']
+    D = problem['num_vars']
 
     # How many values of the Sobol sequence to skip
     skip_values = 1000
@@ -19,7 +17,7 @@ def sample(N, param_file, delta=0.01):
     # Create base sequence - could be any type of sampling
     base_sequence = sobol_sequence.sample(N + skip_values, D)
     # scale before finite differencing
-    scale_samples(base_sequence, pf['bounds'])
+    scale_samples(base_sequence, problem['bounds'])
     dgsm_sequence = np.empty([N * (D + 1), D])
 
     index = 0
@@ -35,9 +33,9 @@ def sample(N, param_file, delta=0.01):
             temp[j] = base_sequence[i, j] * delta
             dgsm_sequence[index, :] = base_sequence[i,:] + temp
             dgsm_sequence[index, j] = min(
-                dgsm_sequence[index, j], pf['bounds'][j][1])
+                dgsm_sequence[index, j], problem['bounds'][j][1])
             dgsm_sequence[index, j] = max(
-                dgsm_sequence[index, j], pf['bounds'][j][0])
+                dgsm_sequence[index, j], problem['bounds'][j][0])
             index += 1
 
     return dgsm_sequence
@@ -50,6 +48,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     np.random.seed(args.seed)
-    param_values = sample(args.samples, args.paramfile, args.delta)
+    problem = read_param_file(args.paramfile)
+
+    param_values = sample(problem, args.samples, args.delta)
     np.savetxt(args.output, param_values, delimiter=args.delimiter,
                fmt='%.' + str(args.precision) + 'e')

@@ -30,8 +30,6 @@ Suggested enhancements:
 
 def sample(problem, N, num_levels, grid_jump, optimal_trajectories=None):
 
-    # sample init goes here
-
     if grid_jump >= num_levels:
         raise ValueError("grid_jump must be less than num_levels")
 

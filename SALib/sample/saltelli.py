@@ -9,10 +9,9 @@ from . import common_args
 # Size N x (D + 2) otherwise
 
 
-def sample(N, param_file, calc_second_order=True):
+def sample(problem, N, calc_second_order=True):
 
-    pf = read_param_file(param_file)
-    D = pf['num_vars']
+    D = problem['num_vars']
 
     # How many values of the Sobol sequence to skip
     skip_values = 1000
@@ -62,7 +61,7 @@ def sample(N, param_file, calc_second_order=True):
 
         index += 1
 
-    scale_samples(saltelli_sequence, pf['bounds'])
+    scale_samples(saltelli_sequence, problem['bounds'])
     return saltelli_sequence
 
 if __name__ == "__main__":
@@ -73,7 +72,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     np.random.seed(args.seed)
-    param_values = sample(
-        args.samples, args.paramfile, calc_second_order=(args.max_order == 2))
+    problem = read_param_file(args.paramfile)
+
+    param_values = sample(problem, args.samples, calc_second_order=(args.max_order == 2))
     np.savetxt(args.output, param_values, delimiter=args.delimiter,
                fmt='%.' + str(args.precision) + 'e')
