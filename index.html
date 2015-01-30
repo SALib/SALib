@@ -33,9 +33,9 @@
         <h2>
 <a id="sensitivity-analysis-library-salib" class="anchor" href="#sensitivity-analysis-library-salib" aria-hidden="true"><span class="octicon octicon-link"></span></a>Sensitivity Analysis Library (SALib)</h2>
 
-<p>Python implementations of commonly used sensitivity analysis methods. Useful in systems modeling to calculate the effects of model inputs or exogenous factors on outputs of interest. </p>
+<p>Python implementations of commonly used sensitivity analysis methods. Useful in systems modeling to calculate the effects of model inputs or exogenous factors on outputs of interest.</p>
 
-<p><strong>Requirements:</strong> <a href="http://www.numpy.org/">NumPy</a>, <a href="http://www.scipy.org/">SciPy</a>, <a href="http://scikit-learn.org">Scikit-learn</a></p>
+<p><strong>Requirements:</strong> <a href="http://www.numpy.org/">NumPy</a>, <a href="http://www.scipy.org/">SciPy</a></p>
 
 <p><strong>Installation:</strong> <code>pip install SALib</code> or <code>python setup.py install</code></p>
 
@@ -45,87 +45,63 @@
 
 <ul>
 <li>Sobol Sensitivity Analysis (<a href="http://www.sciencedirect.com/science/article/pii/S0378475400002706">Sobol 2001</a>, <a href="http://www.sciencedirect.com/science/article/pii/S0010465502002801">Saltelli 2002</a>, <a href="http://www.sciencedirect.com/science/article/pii/S0010465509003087">Saltelli et al. 2010</a>)</li>
-<li>Method of Morris (<a href="http://www.tandfonline.com/doi/abs/10.1080/00401706.1991.10484804">Morris 1991</a>, <a href="http://www.sciencedirect.com/science/article/pii/S1364815206002805">Campolongo et al. 2007</a>)</li>
+<li>Method of Morris, including groups and optimal trajectories (<a href="http://www.tandfonline.com/doi/abs/10.1080/00401706.1991.10484804">Morris 1991</a>, <a href="http://www.sciencedirect.com/science/article/pii/S1364815206002805">Campolongo et al. 2007</a>)</li>
 <li>Fourier Amplitude Sensitivity Test (FAST) (<a href="http://scitation.aip.org/content/aip/journal/jcp/59/8/10.1063/1.1680571">Cukier et al. 1973</a>, <a href="http://amstat.tandfonline.com/doi/abs/10.1080/00401706.1999.10485594">Saltelli et al. 1999</a>)</li>
 <li>Delta Moment-Independent Measure (<a href="http://www.sciencedirect.com/science/article/pii/S0951832006000883">Borgonovo 2007</a>, <a href="http://www.sciencedirect.com/science/article/pii/S0377221712008995">Plischke et al. 2013</a>)</li>
 <li>Derivative-based Global Sensitivity Measure (DGSM) (<a href="http://www.sciencedirect.com/science/article/pii/S0378475409000354">Sobol and Kucherenko 2009</a>)</li>
-<li>Metamodel-based Sobol Analysis (experimental). Uses RBF support vector regression from <code>scikit-learn</code>.</li>
 </ul>
 
-<p><strong>Contributors:</strong> <a href="https://github.com/jdherman">Jon Herman</a>, <a href="https://github.com/cmutel">Chris Mutel</a>, <a href="https://github.com/willu47">Will Usher</a>, <a href="https://github.com/matthewjwoodruff">Matt Woodruff</a>, <a href="https://github.com/zoidy">Fernando Rios</a>, <a href="https://github.com/dhyams">Dan Hyams</a>, <a href="https://github.com/xantares">xantares</a></p>
+<p><strong>Contributing:</strong> see <a href="CONTRIBUTING.md">here</a></p>
 
 <h3>
-<a id="create-a-parameter-file" class="anchor" href="#create-a-parameter-file" aria-hidden="true"><span class="octicon octicon-link"></span></a>Create a parameter file</h3>
+<a id="quick-start" class="anchor" href="#quick-start" aria-hidden="true"><span class="octicon octicon-link"></span></a>Quick Start</h3>
 
-<p>To get started, create a file describing the sampling ranges for the parameters in the model. Parameter files should be created with 3 columns: <code>[name, lower bound, upper bound]</code>:</p>
+<div class="highlight highlight-python"><pre><span class="pl-k">from</span> SALib.sample <span class="pl-k">import</span> saltelli
+<span class="pl-k">from</span> SALib.analyze <span class="pl-k">import</span> sobol
+<span class="pl-k">from</span> SALib.test_functions <span class="pl-k">import</span> Ishigami
+<span class="pl-k">import</span> numpy <span class="pl-k">as</span> np
 
-<pre><code>P1 0.0 1.0
+problem <span class="pl-k">=</span> {
+  <span class="pl-s1"><span class="pl-pds">'</span>num_vars<span class="pl-pds">'</span></span>: <span class="pl-c1">3</span>, 
+  <span class="pl-s1"><span class="pl-pds">'</span>names<span class="pl-pds">'</span></span>: [<span class="pl-s1"><span class="pl-pds">'</span>x1<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>x2<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>x3<span class="pl-pds">'</span></span>], 
+  <span class="pl-s1"><span class="pl-pds">'</span>bounds<span class="pl-pds">'</span></span>: [[<span class="pl-k">-</span><span class="pl-c1">3.14159265359</span>, <span class="pl-c1">3.14159265359</span>], 
+            [<span class="pl-k">-</span><span class="pl-c1">3.14159265359</span>, <span class="pl-c1">3.14159265359</span>], 
+             [<span class="pl-k">-</span><span class="pl-c1">3.14159265359</span>, <span class="pl-c1">3.14159265359</span>]]
+}
+
+<span class="pl-c"># Generate samples</span>
+param_values <span class="pl-k">=</span> saltelli.sample(problem, <span class="pl-c1">1000</span>, <span class="pl-vpf">calc_second_order</span><span class="pl-k">=</span><span class="pl-c1">True</span>)
+
+<span class="pl-c"># Run model (example)</span>
+Y <span class="pl-k">=</span> Ishigami.evaluate(param_values)
+
+<span class="pl-c"># Perform analysis</span>
+Si <span class="pl-k">=</span> sobol.analyze(problem, Y, <span class="pl-vpf">print_to_console</span><span class="pl-k">=</span><span class="pl-c1">False</span>)
+<span class="pl-c"># Returns a dictionary with keys 'S1', 'S1_conf', 'ST', and 'ST_conf'</span>
+<span class="pl-c"># (first and total-order indices with bootstrap confidence intervals)</span></pre></div>
+
+<p>It's also possible to specify the parameter bounds in a file with 3 columns:</p>
+
+<pre><code># name lower_bound upper_bound
+P1 0.0 1.0
 P2 0.0 5.0
 ...etc.
 </code></pre>
 
-<p>Lines beginning with <code>#</code> will be treated as comments and ignored.</p>
+<p>Then the <code>problem</code> dictionary above can be created from the <code>read_param_file</code> function:</p>
 
-<h3>
-<a id="generate-samples" class="anchor" href="#generate-samples" aria-hidden="true"><span class="octicon octicon-link"></span></a>Generate samples</h3>
+<div class="highlight highlight-python"><pre><span class="pl-k">from</span> SALib.util <span class="pl-k">import</span> read_param_file
+problem <span class="pl-k">=</span> read_param_file(<span class="pl-s1"><span class="pl-pds">'</span>/path/to/file.txt<span class="pl-pds">'</span></span>)
+<span class="pl-c"># ... same as above</span></pre></div>
 
-<p>From the command line:</p>
+<p>Lots of other options are included for parameter files, as well as a command-line interface. See the <a href="README-advanced.md">advanced readme</a>.</p>
 
-<pre><code>python -m SALib.sample.saltelli \
-     -n 1000 \
-     -p ./SALib/test_functions/params/Ishigami.txt \
-     -o model_input.txt \
-</code></pre>
-
-<p>Other methods include <code>SALib.sample.morris_oat</code> and <code>SALib.sample.fast_sampler</code>. For an explanation of all command line options, <a href="https://github.com/jdherman/SALib/tree/master/examples">see the examples here</a>. </p>
-
-<p>Or, generate samples from Python:</p>
-
-<div class="highlight highlight-python"><pre><span class="pl-k">from</span> SALib.sample <span class="pl-k">import</span> saltelli
-<span class="pl-k">import</span> numpy <span class="pl-k">as</span> np
-
-param_file <span class="pl-k">=</span> <span class="pl-s1"><span class="pl-pds">'</span>../../SALib/test_functions/params/Ishigami.txt<span class="pl-pds">'</span></span>
-param_values <span class="pl-k">=</span> saltelli.sample(<span class="pl-c1">1000</span>, param_file, <span class="pl-vpf">calc_second_order</span> <span class="pl-k">=</span> <span class="pl-c1">True</span>)
-np.savetxt(<span class="pl-s1"><span class="pl-pds">'</span>model_input.txt<span class="pl-pds">'</span></span>, param_values, <span class="pl-vpf">delimiter</span><span class="pl-k">=</span><span class="pl-s1"><span class="pl-pds">'</span> <span class="pl-pds">'</span></span>)</pre></div>
-
-<p>Either way, this will create a file of sampled input values in <code>model_input.txt</code>.</p>
-
-<h3>
-<a id="run-model" class="anchor" href="#run-model" aria-hidden="true"><span class="octicon octicon-link"></span></a>Run model</h3>
-
-<p>Here's an example of running a test function in Python, but this will usually be a user-defined model, maybe even in another language. Just save the outputs.</p>
-
-<div class="highlight highlight-python"><pre><span class="pl-k">from</span> SALib.test_functions <span class="pl-k">import</span> Ishigami
-Y <span class="pl-k">=</span> Ishigami.evaluate(param_values)
-np.savetxt(<span class="pl-s1"><span class="pl-pds">'</span>model_output.txt<span class="pl-pds">'</span></span>, Y, <span class="pl-vpf">delimiter</span><span class="pl-k">=</span><span class="pl-s1"><span class="pl-pds">'</span> <span class="pl-pds">'</span></span>)</pre></div>
-
-<h3>
-<a id="analyze-model-output" class="anchor" href="#analyze-model-output" aria-hidden="true"><span class="octicon octicon-link"></span></a>Analyze model output</h3>
-
-<p>From the command line:</p>
-
-<pre><code>python -m SALib.analyze.sobol \
-     -p ./SALib/test_functions/params/Ishigami.txt \
-     -Y model_output.txt \
-     -c 0 \
-</code></pre>
-
-<p>This will print indices and confidence intervals to the command line. You can redirect to a file using the <code>&gt;</code> operator.</p>
-
-<p>Or, from Python:</p>
-
-<div class="highlight highlight-python"><pre><span class="pl-k">from</span> SALib.analyze <span class="pl-k">import</span> sobol
-<span class="pl-k">import</span> numpy <span class="pl-k">as</span> np
-Si <span class="pl-k">=</span> sobol.analyze(param_file, <span class="pl-s1"><span class="pl-pds">'</span>model_output.txt<span class="pl-pds">'</span></span>, <span class="pl-vpf">column</span> <span class="pl-k">=</span> <span class="pl-c1">0</span>, <span class="pl-vpf">print_to_console</span><span class="pl-k">=</span><span class="pl-c1">False</span>)
-<span class="pl-c"># Returns a dictionary with keys 'S1', 'S1_conf', 'ST', and 'ST_conf'</span>
-<span class="pl-c"># e.g. Si['S1'] contains the first-order index for each parameter, in the same order as the parameter file</span></pre></div>
-
-<p>Check out the <a href="https://github.com/jdherman/SALib/tree/master/examples">examples</a> for a full description of command line and keyword options for all of the methods.</p>
+<p>Also check out the <a href="https://github.com/jdherman/SALib/tree/master/examples">examples</a> for a full description of options for each method.</p>
 
 <h3>
 <a id="license" class="anchor" href="#license" aria-hidden="true"><span class="octicon octicon-link"></span></a>License</h3>
 
-<p>Copyright (C) 2013-2014 Jon Herman and others. Licensed under the GNU Lesser General Public License.</p>
+<p>Copyright (C) 2013-2015 Jon Herman and others. Licensed under the GNU Lesser General Public License.</p>
 
 <p>The Sensitivity Analysis Library is free software: you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
