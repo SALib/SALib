@@ -15,83 +15,48 @@ Python implementations of commonly used sensitivity analysis methods. Useful in 
 * Delta Moment-Independent Measure ([Borgonovo 2007](http://www.sciencedirect.com/science/article/pii/S0951832006000883), [Plischke et al. 2013](http://www.sciencedirect.com/science/article/pii/S0377221712008995))
 * Derivative-based Global Sensitivity Measure (DGSM) ([Sobol and Kucherenko 2009](http://www.sciencedirect.com/science/article/pii/S0378475409000354))
 
-**Contributors:** [Jon Herman](https://github.com/jdherman), [Chris Mutel](https://github.com/cmutel), [Will Usher](https://github.com/willu47), [Matt Woodruff](https://github.com/matthewjwoodruff), [Fernando Rios](https://github.com/zoidy), [Dan Hyams](https://github.com/dhyams), [xantares](https://github.com/xantares)
+**Contributing:** see [here](CONTRIBUTING.md)
 
-### Create a parameter file
+### Quick Start
+```python
+from SALib.sample import saltelli
+from SALib.analyze import sobol
+import numpy as np
 
-To get started, create a file describing the sampling ranges for the parameters in the model. Parameter files should be created with 3 columns:
+problem = {
+  'num_vars': 3, 
+  'names': ['x1', 'x2', 'x3'], 
+  'bounds': [[-3.14159265359, 3.14159265359], 
+            [-3.14159265359, 3.14159265359], 
+             [-3.14159265359, 3.14159265359]]
+}
+
+# Generate samples
+param_values = saltelli.sample(problem, 1000, calc_second_order=True)
+
+# Run model (example)
+Y = Ishigami.evaluate(param_values)
+# for offline models, save param_values to a file:
+# np.savetxt('model_input.txt', param_values, delimiter=' ')
+# then load the model outputs with np.loadtxt()
+
+# Perform analysis
+Si = sobol.analyze(problem, Y, print_to_console=False)
+# Returns a dictionary with keys 'S1', 'S1_conf', 'ST', and 'ST_conf'
+# (first and total-order indices with bootstrap confidence intervals)
+```
+
+It's also possible to specify the parameter bounds in a file. Parameter files should be created with 3 columns:
 ```
 # name lower_bound upper_bound
 P1 0.0 1.0
 P2 0.0 5.0
 ...etc.
 ```
-Lines beginning with `#` will be treated as comments and ignored. The Morris method also supports groups of input factors, which can be specified with a fourth column:
-```
-# name lower_bound upper_bound group_name
-P1 0.0 1.0 Group_1
-P2 0.0 5.0 Group_2
-P3 0.0 5.0 Group_2
-...etc.
-```
-Parameter files can also be comma-delimited if your parameter names or group names contain spaces. This should be detected automatically.
 
-### Generate samples
+Lots of other options are included for parameter files, as well as a command-line interface--see the [Advanced Readme](README-advanced.md).
 
-From the command line:
-```
-python -m SALib.sample.saltelli \
-     -n 1000 \
-     -p ./SALib/test_functions/params/Ishigami.txt \
-     -o model_input.txt \
-```
-
-Other methods include `SALib.sample.morris` and `SALib.sample.fast_sampler`. For an explanation of all command line options for each method, [see the examples here](https://github.com/jdherman/SALib/tree/master/examples).
-
-Or, generate samples from Python:
-```python
-from SALib.sample import saltelli
-import numpy as np
-
-param_file = '../../SALib/test_functions/params/Ishigami.txt'
-param_values = saltelli.sample(1000, param_file, calc_second_order = True)
-np.savetxt('model_input.txt', param_values, delimiter=' ')
-```
-
-Either way, this will create a file of sampled input values in `model_input.txt`.
-
-### Run model
-Here's an example of running a test function in Python, but this will usually be a user-defined model, maybe even in another language. Just save the outputs.
-
-```python
-from SALib.test_functions import Ishigami
-Y = Ishigami.evaluate(param_values)
-np.savetxt('model_output.txt', Y, delimiter=' ')
-```
-
-### Analyze model output
-
-From the command line:
-```
-python -m SALib.analyze.sobol \
-     -p ./SALib/test_functions/params/Ishigami.txt \
-     -Y model_output.txt \
-     -c 0 \
-```
-
-This will print indices and confidence intervals to the command line. You can redirect to a file using the `>` operator.
-
-Or, from Python:
-```python
-from SALib.analyze import sobol
-import numpy as np
-Si = sobol.analyze(param_file, 'model_output.txt', column = 0, print_to_console=False)
-# Returns a dictionary with keys 'S1', 'S1_conf', 'ST', and 'ST_conf'
-# e.g. Si['S1'] contains the first-order index for each parameter, in the same order as the parameter file
-```
-
-Check out the [examples](https://github.com/jdherman/SALib/tree/master/examples) for a full description of options for each method.
-
+Also check out the [examples](https://github.com/jdherman/SALib/tree/master/examples) for a full description of options for each method.
 
 ### License
 Copyright (C) 2013-2015 Jon Herman and others. Licensed under the GNU Lesser General Public License.
