@@ -1,6 +1,6 @@
 ###Contributing
 
-Thanks to all those who contributed so far, including: [Will Usher](https://github.com/willu47), [Chris Mutel](https://github.com/cmutel), [Matt Woodruff](https://github.com/matthewjwoodruff), [Fernando Rios](https://github.com/zoidy), and [Dan Hyams](https://github.com/dhyams), [xantares](https://github.com/xantares). The library would be far less usable without these efforts.
+Thanks to all those who contributed so far, including: [Will Usher](https://github.com/willu47), [Chris Mutel](https://github.com/cmutel), [Matt Woodruff](https://github.com/matthewjwoodruff), [Fernando Rios](https://github.com/zoidy), and [Dan Hyams](https://github.com/dhyams), [xantares](https://github.com/xantares). The library would be in much worse shape without these efforts.
 
 In my view, development should follow a few objectives:
 

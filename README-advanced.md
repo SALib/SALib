@@ -14,7 +14,7 @@ Parameter files can also be comma-delimited if your parameter names or group nam
 
 #### Command-line interface
 
-First, generate samples ... (the `-p` flag is the parameter file)
+**Generate samples** (the `-p` flag is the parameter file)
 ```
 python -m SALib.sample.saltelli \
      -n 1000 \
@@ -22,9 +22,9 @@ python -m SALib.sample.saltelli \
      -o model_input.txt \
 ```
 
-Then, run the model ... this will usually be a user-defined model, maybe even in another language. Just save the outputs.
+**Run the model** this will usually be a user-defined model, maybe even in another language. Just save the outputs.
 
-Finally, perform the analysis ...
+**Run the analysis**
 ```
 python -m SALib.analyze.sobol \
      -p ./SALib/test_functions/params/Ishigami.txt \
@@ -34,4 +34,4 @@ python -m SALib.analyze.sobol \
 
 This will print indices and confidence intervals to the command line. You can redirect to a file using the `>` operator.
 
-Other methods include `SALib.sample.morris` and `SALib.sample.fast_sampler`. For an explanation of all command line options for each method, [see the examples here](https://github.com/jdherman/SALib/tree/master/examples).
+Other methods include Morris, FAST, Delta-MIM, and DGSM. For an explanation of all command line options for each method, [see the examples here](https://github.com/jdherman/SALib/tree/master/examples).

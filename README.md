@@ -21,6 +21,7 @@ Python implementations of commonly used sensitivity analysis methods. Useful in 
 ```python
 from SALib.sample import saltelli
 from SALib.analyze import sobol
+from SALib.test_functions import Ishigami
 import numpy as np
 
 problem = {
@@ -36,9 +37,6 @@ param_values = saltelli.sample(problem, 1000, calc_second_order=True)
 
 # Run model (example)
 Y = Ishigami.evaluate(param_values)
-# for offline models, save param_values to a file:
-# np.savetxt('model_input.txt', param_values, delimiter=' ')
-# then load the model outputs with np.loadtxt()
 
 # Perform analysis
 Si = sobol.analyze(problem, Y, print_to_console=False)
@@ -46,7 +44,7 @@ Si = sobol.analyze(problem, Y, print_to_console=False)
 # (first and total-order indices with bootstrap confidence intervals)
 ```
 
-It's also possible to specify the parameter bounds in a file. Parameter files should be created with 3 columns:
+It's also possible to specify the parameter bounds in a file with 3 columns:
 ```
 # name lower_bound upper_bound
 P1 0.0 1.0
@@ -54,7 +52,14 @@ P2 0.0 5.0
 ...etc.
 ```
 
-Lots of other options are included for parameter files, as well as a command-line interface--see the [Advanced Readme](README-advanced.md).
+Then the `problem` dictionary above can be created from the `read_param_file` function:
+```python
+from SALib.util import read_param_file
+problem = read_param_file('/path/to/file.txt')
+# ... same as above
+```
+
+Lots of other options are included for parameter files, as well as a command-line interface. See the [advanced readme](README-advanced.md).
 
 Also check out the [examples](https://github.com/jdherman/SALib/tree/master/examples) for a full description of options for each method.
 
