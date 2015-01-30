@@ -38,36 +38,3 @@ def test_incorrect_second_order_setting():
     param_values = saltelli.sample(problem, 501, calc_second_order=False)
     Y = Ishigami.evaluate(param_values)
     sobol.analyze(problem, Y, calc_second_order=True)
-
-# @raises(ValueError)
-# @with_setup(setup, teardown)
-# def test_grid_jump_lt_num_levels():
-
-#     parameter_file = "SALib/tests/test_param_file.txt"
-#     problem = read_param_file(parameter_file)
-
-#     samples = 10
-#     num_levels = 4
-#     grid_jump = 4
-
-#     sample(problem, samples, num_levels, grid_jump, \
-#            optimal_trajectories=samples)
-
-
-
-
-# @raises(ValueError)
-# def test_catch_inputs_not_in_zero_one_range():
-#     input_1 = [[0, 1/3.], [0, 1.], [2/3., 1.]]
-#     input_2 = [[0, 1/3.], [2/3., 1/3.], [2/3., 1.]]
-#     input_3 = [[2/3., 0], [2/3., 2/3.], [0, 2/3.]]
-#     input_4 = [[1/3., 1.], [1., 1.], [1, 1/3.]]
-#     input_5 = [[1/3., 1.], [1/3., 1/3.], [1, 1/3.]]
-#     input_6 = [[1/3., 2/3.], [1/3., 0], [1., 0]]
-#     input_sample = np.concatenate([input_1, input_2, input_3,
-#                                    input_4, input_5, input_6])
-#     problem = {'num_vars': 2}
-#     k_choices = 4
-#     N = 10
-#     input_sample *= 10
-#     optimize_trajectories(problem, input_sample, N, k_choices)
