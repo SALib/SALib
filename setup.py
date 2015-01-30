@@ -37,7 +37,6 @@ def setup_package():
         install_requires=[
             "numpy",
             "scipy",
-            "scikit-learn",
         ],
         # Two arguments required by Versioneer
         version = versioneer.get_version(),
