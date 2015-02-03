@@ -35,7 +35,7 @@ def setup_package():
         license=open('LICENSE.md').read(),
         tests_require=['nose'],
         install_requires=[
-            "numpy",
+            "numpy>1.7",
             "scipy",
         ],
         # Two arguments required by Versioneer
