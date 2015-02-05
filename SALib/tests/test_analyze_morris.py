@@ -6,7 +6,7 @@ import numpy as np
 
 from ..analyze.morris import analyze, \
     compute_mu_star_confidence, \
-    compute_effects_vector,\
+    compute_elementary_effects,\
     get_increased_values,\
     get_decreased_values, \
     compute_grouped_mu_star
@@ -59,7 +59,7 @@ def test_conf_level_within_zero_one_bounds():
     compute_mu_star_confidence(ee, N, num_resamples, conf_level_too_high)
 
 
-def test_compute_elementary_effects_vector():
+def test_compute_elementary_effects():
     model_inputs = np.array([
                             [1.64, -1.64, -1.64, 0.39, -0.39, 0.39, -1.64, -
                                 1.64, -0.39, -0.39, 1.64, 1.64, -0.39, 0.39, 1.64],
@@ -97,14 +97,14 @@ def test_compute_elementary_effects_vector():
                              dtype=np.float)
     delta = 2. / 3
 
-    actual = compute_effects_vector(model_inputs, model_outputs, 16, delta)
+    actual = compute_elementary_effects(model_inputs, model_outputs, 16, delta)
     desired = np.array([[-5.67], [7.18], [1.89], [8.42], [2.93], [3.28], [-3.62], [-7.55],
                         [-2.51], [5.00], [9.34], [0.54], [5.43], [2.15], [13.05]],
                        dtype=np.float)
     assert_allclose(actual, desired, atol=1e-1)
 
 
-def test_compute_elementary_effects_vector_small():
+def test_compute_elementary_effects_small():
     '''
     Computes elementary effects for two variables,
     over six trajectories with four levels.
@@ -121,7 +121,7 @@ def test_compute_elementary_effects_vector_small():
                              dtype=np.float)
 
     delta = 2. / 3
-    actual = compute_effects_vector(model_inputs, model_outputs, 3, delta)
+    actual = compute_elementary_effects(model_inputs, model_outputs, 3, delta)
     desired = np.array(
         [[2.52, 2.01, 2.30, -0.66, -0.93, -1.30], [-0.39, 0.13, 0.80, 0.25, -0.02, 0.51]])
     assert_allclose(actual, desired, atol=1e-0)
