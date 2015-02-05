@@ -35,7 +35,7 @@ def analyze(problem, X, Y,
                             where D is the number of parameters (or groups) in your parameter file. \
                          """)
     ee = np.zeros((num_vars, num_trajectories))
-    ee = compute_effects_vector(X, Y, int(Y.size / num_trajectories), delta)
+    ee = compute_elementary_effects(X, Y, int(Y.size / num_trajectories), delta)
 
     # Output the Mu, Mu*, and Sigma Values. Also return them in case this is
     # being called from Python
@@ -87,26 +87,6 @@ def compute_grouped_mu_star(mu_star_ungrouped, group_matrix):
     return mu_star_grouped.T
 
 
-# This function is not being used right now, in favor of the vectorized version below
-def compute_elementary_effect(X, Y, j1, j2):
-    # The elementary effect is (change in output)/(change in input)
-    # Each parameter has one EE per trajectory, because it is only changed
-    # once in each trajectory
-    try:
-
-        change_in_input = X[j2, :] - X[j1, :]
-        change_in_output = Y[j2] - Y[j1]
-        return np.linalg.solve(change_in_input, change_in_output)
-
-    except np.linalg.linalg.LinAlgError:
-
-        ee = np.zeros(X.shape[1])
-        for k in j1:
-            delta = X[k+1, :] - X[k, :]
-            col = np.nonzero(delta)[0]
-            ee[k] = np.array((Y[k + 1] - Y[k]) / (X[k + 1, col] - X[k, col]))
-        return ee
-
 def get_increased_values(op_vec, up, lo):
 
     up = np.pad(up, ((0, 0), (1, 0), (0, 0)), 'constant')
@@ -127,7 +107,7 @@ def get_decreased_values(op_vec, up, lo):
     return res.T
 
 
-def compute_effects_vector(model_inputs, model_outputs, trajectory_size, delta):
+def compute_elementary_effects(model_inputs, model_outputs, trajectory_size, delta):
     '''
     Arguments:
         - model_inputs - matrix of inputs to the model under analysis.
