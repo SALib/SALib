@@ -12,8 +12,26 @@ from ..analyze.morris import analyze, \
     compute_grouped_mu_star
 
 
-def test_analysis_of_morris_results():
+def test_compute_mu_star_confidence():
+    '''
+    Tests that compute mu_star_confidence is computed correctly
+    '''
+    
+    ee = np.array([[-5.67], [7.18], [1.89], [8.42], [2.93], [3.28], [-3.62], [-7.55],
+                        [-2.51], [5.00], [9.34], [0.54], [5.43], [2.15], [13.05]],
+                       dtype=np.float)
+    num_trajectories = 16
+    num_resamples = 1000
+    conf_level = 0.95
+    
+    actual = compute_mu_star_confidence(ee, num_trajectories, num_resamples, conf_level)
+    expected = 1.5
+    assert_allclose(actual, expected, rtol=1e-01)
 
+def test_analysis_of_morris_results():
+    '''
+    Tests a one-dimensional vector of results
+    '''
     model_input = np.array([[0, 1. / 3], [0, 1],       [2. / 3, 1],
                              [0, 1. / 3],   [2. / 3, 1. / 3], [2. / 3, 1],
                              [2. / 3, 0],   [2. / 3, 2. / 3], [0, 2. / 3],
