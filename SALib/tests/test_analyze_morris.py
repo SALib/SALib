@@ -17,16 +17,15 @@ def test_compute_mu_star_confidence():
     Tests that compute mu_star_confidence is computed correctly
     '''
     
-    ee = np.array([[-5.67], [7.18], [1.89], [8.42], [2.93], [3.28], [-3.62], [-7.55],
-                        [-2.51], [5.00], [9.34], [0.54], [5.43], [2.15], [13.05]],
-                       dtype=np.float)
-    num_trajectories = 16
+    ee = np.array([2.52, 2.01, 2.30, 0.66, 0.93, 1.3], dtype=np.float)
+    num_trajectories = 6
     num_resamples = 1000
     conf_level = 0.95
     
     actual = compute_mu_star_confidence(ee, num_trajectories, num_resamples, conf_level)
-    expected = 1.5
-    assert_allclose(actual, expected, rtol=1e-01)
+    expected = 0.5
+    assert_allclose(actual, expected, atol=1e-01)
+
 
 def test_analysis_of_morris_results():
     '''
@@ -78,6 +77,12 @@ def test_conf_level_within_zero_one_bounds():
 
 
 def test_compute_elementary_effects():
+    '''
+    Inputs for elementary effects taken from Exercise 5 from Saltelli (2008).
+    See page 140-145.
+    `model_inputs` are from trajectory t_1 from table 3.10 on page 141.
+    `desired` is equivalent to column t_1 in table 3.12 on page 145.
+    '''
     model_inputs = np.array([
                             [1.64, -1.64, -1.64, 0.39, -0.39, 0.39, -1.64, -
                                 1.64, -0.39, -0.39, 1.64, 1.64, -0.39, 0.39, 1.64],
