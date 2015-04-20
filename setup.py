@@ -38,6 +38,8 @@ def setup_package():
             "numpy>1.7",
             "scipy",
         ],
+          
+        extras_require={"gurobipy": ["gurobipy",]},
         # Two arguments required by Versioneer
         version = versioneer.get_version(),
         cmdclass=cmdclass,
