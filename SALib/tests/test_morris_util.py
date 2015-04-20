@@ -86,7 +86,7 @@ def test_distance():
     '''
     input_1 = np.matrix([[0, 1/3.], [0, 1.], [2/3., 1.]], dtype=np.float32)
     input_3 = np.matrix([[2/3., 0], [2/3., 2/3.], [0, 2/3.]], dtype=np.float32)
-    output = compute_distance(input_1, input_3, 2)
+    output = compute_distance(input_1, input_3)
     assert_almost_equal(output, 6.18, places=2)
 
 
@@ -159,7 +159,7 @@ def test_find_maximum():
     k_choices = 4
     N = 6
     output = find_maximum(scores, N, k_choices)
-    expected = (2, 3, 4, 5)
+    expected = [2, 3, 4, 5]
     assert_equal(output, expected)
 
 
