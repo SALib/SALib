@@ -1,7 +1,6 @@
 from __future__ import division
 from gurobipy import *
-import morris_optimal, morris_oat
-from morris_optimal import compile_output
+from morris_util import compute_distance_matrix, compile_output
 import common_args
 import numpy as np
 import random as rd
@@ -58,18 +57,12 @@ def model(N, k_choices, distance_matrix):
     return m
 
 
-def return_max_combo(input_data, N, param_file, p_levels, grid_step, k_choices, groups=None, param_delim=None):
+def return_max_combo(input_data, N, num_params, k_choices):
 
-    pf = read_param_file(param_file,groups,param_delim)
-    num_params = pf['num_vars']
 
-    if groups is not None:
-       num_params = groups
-
-    distance_matrix = morris_optimal.compute_distance_matrix(input_data,
-                                                             N,
-                                                             num_params,
-                                                             groups)
+    distance_matrix = compute_distance_matrix(input_data,
+                                              N,
+                                              num_params)
     m = model(N, k_choices, distance_matrix)
     #m.params.MIPFocus=1 # Focus on feasibility over optimality
     m.params.IntFeasTol=min(0.1,1./(k_choices+1))
@@ -88,47 +81,27 @@ def return_max_combo(input_data, N, param_file, p_levels, grid_step, k_choices, 
         if (v.X > 0 ) & (v.VarName[0] == 'x'):
                 x_vars.append(v.VarName)
     b = [re.findall("\d{1,}",str(v)) for v in x_vars]
-    maximum_combo = set([int(y) for z in b for y in z])
-    return tuple(maximum_combo)
+    maximum_combo = list(set([int(y) for z in b for y in z]))
+    return sorted(maximum_combo)
 
 
-def optimised_trajectories(input_sample,
+def optimised_trajectories(problem,
+                           input_sample,
                            N,
-                           param_file,
-                           p_levels,
-                           grid_step,
-                           k_choices,
-                           group=False,
-                           delimiter=None):
+                           k_choices):
     """
     """
-    pf = read_param_file(param_file, group, delimiter)
-    num_params = pf['num_vars']
-
-    group_list = pf['groups']
-    unique_group_names = list(OrderedDict.fromkeys(group_list))
-    number_of_groups = len(unique_group_names)
-
-    if number_of_groups > 0 & number_of_groups < num_params:
-        print("Changed number of parameters to number of groups")
-        groups = number_of_groups
-    else:
-        groups = None
+    num_params = problem['num_vars']
 
     maximum_combo = return_max_combo(input_sample,
-                                     N,
-                                     param_file,
-                                     p_levels,
-                                     grid_step,
-                                     k_choices,
-                                     groups,
-                                     delimiter)
+                                     N, 
+                                     num_params, 
+                                     k_choices)
 
     output = compile_output(input_sample,
                             N,
                             num_params,
-                            maximum_combo,
-                            groups=groups)
+                            maximum_combo)
     return output
 
 
@@ -160,10 +133,10 @@ if __name__ == "__main__":
 
     param_file = args.paramfile
     param_delim = args.p_delim
-    pf = read_param_file(param_file,param_delim)
+    problem = read_param_file(param_file,param_delim)
     N = args.samples
-    num_params = pf['num_vars']
-    bounds = pf['bounds']
+    num_params = problem['num_vars']
+    bounds = problem['bounds']
     k_choices = args.k_choices
     p_levels = int(args.num_levels)
     grid_step = int(args.grid_jump)
