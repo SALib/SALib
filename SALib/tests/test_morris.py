@@ -1,7 +1,7 @@
 from __future__ import division
 from numpy.testing import assert_equal, assert_allclose
 from nose.tools import with_setup, eq_, raises
-from ..sample.morris import sample, find_optimum_trajectories
+from ..sample.morris import sample, compute_optimised_trajectories
 from ..util import read_param_file
 import numpy as np
 
@@ -131,7 +131,7 @@ def test_find_optimum_trajectories():
     problem = {'num_vars': 2, 'groups': None}
     k_choices = 4
 
-    output = find_optimum_trajectories(problem, input_sample, N, k_choices)
+    output = compute_optimised_trajectories(problem, input_sample, N, k_choices)
     expected = np.concatenate([input_1, input_3, input_4, input_6])
     np.testing.assert_equal(output, expected)
 
@@ -150,7 +150,7 @@ def test_catch_inputs_not_in_zero_one_range():
     k_choices = 4
     N = 10
     input_sample *= 10
-    find_optimum_trajectories(problem, input_sample, N, k_choices)
+    compute_optimised_trajectories(problem, input_sample, N, k_choices)
 
 @raises(ValueError)
 def test_group_sample_fails_with_no_G_matrix():

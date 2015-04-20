@@ -1,5 +1,11 @@
 from __future__ import division
-from gurobipy import *
+try:
+    from gurobipy import *
+except ImportError:
+    _has_gurobi = False
+else:
+    _has_gurobi = True
+    
 from morris_util import compute_distance_matrix, compile_output
 import common_args
 import numpy as np
@@ -57,15 +63,19 @@ def model(N, k_choices, distance_matrix):
     return m
 
 
-def return_max_combo(input_data, N, num_params, k_choices):
-
+def return_max_combo(input_data, N, num_params, k_choices, groups=None):
+    
+    if not _has_gurobi:
+        raise ImportError("Gurobipy is required to use this procedure")
 
     distance_matrix = compute_distance_matrix(input_data,
                                               N,
-                                              num_params)
+                                              num_params,
+                                              groups)
+
     m = model(N, k_choices, distance_matrix)
     #m.params.MIPFocus=1 # Focus on feasibility over optimality
-    m.params.IntFeasTol=min(0.1,1./(k_choices+1))
+#     m.params.IntFeasTol=min(0.1,1./(k_choices+1))
     m.params.Threads=0
     #m.params.MIPGap=0.03
 
@@ -83,26 +93,6 @@ def return_max_combo(input_data, N, num_params, k_choices):
     b = [re.findall("\d{1,}",str(v)) for v in x_vars]
     maximum_combo = list(set([int(y) for z in b for y in z]))
     return sorted(maximum_combo)
-
-
-def optimised_trajectories(problem,
-                           input_sample,
-                           N,
-                           k_choices):
-    """
-    """
-    num_params = problem['num_vars']
-
-    maximum_combo = return_max_combo(input_sample,
-                                     N, 
-                                     num_params, 
-                                     k_choices)
-
-    output = compile_output(input_sample,
-                            N,
-                            num_params,
-                            maximum_combo)
-    return output
 
 
 def timestamp(num_params,p_levels,grid_step,k_choices,N):
@@ -146,7 +136,7 @@ if __name__ == "__main__":
                                      num_levels=p_levels,
                                      grid_jump=grid_step)
 
-    output = optimised_trajectories(input_sample,
+    output = combinatorial_optimised_trajectories(input_sample,
                                     N,
                                     param_file,
                                     p_levels,

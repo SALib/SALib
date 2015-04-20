@@ -5,6 +5,16 @@ from . import common_args
 from . morris_util import *
 from ..util import scale_samples, read_param_file
 
+try:
+    import gurobipy as _gurobipy
+except ImportError:
+    _has_gurobi = False
+else:
+    _has_gurobi = True
+
+from . optimal_trajectories import return_max_combo
+
+
 '''
 Three variants of Morris' sampling for
 elementary effects:
@@ -46,7 +56,7 @@ def sample(problem, N, num_levels, grid_jump, optimal_trajectories=None):
         elif optimal_trajectories < 2:
             raise ValueError("The number of optimal trajectories must be set to 2 or more.")
         else:
-            sample = find_optimum_trajectories(problem, sample, N, optimal_trajectories)
+            sample = compute_optimised_trajectories(problem, sample, N, optimal_trajectories)
 
     scale_samples(sample, problem['bounds'])
     return sample
@@ -112,7 +122,7 @@ def sample_groups(problem, N, num_levels, grid_jump):
     return sample.reshape((N*(g + 1), k))
 
 
-def find_optimum_trajectories(problem, input_sample, N, k_choices):
+def compute_optimised_trajectories(problem, input_sample, N, k_choices):
     '''
     Calls the procedure to compute the optimum k_choices of trajectories
     from the input_sample.
@@ -125,21 +135,31 @@ def find_optimum_trajectories(problem, input_sample, N, k_choices):
     if np.any((input_sample < 0) | (input_sample > 1)):
         raise ValueError("Input sample must be scaled between 0 and 1")
     
-    maximum_combo = find_optimum_combination(input_sample, 
-                                             N, 
-                                             num_params, 
-                                             k_choices, 
-                                             groups)
+    if _has_gurobi:
+        maximum_combo = return_max_combo(input_sample,
+                                         N, 
+                                         num_params, 
+                                         k_choices,
+                                         groups)
+        
+    else:
+        maximum_combo = find_optimum_combination(input_sample, 
+                                                 N, 
+                                                 num_params, 
+                                                 k_choices, 
+                                                 groups)
 
     num_groups = None
     if groups != None:
         num_groups = groups[0].shape[1]
 
-    return compile_output(input_sample, 
-                          N, 
-                          num_params, 
-                          maximum_combo, 
-                          num_groups)
+    output = compile_output(input_sample, 
+                            N, 
+                            num_params, 
+                            maximum_combo, 
+                            num_groups)
+    
+    return output
 
 
 if __name__ == "__main__":
