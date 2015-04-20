@@ -1,13 +1,128 @@
 from ..sample.optimal_trajectories import return_max_combo, \
                                           optimised_trajectories
-from ..sample.morris_optimal import find_optimum_combination, \
-                                    find_optimum_trajectories
-from . test_morris import setup
+from ..sample.morris import sample_oat, \
+                            find_optimum_combination, \
+                            find_optimum_trajectories, \
+                            sample_groups
+from . test_morris import setup_param_file_with_groups_prime
 from ..util import read_param_file
 from nose.tools import raises, with_setup
 from numpy.testing import assert_equal
 from .test_util import setup_function
-from ..sample.morris import Morris
+
+
+@with_setup(setup_param_file_with_groups_prime)
+def test_optimal_sample_with_groups():
+    '''
+    Tests that the combinatorial optimisation approach matches
+    that of the brute force approach
+    '''
+    param_file = "SALib/tests/test_param_file_w_groups_prime.txt"
+    problem = read_param_file(param_file)
+
+    N = 10
+    num_levels = 8
+    grid_jump = 4
+    k_choices = 4    
+    num_params = problem['num_vars']
+    
+    sample = sample_oat(problem, 
+                        N, 
+                        num_levels,
+                        grid_jump)
+
+    actual = return_max_combo(sample,
+                              N,
+                              num_params,
+                              k_choices)
+
+    desired = find_optimum_combination(sample,
+                                        N,
+                                        num_params,
+                                        k_choices)
+
+    assert_equal(actual, desired)
+
+
+@with_setup(setup_param_file_with_groups_prime)
+def test_size_of_trajectories_with_groups():
+    '''
+    Tests that the number of trajectories produced is computed
+    correctly (i.e. that the size of the trajectories is a function
+    of the number of groups, rather than the number of variables
+    when groups are used.
+    
+    There are seven variables and three groups.
+    With N=10:
+    1. the sample ignoring groups (i.e. the call to `sample_oat')
+    should be of size N*(D+1)-by-D.
+    2. the sample with groups should be of size N*(G+1)-by-D
+    When k=4:
+    3. the optimal sample ignoring groups should be of size k*(D+1)-by-D
+    4. the optimal sample with groups should be of size k*(G+1)-by-D
+    '''
+    param_file = "SALib/tests/test_param_file_w_groups_prime.txt"
+    group_problem = read_param_file(param_file)
+    no_group_problem = read_param_file(param_file)
+    no_group_problem['groups'] = None
+    
+    N = 11
+    num_levels = 8
+    grid_jump = 4
+    k_choices = 4    
+    num_params = group_problem['num_vars']
+    
+    num_groups = 3
+
+    # Test 1. dimensions of sample ignoring groups    
+    sample = sample_oat(no_group_problem, 
+                        N, 
+                        num_levels,
+                        grid_jump)
+
+    size_x, size_y = sample.shape
+
+
+    assert_equal(size_x, N*(num_params + 1))
+    assert_equal(size_y, num_params)
+
+    # Test 2. dimensions of sample with groups
+
+    group_sample = sample_groups(group_problem, 
+                                 N, 
+                                 num_levels,
+                                 grid_jump)
+
+    size_x, size_y = group_sample.shape
+
+    assert_equal(size_x, N*(num_groups+1))
+    assert_equal(size_y, num_params)
+
+    # Test 3. dimensions of optimal sample without groups
+    
+    optimal_sample_without_groups = find_optimum_trajectories(no_group_problem, 
+                                                              sample, 
+                                                              N, 
+                                                              k_choices)
+
+    size_x, size_y = optimal_sample_without_groups.shape
+
+    assert_equal(size_x, k_choices * (num_params + 1))
+    assert_equal(size_y, num_params)
+
+    # Test 4. dimensions of optimal sample with groups
+    
+    optimal_sample_with_groups = find_optimum_trajectories(group_problem, 
+                                                           group_sample, 
+                                                           N, 
+                                                           k_choices)
+
+    size_x, size_y = optimal_sample_with_groups.shape
+
+    assert_equal(size_x, k_choices * (num_groups + 1))
+    assert_equal(size_y, num_params)
+#     assert_equal(size_x, k_choices * (num_groups + 1))
+#     assert_equal(size_y, num_params)
 
 
 @with_setup(setup_function())
@@ -19,22 +134,19 @@ def test_optimal_combinations():
     """
     N = 6
     param_file = "SALib/tests/test_params.txt"
-    pf = read_param_file(param_file)
-    num_params = pf['num_vars']
-    p_levels = 4
-    grid_step = p_levels / 2
+    problem = read_param_file(param_file)
+    num_params = problem['num_vars']
+    num_levels = 4
+    grid_jump = num_levels / 2
     k_choices = 4
-    morris_sample = Morris(param_file, N, p_levels, grid_step)
-    input_sample = morris_sample.get_input_sample_unscaled()
+    morris_sample = sample_oat(problem, N, num_levels, grid_jump)
 
-    actual = return_max_combo(input_sample,
+    actual = return_max_combo(morris_sample,
                               N,
-                              param_file,
-                              p_levels,
-                              grid_step,
+                              num_params,
                               k_choices)
 
-    desired = find_optimum_combination(input_sample,
+    desired = find_optimum_combination(morris_sample,
                                         N,
                                         num_params,
                                         k_choices)
@@ -45,25 +157,22 @@ def test_optimal_combinations():
 def test_optimised_trajectories():
     N = 6
     param_file = "SALib/tests/test_params.txt"
-    pf = read_param_file(param_file)
-    num_params = pf['num_vars']
-    p_levels = 4
-    grid_step = p_levels / 2
+    problem = read_param_file(param_file)
+    num_levels = 4
+    grid_jump = num_levels / 2
     k_choices = 4
-    morris_sample = Morris(param_file, N, p_levels, grid_step)
-    input_sample = morris_sample.get_input_sample_unscaled()
+    morris_sample = sample_oat(problem, N, num_levels, grid_jump)
 
-    actual = optimised_trajectories(input_sample,
+    # From gurobi optimal trajectories     
+    actual = optimised_trajectories(problem, 
+                                    morris_sample,
                                     N,
-                                    param_file,
-                                    p_levels,
-                                    grid_step,
                                     k_choices)
 
-    desired = find_optimum_trajectories(input_sample,
-                                         N,
-                                         num_params,
-                                         k_choices)
+    desired = find_optimum_trajectories(problem, 
+                                        morris_sample,
+                                        N,
+                                        k_choices)
 
     assert_equal(actual, desired)
 
@@ -76,16 +185,15 @@ def test_raise_error_if_k_gt_N():
     """
     N = 4
     param_file = "SALib/tests/test_params.txt"
-    p_levels = 4
-    grid_step = p_levels / 2
+    problem = read_param_file(param_file)
+    num_levels = 4
+    grid_jump = num_levels / 2
     k_choices = 6
 
-    morris_sample = Morris(param_file, N, p_levels, grid_step)
-    input_sample = morris_sample.get_input_sample_unscaled()
+    morris_sample = sample_oat(problem, N, num_levels, grid_jump)
 
-    optimised_trajectories(input_sample,
-                                    N,
-                                    param_file,
-                                    p_levels,
-                                    grid_step,
-                                    k_choices)
+
+    optimised_trajectories(problem,
+                           morris_sample,
+                           N,
+                           k_choices)
