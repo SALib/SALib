@@ -60,14 +60,12 @@ def sample(problem, N, num_levels, grid_jump, optimal_trajectories=None):
         if optimal_trajectories >= N:
             raise ValueError("The number of optimal trajectories should be less than the number of samples.")
         
-        if _has_gurobi  == True:
-
-            sample = compute_optimised_trajectories(problem, sample, N, optimal_trajectories)
-
         if _has_gurobi == False:
 
             if optimal_trajectories > 10:
                 raise ValueError("Running optimal trajectories greater than values of 10 will take a long time.")
+                
+        sample = compute_optimised_trajectories(problem, sample, N, optimal_trajectories)
         
     scale_samples(sample, problem['bounds'])
     return sample

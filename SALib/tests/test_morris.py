@@ -90,6 +90,7 @@ def test_optimal_trajectories_lt_samples():
     sample(problem, samples, num_levels, grid_jump, \
            optimal_trajectories=samples)
 
+
 @raises(ValueError)
 @with_setup(setup, teardown)
 def test_optimal_trajectories_lt_10():
