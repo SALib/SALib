@@ -7,6 +7,7 @@ versioneer.versionfile_build = None
 versioneer.tag_prefix = 'v' # tags are like 1.2.0
 versioneer.parentdir_prefix = 'SALib-' # dirname like 'myproject-1.2.0'
 
+
 class NoseTestCommand(TestCommand):
 
     def finalize_options(self):
@@ -18,8 +19,6 @@ class NoseTestCommand(TestCommand):
         # Run nose ensuring that argv simulates running nosetests directly
         import nose
         nose.run_exit(argv=['nosetests'])
-
-
 
 
 def setup_package():
@@ -38,6 +37,11 @@ def setup_package():
             "numpy>1.7",
             "scipy",
         ],
+          
+        extras_require = {
+                          "gurobipy": ["gurobipy",]
+                          },
+        
         # Two arguments required by Versioneer
         version = versioneer.get_version(),
         cmdclass=cmdclass,

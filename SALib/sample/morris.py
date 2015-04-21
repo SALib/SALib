@@ -5,6 +5,16 @@ from . import common_args
 from . morris_util import *
 from ..util import scale_samples, read_param_file
 
+try:
+    from gurobipy import *
+except ImportError:
+    _has_gurobi = False
+else:
+    _has_gurobi = True
+
+from . optimal_trajectories import return_max_combo
+
+
 '''
 Three variants of Morris' sampling for
 elementary effects:
@@ -46,7 +56,7 @@ def sample(problem, N, num_levels, grid_jump, optimal_trajectories=None):
         elif optimal_trajectories < 2:
             raise ValueError("The number of optimal trajectories must be set to 2 or more.")
         else:
-            sample = optimize_trajectories(problem, sample, N, optimal_trajectories)
+            sample = compute_optimised_trajectories(problem, sample, N, optimal_trajectories)
 
     scale_samples(sample, problem['bounds'])
     return sample
@@ -103,7 +113,7 @@ def sample_groups(problem, N, num_levels, grid_jump):
     if G is None:
         raise ValueError("Please define the matrix G.")
     if type(G) is not np.matrixlib.defmatrix.matrix:
-       raise TypeError("Matrix G should be formatted as a numpy matrix")
+        raise TypeError("Matrix G should be formatted as a numpy matrix")
 
     k = G.shape[0]
     g = G.shape[1]
@@ -112,24 +122,43 @@ def sample_groups(problem, N, num_levels, grid_jump):
     return sample.reshape((N*(g + 1), k))
 
 
-def optimize_trajectories(problem, input_sample, N, optimal_trajectories):
-
-    D = problem['num_vars']
-    k_choices = optimal_trajectories
-
+def compute_optimised_trajectories(problem, input_sample, N, k_choices):
+    '''
+    Calls the procedure to compute the optimum k_choices of trajectories
+    from the input_sample.
+    If there are groups, then this procedure allocates the groups to the
+    correct call here.
+    '''
+    num_params = problem['num_vars']
+    groups = problem['groups']
+    
     if np.any((input_sample < 0) | (input_sample > 1)):
         raise ValueError("Input sample must be scaled between 0 and 1")
+    
+    if _has_gurobi:
+        maximum_combo = return_max_combo(input_sample,
+                                         N, 
+                                         num_params, 
+                                         k_choices,
+                                         groups)
+        
+    else:
+        maximum_combo = find_optimum_combination(input_sample, 
+                                                 N, 
+                                                 num_params, 
+                                                 k_choices, 
+                                                 groups)
 
-    scores = find_most_distant(input_sample, N, D, k_choices)
+    num_groups = None
+    if groups != None:
+        num_groups = groups[0].shape[1]
 
-    index_list = []
-    for j in range(N):
-        index_list.append(np.arange(D + 1) + j * (D + 1))
-
-    maximum_combo = find_maximum(scores, N, k_choices)
-    output = np.zeros((np.size(maximum_combo) * (D + 1), D))
-    for counter, x in enumerate(maximum_combo):
-        output[index_list[counter]] = np.array(input_sample[index_list[x]])
+    output = compile_output(input_sample, 
+                            N, 
+                            num_params, 
+                            maximum_combo, 
+                            num_groups)
+    
     return output
 
 

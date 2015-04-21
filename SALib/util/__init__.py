@@ -2,7 +2,7 @@ __all__ = ["scale_samples", "read_param_file"]
 import csv
 import numpy as np
 from collections import OrderedDict
-
+from warnings import warn
 
 def scale_samples(params, bounds):
     '''
@@ -132,3 +132,23 @@ def compute_groups_from_parameter_file(group_list, num_vars):
         output[parameter_row, group_index] = 1
 
     return np.matrix(output), unique_group_names
+
+    
+def requires_gurobipy(_has_gurobi):
+    '''
+    Decorator function which takes a boolean _has_gurobi as an argument.
+    Use decorate any functions which require gurobi.
+    Raises an import error at runtime if gurobi is not present.
+    Note that all runtime errors should be avoided in the working code,
+    using brute force options as preference.
+    '''
+    def _outer_wrapper(wrapped_function):
+        def _wrapper(*args, **kwargs):
+            if _has_gurobi:
+                result = wrapped_function(*args, **kwargs)
+            else:
+                warn("Gurobi not available", ImportWarning)
+                result = None
+            return result
+        return _wrapper
+    return _outer_wrapper
