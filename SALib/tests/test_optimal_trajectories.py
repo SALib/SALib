@@ -5,21 +5,23 @@ from ..sample.morris import sample_oat, \
                             compute_optimised_trajectories, \
                             sample_groups
 from . test_morris import setup_param_file_with_groups_prime
-from ..util import read_param_file, requires_gurobipy
+from ..util import read_param_file
 from nose.tools import raises, with_setup
 from numpy.testing import assert_equal
 from .test_util import setup_function
+from unittest import skipUnless
 
 try:
-    from gurobipy import *
+    import gurobipy
 except ImportError:
     _has_gurobi = False
 else:
     _has_gurobi = True
 
 
-@requires_gurobipy(_has_gurobi)
+
 @with_setup(setup_param_file_with_groups_prime)
+@skipUnless(_has_gurobi, "Gurobi is required for combinatorial optimisation")
 def test_optimal_sample_with_groups():
     '''
     Tests that the combinatorial optimisation approach matches
@@ -52,7 +54,7 @@ def test_optimal_sample_with_groups():
     assert_equal(actual, desired)
 
 
-@requires_gurobipy(_has_gurobi)
+@skipUnless(_has_gurobi, "Gurobi is required for combinatorial optimisation")
 @with_setup(setup_param_file_with_groups_prime)
 def test_size_of_trajectories_with_groups():
     '''
@@ -133,7 +135,7 @@ def test_size_of_trajectories_with_groups():
     assert_equal(size_y, num_params)
 
 
-@requires_gurobipy(_has_gurobi)
+@skipUnless(_has_gurobi, "Gurobi is required for combinatorial optimisation")
 @with_setup(setup_function())
 def test_optimal_combinations():
 
@@ -160,7 +162,7 @@ def test_optimal_combinations():
     assert_equal(actual, desired)
 
 
-@requires_gurobipy(_has_gurobi)
+@skipUnless(_has_gurobi, "Gurobi is required for combinatorial optimisation")
 @with_setup(setup_function())
 def test_optimised_trajectories_without_groups():
     """
@@ -196,7 +198,7 @@ def test_optimised_trajectories_without_groups():
     assert_equal(actual, desired)
 
 
-@requires_gurobipy(_has_gurobi)
+@skipUnless(_has_gurobi, "Gurobi is required for combinatorial optimisation")
 @with_setup(setup_param_file_with_groups_prime)
 def test_optimised_trajectories_with_groups():
     """
@@ -233,7 +235,7 @@ def test_optimised_trajectories_with_groups():
     assert_equal(actual, desired)
 
 
-@requires_gurobipy(_has_gurobi)
+@skipUnless(_has_gurobi, "Gurobi is required for combinatorial optimisation")
 @with_setup(setup_function())
 @raises(ValueError)
 def test_raise_error_if_k_gt_N():

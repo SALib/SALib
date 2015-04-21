@@ -1,6 +1,5 @@
 from __future__ import division    
-from morris_util import compute_distance_matrix, compile_output
-import common_args
+from . morris_util import compute_distance_matrix, compile_output
 import numpy as np
 import random as rd
 from ..util import read_param_file, requires_gurobipy

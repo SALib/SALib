@@ -148,6 +148,7 @@ def requires_gurobipy(_has_gurobi):
                 result = wrapped_function(*args, **kwargs)
             else:
                 warn("Gurobi not available", ImportWarning)
+                result = None
             return result
         return _wrapper
     return _outer_wrapper
