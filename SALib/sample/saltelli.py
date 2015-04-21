@@ -1,14 +1,15 @@
 from __future__ import division
+
 import numpy as np
+
+from . import common_args
 from . import sobol_sequence
 from ..util import scale_samples, read_param_file
-from . import common_args
+
 
 # Generate matrix of Saltelli samples
 # Size N x (2D + 2) if calc_second_order is True (default)
 # Size N x (D + 2) otherwise
-
-
 def sample(problem, N, calc_second_order=True):
 
     D = problem['num_vars']

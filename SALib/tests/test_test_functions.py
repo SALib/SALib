@@ -1,12 +1,14 @@
 from nose.tools import assert_almost_equal, assert_equal, raises
-from ..test_functions.Sobol_G import evaluate
+
 import numpy as np
+
+from ..test_functions.Sobol_G import evaluate
 
 
 def test_Sobol_G():
     desired = np.array([4.0583])
 
-    parameter_values = np.zeros((1,8))
+    parameter_values = np.zeros((1, 8))
 
     output = evaluate(parameter_values)
 

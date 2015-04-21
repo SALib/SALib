@@ -1,10 +1,13 @@
 from __future__ import division
-from numpy.testing import assert_equal, assert_allclose
+
 from nose.tools import with_setup, eq_, raises
-from ..sample import saltelli
+from numpy.testing import assert_equal, assert_allclose
+
 from ..analyze import sobol
-from ..util import read_param_file
+from ..sample import saltelli
 from ..test_functions import Ishigami
+from ..util import read_param_file
+
 
 def test_sample_size_second_order():
     param_file = 'SALib/test_functions/params/Ishigami.txt'
@@ -12,7 +15,7 @@ def test_sample_size_second_order():
     N = 500
     D = 3
     param_values = saltelli.sample(problem, N, calc_second_order=True)
-    assert_equal(param_values.shape, [N*(2*D+2), D])
+    assert_equal(param_values.shape, [N * (2 * D + 2), D])
 
 def test_sample_size_first_order():
     param_file = 'SALib/test_functions/params/Ishigami.txt'
@@ -20,7 +23,7 @@ def test_sample_size_first_order():
     N = 500
     D = 3
     param_values = saltelli.sample(problem, N, calc_second_order=False)
-    assert_equal(param_values.shape, [N*(D+2), D])
+    assert_equal(param_values.shape, [N * (D + 2), D])
 
 @raises(RuntimeError)
 def test_incorrect_sample_size():

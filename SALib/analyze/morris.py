@@ -1,15 +1,18 @@
 from __future__ import division
 from __future__ import print_function
-from ..util import read_param_file
-import numpy as np
+
 from scipy.stats import norm
+
+import numpy as np
+
 from . import common_args
+from ..util import read_param_file
+
 
 # Perform Morris Analysis on file of model results
 # Returns a dictionary with keys 'mu', 'mu_star', 'sigma', and 'mu_star_conf'
 # Where each entry is a list of size num_vars (the number of parameters)
 # Containing the indices in the same order as the parameter file
-
 def analyze(problem, X, Y,
             num_resamples=1000,
             conf_level=0.95,
@@ -92,7 +95,7 @@ def get_increased_values(op_vec, up, lo):
     up = np.pad(up, ((0, 0), (1, 0), (0, 0)), 'constant')
     lo = np.pad(lo, ((0, 0), (0, 1), (0, 0)), 'constant')
 
-    res = np.einsum('ik,ikj->ij', op_vec, up+lo)
+    res = np.einsum('ik,ikj->ij', op_vec, up + lo)
 
     return res.T
 
@@ -102,7 +105,7 @@ def get_decreased_values(op_vec, up, lo):
     up = np.pad(up, ((0, 0), (0, 1), (0, 0)), 'constant')
     lo = np.pad(lo, ((0, 0), (1, 0), (0, 0)), 'constant')
 
-    res = np.einsum('ik,ikj->ij', op_vec, up+lo)
+    res = np.einsum('ik,ikj->ij', op_vec, up + lo)
 
     return res.T
 
@@ -123,18 +126,18 @@ def compute_elementary_effects(model_inputs, model_outputs, trajectory_size, del
 
     ee = np.zeros((num_trajectories, num_vars), dtype=np.float)
 
-    ip_vec = model_inputs.reshape(num_trajectories,trajectory_size,num_vars)
-    ip_cha = np.subtract(ip_vec[:,1:,:], ip_vec[:,0:-1,:])
+    ip_vec = model_inputs.reshape(num_trajectories, trajectory_size, num_vars)
+    ip_cha = np.subtract(ip_vec[:, 1:, :], ip_vec[:, 0:-1, :])
     up = (ip_cha > 0)
     lo = (ip_cha < 0)
 
-    op_vec = model_outputs.reshape(num_trajectories,trajectory_size)
+    op_vec = model_outputs.reshape(num_trajectories, trajectory_size)
 
     result_up = get_increased_values(op_vec, up, lo)
     result_lo = get_decreased_values(op_vec, up, lo)
 
     ee = np.subtract(result_up, result_lo)
-    np.divide(ee, delta, out = ee)
+    np.divide(ee, delta, out=ee)
 
     return ee
 
@@ -151,7 +154,7 @@ def compute_mu_star_confidence(ee, num_trajectories, num_resamples, conf_level):
     if conf_level < 0 or conf_level > 1:
         raise ValueError("Confidence level must be between 0-1.")
 
-    resample_index = np.floor(np.random.rand(num_resamples * num_trajectories)*len(ee)).astype(int).reshape(num_resamples, num_trajectories)
+    resample_index = np.floor(np.random.rand(num_resamples * num_trajectories) * len(ee)).astype(int).reshape(num_resamples, num_trajectories)
     ee_resampled = ee[resample_index]
     # Compute average of the absolute values over each of the resamples
     mu_star_resampled = np.average(np.abs(ee_resampled), axis=1)
@@ -166,7 +169,7 @@ if __name__ == "__main__":
                         required=True, default=None, help='Model input file')
     parser.add_argument('-r', '--resamples', type=int, required=False, default=1000,
                         help='Number of bootstrap resamples for Sobol confidence intervals')
-    parser.add_argument('-l','--levels', type=int, required=False,
+    parser.add_argument('-l', '--levels', type=int, required=False,
                         default=4, help='Number of grid levels (Morris only)')
     parser.add_argument('--grid-jump', type=int, required=False,
                         default=2, help='Grid jump size (Morris only)')

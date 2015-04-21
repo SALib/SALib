@@ -1,16 +1,18 @@
 from __future__ import division
 from __future__ import print_function
-import numpy as np
+
 from scipy.stats import norm
-from ..util import read_param_file
+
+import numpy as np
+
 from . import common_args
+from ..util import read_param_file
+
 
 # Calculate DGSM from file of model results
 # Returns a dictionary with keys 'vi', 'vi_std', 'dgsm', and 'dgsm_conf'
 # Where each entry is a list of size D (the number of parameters)
 # Containing the indices in the same order as the parameter file
-
-
 def analyze(problem, X, Y, num_resamples=1000,
             conf_level=0.95, print_to_console=False):
 

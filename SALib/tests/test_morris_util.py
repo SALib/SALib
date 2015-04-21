@@ -1,25 +1,29 @@
 from __future__ import division
-import numpy as np
-from numpy.testing import assert_equal
-from nose.tools import assert_almost_equal, raises
+
 from nose import with_setup
-from ..sample.morris_util import generate_P_star,\
+from nose.tools import assert_almost_equal, raises
+from numpy.testing import assert_equal
+
+import numpy as np
+
+from ..sample.morris_util import generate_P_star, \
                                 compute_B_star, \
                                 compute_delta, \
                                 generate_trajectory, \
                                 compute_distance, \
                                 compute_distance_matrix, \
                                 find_most_distant, find_maximum, \
-                                make_index_list
+                                make_index_list, \
+                                check_input_sample
 
 
 def setup():
-    input_2 = [[0, 1/3.], [2/3., 1/3.], [2/3., 1.]]
-    input_1 = [[0, 1/3.], [0, 1.], [2/3., 1.]]
-    input_3 = [[2/3., 0], [2/3., 2/3.], [0, 2/3.]]
-    input_4 = [[1/3., 1.], [1., 1.], [1, 1/3.]]
-    input_5 = [[1/3., 1.], [1/3., 1/3.], [1, 1/3.]]
-    input_6 = [[1/3., 2/3.], [1/3., 0], [1., 0]]
+    input_2 = [[0, 1 / 3.], [2 / 3., 1 / 3.], [2 / 3., 1.]]
+    input_1 = [[0, 1 / 3.], [0, 1.], [2 / 3., 1.]]
+    input_3 = [[2 / 3., 0], [2 / 3., 2 / 3.], [0, 2 / 3.]]
+    input_4 = [[1 / 3., 1.], [1., 1.], [1, 1 / 3.]]
+    input_5 = [[1 / 3., 1.], [1 / 3., 1 / 3.], [1, 1 / 3.]]
+    input_6 = [[1 / 3., 2 / 3.], [1 / 3., 0], [1., 0]]
     return np.concatenate([input_1, input_2, input_3, input_4, input_5,
                           input_6])
 
@@ -30,16 +34,16 @@ def test_generate_P_star():
     each row contains one element equal to 1, all others are 0
     no two columns have 1s in the same position
     '''
-    for i in range(1,100):
+    for i in range(1, 100):
         output = generate_P_star(i)
-        if np.any(np.sum(output,0) != np.ones(i)):
+        if np.any(np.sum(output, 0) != np.ones(i)):
             raise AssertionError("Not legal P along axis 0")
         elif np.any(np.sum(output, 1) != np.ones(i)):
             raise AssertionError("Not legal P along axis 1")
 
 
 def test_compute_delta():
-    fixture = np.arange(2,10)
+    fixture = np.arange(2, 10)
     output = [compute_delta(f) for f in fixture]
     desired = np.array([1.00, 0.75, 0.66, 0.62,
                         0.60, 0.58, 0.57, 0.56])
@@ -48,14 +52,14 @@ def test_compute_delta():
 
 def test_generate_trajectory():
     # Two groups of three factors
-    G = np.array([[1,0],[0,1],[0,1]])
+    G = np.array([[1, 0], [0, 1], [0, 1]])
     # Four levels, grid_jump = 2
     num_levels, grid_jump = 4, 2
     output = generate_trajectory(G, num_levels, grid_jump)
     if np.any((output > 1) | (output < 0)):
         raise AssertionError("Bound not working")
-    assert_equal(output.shape[0],3)
-    assert_equal(output.shape[1],3)
+    assert_equal(output.shape[0], 3)
+    assert_equal(output.shape[1], 3)
 
 
 def test_compute_B_star():
@@ -68,15 +72,15 @@ def test_compute_B_star():
     k = 3
     g = 2
 
-    x_star = np.matrix(np.array([1./3, 1./3, 0.]))
+    x_star = np.matrix(np.array([1. / 3, 1. / 3, 0.]))
     J = np.matrix(np.ones((g + 1, k)))
     G = np.matrix('1,0;0,1;0,1')
     D_star = np.matrix('1,0,0;0,-1,0;0,0,1')
     P_star = np.matrix('1,0;0,1')
-    delta = 2./3
+    delta = 2. / 3
     B = np.matrix(np.tril(np.ones([g + 1, g], dtype=int), -1))
 
-    desired = np.array([[1./3, 1, 0],[1, 1, 0],[1, 1./3, 2./3]])
+    desired = np.array([[1. / 3, 1, 0], [1, 1, 0], [1, 1. / 3, 2. / 3]])
 
     output = compute_B_star(J, x_star, delta, B, G, P_star, D_star)
     np.testing.assert_array_equal(output, desired)
@@ -86,15 +90,15 @@ def test_distance():
     '''
     Tests the computation of the distance of two trajectories
     '''
-    input_1 = np.matrix([[0, 1/3.], [0, 1.], [2/3., 1.]], dtype=np.float32)
-    input_3 = np.matrix([[2/3., 0], [2/3., 2/3.], [0, 2/3.]], dtype=np.float32)
+    input_1 = np.matrix([[0, 1 / 3.], [0, 1.], [2 / 3., 1.]], dtype=np.float32)
+    input_3 = np.matrix([[2 / 3., 0], [2 / 3., 2 / 3.], [0, 2 / 3.]], dtype=np.float32)
     output = compute_distance(input_1, input_3)
     assert_almost_equal(output, 6.18, places=2)
 
 
 def test_distance_fail_with_difference_size_ip():
-    input_1 = np.matrix([[0, 1/3.], [0, 1.]], dtype=np.float32)
-    input_3 = np.matrix([[2/3., 0], [2/3., 2/3.], [0, 2/3.]], dtype=np.float32)
+    input_1 = np.matrix([[0, 1 / 3.], [0, 1.]], dtype=np.float32)
+    input_3 = np.matrix([[2 / 3., 0], [2 / 3., 2 / 3.], [0, 2 / 3.]], dtype=np.float32)
     try:
         compute_distance(input_1, input_3, 2)
     except:
@@ -132,7 +136,7 @@ def test_combo_from_find_most_distant():
     k_choices = 4
     scores = find_most_distant(sample_inputs, N, num_params, k_choices)
     output = find_maximum(scores, N, k_choices)
-    expected = [0, 2, 3, 5]    # trajectories 1, 3, 4, 6
+    expected = [0, 2, 3, 5]  # trajectories 1, 3, 4, 6
     np.testing.assert_equal(output, expected)
 
 
@@ -169,7 +173,7 @@ def test_catch_combos_too_large():
     N = 1e6
     k_choices = 4
     num_params = 2
-    input_sample = np.random.random_sample((N,num_params))
+    input_sample = np.random.random_sample((N, num_params))
 
     try:
         find_most_distant(input_sample, N, num_params, k_choices)
@@ -185,7 +189,7 @@ def test_make_index_list():
     num_params = 2
     groups = None
     actual = make_index_list(N, num_params, groups)
-    desired = [np.array([0,1,2]),np.array([3,4,5]),np.array([6,7,8]),np.array([9,10,11])]
+    desired = [np.array([0, 1, 2]), np.array([3, 4, 5]), np.array([6, 7, 8]), np.array([9, 10, 11])]
     assert_equal(desired, actual)
     
 
@@ -194,5 +198,30 @@ def test_make_index_list_with_groups():
     num_params = 3
     groups = 2
     actual = make_index_list(N, num_params, groups)
-    desired = [np.array([0,1,2]),np.array([3,4,5]),np.array([6,7,8]),np.array([9,10,11])]
+    desired = [np.array([0, 1, 2]), np.array([3, 4, 5]), np.array([6, 7, 8]), np.array([9, 10, 11])]
     assert_equal(desired, actual)
+
+
+@raises(AssertionError)
+def test_check_input_sample_N():
+    input_sample = setup()
+    num_params = 4
+    N = 5
+    check_input_sample(input_sample, num_params, N)
+
+
+@raises(AssertionError)
+def test_check_input_sample_num_vars():
+    input_sample = setup()
+    num_params = 3
+    N = 6
+    check_input_sample(input_sample, num_params, N)
+  
+    
+@raises(AssertionError)
+def test_check_input_sample_range():
+    input_sample = setup() 
+    input_sample *= 100
+    num_params = 4
+    N = 6
+    check_input_sample(input_sample, num_params, N)

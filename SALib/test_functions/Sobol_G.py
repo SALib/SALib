@@ -1,5 +1,7 @@
 from __future__ import division
+
 import numpy as np
+
 
 # Non-monotonic Sobol G Function (8 parameters)
 # First-order indices:
@@ -8,9 +10,7 @@ import numpy as np
 # x3: 0.0237
 # x4: 0.0072
 # x5-x8: 0.0001
-
-
-def evaluate(values,a=[0, 1, 4.5, 9, 99, 99, 99, 99]):
+def evaluate(values, a=[0, 1, 4.5, 9, 99, 99, 99, 99]):
 
     if type(values) != np.ndarray:
         raise TypeError("The argument `values` must be a numpy ndarray")

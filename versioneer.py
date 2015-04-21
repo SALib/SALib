@@ -272,10 +272,11 @@ domain.
 
 """
 
-import os, sys, re, subprocess, errno
-from distutils.core import Command
-from distutils.command.sdist import sdist as _sdist
 from distutils.command.build import build as _build
+from distutils.command.sdist import sdist as _sdist
+from distutils.core import Command
+import os, sys, re, subprocess, errno
+
 
 # these configuration settings will be overridden by setup.py after it
 # imports us

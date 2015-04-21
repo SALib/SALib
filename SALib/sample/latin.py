@@ -1,11 +1,12 @@
 from __future__ import division
+
 import numpy as np
+
 from . import common_args
 from ..util import scale_samples, read_param_file
 
+
 # Generate N x D matrix of latin hypercube samples
-
-
 def sample(problem, N):
 
     D = problem['num_vars']
@@ -18,7 +19,7 @@ def sample(problem, N):
 
         for j in range(N):
             temp[j] = np.random.uniform(
-                low=j * d, high=(j + 1) * d, size = 1)[0]
+                low=j * d, high=(j + 1) * d, size=1)[0]
 
         np.random.shuffle(temp)
 
