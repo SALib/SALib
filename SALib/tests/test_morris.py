@@ -1,7 +1,7 @@
 from __future__ import division
 
-from nose.tools import with_setup, eq_, raises
-from numpy.testing import assert_equal, assert_allclose
+from nose.tools import with_setup, raises
+from numpy.testing import assert_equal
 
 import numpy as np
 
