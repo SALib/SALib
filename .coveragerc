@@ -1,7 +1,7 @@
 # .coveragerc to control coverage.py
 [run]
 branch = True
-source = sizer
+source = SALib
 omit = */_version.py
 
 [report]
