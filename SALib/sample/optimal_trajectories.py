@@ -1,21 +1,20 @@
-from __future__ import division
+from __future__ import division    
+from morris_util import compute_distance_matrix, compile_output
+import common_args
+import numpy as np
+import random as rd
+from ..util import read_param_file, requires_gurobipy
+from scipy.misc import comb as nchoosek
+import re
+from datetime import datetime as dt
+from collections import OrderedDict
+
 try:
     from gurobipy import *
 except ImportError:
     _has_gurobi = False
 else:
     _has_gurobi = True
-    
-from morris_util import compute_distance_matrix, compile_output
-import common_args
-import numpy as np
-import random as rd
-from ..util import read_param_file
-from scipy.misc import comb as nchoosek
-import re
-from datetime import datetime as dt
-from collections import OrderedDict
-
 
 '''
 Run using
@@ -23,11 +22,9 @@ optimal_trajectories.py -n=10 -p=esme_param.txt -o=test_op.txt -s=12892 --num-le
 
 '''
 
+@requires_gurobipy(_has_gurobi)
 def model(N, k_choices, distance_matrix):
     
-    if not _has_gurobi:
-        raise ImportError("Gurobipy is required to use this procedure")
-
     if k_choices >= N:
         raise ValueError("k_choices must be less than N")
 
@@ -65,12 +62,9 @@ def model(N, k_choices, distance_matrix):
     m.update()
     return m
 
-
+@requires_gurobipy(_has_gurobi)
 def return_max_combo(input_data, N, num_params, k_choices, groups=None):
     
-    if not _has_gurobi:
-        raise ImportError("Gurobipy is required to use this procedure")
-
     distance_matrix = compute_distance_matrix(input_data,
                                               N,
                                               num_params,
@@ -109,47 +103,3 @@ def timestamp(num_params,p_levels,grid_step,k_choices,N):
                                                 N,
                                                 dt.strftime(dt.now(),"%d%m%y%H%M%S"))
     return string
-
-
-if __name__ == "__main__":
-
-    parser = common_args.create()
-    parser.add_argument('--num-levels', type=int, required=False, default=4, help='Number of grid levels (Morris only)')
-    parser.add_argument('-g','--grid-jump', type=int, required=False, default=2, help='Grid jump size (Morris only)')
-    parser.add_argument('-k', '--k-choices', type=int, required=False, default=4, help='Number of desired optimised trajectories')
-    parser.add_argument('-pd','--p-delim', type=str, required=False, default=" ", help='Delimeter for parameter file')
-
-    args = parser.parse_args()
-
-    np.random.seed(args.seed)
-    rd.seed(args.seed)
-
-    param_file = args.paramfile
-    param_delim = args.p_delim
-    problem = read_param_file(param_file,param_delim)
-    N = args.samples
-    num_params = problem['num_vars']
-    bounds = problem['bounds']
-    k_choices = args.k_choices
-    p_levels = int(args.num_levels)
-    grid_step = int(args.grid_jump)
-
-    input_sample = morris_oat.sample(N,
-                                     param_file,
-                                     num_levels=p_levels,
-                                     grid_jump=grid_step)
-
-    output = combinatorial_optimised_trajectories(input_sample,
-                                    N,
-                                    param_file,
-                                    p_levels,
-                                    grid_step,
-                                    k_choices,
-                                    param_delim)
-
-
-    filename = args.output + "_v%s_l%s_gs%s_k%s_N%s_%s.txt" % (num_params, p_levels, grid_step, k_choices, N, timestamp())
-    if (len(list(maximum_combo)) == k_choices) & (m.status == GRB.OPTIMAL):
-        np.savetxt(filename, output, delimiter=args.delim)
-    else:
-        raise RuntimeError("Solution not legal, so file not saved")

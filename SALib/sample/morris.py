@@ -6,7 +6,7 @@ from . morris_util import *
 from ..util import scale_samples, read_param_file
 
 try:
-    import gurobipy as _gurobipy
+    from gurobipy import *
 except ImportError:
     _has_gurobi = False
 else:
