@@ -1,6 +1,7 @@
 from __future__ import division
 import numpy as np
-from nose.tools import assert_almost_equal, assert_equal, raises
+from numpy.testing import assert_equal
+from nose.tools import assert_almost_equal, raises
 from nose import with_setup
 from ..sample.morris_util import generate_P_star,\
                                 compute_B_star, \
@@ -8,7 +9,8 @@ from ..sample.morris_util import generate_P_star,\
                                 generate_trajectory, \
                                 compute_distance, \
                                 compute_distance_matrix, \
-                                find_most_distant, find_maximum
+                                find_most_distant, find_maximum, \
+                                make_index_list
 
 
 def setup():
@@ -86,7 +88,7 @@ def test_distance():
     '''
     input_1 = np.matrix([[0, 1/3.], [0, 1.], [2/3., 1.]], dtype=np.float32)
     input_3 = np.matrix([[2/3., 0], [2/3., 2/3.], [0, 2/3.]], dtype=np.float32)
-    output = compute_distance(input_1, input_3, 2)
+    output = compute_distance(input_1, input_3)
     assert_almost_equal(output, 6.18, places=2)
 
 
@@ -159,7 +161,7 @@ def test_find_maximum():
     k_choices = 4
     N = 6
     output = find_maximum(scores, N, k_choices)
-    expected = (2, 3, 4, 5)
+    expected = [2, 3, 4, 5]
     assert_equal(output, expected)
 
 
@@ -176,3 +178,21 @@ def test_catch_combos_too_large():
     else:
         raise AssertionError("Test did not fail when number of \
                              combinations exceeded system size")
+        
+
+def test_make_index_list():
+    N = 4
+    num_params = 2
+    groups = None
+    actual = make_index_list(N, num_params, groups)
+    desired = [np.array([0,1,2]),np.array([3,4,5]),np.array([6,7,8]),np.array([9,10,11])]
+    assert_equal(desired, actual)
+    
+
+def test_make_index_list_with_groups():
+    N = 4
+    num_params = 3
+    groups = 2
+    actual = make_index_list(N, num_params, groups)
+    desired = [np.array([0,1,2]),np.array([3,4,5]),np.array([6,7,8]),np.array([9,10,11])]
+    assert_equal(desired, actual)

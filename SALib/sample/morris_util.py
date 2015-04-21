@@ -84,7 +84,21 @@ def compute_delta(num_levels):
     return float(num_levels) / (2 * (num_levels - 1))
 
 
-def compute_distance(m, l, num_params):
+def check_input_sample(input_sample, num_params, N):
+    '''
+    Checks input sample is:
+        - the correct size
+        - values between 0 and 1
+    '''
+    if input_sample.shape[0] != (num_params + 1) * N:
+        raise ValueError("Input sample does not match number of parameters or groups")
+    if type(input_sample) != np.ndarray:
+        raise TypeError("Input sample is not an numpy array")
+    if np.any((input_sample < 0) | (input_sample > 1)):
+        raise ValueError("Input sample must be scaled between 0 and 1")
+
+
+def compute_distance(m, l):
     '''
     Computes the distance between two trajectories
     '''
@@ -97,28 +111,32 @@ def compute_distance(m, l, num_params):
     return distance
 
 
-def compute_distance_matrix(input_sample, N, num_params):
-    index_list = []
+def compute_distance_matrix(input_sample, N, num_params, groups=None):
+    '''
+    groups is an integer representing the number of groups
+    '''
+    num_groups = None
+    if groups:
+        num_groups = groups[0].shape[1]
+        check_input_sample(input_sample, num_groups, N)
+    else:
+        check_input_sample(input_sample, num_params, N)
+    index_list = make_index_list(N, num_params, num_groups)
     distance_matrix = np.zeros((N, N), dtype=np.float32)
-
-    for j in range(N):
-        index_list.append(np.arange(num_params + 1) + j * (num_params + 1))
 
     for j in range(N):
         input_1 = input_sample[index_list[j]]
         for k in range(j + 1, N):
             input_2 = input_sample[index_list[k]]
-            distance_matrix[k, j] = compute_distance(input_1, input_2,
-                                                     num_params)
+            distance_matrix[k, j] = compute_distance(input_1, input_2)
     return distance_matrix
 
 
-def find_most_distant(input_sample, N, num_params, k_choices):
+def find_most_distant(input_sample, N, num_params, k_choices, groups=None):
     '''
     Finds the 'k_choices' most distant choices from the
     'N' trajectories contained in 'input_sample'
-    '''
-
+    '''    
     # Now evaluate the (N choose k_choices) possible combinations
     if nchoosek(N, k_choices) >= sys.maxsize:
         raise ValueError("Number of combinations is too large")
@@ -128,7 +146,8 @@ def find_most_distant(input_sample, N, num_params, k_choices):
     # of trajectories and store in a shared-memory array
     distance_matrix = compute_distance_matrix(input_sample,
                                               N,
-                                              num_params)
+                                              num_params, 
+                                              groups)
 
 
     # Initialise the output array
@@ -140,13 +159,13 @@ def find_most_distant(input_sample, N, num_params, k_choices):
     counter = 0
     # Generate a list of all the possible combinations
     #combos = np.array([x for x in combinations(range(N),k_choices)])
-    combo_gen = combinations(list(range(N)),k_choices)
-    scores = np.empty(number_of_combinations,dtype=np.float32)
+    combo_gen = combinations(list(range(N)), k_choices)
+    scores = np.empty(number_of_combinations, dtype=np.float32)
     # Generate the pairwise indices once
-    pairwise = np.array([y for y in combinations(list(range(k_choices)),2)])
+    pairwise = np.array([y for y in combinations(list(range(k_choices)), 2)])
 
     for combos in grouper(chunk, combo_gen):
-        scores[(counter*chunk):((counter+1)*chunk)] = mappable(combos, pairwise, distance_matrix)
+        scores[(counter * chunk):((counter + 1) * chunk)] = mappable(combos, pairwise, distance_matrix)
         counter += 1
     return scores
 
@@ -156,11 +175,10 @@ def mappable(combos, pairwise, distance_matrix):
     Obtains scores from the distance_matrix for each pairwise combination
     held in the combos array
     '''
-    import numpy as np
     combos = np.array(combos)
     # Create a list of all pairwise combination for each combo in combos
     combo_list = combos[:,pairwise[:,]]
-    all_distances = distance_matrix[[combo_list[:,:,1], combo_list[:,:,0]]]
+    all_distances = distance_matrix[[combo_list[:, :, 1], combo_list[:, :, 0]]]
     new_scores = np.sqrt(np.einsum('ij,ij->i', all_distances, all_distances))
     return new_scores
 
@@ -172,16 +190,16 @@ def find_maximum(scores, N, k_choices):
 
     index_of_maximum = int(scores.argmax())
     maximum_combo = nth(combinations(list(range(N)), k_choices), index_of_maximum, None)
-    return maximum_combo
+    return sorted(maximum_combo)
 
 
 def grouper(n, iterable):
     it = iter(iterable)
     while True:
-       chunk = tuple(islice(it, n))
-       if not chunk:
-           return
-       yield chunk
+        chunk = tuple(islice(it, n))
+        if not chunk:
+            return
+        yield chunk
 
 
 def take(n, iterable):
@@ -196,3 +214,44 @@ def nth(iterable, n, default=None):
         raise TypeError("n is not an integer")
 
     return next(islice(iterable, n, None), default)
+
+
+def make_index_list(N, num_params, groups=None):
+
+    if groups == None:
+        groups = num_params
+
+    index_list = []
+    for j in range(N):
+        index_list.append(np.arange(groups + 1) + j * (groups + 1))
+    return index_list
+
+
+def compile_output(input_sample, N, num_params, maximum_combo, groups=None):
+
+    if np.any((input_sample < 0) | (input_sample > 1)):
+        raise ValueError("Input sample must be scaled between 0 and 1")
+
+    if groups == None:
+        groups = num_params
+
+    index_list = make_index_list(N, num_params, groups)
+
+    output = np.zeros((np.size(maximum_combo) * (groups + 1), num_params))
+    for counter, x in enumerate(maximum_combo):
+        output[index_list[counter]] = np.array(input_sample[index_list[x]])
+    return output
+
+
+def find_optimum_combination(input_sample, N, num_params, k_choices, groups=None):
+
+    scores = find_most_distant(input_sample,
+                               N,
+                               num_params,
+                               k_choices,
+                               groups)
+
+    maximum_combo = find_maximum(scores, N, k_choices)
+
+    return maximum_combo
+
