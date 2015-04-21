@@ -10,6 +10,13 @@ from nose.tools import raises, with_setup
 from numpy.testing import assert_equal
 from .test_util import setup_function
 
+try:
+    from gurobipy import *
+except ImportError:
+    _has_gurobi = False
+else:
+    _has_gurobi = True
+
 
 @with_setup(setup_param_file_with_groups_prime)
 def test_optimal_sample_with_groups():

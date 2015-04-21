@@ -24,6 +24,9 @@ optimal_trajectories.py -n=10 -p=esme_param.txt -o=test_op.txt -s=12892 --num-le
 '''
 
 def model(N, k_choices, distance_matrix):
+    
+    if not _has_gurobi:
+        raise ImportError("Gurobipy is required to use this procedure")
 
     if k_choices >= N:
         raise ValueError("k_choices must be less than N")
