@@ -1,9 +1,12 @@
 from __future__ import division
-from numpy.testing import assert_equal, assert_allclose
-from nose.tools import with_setup, eq_, raises
+
+from nose.tools import with_setup, raises
+from numpy.testing import assert_equal
+
+import numpy as np
+
 from ..sample.morris import sample, compute_optimised_trajectories
 from ..util import read_param_file
-import numpy as np
 
 
 def teardown():
@@ -87,6 +90,7 @@ def test_optimal_trajectories_lt_samples():
     sample(problem, samples, num_levels, grid_jump, \
            optimal_trajectories=samples)
 
+
 @raises(ValueError)
 @with_setup(setup, teardown)
 def test_optimal_trajectories_lt_10():
@@ -119,12 +123,12 @@ def test_optimal_trajectories_gte_one():
 
 
 def test_find_optimum_trajectories():
-    input_1 = [[0, 1/3.], [0, 1.], [2/3., 1.]]
-    input_2 = [[0, 1/3.], [2/3., 1/3.], [2/3., 1.]]
-    input_3 = [[2/3., 0], [2/3., 2/3.], [0, 2/3.]]
-    input_4 = [[1/3., 1.], [1., 1.], [1, 1/3.]]
-    input_5 = [[1/3., 1.], [1/3., 1/3.], [1, 1/3.]]
-    input_6 = [[1/3., 2/3.], [1/3., 0], [1., 0]]
+    input_1 = [[0, 1 / 3.], [0, 1.], [2 / 3., 1.]]
+    input_2 = [[0, 1 / 3.], [2 / 3., 1 / 3.], [2 / 3., 1.]]
+    input_3 = [[2 / 3., 0], [2 / 3., 2 / 3.], [0, 2 / 3.]]
+    input_4 = [[1 / 3., 1.], [1., 1.], [1, 1 / 3.]]
+    input_5 = [[1 / 3., 1.], [1 / 3., 1 / 3.], [1, 1 / 3.]]
+    input_6 = [[1 / 3., 2 / 3.], [1 / 3., 0], [1., 0]]
     input_sample = np.concatenate([input_1, input_2, input_3,
                                    input_4, input_5, input_6])
     N = 6
@@ -138,12 +142,12 @@ def test_find_optimum_trajectories():
 
 @raises(ValueError)
 def test_catch_inputs_not_in_zero_one_range():
-    input_1 = [[0, 1/3.], [0, 1.], [2/3., 1.]]
-    input_2 = [[0, 1/3.], [2/3., 1/3.], [2/3., 1.]]
-    input_3 = [[2/3., 0], [2/3., 2/3.], [0, 2/3.]]
-    input_4 = [[1/3., 1.], [1., 1.], [1, 1/3.]]
-    input_5 = [[1/3., 1.], [1/3., 1/3.], [1, 1/3.]]
-    input_6 = [[1/3., 2/3.], [1/3., 0], [1., 0]]
+    input_1 = [[0, 1 / 3.], [0, 1.], [2 / 3., 1.]]
+    input_2 = [[0, 1 / 3.], [2 / 3., 1 / 3.], [2 / 3., 1.]]
+    input_3 = [[2 / 3., 0], [2 / 3., 2 / 3.], [0, 2 / 3.]]
+    input_4 = [[1 / 3., 1.], [1., 1.], [1, 1 / 3.]]
+    input_5 = [[1 / 3., 1.], [1 / 3., 1 / 3.], [1, 1 / 3.]]
+    input_6 = [[1 / 3., 2 / 3.], [1 / 3., 0], [1., 0]]
     input_sample = np.concatenate([input_1, input_2, input_3,
                                    input_4, input_5, input_6])
     problem = {'num_vars': 2, 'groups': None}
@@ -157,8 +161,8 @@ def test_group_sample_fails_with_no_G_matrix():
     N = 6
     num_levels = 4
     grid_jump = 2
-    problem = {'bounds': [[0.,1.],[0.,1.],[0.,1.],[0.,1.]], 
-               'num_vars': 4, 
+    problem = {'bounds': [[0., 1.], [0., 1.], [0., 1.], [0., 1.]],
+               'num_vars': 4,
                'groups': (None, None)}
     sample(problem, N, num_levels, grid_jump)
 
@@ -168,7 +172,7 @@ def test_group_sample_fails_with_wrong_G_matrix():
     N = 6
     num_levels = 4
     grid_jump = 2
-    problem = {'bounds': [[0.,1.],[0.,1.],[0.,1.],[0.,1.]], 
-               'num_vars': 4, 
-               'groups': (list[1,2,3,4], None)}
+    problem = {'bounds': [[0., 1.], [0., 1.], [0., 1.], [0., 1.]],
+               'num_vars': 4,
+               'groups': (list[1, 2, 3, 4], None)}
     sample(problem, N, num_levels, grid_jump)

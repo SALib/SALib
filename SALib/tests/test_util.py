@@ -1,10 +1,14 @@
 from __future__ import division
-from numpy.testing import assert_equal, assert_allclose
+
+import os
+
 from nose.tools import raises, with_setup
+from numpy.testing import assert_equal, assert_allclose
+
+import numpy as np
+
 from ..util import read_param_file, scale_samples, unscale_samples, \
                    compute_groups_from_parameter_file
-import os
-import numpy as np
 
 
 def setup_function():
@@ -106,11 +110,11 @@ def test_scale_samples():
     Simple test to ensure that samples are correctly scaled
     '''
 
-    params = np.arange(0,1.1,0.1).repeat(2).reshape((11,2))
+    params = np.arange(0, 1.1, 0.1).repeat(2).reshape((11, 2))
 
-    bounds = [[10,20],[-10,10]]
+    bounds = [[10, 20], [-10, 10]]
 
-    desired = np.array([np.arange(10,21,1), np.arange(-10,12,2)],dtype=np.float).T
+    desired = np.array([np.arange(10, 21, 1), np.arange(-10, 12, 2)], dtype=np.float).T
     scale_samples(params, bounds)
     assert_allclose(params, desired, atol=1e-03, rtol=1e-03)
 
@@ -118,10 +122,10 @@ def test_unscale_samples():
     '''
     Simple test to unscale samples back to [0,1] range
     '''
-    params = np.array([np.arange(10,21,1), np.arange(-10,12,2)],dtype=np.float).T
-    bounds = [[10,20],[-10,10]]
+    params = np.array([np.arange(10, 21, 1), np.arange(-10, 12, 2)], dtype=np.float).T
+    bounds = [[10, 20], [-10, 10]]
 
-    desired = np.arange(0,1.1,0.1).repeat(2).reshape((11,2))
+    desired = np.arange(0, 1.1, 0.1).repeat(2).reshape((11, 2))
     unscale_samples(params, bounds)
     assert_allclose(params, desired, atol=1e-03, rtol=1e-03)
 
@@ -131,8 +135,8 @@ def test_scale_samples_upper_lt_lower():
     '''
     Raise ValueError if upper bound lower than lower bound
     '''
-    params = np.array([[0, 0],[0.1,0.1],[0.2,0.2]])
-    bounds = [[10,9],[-10,10]]
+    params = np.array([[0, 0], [0.1, 0.1], [0.2, 0.2]])
+    bounds = [[10, 9], [-10, 10]]
     scale_samples(params, bounds)
 
 
@@ -141,8 +145,8 @@ def test_scale_samples_upper_eq_lower():
     '''
     Raise ValueError if upper bound lower equal to lower bound
     '''
-    params = np.array([[0, 0],[0.1,0.1],[0.2,0.2]])
-    bounds = [[10,10],[-10,10]]
+    params = np.array([[0, 0], [0.1, 0.1], [0.2, 0.2]])
+    bounds = [[10, 10], [-10, 10]]
     scale_samples(params, bounds)
 
 

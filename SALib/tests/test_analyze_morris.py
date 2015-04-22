@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import division
-from numpy.testing import assert_allclose, assert_equal
+
 from nose.tools import raises
+from numpy.testing import assert_allclose, assert_equal
+
 import numpy as np
 
 from ..analyze.morris import analyze, \
     compute_mu_star_confidence, \
-    compute_elementary_effects,\
-    get_increased_values,\
+    compute_elementary_effects, \
+    get_increased_values, \
     get_decreased_values, \
     compute_grouped_mu_star
 
@@ -31,21 +33,21 @@ def test_analysis_of_morris_results():
     '''
     Tests a one-dimensional vector of results
     '''
-    model_input = np.array([[0, 1. / 3], [0, 1],       [2. / 3, 1],
-                             [0, 1. / 3],   [2. / 3, 1. / 3], [2. / 3, 1],
-                             [2. / 3, 0],   [2. / 3, 2. / 3], [0, 2. / 3],
-                             [1. / 3, 1],   [1, 1],       [1, 1. / 3],
-                             [1. / 3, 1],   [1. / 3, 1. / 3], [1, 1. / 3],
-                             [1. / 3, 2. / 3], [1. / 3, 0],   [1, 0]],
+    model_input = np.array([[0, 1. / 3], [0, 1], [2. / 3, 1],
+                             [0, 1. / 3], [2. / 3, 1. / 3], [2. / 3, 1],
+                             [2. / 3, 0], [2. / 3, 2. / 3], [0, 2. / 3],
+                             [1. / 3, 1], [1, 1], [1, 1. / 3],
+                             [1. / 3, 1], [1. / 3, 1. / 3], [1, 1. / 3],
+                             [1. / 3, 2. / 3], [1. / 3, 0], [1, 0]],
                             dtype=np.float)
 
     model_output = np.array([0.97, 0.71, 2.39, 0.97, 2.3, 2.39, 1.87, 2.40, 0.87, 2.15, 1.71, 1.54, 2.15, 2.17, 1.54, 2.2, 1.87, 1.0],
                        dtype=np.float)
 
     problem = {
-     'num_vars': 2, 
-     'names': ['Test 1', 'Test 2'], 
-     'groups': None, 
+     'num_vars': 2,
+     'names': ['Test 1', 'Test 2'],
+     'groups': None,
      'bounds': [[0.0, 1.0], [0.0, 1.0]]
     }
 
@@ -54,7 +56,7 @@ def test_analysis_of_morris_results():
                  conf_level=0.95,
                  print_to_console=False)
     ee = np.array([[2.52, 2.01, 2.30, -0.66, -0.93, -1.30],
-                   [-0.39, 0.13, 0.80,  0.25, -0.02,  0.51]])
+                   [-0.39, 0.13, 0.80, 0.25, -0.02, 0.51]])
     desired_mu = np.average(ee, 1)
     assert_allclose(Si['mu'], desired_mu, rtol=1e-1)
     desired_mu_star = np.average(np.abs(ee), 1)
@@ -132,12 +134,12 @@ def test_compute_elementary_effects_small():
     Computes elementary effects for two variables,
     over six trajectories with four levels.
     '''
-    model_inputs = np.array([[0, 1. / 3], [0, 1],       [2. / 3, 1],
-                             [0, 1. / 3],   [2. / 3, 1. / 3], [2. / 3, 1],
-                             [2. / 3, 0],   [2. / 3, 2. / 3], [0, 2. / 3],
-                             [1. / 3, 1],   [1, 1],       [1, 1. / 3],
-                             [1. / 3, 1],   [1. / 3, 1. / 3], [1, 1. / 3],
-                             [1. / 3, 2. / 3], [1. / 3, 0],   [1, 0]],
+    model_inputs = np.array([[0, 1. / 3], [0, 1], [2. / 3, 1],
+                             [0, 1. / 3], [2. / 3, 1. / 3], [2. / 3, 1],
+                             [2. / 3, 0], [2. / 3, 2. / 3], [0, 2. / 3],
+                             [1. / 3, 1], [1, 1], [1, 1. / 3],
+                             [1. / 3, 1], [1. / 3, 1. / 3], [1, 1. / 3],
+                             [1. / 3, 2. / 3], [1. / 3, 0], [1, 0]],
                             dtype=np.float)
 
     model_outputs = np.array([0.97, 0.71, 2.39, 0.97, 2.3, 2.39, 1.87, 2.40, 0.87, 2.15, 1.71, 1.54, 2.15, 2.17, 1.54, 2.2, 1.87, 1.0],
@@ -151,9 +153,9 @@ def test_compute_elementary_effects_small():
 
 
 def test_compute_increased_value_for_ee():
-    up = np.array([[[False,  True], [True, False]],
-                   [[True, False], [False,  True]],
-                   [[False,  True], [False, False]],
+    up = np.array([[[False, True], [True, False]],
+                   [[True, False], [False, True]],
+                   [[False, True], [False, False]],
                    [[True, False], [False, False]],
                    [[False, False], [True, False]],
                    [[False, False], [True, False]]],
@@ -162,9 +164,9 @@ def test_compute_increased_value_for_ee():
     lo = np.array([[[False, False], [False, False]],
                    [[False, False], [False, False]],
                    [[False, False], [True, False]],
-                   [[False, False], [False,  True]],
-                   [[False,  True], [False, False]],
-                   [[False,  True], [False, False]]],
+                   [[False, False], [False, True]],
+                   [[False, True], [False, False]],
+                   [[False, True], [False, False]]],
                   dtype=bool)
 
     model_outputs = np.array([0.97, 0.71, 2.39, 0.97, 2.3, 2.39, 1.87, 2.40, 0.87, 2.15, 1.71, 1.54, 2.15, 2.17, 1.54, 2.2, 1.87, 1.0],
@@ -178,9 +180,9 @@ def test_compute_increased_value_for_ee():
 
 
 def test_compute_decreased_value_for_ee():
-    up = np.array([[[False,  True], [True, False]],
-                   [[True, False], [False,  True]],
-                   [[False,  True], [False, False]],
+    up = np.array([[[False, True], [True, False]],
+                   [[True, False], [False, True]],
+                   [[False, True], [False, False]],
                    [[True, False], [False, False]],
                    [[False, False], [True, False]],
                    [[False, False], [True, False]]],
@@ -189,9 +191,9 @@ def test_compute_decreased_value_for_ee():
     lo = np.array([[[False, False], [False, False]],
                    [[False, False], [False, False]],
                    [[False, False], [True, False]],
-                   [[False, False], [False,  True]],
-                   [[False,  True], [False, False]],
-                   [[False,  True], [False, False]]],
+                   [[False, False], [False, True]],
+                   [[False, True], [False, False]],
+                   [[False, True], [False, False]]],
                   dtype=bool)
 
     model_outputs = np.array([0.97, 0.71, 2.39, 0.97, 2.3, 2.39, 1.87, 2.40, 0.87, 2.15, 1.71, 1.54, 2.15, 2.17, 1.54, 2.2, 1.87, 1.0],
@@ -210,9 +212,9 @@ def test_compute_grouped_mu_star():
     There are six trajectories.
     '''
     group_matrix = np.matrix('1,0;0,1;0,1', dtype=np.int)
-    ee = np.array([[2.52,  2.01,  2.30, -0.66, -0.93, -1.30],
-                   [-2.00,  0.13, -0.80,  0.25, -0.02,  0.51],
-                   [2.00, -0.13,  0.80, -0.25,  0.02, -0.51]])
+    ee = np.array([[2.52, 2.01, 2.30, -0.66, -0.93, -1.30],
+                   [-2.00, 0.13, -0.80, 0.25, -0.02, 0.51],
+                   [2.00, -0.13, 0.80, -0.25, 0.02, -0.51]])
     mu_star = np.average(np.abs(ee), 1)
     actual = compute_grouped_mu_star(mu_star, group_matrix)
     desired = np.array([1.62, 0.62], dtype=np.float)

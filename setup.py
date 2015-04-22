@@ -1,6 +1,9 @@
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
+
 import versioneer
+
+
 versioneer.VCS = 'git'
 versioneer.versionfile_source = 'SALib/_version.py'
 versioneer.versionfile_build = None

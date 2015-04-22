@@ -1,8 +1,10 @@
 __all__ = ["scale_samples", "read_param_file"]
-import csv
-import numpy as np
 from collections import OrderedDict
+import csv
 from warnings import warn
+
+import numpy as np
+
 
 def scale_samples(params, bounds):
     '''

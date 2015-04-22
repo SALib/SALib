@@ -1,15 +1,19 @@
-from __future__ import division
-import numpy as np
-import random as rd
-from itertools import combinations, islice
-from scipy.spatial.distance import cdist
-from scipy.misc import comb as nchoosek
-import sys
-
 '''
 Helper functions for Morris trajectories
 (Generating group samples, and optimizing trajectory distances)
 '''
+
+from __future__ import division
+
+from itertools import combinations, islice
+import sys
+
+from scipy.misc import comb as nchoosek
+from scipy.spatial.distance import cdist
+
+import numpy as np
+import random as rd
+
 
 def generate_trajectory(G, num_levels, grid_jump):
     '''
@@ -35,7 +39,7 @@ def generate_trajectory(G, num_levels, grid_jump):
     P_star = np.asmatrix(generate_P_star(g))
 
     # Matrix J - a (g+1)-by-k matrix of ones
-    J = np.matrix(np.ones((g+1, k)))
+    J = np.matrix(np.ones((g + 1, k)))
 
     # Matrix D* - k-by-k matrix which decribes whether factors move up or down
     D_star = np.diag([rd.choice([-1, 1]) for _ in range(k)])
@@ -49,8 +53,8 @@ def generate_trajectory(G, num_levels, grid_jump):
 
 
 def compute_B_star(J, x_star, delta, B, G, P_star, D_star):
-    B_star = J[:,0] * x_star + \
-             (delta / 2) *  (( 2 * B * (G * P_star).T - J) \
+    B_star = J[:, 0] * x_star + \
+             (delta / 2) * ((2 * B * (G * P_star).T - J) \
              * D_star + J)
     return B_star
 
@@ -59,7 +63,7 @@ def generate_P_star(g):
     '''
     Matrix P* - size (g-by-g) - describes order in which groups move
     '''
-    P_star = np.eye(g,g)
+    P_star = np.eye(g, g)
     np.random.shuffle(P_star)
     return P_star
 
@@ -73,7 +77,7 @@ def generate_x_star(k, num_levels, grid_step):
 
     delta = compute_delta(num_levels)
     bound = 1 - delta
-    grid = np.linspace(0,bound,grid_step)
+    grid = np.linspace(0, bound, grid_step)
 
     for i in range(k):
         x_star[i] = rd.choice(grid)
@@ -90,12 +94,12 @@ def check_input_sample(input_sample, num_params, N):
         - the correct size
         - values between 0 and 1
     '''
-    if input_sample.shape[0] != (num_params + 1) * N:
-        raise ValueError("Input sample does not match number of parameters or groups")
-    if type(input_sample) != np.ndarray:
-        raise TypeError("Input sample is not an numpy array")
-    if np.any((input_sample < 0) | (input_sample > 1)):
-        raise ValueError("Input sample must be scaled between 0 and 1")
+    assert type(input_sample) == np.ndarray, \
+    "Input sample is not an numpy array"
+    assert input_sample.shape[0] == (num_params + 1) * N, \
+    "Input sample does not match number of parameters or groups"
+    assert np.any((input_sample >= 0) | (input_sample <= 1)), \
+    "Input sample must be scaled between 0 and 1"
 
 
 def compute_distance(m, l):
@@ -146,7 +150,7 @@ def find_most_distant(input_sample, N, num_params, k_choices, groups=None):
     # of trajectories and store in a shared-memory array
     distance_matrix = compute_distance_matrix(input_sample,
                                               N,
-                                              num_params, 
+                                              num_params,
                                               groups)
 
 
@@ -158,7 +162,7 @@ def find_most_distant(input_sample, N, num_params, k_choices, groups=None):
 
     counter = 0
     # Generate a list of all the possible combinations
-    #combos = np.array([x for x in combinations(range(N),k_choices)])
+    # combos = np.array([x for x in combinations(range(N),k_choices)])
     combo_gen = combinations(list(range(N)), k_choices)
     scores = np.empty(number_of_combinations, dtype=np.float32)
     # Generate the pairwise indices once
@@ -177,7 +181,7 @@ def mappable(combos, pairwise, distance_matrix):
     '''
     combos = np.array(combos)
     # Create a list of all pairwise combination for each combo in combos
-    combo_list = combos[:,pairwise[:,]]
+    combo_list = combos[:, pairwise[:, ]]
     all_distances = distance_matrix[[combo_list[:, :, 1], combo_list[:, :, 0]]]
     new_scores = np.sqrt(np.einsum('ij,ij->i', all_distances, all_distances))
     return new_scores
@@ -229,11 +233,10 @@ def make_index_list(N, num_params, groups=None):
 
 def compile_output(input_sample, N, num_params, maximum_combo, groups=None):
 
-    if np.any((input_sample < 0) | (input_sample > 1)):
-        raise ValueError("Input sample must be scaled between 0 and 1")
-
     if groups == None:
         groups = num_params
+        
+    check_input_sample(input_sample, groups, N)
 
     index_list = make_index_list(N, num_params, groups)
 

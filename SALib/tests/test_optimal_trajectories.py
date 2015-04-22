@@ -1,15 +1,18 @@
-from ..sample.optimal_trajectories import return_max_combo
-                                          
+from unittest import skipUnless
+
+from nose.tools import raises, with_setup
+from numpy.testing import assert_equal
+
 from ..sample.morris import sample_oat, \
                             find_optimum_combination, \
                             compute_optimised_trajectories, \
                             sample_groups
-from . test_morris import setup_param_file_with_groups_prime
+from ..sample.optimal_trajectories import return_max_combo
 from ..util import read_param_file
-from nose.tools import raises, with_setup
-from numpy.testing import assert_equal
 from .test_util import setup_function
-from unittest import skipUnless
+
+
+from . test_morris import setup_param_file_with_groups_prime
 
 try:
     import gurobipy
@@ -36,8 +39,8 @@ def test_optimal_sample_with_groups():
     k_choices = 4    
     num_params = problem['num_vars']
     
-    sample = sample_oat(problem, 
-                        N, 
+    sample = sample_oat(problem,
+                        N,
                         num_levels,
                         grid_jump)
 
@@ -86,34 +89,34 @@ def test_size_of_trajectories_with_groups():
     num_groups = 3
 
     # Test 1. dimensions of sample ignoring groups    
-    sample = sample_oat(no_group_problem, 
-                        N, 
+    sample = sample_oat(no_group_problem,
+                        N,
                         num_levels,
                         grid_jump)
 
     size_x, size_y = sample.shape
 
 
-    assert_equal(size_x, N*(num_params + 1))
+    assert_equal(size_x, N * (num_params + 1))
     assert_equal(size_y, num_params)
 
     # Test 2. dimensions of sample with groups
 
-    group_sample = sample_groups(group_problem, 
-                                 N, 
+    group_sample = sample_groups(group_problem,
+                                 N,
                                  num_levels,
                                  grid_jump)
 
     size_x, size_y = group_sample.shape
 
-    assert_equal(size_x, N*(num_groups+1))
+    assert_equal(size_x, N * (num_groups + 1))
     assert_equal(size_y, num_params)
 
     # Test 3. dimensions of optimal sample without groups
     
-    optimal_sample_without_groups = compute_optimised_trajectories(no_group_problem, 
-                                                              sample, 
-                                                              N, 
+    optimal_sample_without_groups = compute_optimised_trajectories(no_group_problem,
+                                                              sample,
+                                                              N,
                                                               k_choices)
 
     size_x, size_y = optimal_sample_without_groups.shape
@@ -124,9 +127,9 @@ def test_size_of_trajectories_with_groups():
 
     # Test 4. dimensions of optimal sample with groups
 
-    optimal_sample_with_groups = compute_optimised_trajectories(group_problem, 
-                                                           group_sample, 
-                                                           N, 
+    optimal_sample_with_groups = compute_optimised_trajectories(group_problem,
+                                                           group_sample,
+                                                           N,
                                                            k_choices)
 
     size_x, size_y = optimal_sample_with_groups.shape
@@ -184,15 +187,15 @@ def test_optimised_trajectories_without_groups():
     input_sample = sample_oat(problem, N, num_levels, grid_jump)
 
     # From gurobi optimal trajectories     
-    actual = return_max_combo(input_sample, 
-                              N, 
-                              num_params, 
-                              k_choices, 
+    actual = return_max_combo(input_sample,
+                              N,
+                              num_params,
+                              k_choices,
                               groups)
 
-    desired = find_optimum_combination(input_sample, 
-                                       N, 
-                                       num_params, 
+    desired = find_optimum_combination(input_sample,
+                                       N,
+                                       num_params,
                                        k_choices,
                                        groups)
     assert_equal(actual, desired)
@@ -221,15 +224,15 @@ def test_optimised_trajectories_with_groups():
     input_sample = sample_groups(problem, N, num_levels, grid_jump)
 
     # From gurobi optimal trajectories     
-    actual = return_max_combo(input_sample, 
-                              N, 
-                              num_params, 
-                              k_choices, 
+    actual = return_max_combo(input_sample,
+                              N,
+                              num_params,
+                              k_choices,
                               groups)
 
-    desired = find_optimum_combination(input_sample, 
-                                       N, 
-                                       num_params, 
+    desired = find_optimum_combination(input_sample,
+                                       N,
+                                       num_params,
                                        k_choices,
                                        groups)
     assert_equal(actual, desired)

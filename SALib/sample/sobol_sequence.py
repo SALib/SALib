@@ -1,8 +1,12 @@
 from __future__ import division
-from .directions import directions
+
 import math
-import numpy as np
 import sys
+
+import numpy as np
+
+from .directions import directions
+
 
 if sys.version_info[0] > 2:
     long = int

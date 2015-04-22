@@ -1,11 +1,14 @@
 from __future__ import division
-import numpy as np
+
 import math
-from ..util import scale_samples, read_param_file
+
+import numpy as np
+
 from . import common_args
+from .. util import scale_samples, read_param_file
+
 
 # Generate N x D matrix of extended FAST samples (Saltelli 1999)
-
 def sample(problem, N, M=4):
 
     D = problem['num_vars']

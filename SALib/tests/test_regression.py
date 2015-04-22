@@ -1,27 +1,30 @@
 from __future__ import division
-from numpy.testing import assert_allclose
-from nose.tools import with_setup
-from .test_util import teardown
-import numpy as np
+
 import sys
 
-from ..sample.morris import sample
-from ..analyze import morris
-from SALib.sample import saltelli
+from nose.tools import with_setup
+from numpy.testing import assert_allclose
+
+from SALib.analyze import delta
+from SALib.analyze import dgsm
+from SALib.analyze import fast
 from SALib.analyze import sobol
 from SALib.sample import fast_sampler
-from SALib.analyze import fast
 from SALib.sample import finite_diff
-from SALib.analyze import dgsm
 from SALib.sample import latin
-from SALib.analyze import delta
+from SALib.sample import saltelli
+import numpy as np
+
+from ..analyze import morris
+from ..sample.morris import sample
 from ..test_functions import Ishigami
 from ..util import read_param_file
+from .test_util import teardown
 
 
 def test_regression_morris_vanilla():
 
-    param_file ='SALib/test_functions/params/Ishigami.txt'
+    param_file = 'SALib/test_functions/params/Ishigami.txt'
     problem = read_param_file(param_file)
     param_values = sample(problem=problem, N=5000, \
                           num_levels=10, grid_jump=5, \

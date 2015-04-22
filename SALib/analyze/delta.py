@@ -1,15 +1,18 @@
 from __future__ import division
 from __future__ import print_function
-import numpy as np
+
 from scipy.stats import norm, gaussian_kde, rankdata
-from ..util import read_param_file
+
+import numpy as np
+
 from . import common_args
+from ..util import read_param_file
+
 
 # Perform Delta moment-independent Analysis on file of model results
 # Returns a dictionary with keys 'delta', 'delta_conf', 'S1', and 'S1_conf'
 # Where each entry is a list of size D (the number of parameters)
 # Containing the indices in the same order as the parameter file
-
 def analyze(problem, X, Y, calc_second_order=True, num_resamples=10,
             conf_level=0.95, print_to_console=False):
 

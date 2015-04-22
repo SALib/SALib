@@ -1,9 +1,12 @@
 import sys
-sys.path.append('../..')
 
 from SALib.analyze import delta
 from SALib.util import read_param_file
 import numpy as np
+
+
+sys.path.append('../..')
+
 
 # Read the parameter range file and generate samples
 # Since this is "given data", the bounds in the parameter file will not be used

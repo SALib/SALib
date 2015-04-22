@@ -1,17 +1,19 @@
 from __future__ import division
 from __future__ import print_function
-from ..util import read_param_file
-from sys import exit
-import numpy as np
+
 import math
+from sys import exit
+
+import numpy as np
+
 from . import common_args
+from ..util import read_param_file
+
 
 # Perform FAST Analysis on file of model results
 # Returns a dictionary with keys 'S1' and 'ST'
 # Where each entry is a list of size D (the number of parameters)
 # Containing the indices in the same order as the parameter file
-
-
 def analyze(problem, Y, M=4, print_to_console=False):
 
     D = problem['num_vars']
@@ -44,7 +46,7 @@ def analyze(problem, Y, M=4, print_to_console=False):
         Si['S1'][i] = compute_first_order(Y[l], N, M, omega[0])
         Si['ST'][i] = compute_total_order(Y[l], N, omega[0])
         if print_to_console:
-            print("%s %f %f" %
+            print("%s %f %f" % 
                   (problem['names'][i], Si['S1'][i], Si['ST'][i]))
     return Si
 
