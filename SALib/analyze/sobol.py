@@ -13,7 +13,7 @@ from ..util import read_param_file
 # Returns a dictionary with keys 'S1', 'S1_conf', 'ST', and 'ST_conf'
 # Where each entry is a list of size D (the number of parameters)
 # Containing the indices in the same order as the parameter file
-def analyze(problem, Y, calc_second_order=True, num_resamples=1000,
+def analyze(problem, Y, calc_second_order=True, num_resamples=100,
             conf_level=0.95, print_to_console=False):
 
     D = problem['num_vars']
@@ -49,13 +49,14 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=1000,
     if print_to_console:
         print("Parameter %s %s %s %s" % keys)
 
+    r = np.random.randint(N, size=(N, num_resamples))
+    Z = norm.ppf(0.5 + conf_level / 2)
+
     for j in range(D):
         S['S1'][j] = first_order(A, AB[:, j], B)
-        S['S1_conf'][j] = first_order_confidence(
-            A, AB[:, j], B, num_resamples, conf_level)
+        S['S1_conf'][j] = Z * first_order(A[r], AB[r,j], B[r]).std(ddof=1)
         S['ST'][j] = total_order(A, AB[:, j], B)
-        S['ST_conf'][j] = total_order_confidence(
-            A, AB[:, j], B, num_resamples, conf_level)
+        S['ST_conf'][j] = Z * total_order(A[r], AB[r,j], B[r]).std(ddof=1)
 
         if print_to_console:
             print("%s %f %f %f %f" % (problem['names'][j], S['S1'][
@@ -74,8 +75,8 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=1000,
             for k in range(j + 1, D):
                 S['S2'][j, k] = second_order(
                     A, AB[:, j], AB[:, k], BA[:, j], B)
-                S['S2_conf'][j, k] = second_order_confidence(
-                    A, AB[:, j], AB[:, k], BA[:, j], B, num_resamples, conf_level)
+                S['S2_conf'][j, k] = Z * second_order(A[r], AB[r, j], 
+                    AB[r, k], BA[r, j], B[r]).std(ddof=1)
 
                 if print_to_console:
                     print("%s %s %f %f" % (problem['names'][j], problem[
@@ -87,50 +88,23 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=1000,
 def first_order(A, AB, B):
     # First order estimator following Saltelli et al. 2010 CPC, normalized by
     # sample variance
-    return np.mean(B * (AB - A)) / np.var(np.r_[A, B])
-
-
-def first_order_confidence(A, AB, B, num_resamples, conf_level):
-    s = np.empty(num_resamples)
-    for i in range(num_resamples):
-        r = np.random.randint(len(A), size=len(A))
-        s[i] = first_order(A[r], AB[r], B[r])
-
-    return norm.ppf(0.5 + conf_level / 2) * s.std(ddof=1)
+    return np.mean(B * (AB - A), axis=0) / np.var(np.r_[A, B], axis=0)
 
 
 def total_order(A, AB, B):
     # Total order estimator following Saltelli et al. 2010 CPC, normalized by
     # sample variance
-    return 0.5 * np.mean((A - AB) ** 2) / np.var(np.r_[A, B])
-
-
-def total_order_confidence(A, AB, B, num_resamples, conf_level):
-    s = np.empty(num_resamples)
-    for i in range(num_resamples):
-        r = np.random.randint(len(A), size=len(A))
-        s[i] = total_order(A[r], AB[r], B[r])
-
-    return norm.ppf(0.5 + conf_level / 2) * s.std(ddof=1)
+    return 0.5 * np.mean((A - AB) ** 2, axis=0) / np.var(np.r_[A, B], axis=0)
 
 
 def second_order(A, ABj, ABk, BAj, B):
     # Second order estimator following Saltelli 2002
-    V = np.var(np.r_[A, B])
-    Vjk = np.mean(BAj * ABk - A * B)
+    Vjk = np.mean(BAj * ABk - A * B, axis=0) / np.var(np.r_[A, B], axis=0)
     Sj = first_order(A, ABj, B)
     Sk = first_order(A, ABk, B)
 
-    return Vjk / V - Sj - Sk
+    return Vjk - Sj - Sk
 
-
-def second_order_confidence(A, ABj, ABk, BAj, B, num_resamples, conf_level):
-    s = np.empty(num_resamples)
-    for i in range(num_resamples):
-        r = np.random.randint(len(A), size=len(A))
-        s[i] = second_order(A[r], ABj[r], ABk[r], BAj[r], B[r])
-
-    return norm.ppf(0.5 + conf_level / 2) * s.std(ddof=1)
 
 if __name__ == "__main__":
     parser = common_args.create()
