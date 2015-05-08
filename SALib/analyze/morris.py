@@ -154,7 +154,7 @@ def compute_mu_star_confidence(ee, num_trajectories, num_resamples, conf_level):
     if conf_level < 0 or conf_level > 1:
         raise ValueError("Confidence level must be between 0-1.")
 
-    resample_index = np.floor(np.random.rand(num_resamples * num_trajectories) * len(ee)).astype(int).reshape(num_resamples, num_trajectories)
+    resample_index = np.random.randint(len(ee), size=(num_resamples, num_trajectories)) 
     ee_resampled = ee[resample_index]
     # Compute average of the absolute values over each of the resamples
     mu_star_resampled = np.average(np.abs(ee_resampled), axis=1)

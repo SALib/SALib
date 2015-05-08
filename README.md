@@ -64,17 +64,4 @@ Lots of other options are included for parameter files, as well as a command-lin
 Also check out the [examples](https://github.com/jdherman/SALib/tree/master/examples) for a full description of options for each method.
 
 ### License
-Copyright (C) 2013-2015 Jon Herman and others. Licensed under the GNU Lesser General Public License.
-
-The Sensitivity Analysis Library is free software: you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-The Sensitivity Analysis Library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public License
-along with the Sensitivity Analysis Library.  If not, see <http://www.gnu.org/licenses/>.
+Copyright (C) 2013-2015 Jon Herman and others. Versions v0.5 and later are released under the [MIT license](LICENSE.md).
