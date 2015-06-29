@@ -4,6 +4,8 @@ from SALib.analyze import morris
 from SALib.sample.morris import sample
 from SALib.test_functions import Ishigami
 from SALib.util import read_param_file
+from SALib.plotting.morris import cov_plot
+import matplotlib.pyplot as plot
 
 
 sys.path.append('../..')
@@ -41,10 +43,5 @@ Si = morris.analyze(problem, param_values, Y, conf_level=0.95, print_to_console=
 # e.g. Si['mu_star'] contains the mu* value for each parameter, in the
 # same order as the parameter file
 
-from plotting.morris import cov_plot
-import matplotlib.pyplot as plot
-
 plot = cov_plot(Si, 'mu_star')
 plot.show()
-
-

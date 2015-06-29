@@ -21,5 +21,5 @@ def test_morris_horizontal_bar_plot():
           'names':['x1', 'x2', 'x3', 'x4', 'x5', 'x6'],
           'mu_star_conf':[0.5, 1, 1.5, 2, 2.5, 3.0]} 
     
-    morris.cov_plot(Si, sortby='mu_star')
+    morris.horiz_bar_plot(Si, sortby='mu_star')
 #     plt.savefig('morris_horiz_bar_plot.png')
