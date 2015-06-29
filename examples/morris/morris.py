@@ -13,11 +13,11 @@ sys.path.append('../..')
 problem = read_param_file('../../SALib/test_functions/params/Ishigami.txt')
 # or define manually without a parameter file:
 # problem = {
-#  'num_vars': 3, 
-#  'names': ['x1', 'x2', 'x3'], 
-#  'groups': None, 
-#  'bounds': [[-3.14159265359, 3.14159265359], 
-#             [-3.14159265359, 3.14159265359], 
+#  'num_vars': 3,
+#  'names': ['x1', 'x2', 'x3'],
+#  'groups': None,
+#  'bounds': [[-3.14159265359, 3.14159265359],
+#             [-3.14159265359, 3.14159265359],
 #             [-3.14159265359, 3.14159265359]]
 # }
 
@@ -35,9 +35,16 @@ Y = Ishigami.evaluate(param_values)
 
 # Perform the sensitivity analysis using the model output
 # Specify which column of the output file to analyze (zero-indexed)
-Si = morris.analyze(problem, param_values, Y, conf_level=0.95, print_to_console=False,
+Si = morris.analyze(problem, param_values, Y, conf_level=0.95, print_to_console=True,
                     num_levels=10, grid_jump=5)
 # Returns a dictionary with keys 'mu', 'mu_star', 'sigma', and 'mu_star_conf'
 # e.g. Si['mu_star'] contains the mu* value for each parameter, in the
 # same order as the parameter file
-print(Si['mu_star'])
+
+from plotting.morris import cov_plot
+import matplotlib.pyplot as plot
+
+plot = cov_plot(Si, 'mu_star')
+plot.show()
+
+
