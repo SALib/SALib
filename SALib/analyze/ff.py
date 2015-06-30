@@ -24,23 +24,27 @@ def analyze(problem, X, Y, second_order=False, print_to_console=False):
               for k in ['names', 'ME'])
     Si['ME'] = main_effect
     Si['names'] = names
-    
-    if second_order == True:
-        interactions(problem, X, Y)
-    
+        
     if print_to_console:
         print("Parameter ME")
         for j in range(num_vars):
             print("%s %f" % (problem['names'][j], Si['ME'][j]))
     
+    if second_order == True:
+        interactions(problem, X, Y, print_to_console)
+    
     return Si
 
-def interactions(problem, X, Y):
+def interactions(problem, X, Y, print_to_console=False):
+    
+    names = problem['names']
     
     for col in range(X.shape[1]):
         for col_2 in range(col):
             x = X[:, col] * X[:, col_2]
-            print (1. / (2 * problem['num_vars'])) * np.dot(Y, x)
+            if print_to_console:
+                var_names = names[col_2] + names[col]
+                print ('%s %f' % (var_names, (1. / (2 * problem['num_vars'])) * np.dot(Y, x)))
 
 if __name__ == "__main__":
 

@@ -104,5 +104,5 @@ def test_interactions():
                   [0, 0, 1, 1],
                   [0, 1, 1, 0]], dtype=np.float)
     Y = np.array([1.5, 1, 1.5, 1, 2, 2.5, 2, 2.5], dtype=np.float)
-    actual = analyze(problem, X, Y, second_order=True)
+    actual = analyze(problem, X, Y, second_order=True, print_to_console=True)
     assert_equal(1,0)
