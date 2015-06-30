@@ -16,7 +16,6 @@ def sample(problem):
     # Find the smallest n, such that num_vars < k
     k = [2 ** n for n in range(16)]
     k_chosen = 2**(np.argmax(num_vars < np.array(k)) - 1)
-    dummy_vars = k_chosen - num_vars
 
     # Generate the sample
     sample = np.vstack([hadamard(k_chosen), -hadamard(k_chosen)])
@@ -34,8 +33,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     problem = read_param_file(args.paramfile)
-    param_values = sample(problem, args.samples, args.levels, \
-                    args.grid_jump, args.k_optimal)
+    param_values = sample(problem)
 
     np.savetxt(args.output, param_values, delimiter=args.delimiter,
                fmt='%.' + str(args.precision) + 'e')
