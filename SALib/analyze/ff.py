@@ -8,7 +8,7 @@ import numpy as np
 from . import common_args
 from ..util import read_param_file
 
-def analyze(problem, X, Y):
+def analyze(problem, X, Y, second_order=False):
     
     num_vars = problem['num_vars']
     number_of_vars_in_input_sample = X.shape[1]
@@ -16,7 +16,7 @@ def analyze(problem, X, Y):
     number_of_dummy_vars = number_of_vars_in_input_sample - num_vars
     
     names = problem['names']
-    names.extend(["dummy_" + var for var in range(number_of_dummy_vars)])
+    names.extend(["dummy_" + str(var) for var in range(number_of_dummy_vars)])
     
     main_effect = (1. / (2 * number_of_vars_in_input_sample)) * np.dot(Y, X)
     
@@ -25,7 +25,17 @@ def analyze(problem, X, Y):
     Si['ME'] = main_effect
     Si['names'] = names
     
+    if second_order == True:
+        interactions(problem, X, Y)
+    
     return Si
+
+def interactions(problem, X, Y):
+    
+    for col in range(X.shape[1]):
+        for col_2 in range(col):
+            x = X[:,col] * X[:,col_2]
+            print (1. / (2 * problem['num_vars'])) * np.dot(Y, x)
 
 if __name__ == "__main__":
 
