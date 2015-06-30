@@ -8,7 +8,7 @@ import numpy as np
 from . import common_args
 from ..util import read_param_file
 
-def analyze(problem, X, Y, second_order=False):
+def analyze(problem, X, Y, second_order=False, print_to_console=False):
     
     num_vars = problem['num_vars']
     number_of_vars_in_input_sample = X.shape[1]
@@ -28,13 +28,18 @@ def analyze(problem, X, Y, second_order=False):
     if second_order == True:
         interactions(problem, X, Y)
     
+    if print_to_console:
+        print("Parameter ME")
+        for j in range(num_vars):
+            print("%s %f" % (problem['names'][j], Si['ME'][j]))
+    
     return Si
 
 def interactions(problem, X, Y):
     
     for col in range(X.shape[1]):
         for col_2 in range(col):
-            x = X[:,col] * X[:,col_2]
+            x = X[:, col] * X[:, col_2]
             print (1. / (2 * problem['num_vars'])) * np.dot(Y, x)
 
 if __name__ == "__main__":
