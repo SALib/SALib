@@ -36,7 +36,6 @@ def test_extend_bounds():
                            np.array([0, 1]), np.array([0, 1])], 
                 'num_vars': 16}
 
-    print actual
     assert_equal(actual, expected)
 
 def test_ff_sample():
@@ -104,7 +103,6 @@ def test_ff_example():
                }
     
     X = sample(problem)
-    print X
     Y = X[:, 0] + 2 * X[:, 1] + 3 * X[:, 2] + 4 * X[:, 6] * X[:, 11]
 
     expected = np.array([10, -2, 4, -8, 2, 6, -4,
@@ -136,7 +134,6 @@ def test_interactions_from_saltelli():
                  - 10, 2, -4, 8, -2, -6, 4, 0])
     
     Si = analyze(problem, X, Y, second_order=True)
-    print Si
     actual = Si['IE']
     expected = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
                 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
