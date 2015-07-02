@@ -6,24 +6,22 @@ Created on 30 Jun 2015
 
 import numpy as np
 from . import common_args
-from ..util import read_param_file
+from ..util import read_param_file, unscale_samples
+from ..sample.ff import generate_contrast, sample, extend_bounds
 
 def analyze(problem, X, Y, second_order=False, print_to_console=False):
     
+    problem = extend_bounds(problem)
     num_vars = problem['num_vars']
-    number_of_vars_in_input_sample = X.shape[1]
     
-    number_of_dummy_vars = number_of_vars_in_input_sample - num_vars
+    X = generate_contrast(problem)
     
-    names = problem['names']
-    names.extend(["dummy_" + str(var) for var in range(number_of_dummy_vars)])
-    
-    main_effect = (1. / (2 * number_of_vars_in_input_sample)) * np.dot(Y, X)
+    main_effect = (1. / (2 * num_vars)) * np.dot(Y, X)
     
     Si = dict((k, [None] * num_vars)
               for k in ['names', 'ME'])
     Si['ME'] = main_effect
-    Si['names'] = names
+    Si['names'] = problem['names']
         
     if print_to_console:
         print("Parameter ME")
@@ -31,20 +29,40 @@ def analyze(problem, X, Y, second_order=False, print_to_console=False):
             print("%s %f" % (problem['names'][j], Si['ME'][j]))
     
     if second_order == True:
-        interactions(problem, X, Y, print_to_console)
+        interaction_names, interaction_effects = interactions(problem, 
+                                                              Y, 
+                                                              print_to_console)
+    
+        Si['names'].append(interaction_names)
+        Si['IE'] = interaction_effects
     
     return Si
 
-def interactions(problem, X, Y, print_to_console=False):
+
+def interactions(problem, Y, print_to_console=False):
+    '''
+    Computes the second order effects (interactions) between
+    all combinations of pairs of input factors
+    '''
     
     names = problem['names']
+    num_vars = problem['num_vars']
     
+    X = generate_contrast(problem)
+    
+    ie_names = []
+    IE = []
+
     for col in range(X.shape[1]):
         for col_2 in range(col):
             x = X[:, col] * X[:, col_2]
-            if print_to_console:
-                var_names = names[col_2] + names[col]
-                print ('%s %f' % (var_names, (1. / (2 * problem['num_vars'])) * np.dot(Y, x)))
+            var_names = names[col_2] + names[col]
+            ie_names.append(var_names)
+            IE.append((1. / (2 * num_vars)) * np.dot(Y, x))
+    if print_to_console:
+        print[('%s %f \n' % (n, i) ) for (n, i) in zip(ie_names, IE) ]
+    
+    return ie_names, IE
 
 if __name__ == "__main__":
 
