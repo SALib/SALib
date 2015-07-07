@@ -55,12 +55,41 @@ def horizontal_bar_plot(Si, sortby='mu_star'):
 
 
 def covariance_plot(Si, unit=""):
-    
+    '''
+    Plots mu* against sigma or the 95% confidence interval
+    '''
     plt.scatter(Si['mu_star'], Si['mu_star_conf'])
     plt.xlabel('mu* ' + unit)
     plt.ylabel('95% CI')
 #     plt.title(results_prefix)
     plt.tight_layout()
+    
+    return plt
+
+
+def sample_histograms(input_sample, problem):
+    '''
+    Plots a set of subplots of histograms of the input sample
+    '''
+    num_vars = problem['num_vars']
+    names = problem['names']
+    
+    
+    fig, axes = plt.subplots(nrows=1, ncols=num_vars)
+    
+    for v in range(num_vars):
+        axes[v].hist(input_sample[:, v], bins=4, normed=False)
+        axes[v].set_title('%s' % (names[v]))
+        axes[v].xaxis.set_tick_params(label1On=False)
+        axes[v].yaxis.set_tick_params(label1On=True)    
+    
+    plt.tight_layout()
+    
+    return plt
+
+
+
+
 
 if __name__ == '__main__':
     pass
