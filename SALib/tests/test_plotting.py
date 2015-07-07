@@ -11,7 +11,7 @@ import matplotlib
 from matplotlib.testing.decorators import image_comparison
 import matplotlib.pyplot as plt
 
-from ...SALib.plotting import morris
+from ..SALib.plotting import morris
 
 @image_comparison(baseline_images=['morris_horiz_bar_plot'])
 def test_morris_horizontal_bar_plot():
