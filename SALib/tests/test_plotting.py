@@ -11,7 +11,7 @@ import matplotlib
 from matplotlib.testing.decorators import image_comparison
 import matplotlib.pyplot as plt
 
-from SALib.plotting import morris
+from ...SALib.plotting import morris
 
 @image_comparison(baseline_images=['morris_horiz_bar_plot'])
 def test_morris_horizontal_bar_plot():
@@ -21,5 +21,5 @@ def test_morris_horizontal_bar_plot():
           'names':['x1', 'x2', 'x3', 'x4', 'x5', 'x6'],
           'mu_star_conf':[0.5, 1, 1.5, 2, 2.5, 3.0]} 
     
-    morris.horiz_bar_plot(Si, sortby='mu_star')
+    morris.horizontal_bar_plot(Si, sortby='mu_star')
 #     plt.savefig('morris_horiz_bar_plot.png')

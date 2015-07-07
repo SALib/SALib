@@ -7,7 +7,7 @@ This module provides the basic infrastructure for plotting charts for the
 Method of Morris results
 
 Si = morris.analyze(problem, param_values, Y, conf_level=0.95, print_to_console=False, num_levels=10, grid_jump=5)
-p = morris.horiz_bar_plot(Si)
+p = morris.horizontal_bar_plot(Si)
 # set plot style etc.
 p.show()
 
@@ -24,7 +24,7 @@ def _sort_Si_by_index(Si, key, index):
     return np.array([Si[key][x] for x in index])
 
 
-def horiz_bar_plot(Si, sortby='mu_star'):
+def horizontal_bar_plot(Si, sortby='mu_star'):
     '''
     Returns a matplotlib plot instance
     Use p.show() to display the plot
@@ -53,6 +53,14 @@ def horiz_bar_plot(Si, sortby='mu_star'):
 
     return plt
 
+
+def covariance_plot(Si, unit=""):
+    
+    plt.scatter(Si['mu_star'], Si['mu_star_conf'])
+    plt.xlabel('mu* ' + unit)
+    plt.ylabel('95% CI')
+#     plt.title(results_prefix)
+    plt.tight_layout()
 
 if __name__ == '__main__':
     pass
