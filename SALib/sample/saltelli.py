@@ -68,6 +68,10 @@ def sample(problem, N, calc_second_order=True):
 if __name__ == "__main__":
 
     parser = common_args.create()
+    
+    parser.add_argument(
+        '-n', '--samples', type=int, required=True, help='Number of Samples')
+   
     parser.add_argument('--max-order', type=int, required=False, default=2,
                         choices=[1, 2], help='Maximum order of sensitivity indices to calculate')
     args = parser.parse_args()
