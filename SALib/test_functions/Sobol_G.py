@@ -16,7 +16,7 @@ def evaluate(values, a=[0, 1, 4.5, 9, 99, 99, 99, 99]):
         raise TypeError("The argument `values` must be a numpy ndarray")
 
     ltz = np.array(values) < 0
-    gto = np.array(values) > 1
+    gtz = np.array(values) > 1
 
     if ltz.any() == True:
         raise ValueError("Sobol G function called with values less than one")
