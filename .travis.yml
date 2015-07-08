@@ -1,9 +1,10 @@
-# Travis config for jdherman/SALib
+# Travis config for SALib/SALib
 language: python
 
 python:
 - "2.7"
 - "3.3"
+- "3.4"
 
 env: 
  - DEPS="numpy=1.8.0 scipy matplotlib"
