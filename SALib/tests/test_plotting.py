@@ -12,12 +12,12 @@ import numpy as np
 from matplotlib.testing.decorators import image_comparison
 import matplotlib.pyplot as plt
 
-
 from SALib.plotting.morris import horizontal_bar_plot, \
                                   covariance_plot, \
                                   sample_histograms
 
-@image_comparison(baseline_images=['horizontal_bar_plot'])
+@image_comparison(baseline_images=['horizontal_bar_plot'],
+                  extensions=['png'])
 def test_morris_horizontal_bar_plot():
     # Create a fixture to represent Si, the dictionary of output metrics
     
@@ -30,7 +30,8 @@ def test_morris_horizontal_bar_plot():
     horizontal_bar_plot(ax, Si,{}, sortby='mu_star', unit=r"tCO$_2$/year")
 
 
-@image_comparison(baseline_images=['covariance_plot'])
+@image_comparison(baseline_images=['covariance_plot'],
+                  extensions=['png'])
 def test_morris_covariance_plot():
     # Create a fixture to represent Si, the dictionary of output metrics
     Si = {'mu_star':[1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
@@ -40,7 +41,8 @@ def test_morris_covariance_plot():
     fig, ax = plt.subplots(1, 1)
     covariance_plot(ax, Si, {}, unit=r"tCO$_2$/year")
 
-@image_comparison(baseline_images=['sample_histograms'])
+@image_comparison(baseline_images=['sample_histograms'],
+                  extensions=['png'])
 def test_morris_sample_histograms():
     
     input_1 = [[0, 1 / 3.], [0, 1.], [2 / 3., 1.]]
