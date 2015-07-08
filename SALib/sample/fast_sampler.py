@@ -50,6 +50,9 @@ if __name__ == "__main__":
 
     parser = common_args.create()
     parser.add_argument(
+        '-n', '--samples', type=int, required=True, help='Number of Samples')
+   
+    parser.add_argument(
         '-M', type=int, required=False, default=4, help='M coefficient, default 4')
     args = parser.parse_args()
 
