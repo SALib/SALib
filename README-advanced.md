@@ -34,4 +34,4 @@ python -m SALib.analyze.sobol \
 
 This will print indices and confidence intervals to the command line. You can redirect to a file using the `>` operator.
 
-Other methods include Morris, FAST, Delta-MIM, and DGSM. For an explanation of all command line options for each method, [see the examples here](https://github.com/jdherman/SALib/tree/master/examples).
+Other methods include Morris, FAST, Delta-MIM, and DGSM. For an explanation of all command line options for each method, [see the examples here](https://github.com/SALib/SALib/tree/master/examples).
