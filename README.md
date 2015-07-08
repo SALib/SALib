@@ -2,11 +2,11 @@
 
 Python implementations of commonly used sensitivity analysis methods. Useful in systems modeling to calculate the effects of model inputs or exogenous factors on outputs of interest.
 
-**Requirements:** [NumPy](http://www.numpy.org/), [SciPy](http://www.scipy.org/)
+**Requirements:** [NumPy](http://www.numpy.org/), [SciPy](http://www.scipy.org/), [matplotlib](http://matplotlib.org/)
 
 **Installation:** `pip install SALib` or `python setup.py install`
 
-**Build Status:** [![Build Status](https://travis-ci.org/jdherman/SALib.svg?branch=master)](https://travis-ci.org/jdherman/SALib)    **Test Coverage:** [![Coverage Status](https://img.shields.io/coveralls/jdherman/SALib.svg)](https://coveralls.io/r/jdherman/SALib)
+**Build Status:** [![Build Status](https://travis-ci.org/SALib/SALib.svg?branch=master)](https://travis-ci.org/SALib/SALib)    **Test Coverage:** [![Coverage Status](https://img.shields.io/coveralls/SALib/SALib.svg)](https://coveralls.io/r/SALib/SALib)
 
 **Methods included:**
 * Sobol Sensitivity Analysis ([Sobol 2001](http://www.sciencedirect.com/science/article/pii/S0378475400002706), [Saltelli 2002](http://www.sciencedirect.com/science/article/pii/S0010465502002801), [Saltelli et al. 2010](http://www.sciencedirect.com/science/article/pii/S0010465509003087))
@@ -61,7 +61,7 @@ problem = read_param_file('/path/to/file.txt')
 
 Lots of other options are included for parameter files, as well as a command-line interface. See the [advanced readme](README-advanced.md).
 
-Also check out the [examples](https://github.com/jdherman/SALib/tree/master/examples) for a full description of options for each method.
+Also check out the [examples](https://github.com/SALib/SALib/tree/master/examples) for a full description of options for each method.
 
 ### License
 Copyright (C) 2013-2015 Jon Herman and others. Versions v0.5 and later are released under the [MIT license](LICENSE.md).
