@@ -14,7 +14,7 @@ sys.path.append('../..')
 
 
 # Read the parameter range file and generate samples
-problem = read_param_file('../../SALib/test_functions/params/Ishigami.txt')
+problem = read_param_file('../../SALib/test_functions/params/Sobol_G.txt')
 # or define manually without a parameter file:
 # problem = {
 #  'num_vars': 3,
@@ -29,13 +29,13 @@ problem = read_param_file('../../SALib/test_functions/params/Ishigami.txt')
 # param_file = '../../SALib/test_functions/params/Ishigami_groups.txt'
 
 # Generate samples
-param_values = sample(problem, N=10, num_levels=4, grid_jump=2, \
+param_values = sample(problem, N=1000, num_levels=4, grid_jump=2, \
                       optimal_trajectories=None)
 
 # To use optimized trajectories (brute force method), give an integer value for optimal_trajectories
 
 # Run the "model" -- this will happen offline for external models
-Y = Ishigami.evaluate(param_values)
+Y = Sobol_G.evaluate(param_values)
 
 # Perform the sensitivity analysis using the model output
 # Specify which column of the output file to analyze (zero-indexed)
