@@ -6,8 +6,6 @@ def create():
         description='Create parameter samples for sensitivity analysis')
 
     parser.add_argument(
-        '-n', '--samples', type=int, required=True, help='Number of Samples')
-    parser.add_argument(
         '-p', '--paramfile', type=str, required=True, help='Parameter Range File')
     parser.add_argument(
         '-o', '--output', type=str, required=True, help='Output File')
