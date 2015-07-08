@@ -34,7 +34,6 @@ def model(N, k_choices, distance_matrix):
 
     m = Model("distance1")
     I = range(N)
-    big_M = k_choices + 1
 
     distance_matrix = distance_matrix / distance_matrix.max()
 
@@ -49,22 +48,19 @@ def model(N, k_choices, distance_matrix):
 
     m.setObjective(quicksum([x[i, j] * dm[j][i] for i in I for j in range(i + 1, N)]))
 
-    m.addConstr(quicksum([x[i, j] for i in I for j in range(i + 1, N)]) == nchoosek(k_choices, 2), "All")
-
-    # Finally, each combination may only appear three times in the combination list
-    for i in I:
-        m.addConstr(quicksum(x[i, j] for j in range(i + 1, N)) + quicksum(x[k, i] for k in range(0, i)) - (y[i] * big_M),
-                    '<=',
-                    (k_choices - 1),
-                    "a:Only k-1 scores in any row/column for %s" % i)
-        m.addConstr(quicksum(x[i, j] for j in range(i + 1, N)) + quicksum(x[k, i] for k in range(0, i)) + (y[i] * big_M),
-                    '>=',
-                    (k_choices - 1),
-                    "b:Only k-1 scores in any row/column for %s" % i)
-
-    m.addConstr(quicksum(y[i] for i in I), "==", N - k_choices, name="Only %s hold" % (N - k_choices))
+    # Add constraints to the model     
+    m.addConstr(quicksum([y[i] for i in I]) <= k_choices, "27")
+    
+    for i in I: 
+        for j in range(i + 1, N):
+            m.addConstr(x[i, j] <= y[i], "28-%s-%s" % (i, j))
+            m.addConstr(x[i, j] <= y[j], "29-%s-%s" % (i, j))
+            m.addConstr(y[i] + y[j] <= 1 + x[i, j], "30-%s-%s" % (i, j))
+    
+    m.addConstr(quicksum([x[i, j] for i in I for j in range(i + 1, N)]) <= nchoosek(k_choices, 2), "Cut_1")
     m.update()
     return m
+
 
 @requires_gurobipy(_has_gurobi)
 def return_max_combo(input_data, N, num_params, k_choices, groups=None):
@@ -80,7 +76,7 @@ def return_max_combo(input_data, N, num_params, k_choices, groups=None):
     m.params.Threads = 0
     # m.params.MIPGap=0.03
 
-    # m.write("model.lp")
+    m.write("model.lp")
     m.ModelSense = GRB.MAXIMIZE
     m.optimize()
     if m.Status == GRB.OPTIMAL:
