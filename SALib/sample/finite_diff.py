@@ -47,6 +47,9 @@ if __name__ == "__main__":
     parser = common_args.create()
     parser.add_argument('-d', '--delta', type=float, required=False,
                         default=0.01, help='Finite difference step size (percent)')
+    parser.add_argument(
+        '-n', '--samples', type=int, required=True, help='Number of Samples')
+   
     args = parser.parse_args()
 
     np.random.seed(args.seed)

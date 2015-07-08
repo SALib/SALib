@@ -33,7 +33,9 @@ if __name__ == "__main__":
 
     parser = common_args.create()
     args = parser.parse_args()
-
+    parser.add_argument(
+        '-n', '--samples', type=int, required=True, help='Number of Samples')
+   
     np.random.seed(args.seed)
     problem = read_param_file(args.paramfile)
 
