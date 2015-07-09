@@ -32,7 +32,7 @@ def setup_package():
     setup(
         name='SALib',
         packages=find_packages(exclude=["*tests*"]),
-        author="Jon Herman",
+        author="Jon Herman and Will Usher",
         author_email="jdherman8@gmail.com",
         license=open('LICENSE.md').read(),
         tests_require=['nose'],
@@ -49,7 +49,7 @@ def setup_package():
         # Two arguments required by Versioneer
         version = versioneer.get_version(),
         cmdclass=cmdclass,
-        url="https://github.com/jdherman/SALib",
+        url="https://github.com/SALib/SALib",
         long_description=open('README.md').read(),
         description=(
             'Tools for sensitivity analysis. Contains Sobol, Morris, and FAST methods.'),
