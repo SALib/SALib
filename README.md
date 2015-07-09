@@ -14,6 +14,7 @@ Python implementations of commonly used sensitivity analysis methods. Useful in 
 * Fourier Amplitude Sensitivity Test (FAST) ([Cukier et al. 1973](http://scitation.aip.org/content/aip/journal/jcp/59/8/10.1063/1.1680571), [Saltelli et al. 1999](http://amstat.tandfonline.com/doi/abs/10.1080/00401706.1999.10485594))
 * Delta Moment-Independent Measure ([Borgonovo 2007](http://www.sciencedirect.com/science/article/pii/S0951832006000883), [Plischke et al. 2013](http://www.sciencedirect.com/science/article/pii/S0377221712008995))
 * Derivative-based Global Sensitivity Measure (DGSM) ([Sobol and Kucherenko 2009](http://www.sciencedirect.com/science/article/pii/S0378475409000354))
+* Fractional Factorial Sensitivity Analysis ([Saltelli et al. 2008](http://www.wiley.com/WileyCDA/WileyTitle/productCd-0470059974.html))
 
 **Contributing:** see [here](CONTRIBUTING.md)
 
@@ -64,4 +65,4 @@ Lots of other options are included for parameter files, as well as a command-lin
 Also check out the [examples](https://github.com/SALib/SALib/tree/master/examples) for a full description of options for each method.
 
 ### License
-Copyright (C) 2013-2015 Jon Herman and others. Versions v0.5 and later are released under the [MIT license](LICENSE.md).
+Copyright (C) 2013-2015 Jon Herman, Will Usher, and others. Versions v0.5 and later are released under the [MIT license](LICENSE.md).
