@@ -66,15 +66,17 @@ def analyze(problem, X, Y,
         Si_grouped = dict((k, [None] * num_vars)
                 for k in ['mu_star', 'mu_star_conf'])
         Si_grouped['mu_star'] = compute_grouped_mu_star(Si['mu_star'], groups)
+        Si_grouped['sigma'] = compute_grouped_mu_star(Si['sigma'], groups)
         Si_grouped['mu_star_conf'] = compute_grouped_mu_star(Si['mu_star_conf'],
                                                              groups)
         Si_grouped['names'] = unique_group_names
 
         if print_to_console:
-            print("Parameter Mu_Star Mu_Star_Conf")
+            print("Parameter Mu_Star Sigma Mu_Star_Conf")
             for j in list(range(number_of_groups)):
-                print("%s %f %f" % (Si_grouped['names'][j],
+                print("%s %f %f %f" % (Si_grouped['names'][j],
                                     Si_grouped['mu_star'][j],
+                                    Si_grouped['sigma'][j],
                                     Si_grouped['mu_star_conf'][j]))
 
         return Si_grouped
