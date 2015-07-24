@@ -86,6 +86,10 @@ def analyze(problem, X, Y,
 
 
 def compute_grouped_metric(ungrouped_metric, group_matrix):
+    '''
+    Computes the mean value for the groups of parameter values in the
+    argument ungrouped_metric
+    '''
 
     group_matrix = np.array(group_matrix, dtype=np.bool)
 
@@ -97,6 +101,11 @@ def compute_grouped_metric(ungrouped_metric, group_matrix):
 
 
 def compute_grouped_sigma(Si, group_matrix):
+    '''
+    Computes a pooled standard deviation from the groups of parameters defined
+    but the group_matrix, from the sum of the mean of variances and variance
+    of the means of the (absolute) elementary effects.
+    '''
     
     group_matrix = np.array(group_matrix, dtype=np.bool)
 
@@ -106,8 +115,6 @@ def compute_grouped_sigma(Si, group_matrix):
                                       mask=(group_matrix^1).T)**2
     
     mean_of_variances_of_ee = np.ma.mean(sigma_masked, axis=1)
-#     variance_of_means = np.var(Si['mu_star'] * group_matrix.T, axis=1)
-# ``var = mean(abs(x - x.mean())**2)``
 
     variance_of_means_of_ee = np.ma.var(mu_star_masked, axis=1, ddof=1)
 
