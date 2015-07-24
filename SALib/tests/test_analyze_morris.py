@@ -6,7 +6,7 @@ from numpy.testing import assert_allclose, assert_equal
 
 import numpy as np
 
-from ..analyze.morris import analyze, \
+from SALib.analyze.morris import analyze, \
     compute_mu_star_confidence, \
     compute_elementary_effects, \
     get_increased_values, \
@@ -32,6 +32,8 @@ def test_compute_mu_star_confidence():
 def test_analysis_of_morris_results():
     '''
     Tests a one-dimensional vector of results
+    
+    Taken from the solution to Exercise 4 (p.138) in Saltelli (2008).
     '''
     model_input = np.array([[0, 1. / 3], [0, 1], [2. / 3, 1],
                              [0, 1. / 3], [2. / 3, 1. / 3], [2. / 3, 1],
@@ -57,14 +59,18 @@ def test_analysis_of_morris_results():
                  print_to_console=False)
     ee = np.array([[2.52, 2.01, 2.30, -0.66, -0.93, -1.30],
                    [-0.39, 0.13, 0.80, 0.25, -0.02, 0.51]])
-    desired_mu = np.average(ee, 1)
-    assert_allclose(Si['mu'], desired_mu, rtol=1e-1)
-    desired_mu_star = np.average(np.abs(ee), 1)
-    assert_allclose(Si['mu_star'], desired_mu_star, rtol=1e-2)
-    desired_sigma = np.std(ee, 1)
-    assert_allclose(Si['sigma'], desired_sigma, rtol=1e-2)
+    desired_mu = np.array([0.66, 0.21])
+    assert_allclose(Si['mu'], desired_mu, rtol=1e-1, 
+                    err_msg="The values for mu are incorrect")
+    desired_mu_star = np.array([1.62, 0.35])
+    assert_allclose(Si['mu_star'], desired_mu_star, rtol=1e-2, 
+                    err_msg="The values for mu star are incorrect")
+    desired_sigma = np.array([1.79, 0.41])
+    assert_allclose(Si['sigma'], desired_sigma, rtol=1e-2, 
+                    err_msg="The values for sigma are incorrect")
     desired_names = ['Test 1', 'Test 2']
-    assert_equal(Si['names'], desired_names)
+    assert_equal(Si['names'], desired_names, 
+                 err_msg="The values for names are incorrect")
 
 
 @raises(ValueError)
