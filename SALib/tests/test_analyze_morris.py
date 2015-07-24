@@ -43,7 +43,9 @@ def test_analysis_of_morris_results():
                              [1. / 3, 2. / 3], [1. / 3, 0], [1, 0]],
                             dtype=np.float)
 
-    model_output = np.array([0.97, 0.71, 2.39, 0.97, 2.3, 2.39, 1.87, 2.40, 0.87, 2.15, 1.71, 1.54, 2.15, 2.17, 1.54, 2.2, 1.87, 1.0],
+    model_output = np.array([0.97, 0.71, 2.39, 0.97, 2.30, 2.39, 
+                             1.87, 2.40, 0.87, 2.15, 1.71, 1.54, 
+                             2.15, 2.17, 1.54, 2.20, 1.87, 1.0],
                        dtype=np.float)
 
     problem = {
@@ -57,8 +59,7 @@ def test_analysis_of_morris_results():
                  num_resamples=1000,
                  conf_level=0.95,
                  print_to_console=False)
-    ee = np.array([[2.52, 2.01, 2.30, -0.66, -0.93, -1.30],
-                   [-0.39, 0.13, 0.80, 0.25, -0.02, 0.51]])
+
     desired_mu = np.array([0.66, 0.21])
     assert_allclose(Si['mu'], desired_mu, rtol=1e-1, 
                     err_msg="The values for mu are incorrect")
