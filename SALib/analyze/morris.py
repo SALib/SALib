@@ -96,9 +96,9 @@ def compute_grouped_metric(ungrouped_metric, group_matrix):
 def compute_grouped_sigma(Si, group_matrix):
     
     group_matrix = np.array(group_matrix, dtype=np.bool)
-    
-    mu_star_masked = np.ma.masked_array(Si['mu_star'] * group_matrix.T, mask=-group_matrix.T)
-    sigma_masked = np.ma.masked_array(Si['sigma'] * group_matrix.T, mask=-group_matrix.T)**2
+
+    mu_star_masked = np.ma.masked_array(Si['mu_star'] * group_matrix.T, mask=(group_matrix^1).T)
+    sigma_masked = np.ma.masked_array(Si['sigma'] * group_matrix.T, mask=(group_matrix^1).T)**2
     
     mean_of_variances_of_ee = np.ma.mean(sigma_masked, axis=1)
 #     variance_of_means = np.var(Si['mu_star'] * group_matrix.T, axis=1)
