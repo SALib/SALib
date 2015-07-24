@@ -87,18 +87,23 @@ def analyze(problem, X, Y,
 
 def compute_grouped_metric(ungrouped_metric, group_matrix):
 
-    group_matrix = np.array(group_matrix)
-    grouped_metric = np.divide(np.dot(ungrouped_metric, group_matrix), np.sum(group_matrix, 0))
+    group_matrix = np.array(group_matrix, dtype=np.bool)
 
-    return grouped_metric.T
+    mu_star_masked = np.ma.masked_array(ungrouped_metric * group_matrix.T, 
+                                        mask=(group_matrix^1).T)
+    mean_of_mu_star = np.ma.mean(mu_star_masked, axis=1)
+
+    return mean_of_mu_star
 
 
 def compute_grouped_sigma(Si, group_matrix):
     
     group_matrix = np.array(group_matrix, dtype=np.bool)
 
-    mu_star_masked = np.ma.masked_array(Si['mu_star'] * group_matrix.T, mask=(group_matrix^1).T)
-    sigma_masked = np.ma.masked_array(Si['sigma'] * group_matrix.T, mask=(group_matrix^1).T)**2
+    mu_star_masked = np.ma.masked_array(Si['mu_star'] * group_matrix.T, 
+                                        mask=(group_matrix^1).T)
+    sigma_masked = np.ma.masked_array(Si['sigma'] * group_matrix.T, 
+                                      mask=(group_matrix^1).T)**2
     
     mean_of_variances_of_ee = np.ma.mean(sigma_masked, axis=1)
 #     variance_of_means = np.var(Si['mu_star'] * group_matrix.T, axis=1)
