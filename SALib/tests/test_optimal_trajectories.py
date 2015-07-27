@@ -13,7 +13,7 @@ from SALib.util import read_param_file
 from .test_util import setup_function
 
 
-from test_morris import setup_param_file_with_groups_prime
+from . test_morris import setup_param_file_with_groups_prime
 
 try:
     import gurobipy
