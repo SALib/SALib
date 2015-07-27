@@ -1,12 +1,13 @@
 from __future__ import division
 
 from nose import with_setup
-from nose.tools import assert_almost_equal, raises
-from numpy.testing import assert_equal
+from nose.tools import raises
+from numpy.testing import assert_equal, assert_array_equal, \
+                          assert_almost_equal, assert_allclose
 
 import numpy as np
 
-from ..sample.morris_util import generate_P_star, \
+from SALib.sample.morris_util import generate_P_star, \
                                 compute_B_star, \
                                 compute_delta, \
                                 generate_trajectory, \
@@ -47,7 +48,7 @@ def test_compute_delta():
     output = [compute_delta(f) for f in fixture]
     desired = np.array([1.00, 0.75, 0.66, 0.62,
                         0.60, 0.58, 0.57, 0.56])
-    np.testing.assert_almost_equal(output, desired, decimal=2)
+    assert_almost_equal(output, desired, decimal=2)
 
 
 def test_generate_trajectory():
@@ -83,7 +84,7 @@ def test_compute_B_star():
     desired = np.array([[1. / 3, 1, 0], [1, 1, 0], [1, 1. / 3, 2. / 3]])
 
     output = compute_B_star(J, x_star, delta, B, G, P_star, D_star)
-    np.testing.assert_array_equal(output, desired)
+    assert_array_equal(output, desired)
 
 
 def test_distance():
@@ -93,7 +94,17 @@ def test_distance():
     input_1 = np.matrix([[0, 1 / 3.], [0, 1.], [2 / 3., 1.]], dtype=np.float32)
     input_3 = np.matrix([[2 / 3., 0], [2 / 3., 2 / 3.], [0, 2 / 3.]], dtype=np.float32)
     output = compute_distance(input_1, input_3)
-    assert_almost_equal(output, 6.18, places=2)
+    assert_allclose(output, 6.18, atol=1e-2)
+
+
+def test_distance_of_identical_matrices_is_min():
+    input_1 = np.matrix([[ 1.          ,1.        ],
+                         [ 1.          ,0.33333333],
+                         [ 0.33333333  ,0.33333333]])
+    input_2 = input_1.copy()
+    actual = compute_distance(input_1, input_2)
+    desired = 4.55
+    assert_allclose(actual, desired, atol=1e-2)
 
 
 def test_distance_fail_with_difference_size_ip():
@@ -121,7 +132,7 @@ def test_compute_distance_matrix():
     expected[3, :] = [6.89, 6.18, 6.57, 0, 0, 0]
     expected[4, :] = [6.18, 5.31, 5.41, 5.5, 0, 0]
     expected[5, :] = [7.52, 5.99, 5.52, 7.31, 5.77, 0]
-    np.testing.assert_allclose(output, expected, rtol=1e-2)
+    assert_allclose(output, expected, rtol=1e-2)
 
 
 def test_combo_from_find_most_distant():
@@ -137,7 +148,7 @@ def test_combo_from_find_most_distant():
     scores = find_most_distant(sample_inputs, N, num_params, k_choices)
     output = find_maximum(scores, N, k_choices)
     expected = [0, 2, 3, 5]  # trajectories 1, 3, 4, 6
-    np.testing.assert_equal(output, expected)
+    assert_equal(output, expected)
 
 
 def test_scores_from_find_most_distant():
@@ -157,7 +168,7 @@ def test_scores_from_find_most_distant():
                 15.685, 16.098, 14.049, 15.146, 14.333, 14.807, 14.825],
                 dtype=np.float32)
 
-    np.testing.assert_allclose(output, expected, rtol=1e-1, atol=1e-2)
+    assert_allclose(output, expected, rtol=1e-1, atol=1e-2)
 
 
 def test_find_maximum():

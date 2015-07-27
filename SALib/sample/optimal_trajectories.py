@@ -35,7 +35,7 @@ def model(N, k_choices, distance_matrix):
     m = Model("distance1")
     I = range(N)
 
-    distance_matrix = distance_matrix / distance_matrix.max()
+#     distance_matrix = np.array(distance_matrix / distance_matrix.max(), dtype=np.float64)
 
     dm = distance_matrix ** 2
 
@@ -89,6 +89,9 @@ def return_max_combo(input_data, N, num_params, k_choices, groups=None):
                 x_vars.append(v.VarName)
     b = [re.findall("\d{1,}", str(v)) for v in x_vars]
     maximum_combo = list(set([int(y) for z in b for y in z]))
+    
+    print(maximum_combo)
+    
     return sorted(maximum_combo)
 
 

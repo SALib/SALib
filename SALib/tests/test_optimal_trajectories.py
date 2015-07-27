@@ -1,18 +1,19 @@
 from unittest import skipUnless
 
+import numpy as np
 from nose.tools import raises, with_setup
 from numpy.testing import assert_equal
 
-from ..sample.morris import sample_oat, \
+from SALib.sample.morris import sample_oat, \
                             find_optimum_combination, \
                             compute_optimised_trajectories, \
                             sample_groups
-from ..sample.optimal_trajectories import return_max_combo
-from ..util import read_param_file
+from SALib.sample.optimal_trajectories import return_max_combo
+from SALib.util import read_param_file
 from .test_util import setup_function
 
 
-from . test_morris import setup_param_file_with_groups_prime
+from test_morris import setup_param_file_with_groups_prime
 
 try:
     import gurobipy
@@ -171,20 +172,41 @@ def test_optimised_trajectories_without_groups():
     """
     Tests that the optimisation problem gives
     the same answer as the brute force problem
-    (for small values of `k_choices` and `N`)
+    (for small values of `k_choices` and `N`),
+    particularly when there are two or more identical
+    trajectories
     """
     
     N = 6
     param_file = "SALib/tests/test_params.txt"
     problem = read_param_file(param_file)
     num_levels = 4
-    grid_jump = num_levels / 2
     k_choices = 4
 
     num_params = problem['num_vars']
     groups = problem['groups']
 
-    input_sample = sample_oat(problem, N, num_levels, grid_jump)
+    # 6 trajectories, with 5th and 6th identical
+    input_sample = np.array([[ 0.33333333,  0.66666667],
+                             [ 1.          ,0.66666667],
+                             [ 1.          ,0.        ],
+                             [ 0.          ,0.33333333],
+                             [ 0.          ,1.        ],
+                             [ 0.66666667  ,1.        ],
+                             [ 0.66666667  ,0.33333333],
+                             [ 0.66666667  ,1.        ],
+                             [ 0.          ,1.        ],
+                             [ 0.66666667  ,1.        ],
+                             [ 0.66666667  ,0.33333333],
+                             [ 0.          ,0.33333333],
+                             [ 1.          ,1.        ],
+                             [ 1.          ,0.33333333],
+                             [ 0.33333333  ,0.33333333],
+                             [ 1.          ,1.        ],
+                             [ 1.          ,0.33333333],
+                             [ 0.33333333  ,0.33333333]], dtype=np.float32)
+
+    print(input_sample)
 
     # From gurobi optimal trajectories     
     actual = return_max_combo(input_sample,
@@ -198,6 +220,7 @@ def test_optimised_trajectories_without_groups():
                                        num_params,
                                        k_choices,
                                        groups)
+    
     assert_equal(actual, desired)
 
 

@@ -61,7 +61,7 @@ def analyze(problem, X, Y,
                     'sigma'][j], Si['mu_star'][j], Si['mu_star_conf'][j]))
         return Si
     elif groups is not None:
-        Si['sigma'] = np.std(np.abs(ee), axis=1, ddof=1)
+        Si['sigma'] = np.std(ee, axis=1, ddof=1)
         # if there are groups, then the elementary effects returned need to be
         # computed over the groups of variables, rather than the individual variables
         Si_grouped = dict((k, [None] * num_vars)
