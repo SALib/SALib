@@ -35,7 +35,7 @@ def model(N, k_choices, distance_matrix):
     m = Model("distance1")
     I = range(N)
 
-#     distance_matrix = np.array(distance_matrix / distance_matrix.max(), dtype=np.float64)
+    distance_matrix = np.array(distance_matrix / distance_matrix.max(), dtype=np.float64)
 
     dm = distance_matrix ** 2
 
@@ -76,7 +76,7 @@ def return_max_combo(input_data, N, num_params, k_choices, groups=None):
     m.params.Threads = 0
     # m.params.MIPGap=0.03
 
-    m.write("model.lp")
+#     m.write("model.lp")
     m.ModelSense = GRB.MAXIMIZE
     m.optimize()
     if m.Status == GRB.OPTIMAL:
