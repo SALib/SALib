@@ -103,7 +103,7 @@ def test_distance_of_identical_matrices_is_min():
                          [ 0.33333333  ,0.33333333]])
     input_2 = input_1.copy()
     actual = compute_distance(input_1, input_2)
-    desired = 4.55
+    desired = 0
     assert_allclose(actual, desired, atol=1e-2)
 
 
