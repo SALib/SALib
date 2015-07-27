@@ -61,7 +61,7 @@ def analyze(problem, X, Y,
                     'sigma'][j], Si['mu_star'][j], Si['mu_star_conf'][j]))
         return Si
     elif groups is not None:
-        Si['sigma'] = np.std(np.abs(ee), axis=1, ddof=1)
+        Si['sigma'] = np.std(ee, axis=1, ddof=1)
         # if there are groups, then the elementary effects returned need to be
         # computed over the groups of variables, rather than the individual variables
         Si_grouped = dict((k, [None] * num_vars)
@@ -86,23 +86,35 @@ def analyze(problem, X, Y,
 
 
 def compute_grouped_metric(ungrouped_metric, group_matrix):
+    '''
+    Computes the mean value for the groups of parameter values in the
+    argument ungrouped_metric
+    '''
 
-    group_matrix = np.array(group_matrix)
-    grouped_metric = np.divide(np.dot(ungrouped_metric, group_matrix), np.sum(group_matrix, 0))
+    group_matrix = np.array(group_matrix, dtype=np.bool)
 
-    return grouped_metric.T
+    mu_star_masked = np.ma.masked_array(ungrouped_metric * group_matrix.T, 
+                                        mask=(group_matrix^1).T)
+    mean_of_mu_star = np.ma.mean(mu_star_masked, axis=1)
+
+    return mean_of_mu_star
 
 
 def compute_grouped_sigma(Si, group_matrix):
+    '''
+    Computes a pooled standard deviation from the groups of parameters defined
+    but the group_matrix, from the sum of the mean of variances and variance
+    of the means of the (absolute) elementary effects.
+    '''
     
     group_matrix = np.array(group_matrix, dtype=np.bool)
 
-    mu_star_masked = np.ma.masked_array(Si['mu_star'] * group_matrix.T, mask=(group_matrix^1).T)
-    sigma_masked = np.ma.masked_array(Si['sigma'] * group_matrix.T, mask=(group_matrix^1).T)**2
+    mu_star_masked = np.ma.masked_array(Si['mu_star'] * group_matrix.T, 
+                                        mask=(group_matrix^1).T)
+    sigma_masked = np.ma.masked_array(Si['sigma'] * group_matrix.T, 
+                                      mask=(group_matrix^1).T)**2
     
     mean_of_variances_of_ee = np.ma.mean(sigma_masked, axis=1)
-#     variance_of_means = np.var(Si['mu_star'] * group_matrix.T, axis=1)
-# ``var = mean(abs(x - x.mean())**2)``
 
     variance_of_means_of_ee = np.ma.var(mu_star_masked, axis=1, ddof=1)
 

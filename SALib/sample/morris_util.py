@@ -100,7 +100,7 @@ def check_input_sample(input_sample, num_params, N):
     "Input sample does not match number of parameters or groups"
     assert np.any((input_sample >= 0) | (input_sample <= 1)), \
     "Input sample must be scaled between 0 and 1"
-
+            
 
 def compute_distance(m, l):
     '''
@@ -109,8 +109,11 @@ def compute_distance(m, l):
 
     if np.shape(m) != np.shape(l):
         raise ValueError("Input matrices are different sizes")
-
-    distance = np.array(np.sum(cdist(m, l)), dtype=np.float32)
+    if np.array_equal(m, l):
+        print("Trajectory %s and %s are equal" % (m, l))
+        distance = 0
+    else:
+        distance = np.array(np.sum(cdist(m, l)), dtype=np.float32)
 
     return distance
 
@@ -125,6 +128,7 @@ def compute_distance_matrix(input_sample, N, num_params, groups=None):
         check_input_sample(input_sample, num_groups, N)
     else:
         check_input_sample(input_sample, num_params, N)
+    
     index_list = make_index_list(N, num_params, num_groups)
     distance_matrix = np.zeros((N, N), dtype=np.float32)
 
@@ -132,7 +136,7 @@ def compute_distance_matrix(input_sample, N, num_params, groups=None):
         input_1 = input_sample[index_list[j]]
         for k in range(j + 1, N):
             input_2 = input_sample[index_list[k]]
-            distance_matrix[k, j] = compute_distance(input_1, input_2)
+            distance_matrix[k, j] = compute_distance(input_1, input_2)    
     return distance_matrix
 
 
@@ -254,7 +258,11 @@ def find_optimum_combination(input_sample, N, num_params, k_choices, groups=None
                                k_choices,
                                groups)
 
+    print(scores)
+
     maximum_combo = find_maximum(scores, N, k_choices)
+
+    print(maximum_combo)
 
     return maximum_combo
 
