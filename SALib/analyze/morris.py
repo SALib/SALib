@@ -69,6 +69,7 @@ def analyze(problem, X, Y,
         Si_grouped['mu_star_conf'] = compute_grouped_metric(Si['mu_star_conf'],
                                                              groups)
         Si_grouped['names'] = unique_group_names
+        Si_grouped['sigma'] = None
 
         if print_to_console:
             print("Parameter Mu_Star Mu_Star_Conf")

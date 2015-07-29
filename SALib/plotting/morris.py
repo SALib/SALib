@@ -95,7 +95,7 @@ def covariance_plot(ax, Si, param_dict, unit=""):
     Plots mu* against sigma or the 95% confidence interval
     '''
     
-    if Si['sigma'].any():
+    if Si['sigma'] is not None:
         # sigma is not present if using morris groups         
         y = Si['sigma']
         out = ax.scatter(Si['mu_star'], y, c=u'k', marker=u'o',
