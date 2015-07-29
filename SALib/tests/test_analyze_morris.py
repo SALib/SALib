@@ -137,6 +137,30 @@ def test_compute_elementary_effects():
     assert_allclose(actual, desired, atol=1e-1)
 
 
+
+def test_compute_grouped_elementary_effects():
+    
+    model_inputs = np.array([[.39, -.39, -1.64, 0.39, -0.39, -0.39, 0.39, 0.39, -1.64, -0.39, 0.39, -1.64, 1.64, 1.64, 1.64],
+                             [-1.64, 1.64, 0.39, -1.64, 1.64, 1.64, -1.64, -1.64, -1.64, 1.64, 0.39, -1.64, 1.64, 1.64, 1.64],
+                             [-1.64, 1.64, 0.39, -1.64, 1.64, 1.64, -1.64, -1.64, 0.39, 1.64, -1.64, 0.39, -.39, -.39, -.39]
+                            ])
+    
+    model_results = np.array([13.85, -10.11, 1.12])
+    
+    problem = {'names':['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15'],
+               'bounds':[[]],
+               'groups':(np.matrix('0,0,0,0,0,0,0,0,1,0,1,1,1,1,1;1,1,1,1,1,1,1,1,0,1,0,0,0,0,0'),
+                         ['gp1', 'gp2']),
+               'num_vars': 15
+               }
+    ee = compute_elementary_effects(model_inputs, model_results, 3, 2./3)
+    mu_star = np.average(np.abs(ee), axis=1)
+    actual = compute_grouped_metric(mu_star, problem['groups'][0].T)
+    desired = np.array([16.86, 35.95])
+    assert_allclose(actual, desired, atol=1e-1)
+
+
+
 def test_compute_elementary_effects_small():
     '''
     Computes elementary effects for two variables,
