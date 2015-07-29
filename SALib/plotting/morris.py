@@ -71,7 +71,6 @@ def horizontal_bar_plot(ax, Si, param_dict={}, sortby='mu_star', unit=''):
     names_sorted = _sort_Si(Si, 'names', sortby)
     mu_star_sorted = _sort_Si(Si, 'mu_star', sortby)
     mu_star_conf_sorted = _sort_Si(Si, 'mu_star_conf', sortby)
-    sigma_sorted = _sort_Si(Si, 'sigma', sortby)
     
     # Plot horizontal barchart
     y_pos = np.arange(len(mu_star_sorted))
@@ -79,7 +78,7 @@ def horizontal_bar_plot(ax, Si, param_dict={}, sortby='mu_star', unit=''):
 
     out = ax.barh(y_pos,
                   mu_star_sorted,
-                  xerr=sigma_sorted,
+                  xerr=mu_star_conf_sorted,
                   align='center',
                   ecolor='black',
                   **param_dict)
@@ -95,27 +94,36 @@ def covariance_plot(ax, Si, param_dict, unit=""):
     '''
     Plots mu* against sigma or the 95% confidence interval
     '''
-    out = ax.scatter(Si['mu_star'], Si['sigma'], c=u'k', marker=u'o',
-                     **param_dict)
+    
+    if Si['sigma'].any():
+        # sigma is not present if using morris groups         
+        y = Si['sigma']
+        out = ax.scatter(Si['mu_star'], y, c=u'k', marker=u'o',
+                 **param_dict)
+        ax.set_ylabel(r'$\sigma$')
+        
+        ax.set_xlim(0,)
+        ax.set_ylim(0,)
+        
+        x_axis_bounds = np.array(ax.get_xlim())
+    
+        line1, = ax.plot(x_axis_bounds, x_axis_bounds, 'k-')
+        line2, = ax.plot(x_axis_bounds, 0.5 * x_axis_bounds, 'k--')
+        line3, = ax.plot(x_axis_bounds, 0.1 * x_axis_bounds, 'k-.')
+     
+        ax.legend((line1, line2, line3), (r'$\sigma / \mu^{\star} = 1.0$',
+                                          r'$\sigma / \mu^{\star} = 0.5$',
+                                          r'$\sigma / \mu^{\star} = 0.1$'),
+                  loc='upper left')
+    
+    else:
+        y = Si['mu_star_conf']
+        out = ax.scatter(Si['mu_star'], y, c=u'k', marker=u'o',
+                 **param_dict)
+        ax.set_ylabel(r'$95\% CI$')
+
     ax.set_xlabel(r'$\mu^\star$ ' + unit)
-    ax.set_ylabel(r'$\sigma$')
 
-    ax.set_xlim(0,)
-    ax.set_ylim(0,)
-    
-    x_axis_bounds = np.array(ax.get_xlim())
-
-    line1, = ax.plot(x_axis_bounds, x_axis_bounds, 'k-')
-    line2, = ax.plot(x_axis_bounds, 0.5 * x_axis_bounds, 'k--')
-    line3, = ax.plot(x_axis_bounds, 0.1 * x_axis_bounds, 'k-.')
-    
-    ax.legend((line1, line2, line3), (r'$\sigma / \mu^{\star} = 1.0$',
-                                      r'$\sigma / \mu^{\star} = 0.5$',
-                                      r'$\sigma / \mu^{\star} = 0.1$'),
-              loc='upper left')
-    
-
-    
     return out
 
 
