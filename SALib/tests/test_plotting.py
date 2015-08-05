@@ -12,7 +12,7 @@ import numpy as np
 from matplotlib.testing.decorators import image_comparison
 import matplotlib.pyplot as plt
 
-from SALib.plotting.morris import horizontal_bar_plot, \
+from .. plotting.morris import horizontal_bar_plot, \
                                   covariance_plot, \
                                   sample_histograms
 
