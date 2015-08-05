@@ -12,7 +12,7 @@ import numpy as np
 from matplotlib.testing.decorators import image_comparison
 import matplotlib.pyplot as plt
 
-from SALib.plotting.morris import horizontal_bar_plot, \
+from .. plotting.morris import horizontal_bar_plot, \
                                   covariance_plot, \
                                   sample_histograms
 
@@ -40,6 +40,19 @@ def test_morris_covariance_plot():
           'sigma':[0.5, 1, 1.5, 2, 2.5, 3.0]} 
     fig, ax = plt.subplots(1, 1)
     covariance_plot(ax, Si, {}, unit=r"tCO$_2$/year")
+
+
+@image_comparison(baseline_images=['covariance_plot_grouped'],
+                  extensions=['png'])
+def test_morris_covariance_plot_grouped():
+    # Create a fixture to represent Si, the dictionary of output metrics
+    Si = {'mu_star':[1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
+          'names':['x1', 'x2', 'x3', 'x4', 'x5', 'x6'],
+          'mu_star_conf': [0.5, 1, 1.5, 2, 2.5, 3.0],
+          'sigma': None} 
+    fig, ax = plt.subplots(1, 1)
+    covariance_plot(ax, Si, {}, unit=r"tCO$_2$/year")
+
 
 @image_comparison(baseline_images=['sample_histograms'],
                   extensions=['png'])

@@ -61,23 +61,21 @@ def analyze(problem, X, Y,
                     'sigma'][j], Si['mu_star'][j], Si['mu_star_conf'][j]))
         return Si
     elif groups is not None:
-        Si['sigma'] = np.std(ee, axis=1, ddof=1)
         # if there are groups, then the elementary effects returned need to be
         # computed over the groups of variables, rather than the individual variables
         Si_grouped = dict((k, [None] * num_vars)
                 for k in ['mu_star', 'mu_star_conf'])
         Si_grouped['mu_star'] = compute_grouped_metric(Si['mu_star'], groups)
-        Si_grouped['sigma'] = compute_grouped_sigma(Si, groups)
         Si_grouped['mu_star_conf'] = compute_grouped_metric(Si['mu_star_conf'],
                                                              groups)
         Si_grouped['names'] = unique_group_names
+        Si_grouped['sigma'] = None
 
         if print_to_console:
-            print("Parameter Mu_Star Sigma Mu_Star_Conf")
+            print("Parameter Mu_Star Mu_Star_Conf")
             for j in list(range(number_of_groups)):
-                print("%s %f %f %f" % (Si_grouped['names'][j],
+                print("%s %f %f" % (Si_grouped['names'][j],
                                     Si_grouped['mu_star'][j],
-                                    Si_grouped['sigma'][j],
                                     Si_grouped['mu_star_conf'][j]))
 
         return Si_grouped
@@ -98,31 +96,6 @@ def compute_grouped_metric(ungrouped_metric, group_matrix):
     mean_of_mu_star = np.ma.mean(mu_star_masked, axis=1)
 
     return mean_of_mu_star
-
-
-def compute_grouped_sigma(Si, group_matrix):
-    '''
-    Computes a pooled standard deviation from the groups of parameters defined
-    but the group_matrix, from the sum of the mean of variances and variance
-    of the means of the (absolute) elementary effects.
-    '''
-    
-    group_matrix = np.array(group_matrix, dtype=np.bool)
-
-    mu_star_masked = np.ma.masked_array(Si['mu_star'] * group_matrix.T, 
-                                        mask=(group_matrix^1).T)
-    sigma_masked = np.ma.masked_array(Si['sigma'] * group_matrix.T, 
-                                      mask=(group_matrix^1).T)**2
-    
-    mean_of_variances_of_ee = np.ma.mean(sigma_masked, axis=1)
-
-    variance_of_means_of_ee = np.ma.var(mu_star_masked, axis=1, ddof=1)
-
-    grouped_sigma = np.sqrt(mean_of_variances_of_ee + variance_of_means_of_ee)
-
-    grouped_sigma = np.where(np.sum(group_matrix, axis=0)==1, np.sqrt(np.sum(sigma_masked, axis=1)), grouped_sigma)
-
-    return grouped_sigma.T
 
 
 def get_increased_values(op_vec, up, lo):

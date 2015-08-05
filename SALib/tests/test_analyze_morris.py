@@ -11,8 +11,7 @@ from SALib.analyze.morris import analyze, \
     compute_elementary_effects, \
     get_increased_values, \
     get_decreased_values, \
-    compute_grouped_metric, \
-    compute_grouped_sigma
+    compute_grouped_metric
 
 
 def test_compute_mu_star_confidence():
@@ -137,6 +136,30 @@ def test_compute_elementary_effects():
     assert_allclose(actual, desired, atol=1e-1)
 
 
+
+def test_compute_grouped_elementary_effects():
+    
+    model_inputs = np.array([[.39, -.39, -1.64, 0.39, -0.39, -0.39, 0.39, 0.39, -1.64, -0.39, 0.39, -1.64, 1.64, 1.64, 1.64],
+                             [-1.64, 1.64, 0.39, -1.64, 1.64, 1.64, -1.64, -1.64, -1.64, 1.64, 0.39, -1.64, 1.64, 1.64, 1.64],
+                             [-1.64, 1.64, 0.39, -1.64, 1.64, 1.64, -1.64, -1.64, 0.39, 1.64, -1.64, 0.39, -.39, -.39, -.39]
+                            ])
+    
+    model_results = np.array([13.85, -10.11, 1.12])
+    
+    problem = {'names':['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15'],
+               'bounds':[[]],
+               'groups':(np.matrix('0,0,0,0,0,0,0,0,1,0,1,1,1,1,1;1,1,1,1,1,1,1,1,0,1,0,0,0,0,0'),
+                         ['gp1', 'gp2']),
+               'num_vars': 15
+               }
+    ee = compute_elementary_effects(model_inputs, model_results, 3, 2./3)
+    mu_star = np.average(np.abs(ee), axis=1)
+    actual = compute_grouped_metric(mu_star, problem['groups'][0].T)
+    desired = np.array([16.86, 35.95])
+    assert_allclose(actual, desired, atol=1e-1)
+
+
+
 def test_compute_elementary_effects_small():
     '''
     Computes elementary effects for two variables,
@@ -227,25 +250,3 @@ def test_compute_grouped_mu_star():
     actual = compute_grouped_metric(mu_star, group_matrix)
     desired = np.array([1.62, 0.62], dtype=np.float)
     assert_allclose(actual, desired, rtol=1e-1)
-    
-    
-def test_compute_grouped_sigma():
-    '''
-    Computes sigma for 3 variables grouped into 2 groups
-    There are six trajectories.
-    '''
-    group_matrix = np.matrix('1,0;0,1;0,1', dtype=np.int)
-    ee = np.array([[2.52, 2.01, 2.30, -0.66, -0.93, -1.30],
-                   [-2.00, 0.13, -0.80, 0.25, -0.02, 0.51],
-                   [2.00, -0.13, 0.80, -0.25, 0.02, -0.51]])
-    mu_star = np.average(np.abs(ee), 1)
-    Si = {}
-    Si['mu_star'] = mu_star
-    Si['sigma'] = np.std(np.abs(ee), ddof=1, axis=1)
-    
-    actual = compute_grouped_sigma(Si, group_matrix)
-    desired = np.array([0.7648, 0.7329], dtype=np.float64)
-    assert_allclose(actual, desired, rtol=1e-4)
-    
-    
-
