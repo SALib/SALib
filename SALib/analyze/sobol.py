@@ -4,7 +4,6 @@ from __future__ import print_function
 from scipy.stats import norm
 
 import numpy as np
-import random as rd
 
 from . import common_args
 from ..util import read_param_file
@@ -63,7 +62,7 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
                         AB[r, k], BA[r, j], B[r]).std(ddof=1)
 
     else:           
-        n_processors, tasks = create_task_list(D, calc_second_order, n_processors)
+        tasks, n_processors = create_task_list(D, calc_second_order, n_processors)
 
         func = partial(sobol_parallel, Z, A, AB, BA, B, r)
         pool = Pool(n_processors)
@@ -141,7 +140,7 @@ def sobol_parallel(Z, A, AB, BA, B, r, tasks):
             s = total_order(A, AB[:, j], B)
         elif d == 'ST_conf':
             s = Z * total_order(A[r], AB[r, j], B[r]).std(ddof=1)
-        if d == 'S2':
+        elif d == 'S2':
             s = second_order(A, AB[:, j], AB[:, k], BA[:, j], B)
         elif d == 'S2_conf':
             s = Z * second_order(A[r], AB[r, j], AB[r, k],
@@ -173,7 +172,7 @@ def create_task_list(D, calc_second_order, n_processors):
             zip_longest(tasks_first_order[::-1], tasks_second_order), ()) 
                 if v is not None], n_processors)
 
-    return n_processors, tasks
+    return tasks, n_processors
 
 
 def Si_list_to_dict(S_list, D, calc_second_order):
@@ -190,12 +189,6 @@ def Si_list_to_dict(S_list, D, calc_second_order):
             S[s[0]][s[1], s[2]] = s[3]
 
     return S
-
-
-def chunk(l, n):
-    # Divide list l into n equal chunks
-    n = max(1, n)
-    return [l[i:i + n] for i in range(0, len(l), n)]
 
 
 def print_indices(S, problem, calc_second_order):
@@ -226,6 +219,13 @@ if __name__ == "__main__":
                         default=1000,
                         help='Number of bootstrap resamples for Sobol '
                              'confidence intervals')
+    parser.add_argument('--parallel', action='store_true', help='Makes '
+                        'use of parallelization.',
+                        dest='parallel')
+    parser.add_argument('--processors', type=int, required=False,
+                        default=None,
+                        help='Number of processors to be used with the ' +
+                        'parallel option.', dest='n_processors')
     args = parser.parse_args()
 
     problem = read_param_file(args.paramfile)
@@ -233,4 +233,5 @@ if __name__ == "__main__":
                    usecols=(args.column,))
 
     analyze(problem, Y, (args.max_order == 2),
-            num_resamples=args.resamples, print_to_console=True)
+            num_resamples=args.resamples, print_to_console=True, 
+            parallel=args.parallel, n_processors=args.n_processors)
