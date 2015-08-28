@@ -62,8 +62,8 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
                     S['S2_conf'][j, k] = Z * second_order(A[r], AB[r, j], 
                         AB[r, k], BA[r, j], B[r]).std(ddof=1)
 
-    else:            
-        tasks = create_task_list(D, calc_second_order, n_processors)
+    else:           
+        n_processors, tasks = create_task_list(D, calc_second_order, n_processors)
 
         func = partial(sobol_parallel, Z, A, AB, BA, B, r)
         pool = Pool(n_processors)
@@ -173,7 +173,7 @@ def create_task_list(D, calc_second_order, n_processors):
             zip_longest(tasks_first_order[::-1], tasks_second_order), ()) 
                 if v is not None], n_processors)
 
-    return tasks
+    return n_processors, tasks
 
 
 def Si_list_to_dict(S_list, D, calc_second_order):
@@ -190,6 +190,12 @@ def Si_list_to_dict(S_list, D, calc_second_order):
             S[s[0]][s[1], s[2]] = s[3]
 
     return S
+
+
+def chunk(l, n):
+    # Divide list l into n equal chunks
+    n = max(1, n)
+    return [l[i:i + n] for i in range(0, len(l), n)]
 
 
 def print_indices(S, problem, calc_second_order):
