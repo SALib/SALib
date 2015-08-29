@@ -34,4 +34,10 @@ python -m SALib.analyze.sobol \
 
 This will print indices and confidence intervals to the command line. You can redirect to a file using the `>` operator.
 
+#### Parallel indices calculation (Sobol method only)
+```python
+Si = sobol.analyze(problem, Y,
+                       calc_second_order=True, conf_level=0.95, print_to_console=False, parallel=True, n_processors=4)
+```
+
 Other methods include Morris, FAST, Delta-MIM, and DGSM. For an explanation of all command line options for each method, [see the examples here](https://github.com/SALib/SALib/tree/master/examples).
