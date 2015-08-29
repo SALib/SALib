@@ -1,8 +1,10 @@
 ###Contributing
 
-Thanks to all those who contributed so far, including: [Will Usher](https://github.com/willu47), [Chris Mutel](https://github.com/cmutel), [Matt Woodruff](https://github.com/matthewjwoodruff), [Fernando Rios](https://github.com/zoidy), and [Dan Hyams](https://github.com/dhyams), [xantares](https://github.com/xantares). The library would be in much worse shape without these efforts.
+Admins: [Will Usher](https://github.com/willu47) and [Jon Herman](https://github.com/jdherman)
 
-In my view, development should follow a few objectives:
+Thanks to all those who contributed so far, including: [Chris Mutel](https://github.com/cmutel), [Bernardo Trindade](https://github.com/bernardoct), [Dave Hadka](https://github.com/dhadka), [Matt Woodruff](https://github.com/matthewjwoodruff), [Fernando Rios](https://github.com/zoidy), and [Dan Hyams](https://github.com/dhyams), [xantares](https://github.com/xantares). The library would be in much worse shape without these efforts.
+
+Development should follow a few objectives:
 
 * Maintain the decoupled sample/analysis workflow, including the command-line interface. People may not have their models written in Python, so the ability to work from data files rather than Python objects is important. Sending parameter samples to the model should be left to the user.
 

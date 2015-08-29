@@ -54,3 +54,7 @@ python -m SALib.analyze.sobol \
 #               This must match the value chosen during sampling.
 #
 # -r, --resamples (optional): Number of bootstrap resamples used to calculate confidence intervals on indices. Default 1000.
+#
+# --parallel (optional): Flag to enable parallel execution with multiprocessing
+#
+# --processors (optional, int): Number of processors to be used with the parallel option
