@@ -94,6 +94,21 @@ def test_regression_sobol():
     assert_allclose([Si['S2'][0][1], Si['S2'][0][2], Si['S2'][1][2]], [0.00, 0.25, 0.00], atol=5e-2, rtol=1e-1)
 
 
+def test_regression_sobol_parallel():
+    param_file = 'SALib/test_functions/params/Ishigami.txt'
+    problem = read_param_file(param_file)
+    param_values = saltelli.sample(problem, 10000, calc_second_order=True)
+
+    Y = Ishigami.evaluate(param_values)
+
+    Si = sobol.analyze(problem, Y,
+                       calc_second_order=True, parallel=True, conf_level=0.95, print_to_console=False)
+
+    assert_allclose(Si['S1'], [0.31, 0.44, 0.00], atol=5e-2, rtol=1e-1)
+    assert_allclose(Si['ST'], [0.55, 0.44, 0.24], atol=5e-2, rtol=1e-1)
+    assert_allclose([Si['S2'][0][1], Si['S2'][0][2], Si['S2'][1][2]], [0.00, 0.25, 0.00], atol=5e-2, rtol=1e-1)
+
+
 def test_regression_fast():
     param_file = 'SALib/test_functions/params/Ishigami.txt'
     problem = read_param_file(param_file)
