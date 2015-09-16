@@ -10,6 +10,7 @@ effects of model inputs or exogenous factors on outputs of interest.
    :maxdepth: 2
    
    getting-started
+   basics
    
 
 Supported Methods
@@ -20,7 +21,6 @@ Supported Methods
 * Delta Moment-Independent Measure ([`Borgonovo 2007 <http://www.sciencedirect.com/science/article/pii/S0951832006000883>`_], [`Plischke et al. 2013 <http://www.sciencedirect.com/science/article/pii/S0377221712008995>`_])
 * Derivative-based Global Sensitivity Measure (DGSM) ([`Sobol and Kucherenko 2009 <http://www.sciencedirect.com/science/article/pii/S0378475409000354>`_])
 * Fractional Factorial Sensitivity Analysis ([`Saltelli et al. 2008 <http://www.wiley.com/WileyCDA/WileyTitle/productCd-0470059974.html>`_])
-
 
 
 
