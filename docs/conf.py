@@ -19,7 +19,8 @@ import shlex
 # Work on ReadTheDocs.org
 #on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 #if on_rtd:
-MOCK_MODULES = [ 'numpy',  'scipy', 'matplotlib' ]
+MOCK_MODULES = [ 'numpy',  'scipy', 'scipy.linalg', 'scipy.misc', 'scipy.spatial',
+                 'scipy.spatial.distance', 'matplotlib' ]
 try:
     from unittest.mock import MagicMock
     class Mock(MagicMock):
