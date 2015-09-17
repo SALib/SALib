@@ -20,7 +20,7 @@ import shlex
 #on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 #if on_rtd:
 MOCK_MODULES = [ 'numpy',  'scipy', 'scipy.linalg', 'scipy.misc', 'scipy.spatial',
-                 'scipy.spatial.distance', 'matplotlib' ]
+                 'scipy.spatial.distance', 'scipy.stats', 'matplotlib' ]
 try:
     from unittest.mock import MagicMock
     class Mock(MagicMock):
@@ -52,6 +52,7 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.viewcode',
     'sphinx.ext.pngmath',
+    'numpydoc'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -108,7 +109,7 @@ exclude_patterns = []
 
 # If true, the current module name will be prepended to all description
 # unit titles (such as .. function::).
-add_module_names = False
+add_module_names = True
 
 # If true, sectionauthor and moduleauthor directives will be shown in the
 # output. They are ignored by default.
@@ -131,7 +132,7 @@ todo_include_todos = True
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-#html_theme = 'alabaster'
+html_theme = 'default'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the

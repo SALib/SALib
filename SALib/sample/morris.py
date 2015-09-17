@@ -17,31 +17,47 @@ except ImportError:
 else:
     _has_gurobi = True
 
-'''
-Three variants of Morris' sampling for
-elementary effects:
-        - vanilla Morris
-        - optimised trajectories (Campolongo's enhancements from 2007)
-        - groups with optimised trajectories (again Campolongo 2007)
-
-At present, optimised trajectories is implemented using a brute-force
-approach, which can be very slow, especially if you require more than four
-trajectories.  Note that the number of factors makes little difference,
-but the ratio between number of optimal trajectories and the sample size
-results in an exponentially increasing number of scores that must be
-computed to find the optimal combination of trajectories.
-
-I suggest going no higher than 4 from a pool of 100 samples.
-
-Suggested enhancements:
-    - a parallel brute force method (incomplete)
-    - a combinatorial optimisation approach (completed, but dependencies are
-      not open-source)
-'''
-
-
+#Suggested enhancements:
+#    - a parallel brute force method (incomplete)
+#    - a combinatorial optimisation approach (completed, but dependencies are
+#      not open-source)
 def sample(problem, N, num_levels, grid_jump, optimal_trajectories=None):
-
+    """Generates model inputs using for Method of Morris.
+    
+    Returns a NumPy matrix containing the model inputs required for Method of
+    Morris.  The resulting matrix has N rows and D columns, where D is the
+    number of parameters.  These model inputs are intended to be used with
+    :func:`SALib.analyze.morris.analyze`.
+    
+    Three variants of Morris' sampling for elementary effects is supported:
+    
+    - Vanilla Morris
+    - Optimised trajectories when optimal_trajectories is set (using 
+      Campolongo's enhancements from 2007)
+    - Groups with optimised trajectories when optimal_trajectores is set and 
+      the problem definition specifies groups
+    
+    At present, optimised trajectories is implemented using a brute-force
+    approach, which can be very slow, especially if you require more than four
+    trajectories.  Note that the number of factors makes little difference,
+    but the ratio between number of optimal trajectories and the sample size
+    results in an exponentially increasing number of scores that must be
+    computed to find the optimal combination of trajectories.  We suggest going
+    no higher than 4 from a pool of 100 samples.
+    
+    Parameters
+    ----------
+    problem : dict
+        The problem definition
+    N : int
+        The number of samples to generate
+    num_levels : int
+        The number of grid levels
+    grid_jump : int
+        The grid jump size
+    optimal_trajectories : int
+        The number of optimal trajectories to sample (between 2 and N)
+    """
     if grid_jump >= num_levels:
         raise ValueError("grid_jump must be less than num_levels")
 

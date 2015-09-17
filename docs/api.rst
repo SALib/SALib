@@ -1,25 +1,38 @@
-=========
-SALib API
-=========
+=============
+API Reference
+=============
 
-Samplers
---------
+This page documents the sensitivity analysis methods supported by SALib.
 
-.. automodule:: SALib.sample.fast_sampler
-   :members:
+FAST - Fourier Amplitude Sensitivity Test
+-----------------------------------------
 
-.. automodule:: SALib.sample.ff
-   :members:
+.. autofunction:: SALib.sample.fast_sampler.sample
 
-.. automodule:: SALib.sample.finite_diff
-   :members:
-   
-.. automodule:: SALib.sample.latin
-   :members:
-   
-.. automodule:: SALib.sample.morris
-   :members:
-   
-.. automodule:: SALib.sample.saltelli
-   :members:
-   
+.. autofunction:: SALib.analyze.fast.analyze
+
+Method of Morris
+----------------
+
+.. autofunction:: SALib.sample.morris.sample
+
+.. autofunction:: SALib.analyze.morris.analyze
+
+Sobol Sensitivity Analysis
+--------------------------
+
+.. autofunction:: SALib.sample.saltelli.sample
+
+.. autofunction:: SALib.analyze.sobol.analyze
+
+Delta Moment-Independent Measure
+--------------------------------
+
+.. autofunction:: SALib.sample.latin.sample
+
+.. autofunction:: SALib.analyze.delta.analyze
+
+Derivative-based Global Sensitivity Measure (DGSM)
+--------------------------------------------------
+
+.. autofunction:: SALib.analyze.dgsm.analyze

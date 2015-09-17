@@ -9,12 +9,47 @@ from . import common_args
 from ..util import read_param_file
 
 
-# Perform Delta moment-independent Analysis on file of model results
-# Returns a dictionary with keys 'delta', 'delta_conf', 'S1', and 'S1_conf'
-# Where each entry is a list of size D (the number of parameters)
-# Containing the indices in the same order as the parameter file
 def analyze(problem, X, Y, calc_second_order=True, num_resamples=10,
             conf_level=0.95, print_to_console=False):
+    """Perform Delta Moment-Independent Analysis on model outputs.
+    
+    Returns a dictionary with keys 'delta', 'delta_conf', 'S1', and 'S1_conf',
+    where each entry is a list of size D (the number of parameters) containing
+    the indices in the same order as the parameter file.
+    
+    Parameters
+    ----------
+    problem : dict
+        The problem definition
+    X: numpy.matrix
+        A NumPy matrix containing the model inputs
+    Y : numpy.array
+        A NumPy array containing the model outputs
+    calc_second_order : bool
+        Not used
+    num_resamples : int
+        The number of resamples when computing confidence intervals (default 10)
+    conf_level : float
+        The confidence interval level (default 0.95)
+    print_to_console : bool
+        Print results directly to console (default False)
+        
+    References
+    ----------
+    .. [1] Borgonovo, E. (2007). "A new uncertainty importance measure."
+           Reliability Engineering & System Safety, 92(6):771-784,
+           doi:10.1016/j.ress.2006.04.015.
+           
+    .. [2] Plischke, E., E. Borgonovo, and C. L. Smith (2013). "Global
+           sensitivity measures from given data." European Journal of
+           Operational Research, 226(3):536-550, doi:10.1016/j.ejor.2012.11.047.
+           
+    Examples
+    --------
+    >>> X = latin.sample(problem, 1000)
+    >>> Y = Ishigami.evaluate(X)
+    >>> Si = delta.analyze(problem, X, Y, print_to_console=True)
+    """
 
     D = problem['num_vars']
     N = Y.size

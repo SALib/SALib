@@ -8,8 +8,24 @@ from . import common_args
 from .. util import scale_samples, read_param_file
 
 
-# Generate N x D matrix of extended FAST samples (Saltelli 1999)
 def sample(problem, N, M=4):
+    """Generate model inputs for the Fourier Amplitude Sensitivity Test (FAST).
+    
+    Returns a NumPy matrix containing the model inputs required by the Fourier
+    Amplitude sensitivity test.  The resulting matrix contains N rows and D
+    columns, where D is the number of parameters.  The samples generated are
+    intended to be used by :func:`SALib.analyze.fast.analyze`.
+    
+    Parameters
+    ----------
+    problem : dict
+        The problem definition
+    N : int
+        The number of samples to generate
+    M : int
+        The interference parameter, i.e., the number of harmonics to sum in the
+        Fourier series decomposition (default 4)
+    """
 
     D = problem['num_vars']
 

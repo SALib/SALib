@@ -9,16 +9,57 @@ from . import common_args
 from ..util import read_param_file
 
 
-# Perform Morris Analysis on file of model results
-# Returns a dictionary with keys 'mu', 'mu_star', 'sigma', and 'mu_star_conf'
-# Where each entry is a list of size num_vars (the number of parameters)
-# Containing the indices in the same order as the parameter file
 def analyze(problem, X, Y,
             num_resamples=1000,
             conf_level=0.95,
             print_to_console=False,
             grid_jump=2,
             num_levels=4):
+    """Perform Morris Analysis on model outputs.
+    
+    Returns a dictionary with keys 'mu', 'mu_star', 'sigma', and 'mu_star_conf',
+    where each entry is a list of size D (the number of parameters) containing
+    the indices in the same order as the parameter file.
+          
+    Parameters
+    ----------
+    problem : dict
+        The problem definition
+    X : numpy.matrix
+        The NumPy matrix containing the model inputs
+    Y : numpy.array
+        The NumPy array containing the model outputs
+    num_resamples : int
+        The number of resamples used to compute the confidence
+        intervals (default 1000)
+    conf_level : float
+        The confidence interval level (default 0.95)
+    print_to_console : bool
+        Print results directly to console (default False)
+    grid_jump : int
+        The grid jump size, must be identical to the value passed
+        to :func:`SALib.sample.morris.sample` (default 2)
+    num_levels : int
+        The number of grid levels, must be identical to the value
+        passed to SALib.sample.morris (default 4)
+        
+    References
+    ----------
+    .. [1] Morris, M. (1991).  "Factorial Sampling Plans for Preliminary
+           Computational Experiments."  Technometrics, 33(2):161-174,
+           doi:10.1080/00401706.1991.10484804.
+    .. [2] Campolongo, F., J. Cariboni, and A. Saltelli (2007).  "An effective
+           screening design for sensitivity analysis of large models."
+           Environmental Modelling & Software, 22(10):1509-1518,
+           doi:10.1016/j.envsoft.2006.10.004.
+           
+    Examples
+    --------
+    >>> X = morris.sample(problem, 1000, num_levels=4, grid_jump=2)
+    >>> Y = Ishigami.evaluate(X)
+    >>> Si = morris.analyze(problem, X, Y, conf_level=0.95, 
+    >>>                     print_to_console=True, num_levels=4, grid_jump=2)
+    """
 
     # Assume that there are no groups
     groups = None
