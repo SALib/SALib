@@ -2,6 +2,8 @@
 
 Python implementations of commonly used sensitivity analysis methods. Useful in systems modeling to calculate the effects of model inputs or exogenous factors on outputs of interest.
 
+**Documentation:** [ReadTheDocs](http://salib.readthedocs.org)
+
 **Requirements:** [NumPy](http://www.numpy.org/), [SciPy](http://www.scipy.org/), [matplotlib](http://matplotlib.org/)
 
 **Installation:** `pip install SALib` or `python setup.py install`
