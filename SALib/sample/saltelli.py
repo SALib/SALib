@@ -7,11 +7,26 @@ from . import sobol_sequence
 from ..util import scale_samples, read_param_file
 
 
-# Generate matrix of Saltelli samples
-# Size N x (2D + 2) if calc_second_order is True (default)
-# Size N x (D + 2) otherwise
 def sample(problem, N, calc_second_order=True):
-
+    """Generates model inputs using Saltelli's extension of the Sobol sequence.
+    
+    Returns a NumPy matrix containing the model inputs using Saltelli's sampling
+    scheme.  Saltelli's scheme extends the Sobol sequence in a way to reduce
+    the error rates in the resulting sensitivity index calculations.  If
+    calc_second_order is False, the resulting matrix has N * (D + 2)
+    rows, where D is the number of parameters.  If calc_second_order is True,
+    the resulting matrix has N * (2D + 2) rows.  These model inputs are
+    intended to be used with :func:`SALib.analyze.sobol.analyze`.
+    
+    Parameters
+    ----------
+    problem : dict
+        The problem definition
+    N : int
+        The number of samples to generate
+    calc_second_order : bool
+        Calculate second-order sensitivities (default True)
+    """
     D = problem['num_vars']
 
     # How many values of the Sobol sequence to skip

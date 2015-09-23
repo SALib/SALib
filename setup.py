@@ -37,9 +37,9 @@ def setup_package():
         license=open('LICENSE.md').read(),
         tests_require=['nose'],
         install_requires=[
-            "numpy>1.7",
+            "numpy>=1.9.0",
             "scipy",
-            "matplotlib>1.4",
+            "matplotlib>=1.4.3",
         ],
           
         extras_require = {
