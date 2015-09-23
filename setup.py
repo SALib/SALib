@@ -39,7 +39,7 @@ def setup_package():
         install_requires=[
             "numpy>1.7",
             "scipy",
-            "matplotlib>1.4",
+            "matplotlib>1.3”,
         ],
           
         extras_require = {
