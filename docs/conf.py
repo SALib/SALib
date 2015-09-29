@@ -15,7 +15,6 @@
 import sys
 import os
 import shlex
-import SALib
 
 # Work on ReadTheDocs.org
 #on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
