@@ -49,7 +49,7 @@ def test_morris_covariance_plot_grouped():
     Si = {'mu_star':[1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
           'names':['x1', 'x2', 'x3', 'x4', 'x5', 'x6'],
           'mu_star_conf': [0.5, 1, 1.5, 2, 2.5, 3.0],
-          'sigma': None} 
+          'sigma': [np.NAN, 0.2, 0.3, 0.5, np.NAN, 0.3 ]} 
     fig, ax = plt.subplots(1, 1)
     covariance_plot(ax, Si, {}, unit=r"tCO$_2$/year")
 
