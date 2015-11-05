@@ -15,7 +15,8 @@ from SALib.sample.morris_util import generate_P_star, \
                                 compute_distance_matrix, \
                                 find_most_distant, find_maximum, \
                                 make_index_list, \
-                                check_input_sample
+                                check_input_sample, \
+                                find_local_maximum
 
 
 def setup():
@@ -149,6 +150,22 @@ def test_combo_from_find_most_distant():
     output = find_maximum(scores, N, k_choices)
     expected = [0, 2, 3, 5]  # trajectories 1, 3, 4, 6
     assert_equal(output, expected)
+
+def test_find_local_maximum_distance():
+    '''
+    Test whether finding the local maximum distance equals the global maximum distance
+    in a simple case. From Saltelli et al. 2008, in the solution to exercise 3a,
+    Chapter 3, page 134.
+    '''
+    
+    sample_inputs = setup()
+    N=6
+    num_params = 2
+    k_choices = 4
+    scores_global = find_most_distant(sample_inputs, N, num_params, k_choices)
+    output_global = find_maximum(scores_global, N, k_choices)
+    output_local = find_local_maximum(sample_inputs, N, num_params, k_choices)
+    assert_equal(output_global, output_local)
 
 
 def test_scores_from_find_most_distant():
