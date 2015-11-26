@@ -6,7 +6,8 @@ python:
 - "3.3"
 
 env: 
- - DEPS="numpy scipy matplotlib"
+ # Workaround for image_comparison issue in v1.5.0 of matplotlib - fix matplotlib to 1.4.3
+ - DEPS="numpy scipy matplotlib=1.4.3"
 
 install:
  - sudo apt-get update
