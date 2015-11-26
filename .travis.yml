@@ -29,6 +29,8 @@ install:
  - source activate testenv
  - python setup.py install
  - pip install coveralls
+ # Workaround for image_comparison issue in v1.5.0 of matplotlib
+ - pip install git+https://github.com/matplotlib/matplotlib.git
 script:
  - coverage run --source=SALib --omit=SALib/_version.py setup.py test
 after_success:
