@@ -13,11 +13,6 @@ versioneer.parentdir_prefix = 'SALib-' # dirname like 'myproject-1.2.0'
 
 class NoseTestCommand(TestCommand):
 
-    def finalize_options(self):
-        TestCommand.finalize_options(self)
-        self.test_args = []
-        self.test_suite = True
-
     def run_tests(self):
         # Run nose ensuring that argv simulates running nosetests directly
         import nose
