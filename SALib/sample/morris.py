@@ -21,7 +21,7 @@ else:
 #    - a parallel brute force method (incomplete)
 #    - a combinatorial optimisation approach (completed, but dependencies are
 #      not open-source)
-def sample(problem, N, num_levels, grid_jump, optimal_trajectories=None):
+def sample(problem, N, num_levels, grid_jump, optimal_trajectories=None, local_optimization=False):
     """Generates model inputs using for Method of Morris.
     
     Returns a NumPy matrix containing the model inputs required for Method of
@@ -76,7 +76,7 @@ def sample(problem, N, num_levels, grid_jump, optimal_trajectories=None):
         if optimal_trajectories >= N:
             raise ValueError("The number of optimal trajectories should be less than the number of samples.")
         
-        if _has_gurobi == False:
+        if _has_gurobi == False and local_optimization == False:
 
             if optimal_trajectories > 10:
                 raise ValueError("Running optimal trajectories greater than values of 10 will take a long time.")
@@ -84,7 +84,8 @@ def sample(problem, N, num_levels, grid_jump, optimal_trajectories=None):
         sample = compute_optimised_trajectories(problem, 
                                                 sample, 
                                                 N, 
-                                                optimal_trajectories)
+                                                optimal_trajectories,
+                                                local_optimization)
         
     scale_samples(sample, problem['bounds'])
     return sample
@@ -150,7 +151,7 @@ def sample_groups(problem, N, num_levels, grid_jump):
     return sample.reshape((N * (g + 1), k))
 
 
-def compute_optimised_trajectories(problem, input_sample, N, k_choices):
+def compute_optimised_trajectories(problem, input_sample, N, k_choices, local_optimization = False):
     '''
     Calls the procedure to compute the optimum k_choices of trajectories
     from the input_sample.
@@ -175,7 +176,8 @@ def compute_optimised_trajectories(problem, input_sample, N, k_choices):
                                                  N,
                                                  num_params,
                                                  k_choices,
-                                                 groups)
+                                                 groups,
+                                                 local_optimization)
 
     num_groups = None
     if groups != None:
@@ -213,3 +215,4 @@ if __name__ == "__main__":
 
     np.savetxt(args.output, param_values, delimiter=args.delimiter,
                fmt='%.' + str(args.precision) + 'e')
+
