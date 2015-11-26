@@ -6,7 +6,8 @@ python:
 - "3.3"
 
 env: 
- - DEPS="numpy scipy matplotlib"
+ # Workaround for image_comparison issue in v1.5.0 of matplotlib - fix matplotlib to 1.4.3
+ - DEPS="numpy scipy matplotlib=1.4.3"
 
 install:
  - sudo apt-get update
@@ -29,8 +30,6 @@ install:
  - source activate testenv
  - python setup.py install
  - pip install coveralls
- # Workaround for image_comparison issue in v1.5.0 of matplotlib
- - pip install git+https://github.com/matplotlib/matplotlib.git
 script:
  - coverage run --source=SALib --omit=SALib/_version.py setup.py test
 after_success:
