@@ -11,3 +11,4 @@ tests/*.txt
 .coveralls.yml
 
 .coverage
+./result_images/*
