@@ -16,7 +16,8 @@ from SALib.sample.morris_util import generate_P_star, \
                                 find_most_distant, find_maximum, \
                                 make_index_list, \
                                 check_input_sample, \
-                                find_local_maximum
+                                find_local_maximum, \
+                                sum_distances, get_max_sum_ind, add_indices
 
 
 def setup():
@@ -135,6 +136,60 @@ def test_compute_distance_matrix():
     expected[5, :] = [7.52, 5.99, 5.52, 7.31, 5.77, 0]
     assert_allclose(output, expected, rtol=1e-2)
 
+def test_compute_distance_matrix_local():
+    '''
+    Tests that a distance matrix is computed correctly for the local distance optimization.
+    The only change is that the local method needs the upper triangle of 
+    the distance matrix instead of the lower one.
+    
+    This is for an input of six trajectories and two parameters
+    '''
+    sample_inputs = setup()
+    output = compute_distance_matrix(sample_inputs, 6, 2, local_optimization=True)
+    expected = np.zeros((6, 6), dtype=np.float32)
+    expected[0, :] = [0,    5.50, 6.18, 6.89, 6.18, 7.52]
+    expected[1, :] = [5.50, 0,    5.31, 6.18, 5.31, 5.99]
+    expected[2, :] = [6.18, 5.31, 0,    6.57, 5.41, 5.52]
+    expected[3, :] = [6.89, 6.18, 6.57, 0,    5.50, 7.31]
+    expected[4, :] = [6.18, 5.31, 5.41, 5.5,  0,    5.77]
+    expected[5, :] = [7.52, 5.99, 5.52, 7.31, 5.77, 0   ]
+    assert_allclose(output, expected, rtol=1e-2)
+
+def test_sum_distances():
+    '''
+    Tests whether the combinations are summed correctly. 
+    '''
+    sample_inputs = setup()
+    dist_matr = compute_distance_matrix(sample_inputs, 6, 2, local_optimization=True)
+    indices = (1,3,2)
+    distance = sum_distances(indices, dist_matr)
+
+    expected = 10.47
+    assert_allclose(distance, expected, rtol=1e-2)
+    
+def test_get_max_sum_ind():
+    '''
+    Tests whether the right maximum indices are returned.
+    '''
+    indices = np.array([(1,2,4),(3,2,1),(4,2,1)])
+    distances = np.array([20, 40, 50])
+    
+    output = get_max_sum_ind(indices, distances, 0, 0)
+    expected = (4,2,1)    
+    
+    assert_equal(output, expected)
+
+def test_add_indices():
+    '''
+    Tests whether the right indices are added.
+    '''
+    indices = (1,3,4)
+    matr = np.zeros((6,6), dtype = np.int16)
+    ind_extra = add_indices(indices, matr)
+
+    expected = [(1,3,4,0),(1,3,4,2),(1,3,4,5)]
+    
+    assert_equal(ind_extra, expected)
 
 def test_combo_from_find_most_distant():
     '''
@@ -229,6 +284,12 @@ def test_make_index_list_with_groups():
     desired = [np.array([0, 1, 2]), np.array([3, 4, 5]), np.array([6, 7, 8]), np.array([9, 10, 11])]
     assert_equal(desired, actual)
 
+@raises(ValueError)
+def test_get_max_sum_ind_Error():
+    indices = [(1,2,4),(3,2,1),(4,2,1)]
+    distances_wrong = [20,40]
+    
+    get_max_sum_ind(indices, distances_wrong, 0, 0)
 
 @raises(AssertionError)
 def test_check_input_sample_N():

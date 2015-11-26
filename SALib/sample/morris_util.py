@@ -13,7 +13,6 @@ from scipy.spatial.distance import cdist
 
 import numpy as np
 import random as rd
-import math
 
 def generate_trajectory(G, num_levels, grid_jump):
     '''
@@ -136,9 +135,11 @@ def compute_distance_matrix(input_sample, N, num_params, groups=None, local_opti
         input_1 = input_sample[index_list[j]]
         for k in range(j + 1, N):
             input_2 = input_sample[index_list[k]]
+            
+            if local_optimization is True:
+                distance_matrix[j, k] = compute_distance(input_1, input_2)
+            
             distance_matrix[k, j] = compute_distance(input_1, input_2)
-            if local_optimization is not False:
-                distance_matrix[j, k] = compute_distance(input_1, input_2) 
     return distance_matrix
 
 
@@ -251,9 +252,6 @@ def compile_output(input_sample, N, num_params, maximum_combo, groups=None):
         output[index_list[counter]] = np.array(input_sample[index_list[x]])
     return output
 
-# method of Ruano et al.
-# defined num_params as number of factors in model
-# defined k_choices as number of desired trajectories
 def sum_distances(indices, distance_matrix):
     '''Calculate combinatorial distance between a select group of trajectories, indicated by indices
     
@@ -266,23 +264,28 @@ def sum_distances(indices, distance_matrix):
     The calculated distances, as they are right now, are only used in a relative way. 
     Purely summing distances would lead to the same result, at a perhaps quicker rate.
     '''  
-    combs = np.array(tuple(combinations(indices, 2)))
-    dist = 0.0
-    
-    for comb in combs:
-        dist += distance_matrix[comb[0],comb[1]]**2
-        
-    return math.sqrt(dist)
+    combs_tup = np.array(tuple(combinations(indices, 2)))
 
+    #Put indices from tuples into two-dimensional array.
+    combs = np.array([[i[0] for i in combs_tup], [i[1] for i in combs_tup]])
 
-def get_max_sum_ind(indices_list, distances):
+    #Calculate distance (vectorized)
+    dist = np.sqrt(np.sum(np.square(distance_matrix[combs[0],combs[1]]), axis=0))
+
+    return dist
+
+def get_max_sum_ind(indices_list, distances, i, m):
     '''Get the indices that belong to the maximum distance in an array of distances
     
     indices_list = list of tuples
     distance = array (M)
+    i = int
+    m = int
     '''
-    if len(indices_list) is not len(distances):
-        raise ValueError("indices and distances are lists of different length")
+    if len(indices_list) != len(distances):
+        raise ValueError("Indices and distances are lists of different length." +
+        "Length indices_list = " + str(len(indices_list)) + " and length distances = " + 
+        str(len(distances)) + ". In loop i = " + str(i) + " and m =  " + str(m))
     
     max_index = tuple(distances.argsort()[-1:][::-1])
     return indices_list[max_index[0]]
@@ -303,7 +306,8 @@ def add_indices(indices, distance_matrix):
 def find_local_maximum(input_sample, N, num_params, k_choices, groups = None):
     '''An alternative by Ruano et al. (2012) for the brute force approach as 
     originally proposed by Campolongo et al. (2007). The method should improve 
-    the speed with which an optimal set of trajectories is found tremendously.
+    the speed with which an optimal set of trajectories is found tremendously 
+    for larger sample sizes.
     '''
     
     if groups is not None:
@@ -328,7 +332,7 @@ def find_local_maximum(input_sample, N, num_params, k_choices, groups = None):
             row_nr += 1
         
         #Find the indices belonging to the maximum distance 
-        i_max_ind = get_max_sum_ind(indices_list,row_maxima_i)
+        i_max_ind = get_max_sum_ind(indices_list,row_maxima_i, i, 0)
 
         #########Loop 'm' (called loop 'k' in Ruano)############
         m_max_ind = i_max_ind
@@ -343,22 +347,24 @@ def find_local_maximum(input_sample, N, num_params, k_choices, groups = None):
             for n in range(0,len(m_ind)):
                 m_maxima[n] = sum_distances(m_ind[n], distance_matrix)  
             
-            m_max_ind = get_max_sum_ind(m_ind, m_maxima)
+            m_max_ind = get_max_sum_ind(m_ind, m_maxima, i, m)
             
             m += 1
         
         tot_indices_list.append(m_max_ind)
         tot_max_array[i-1] = sum_distances(m_max_ind, distance_matrix)
     
-    tot_max = get_max_sum_ind(tot_indices_list, tot_max_array)
+    tot_max = get_max_sum_ind(tot_indices_list, tot_max_array, "tot", "tot")
     return sorted(list(tot_max))
 
-#end method
+
 
 def find_optimum_combination(input_sample, N, num_params, k_choices, groups=None, local_optimization=False):
 
-    if local_optimization is False:
+    if local_optimization is True:
+        maximum_combo = find_local_maximum(input_sample, N, num_params, k_choices, groups)
         
+    else:
         scores = find_most_distant(input_sample,
                                    N,
                                    num_params,
@@ -370,8 +376,5 @@ def find_optimum_combination(input_sample, N, num_params, k_choices, groups=None
         maximum_combo = find_maximum(scores, N, k_choices)
     
         #print(maximum_combo)
-
-    else:
-        maximum_combo = find_local_maximum(input_sample, N, num_params, k_choices, groups)
 
     return maximum_combo
