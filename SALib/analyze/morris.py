@@ -16,11 +16,11 @@ def analyze(problem, X, Y,
             grid_jump=2,
             num_levels=4):
     """Perform Morris Analysis on model outputs.
-    
+
     Returns a dictionary with keys 'mu', 'mu_star', 'sigma', and 'mu_star_conf',
     where each entry is a list of size D (the number of parameters) containing
     the indices in the same order as the parameter file.
-          
+
     Parameters
     ----------
     problem : dict
@@ -42,7 +42,7 @@ def analyze(problem, X, Y,
     num_levels : int
         The number of grid levels, must be identical to the value
         passed to SALib.sample.morris (default 4)
-        
+
     References
     ----------
     .. [1] Morris, M. (1991).  "Factorial Sampling Plans for Preliminary
@@ -52,12 +52,12 @@ def analyze(problem, X, Y,
            screening design for sensitivity analysis of large models."
            Environmental Modelling & Software, 22(10):1509-1518,
            doi:10.1016/j.envsoft.2006.10.004.
-           
+
     Examples
     --------
     >>> X = morris.sample(problem, 1000, num_levels=4, grid_jump=2)
     >>> Y = Ishigami.evaluate(X)
-    >>> Si = morris.analyze(problem, X, Y, conf_level=0.95, 
+    >>> Si = morris.analyze(problem, X, Y, conf_level=0.95,
     >>>                     print_to_console=True, num_levels=4, grid_jump=2)
     """
 
@@ -96,10 +96,21 @@ def analyze(problem, X, Y,
 
     if groups is None:
         if print_to_console:
-            print("Parameter Mu Sigma Mu_Star Mu_Star_Conf")
-            for j in range(num_vars):
-                print("%s %f %f %f %f" % (problem['names'][j], Si['mu'][j], Si[
-                    'sigma'][j], Si['mu_star'][j], Si['mu_star_conf'][j]))
+            print("{0:<30} {1:>10} {2:>10} {3:>15} {4:>10}".format(
+                                "Parameter",
+                                "Mu_Star",
+                                "Mu",
+                                "Mu_Star_Conf",
+                                "Sigma")
+                  )
+            for j in list(range(num_vars)):
+                print("{0:30} {1:10.3f} {2:10.3f} {3:15.3f} {4:10.3f}".format(
+                                    Si['names'][j],
+                                    Si['mu_star'][j],
+                                    Si['mu'][j],
+                                    Si['mu_star_conf'][j],
+                                    Si['sigma'][j])
+                      )
         return Si
     elif groups is not None:
         # if there are groups, then the elementary effects returned need to be
@@ -110,18 +121,48 @@ def analyze(problem, X, Y,
         Si_grouped['mu_star_conf'] = compute_grouped_metric(Si['mu_star_conf'],
                                                              groups)
         Si_grouped['names'] = unique_group_names
-        Si_grouped['sigma'] = None
+        Si_grouped['sigma'] = compute_grouped_sigma(Si['sigma'], groups)
+        Si_grouped['mu'] = compute_grouped_sigma(Si['mu'], groups)
 
         if print_to_console:
-            print("Parameter Mu_Star Mu_Star_Conf")
+            print("{0:<30} {1:>10} {2:>10} {3:>15} {4:>10}".format(
+                                "Parameter",
+                                "Mu_Star",
+                                "Mu",
+                                "Mu_Star_Conf",
+                                "Sigma")
+                  )
             for j in list(range(number_of_groups)):
-                print("%s %f %f" % (Si_grouped['names'][j],
+                print("{0:30} {1:10.3f} {2:10.3f} {3:15.3f} {4:10.3f}".format(
+                                    Si_grouped['names'][j],
                                     Si_grouped['mu_star'][j],
-                                    Si_grouped['mu_star_conf'][j]))
+                                    Si_grouped['mu'][j],
+                                    Si_grouped['mu_star_conf'][j],
+                                    Si_grouped['sigma'][j])
+                      )
 
         return Si_grouped
     else:
         raise RuntimeError("Could not determine which parameters should be returned")
+
+
+def compute_grouped_sigma(ungrouped_sigma, group_matrix):
+    '''
+    Returns sigma for the groups of parameter values in the
+    argument ungrouped_metric where the group consists of no more than
+    one parameter
+    '''
+
+    group_matrix = np.array(group_matrix, dtype=np.bool)
+
+    sigma_masked = np.ma.masked_array(ungrouped_sigma * group_matrix.T,
+                                        mask=(group_matrix^1).T)
+    sigma_agg = np.ma.mean(sigma_masked, axis=1)
+    sigma = np.empty(group_matrix.shape[1], dtype=np.float)
+    np.copyto(sigma, sigma_agg, where=group_matrix.sum(axis=0)==1 )
+    np.copyto(sigma, np.NAN, where=group_matrix.sum(axis=0)!=1 )
+
+    return sigma
 
 
 def compute_grouped_metric(ungrouped_metric, group_matrix):
@@ -132,7 +173,7 @@ def compute_grouped_metric(ungrouped_metric, group_matrix):
 
     group_matrix = np.array(group_matrix, dtype=np.bool)
 
-    mu_star_masked = np.ma.masked_array(ungrouped_metric * group_matrix.T, 
+    mu_star_masked = np.ma.masked_array(ungrouped_metric * group_matrix.T,
                                         mask=(group_matrix^1).T)
     mean_of_mu_star = np.ma.mean(mu_star_masked, axis=1)
 

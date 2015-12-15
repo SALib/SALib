@@ -11,7 +11,8 @@ from SALib.analyze.morris import analyze, \
     compute_elementary_effects, \
     get_increased_values, \
     get_decreased_values, \
-    compute_grouped_metric
+    compute_grouped_metric, \
+    compute_grouped_sigma
 
 
 def test_compute_mu_star_confidence():
@@ -250,3 +251,28 @@ def test_compute_grouped_mu_star():
     actual = compute_grouped_metric(mu_star, group_matrix)
     desired = np.array([1.62, 0.62], dtype=np.float)
     assert_allclose(actual, desired, rtol=1e-1)
+    
+    
+def test_sigma_returned_for_groups_with_only_one_param():
+    '''
+    Tests that a value for sigma is returned when the group contains 1 param
+    
+    Morris groups do not allow a value for sigma to be computed because it
+    requires the use of mu (as opposed to mu_star).
+    
+    However, if the group consists of just one parameter, then the sampling will
+    be identical to the situation in which no groups are used, but only for that
+    parameter.
+    
+    An NA should be returned for all other groups (as opposed to 0, which could
+    confuse plotting.morris)
+    '''
+    group_matrix = np.matrix('1,0;0,1;0,1', dtype=np.int)
+    ee = np.array([[2.52, 2.01, 2.30, -0.66, -0.93, -1.30],
+                   [-2.00, 0.13, -0.80, 0.25, -0.02, 0.51],
+                   [2.00, -0.13, 0.80, -0.25, 0.02, -0.51]])
+    sigma = np.std(ee, axis=1, ddof=1)
+    actual = compute_grouped_sigma(sigma, group_matrix)
+    desired = np.array([1.79352911, np.NAN], dtype=np.float)
+    assert_allclose(actual, desired, rtol=1e-1)
+    

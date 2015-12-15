@@ -106,6 +106,7 @@ def test_optimal_trajectories_lt_10():
     sample(problem, samples, num_levels, grid_jump, \
            optimal_trajectories=optimal_trajectories)
 
+
 @raises(ValueError)
 @with_setup(setup, teardown)
 def test_optimal_trajectories_gte_one():
@@ -155,6 +156,7 @@ def test_catch_inputs_not_in_zero_one_range():
     N = 10
     input_sample *= 10
     compute_optimised_trajectories(problem, input_sample, N, k_choices)
+
 
 @raises(ValueError)
 def test_group_sample_fails_with_no_G_matrix():
