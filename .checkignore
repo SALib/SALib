@@ -1,1 +1,3 @@
 SALib/sample/directions.py
+versioneer.py
+SALib/_version.py
