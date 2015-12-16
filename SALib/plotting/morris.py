@@ -125,6 +125,7 @@ def covariance_plot(ax, Si, param_dict, unit=""):
         ax.set_ylabel(r'$95\% CI$')
 
     ax.set_xlabel(r'$\mu^\star$ ' + unit)
+    ax.set_ylim(0-(0.01 * np.array(ax.get_ylim()[1])), )
 
     return out
 
