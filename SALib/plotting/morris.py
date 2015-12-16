@@ -86,6 +86,8 @@ def horizontal_bar_plot(ax, Si, param_dict={}, sortby='mu_star', unit=''):
     ax.set_yticks(y_pos)
     ax.set_yticklabels(plot_names)
     ax.set_xlabel(r'$\mu^\star$' + unit)    
+    
+    ax.set_ylim(min(y_pos)-1, max(y_pos)+1)
 
     return out
 
@@ -114,7 +116,7 @@ def covariance_plot(ax, Si, param_dict, unit=""):
         ax.legend((line1, line2, line3), (r'$\sigma / \mu^{\star} = 1.0$',
                                           r'$\sigma / \mu^{\star} = 0.5$',
                                           r'$\sigma / \mu^{\star} = 0.1$'),
-                  loc='upper left')
+                  loc='best')
     
     else:
         y = Si['mu_star_conf']
