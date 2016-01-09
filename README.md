@@ -34,9 +34,7 @@ import numpy as np
 problem = {
   'num_vars': 3, 
   'names': ['x1', 'x2', 'x3'], 
-  'bounds': [[-3.14159265359, 3.14159265359], 
-            [-3.14159265359, 3.14159265359], 
-             [-3.14159265359, 3.14159265359]]
+  'bounds': [[-np.pi, np.pi]]*3
 }
 
 # Generate samples
@@ -71,4 +69,4 @@ Lots of other options are included for parameter files, as well as a command-lin
 Also check out the [examples](https://github.com/SALib/SALib/tree/master/examples) for a full description of options for each method.
 
 ### License
-Copyright (C) 2013-2015 Jon Herman, Will Usher, and others. Versions v0.5 and later are released under the [MIT license](LICENSE.md).
+Copyright (C) 2016 Jon Herman, Will Usher, and others. Versions v0.5 and later are released under the [MIT license](LICENSE.md).
