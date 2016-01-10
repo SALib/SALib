@@ -241,7 +241,7 @@ def compute_mu_star_confidence(ee, num_trajectories, num_resamples, conf_level):
     ee_resampled = np.empty([num_trajectories])
     mu_star_resampled = np.empty([num_resamples])
 
-    if conf_level < 0 or conf_level > 1:
+    if not 0 < conf_level < 1:
         raise ValueError("Confidence level must be between 0-1.")
 
     resample_index = np.random.randint(len(ee), size=(num_resamples, num_trajectories))

@@ -67,7 +67,7 @@ def sample(problem, N, num_levels, grid_jump, optimal_trajectories=None, local_o
     if grid_jump >= num_levels:
         raise ValueError("grid_jump must be less than num_levels")
 
-    if problem.get('groups', None) is None:
+    if problem.get('groups') is None:
         sample = sample_oat(problem, N, num_levels, grid_jump)
     else:
         sample = sample_groups(problem, N, num_levels, grid_jump)
@@ -82,10 +82,8 @@ def sample(problem, N, num_levels, grid_jump, optimal_trajectories=None, local_o
         if optimal_trajectories >= N:
             raise ValueError("The number of optimal trajectories should be less than the number of samples.")
         
-        if _has_gurobi == False and local_optimization == False:
-
-            if optimal_trajectories > 10:
-                raise ValueError("Running optimal trajectories greater than values of 10 will take a long time.")
+        if _has_gurobi == False and local_optimization == False and optimal_trajectories > 10:
+            raise ValueError("Running optimal trajectories greater than values of 10 will take a long time.")
                 
         sample = compute_optimised_trajectories(problem, 
                                                 sample, 
@@ -186,7 +184,7 @@ def compute_optimised_trajectories(problem, input_sample, N, k_choices, local_op
                                                  local_optimization)
 
     num_groups = None
-    if groups != None:
+    if groups is not None:
         num_groups = groups[0].shape[1]
 
     output = compile_output(input_sample,

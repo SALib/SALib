@@ -56,7 +56,7 @@ def _sort_Si_by_index(Si, key, index):
     return np.array([Si[key][x] for x in index])
 
 
-def horizontal_bar_plot(ax, Si, param_dict={}, sortby='mu_star', unit=''):
+def horizontal_bar_plot(ax, Si, param_dict, sortby='mu_star', unit=''):
     '''
     Updates a matplotlib axes instance with a horizontal bar plot
     of mu_star, with error bars representing mu_star_conf
@@ -127,7 +127,7 @@ def covariance_plot(ax, Si, param_dict, unit=""):
     return out
 
 
-def sample_histograms(fig, input_sample, problem, param_dict={}):
+def sample_histograms(fig, input_sample, problem, param_dict):
     '''
     Plots a set of subplots of histograms of the input sample
     '''

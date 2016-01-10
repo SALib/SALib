@@ -9,7 +9,7 @@ from . import common_args
 from ..util import read_param_file
 
 
-def analyze(problem, X, Y, calc_second_order=True, num_resamples=10,
+def analyze(problem, X, Y, num_resamples=10,
             conf_level=0.95, print_to_console=False):
     """Perform Delta Moment-Independent Analysis on model outputs.
     
@@ -25,8 +25,6 @@ def analyze(problem, X, Y, calc_second_order=True, num_resamples=10,
         A NumPy matrix containing the model inputs
     Y : numpy.array
         A NumPy array containing the model outputs
-    calc_second_order : bool
-        Not used
     num_resamples : int
         The number of resamples when computing confidence intervals (default 10)
     conf_level : float
@@ -54,7 +52,7 @@ def analyze(problem, X, Y, calc_second_order=True, num_resamples=10,
     D = problem['num_vars']
     N = Y.size
 
-    if conf_level < 0 or conf_level > 1:
+    if not 0 < conf_level < 1:
         raise RuntimeError("Confidence level must be between 0-1.")
 
     # equal frequency partition
