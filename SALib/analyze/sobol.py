@@ -75,7 +75,7 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
         Incorrect number of samples in model output file. 
         Confirm that calc_second_order matches option used during sampling.""")
 
-    if conf_level < 0 or conf_level > 1:
+    if not 0 < conf_level < 1:
         raise RuntimeError("Confidence level must be between 0-1.")
 
     A,B,AB,BA = separate_output_values(Y, D, N, calc_second_order)
@@ -200,7 +200,7 @@ def create_task_list(D, calc_second_order, n_processors):
         tasks_second_order = [[d, j, k] for j in range(D) for k in
                             range(j + 1, D) for d in ('S2', 'S2_conf')]
 
-    if n_processors == None:
+    if n_processors is None:
         n_processors = min(cpu_count(), len(tasks_first_order) + len(tasks_second_order))
 
     if not calc_second_order:

@@ -10,10 +10,12 @@ import numpy as np
 # x3: 0.0237
 # x4: 0.0072
 # x5-x8: 0.0001
-def evaluate(values, a=[0, 1, 4.5, 9, 99, 99, 99, 99]):
+def evaluate(values, a=None):
 
     if type(values) != np.ndarray:
         raise TypeError("The argument `values` must be a numpy ndarray")
+    if a is None:
+        a = [0, 1, 4.5, 9, 99, 99, 99, 99]
 
     ltz = np.array(values) < 0
     gto = np.array(values) > 1
@@ -35,12 +37,16 @@ def evaluate(values, a=[0, 1, 4.5, 9, 99, 99, 99, 99]):
     return Y
 
 
-def partial_first_order_variance(a=[0, 1, 4.5, 9, 99, 99, 99, 99]):
+def partial_first_order_variance(a=None):
+    if a is None:
+        a = [0, 1, 4.5, 9, 99, 99, 99, 99]
     a = np.array(a)
     return np.divide(1, np.multiply(3, np.square(1 + a)))
 
 
-def total_variance(a=[0, 1, 4.5, 9, 99, 99, 99, 99]):
+def total_variance(a=None):
+    if a is None:
+        a = [0, 1, 4.5, 9, 99, 99, 99, 99]
     a = np.array(a)
     return np.add(-1, np.product(1 + partial_first_order_variance(a), axis=0))
 
