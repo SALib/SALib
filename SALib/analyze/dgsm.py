@@ -48,7 +48,7 @@ def analyze(problem, X, Y, num_resamples=1000,
     else:
         raise RuntimeError("Incorrect number of samples in model output file.")
 
-    if conf_level < 0 or conf_level > 1:
+    if not 0 < conf_level < 1:
         raise RuntimeError("Confidence level must be between 0-1.")
 
     base = np.empty(N)

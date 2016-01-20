@@ -229,7 +229,7 @@ def nth(iterable, n, default=None):
 
 def make_index_list(N, num_params, groups=None):
 
-    if groups == None:
+    if groups is None:
         groups = num_params
 
     index_list = []
@@ -240,7 +240,7 @@ def make_index_list(N, num_params, groups=None):
 
 def compile_output(input_sample, N, num_params, maximum_combo, groups=None):
 
-    if groups == None:
+    if groups is None:
         groups = num_params
         
     check_input_sample(input_sample, groups, N)
