@@ -19,14 +19,14 @@ except ImportError:
 
 def analyze(problem, Y, calc_second_order=True, num_resamples=100,
             conf_level=0.95, print_to_console=False, parallel=False,
-            n_processors=None):
+            n_processors=None, groups = False):
     """Perform Sobol Analysis on model outputs.
-    
+
     Returns a dictionary with keys 'S1', 'S1_conf', 'ST', and 'ST_conf', where
     each entry is a list of size D (the number of parameters) containing the
     indices in the same order as the parameter file.  If calc_second_order is
     True, the dictionary also contains keys 'S2' and 'S2_conf'.
-    
+
     Parameters
     ----------
     problem : dict
@@ -41,7 +41,9 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
         The confidence interval level (default 0.95)
     print_to_console : bool
         Print results directly to console (default False)
-        
+    groups : bool
+        Calculate indices based on groups (default False)
+
     References
     ----------
     .. [1] Sobol, I. M. (2001).  "Global sensitivity indices for nonlinear
@@ -56,15 +58,18 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
            output.  Design and estimator for the total sensitivity index."
            Computer Physics Communications, 181(2):259-270,
            doi:10.1016/j.cpc.2009.09.018.
-           
+
     Examples
     --------
     >>> X = saltelli.sample(problem, 1000)
     >>> Y = Ishigami.evaluate(X)
     >>> Si = sobol.analyze(problem, Y, print_to_console=True)
     """
-
-    D = problem['num_vars']
+    # funding number of variables/groups for sensitivity indices
+    if groups:
+        D = len(problem['groups'])
+    else:
+        D = problem['num_vars']
 
     if calc_second_order and Y.size % (2 * D + 2) == 0:
         N = int(Y.size / (2 * D + 2))
@@ -72,7 +77,7 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
         N = int(Y.size / (D + 2))
     else:
         raise RuntimeError("""
-        Incorrect number of samples in model output file. 
+        Incorrect number of samples in model output file.
         Confirm that calc_second_order matches option used during sampling.""")
 
     if not 0 < conf_level < 1:
@@ -97,10 +102,10 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
                 for k in range(j + 1, D):
                     S['S2'][j, k] = second_order(
                         A, AB[:, j], AB[:, k], BA[:, j], B)
-                    S['S2_conf'][j, k] = Z * second_order(A[r], AB[r, j], 
+                    S['S2_conf'][j, k] = Z * second_order(A[r], AB[r, j],
                         AB[r, k], BA[r, j], B[r]).std(ddof=1)
 
-    else:           
+    else:
         tasks, n_processors = create_task_list(D, calc_second_order, n_processors)
 
         func = partial(sobol_parallel, Z, A, AB, BA, B, r)
@@ -153,7 +158,7 @@ def create_Si_dict(D, calc_second_order):
     return S
 
 
-def separate_output_values(Y, D, N, calc_second_order): 
+def separate_output_values(Y, D, N, calc_second_order):
     AB = np.empty((N, D))
     BA = np.empty((N, D)) if calc_second_order else None
     step = 2 * D + 2 if calc_second_order else D + 2
@@ -193,7 +198,7 @@ def create_task_list(D, calc_second_order, n_processors):
     # Create list with one entry (key, parameter 1, parameter 2) per sobol
     # index (+conf.). This is used to supply parallel tasks to multiprocessing.Pool
     tasks_first_order = [[d, j, None] for j in range(D) for d in ('S1', 'S1_conf', 'ST', 'ST_conf')]
-    
+
     # Add second order (+conf.) to tasks
     tasks_second_order = []
     if calc_second_order:
@@ -208,7 +213,7 @@ def create_task_list(D, calc_second_order, n_processors):
     else:
         # merges both lists alternating its elements and splits the resulting list into n_processors sublists
         tasks = np.array_split([v for v in sum(
-            zip_longest(tasks_first_order[::-1], tasks_second_order), ()) 
+            zip_longest(tasks_first_order[::-1], tasks_second_order), ())
                 if v is not None], n_processors)
 
     return tasks, n_processors
@@ -272,5 +277,5 @@ if __name__ == "__main__":
                    usecols=(args.column,))
 
     analyze(problem, Y, (args.max_order == 2),
-            num_resamples=args.resamples, print_to_console=True, 
+            num_resamples=args.resamples, print_to_console=True,
             parallel=args.parallel, n_processors=args.n_processors)
