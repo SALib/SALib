@@ -7,7 +7,7 @@ from . import sobol_sequence
 from ..util import scale_samples, read_param_file
 
 
-def sample(problem, N, calc_second_order=True,groups=False):
+def sample(problem, N, calc_second_order=True,groups=False,dists=False):
     """Generates model inputs using Saltelli's extension of the Sobol sequence.
 
     Returns a NumPy matrix containing the model inputs using Saltelli's sampling
@@ -27,7 +27,9 @@ def sample(problem, N, calc_second_order=True,groups=False):
     calc_second_order : bool
         Calculate second-order sensitivities (default True)
     groups : bool
-        Cross-sample based on groups of parameters
+        Should cross-sampling be based on groups of parameters
+    dists : bool
+    	Should 0-1 values be converted to non-uniform distributions
     """
     # finding number of groups of groups, Dg
     # if groups = False, number of groups is the number of variables
@@ -35,30 +37,30 @@ def sample(problem, N, calc_second_order=True,groups=False):
         Dg = len(problem['groups'])
     else:
         Dg = problem['num_vars']
-
+		
     # number of variables
     D = problem['num_vars']
-
+	
     # How many values of the Sobol sequence to skip
     skip_values = 1000
-
+	
     # Create base sequence - could be any type of sampling
     base_sequence = sobol_sequence.sample(N + skip_values, 2 * D)
-
+	
     if calc_second_order:
         saltelli_sequence = np.empty([(2 * Dg + 2) * N, D])
     else:
         saltelli_sequence = np.empty([(Dg + 2) * N, D])
     index = 0
-
+	
     for i in range(skip_values, N + skip_values):
-
+		
         # Copy matrix "A"
         for j in range(D):
             saltelli_sequence[index, j] = base_sequence[i, j]
-
+			
         index += 1
-
+		
         # Cross-sample elements of "B" into "A"
         if groups:
             # method of cross-sampling "B" into "A" for groups
@@ -78,7 +80,7 @@ def sample(problem, N, calc_second_order=True,groups=False):
                         for k in range(len(problem['groups'][m])):
                             j = problem['names'].index(problem['groups'][m][k])
                             saltelli_sequence[index, j] = base_sequence[i, j]
-
+							
                 index += 1
         else:
             # cross-sampling without groups
@@ -88,9 +90,9 @@ def sample(problem, N, calc_second_order=True,groups=False):
                         saltelli_sequence[index, j] = base_sequence[i, j + D]
                     else:
                         saltelli_sequence[index, j] = base_sequence[i, j]
-
+						
                 index += 1
-
+		
         # Cross-sample elements of "A" into "B"
         # Only needed if you're doing second-order indices (true by default)
         if calc_second_order:
@@ -112,9 +114,9 @@ def sample(problem, N, calc_second_order=True,groups=False):
                             for k in range(len(problem['groups'][m])):
                                 j = problem['names'].index(problem['groups'][m][k])
                                 saltelli_sequence[index, j] = base_sequence[i, j+D]
-
+								
                     index += 1
-
+					
             else:
                 # cross-sampling without groups
                 for k in range(D):
@@ -123,17 +125,21 @@ def sample(problem, N, calc_second_order=True,groups=False):
                             saltelli_sequence[index, j] = base_sequence[i, j]
                         else:
                             saltelli_sequence[index, j] = base_sequence[i, j + D]
-
+							
                     index += 1
-
+					
         # Copy matrix "B"
         for j in range(D):
             saltelli_sequence[index, j] = base_sequence[i, j + D]
-
+			
         index += 1
-
-    scale_samples(saltelli_sequence, problem['bounds'])
-    return saltelli_sequence
+    # if/else conditions for using non-uniform distributions
+    if dists:
+    	conv_saltelli = scale_samples(saltelli_sequence, problem['bounds'],problem['dists'])
+    else:
+    	conv_saltelli = scale-Samples(saltelli_sequence,problem['bounds'],None)
+    
+    return conv_saltelli
 
 if __name__ == "__main__":
 
