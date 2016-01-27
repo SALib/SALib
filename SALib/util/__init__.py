@@ -4,9 +4,9 @@ import csv
 from warnings import warn
 
 import numpy as np
+import scipy as sp
 
-
-def scale_samples(params, bounds):
+def scale_samples(params, bounds, dists=None):
     '''
     Rescales samples in 0-to-1 range to arbitrary bounds.
 
@@ -14,24 +14,108 @@ def scale_samples(params, bounds):
         bounds - list of lists of dimensions num_params-by-2
         params - numpy array of dimensions num_params-by-N,
         where N is the number of samples
+        dists - vector of distribution names, None implies uniform
     '''
-    # Check bounds are legal (upper bound is greater than lower bound)
-    b = np.array(bounds)
-    lower_bounds = b[:, 0]
-    upper_bounds = b[:, 1]
-
-    if np.any(lower_bounds >= upper_bounds):
-        raise ValueError("Bounds are not legal")
-
-    # This scales the samples in-place, by using the optional output
-    # argument for the numpy ufunctions
-    # The calculation is equivalent to:
-    #   sample * (upper_bound - lower_bound) + lower_bound
-    np.add(np.multiply(params,
-                       (upper_bounds - lower_bounds),
-                       out=params),
-           lower_bounds,
-           out=params)
+    if dists == None:
+        # computations when only uniform distributoins are used
+		
+        # Check bounds are legal (upper bound is greater than lower bound)
+        b = np.array(bounds)
+        lower_bounds = b[:, 0]
+        upper_bounds = b[:, 1]
+		
+        if np.any(lower_bounds >= upper_bounds):
+            raise ValueError("Bounds are not legal")
+		
+        # This scales the samples in-place, by using the optional output
+        # argument for the numpy ufunctions
+        # The calculation is equivalent to:
+        #   sample * (upper_bound - lower_bound) + lower_bound
+        np.add(np.multiply(params,
+                           (upper_bounds - lower_bounds),
+                           out=params),
+               lower_bounds,
+               out=params)
+	
+    else:
+    	# computations for non-uniform distributions
+    	
+        # initializing matrix to hold converted values
+        conv_param =  np.empty([len(params),len(params[0])])
+		
+        if len(dists) != len(params[0]):
+            print('Invalid number of distributions')
+			
+        for i in range(len(dists)):
+            # loop over variables and converting them one by one into specified distributions
+            
+            # uniform distribution
+            if dists[i] == 'unif':
+                arg1 = bounds[i][0] # lower bound
+                arg2 = bounds[i][1] # upper bound
+                
+                # printing error when upper bound is less than lower bound
+                if arg1 > arg2:
+                    print('Upper bound must be less than lower bound')
+                else:
+                    conv_param[:,i] = params[:,i]*(arg2-arg1) + arg1
+					
+			# normal distribution
+            elif dists[i] == 'norm':
+                arg1 = bounds[i][0] # mean
+                arg2 = bounds[i][1] # standard deviation
+                
+                # printing error when standard deviation is not positive
+                if arg2 <= 0:
+                    print('Standard deviation must be positive')
+                else:
+                    conv_param[:,i] = sp.stats.norm.ppf(params[:,i],loc=arg1,scale=arg2)
+					
+			# log-normal distribution (base-e not base-10)
+            elif dists[i] == 'lognorm':
+                arg1 = bounds[i][0] # ln-space mean
+                arg2 = bounds[i][1] # ln-space standard deviation
+                
+                # checking if real-space lower bound is specified
+                if(len(bound[i]) == 3):
+                    arg3 = bounds[i][2]
+                else:
+                    arg3 = 0. # lower bound
+                
+                # printing error if log-space standard deviation is not positive
+                if arg2[i] <= 0:
+                    print('Standard deviation must be positive')
+                else:
+                    conv_param[:,i] = exp(sp.stats.norm.ppf(params[:,i],loc=arg1,scale=arg2))+arg3
+			
+			# triangular distribution
+            elif dists[i] == 'triang':
+                arg1 = bounds[i][0] # lower bound
+                arg2 = bounds[i][1] # upper bound
+                
+                # condition is most-likely value specified
+                # if not specified, use average of upper and lower bounds
+                if(len(bound[i]) == 3):
+                    arg3 = bounds[i][2] # most likely
+                else:
+                    arg3 = np.mean([arg1,arg2]) # lower bound
+                
+                # checking upper bound less than lower bound
+                # and that most likely value within the bounds
+                if arg1 > arg2:
+                    print('Upper bound must be greater than lower bound')
+                elif (arg3 < arg1) or (arg3 > arg2):
+                    print('Most likely value must be within upper and lower bounds')
+                else:
+                    a = arg1 # location (lower bound)
+                    b = arg2 - arg1 # scale (width of distribution)
+                    c = (arg3-a)/b # most likely as percentage of scale
+                    conv_param[:,i] = sp.stats.triang.ppf(params[:,i],c=c,loc=a,scale=b)
+            
+            # error message for a distribution type that is not valid
+            else:
+                print('Not a valid distribution type')
+    	return(conv_param)
 
 def unscale_samples(params, bounds):
     '''
@@ -135,7 +219,7 @@ def compute_groups_from_parameter_file(group_list, num_vars):
 
     return np.matrix(output), unique_group_names
 
-    
+
 def requires_gurobipy(_has_gurobi):
     '''
     Decorator function which takes a boolean _has_gurobi as an argument.
