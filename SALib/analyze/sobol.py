@@ -19,7 +19,7 @@ except ImportError:
 
 def analyze(problem, Y, calc_second_order=True, num_resamples=100,
             conf_level=0.95, print_to_console=False, parallel=False,
-            n_processors=None, groups = False):
+            n_processors=None):
     """Perform Sobol Analysis on model outputs.
 
     Returns a dictionary with keys 'S1', 'S1_conf', 'ST', and 'ST_conf', where
@@ -41,8 +41,6 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
         The confidence interval level (default 0.95)
     print_to_console : bool
         Print results directly to console (default False)
-    groups : bool
-        Calculate indices based on groups (default False)
 
     References
     ----------
@@ -65,11 +63,12 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
     >>> Y = Ishigami.evaluate(X)
     >>> Si = sobol.analyze(problem, Y, print_to_console=True)
     """
-    # funding number of variables/groups for sensitivity indices
-    if groups:
-        D = len(problem['groups'])
-    else:
+    # determining if groups are defined and adjusting the number
+    # of rows in the cross-sampled matrix accordingly
+    if problem['groups'] == None:
         D = problem['num_vars']
+    else:
+        D = len(problem['groups'][1])
 
     if calc_second_order and Y.size % (2 * D + 2) == 0:
         N = int(Y.size / (2 * D + 2))
@@ -80,7 +79,7 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
         Incorrect number of samples in model output file.
         Confirm that calc_second_order matches option used during sampling.""")
 
-    if not 0 < conf_level < 1:
+    if conf_level < 0 or conf_level > 1:
         raise RuntimeError("Confidence level must be between 0-1.")
 
     A,B,AB,BA = separate_output_values(Y, D, N, calc_second_order)
@@ -205,7 +204,7 @@ def create_task_list(D, calc_second_order, n_processors):
         tasks_second_order = [[d, j, k] for j in range(D) for k in
                             range(j + 1, D) for d in ('S2', 'S2_conf')]
 
-    if n_processors is None:
+    if n_processors == None:
         n_processors = min(cpu_count(), len(tasks_first_order) + len(tasks_second_order))
 
     if not calc_second_order:
@@ -237,21 +236,37 @@ def Si_list_to_dict(S_list, D, calc_second_order):
 
 def print_indices(S, problem, calc_second_order):
     # Output to console
-    D = problem['num_vars']
-    print('Parameter S1 S1_conf ST ST_conf')
-
-    for j in range(D):
-        print('%s %f %f %f %f' % (problem['names'][j], S['S1'][
-            j], S['S1_conf'][j], S['ST'][j], S['ST_conf'][j]))
-
-    if calc_second_order:
-        print('\nParameter_1 Parameter_2 S2 S2_conf')
+    if problem['groups'] == None:
+        D = problem['num_vars']
+        print('Parameter S1 S1_conf ST ST_conf')
 
         for j in range(D):
-            for k in range(j + 1, D):
-                print("%s %s %f %f" % (problem['names'][j], problem[
-                    'names'][k], S['S2'][j, k], S['S2_conf'][j, k]))
+            print('%s %f %f %f %f' % (problem['names'][j], S['S1'][
+                j], S['S1_conf'][j], S['ST'][j], S['ST_conf'][j]))
 
+        if calc_second_order:
+            print('\nParameter_1 Parameter_2 S2 S2_conf')
+
+            for j in range(D):
+                for k in range(j + 1, D):
+                    print("%s %s %f %f" % (problem['names'][j], problem[
+                        'names'][k], S['S2'][j, k], S['S2_conf'][j, k]))
+
+    else:
+        D = len(problem['groups'][1])
+        print('Group S1 S1_conf ST ST_conf')
+
+        for j in range(D):
+            print('%s %f %f %f %f' % (problem['groups'][1][j], S['S1'][
+                j], S['S1_conf'][j], S['ST'][j], S['ST_conf'][j]))
+
+        if calc_second_order:
+            print('\nGroup_1 Group_2 S2 S2_conf')
+
+            for j in range(D):
+                for k in range(j + 1, D):
+                    print("%s %s %f %f" % (problem['groups'][1][j], problem[
+                    'groups'][1][k], S['S2'][j, k], S['S2_conf'][j, k]))
 
 if __name__ == "__main__":
     parser = common_args.create()
