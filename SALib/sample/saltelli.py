@@ -4,10 +4,10 @@ import numpy as np
 
 from . import common_args
 from . import sobol_sequence
-from ..util import scale_samples, read_param_file
+from ..util import scale_samples, nonuniform_scale_samples, read_param_file
 
 
-def sample(problem, N, calc_second_order=True,groups=False,dists=False):
+def sample(problem, N, calc_second_order=True):
     """Generates model inputs using Saltelli's extension of the Sobol sequence.
 
     Returns a NumPy matrix containing the model inputs using Saltelli's sampling
@@ -26,120 +26,99 @@ def sample(problem, N, calc_second_order=True,groups=False,dists=False):
         The number of samples to generate
     calc_second_order : bool
         Calculate second-order sensitivities (default True)
-    groups : bool
-        Should cross-sampling be based on groups of parameters
-    dists : bool
-    	Should 0-1 values be converted to non-uniform distributions
     """
-    # finding number of groups of groups, Dg
-    # if groups = False, number of groups is the number of variables
-    if groups:
-        Dg = len(problem['groups'])
-    else:
+    if problem['groups'] == None:
+        groups = False
         Dg = problem['num_vars']
-		
-    # number of variables
+    else:
+        groups = True
+        Dg = len(problem['groups'][1])
+
     D = problem['num_vars']
-	
+
     # How many values of the Sobol sequence to skip
     skip_values = 1000
-	
+
     # Create base sequence - could be any type of sampling
     base_sequence = sobol_sequence.sample(N + skip_values, 2 * D)
-	
+
     if calc_second_order:
         saltelli_sequence = np.empty([(2 * Dg + 2) * N, D])
     else:
         saltelli_sequence = np.empty([(Dg + 2) * N, D])
     index = 0
-	
+
     for i in range(skip_values, N + skip_values):
-		
+
         # Copy matrix "A"
         for j in range(D):
             saltelli_sequence[index, j] = base_sequence[i, j]
-			
+
         index += 1
-		
+
         # Cross-sample elements of "B" into "A"
+        # condition for group sampling (groups is True)
         if groups:
             # method of cross-sampling "B" into "A" for groups
-            # groups that are "off-diagonal" (l != m) will be drawn from "A"
-            # groups that are "on-diagonal" (l = m) will be drawn from "B"
-            for l in range(len(problem['groups'])):
-                for m in range(len(problem['groups'])):
-                    if l == m:
-                        # condition for being "on-diagonal" group
-                        # "on-diagonal" groups have elements taken from "B"
-                        for k in range(len(problem['groups'][m])):
-                            j = problem['names'].index(problem['groups'][m][k])
-                            saltelli_sequence[index, j] = base_sequence[i, j + D]
+            # groups that are "off-diagional" (l != m) will be form "A"
+            # groups that are "on-diagional" (l = m) will be from "B"
+            for l in range(Dg):
+                for m in range(D):
+                    if problem['groups'][0][m,l] == 1:
+                        saltelli_sequence[index, m] = base_sequence[i, m + D]
                     else:
-                        # condition for being "off-diagonal" group
-                        # "off-diagonal" groups have elements taken from "A"
-                        for k in range(len(problem['groups'][m])):
-                            j = problem['names'].index(problem['groups'][m][k])
-                            saltelli_sequence[index, j] = base_sequence[i, j]
-							
+                        saltelli_sequence[index, m] = base_sequence[i, m]
+
                 index += 1
         else:
-            # cross-sampling without groups
             for k in range(D):
                 for j in range(D):
                     if j == k:
                         saltelli_sequence[index, j] = base_sequence[i, j + D]
                     else:
                         saltelli_sequence[index, j] = base_sequence[i, j]
-						
+
                 index += 1
-		
+
         # Cross-sample elements of "A" into "B"
         # Only needed if you're doing second-order indices (true by default)
         if calc_second_order:
+            # condition for group sampling (groups is True)
             if groups:
                 # method of cross-sampling "A" into "B" for groups
-                # groups that are "off-diagonal" (l != m) will be drawn from "B"
-                # groups that are "on-diagonal" (l = m) will be drawn from "A"
-                for l in range(len(problem['groups'])):
-                    for m in range(len(problem['groups'])):
-                        if l == m:
-                            # condition for being "on-diagonal" group
-                            # "on-diagonal" groups have elements taken from "A"
-                            for k in range(len(problem['groups'][m])):
-                                j = problem['names'].index(problem['groups'][m][k])
-                                saltelli_sequence[index, j] = base_sequence[i, j]
+                # groups that are "off-diagional" (l != m) will be form "B"
+                # groups that are "on-diagional" (l = m) will be from "A"
+                for l in range(Dg):
+                    for m in range(D):
+                        if problem['groups'][0][m,l] == 1:
+                            saltelli_sequence[index, m] = base_sequence[i, m]
                         else:
-                            # condition for being "off-diagonal" group
-                            # "off-diagonal" groups have elements taken from "B"
-                            for k in range(len(problem['groups'][m])):
-                                j = problem['names'].index(problem['groups'][m][k])
-                                saltelli_sequence[index, j] = base_sequence[i, j+D]
-								
+                            saltelli_sequence[index, m] = base_sequence[i, m + D]
+
                     index += 1
-					
             else:
-                # cross-sampling without groups
                 for k in range(D):
                     for j in range(D):
                         if j == k:
                             saltelli_sequence[index, j] = base_sequence[i, j]
                         else:
                             saltelli_sequence[index, j] = base_sequence[i, j + D]
-							
+
                     index += 1
-					
+
         # Copy matrix "B"
         for j in range(D):
             saltelli_sequence[index, j] = base_sequence[i, j + D]
-			
+
         index += 1
-    # if/else conditions for using non-uniform distributions
-    if dists:
-    	conv_saltelli = scale_samples(saltelli_sequence, problem['bounds'],problem['dists'])
+    if problem['dists'] == None:
+        # scaling values out of 0-1 range with uniform distributions
+        scale_samples(saltelli_sequence,problem['bounds'],None)
+        return saltelli_sequence
     else:
-    	conv_saltelli = scale-Samples(saltelli_sequence,problem['bounds'],None)
-    
-    return conv_saltelli
+        # scaling values to other distributions based on inverse CDFs
+        scaled_saltelli = nonuniform_scale_samples(saltelli_sequence,problem['bounds'],problem['dists'])
+        return scaled_saltelli
 
 if __name__ == "__main__":
 
