@@ -6,7 +6,7 @@ from warnings import warn
 import numpy as np
 import scipy as sp
 
-def scale_samples(params, bounds, dists):
+def scale_samples(params, bounds):
     '''
     Rescales samples in 0-to-1 range to arbitrary bounds.
 
@@ -75,7 +75,7 @@ def nonuniform_scale_samples(params, bounds, dists):
                 lognorm: lognormal with ln-space mean and standard deviation
     '''
     b = np.array(bounds)
-    
+
     if len(params[0]) != len(dists):
         print('Incorrect number of distributions specified')
         print('Original parameters returned')

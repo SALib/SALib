@@ -113,7 +113,7 @@ def sample(problem, N, calc_second_order=True):
         index += 1
     if problem['dists'] == None:
         # scaling values out of 0-1 range with uniform distributions
-        scale_samples(saltelli_sequence,problem['bounds'],None)
+        scale_samples(saltelli_sequence,problem['bounds'])
         return saltelli_sequence
     else:
         # scaling values to other distributions based on inverse CDFs
