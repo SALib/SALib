@@ -65,7 +65,7 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
     """
     # determining if groups are defined and adjusting the number
     # of rows in the cross-sampled matrix accordingly
-    if problem['groups'] == None:
+    if not problem.get('groups'):
         D = problem['num_vars']
     else:
         D = len(problem['groups'][1])
@@ -118,7 +118,6 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
     # Print results to console
     if print_to_console:
         print_indices(S, problem, calc_second_order)
-
 
     return S
 
@@ -204,7 +203,7 @@ def create_task_list(D, calc_second_order, n_processors):
         tasks_second_order = [[d, j, k] for j in range(D) for k in
                             range(j + 1, D) for d in ('S2', 'S2_conf')]
 
-    if n_processors == None:
+    if n_processors is None:
         n_processors = min(cpu_count(), len(tasks_first_order) + len(tasks_second_order))
 
     if not calc_second_order:
@@ -236,7 +235,7 @@ def Si_list_to_dict(S_list, D, calc_second_order):
 
 def print_indices(S, problem, calc_second_order):
     # Output to console
-    if problem['groups'] == None:
+    if not problem.get('groups'):
         D = problem['num_vars']
         print('Parameter S1 S1_conf ST ST_conf')
 
