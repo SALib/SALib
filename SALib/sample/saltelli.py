@@ -27,14 +27,33 @@ def sample(problem, N, calc_second_order=True):
     calc_second_order : bool
         Calculate second-order sensitivities (default True)
     """
-    if problem['groups'] == None:
+    D = problem['num_vars']
+
+    if not problem.get('groups'):
         groups = False
         Dg = problem['num_vars']
     else:
         groups = True
-        Dg = len(problem['groups'][1])
-
-    D = problem['num_vars']
+        # condition for when problem was defined from parameter file
+        # can access the 'groups' tuple (matrix, list of unique group names)
+        # to determine the number of groups
+        # if problem defined as a dictionary in the code, find the number
+        # of unique group names
+        # also make matrix to account for group names
+        if len(problem['groups']) == 2:
+            Dg = len(problem['groups'][1])
+        else:
+            Dg = len(np.unique(problem['groups']))
+            gp_mat = np.zeros([D, Dg])
+            for i in range(Dg):
+                # group name to check for equivalency
+                groupNameIt = np.unique(problem['groups'])[i]
+                for j in range(D):
+                    if problem['groups'][j] == groupNameIt:
+                        gp_mat[j,i] = 1
+            # making a tuple similar to the one made by the read_param_file
+            # for use later in the code
+            problem['groups'] = (gp_mat,np.unique(problem['groups']))
 
     # How many values of the Sobol sequence to skip
     skip_values = 1000
@@ -111,7 +130,7 @@ def sample(problem, N, calc_second_order=True):
             saltelli_sequence[index, j] = base_sequence[i, j + D]
 
         index += 1
-    if problem['dists'] == None:
+    if not problem.get('dists'):
         # scaling values out of 0-1 range with uniform distributions
         scale_samples(saltelli_sequence,problem['bounds'])
         return saltelli_sequence
