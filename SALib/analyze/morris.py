@@ -6,7 +6,7 @@ from scipy.stats import norm
 import numpy as np
 
 from . import common_args
-from ..util import read_param_file
+from ..util import read_param_file, compute_groups_matrix
 
 
 def analyze(problem, X, Y,
@@ -71,7 +71,7 @@ def analyze(problem, X, Y,
     if (problem['groups'] is None) & (Y.size % (num_vars + 1) == 0):
         num_trajectories = int(Y.size / (num_vars + 1))
     elif problem['groups'] is not None:
-        groups, unique_group_names = problem['groups']
+        groups, unique_group_names = compute_groups_matrix(problem['groups'], num_vars)
         number_of_groups = len(unique_group_names)
         num_trajectories = int(Y.size / (number_of_groups + 1))
     else:

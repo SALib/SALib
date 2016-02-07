@@ -150,6 +150,7 @@ def read_param_file(filename, delimiter=None):
         Param1,0,1,Group1,dist1
         Param2,0,1,Group2,dist2
         Param3,0,1,Group3,dist3
+    (Group and Dist columns are optional)
     And returns a dictionary containing:
         - names - the names of the parameters
         - bounds - a list of lists of lower and upper bounds
@@ -163,11 +164,10 @@ def read_param_file(filename, delimiter=None):
     '''
     names = []
     bounds = []
-    group_list = []
-    dist_list = []
+    groups = []
+    dists = []
     num_vars = 0
     fieldnames = ['name', 'lower_bound', 'upper_bound', 'group', 'dist']
-    dist_none_count = 0 # used when evaluating if non-uniform distributions are specified
 
     with open(filename, 'rU') as csvfile:
         dialect = csv.Sniffer().sniff(csvfile.read(1024), delimiters=delimiter)
@@ -186,42 +186,38 @@ def read_param_file(filename, delimiter=None):
                 # If the fourth column does not contain a group name, use
                 # the parameter name
                 if row['group'] is None:
-                    group_list.append(row['name'])
+                    groups.append(row['name'])
                 elif row['group'] is 'NA':
-                    group_list.append(row['name'])
+                    groups.append(row['name'])
                 else:
-                    group_list.append(row['group'])
+                    groups.append(row['group'])
 
                 # If the fifth column does not contain a distribution
                 # use uniform
                 if row['dist'] is None:
-                    dist_list.append('unif')
-                    dist_none_count += 1
+                    dists.append('unif')
                 else:
-                    dist_list.append(row['dist'])
+                    dists.append(row['dist'])
 
-    group_matrix, group_names = compute_groups_from_parameter_file(
-        group_list, num_vars)
+    # group_matrix, group_names = compute_groups_from_parameter_file(
+    #     groups, num_vars)
 
-    # setting group_tuple to zero if no groups are defined
-    # or all groups are 'NA'
-    if np.all(group_matrix == np.eye(num_vars)):
-        group_tuple = None
-    elif len(np.unique(group_list)) == 1:
-        group_tuple = None
-    else:
-        group_tuple = (group_matrix, group_names)
+    if len(set(groups)) == num_vars:
+        groups = None
+    elif len(set(groups)) == 1:
+        raise ValueError('''Only one group defined, results will not be
+            meaningful''')
 
-    # setting dist list to none if all are uniform
+    # setting dists to none if all are uniform
     # because non-uniform scaling is not needed
-    if dist_none_count == num_vars:
-        dist_list = None
+    if all([d == 'unif' for d in dists]):
+        dists = None
 
     return {'names': names, 'bounds': bounds, 'num_vars': num_vars,
-            'groups': group_tuple, 'dists': dist_list}
+            'groups': groups, 'dists': dists}
 
 
-def compute_groups_from_parameter_file(group_list, num_vars):
+def compute_groups_matrix(groups, num_vars):
     '''
     Computes a k-by-g matrix which notes factor membership of groups
     where:
@@ -229,16 +225,21 @@ def compute_groups_from_parameter_file(group_list, num_vars):
         g is the number of groups
     Also returns a g-length list of unique group_names whose positions
     correspond to the order of groups in the k-by-g matrix
+    Returns: a tuple containing i) a group matrix assigning parameters to
+             groups, and ii) a list of unique group names
     '''
+    if not groups:
+        return None
+    
     # Get a unique set of the group names
-    unique_group_names = list(OrderedDict.fromkeys(group_list))
+    unique_group_names = list(OrderedDict.fromkeys(groups))
     number_of_groups = len(unique_group_names)
 
     indices = dict([(x, i) for (i, x) in enumerate(unique_group_names)])
 
     output = np.zeros((num_vars, number_of_groups), dtype=np.int)
 
-    for parameter_row, group_membership in enumerate(group_list):
+    for parameter_row, group_membership in enumerate(groups):
         group_index = indices[group_membership]
         output[parameter_row, group_index] = 1
 

@@ -8,7 +8,7 @@ from numpy.testing import assert_equal, assert_allclose
 import numpy as np
 
 from ..util import read_param_file, scale_samples, unscale_samples, \
-                   compute_groups_from_parameter_file
+                   compute_groups_matrix
 
 
 def setup_function():
@@ -17,6 +17,12 @@ def setup_function():
          ofile.write("Test1 0.0 100.0\n")
          ofile.write("Test2 5.0 51.0\n")
 
+def setup_param_file_group_dist():
+    filename = "SALib/tests/test_params_group_dist.txt"
+    with open(filename, "w") as ofile:
+         ofile.write("Test1 0.0 100.0 Group1 unif\n")
+         ofile.write("Test2 5.0 51.0 Group1 triang\n")
+         ofile.write("Test3 10.0 1.0 Group2 norm\n")
 
 def setup_csv_param_file_with_whitespace_in_names():
     filename = "SALib/tests/test_params_csv_whitespace.txt"
@@ -58,6 +64,20 @@ def test_readfile():
     assert_equal(pf['bounds'], [[0, 100], [5, 51]])
     assert_equal(pf['num_vars'], 2)
     assert_equal(pf['names'], ['Test1', 'Test2'])
+
+
+@with_setup(setup_param_file_group_dist, teardown)
+def test_readfile_group_dist():
+    '''
+    Tests a parameter file with groups and distributions is read correctly
+    '''
+    filename = "SALib/tests/test_params_group_dist.txt"
+    pf = read_param_file(filename)
+    assert_equal(pf['bounds'], [[0, 100], [5, 51], [10, 1]])
+    assert_equal(pf['num_vars'], 3)
+    assert_equal(pf['names'], ['Test1', 'Test2', 'Test3'])
+    assert_equal(pf['groups'], ['Group1', 'Group1', 'Group2'])
+    assert_equal(pf['dists'], ['unif', 'triang', 'norm'])
 
 
 @with_setup(setup_csv_param_file_with_whitespace_in_names, teardown)
@@ -155,7 +175,7 @@ def test_compute_groups_from_parameter_file():
     Tests that a group file is read correctly
     '''
     actual_matrix, actual_unique_names = \
-        compute_groups_from_parameter_file(['Group 1', 'Group 2', 'Group 2'], 3)
+        compute_groups_matrix(['Group 1', 'Group 2', 'Group 2'], 3)
 
     assert_equal(actual_matrix, np.matrix('1,0;0,1;0,1', dtype=np.int))
     assert_equal(actual_unique_names, ['Group 1', 'Group 2'])
