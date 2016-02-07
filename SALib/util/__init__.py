@@ -76,73 +76,49 @@ def nonuniform_scale_samples(params, bounds, dists):
     '''
     b = np.array(bounds)
 
-    if len(params[0]) != len(dists):
-        print('Incorrect number of distributions specified')
-        print('Original parameters returned')
-        return params
-    else:
-        # initializing matrix for converted values
-        conv_params = np.empty([len(params),len(params[0])])
+    # initializing matrix for converted values
+    conv_params = np.zeros_like(params)
 
-        # loop over the parameters
-        for i in range(len(conv_params[0])):
-            # setting first and second arguments for distributions
-            arg1 = b[i][0]
-            arg2 = b[i][1]
+    # loop over the parameters
+    for i in range(len(conv_params[0])):
+        # setting first and second arguments for distributions
+        b1 = b[i][0]
+        b2 = b[i][1]
 
-            # triangular distribution
-            # paramters are width (scale) and location of peak
-            # location of peak is relative to scale
-            # e.g., 0.25 means peak is 25% of the width distance from zero
-            if dists[i] == 'triang':
-                # checking for correct parameters
-                if arg1 <= 0:
-                    print('Scale must be greater than zero')
-                    print('Parameter not converted')
-                    conv_params[:,i] = params[:,i]
-                elif (arg2 <= 0) or (arg2 >= 1):
-                    print('Peak must be on interval [0,1]')
-                    print('Parameter not converted')
-                    conv_params[:,i] = params[:,i]
-                else:
-                    conv_params[:,i] = sp.stats.triang.ppf(params[:,i],c=arg2,scale=arg1,loc=0)
-
-            # uniform distribution
-            # parameters are lower and upper bounds
-            elif dists[i] == 'unif':
-                # checking that upper bound is greater than lower bound
-                if arg1 >= arg2:
-                    print('Lower bound greater than upper bound')
-                    print('Parameter not converted')
-                    conv_params[:,i] = params[:,i]
-                else:
-                    conv_params[:,i] = params[:,i]*(arg2-arg1) + arg1
-
-            # normal distribution
-            # paramters are mean and standard deviation
-            elif dists[i] == 'norm':
-                # checking for valid parameters
-                if arg2 <= 0:
-                    print('Scale must be greater than zero')
-                    print('Parameter not converted')
-                    conv_params[:,i] = params[:,i]
-                else:
-                    conv_params[:,i] = sp.stats.norm.ppf(params[:,i],loc=arg1,scale=arg2)
-
-            # lognormal distribution (ln-space, not base-10)
-            # paramters are ln-space mean and standard deviation
-            elif dists[i] == 'lognorm':
-                # checking for valid parameters
-                if arg2 <= 0:
-                    print('Scale must be greater than zero')
-                    print('Parameter not converted')
-                    conv_params[:,i] = params[:,i]
-                else:
-                    conv_params[:,i] = np.exp(sp.stats.norm.ppf(params[:,i],loc=arg1,scale=arg2))
-
+        if dists[i] == 'triang':
+            # checking for correct parameters
+            if b1 <= 0 or b2 <= 0 or b2 >= 1:
+                raise ValueError('''Triangular distribution: Scale must be 
+                    greater than zero; peak on interval [0,1]''')
             else:
-                print('No valid distribution selected')
-    return(conv_params)
+                conv_params[:,i] = sp.stats.triang.ppf(params[:,i], c=b2, scale=b1, loc=0)
+
+        elif dists[i] == 'unif':
+            if b1 >= b2:
+                raise ValueError('''Uniform distribution: lower bound
+                    must be less than upper bound''')
+            else:
+                conv_params[:,i] = params[:,i] * (b2 - b1) + b1
+
+        elif dists[i] == 'norm':
+            if b2 <= 0:
+                raise ValueError('''Normal distribution: stdev must be > 0''')
+            else:
+                conv_params[:,i] = sp.stats.norm.ppf(params[:,i], loc=b1, scale=b2)
+
+        # lognormal distribution (ln-space, not base-10)
+        # paramters are ln-space mean and standard deviation
+        elif dists[i] == 'lognorm':
+            # checking for valid parameters
+            if b2 <= 0:
+                raise ValueError('''Lognormal distribution: stdev must be > 0''') 
+            else:
+                conv_params[:,i] = np.exp(sp.stats.norm.ppf(params[:,i], loc=b1, scale=b2))
+
+        else:
+            raise ValueError('Distributions: choose one of %s' % valid_dists) 
+
+    return conv_params
 
 def read_param_file(filename, delimiter=None):
     '''
@@ -230,7 +206,7 @@ def compute_groups_matrix(groups, num_vars):
     '''
     if not groups:
         return None
-    
+
     # Get a unique set of the group names
     unique_group_names = list(OrderedDict.fromkeys(groups))
     number_of_groups = len(unique_group_names)
