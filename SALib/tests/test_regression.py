@@ -109,6 +109,43 @@ def test_regression_sobol_parallel():
     assert_allclose([Si['S2'][0][1], Si['S2'][0][2], Si['S2'][1][2]], [0.00, 0.25, 0.00], atol=5e-2, rtol=1e-1)
 
 
+def test_regression_sobol_groups():
+    problem = {
+      'num_vars': 3, 
+      'names': ['x1', 'x2', 'x3'], 
+      'bounds': [[-np.pi, np.pi]]*3,
+      'groups': ['G1', 'G2', 'G1']
+    }
+    param_values = saltelli.sample(problem, 10000, calc_second_order=True)
+
+    Y = Ishigami.evaluate(param_values)
+    Si = sobol.analyze(problem, Y,
+                       calc_second_order=True, parallel=True, conf_level=0.95, print_to_console=False)
+
+    assert_allclose(Si['S1'], [0.55, 0.44], atol=5e-2, rtol=1e-1)
+    assert_allclose(Si['ST'], [0.55, 0.44], atol=5e-2, rtol=1e-1)
+    assert_allclose(Si['S2'][0][1], [0.00], atol=5e-2, rtol=1e-1)
+
+
+def test_regression_sobol_groups_dists():
+    problem = {
+      'num_vars': 3, 
+      'names': ['x1', 'x2', 'x3'], 
+      'bounds': [[-np.pi,np.pi], [1.0, 0.2], [3, 0.5]],
+      'groups': ['G1', 'G2', 'G1'],
+      'dists': ['unif', 'lognorm', 'triang']
+    }
+    param_values = saltelli.sample(problem, 10000, calc_second_order=True)
+
+    Y = Ishigami.evaluate(param_values)
+    Si = sobol.analyze(problem, Y,
+                       calc_second_order=True, parallel=True, conf_level=0.95, print_to_console=False)
+
+    assert_allclose(Si['S1'], [0.427, 0.573], atol=5e-2, rtol=1e-1)
+    assert_allclose(Si['ST'], [0.428, 0.573], atol=5e-2, rtol=1e-1)
+    assert_allclose(Si['S2'][0][1], [0.001], atol=5e-2, rtol=1e-1)
+
+
 def test_regression_fast():
     param_file = 'SALib/test_functions/params/Ishigami.txt'
     problem = read_param_file(param_file)
