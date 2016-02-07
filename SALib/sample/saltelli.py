@@ -4,7 +4,7 @@ import numpy as np
 
 from . import common_args
 from . import sobol_sequence
-from ..util import scale_samples, nonuniform_scale_samples, read_param_file
+from ..util import scale_samples, nonuniform_scale_samples, read_param_file, compute_groups_matrix
 
 
 def sample(problem, N, calc_second_order=True):
@@ -28,32 +28,13 @@ def sample(problem, N, calc_second_order=True):
         Calculate second-order sensitivities (default True)
     """
     D = problem['num_vars']
+    groups = problem.get('groups')
 
-    if not problem.get('groups'):
-        groups = False
+    if not groups:
         Dg = problem['num_vars']
     else:
-        groups = True
-        # condition for when problem was defined from parameter file
-        # can access the 'groups' tuple (matrix, list of unique group names)
-        # to determine the number of groups
-        # if problem defined as a dictionary in the code, find the number
-        # of unique group names
-        # also make matrix to account for group names
-        if len(problem['groups']) == 2:
-            Dg = len(problem['groups'][1])
-        else:
-            Dg = len(np.unique(problem['groups']))
-            gp_mat = np.zeros([D, Dg])
-            for i in range(Dg):
-                # group name to check for equivalency
-                groupNameIt = np.unique(problem['groups'])[i]
-                for j in range(D):
-                    if problem['groups'][j] == groupNameIt:
-                        gp_mat[j,i] = 1
-            # making a tuple similar to the one made by the read_param_file
-            # for use later in the code
-            problem['groups'] = (gp_mat,np.unique(problem['groups']))
+        Dg = len(set(groups))
+        G, group_names = compute_groups_matrix(groups, D)
 
     # How many values of the Sobol sequence to skip
     skip_values = 1000
@@ -76,54 +57,26 @@ def sample(problem, N, calc_second_order=True):
         index += 1
 
         # Cross-sample elements of "B" into "A"
-        # condition for group sampling (groups is True)
-        if groups:
-            # method of cross-sampling "B" into "A" for groups
-            # groups that are "off-diagional" (l != m) will be form "A"
-            # groups that are "on-diagional" (l = m) will be from "B"
-            for l in range(Dg):
-                for m in range(D):
-                    if problem['groups'][0][m,l] == 1:
-                        saltelli_sequence[index, m] = base_sequence[i, m + D]
-                    else:
-                        saltelli_sequence[index, m] = base_sequence[i, m]
+        for k in range(Dg):
+            for j in range(D):
+                if (not groups and j == k) or (groups and group_names[k] == groups[j]):
+                    saltelli_sequence[index, j] = base_sequence[i, j + D]
+                else:
+                    saltelli_sequence[index, j] = base_sequence[i, j]
 
-                index += 1
-        else:
-            for k in range(D):
-                for j in range(D):
-                    if j == k:
-                        saltelli_sequence[index, j] = base_sequence[i, j + D]
-                    else:
-                        saltelli_sequence[index, j] = base_sequence[i, j]
-
-                index += 1
+            index += 1
 
         # Cross-sample elements of "A" into "B"
         # Only needed if you're doing second-order indices (true by default)
         if calc_second_order:
-            # condition for group sampling (groups is True)
-            if groups:
-                # method of cross-sampling "A" into "B" for groups
-                # groups that are "off-diagional" (l != m) will be form "B"
-                # groups that are "on-diagional" (l = m) will be from "A"
-                for l in range(Dg):
-                    for m in range(D):
-                        if problem['groups'][0][m,l] == 1:
-                            saltelli_sequence[index, m] = base_sequence[i, m]
-                        else:
-                            saltelli_sequence[index, m] = base_sequence[i, m + D]
+            for k in range(Dg):
+                for j in range(D):
+                    if (not groups and j == k) or (groups and group_names[k] == groups[j]):
+                        saltelli_sequence[index, j] = base_sequence[i, j]
+                    else:
+                        saltelli_sequence[index, j] = base_sequence[i, j + D]
 
-                    index += 1
-            else:
-                for k in range(D):
-                    for j in range(D):
-                        if j == k:
-                            saltelli_sequence[index, j] = base_sequence[i, j]
-                        else:
-                            saltelli_sequence[index, j] = base_sequence[i, j + D]
-
-                    index += 1
+                index += 1
 
         # Copy matrix "B"
         for j in range(D):

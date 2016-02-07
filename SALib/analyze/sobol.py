@@ -6,7 +6,7 @@ from scipy.stats import norm
 import numpy as np
 
 from . import common_args
-from ..util import read_param_file
+from ..util import read_param_file, compute_groups_matrix
 
 from multiprocessing import Pool, cpu_count
 from functools import partial
@@ -68,7 +68,7 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
     if not problem.get('groups'):
         D = problem['num_vars']
     else:
-        D = len(problem['groups'][1])
+        D = len(set(problem['groups']))
 
     if calc_second_order and Y.size % (2 * D + 2) == 0:
         N = int(Y.size / (2 * D + 2))
@@ -236,36 +236,27 @@ def Si_list_to_dict(S_list, D, calc_second_order):
 def print_indices(S, problem, calc_second_order):
     # Output to console
     if not problem.get('groups'):
+        title = 'Parameter'
+        names = problem['names']
         D = problem['num_vars']
-        print('Parameter S1 S1_conf ST ST_conf')
-
-        for j in range(D):
-            print('%s %f %f %f %f' % (problem['names'][j], S['S1'][
-                j], S['S1_conf'][j], S['ST'][j], S['ST_conf'][j]))
-
-        if calc_second_order:
-            print('\nParameter_1 Parameter_2 S2 S2_conf')
-
-            for j in range(D):
-                for k in range(j + 1, D):
-                    print("%s %s %f %f" % (problem['names'][j], problem[
-                        'names'][k], S['S2'][j, k], S['S2_conf'][j, k]))
-
     else:
-        D = len(problem['groups'][1])
-        print('Group S1 S1_conf ST ST_conf')
+        title = 'Group'
+        _,names = compute_groups_matrix(problem['groups'], problem['num_vars'])
+        D = len(names)
+
+    print('%s S1 S1_conf ST ST_conf' % title)
+
+    for j in range(D):
+        print('%s %f %f %f %f' % (names[j], S['S1'][
+            j], S['S1_conf'][j], S['ST'][j], S['ST_conf'][j]))
+
+    if calc_second_order:
+        print('\n%s_1 %s_2 S2 S2_conf' % (title,title))
 
         for j in range(D):
-            print('%s %f %f %f %f' % (problem['groups'][1][j], S['S1'][
-                j], S['S1_conf'][j], S['ST'][j], S['ST_conf'][j]))
-
-        if calc_second_order:
-            print('\nGroup_1 Group_2 S2 S2_conf')
-
-            for j in range(D):
-                for k in range(j + 1, D):
-                    print("%s %s %f %f" % (problem['groups'][1][j], problem[
-                    'groups'][1][k], S['S2'][j, k], S['S2_conf'][j, k]))
+            for k in range(j + 1, D):
+                print("%s %s %f %f" % (names[j], names[k], 
+                    S['S2'][j, k], S['S2_conf'][j, k]))
 
 if __name__ == "__main__":
     parser = common_args.create()
