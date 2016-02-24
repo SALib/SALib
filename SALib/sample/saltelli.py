@@ -4,12 +4,12 @@ import numpy as np
 
 from . import common_args
 from . import sobol_sequence
-from ..util import scale_samples, read_param_file
+from ..util import scale_samples, nonuniform_scale_samples, read_param_file, compute_groups_matrix
 
 
 def sample(problem, N, calc_second_order=True):
     """Generates model inputs using Saltelli's extension of the Sobol sequence.
-    
+
     Returns a NumPy matrix containing the model inputs using Saltelli's sampling
     scheme.  Saltelli's scheme extends the Sobol sequence in a way to reduce
     the error rates in the resulting sensitivity index calculations.  If
@@ -17,7 +17,7 @@ def sample(problem, N, calc_second_order=True):
     rows, where D is the number of parameters.  If calc_second_order is True,
     the resulting matrix has N * (2D + 2) rows.  These model inputs are
     intended to be used with :func:`SALib.analyze.sobol.analyze`.
-    
+
     Parameters
     ----------
     problem : dict
@@ -28,6 +28,13 @@ def sample(problem, N, calc_second_order=True):
         Calculate second-order sensitivities (default True)
     """
     D = problem['num_vars']
+    groups = problem.get('groups')
+
+    if not groups:
+        Dg = problem['num_vars']
+    else:
+        Dg = len(set(groups))
+        G, group_names = compute_groups_matrix(groups, D)
 
     # How many values of the Sobol sequence to skip
     skip_values = 1000
@@ -36,9 +43,9 @@ def sample(problem, N, calc_second_order=True):
     base_sequence = sobol_sequence.sample(N + skip_values, 2 * D)
 
     if calc_second_order:
-        saltelli_sequence = np.empty([(2 * D + 2) * N, D])
+        saltelli_sequence = np.empty([(2 * Dg + 2) * N, D])
     else:
-        saltelli_sequence = np.empty([(D + 2) * N, D])
+        saltelli_sequence = np.empty([(Dg + 2) * N, D])
     index = 0
 
     for i in range(skip_values, N + skip_values):
@@ -50,9 +57,9 @@ def sample(problem, N, calc_second_order=True):
         index += 1
 
         # Cross-sample elements of "B" into "A"
-        for k in range(D):
+        for k in range(Dg):
             for j in range(D):
-                if j == k:
+                if (not groups and j == k) or (groups and group_names[k] == groups[j]):
                     saltelli_sequence[index, j] = base_sequence[i, j + D]
                 else:
                     saltelli_sequence[index, j] = base_sequence[i, j]
@@ -62,9 +69,9 @@ def sample(problem, N, calc_second_order=True):
         # Cross-sample elements of "A" into "B"
         # Only needed if you're doing second-order indices (true by default)
         if calc_second_order:
-            for k in range(D):
+            for k in range(Dg):
                 for j in range(D):
-                    if j == k:
+                    if (not groups and j == k) or (groups and group_names[k] == groups[j]):
                         saltelli_sequence[index, j] = base_sequence[i, j]
                     else:
                         saltelli_sequence[index, j] = base_sequence[i, j + D]
@@ -76,17 +83,22 @@ def sample(problem, N, calc_second_order=True):
             saltelli_sequence[index, j] = base_sequence[i, j + D]
 
         index += 1
-
-    scale_samples(saltelli_sequence, problem['bounds'])
-    return saltelli_sequence
+    if not problem.get('dists'):
+        # scaling values out of 0-1 range with uniform distributions
+        scale_samples(saltelli_sequence, problem['bounds'])
+        return saltelli_sequence
+    else:
+        # scaling values to other distributions based on inverse CDFs
+        scaled_saltelli = nonuniform_scale_samples(saltelli_sequence, problem['bounds'], problem['dists'])
+        return scaled_saltelli
 
 if __name__ == "__main__":
 
     parser = common_args.create()
-    
+
     parser.add_argument(
         '-n', '--samples', type=int, required=True, help='Number of Samples')
-   
+
     parser.add_argument('--max-order', type=int, required=False, default=2,
                         choices=[1, 2], help='Maximum order of sensitivity indices to calculate')
     args = parser.parse_args()

@@ -4,7 +4,7 @@ import numpy as np
 import random as rd
 
 from . import common_args
-from ..util import scale_samples, read_param_file
+from ..util import scale_samples, read_param_file, compute_groups_matrix
 from . optimal_trajectories import return_max_combo
 
 from . morris_util import *
@@ -67,10 +67,10 @@ def sample(problem, N, num_levels, grid_jump, optimal_trajectories=None, local_o
     if grid_jump >= num_levels:
         raise ValueError("grid_jump must be less than num_levels")
 
-    if problem.get('groups') is None:
-        sample = sample_oat(problem, N, num_levels, grid_jump)
-    else:
+    if problem.get('groups'):
         sample = sample_groups(problem, N, num_levels, grid_jump)
+    else:
+        sample = sample_oat(problem, N, num_levels, grid_jump)
 
     if optimal_trajectories:
         
@@ -141,7 +141,7 @@ def sample_groups(problem, N, num_levels, grid_jump):
     Returns an N(g+1)-by-k array of N trajectories;
     where g is the number of groups and k is the number of factors
     '''
-    G, group_names = problem['groups']
+    G, group_names = compute_groups_matrix(problem['groups'], problem['num_vars'])
 
     if G is None:
         raise ValueError("Please define the matrix G.")
@@ -163,7 +163,7 @@ def compute_optimised_trajectories(problem, input_sample, N, k_choices, local_op
     correct call here.
     '''
     num_params = problem['num_vars']
-    groups = problem['groups']
+    groups = compute_groups_matrix(problem['groups'], num_params)
     
     if np.any((input_sample < 0) | (input_sample > 1)):
         raise ValueError("Input sample must be scaled between 0 and 1")

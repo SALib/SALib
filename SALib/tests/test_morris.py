@@ -6,7 +6,7 @@ from numpy.testing import assert_equal
 import numpy as np
 
 from ..sample.morris import sample, compute_optimised_trajectories
-from ..util import read_param_file
+from ..util import read_param_file, compute_groups_matrix
 
 
 def teardown():
@@ -54,7 +54,7 @@ def test_group_in_param_file_read():
     '''
     parameter_file = "SALib/tests/test_param_file_w_groups.txt"
     problem = read_param_file(parameter_file)
-    groups, group_names = problem['groups']
+    groups, group_names = compute_groups_matrix(problem['groups'], problem['num_vars'])
 
     assert_equal(problem['names'], ["Test 1", "Test 2", "Test 3"])
     assert_equal(groups, np.matrix('1,0;1,0;0,1', dtype=np.int))
@@ -158,15 +158,15 @@ def test_catch_inputs_not_in_zero_one_range():
     compute_optimised_trajectories(problem, input_sample, N, k_choices)
 
 
-@raises(ValueError)
-def test_group_sample_fails_with_no_G_matrix():
-    N = 6
-    num_levels = 4
-    grid_jump = 2
-    problem = {'bounds': [[0., 1.], [0., 1.], [0., 1.], [0., 1.]],
-               'num_vars': 4,
-               'groups': (None, None)}
-    sample(problem, N, num_levels, grid_jump)
+# @raises(ValueError)
+# def test_group_sample_fails_with_no_G_matrix():
+#     N = 6
+#     num_levels = 4
+#     grid_jump = 2
+#     problem = {'bounds': [[0., 1.], [0., 1.], [0., 1.], [0., 1.]],
+#                'num_vars': 4,
+#                'groups': None}
+#     sample(problem, N, num_levels, grid_jump)
 
 
 @raises(TypeError)

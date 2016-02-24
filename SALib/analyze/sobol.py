@@ -6,7 +6,7 @@ from scipy.stats import norm
 import numpy as np
 
 from . import common_args
-from ..util import read_param_file
+from ..util import read_param_file, compute_groups_matrix
 
 from multiprocessing import Pool, cpu_count
 from functools import partial
@@ -21,12 +21,12 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
             conf_level=0.95, print_to_console=False, parallel=False,
             n_processors=None):
     """Perform Sobol Analysis on model outputs.
-    
+
     Returns a dictionary with keys 'S1', 'S1_conf', 'ST', and 'ST_conf', where
     each entry is a list of size D (the number of parameters) containing the
     indices in the same order as the parameter file.  If calc_second_order is
     True, the dictionary also contains keys 'S2' and 'S2_conf'.
-    
+
     Parameters
     ----------
     problem : dict
@@ -41,7 +41,7 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
         The confidence interval level (default 0.95)
     print_to_console : bool
         Print results directly to console (default False)
-        
+
     References
     ----------
     .. [1] Sobol, I. M. (2001).  "Global sensitivity indices for nonlinear
@@ -56,15 +56,19 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
            output.  Design and estimator for the total sensitivity index."
            Computer Physics Communications, 181(2):259-270,
            doi:10.1016/j.cpc.2009.09.018.
-           
+
     Examples
     --------
     >>> X = saltelli.sample(problem, 1000)
     >>> Y = Ishigami.evaluate(X)
     >>> Si = sobol.analyze(problem, Y, print_to_console=True)
     """
-
-    D = problem['num_vars']
+    # determining if groups are defined and adjusting the number
+    # of rows in the cross-sampled matrix accordingly
+    if not problem.get('groups'):
+        D = problem['num_vars']
+    else:
+        D = len(set(problem['groups']))
 
     if calc_second_order and Y.size % (2 * D + 2) == 0:
         N = int(Y.size / (2 * D + 2))
@@ -72,10 +76,10 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
         N = int(Y.size / (D + 2))
     else:
         raise RuntimeError("""
-        Incorrect number of samples in model output file. 
+        Incorrect number of samples in model output file.
         Confirm that calc_second_order matches option used during sampling.""")
 
-    if not 0 < conf_level < 1:
+    if conf_level < 0 or conf_level > 1:
         raise RuntimeError("Confidence level must be between 0-1.")
 
     A,B,AB,BA = separate_output_values(Y, D, N, calc_second_order)
@@ -97,10 +101,10 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
                 for k in range(j + 1, D):
                     S['S2'][j, k] = second_order(
                         A, AB[:, j], AB[:, k], BA[:, j], B)
-                    S['S2_conf'][j, k] = Z * second_order(A[r], AB[r, j], 
+                    S['S2_conf'][j, k] = Z * second_order(A[r], AB[r, j],
                         AB[r, k], BA[r, j], B[r]).std(ddof=1)
 
-    else:           
+    else:
         tasks, n_processors = create_task_list(D, calc_second_order, n_processors)
 
         func = partial(sobol_parallel, Z, A, AB, BA, B, r)
@@ -114,7 +118,6 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
     # Print results to console
     if print_to_console:
         print_indices(S, problem, calc_second_order)
-
 
     return S
 
@@ -153,7 +156,7 @@ def create_Si_dict(D, calc_second_order):
     return S
 
 
-def separate_output_values(Y, D, N, calc_second_order): 
+def separate_output_values(Y, D, N, calc_second_order):
     AB = np.empty((N, D))
     BA = np.empty((N, D)) if calc_second_order else None
     step = 2 * D + 2 if calc_second_order else D + 2
@@ -193,7 +196,7 @@ def create_task_list(D, calc_second_order, n_processors):
     # Create list with one entry (key, parameter 1, parameter 2) per sobol
     # index (+conf.). This is used to supply parallel tasks to multiprocessing.Pool
     tasks_first_order = [[d, j, None] for j in range(D) for d in ('S1', 'S1_conf', 'ST', 'ST_conf')]
-    
+
     # Add second order (+conf.) to tasks
     tasks_second_order = []
     if calc_second_order:
@@ -208,7 +211,7 @@ def create_task_list(D, calc_second_order, n_processors):
     else:
         # merges both lists alternating its elements and splits the resulting list into n_processors sublists
         tasks = np.array_split([v for v in sum(
-            zip_longest(tasks_first_order[::-1], tasks_second_order), ()) 
+            zip_longest(tasks_first_order[::-1], tasks_second_order), ())
                 if v is not None], n_processors)
 
     return tasks, n_processors
@@ -232,21 +235,28 @@ def Si_list_to_dict(S_list, D, calc_second_order):
 
 def print_indices(S, problem, calc_second_order):
     # Output to console
-    D = problem['num_vars']
-    print('Parameter S1 S1_conf ST ST_conf')
+    if not problem.get('groups'):
+        title = 'Parameter'
+        names = problem['names']
+        D = problem['num_vars']
+    else:
+        title = 'Group'
+        _,names = compute_groups_matrix(problem['groups'], problem['num_vars'])
+        D = len(names)
+
+    print('%s S1 S1_conf ST ST_conf' % title)
 
     for j in range(D):
-        print('%s %f %f %f %f' % (problem['names'][j], S['S1'][
+        print('%s %f %f %f %f' % (names[j], S['S1'][
             j], S['S1_conf'][j], S['ST'][j], S['ST_conf'][j]))
 
     if calc_second_order:
-        print('\nParameter_1 Parameter_2 S2 S2_conf')
+        print('\n%s_1 %s_2 S2 S2_conf' % (title,title))
 
         for j in range(D):
             for k in range(j + 1, D):
-                print("%s %s %f %f" % (problem['names'][j], problem[
-                    'names'][k], S['S2'][j, k], S['S2_conf'][j, k]))
-
+                print("%s %s %f %f" % (names[j], names[k], 
+                    S['S2'][j, k], S['S2_conf'][j, k]))
 
 if __name__ == "__main__":
     parser = common_args.create()
@@ -272,5 +282,5 @@ if __name__ == "__main__":
                    usecols=(args.column,))
 
     analyze(problem, Y, (args.max_order == 2),
-            num_resamples=args.resamples, print_to_console=True, 
+            num_resamples=args.resamples, print_to_console=True,
             parallel=args.parallel, n_processors=args.n_processors)
