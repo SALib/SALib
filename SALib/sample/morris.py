@@ -67,10 +67,10 @@ def sample(problem, N, num_levels, grid_jump, optimal_trajectories=None, local_o
     if grid_jump >= num_levels:
         raise ValueError("grid_jump must be less than num_levels")
 
-    if not problem.get('groups'):
-        sample = sample_oat(problem, N, num_levels, grid_jump)
-    else:
+    if problem.get('groups'):
         sample = sample_groups(problem, N, num_levels, grid_jump)
+    else:
+        sample = sample_oat(problem, N, num_levels, grid_jump)
 
     if optimal_trajectories:
         

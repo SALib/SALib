@@ -80,7 +80,7 @@ def nonuniform_scale_samples(params, bounds, dists):
     conv_params = np.zeros_like(params)
 
     # loop over the parameters
-    for i in range(len(conv_params[0])):
+    for i in range(conv_params.shape[1]):
         # setting first and second arguments for distributions
         b1 = b[i][0]
         b2 = b[i][1]
@@ -178,7 +178,7 @@ def read_param_file(filename, delimiter=None):
     # group_matrix, group_names = compute_groups_from_parameter_file(
     #     groups, num_vars)
 
-    if len(set(groups)) == num_vars:
+    if groups == names:
         groups = None
     elif len(set(groups)) == 1:
         raise ValueError('''Only one group defined, results will not be
