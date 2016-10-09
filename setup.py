@@ -2,13 +2,8 @@ from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 
 import versioneer
-
-
-versioneer.VCS = 'git'
-versioneer.versionfile_source = 'SALib/_version.py'
-versioneer.versionfile_build = None
-versioneer.tag_prefix = 'v' # tags are like 1.2.0
-versioneer.parentdir_prefix = 'SALib-' # dirname like 'myproject-1.2.0'
+setup(version=versioneer.get_version(),
+      cmdclass=versioneer.get_cmdclass())
 
 
 class NoseTestCommand(TestCommand):
@@ -36,11 +31,11 @@ def setup_package():
             "scipy",
             "matplotlib>=1.4.3",
         ],
-          
+
         extras_require = {
                           "gurobipy": ["gurobipy",]
                           },
-        
+
         # Two arguments required by Versioneer
         version = versioneer.get_version(),
         cmdclass=cmdclass,
