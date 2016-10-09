@@ -8,7 +8,7 @@ services:
 env:
   matrix:
   - DISTRIB="conda" PYTHON_VERSION="2.7" COVERAGE="true"
-  - DISTRIB="conda" PYTHON_VERSION="3.5 COVERAGE="false"
+  - DISTRIB="conda" PYTHON_VERSION="3.5" COVERAGE="false"
 addons:
   apt:
     packages:
