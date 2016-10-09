@@ -1,5 +1,5 @@
 ==============================================
-SALib - Sensitivity Analysis Library in Python 
+SALib - Sensitivity Analysis Library in Python
 ==============================================
 
 Python implementations of commonly used sensitivity analysis methods, including
@@ -23,10 +23,19 @@ Supported Methods
 
 .. toctree::
    :maxdepth: 2
-   
+
    getting-started
    basics
    api
 
+   License <license>
+   Authors <authors>
+   Complete Module Reference <api/modules>
 
 
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

@@ -15,12 +15,10 @@ from SALib.sample import latin
 from SALib.sample import saltelli
 import numpy as np
 
-from ..analyze import morris
-from ..sample.morris import sample
-from ..test_functions import Ishigami
-from ..util import read_param_file
-from .test_util import teardown
-
+from SALib.analyze import morris
+from SALib.sample.morris import sample
+from SALib.test_functions import Ishigami
+from SALib.util import read_param_file
 
 def test_regression_morris_vanilla():
 
@@ -111,8 +109,8 @@ def test_regression_sobol_parallel():
 
 def test_regression_sobol_groups():
     problem = {
-      'num_vars': 3, 
-      'names': ['x1', 'x2', 'x3'], 
+      'num_vars': 3,
+      'names': ['x1', 'x2', 'x3'],
       'bounds': [[-np.pi, np.pi]]*3,
       'groups': ['G1', 'G2', 'G1']
     }
@@ -129,8 +127,8 @@ def test_regression_sobol_groups():
 
 def test_regression_sobol_groups_dists():
     problem = {
-      'num_vars': 3, 
-      'names': ['x1', 'x2', 'x3'], 
+      'num_vars': 3,
+      'names': ['x1', 'x2', 'x3'],
       'bounds': [[-np.pi,np.pi], [1.0, 0.2], [3, 0.5]],
       'groups': ['G1', 'G2', 'G1'],
       'dists': ['unif', 'lognorm', 'triang']

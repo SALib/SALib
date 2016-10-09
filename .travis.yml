@@ -1,38 +1,27 @@
 # Travis config for SALib/SALib
+sudo: false
 language: python
-
-python:
-- "2.7"
-- "3.3"
-
-env: 
- # Workaround for image_comparison issue in v1.5.0 of matplotlib - fix matplotlib to 1.4.3
- - DEPS="numpy scipy matplotlib=1.4.3"
-
+virtualenv:
+  system_site_packages: true
+services:
+  - postgresql
+env:
+  matrix:
+  - DISTRIB="conda" PYTHON_VERSION="2.7" COVERAGE="true"
+  - DISTRIB="conda" PYTHON_VERSION="3.5" COVERAGE="false"
+addons:
+  apt:
+    packages:
+    - git
+    - python-pip
 install:
- - sudo apt-get update
- - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-     wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh;
-   else
-     wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-   fi
- - bash miniconda.sh -b -p $HOME/miniconda
- - export PATH="$HOME/miniconda/bin:$PATH"
- - hash -r
- - conda config --set always_yes yes --set changeps1 no
- - conda install -c conda conda-env
- - conda update -q conda --no-deps
-  # Useful for debugging any issues with conda
- - conda info -a
-
-  # Replace dep1 dep2 ... with your dependencies
- - conda create -q -n testenv python=$TRAVIS_PYTHON_VERSION $DEPS pip
- - source activate testenv
- - python setup.py install
- - pip install coveralls
+- source tests/travis_install.sh
+- pip install -r test-requirements.txt
 script:
- - coverage run --source=SALib --omit=SALib/_version.py setup.py test
+- python setup.py test
 after_success:
- - coveralls
+- if [[ "$COVERAGE" == "true" ]]; then coveralls || echo "failed"; fi
+cache:
+- apt
 notifications:
  email: false
