@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-    Setup file for salib.
+    Setup file for SALib.
 
     This file was generated with PyScaffold 2.5.5.post0.dev2+gf5d2c64, a tool that easily
     puts up a scaffold for your new Python project. Learn more under:
