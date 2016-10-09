@@ -1,12 +1,10 @@
 # .coveragerc to control coverage.py
 [run]
 branch = True
-source = SALib
-omit = */_version.py
+source = salib
+# omit = bad_file.py
 
 [report]
-omit = */tests/*
-
 # Regexes for lines to exclude from consideration
 exclude_lines =
     # Have to re-enable the standard pragma

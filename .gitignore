@@ -1,14 +1,41 @@
-*.egg-info
-*.pyc
-dist
-model_input.txt
-model_output.txt
-y_rbf.txt
-tests/*.txt
-/build/
-/dist/
+# Temporary and binary files
+*~
+*.py[cod]
+*.so
+*.cfg
+!setup.cfg
+*.orig
 *.log
-.coveralls.yml
+*.pot
+__pycache__/*
+.cache/*
+.*.swp
 
+# Project files
+.ropeproject
+.project
+.pydevproject
+.settings
+.idea
+
+# Package files
+*.egg
+*.eggs/
+.installed.cfg
+*.egg-info
+
+# Unittest and coverage
+htmlcov/*
 .coverage
-./result_images/*
+.tox
+junit.xml
+coverage.xml
+
+# Build and docs folder/files
+build/*
+dist/*
+sdist/*
+docs/api/*
+docs/_build/*
+cover/*
+MANIFEST
