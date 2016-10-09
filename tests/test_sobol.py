@@ -5,10 +5,10 @@ from numpy.testing import assert_equal, assert_allclose
 import numpy as np
 from scipy.stats import norm
 
-from ..analyze import sobol
-from ..sample import saltelli
-from ..test_functions import Ishigami, Sobol_G
-from ..util import read_param_file
+from SALib.analyze import sobol
+from SALib.sample import saltelli
+from SALib.test_functions import Ishigami, Sobol_G
+from SALib.util import read_param_file
 
 
 def setup_samples(N = 500, calc_second_order = True):
@@ -67,12 +67,12 @@ def test_parallel_first_order():
     N = 10000
     problem,param_values = setup_samples(N=N, calc_second_order=c2o)
     Y = Ishigami.evaluate(param_values)
-    
-    A,B,AB,BA = sobol.separate_output_values(Y, D=3, N=N, 
+
+    A,B,AB,BA = sobol.separate_output_values(Y, D=3, N=N,
                                             calc_second_order=c2o)
     r = np.random.randint(N, size=(N, 100))
     Z = norm.ppf(0.5 + 0.95 / 2)
-    tasks, n_processors = sobol.create_task_list(D=3, 
+    tasks, n_processors = sobol.create_task_list(D=3,
                             calc_second_order=c2o, n_processors=None)
     Si_list = []
     for t in tasks:
@@ -88,12 +88,12 @@ def test_parallel_second_order():
     N = 10000
     problem,param_values = setup_samples(N=N, calc_second_order=c2o)
     Y = Ishigami.evaluate(param_values)
-    
-    A,B,AB,BA = sobol.separate_output_values(Y, D=3, N=N, 
+
+    A,B,AB,BA = sobol.separate_output_values(Y, D=3, N=N,
                                             calc_second_order=c2o)
     r = np.random.randint(N, size=(N, 100))
     Z = norm.ppf(0.5 + 0.95 / 2)
-    tasks, n_processors = sobol.create_task_list(D=3, 
+    tasks, n_processors = sobol.create_task_list(D=3,
                             calc_second_order=c2o, n_processors=None)
     Si_list = []
     for t in tasks:

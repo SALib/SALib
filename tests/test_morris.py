@@ -3,34 +3,36 @@ from __future__ import division
 from nose.tools import with_setup, raises
 from numpy.testing import assert_equal
 
+import pytest
+
 import numpy as np
 
-from ..sample.morris import sample, compute_optimised_trajectories
-from ..util import read_param_file, compute_groups_matrix
+from SALib.sample.morris import sample, compute_optimised_trajectories
+from SALib.util import read_param_file, compute_groups_matrix
 
+from tests.test_util import make_temporary_file
 
-def teardown():
-    pass
-
-
+@pytest.fixture(scope='function')
 def setup_param_file():
-    filename = "SALib/tests/test_param_file.txt"
+    filename = make_temporary_file()
     with open(filename, "w") as ofile:
         ofile.write("Test 1,0,1.0\n")
         ofile.write("Test 2,0,1.0\n")
         ofile.write("Test 3,0,1.0\n")
+    return filename
 
-
+@pytest.fixture(scope='function')
 def setup_param_file_with_groups():
-    filename = "SALib/tests/test_param_file_w_groups.txt"
+    filename = make_temporary_file()
     with open(filename, "w") as ofile:
         ofile.write("Test 1,0,1.0,Group 1\n")
         ofile.write("Test 2,0,1.0,Group 1\n")
         ofile.write("Test 3,0,1.0,Group 2\n")
+    return filename
 
-
+@pytest.fixture(scope='function')
 def setup_param_file_with_groups_prime():
-    filename = "SALib/tests/test_param_file_w_groups_prime.txt"
+    filename = make_temporary_file()
     with open(filename, "w") as ofile:
         ofile.write("Test 1,0,1.0,Group 1\n")
         ofile.write("Test 2,0,1.0,Group 2\n")
@@ -39,12 +41,7 @@ def setup_param_file_with_groups_prime():
         ofile.write("Test 5,0,1.0,Group 3\n")
         ofile.write("Test 6,0,1.0,Group 3\n")
         ofile.write("Test 7,0,1.0,Group 3\n")
-
-
-def setup():
-    setup_param_file()
-    setup_param_file_with_groups()
-    setup_param_file_with_groups_prime()
+    return filename
 
 
 @with_setup(setup_param_file_with_groups)
@@ -52,7 +49,7 @@ def test_group_in_param_file_read():
     '''
     Tests that groups in a parameter file are read correctly
     '''
-    parameter_file = "SALib/tests/test_param_file_w_groups.txt"
+    parameter_file = setup_param_file_with_groups()
     problem = read_param_file(parameter_file)
     groups, group_names = compute_groups_matrix(problem['groups'], problem['num_vars'])
 
@@ -62,10 +59,10 @@ def test_group_in_param_file_read():
 
 
 @raises(ValueError)
-@with_setup(setup, teardown)
+@with_setup(setup_param_file)
 def test_grid_jump_lt_num_levels():
 
-    parameter_file = "SALib/tests/test_param_file.txt"
+    parameter_file = setup_param_file()
     problem = read_param_file(parameter_file)
 
     samples = 10
@@ -77,10 +74,10 @@ def test_grid_jump_lt_num_levels():
 
 
 @raises(ValueError)
-@with_setup(setup, teardown)
+@with_setup(setup_param_file)
 def test_optimal_trajectories_lt_samples():
 
-    parameter_file = "SALib/tests/test_param_file.txt"
+    parameter_file = setup_param_file()
     problem = read_param_file(parameter_file)
 
     samples = 10
@@ -92,10 +89,10 @@ def test_optimal_trajectories_lt_samples():
 
 
 @raises(ValueError)
-@with_setup(setup, teardown)
+@with_setup(setup_param_file)
 def test_optimal_trajectories_lt_10():
 
-    parameter_file = "SALib/tests/test_param_file.txt"
+    parameter_file = setup_param_file()
     problem = read_param_file(parameter_file)
 
     samples = 10
@@ -108,10 +105,10 @@ def test_optimal_trajectories_lt_10():
 
 
 @raises(ValueError)
-@with_setup(setup, teardown)
+@with_setup(setup_param_file())
 def test_optimal_trajectories_gte_one():
 
-    parameter_file = "SALib/tests/test_param_file.txt"
+    parameter_file = setup_param_file()
     problem = read_param_file(parameter_file)
 
     samples = 10

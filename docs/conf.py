@@ -38,7 +38,7 @@ if on_rtd:
         inspect.getfile(inspect.currentframe())))
 
     output_dir = os.path.join(__location__, "../docs/api")
-    module_dir = os.path.join(__location__, "../salib")
+    module_dir = os.path.join(__location__, "../SALib")
     cmd_line_template = "sphinx-apidoc -f -o {outputdir} {moduledir}"
     cmd_line = cmd_line_template.format(outputdir=output_dir, moduledir=module_dir)
     apidoc.main(cmd_line.split(" "))
@@ -69,7 +69,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'SALib'
-copyright = u'2016, Will Usher'
+copyright = u'2016, Jon Herman, Will Usher'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

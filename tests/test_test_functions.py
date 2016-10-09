@@ -3,7 +3,7 @@ from nose.tools import assert_almost_equal, assert_equal, raises
 from numpy.testing import assert_allclose
 import numpy as np
 
-from ..test_functions.Sobol_G import evaluate, total_variance, \
+from SALib.test_functions.Sobol_G import evaluate, total_variance, \
                                      partial_first_order_variance, \
                                      sensitivity_index, \
                                      total_sensitivity_index
@@ -57,24 +57,24 @@ def test_Sobol_G_raises_error_if_values_not_numpy_array():
 
 
 def test_total_variance():
-    
+
     a = np.array([78, 12, 0.5, 2, 97, 33])
     actual = total_variance(a)
     expected = 0.19347
-    
-    assert_allclose(actual, expected, rtol=1e-4)    
+
+    assert_allclose(actual, expected, rtol=1e-4)
 
 
 def test_partial_first_order_variance():
-    
+
     a = np.array([78, 12, 0.5, 2, 97, 33])
     actual = partial_first_order_variance(a)
     expected = (len(a),)
-    
+
     assert_equal(a.shape, expected)
-    
+
     expected = np.array([0.000053, 0.001972, 0.148148, 0.037037, 0.000035, 0.000288])
-    
+
     assert_allclose(actual, expected, atol=1e-4, rtol=1e-4)
 
 
@@ -84,14 +84,14 @@ def test_sensitivity_index():
     expected = np.array([0.000276, 0.010195, 0.765743,
                          0.191436, 0.000179, 0.001490])
     assert_allclose(actual, expected, atol=1e-2, rtol=1e-6)
-    
-    
+
+
 def test_total_sensitivity_index():
     a = np.array([78, 12, 0.5, 2, 97, 33])
-    
+
     actual = total_sensitivity_index(a)
-    
+
     expected = np.array([0.030956547, 0.040875287, 0.796423551,
                          0.222116249, 0.030859879, 0.032170899])
-    
-    assert_allclose(actual, expected, atol=1e-2, rtol=1e-6)             
+
+    assert_allclose(actual, expected, atol=1e-2, rtol=1e-6)
