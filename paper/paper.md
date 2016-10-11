@@ -16,7 +16,7 @@ authors:
    orcid: 0000-0001-9367-1791
    affiliation: 2
 affiliations:
- - name: UCDavis
+ - name: University of California, Davis
    index: 1
  - name: University of Oxford
    index: 2
