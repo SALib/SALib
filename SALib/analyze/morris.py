@@ -18,11 +18,11 @@ def analyze(problem, X, Y,
     """Perform Morris Analysis on model outputs.
 
     Returns a dictionary with keys 'mu', 'mu_star', 'sigma', and 'mu_star_conf',
-    where each entry is a list of size D (the number of parameters) containing
+    where each entry is a list of size D (the number of eters) containing
     the indices in the same order as the parameter file.
 
-    Parameters
-    ----------
+    Arguments
+    ---------
     problem : dict
         The problem definition
     X : numpy.matrix
@@ -59,6 +59,7 @@ def analyze(problem, X, Y,
     >>> Y = Ishigami.evaluate(X)
     >>> Si = morris.analyze(problem, X, Y, conf_level=0.95,
     >>>                     print_to_console=True, num_levels=4, grid_jump=2)
+
     """
 
     # Assume that there are no groups
@@ -203,12 +204,14 @@ def get_decreased_values(op_vec, up, lo):
 def compute_elementary_effects(model_inputs, model_outputs, trajectory_size, delta):
     '''
     Arguments:
-        - model_inputs - matrix of inputs to the model under analysis.
-                         x-by-r where x is the number of variables and
-                         r is the number of rows (a function of x and num_trajectories)
-        - model_outputs - an r-length vector of model outputs
-        - trajectory_size - a scalar indicating the number of rows in a
-                            trajectory
+    ----------
+    model_inputs : matrix of inputs to the model under analysis.
+        x-by-r where x is the number of variables and
+        r is the number of rows (a function of x and num_trajectories)
+    model_outputs
+        an r-length vector of model outputs
+    trajectory_size
+        a scalar indicating the number of rows in a trajectory
     '''
     num_vars = model_inputs.shape[1]
     num_rows = model_inputs.shape[0]

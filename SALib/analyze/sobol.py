@@ -62,6 +62,7 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
     >>> X = saltelli.sample(problem, 1000)
     >>> Y = Ishigami.evaluate(X)
     >>> Si = sobol.analyze(problem, Y, print_to_console=True)
+    
     """
     # determining if groups are defined and adjusting the number
     # of rows in the cross-sampled matrix accordingly
@@ -255,7 +256,7 @@ def print_indices(S, problem, calc_second_order):
 
         for j in range(D):
             for k in range(j + 1, D):
-                print("%s %s %f %f" % (names[j], names[k], 
+                print("%s %s %f %f" % (names[j], names[k],
                     S['S2'][j, k], S['S2_conf'][j, k]))
 
 if __name__ == "__main__":

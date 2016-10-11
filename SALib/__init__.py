@@ -1,7 +1,6 @@
-__version__ = "0.1"
+import pkg_resources
 
-from ._version import get_versions
-
-
-__version__ = get_versions()['version']
-del get_versions
+try:
+    __version__ = pkg_resources.get_distribution(__name__).version
+except:
+    __version__ = 'unknown'
