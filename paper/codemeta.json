@@ -1,0 +1,17 @@
+{
+  "@context": "https://raw.githubusercontent.com/mbjones/codemeta/master/codemeta.jsonld",
+  "@type": "Code",
+  "author": [
+
+  ],
+  "identifier": "https://doi.org/10.5281/zenodo.160164",
+  "codeRepository": "https://github.com/SALib/SALib",
+  "datePublished": "2016-10-18",
+  "dateModified": "2016-10-18",
+  "dateCreated": "2016-10-18",
+  "description": "Sensitivity Analysis Library in Python (Numpy). Contains Sobol, Morris, Fractional Factorial and FAST methods.",
+  "keywords": "sensitivity analysis, Python, uncertainty, variance-based, global sensitivity analysis, fractional factorial, Method of Morris, elementary effects",
+  "license": "MIT",
+  "title": "SALib",
+  "version": "v1.0.1"
+}
