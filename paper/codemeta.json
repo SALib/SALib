@@ -2,7 +2,20 @@
   "@context": "https://raw.githubusercontent.com/mbjones/codemeta/master/codemeta.jsonld",
   "@type": "Code",
   "author": [
-
+    {
+      "@id": "http://orcid.org/0000-0001-9367-1791",
+      "@type": "Person",
+      "email": "william.usher@ouce.ox.ac.uk",
+      "name": "Will Usher",
+      "affiliation": "University of Oxford"
+    },
+    {
+      "@id": "http://orcid.org/0000-0002-4081-3175",
+      "@type": "Person",
+      "email": "jdherman@ucdavis.edu",
+      "name": "jdherman",
+      "affiliation": "University of California, Davis"
+    }
   ],
   "identifier": "https://doi.org/10.5281/zenodo.160164",
   "codeRepository": "https://github.com/SALib/SALib",
