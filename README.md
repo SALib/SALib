@@ -14,6 +14,8 @@ Python implementations of commonly used sensitivity analysis methods. Useful in 
 
 **Cite SALib:** [![DOI](https://zenodo.org/badge/15666/SALib/SALib.svg)](https://zenodo.org/badge/latestdoi/15666/SALib/SALib)
 
+ **Paper:** [![status](http://joss.theoj.org/papers/431262803744581c1d4b6a95892d3343/status.svg)](http://joss.theoj.org/papers/431262803744581c1d4b6a95892d3343)
+
 **Methods included:**
 * Sobol Sensitivity Analysis ([Sobol 2001](http://www.sciencedirect.com/science/article/pii/S0378475400002706), [Saltelli 2002](http://www.sciencedirect.com/science/article/pii/S0010465502002801), [Saltelli et al. 2010](http://www.sciencedirect.com/science/article/pii/S0010465509003087))
 * Method of Morris, including groups and optimal trajectories ([Morris 1991](http://www.tandfonline.com/doi/abs/10.1080/00401706.1991.10484804), [Campolongo et al. 2007](http://www.sciencedirect.com/science/article/pii/S1364815206002805))
@@ -32,8 +34,8 @@ from SALib.test_functions import Ishigami
 import numpy as np
 
 problem = {
-  'num_vars': 3, 
-  'names': ['x1', 'x2', 'x3'], 
+  'num_vars': 3,
+  'names': ['x1', 'x2', 'x3'],
   'bounds': [[-np.pi, np.pi]]*3
 }
 
