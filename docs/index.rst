@@ -30,6 +30,7 @@ Supported Methods
 
    License <license>
    Authors <authors>
+   Changes <changes>
    Complete Module Reference <api/modules>
 
 

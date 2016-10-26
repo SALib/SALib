@@ -4,7 +4,7 @@ Developers
 
 * Jon Herman <jdherman8@gmail.com>
 * Will Usher <william.usher@ouce.ox.ac.uk>
-* Chris Mutel]
+* Chris Mutel
 * Bernardo Trindade
 * Dave Hadka
 * Matt Woodruff
