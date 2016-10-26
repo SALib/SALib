@@ -2,6 +2,26 @@
 SALib - Sensitivity Analysis Library in Python
 ==============================================
 
+.. image:: http://readthedocs.org/projects/salib/badge/?version=latest
+  :target: http://salib.readthedocs.io/en/latest/?badge=latest
+  :alt: Documentation Status
+
+.. image:: https://travis-ci.org/SALib/SALib.svg?branch=master
+    :target: https://travis-ci.org/SALib/SALib
+
+.. image:: https://coveralls.io/repos/github/SALib/SALib/badge.svg?branch=master
+  :target: https://coveralls.io/github/SALib/SALib?branch=master
+
+.. image:: https://www.quantifiedcode.com/api/v1/project/ed62e70f899e4ec8af4ea6b2212d4b30/badge.svg
+  :target: https://www.quantifiedcode.com/app/project/ed62e70f899e4ec8af4ea6b2212d4b30
+  :alt: Code issues
+
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.160164.svg
+   :target: https://doi.org/10.5281/zenodo.160164
+
+.. image:: http://joss.theoj.org/papers/431262803744581c1d4b6a95892d3343/status.svg
+  :target: http://joss.theoj.org/papers/431262803744581c1d4b6a95892d3343
+
 Python implementations of commonly used sensitivity analysis methods, including
 Sobol, Morris, and FAST methods. Useful in systems modeling to calculate the
 effects of model inputs or exogenous factors on outputs of interest.
