@@ -50,6 +50,7 @@ Supported Methods
 
    License <license>
    Authors <authors>
+   Projects that use SALib <citations>
    Changes <changes>
    Complete Module Reference <api/modules>
 
