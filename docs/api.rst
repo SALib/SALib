@@ -45,3 +45,12 @@ Derivative-based Global Sensitivity Measure (DGSM)
 
 .. autofunction:: SALib.analyze.dgsm.analyze
    :noindex:
+
+Fractional Factorial
+--------------------
+
+.. autofunction:: SALib.sample.ff.sample
+   :noindex:
+
+.. autofunction:: SALib.analyze.ff.analyze
+   :noindex:

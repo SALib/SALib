@@ -1,12 +1,9 @@
-"""The sampling implmentation of fractional factorial method
+"""The sampling implementation of fractional factorial method
 
 This implementation is based on the formulation put forward in
-[`Saltelli et al. 2008
- <http://www.wiley.com/WileyCDA/WileyTitle/productCd-0470059974.html>`_]
+[`Saltelli et al. 2008 <http://www.wiley.com/WileyCDA/WileyTitle/productCd-0470059974.html>`_]
 
-Created on 30 Jun 2015
-
-@author: @willu47"""
+"""
 
 from scipy.linalg import hadamard
 import numpy as np
@@ -78,8 +75,20 @@ def generate_contrast(problem):
     return contrast
 
 def sample(problem):
-    """Generates a fractional factorial sample
+    """Generates model inputs using a fractional factorial sample
 
+    Returns a NumPy matrix containing the model inputs required for a
+    fractional factorial analysis.
+    The resulting matrix has D columns, where D is smallest power of 2 that is
+    greater than the number of parameters.
+    These model inputs are intended to be used with
+    :func:`SALib.analyze.ff.analyze`.
+
+    The problem file is padded with a number of dummy variables called
+    ``dummy_0`` required for this procedure. These dummy variables can be used
+    as a check for errors in the analyze procedure.
+
+    This algorithm is an implementation of that contained in
     [`Saltelli et al. 2008 <http://www.wiley.com/WileyCDA/WileyTitle/productCd-0470059974.html>`_]
 
     Arguments
