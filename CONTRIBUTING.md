@@ -4,6 +4,27 @@ Admins: [Will Usher](https://github.com/willu47) and [Jon Herman](https://github
 
 Thanks to all those who contributed so far, including: [Chris Mutel](https://github.com/cmutel), [Bernardo Trindade](https://github.com/bernardoct), [Dave Hadka](https://github.com/dhadka), [Matt Woodruff](https://github.com/matthewjwoodruff), [Fernando Rios](https://github.com/zoidy), and [Dan Hyams](https://github.com/dhyams), [xantares](https://github.com/xantares). The library would be in much worse shape without these efforts.
 
+## Asking Questions, Reporting Bugs
+
+We use Github issues to keep track of bugs and to answer questions about the use
+of the library.  
+
+For bugs, [create a new issue](https://github.com/SALib/SALib/issues/new)
+on Github with the label `bug`. Use this to describe the nature of the bug and
+the conditions needed to recreate it.
+
+If you have a question on interpretation of results, than we may be able to help.
+Again, create an issue with your question and use the label `question_interpretation`.
+
+We cannot answer general implementation questions (such as 'how do I run my model
+with SALib?')
+
+You can format your questions using
+Github Markdown, which makes it easy to paste in short snippets of code
+(use backticks \` around code).  For long python error tracebacks, use a github
+[gist](https://gist.github.com/).
+
+
 ## General Objectives
 
 Development should follow a few objectives:
