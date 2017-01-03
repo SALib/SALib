@@ -1,7 +1,7 @@
 '''
 Created on 30 Jun 2015
 
-@author: will2
+@author: @willu47
 '''
 import numpy as np
 from numpy.testing import assert_equal, assert_allclose
@@ -25,7 +25,10 @@ def test_extend_bounds():
            'names': ["x" + str(x + 1) for x in range(12)]
            }
     actual = extend_bounds(problem)
-    expected = {'names': ['x1', 'x2', 'x3', 'x4', 'x5', 'x6', 'x7', 'x8', 'x9', 'x10', 'x11', 'x12', 'dummy_0', 'dummy_1', 'dummy_2', 'dummy_3'],
+    expected = {'names': ['x1', 'x2', 'x3', 'x4',
+                          'x5', 'x6', 'x7', 'x8',
+                          'x9', 'x10', 'x11', 'x12',
+                          'dummy_0', 'dummy_1', 'dummy_2', 'dummy_3'],
                 'bounds': [np.array([-1,  1]), np.array([-1,  1]),
                            np.array([-1,  1]), np.array([-1,  1]),
                            np.array([-1,  1]), np.array([-1,  1]),

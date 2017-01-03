@@ -18,7 +18,7 @@ def analyze(problem, X, Y,
     """Perform Morris Analysis on model outputs.
 
     Returns a dictionary with keys 'mu', 'mu_star', 'sigma', and 'mu_star_conf',
-    where each entry is a list of size D (the number of eters) containing
+    where each entry is a list of size D (the number of parameters) containing
     the indices in the same order as the parameter file.
 
     Arguments
