@@ -1,0 +1,8 @@
+title: SALib
+description: Sensitivity Analysis Library in Python (Numpy). Contains Sobol, Morris, and FAST methods.
+google_analytics: UA-10257113-9
+show_downloads: true
+theme: jekyll-theme-cayman
+
+gems:
+  - jekyll-mentions
