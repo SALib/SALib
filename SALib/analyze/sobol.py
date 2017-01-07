@@ -83,6 +83,9 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
     if conf_level < 0 or conf_level > 1:
         raise RuntimeError("Confidence level must be between 0-1.")
 
+    # normalize the model output
+    Y = (Y - Y.mean())/Y.std()
+    
     A,B,AB,BA = separate_output_values(Y, D, N, calc_second_order)
     r = np.random.randint(N, size=(N, num_resamples))
     Z = norm.ppf(0.5 + conf_level / 2)
