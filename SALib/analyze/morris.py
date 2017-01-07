@@ -69,9 +69,9 @@ def analyze(problem, X, Y,
 
     num_vars = problem['num_vars']
 
-    if (problem['groups'] is None) & (Y.size % (num_vars + 1) == 0):
+    if (problem.get('groups') is None) & (Y.size % (num_vars + 1) == 0):
         num_trajectories = int(Y.size / (num_vars + 1))
-    elif problem['groups'] is not None:
+    elif problem.get('groups') is not None:
         groups, unique_group_names = compute_groups_matrix(problem['groups'], num_vars)
         number_of_groups = len(unique_group_names)
         num_trajectories = int(Y.size / (number_of_groups + 1))
