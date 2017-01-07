@@ -71,4 +71,4 @@ Lots of other options are included for parameter files, as well as a command-lin
 Also check out the [examples](https://github.com/SALib/SALib/tree/master/examples) for a full description of options for each method.
 
 ### License
-Copyright (C) 2016 Jon Herman, Will Usher, and others. Versions v0.5 and later are released under the [MIT license](LICENSE.md).
+Copyright (C) 2017 Jon Herman, Will Usher, and others. Versions v0.5 and later are released under the [MIT license](LICENSE.md).
