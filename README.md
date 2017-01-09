@@ -12,7 +12,7 @@ Python implementations of commonly used sensitivity analysis methods. Useful in 
 
 **Code Issues:** [![Code Issues](https://www.quantifiedcode.com/api/v1/project/ed62e70f899e4ec8af4ea6b2212d4b30/badge.svg)](https://www.quantifiedcode.com/app/project/ed62e70f899e4ec8af4ea6b2212d4b30)
 
-**Cite SALib:** [![DOI](https://zenodo.org/badge/15666/SALib/SALib.svg)](https://zenodo.org/badge/latestdoi/15666/SALib/SALib)
+**Cite SALib:** [![DOI](https://zenodo.org/badge/10383500.svg)](https://zenodo.org/badge/latestdoi/10383500)
 
  **Paper:** [![status](http://joss.theoj.org/papers/431262803744581c1d4b6a95892d3343/status.svg)](http://joss.theoj.org/papers/431262803744581c1d4b6a95892d3343)
 
