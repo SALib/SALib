@@ -13,9 +13,9 @@ Python implementations of commonly used sensitivity analysis methods. Useful in 
 **Code Issues:** [![Code Issues](https://www.quantifiedcode.com/api/v1/project/ed62e70f899e4ec8af4ea6b2212d4b30/badge.svg)](https://www.quantifiedcode.com/app/project/ed62e70f899e4ec8af4ea6b2212d4b30)
 
  **SALib Paper:** [![status](http://joss.theoj.org/papers/431262803744581c1d4b6a95892d3343/status.svg)](http://joss.theoj.org/papers/431262803744581c1d4b6a95892d3343)
+ 
  ```
-Herman, J. and Usher, W. (2017) SALib: An open-source Python library for sensitivity analysis. 
-Journal of Open Source Software, 2(9).
+Herman, J. and Usher, W. (2017) SALib: An open-source Python library for sensitivity analysis. Journal of Open Source Software, 2(9).
 ```
 
 **Methods included:**
