@@ -12,9 +12,11 @@ Python implementations of commonly used sensitivity analysis methods. Useful in 
 
 **Code Issues:** [![Code Issues](https://www.quantifiedcode.com/api/v1/project/ed62e70f899e4ec8af4ea6b2212d4b30/badge.svg)](https://www.quantifiedcode.com/app/project/ed62e70f899e4ec8af4ea6b2212d4b30)
 
-**Cite SALib:** [![DOI](https://zenodo.org/badge/10383500.svg)](https://zenodo.org/badge/latestdoi/10383500)
-
- **Paper:** [![status](http://joss.theoj.org/papers/431262803744581c1d4b6a95892d3343/status.svg)](http://joss.theoj.org/papers/431262803744581c1d4b6a95892d3343)
+ **SALib Paper:** [![status](http://joss.theoj.org/papers/431262803744581c1d4b6a95892d3343/status.svg)](http://joss.theoj.org/papers/431262803744581c1d4b6a95892d3343)
+ ```
+Herman, J. and Usher, W. (2017) SALib: An open-source Python library for sensitivity analysis. 
+Journal of Open Source Software, 2(9).
+```
 
 **Methods included:**
 * Sobol Sensitivity Analysis ([Sobol 2001](http://www.sciencedirect.com/science/article/pii/S0378475400002706), [Saltelli 2002](http://www.sciencedirect.com/science/article/pii/S0010465502002801), [Saltelli et al. 2010](http://www.sciencedirect.com/science/article/pii/S0010465509003087))
