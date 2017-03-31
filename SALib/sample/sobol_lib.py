@@ -157,7 +157,7 @@ def i4_sobol_generate(m, n, skip):
 
     """
     r = np.zeros((m, n))
-    for j in np.xrange(1, n + 1):
+    for j in range(1, n + 1):
         seed = skip + j - 2
         [r[0:m, j - 1], seed] = i4_sobol(m, seed)
     return r
@@ -320,7 +320,7 @@ def i4_sobol(dim_num, seed):
 
         dim_num_save = dim_num
         # Initialize the remaining rows of V.
-        for i in np.xrange(2, dim_num + 1):
+        for i in range(2, dim_num + 1):
             # The bits of the integer POLY(I) gives the form of polynomial I.
             # Find the degree of polynomial I from binary encoding.
             j = poly[i - 1]
@@ -335,7 +335,7 @@ def i4_sobol(dim_num, seed):
             # array INCLUD.
             j = poly[i - 1]
             includ = np.zeros(m)
-            for k in np.xrange(m, 0, -1):
+            for k in range(m, 0, -1):
                 j2 = math.floor(j / 2.)
                 includ[k - 1] = (j != 2 * j2)
                 j = j2
@@ -343,10 +343,10 @@ def i4_sobol(dim_num, seed):
             # Calculate the remaining elements of row I as explained
             # in Bratley and Fox, section 2.
 
-            for j in np.xrange(m + 1, maxcol + 1):
+            for j in range(m + 1, maxcol + 1):
                 newv = v[i - 1, j - m - 1]
                 l = 1
-                for k in np.xrange(1, m + 1):
+                for k in range(1, m + 1):
                     l = 2 * l
                     if (includ[k - 1]):
                         newv = np.bitwise_xor(
@@ -355,7 +355,7 @@ def i4_sobol(dim_num, seed):
 
         # Multiply columns of V by appropriate power of 2.
         l = 1
-        for j in np.xrange(maxcol - 1, 0, -1):
+        for j in range(maxcol - 1, 0, -1):
             l = 2 * l
             v[0:dim_num, j - 1] = v[0:dim_num, j - 1] * l
 
@@ -383,9 +383,9 @@ def i4_sobol(dim_num, seed):
         l = 1
         lastq = np.zeros(dim_num)
 
-        for seed_temp in np.xrange(int(seed_save), int(seed)):
+        for seed_temp in range(int(seed_save), int(seed)):
             l = i4_bit_lo0(seed_temp)
-            for i in np.xrange(1, dim_num + 1):
+            for i in range(1, dim_num + 1):
                 lastq[i - 1] = np.bitwise_xor(int(lastq[i - 1]),
                                               int(v[i - 1, l - 1]))
 
@@ -393,9 +393,9 @@ def i4_sobol(dim_num, seed):
 
     elif (seed_save + 1 < seed):
 
-        for seed_temp in np.xrange(int(seed_save + 1), int(seed)):
+        for seed_temp in range(int(seed_save + 1), int(seed)):
             l = i4_bit_lo0(seed_temp)
-            for i in np.xrange(1, dim_num + 1):
+            for i in range(1, dim_num + 1):
                 lastq[i - 1] = np.bitwise_xor(int(lastq[i - 1]),
                                               int(v[i - 1, l - 1]))
 
@@ -410,7 +410,7 @@ def i4_sobol(dim_num, seed):
 
     # Calculate the new components of QUASI.
     quasi = np.zeros(dim_num)
-    for i in np.xrange(1, dim_num + 1):
+    for i in range(1, dim_num + 1):
         quasi[i - 1] = lastq[i - 1] * recipd
         lastq[i - 1] = np.bitwise_xor(int(lastq[i - 1]), int(v[i - 1, l - 1]))
 
@@ -481,8 +481,8 @@ def i4_uniform(a, b, seed):
       Volume 8, pages 136-143, 1969.
        """
     if (seed == 0):
-        print 'I4_UNIFORM - Fatal error!'
-        print '	Input SEED = 0!'
+        msg = "Input SEED = 0"
+        raise ValueError(msg)
 
     seed = math.floor(seed)
     a = round(a)
