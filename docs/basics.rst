@@ -121,7 +121,7 @@ will loop over each sample input and evaluate the model:
 
 .. code:: python
 
-    Y = np.empty([param_values.shape[0]])
+    Y = np.zeros([param_values.shape[0]])
 
     for i, X in enumerate(param_values):
         Y[i] = evaluate_model(X)

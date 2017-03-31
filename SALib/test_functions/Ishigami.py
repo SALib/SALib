@@ -11,7 +11,7 @@ import numpy as np
 # x2: 0.4424
 # x3: 0.0
 def evaluate(values):
-    Y = np.empty([values.shape[0]])
+    Y = np.zeros([values.shape[0]])
     A = 7
     B = 0.1
 

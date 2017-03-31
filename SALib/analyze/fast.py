@@ -60,7 +60,7 @@ def analyze(problem, Y, M=4, print_to_console=False):
         exit()
 
     # Recreate the vector omega used in the sampling
-    omega = np.empty([D])
+    omega = np.zeros([D])
     omega[0] = math.floor((N - 1) / (2 * M))
     m = math.floor(omega[0] / (2 * M))
 

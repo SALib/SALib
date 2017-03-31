@@ -72,7 +72,7 @@ def generate_x_star(k, num_levels, grid_step):
     Generate an 1-by-k array to represent initial position for EE
     This should be a randomly generated array in the p level grid :math:\omega
     '''
-    x_star = np.empty(k)
+    x_star = np.zeros(k)
 
     delta = compute_delta(num_levels)
     bound = 1 - delta
@@ -171,7 +171,7 @@ def find_most_distant(input_sample, N, num_params, k_choices, groups=None):
     # Generate a list of all the possible combinations
     # combos = np.array([x for x in combinations(range(N),k_choices)])
     combo_gen = combinations(list(range(N)), k_choices)
-    scores = np.empty(number_of_combinations, dtype=np.float32)
+    scores = np.zeros(number_of_combinations, dtype=np.float32)
     # Generate the pairwise indices once
     pairwise = np.array([y for y in combinations(list(range(k_choices)), 2)])
 

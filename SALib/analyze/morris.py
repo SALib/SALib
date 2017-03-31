@@ -159,7 +159,7 @@ def compute_grouped_sigma(ungrouped_sigma, group_matrix):
     sigma_masked = np.ma.masked_array(ungrouped_sigma * group_matrix.T,
                                         mask=(group_matrix^1).T)
     sigma_agg = np.ma.mean(sigma_masked, axis=1)
-    sigma = np.empty(group_matrix.shape[1], dtype=np.float)
+    sigma = np.zeros(group_matrix.shape[1], dtype=np.float)
     np.copyto(sigma, sigma_agg, where=group_matrix.sum(axis=0)==1 )
     np.copyto(sigma, np.NAN, where=group_matrix.sum(axis=0)!=1 )
 
@@ -241,8 +241,8 @@ def compute_mu_star_confidence(ee, num_trajectories, num_resamples, conf_level):
     to produce a histogram of resampled mu_star metrics.
     This resample is used to produce a confidence interval.
     '''
-    ee_resampled = np.empty([num_trajectories])
-    mu_star_resampled = np.empty([num_resamples])
+    ee_resampled = np.zeros([num_trajectories])
+    mu_star_resampled = np.zeros([num_resamples])
 
     if not 0 < conf_level < 1:
         raise ValueError("Confidence level must be between 0-1.")

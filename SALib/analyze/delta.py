@@ -96,7 +96,7 @@ def calc_delta(Y, Ygrid, X, m):
 # Plischke et al. 2013 bias reduction technique (eqn 30)
 
 def bias_reduced_delta(Y, Ygrid, X, m, num_resamples, conf_level):
-    d = np.empty(num_resamples)
+    d = np.zeros(num_resamples)
     d_hat = calc_delta(Y, Ygrid, X, m)
 
     for i in range(num_resamples):
@@ -119,7 +119,7 @@ def sobol_first(Y, X, m):
 
 
 def sobol_first_conf(Y, X, m, num_resamples, conf_level):
-    s = np.empty(num_resamples)
+    s = np.zeros(num_resamples)
 
     for i in range(num_resamples):
         r = np.random.randint(len(Y), size=len(Y))

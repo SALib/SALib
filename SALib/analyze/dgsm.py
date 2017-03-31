@@ -51,10 +51,10 @@ def analyze(problem, X, Y, num_resamples=1000,
     if not 0 < conf_level < 1:
         raise RuntimeError("Confidence level must be between 0-1.")
 
-    base = np.empty(N)
-    X_base = np.empty((N, D))
-    perturbed = np.empty((N, D))
-    X_perturbed = np.empty((N, D))
+    base = np.zeros(N)
+    X_base = np.zeros((N, D))
+    perturbed = np.zeros((N, D))
+    X_perturbed = np.zeros((N, D))
     step = D + 1
 
     base = Y[0:Y.size:step]
@@ -65,7 +65,7 @@ def analyze(problem, X, Y, num_resamples=1000,
 
     # First order (+conf.) and Total order (+conf.)
     keys = ('vi', 'vi_std', 'dgsm', 'dgsm_conf')
-    S = dict((k, np.empty(D)) for k in keys)
+    S = dict((k, np.zeros(D)) for k in keys)
     if print_to_console:
         print("Parameter %s %s %s %s" % keys)
 
@@ -98,7 +98,7 @@ def calc_dgsm(base, perturbed, x_delta, bounds, num_resamples, conf_level):
     vi, _ = calc_vi(base, perturbed, x_delta)
     dgsm = vi * (bounds[1] - bounds[0]) ** 2 / (D * np.pi ** 2)
 
-    s = np.empty(num_resamples)
+    s = np.zeros(num_resamples)
     for i in range(num_resamples):
         r = np.random.randint(len(base), size=len(base))
         s[i], _ = calc_vi(base[r], perturbed[r], x_delta[r])
