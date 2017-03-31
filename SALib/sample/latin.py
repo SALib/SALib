@@ -24,8 +24,8 @@ def sample(problem, N):
     """
     D = problem['num_vars']
 
-    result = np.empty([N, D])
-    temp = np.empty([N])
+    result = np.zeros([N, D])
+    temp = np.zeros([N])
     d = 1.0 / N
 
     for i in range(D):

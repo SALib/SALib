@@ -43,9 +43,9 @@ def sample(problem, N, calc_second_order=True):
     base_sequence = sobol_sequence.sample(N + skip_values, 2 * D)
 
     if calc_second_order:
-        saltelli_sequence = np.empty([(2 * Dg + 2) * N, D])
+        saltelli_sequence = np.zeros([(2 * Dg + 2) * N, D])
     else:
-        saltelli_sequence = np.empty([(Dg + 2) * N, D])
+        saltelli_sequence = np.zeros([(Dg + 2) * N, D])
     index = 0
 
     for i in range(skip_values, N + skip_values):

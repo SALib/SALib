@@ -33,7 +33,7 @@ def sample(problem, N, M=4):
 
     D = problem['num_vars']
 
-    omega = np.empty([D])
+    omega = np.zeros([D])
     omega[0] = math.floor((N - 1) / (2 * M))
     m = math.floor(omega[0] / (2 * M))
 
@@ -46,8 +46,8 @@ def sample(problem, N, M=4):
     s = (2 * math.pi / N) * np.arange(N)
 
     # Transformation to get points in the X space
-    X = np.empty([N * D, D])
-    omega2 = np.empty([D])
+    X = np.zeros([N * D, D])
+    omega2 = np.zeros([D])
 
     for i in range(D):
         omega2[i] = omega[0]

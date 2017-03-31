@@ -107,7 +107,7 @@ def sample_oat(problem, N, num_levels, grid_jump):
 
     # grid step delta, and final sample matrix X
     delta = grid_jump / (num_levels - 1)
-    X = np.empty([N * (D + 1), D])
+    X = np.zeros([N * (D + 1), D])
 
     # Create N trajectories. Each trajectory contains D+1 parameter sets.
     # (Starts at a base point, and then changes one parameter at a time)
@@ -123,7 +123,7 @@ def sample_oat(problem, N, num_levels, grid_jump):
             P[i, perm[i]] = 1
 
         # starting point for this trajectory
-        x_base = np.empty([D + 1, D])
+        x_base = np.zeros([D + 1, D])
         for i in range(D):
             x_base[:, i] = (
                 rd.choice(np.arange(num_levels - grid_jump))) / (num_levels - 1)
@@ -152,7 +152,7 @@ def sample_groups(problem, N, num_levels, grid_jump):
 
     k = G.shape[0]
     g = G.shape[1]
-    sample = np.empty((N * (g + 1), k))
+    sample = np.zeros((N * (g + 1), k))
     sample = np.array([generate_trajectory(G, num_levels, grid_jump) for n in range(N)])
     return sample.reshape((N * (g + 1), k))
 

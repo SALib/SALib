@@ -149,20 +149,20 @@ def second_order(A, ABj, ABk, BAj, B):
 
 def create_Si_dict(D, calc_second_order):
     # initialize empty dict to store sensitivity indices
-    S = dict((k, np.empty(D)) for k in ('S1', 'S1_conf', 'ST', 'ST_conf'))
+    S = dict((k, np.zeros(D)) for k in ('S1', 'S1_conf', 'ST', 'ST_conf'))
 
     if calc_second_order:
-        S['S2'] = np.empty((D, D))
+        S['S2'] = np.zeros((D, D))
         S['S2'][:] = np.nan
-        S['S2_conf'] = np.empty((D, D))
+        S['S2_conf'] = np.zeros((D, D))
         S['S2_conf'][:] = np.nan
 
     return S
 
 
 def separate_output_values(Y, D, N, calc_second_order):
-    AB = np.empty((N, D))
-    BA = np.empty((N, D)) if calc_second_order else None
+    AB = np.zeros((N, D))
+    BA = np.zeros((N, D)) if calc_second_order else None
     step = 2 * D + 2 if calc_second_order else D + 2
 
     A = Y[0:Y.size:step]

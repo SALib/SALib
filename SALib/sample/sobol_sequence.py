@@ -62,7 +62,7 @@ def sample(N, D):
         raise ValueError("Error in Sobol sequence: not enough bits")
 
     for i in range(D):
-        V = np.empty(L + 1, dtype=long)
+        V = np.zeros(L + 1, dtype=long)
 
         if i == 0:
             for j in range(1, L + 1):

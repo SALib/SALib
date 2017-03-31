@@ -25,7 +25,7 @@ def evaluate(values, a=None):
     elif gto.any() == True:
         raise ValueError("Sobol G function called with values greater than one")
 
-    Y = np.empty([values.shape[0]])
+    Y = np.zeros([values.shape[0]])
 
     for i, row in enumerate(values):
         Y[i] = 1.0

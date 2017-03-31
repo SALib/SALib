@@ -20,7 +20,7 @@ def sample(problem, N, delta=0.01):
     base_sequence = sobol_sequence.sample(N + skip_values, D)
     # scale before finite differencing
     scale_samples(base_sequence, problem['bounds'])
-    dgsm_sequence = np.empty([N * (D + 1), D])
+    dgsm_sequence = np.zeros([N * (D + 1), D])
 
     index = 0
 
