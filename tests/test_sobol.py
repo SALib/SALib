@@ -6,7 +6,7 @@ import numpy as np
 from scipy.stats import norm
 
 from SALib.analyze import sobol
-from SALib.sample import saltelli
+from SALib.sample import saltelli, sobol_sequence
 from SALib.test_functions import Ishigami, Sobol_G
 from SALib.util import read_param_file
 
@@ -16,6 +16,15 @@ def setup_samples(N = 500, calc_second_order = True):
     problem = read_param_file(param_file)
     param_values = saltelli.sample(problem, N=N, calc_second_order=calc_second_order)
     return problem,param_values
+
+
+def test_sobol_sequence():
+    # example from Joe & Kuo: http://web.maths.unsw.edu.au/~fkuo/sobol/
+    S = sobol_sequence.sample(10,3)
+    expected = [[0,0,0],[0.5,0.5,0.5],[0.75,0.25,0.25],[0.25,0.75,0.75],
+                [0.375,0.375,0.625],[0.875,0.875,0.125],[0.625,0.125,0.875],
+                [0.125,0.625,0.375],[0.1875,0.3125,0.9375],[0.6875,0.8125,0.4375]]
+    assert_allclose(S, expected, atol=5e-2, rtol=1e-1)
 
 
 def test_sample_size_second_order():
