@@ -253,7 +253,7 @@ def test_find_maximum():
 
 
 def test_catch_combos_too_large():
-    N = 1e6
+    N = int(1e6)
     k_choices = 4
     num_params = 2
     input_sample = np.random.random_sample((N, num_params))
