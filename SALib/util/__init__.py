@@ -181,8 +181,8 @@ def read_param_file(filename, delimiter=None):
     if groups == names:
         groups = None
     elif len(set(groups)) == 1:
-        raise ValueError('''Only one group defined, results will not be
-            meaningful''')
+        print('''Warning: Only one group defined, analysis 
+            performed with individual parameters''')
 
     # setting dists to none if all are uniform
     # because non-uniform scaling is not needed
