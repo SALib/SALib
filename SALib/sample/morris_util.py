@@ -141,9 +141,23 @@ def compute_distance(m, l):
 
 def compute_distance_matrix(input_sample, N, num_params, groups=None,
                             local_optimization=False):
-    '''
-    groups is an integer representing the number of groups
-    '''
+    """
+
+    Arguments
+    ---------
+    input_sample : int
+    N : int
+    num_params : int
+    groups : numpy.ndarray, default=None
+        the mapping between factors and groups
+    local_optimization : bool, default=False
+
+    Returns
+    -------
+    distance_matrix : numpy.ndarray
+
+
+    """
     num_groups = None
     if groups:
         num_groups = groups[0].shape[1]
@@ -218,8 +232,16 @@ def mappable(combos, pairwise, distance_matrix):
 
 
 def find_maximum(scores, N, k_choices):
+    """Finds the `k_choices` maximum scores from `scores`
 
-    if type(scores) != np.ndarray:
+    Arguments
+    ---------
+    scores : numpy.ndarray
+    N : int
+    k_choices : int
+    """
+
+    if not isinstance(scores, np.ndarray):
         raise TypeError("Scores input is not a numpy array")
 
     index_of_maximum = int(scores.argmax())
@@ -243,7 +265,15 @@ def take(n, iterable):
 
 
 def nth(iterable, n, default=None):
-    "Returns the nth item or a default value"
+    """Returns the nth item or a default value
+
+    Arguments
+    ---------
+    iterable : iterable
+    n : int
+    default : default=None
+        The default value to return
+    """
 
     if type(n) != int:
         raise TypeError("n is not an integer")
@@ -281,8 +311,10 @@ def sum_distances(indices, distance_matrix):
     """Calculate combinatorial distance between a select group of trajectories,
     indicated by indices
 
-    indices = tuple
-    distance_matrix = array (M,M)
+    Arguments
+    ---------
+    indices : tuple
+    distance_matrix : numpy.ndarray (M,M)
 
     Notes
     -----
@@ -311,7 +343,7 @@ def get_max_sum_ind(indices_list, distances, i, m):
     indices_list : list
         list of tuples
     distances : np.ndarray
-        M
+        size M
     i : int
     m : int
     '''
@@ -359,12 +391,6 @@ def find_local_maximum(input_sample, N, num_params, k_choices, groups=None):
     groups : default=None
 
     """
-
-    if groups is not None:
-        raise ValueError(
-            'Method not tested nor developed with groups. \
-            Adapt the code to work with groups.')
-
     distance_matrix = compute_distance_matrix(input_sample, N, num_params,
                                               groups, local_optimization=True)
 
@@ -410,9 +436,9 @@ def find_local_maximum(input_sample, N, num_params, k_choices, groups=None):
     return sorted(list(tot_max))
 
 
-def find_optimum_combination(input_sample, N, num_params, k_choices,
-                             groups=None, local_optimization=False):
-    """
+def brute_force_most_distant(input_sample, N, num_params, k_choices,
+                             groups=None):
+    """Use brute force method to find most distant trajectories
 
     Arguments
     ---------
@@ -421,20 +447,32 @@ def find_optimum_combination(input_sample, N, num_params, k_choices,
     num_params : int
     k_choices : int
     groups : default=None,
-    local_optimization : bool, default=False
     """
+    scores = find_most_distant(input_sample,
+                               N,
+                               num_params,
+                               k_choices,
+                               groups)
 
-    if local_optimization is True:
-        maximum_combo = find_local_maximum(
-            input_sample, N, num_params, k_choices, groups)
+    maximum_combo = find_maximum(scores, N, k_choices)
 
-    else:
-        scores = find_most_distant(input_sample,
-                                   N,
-                                   num_params,
-                                   k_choices,
-                                   groups)
+    return maximum_combo
 
-        maximum_combo = find_maximum(scores, N, k_choices)
+
+def find_locally_optimum_combination(input_sample, N, num_params, k_choices,
+                                     groups=None):
+    """Use local optimisation to find most distant trajectories
+
+    Arguments
+    ---------
+    input_sample
+    N : int
+    num_params : int
+    k_choices : int
+    groups : default=None,
+    """
+    scores = find_local_maximum(input_sample, N, num_params, k_choices, groups)
+
+    maximum_combo = find_maximum(scores, N, k_choices)
 
     return maximum_combo

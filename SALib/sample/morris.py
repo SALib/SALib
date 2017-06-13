@@ -27,13 +27,14 @@ from __future__ import division
 import random as rd
 import numpy as np
 
+from SALib.sample.morris_strategies import SampleMorris, LocalOptimisation
 
 from . import common_args
 from ..util import scale_samples, read_param_file, compute_groups_matrix
 from . optimal_trajectories import return_max_combo
 
-from . morris_util import generate_trajectory, find_optimum_combination, \
-    compile_output
+from . morris_util import generate_trajectory, \
+    compile_output, brute_force_most_distant
 try:
     import gurobipy
 except ImportError:
@@ -84,24 +85,6 @@ def sample(problem, N, num_levels, grid_jump, optimal_trajectories=None,
         sample = sample_oat(problem, N, num_levels, grid_jump)
 
     if optimal_trajectories:
-
-        assert isinstance(optimal_trajectories, int), \
-            "Number of optimal trajectories should be an integer"
-
-        if optimal_trajectories < 2:
-            raise ValueError(
-                "The number of optimal trajectories must be set to 2 or more.")
-        if optimal_trajectories >= N:
-            msg = "The number of optimal trajectories should be less than the \
-                   number of samples"
-            raise ValueError(msg)
-
-        if _has_gurobi is False \
-           and local_optimization is False \
-           and optimal_trajectories > 10:
-            msg = "Running optimal trajectories greater than values of 10 \
-                   will take a long time."
-            raise ValueError(msg)
 
         sample = compute_optimised_trajectories(problem,
                                                 sample,
@@ -185,6 +168,10 @@ def sample_groups(problem, N, num_levels, grid_jump):
         The number of grid levels
     grid_jump : int
         The grid jump size
+
+    Returns
+    -------
+    numpy.ndarray
     """
     G, _ = compute_groups_matrix(problem['groups'], problem['num_vars'])
 
@@ -217,10 +204,28 @@ def compute_optimised_trajectories(problem, input_sample, N, k_choices,
     N : int
         The number of samples to generate
     k_choices : int
-        The number
+        The number of optimal trajectories
     local_optimization : bool, default=False
         If true, uses local optimisation heuristic
     '''
+    assert isinstance(k_choices, int), \
+        "Number of optimal trajectories should be an integer"
+
+    if k_choices < 2:
+        raise ValueError(
+            "The number of optimal trajectories must be set to 2 or more.")
+    if k_choices >= N:
+        msg = "The number of optimal trajectories should be less than the \
+                number of samples"
+        raise ValueError(msg)
+
+    if _has_gurobi is False \
+            and local_optimization is False \
+            and k_choices > 10:
+        msg = "Running optimal trajectories greater than values of 10 \
+                will take a long time."
+        raise ValueError(msg)
+
     num_params = problem['num_vars']
     groups = compute_groups_matrix(problem['groups'], num_params)
 
@@ -228,19 +233,26 @@ def compute_optimised_trajectories(problem, input_sample, N, k_choices,
         raise ValueError("Input sample must be scaled between 0 and 1")
 
     if _has_gurobi and local_optimization is False:
+        # Use global optimization method
         maximum_combo = return_max_combo(input_sample,
                                          N,
                                          num_params,
                                          k_choices,
                                          groups)
 
+    elif _has_gurobi is False and local_optimization:
+        # Use local method
+        localoptimisation = LocalOptimisation()
+        context = SampleMorris(localoptimisation)
+        maximum_combo = context.sample(
+            input_sample, N, num_params, k_choices, groups)
     else:
-        maximum_combo = find_optimum_combination(input_sample,
+        # Use brute force approach
+        maximum_combo = brute_force_most_distant(input_sample,
                                                  N,
                                                  num_params,
                                                  k_choices,
-                                                 groups,
-                                                 local_optimization)
+                                                 groups)
 
     num_groups = None
     if groups is not None:
