@@ -1,13 +1,15 @@
 from unittest import skipUnless
 
 import numpy as np
-from nose.tools import raises, with_setup
 from numpy.testing import assert_equal
+from nose.tools import raises, with_setup
 
 
-from SALib.sample.morris_util import find_locally_optimum_combination, \
-    brute_force_most_distant, \
+from SALib.sample.morris_util import brute_force_most_distant, \
     find_local_maximum
+
+from SALib.sample.morris_strategies.local import LocalOptimisation
+
 from SALib.sample.morris import sample_oat, \
     compute_optimised_trajectories, \
     sample_groups
@@ -156,16 +158,17 @@ def test_optimal_combinations():
 
     morris_sample = sample_oat(problem, N, num_levels, grid_jump)
 
-    strategy = GlobalOptimisation()
-    actual = strategy.return_max_combo(morris_sample,
-                                       N,
-                                       num_params,
-                                       k_choices)
+    global_strategy = GlobalOptimisation()
+    actual = global_strategy.return_max_combo(morris_sample,
+                                              N,
+                                              num_params,
+                                              k_choices)
 
-    desired = find_locally_optimum_combination(morris_sample,
-                                               N,
-                                               num_params,
-                                               k_choices)
+    local_strategy = LocalOptimisation()
+    desired = local_strategy.find_locally_optimum_combination(morris_sample,
+                                                              N,
+                                                              num_params,
+                                                              k_choices)
 
     assert_equal(actual, desired)
 
@@ -218,11 +221,12 @@ def test_optimised_trajectories_without_groups():
                                        num_params,
                                        k_choices)
 
-    desired = find_locally_optimum_combination(input_sample,
-                                               N,
-                                               num_params,
-                                               k_choices,
-                                               groups)
+    local_strategy = LocalOptimisation()
+    desired = local_strategy.find_locally_optimum_combination(input_sample,
+                                                              N,
+                                                              num_params,
+                                                              k_choices,
+                                                              groups)
 
     assert_equal(actual, desired)
 
@@ -256,11 +260,12 @@ def test_optimised_trajectories_with_groups():
                                        num_params,
                                        k_choices)
 
-    desired = find_locally_optimum_combination(input_sample,
-                                               N,
-                                               num_params,
-                                               k_choices,
-                                               groups)
+    local_strategy = LocalOptimisation()
+    desired = local_strategy.find_locally_optimum_combination(input_sample,
+                                                              N,
+                                                              num_params,
+                                                              k_choices,
+                                                              groups)
     assert_equal(actual, desired)
 
 
@@ -312,9 +317,10 @@ def test_local_optimised_trajectories_with_groups():
     # From local optimal trajectories
     actual = find_local_maximum(input_sample, N, num_params, k_choices, groups)
 
-    desired = find_locally_optimum_combination(input_sample,
-                                               N,
-                                               num_params,
-                                               k_choices,
-                                               groups)
+    strategy = LocalOptimisation()
+    desired = strategy.find_locally_optimum_combination(input_sample,
+                                                        N,
+                                                        num_params,
+                                                        k_choices,
+                                                        groups)
     assert_equal(actual, desired)

@@ -11,7 +11,6 @@ Example
 """
 
 import abc
-from SALib.sample.morris_util import find_locally_optimum_combination
 from .. morris_util import brute_force_most_distant, compile_output
 
 
@@ -104,16 +103,6 @@ class Strategy(metaclass=abc.ABCMeta):
     def _sample(self, input_sample, num_samples,
                 num_params, k_choices, groups):
         pass
-
-
-class LocalOptimisation(Strategy):
-    """Implements the local optimisation algorithm using the Strategy interface
-    """
-
-    def _sample(self, input_sample, num_samples,
-                num_params, k_choices, groups):
-        return find_locally_optimum_combination(
-            input_sample, num_samples, num_params, k_choices, groups)
 
 
 class BruteForce(Strategy):

@@ -476,22 +476,3 @@ def brute_force_most_distant(input_sample, N, num_params, k_choices,
     maximum_combo = find_maximum(scores, N, k_choices)
 
     return maximum_combo
-
-
-def find_locally_optimum_combination(input_sample, N, num_params, k_choices,
-                                     groups=None):
-    """Use local optimisation to find most distant trajectories
-
-    Arguments
-    ---------
-    input_sample
-    N : int
-    num_params : int
-    k_choices : int
-    groups : default=None,
-    """
-    scores = find_local_maximum(input_sample, N, num_params, k_choices, groups)
-
-    maximum_combo = find_maximum(scores, N, k_choices)
-
-    return maximum_combo

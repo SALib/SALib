@@ -27,9 +27,10 @@ from __future__ import division
 import random as rd
 import numpy as np
 
-from SALib.sample.morris_strategies import (SampleMorris, LocalOptimisation,
+from SALib.sample.morris_strategies import (SampleMorris,
                                             BruteForce)
 from SALib.sample.optimal_trajectories import GlobalOptimisation
+from SALib.sample.morris_strategies.local import LocalOptimisation
 
 from . import common_args
 from ..util import scale_samples, read_param_file, compute_groups_matrix
