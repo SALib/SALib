@@ -2,11 +2,10 @@ from unittest import skipUnless
 
 import numpy as np
 from numpy.testing import assert_equal
-from nose.tools import raises, with_setup
+from nose.tools import raises
 
 
-from SALib.sample.morris_util import brute_force_most_distant, \
-    find_local_maximum
+from SALib.sample.morris_util import brute_force_most_distant
 
 from SALib.sample.morris_strategies.local import LocalOptimisation
 
@@ -15,11 +14,7 @@ from SALib.sample.morris import sample_oat, \
     sample_groups
 
 from SALib.sample.optimal_trajectories import GlobalOptimisation
-from SALib.util import read_param_file, compute_groups_matrix
-from . test_util import setup_function
-
-
-from . test_morris import setup_param_file_with_groups_prime
+from SALib.util import read_param_file
 
 try:
     import gurobipy
@@ -29,9 +24,8 @@ else:
     _has_gurobi = True
 
 
-@with_setup(setup_param_file_with_groups_prime)
 @skipUnless(_has_gurobi, "Gurobi is required for combinatorial optimisation")
-def test_optimal_sample_with_groups():
+def test_optimal_sample_with_groups(setup_param_file_with_groups_prime):
     '''
     Tests that the combinatorial optimisation approach matches
     that of the brute force approach
@@ -65,8 +59,7 @@ def test_optimal_sample_with_groups():
 
 
 @skipUnless(_has_gurobi, "Gurobi is required for combinatorial optimisation")
-@with_setup(setup_param_file_with_groups_prime)
-def test_size_of_trajectories_with_groups():
+def test_size_of_trajectories_with_groups(setup_param_file_with_groups_prime):
     '''
     Tests that the number of trajectories produced is computed
     correctly (i.e. that the size of the trajectories is a function
@@ -145,8 +138,7 @@ def test_size_of_trajectories_with_groups():
 
 
 @skipUnless(_has_gurobi, "Gurobi is required for combinatorial optimisation")
-@with_setup(setup_function())
-def test_optimal_combinations():
+def test_optimal_combinations(setup_function):
 
     N = 6
     param_file = setup_function
@@ -165,17 +157,16 @@ def test_optimal_combinations():
                                               k_choices)
 
     local_strategy = LocalOptimisation()
-    desired = local_strategy.find_locally_optimum_combination(morris_sample,
-                                                              N,
-                                                              num_params,
-                                                              k_choices)
+    desired = local_strategy.locally_optimal_combination(morris_sample,
+                                                         N,
+                                                         num_params,
+                                                         k_choices)
 
     assert_equal(actual, desired)
 
 
 @skipUnless(_has_gurobi, "Gurobi is required for combinatorial optimisation")
-@with_setup(setup_function())
-def test_optimised_trajectories_without_groups():
+def test_optimised_trajectories_without_groups(setup_function):
     """
     Tests that the optimisation problem gives
     the same answer as the brute force problem
@@ -222,18 +213,17 @@ def test_optimised_trajectories_without_groups():
                                        k_choices)
 
     local_strategy = LocalOptimisation()
-    desired = local_strategy.find_locally_optimum_combination(input_sample,
-                                                              N,
-                                                              num_params,
-                                                              k_choices,
-                                                              groups)
+    desired = local_strategy.locally_optimal_combination(input_sample,
+                                                         N,
+                                                         num_params,
+                                                         k_choices,
+                                                         groups)
 
     assert_equal(actual, desired)
 
 
 @skipUnless(_has_gurobi, "Gurobi is required for combinatorial optimisation")
-@with_setup(setup_param_file_with_groups_prime)
-def test_optimised_trajectories_with_groups():
+def test_optimised_trajectories_groups(setup_param_file_with_groups_prime):
     """
     Tests that the optimisation problem gives
     the same answer as the brute force problem
@@ -261,18 +251,17 @@ def test_optimised_trajectories_with_groups():
                                        k_choices)
 
     local_strategy = LocalOptimisation()
-    desired = local_strategy.find_locally_optimum_combination(input_sample,
-                                                              N,
-                                                              num_params,
-                                                              k_choices,
-                                                              groups)
+    desired = local_strategy.locally_optimal_combination(input_sample,
+                                                         N,
+                                                         num_params,
+                                                         k_choices,
+                                                         groups)
     assert_equal(actual, desired)
 
 
 @skipUnless(_has_gurobi, "Gurobi is required for combinatorial optimisation")
-@with_setup(setup_function())
 @raises(ValueError)
-def test_raise_error_if_k_gt_N():
+def test_raise_error_if_k_gt_N(setup_function):
     """Check that an error is raised if `k_choices` is greater than
     (or equal to) `N`
     """
@@ -289,38 +278,3 @@ def test_raise_error_if_k_gt_N():
                                    morris_sample,
                                    N,
                                    k_choices)
-
-
-@with_setup(setup_param_file_with_groups_prime)
-def test_local_optimised_trajectories_with_groups():
-    """
-    Tests that the local optimisation problem gives
-    the same answer as the brute force problem
-    (for small values of `k_choices` and `N`)
-    with groups
-    """
-
-    N = 8
-    param_file = setup_param_file_with_groups_prime()
-    problem = read_param_file(param_file)
-    num_levels = 4
-    grid_jump = num_levels / 2
-    k_choices = 4
-
-    num_params = problem['num_vars']
-    groups = problem['groups']
-
-    input_sample = sample_groups(problem, N, num_levels, grid_jump)
-
-    groups = compute_groups_matrix(groups, num_params)
-
-    # From local optimal trajectories
-    actual = find_local_maximum(input_sample, N, num_params, k_choices, groups)
-
-    strategy = LocalOptimisation()
-    desired = strategy.find_locally_optimum_combination(input_sample,
-                                                        N,
-                                                        num_params,
-                                                        k_choices,
-                                                        groups)
-    assert_equal(actual, desired)

@@ -1,27 +1,16 @@
 from __future__ import division
 
-import os
-
 from nose.tools import raises, with_setup
 from numpy.testing import assert_equal, assert_allclose
 
 import numpy as np
-import tempfile
 import pytest
 
 from SALib.util import read_param_file, scale_samples, unscale_samples, \
-                   compute_groups_matrix
+    compute_groups_matrix
 
-def make_temporary_file():
-    """ Returns a temporary file name
+from . conftest import make_temporary_file
 
-    Returns
-    =========
-    openfile.name : str
-        Name of the temporary file
-    """
-    with tempfile.NamedTemporaryFile() as openfile:
-        return openfile.name
 
 @pytest.fixture(scope='function')
 def setup_function():
@@ -30,6 +19,7 @@ def setup_function():
         ofile.write("Test1 0.0 100.0\n")
         ofile.write("Test2 5.0 51.0\n")
     return filename
+
 
 @pytest.fixture(scope='function')
 def setup_param_file_group_dist():
@@ -40,6 +30,7 @@ def setup_param_file_group_dist():
         ofile.write("Test3 10.0 1.0 Group2 norm\n")
     return filename
 
+
 @pytest.fixture(scope='function')
 def setup_csv_param_file_with_whitespace_in_names():
     filename = make_temporary_file()
@@ -47,6 +38,7 @@ def setup_csv_param_file_with_whitespace_in_names():
         ofile.write("Test 1,0.0,100.0\n")
         ofile.write("Test 2,5.0,51.0\n")
     return filename
+
 
 @pytest.fixture(scope='function')
 def setup_tab_param_file_with_whitespace_in_names():
@@ -56,6 +48,7 @@ def setup_tab_param_file_with_whitespace_in_names():
         ofile.write("Test 2\t5.0\t51.0\n")
     return filename
 
+
 @pytest.fixture(scope='function')
 def setup_csv_param_file_with_whitespace_in_names_comments():
     filename = make_temporary_file()
@@ -64,6 +57,7 @@ def setup_csv_param_file_with_whitespace_in_names_comments():
         ofile.write("'Test 1',0.0,100.0\n")
         ofile.write("'Test 2',5.0,51.0\n")
     return filename
+
 
 @with_setup(setup_function)
 def test_readfile():
@@ -147,15 +141,18 @@ def test_scale_samples():
 
     bounds = [[10, 20], [-10, 10]]
 
-    desired = np.array([np.arange(10, 21, 1), np.arange(-10, 12, 2)], dtype=np.float).T
+    desired = np.array(
+        [np.arange(10, 21, 1), np.arange(-10, 12, 2)], dtype=np.float).T
     scale_samples(params, bounds)
     assert_allclose(params, desired, atol=1e-03, rtol=1e-03)
+
 
 def test_unscale_samples():
     '''
     Simple test to unscale samples back to [0,1] range
     '''
-    params = np.array([np.arange(10, 21, 1), np.arange(-10, 12, 2)], dtype=np.float).T
+    params = np.array(
+        [np.arange(10, 21, 1), np.arange(-10, 12, 2)], dtype=np.float).T
     bounds = [[10, 20], [-10, 10]]
 
     desired = np.arange(0, 1.1, 0.1).repeat(2).reshape((11, 2))

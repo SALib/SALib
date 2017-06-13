@@ -14,9 +14,7 @@ from SALib.sample.morris_util import generate_P_star, \
     compute_distance_matrix, \
     find_most_distant, find_maximum, \
     make_index_list, \
-    check_input_sample, \
-    find_local_maximum, \
-    sum_distances, get_max_sum_ind, add_indices
+    check_input_sample
 
 
 def setup():
@@ -160,46 +158,6 @@ def test_compute_distance_matrix_local():
     assert_allclose(output, expected, rtol=1e-2)
 
 
-def test_sum_distances():
-    '''
-    Tests whether the combinations are summed correctly.
-    '''
-    sample_inputs = setup()
-    dist_matr = compute_distance_matrix(
-        sample_inputs, 6, 2, local_optimization=True)
-    indices = (1, 3, 2)
-    distance = sum_distances(indices, dist_matr)
-
-    expected = 10.47
-    assert_allclose(distance, expected, rtol=1e-2)
-
-
-def test_get_max_sum_ind():
-    '''
-    Tests whether the right maximum indices are returned.
-    '''
-    indices = np.array([(1, 2, 4), (3, 2, 1), (4, 2, 1)])
-    distances = np.array([20, 40, 50])
-
-    output = get_max_sum_ind(indices, distances, 0, 0)
-    expected = (4, 2, 1)
-
-    assert_equal(output, expected)
-
-
-def test_add_indices():
-    '''
-    Tests whether the right indices are added.
-    '''
-    indices = (1, 3, 4)
-    matr = np.zeros((6, 6), dtype=np.int16)
-    ind_extra = add_indices(indices, matr)
-
-    expected = [(1, 3, 4, 0), (1, 3, 4, 2), (1, 3, 4, 5)]
-
-    assert_equal(ind_extra, expected)
-
-
 def test_combo_from_find_most_distant():
     '''
     Tests whether the correct combination is picked from the fixture drawn
@@ -214,24 +172,6 @@ def test_combo_from_find_most_distant():
     output = find_maximum(scores, N, k_choices)
     expected = [0, 2, 3, 5]  # trajectories 1, 3, 4, 6
     assert_equal(output, expected)
-
-
-def test_find_local_maximum_distance():
-    '''
-    Test whether finding the local maximum distance equals the global maximum
-    distance in a simple case.
-    From Saltelli et al. 2008, in the solution to exercise 3a,
-    Chapter 3, page 134.
-    '''
-
-    sample_inputs = setup()
-    N = 6
-    num_params = 2
-    k_choices = 4
-    scores_global = find_most_distant(sample_inputs, N, num_params, k_choices)
-    output_global = find_maximum(scores_global, N, k_choices)
-    output_local = find_local_maximum(sample_inputs, N, num_params, k_choices)
-    assert_equal(output_global, output_local)
 
 
 def test_scores_from_find_most_distant():
@@ -297,14 +237,6 @@ def test_make_index_list_with_groups():
     desired = [np.array([0, 1, 2]), np.array([3, 4, 5]),
                np.array([6, 7, 8]), np.array([9, 10, 11])]
     assert_equal(desired, actual)
-
-
-@raises(ValueError)
-def test_get_max_sum_ind_Error():
-    indices = [(1, 2, 4), (3, 2, 1), (4, 2, 1)]
-    distances_wrong = [20, 40]
-
-    get_max_sum_ind(indices, distances_wrong, 0, 0)
 
 
 @raises(AssertionError)
