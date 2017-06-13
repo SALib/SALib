@@ -1,8 +1,5 @@
 from __future__ import division
 
-import sys
-
-from nose.tools import with_setup
 from numpy.testing import assert_allclose
 
 from SALib.analyze import delta
@@ -20,12 +17,13 @@ from SALib.sample.morris import sample
 from SALib.test_functions import Ishigami
 from SALib.util import read_param_file
 
+
 def test_regression_morris_vanilla():
 
     param_file = 'SALib/test_functions/params/Ishigami.txt'
     problem = read_param_file(param_file)
-    param_values = sample(problem=problem, N=5000, \
-                          num_levels=10, grid_jump=5, \
+    param_values = sample(problem=problem, N=5000,
+                          num_levels=10, grid_jump=5,
                           optimal_trajectories=None)
 
     Y = Ishigami.evaluate(param_values)
@@ -42,9 +40,28 @@ def test_regression_morris_groups():
     param_file = 'SALib/test_functions/params/Ishigami_groups.txt'
     problem = read_param_file(param_file)
 
-    param_values = sample(problem=problem, N=5000, \
-                          num_levels=10, grid_jump=5, \
+    param_values = sample(problem=problem, N=5000,
+                          num_levels=10, grid_jump=5,
                           optimal_trajectories=None)
+
+    Y = Ishigami.evaluate(param_values)
+
+    Si = morris.analyze(problem, param_values, Y,
+                        conf_level=0.95, print_to_console=False,
+                        num_levels=10, grid_jump=5)
+
+    assert_allclose(Si['mu_star'], [7.87, 6.26], rtol=5e-1)
+
+
+def test_regression_morris_groups_local_optim():
+
+    param_file = 'SALib/test_functions/params/Ishigami_groups.txt'
+    problem = read_param_file(param_file)
+
+    param_values = sample(problem=problem, N=500,
+                          num_levels=10, grid_jump=5,
+                          optimal_trajectories=10,
+                          local_optimization=True)
 
     Y = Ishigami.evaluate(param_values)
 
@@ -59,13 +76,14 @@ def test_regression_morris_optimal():
     '''
     Tests the use of optimal trajectories with Morris.
 
-    Note that the relative tolerance is set to a very high value (default is 1e-05)
-    due to the coarse nature of the num_levels and grid_jump.
+    Note that the relative tolerance is set to a very high value
+    (default is 1e-05) due to the coarse nature of the num_levels
+    and grid_jump.
     '''
     param_file = 'SALib/test_functions/params/Ishigami.txt'
     problem = read_param_file(param_file)
-    param_values = sample(problem=problem, N=20, \
-                          num_levels=4, grid_jump=2, \
+    param_values = sample(problem=problem, N=20,
+                          num_levels=4, grid_jump=2,
                           optimal_trajectories=9)
 
     Y = Ishigami.evaluate(param_values)
@@ -85,11 +103,13 @@ def test_regression_sobol():
     Y = Ishigami.evaluate(param_values)
 
     Si = sobol.analyze(problem, Y,
-                       calc_second_order=True, conf_level=0.95, print_to_console=False)
+                       calc_second_order=True, conf_level=0.95,
+                       print_to_console=False)
 
     assert_allclose(Si['S1'], [0.31, 0.44, 0.00], atol=5e-2, rtol=1e-1)
     assert_allclose(Si['ST'], [0.55, 0.44, 0.24], atol=5e-2, rtol=1e-1)
-    assert_allclose([Si['S2'][0][1], Si['S2'][0][2], Si['S2'][1][2]], [0.00, 0.25, 0.00], atol=5e-2, rtol=1e-1)
+    assert_allclose([Si['S2'][0][1], Si['S2'][0][2], Si['S2'][1][2]], [
+                    0.00, 0.25, 0.00], atol=5e-2, rtol=1e-1)
 
 
 def test_regression_sobol_parallel():
@@ -100,25 +120,28 @@ def test_regression_sobol_parallel():
     Y = Ishigami.evaluate(param_values)
 
     Si = sobol.analyze(problem, Y,
-                       calc_second_order=True, parallel=True, conf_level=0.95, print_to_console=False)
+                       calc_second_order=True, parallel=True,
+                       conf_level=0.95, print_to_console=False)
 
     assert_allclose(Si['S1'], [0.31, 0.44, 0.00], atol=5e-2, rtol=1e-1)
     assert_allclose(Si['ST'], [0.55, 0.44, 0.24], atol=5e-2, rtol=1e-1)
-    assert_allclose([Si['S2'][0][1], Si['S2'][0][2], Si['S2'][1][2]], [0.00, 0.25, 0.00], atol=5e-2, rtol=1e-1)
+    assert_allclose([Si['S2'][0][1], Si['S2'][0][2], Si['S2'][1][2]], [
+                    0.00, 0.25, 0.00], atol=5e-2, rtol=1e-1)
 
 
 def test_regression_sobol_groups():
     problem = {
-      'num_vars': 3,
-      'names': ['x1', 'x2', 'x3'],
-      'bounds': [[-np.pi, np.pi]]*3,
-      'groups': ['G1', 'G2', 'G1']
+        'num_vars': 3,
+        'names': ['x1', 'x2', 'x3'],
+        'bounds': [[-np.pi, np.pi]] * 3,
+        'groups': ['G1', 'G2', 'G1']
     }
     param_values = saltelli.sample(problem, 10000, calc_second_order=True)
 
     Y = Ishigami.evaluate(param_values)
     Si = sobol.analyze(problem, Y,
-                       calc_second_order=True, parallel=True, conf_level=0.95, print_to_console=False)
+                       calc_second_order=True, parallel=True,
+                       conf_level=0.95, print_to_console=False)
 
     assert_allclose(Si['S1'], [0.55, 0.44], atol=5e-2, rtol=1e-1)
     assert_allclose(Si['ST'], [0.55, 0.44], atol=5e-2, rtol=1e-1)
@@ -127,17 +150,18 @@ def test_regression_sobol_groups():
 
 def test_regression_sobol_groups_dists():
     problem = {
-      'num_vars': 3,
-      'names': ['x1', 'x2', 'x3'],
-      'bounds': [[-np.pi,np.pi], [1.0, 0.2], [3, 0.5]],
-      'groups': ['G1', 'G2', 'G1'],
-      'dists': ['unif', 'lognorm', 'triang']
+        'num_vars': 3,
+        'names': ['x1', 'x2', 'x3'],
+        'bounds': [[-np.pi, np.pi], [1.0, 0.2], [3, 0.5]],
+        'groups': ['G1', 'G2', 'G1'],
+        'dists': ['unif', 'lognorm', 'triang']
     }
     param_values = saltelli.sample(problem, 10000, calc_second_order=True)
 
     Y = Ishigami.evaluate(param_values)
     Si = sobol.analyze(problem, Y,
-                       calc_second_order=True, parallel=True, conf_level=0.95, print_to_console=False)
+                       calc_second_order=True, parallel=True,
+                       conf_level=0.95, print_to_console=False)
 
     assert_allclose(Si['S1'], [0.427, 0.573], atol=5e-2, rtol=1e-1)
     assert_allclose(Si['ST'], [0.428, 0.573], atol=5e-2, rtol=1e-1)
@@ -176,8 +200,8 @@ def test_regression_delta():
 
     Y = Ishigami.evaluate(param_values)
 
-    Si = delta.analyze(problem, param_values, Y,
-                    num_resamples=10, conf_level=0.95, print_to_console=True)
+    Si = delta.analyze(problem, param_values, Y, num_resamples=10,
+                       conf_level=0.95, print_to_console=True)
 
     assert_allclose(Si['delta'], [0.210, 0.358, 0.155], atol=5e-2, rtol=1e-1)
     assert_allclose(Si['S1'], [0.31, 0.44, 0.00], atol=5e-2, rtol=1e-1)

@@ -4,13 +4,17 @@ import numpy as np
 from nose.tools import raises, with_setup
 from numpy.testing import assert_equal
 
+
+from SALib.sample.morris_util import find_locally_optimum_combination, \
+    brute_force_most_distant, \
+    find_local_maximum
 from SALib.sample.morris import sample_oat, \
-                            find_optimum_combination, \
-                            compute_optimised_trajectories, \
-                            sample_groups
-from SALib.sample.optimal_trajectories import return_max_combo
-from SALib.util import read_param_file
-from .test_util import setup_function
+    compute_optimised_trajectories, \
+    sample_groups
+
+from SALib.sample.optimal_trajectories import GlobalOptimisation
+from SALib.util import read_param_file, compute_groups_matrix
+from . test_util import setup_function
 
 
 from . test_morris import setup_param_file_with_groups_prime
@@ -23,7 +27,6 @@ else:
     _has_gurobi = True
 
 
-
 @with_setup(setup_param_file_with_groups_prime)
 @skipUnless(_has_gurobi, "Gurobi is required for combinatorial optimisation")
 def test_optimal_sample_with_groups():
@@ -31,29 +34,30 @@ def test_optimal_sample_with_groups():
     Tests that the combinatorial optimisation approach matches
     that of the brute force approach
     '''
-    param_file = "SALib/tests/test_param_file_w_groups_prime.txt"
+    param_file = setup_param_file_with_groups_prime
     problem = read_param_file(param_file)
 
     N = 10
     num_levels = 8
     grid_jump = 4
-    k_choices = 4    
+    k_choices = 4
     num_params = problem['num_vars']
-    
+
     sample = sample_oat(problem,
                         N,
                         num_levels,
                         grid_jump)
 
-    actual = return_max_combo(sample,
-                              N,
-                              num_params,
-                              k_choices)
+    strategy = GlobalOptimisation()
+    actual = strategy.return_max_combo(sample,
+                                       N,
+                                       num_params,
+                                       k_choices)
 
-    desired = find_optimum_combination(sample,
-                                        N,
-                                        num_params,
-                                        k_choices)
+    desired = brute_force_most_distant(sample,
+                                       N,
+                                       num_params,
+                                       k_choices)
 
     assert_equal(actual, desired)
 
@@ -66,7 +70,7 @@ def test_size_of_trajectories_with_groups():
     correctly (i.e. that the size of the trajectories is a function
     of the number of groups, rather than the number of variables
     when groups are used.
-    
+
     There are seven variables and three groups.
     With N=10:
     1. the sample ignoring groups (i.e. the call to `sample_oat')
@@ -76,27 +80,26 @@ def test_size_of_trajectories_with_groups():
     3. the optimal sample ignoring groups should be of size k*(D+1)-by-D
     4. the optimal sample with groups should be of size k*(G+1)-by-D
     '''
-    param_file = "SALib/tests/test_param_file_w_groups_prime.txt"
+    param_file = setup_param_file_with_groups_prime
     group_problem = read_param_file(param_file)
     no_group_problem = read_param_file(param_file)
     no_group_problem['groups'] = None
-    
+
     N = 11
     num_levels = 8
     grid_jump = 4
-    k_choices = 4    
+    k_choices = 4
     num_params = group_problem['num_vars']
-    
+
     num_groups = 3
 
-    # Test 1. dimensions of sample ignoring groups    
+    # Test 1. dimensions of sample ignoring groups
     sample = sample_oat(no_group_problem,
                         N,
                         num_levels,
                         grid_jump)
 
     size_x, size_y = sample.shape
-
 
     assert_equal(size_x, N * (num_params + 1))
     assert_equal(size_y, num_params)
@@ -114,24 +117,24 @@ def test_size_of_trajectories_with_groups():
     assert_equal(size_y, num_params)
 
     # Test 3. dimensions of optimal sample without groups
-    
-    optimal_sample_without_groups = compute_optimised_trajectories(no_group_problem,
-                                                              sample,
-                                                              N,
-                                                              k_choices)
+
+    optimal_sample_without_groups = \
+        compute_optimised_trajectories(no_group_problem,
+                                       sample,
+                                       N,
+                                       k_choices)
 
     size_x, size_y = optimal_sample_without_groups.shape
 
     assert_equal(size_x, k_choices * (num_params + 1))
     assert_equal(size_y, num_params)
 
-
     # Test 4. dimensions of optimal sample with groups
 
     optimal_sample_with_groups = compute_optimised_trajectories(group_problem,
-                                                           group_sample,
-                                                           N,
-                                                           k_choices)
+                                                                group_sample,
+                                                                N,
+                                                                k_choices)
 
     size_x, size_y = optimal_sample_with_groups.shape
 
@@ -144,7 +147,7 @@ def test_size_of_trajectories_with_groups():
 def test_optimal_combinations():
 
     N = 6
-    param_file = "SALib/tests/test_params.txt"
+    param_file = setup_function
     problem = read_param_file(param_file)
     num_params = problem['num_vars']
     num_levels = 10
@@ -153,15 +156,16 @@ def test_optimal_combinations():
 
     morris_sample = sample_oat(problem, N, num_levels, grid_jump)
 
-    actual = return_max_combo(morris_sample,
-                              N,
-                              num_params,
-                              k_choices)
+    strategy = GlobalOptimisation()
+    actual = strategy.return_max_combo(morris_sample,
+                                       N,
+                                       num_params,
+                                       k_choices)
 
-    desired = find_optimum_combination(morris_sample,
-                                        N,
-                                        num_params,
-                                        k_choices)
+    desired = find_locally_optimum_combination(morris_sample,
+                                               N,
+                                               num_params,
+                                               k_choices)
 
     assert_equal(actual, desired)
 
@@ -176,51 +180,50 @@ def test_optimised_trajectories_without_groups():
     particularly when there are two or more identical
     trajectories
     """
-    
+
     N = 6
-    param_file = "SALib/tests/test_params.txt"
+    param_file = setup_function
     problem = read_param_file(param_file)
-    num_levels = 4
     k_choices = 4
 
     num_params = problem['num_vars']
     groups = problem['groups']
 
     # 6 trajectories, with 5th and 6th identical
-    input_sample = np.array([[ 0.33333333,  0.66666667],
-                             [ 1.          ,0.66666667],
-                             [ 1.          ,0.        ],
-                             [ 0.          ,0.33333333],
-                             [ 0.          ,1.        ],
-                             [ 0.66666667  ,1.        ],
-                             [ 0.66666667  ,0.33333333],
-                             [ 0.66666667  ,1.        ],
-                             [ 0.          ,1.        ],
-                             [ 0.66666667  ,1.        ],
-                             [ 0.66666667  ,0.33333333],
-                             [ 0.          ,0.33333333],
-                             [ 1.          ,1.        ],
-                             [ 1.          ,0.33333333],
-                             [ 0.33333333  ,0.33333333],
-                             [ 1.          ,1.        ],
-                             [ 1.          ,0.33333333],
-                             [ 0.33333333  ,0.33333333]], dtype=np.float32)
+    input_sample = np.array([[0.33333333,  0.66666667],
+                             [1., 0.66666667],
+                             [1., 0.],
+                             [0., 0.33333333],
+                             [0., 1.],
+                             [0.66666667, 1.],
+                             [0.66666667, 0.33333333],
+                             [0.66666667, 1.],
+                             [0., 1.],
+                             [0.66666667, 1.],
+                             [0.66666667, 0.33333333],
+                             [0., 0.33333333],
+                             [1., 1.],
+                             [1., 0.33333333],
+                             [0.33333333, 0.33333333],
+                             [1., 1.],
+                             [1., 0.33333333],
+                             [0.33333333, 0.33333333]], dtype=np.float32)
 
     print(input_sample)
 
-    # From gurobi optimal trajectories     
-    actual = return_max_combo(input_sample,
-                              N,
-                              num_params,
-                              k_choices,
-                              groups)
-
-    desired = find_optimum_combination(input_sample,
+    # From gurobi optimal trajectories
+    strategy = GlobalOptimisation()
+    actual = strategy.return_max_combo(input_sample,
                                        N,
                                        num_params,
-                                       k_choices,
-                                       groups)
-    
+                                       k_choices)
+
+    desired = find_locally_optimum_combination(input_sample,
+                                               N,
+                                               num_params,
+                                               k_choices,
+                                               groups)
+
     assert_equal(actual, desired)
 
 
@@ -233,31 +236,31 @@ def test_optimised_trajectories_with_groups():
     (for small values of `k_choices` and `N`)
     with groups
     """
-    
+
     N = 11
-    param_file = "SALib/tests/test_param_file_w_groups_prime.txt"
+    param_file = setup_param_file_with_groups_prime
     problem = read_param_file(param_file)
     num_levels = 4
     grid_jump = num_levels / 2
     k_choices = 4
-    
+
     num_params = problem['num_vars']
     groups = problem['groups']
 
     input_sample = sample_groups(problem, N, num_levels, grid_jump)
 
-    # From gurobi optimal trajectories     
-    actual = return_max_combo(input_sample,
-                              N,
-                              num_params,
-                              k_choices,
-                              groups)
-
-    desired = find_optimum_combination(input_sample,
+    # From gurobi optimal trajectories
+    strategy = GlobalOptimisation()
+    actual = strategy.return_max_combo(input_sample,
                                        N,
                                        num_params,
-                                       k_choices,
-                                       groups)
+                                       k_choices)
+
+    desired = find_locally_optimum_combination(input_sample,
+                                               N,
+                                               num_params,
+                                               k_choices,
+                                               groups)
     assert_equal(actual, desired)
 
 
@@ -265,11 +268,11 @@ def test_optimised_trajectories_with_groups():
 @with_setup(setup_function())
 @raises(ValueError)
 def test_raise_error_if_k_gt_N():
-    """
-    Check that an error is raised if `k_choices` is greater than (or equal to) `N`
+    """Check that an error is raised if `k_choices` is greater than
+    (or equal to) `N`
     """
     N = 4
-    param_file = "SALib/tests/test_params.txt"
+    param_file = setup_function
     problem = read_param_file(param_file)
     num_levels = 4
     grid_jump = num_levels / 2
@@ -277,8 +280,41 @@ def test_raise_error_if_k_gt_N():
 
     morris_sample = sample_oat(problem, N, num_levels, grid_jump)
 
-
     compute_optimised_trajectories(problem,
                                    morris_sample,
                                    N,
                                    k_choices)
+
+
+@with_setup(setup_param_file_with_groups_prime)
+def test_local_optimised_trajectories_with_groups():
+    """
+    Tests that the local optimisation problem gives
+    the same answer as the brute force problem
+    (for small values of `k_choices` and `N`)
+    with groups
+    """
+
+    N = 8
+    param_file = setup_param_file_with_groups_prime()
+    problem = read_param_file(param_file)
+    num_levels = 4
+    grid_jump = num_levels / 2
+    k_choices = 4
+
+    num_params = problem['num_vars']
+    groups = problem['groups']
+
+    input_sample = sample_groups(problem, N, num_levels, grid_jump)
+
+    groups = compute_groups_matrix(groups, num_params)
+
+    # From local optimal trajectories
+    actual = find_local_maximum(input_sample, N, num_params, k_choices, groups)
+
+    desired = find_locally_optimum_combination(input_sample,
+                                               N,
+                                               num_params,
+                                               k_choices,
+                                               groups)
+    assert_equal(actual, desired)

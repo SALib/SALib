@@ -1,3 +1,6 @@
+"""A set of utility functions
+
+"""
 from collections import OrderedDict
 import csv
 from warnings import warn

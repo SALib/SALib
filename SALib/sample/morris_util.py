@@ -141,21 +141,24 @@ def compute_distance(m, l):
 
 def compute_distance_matrix(input_sample, N, num_params, groups=None,
                             local_optimization=False):
-    """
+    """Computes the distance between every trajectory
 
     Arguments
     ---------
-    input_sample : int
+    input_sample : numpy.ndarray
+        The input sample of trajectories for which to compute
+        the distance matrix
     N : int
+        The number of samples
     num_params : int
-    groups : numpy.ndarray, default=None
+        The number of factors
+    groups : tuple, default=None
         the mapping between factors and groups
     local_optimization : bool, default=False
 
     Returns
     -------
     distance_matrix : numpy.ndarray
-
 
     """
     num_groups = None
@@ -181,10 +184,14 @@ def compute_distance_matrix(input_sample, N, num_params, groups=None,
 
 
 def find_most_distant(input_sample, N, num_params, k_choices, groups=None):
-    '''
+    """
     Finds the 'k_choices' most distant choices from the
     'N' trajectories contained in 'input_sample'
-    '''
+
+    Returns
+    -------
+    numpy.ndarray
+    """
     # Now evaluate the (N choose k_choices) possible combinations
     if nchoosek(N, k_choices) >= sys.maxsize:
         raise ValueError("Number of combinations is too large")
@@ -198,7 +205,6 @@ def find_most_distant(input_sample, N, num_params, k_choices, groups=None):
                                               groups)
 
     # Initialise the output array
-
     chunk = int(1e6)
     if chunk > number_of_combinations:
         chunk = number_of_combinations
@@ -212,8 +218,8 @@ def find_most_distant(input_sample, N, num_params, k_choices, groups=None):
     pairwise = np.array([y for y in combinations(list(range(k_choices)), 2)])
 
     for combos in grouper(chunk, combo_gen):
-        scores[(counter * chunk):((counter + 1) * chunk)
-               ] = mappable(combos, pairwise, distance_matrix)
+        scores[(counter * chunk):((counter + 1) * chunk)] \
+            = mappable(combos, pairwise, distance_matrix)
         counter += 1
     return scores
 
@@ -240,7 +246,6 @@ def find_maximum(scores, N, k_choices):
     N : int
     k_choices : int
     """
-
     if not isinstance(scores, np.ndarray):
         raise TypeError("Scores input is not a numpy array")
 
@@ -282,7 +287,12 @@ def nth(iterable, n, default=None):
 
 
 def make_index_list(N, num_params, groups=None):
+    """
 
+    Returns
+    -------
+    list of numpy.ndarray
+    """
     if groups is None:
         groups = num_params
 
@@ -293,6 +303,8 @@ def make_index_list(N, num_params, groups=None):
 
 
 def compile_output(input_sample, N, num_params, maximum_combo, groups=None):
+    """
+    """
 
     if groups is None:
         groups = num_params
@@ -346,6 +358,10 @@ def get_max_sum_ind(indices_list, distances, i, m):
         size M
     i : int
     m : int
+
+    Returns
+    -------
+    list
     '''
     if len(indices_list) != len(distances):
         msg = "Indices and distances are lists of different length." + \
@@ -385,11 +401,14 @@ def find_local_maximum(input_sample, N, num_params, k_choices, groups=None):
     input_sample :
     N : int
         The number of samples to generate
-    num_params : it
+    num_params : int
     k_choices : int
         The number
     groups : default=None
 
+    Returns
+    -------
+    list
     """
     distance_matrix = compute_distance_matrix(input_sample, N, num_params,
                                               groups, local_optimization=True)
@@ -433,7 +452,7 @@ def find_local_maximum(input_sample, N, num_params, k_choices, groups=None):
         tot_max_array[i - 1] = sum_distances(m_max_ind, distance_matrix)
 
     tot_max = get_max_sum_ind(tot_indices_list, tot_max_array, "tot", "tot")
-    return sorted(list(tot_max))
+    return np.array(sorted(list(tot_max)))
 
 
 def brute_force_most_distant(input_sample, N, num_params, k_choices,

@@ -27,14 +27,15 @@ from __future__ import division
 import random as rd
 import numpy as np
 
-from SALib.sample.morris_strategies import SampleMorris, LocalOptimisation
+from SALib.sample.morris_strategies import (SampleMorris, LocalOptimisation,
+                                            BruteForce)
+from SALib.sample.optimal_trajectories import GlobalOptimisation
 
 from . import common_args
 from ..util import scale_samples, read_param_file, compute_groups_matrix
-from . optimal_trajectories import return_max_combo
 
-from . morris_util import generate_trajectory, \
-    compile_output, brute_force_most_distant
+
+from . morris_util import generate_trajectory
 try:
     import gurobipy
 except ImportError:
@@ -208,17 +209,6 @@ def compute_optimised_trajectories(problem, input_sample, N, k_choices,
     local_optimization : bool, default=False
         If true, uses local optimisation heuristic
     '''
-    assert isinstance(k_choices, int), \
-        "Number of optimal trajectories should be an integer"
-
-    if k_choices < 2:
-        raise ValueError(
-            "The number of optimal trajectories must be set to 2 or more.")
-    if k_choices >= N:
-        msg = "The number of optimal trajectories should be less than the \
-                number of samples"
-        raise ValueError(msg)
-
     if _has_gurobi is False \
             and local_optimization is False \
             and k_choices > 10:
@@ -234,35 +224,17 @@ def compute_optimised_trajectories(problem, input_sample, N, k_choices,
 
     if _has_gurobi and local_optimization is False:
         # Use global optimization method
-        maximum_combo = return_max_combo(input_sample,
-                                         N,
-                                         num_params,
-                                         k_choices,
-                                         groups)
-
+        strategy = GlobalOptimisation()
     elif _has_gurobi is False and local_optimization:
         # Use local method
-        localoptimisation = LocalOptimisation()
-        context = SampleMorris(localoptimisation)
-        maximum_combo = context.sample(
-            input_sample, N, num_params, k_choices, groups)
+        strategy = LocalOptimisation()
     else:
         # Use brute force approach
-        maximum_combo = brute_force_most_distant(input_sample,
-                                                 N,
-                                                 num_params,
-                                                 k_choices,
-                                                 groups)
+        strategy = BruteForce()
 
-    num_groups = None
-    if groups is not None:
-        num_groups = groups[0].shape[1]
-
-    output = compile_output(input_sample,
-                            N,
-                            num_params,
-                            maximum_combo,
-                            num_groups)
+    context = SampleMorris(strategy)
+    output = context.sample(input_sample, N, num_params,
+                            k_choices, groups)
 
     return output
 
