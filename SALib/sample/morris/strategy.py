@@ -48,12 +48,20 @@ class SampleMorris(object):
                                      k_choices, groups)
 
 
-class Strategy(metaclass=abc.ABCMeta):
+class Strategy:
     """
     Declare an interface common to all supported algorithms.
     :class:`SampleMorris` uses this interface to call the algorithm
     defined by a ConcreteStrategy.
     """
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractmethod
+    def _sample(self, input_sample, num_samples,
+                num_params, k_choices, groups):
+        """Implement this in your class
+        """
+        pass
 
     @staticmethod
     def run_checks(number_samples, k_choices):
@@ -101,13 +109,6 @@ class Strategy(metaclass=abc.ABCMeta):
                                      maximum_combo,
                                      num_groups)
         return output
-
-    @abc.abstractmethod
-    def _sample(self, input_sample, num_samples,
-                num_params, k_choices, groups):
-        """Implement this in your class
-        """
-        pass
 
     @staticmethod
     def _make_index_list(num_samples, num_params, groups=None):
@@ -170,7 +171,7 @@ class Strategy(metaclass=abc.ABCMeta):
         if np.shape(m) != np.shape(l):
             raise ValueError("Input matrices are different sizes")
         if np.array_equal(m, l):
-            print("Trajectory %s and %s are equal" % (m, l))
+            # print("Trajectory %s and %s are equal" % (m, l))
             distance = 0
         else:
             distance = np.array(np.sum(cdist(m, l)), dtype=np.float32)

@@ -53,12 +53,31 @@ def test_regression_morris_groups():
     assert_allclose(Si['mu_star'], [7.87, 6.26], rtol=5e-1)
 
 
+def test_regression_morris_groups_brute_optim():
+
+    param_file = 'SALib/test_functions/params/Ishigami_groups.txt'
+    problem = read_param_file(param_file)
+
+    param_values = sample(problem=problem, N=20,
+                          num_levels=10, grid_jump=5,
+                          optimal_trajectories=8,
+                          local_optimization=False)
+
+    Y = Ishigami.evaluate(param_values)
+
+    Si = morris.analyze(problem, param_values, Y,
+                        conf_level=0.95, print_to_console=False,
+                        num_levels=10, grid_jump=5)
+
+    assert_allclose(Si['mu_star'], [7.87, 6.26], rtol=5e-1)
+
+
 def test_regression_morris_groups_local_optim():
 
     param_file = 'SALib/test_functions/params/Ishigami_groups.txt'
     problem = read_param_file(param_file)
 
-    param_values = sample(problem=problem, N=100,
+    param_values = sample(problem=problem, N=500,
                           num_levels=10, grid_jump=5,
                           optimal_trajectories=10,
                           local_optimization=True)
@@ -76,6 +95,8 @@ def test_regression_morris_optimal():
     '''
     Tests the use of optimal trajectories with Morris.
 
+    Uses brute force approach
+
     Note that the relative tolerance is set to a very high value
     (default is 1e-05) due to the coarse nature of the num_levels
     and grid_jump.
@@ -84,7 +105,8 @@ def test_regression_morris_optimal():
     problem = read_param_file(param_file)
     param_values = sample(problem=problem, N=20,
                           num_levels=4, grid_jump=2,
-                          optimal_trajectories=9)
+                          optimal_trajectories=9,
+                          local_optimization=False)
 
     Y = Ishigami.evaluate(param_values)
 
