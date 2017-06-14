@@ -1,6 +1,6 @@
 """
 """
-from SALib.sample.morris import sample_groups, SampleMorris
+from SALib.sample.morris import _sample_groups, SampleMorris
 from SALib.sample.morris.local import LocalOptimisation
 from SALib.sample.morris.brute import BruteForce
 
@@ -186,8 +186,8 @@ class TestLocallyOptimalStrategy:
         k_choices = 4
         scores_global = brute_strategy.find_most_distant(sample_inputs, N,
                                                          num_params, k_choices)
-        output_global = brute_strategy.find_maximum(
-            scores_global, N, k_choices)
+        output_global = brute_strategy.find_maximum(scores_global, N,
+                                                    k_choices)
         output_local = local_strategy.find_local_maximum(sample_inputs, N,
                                                          num_params, k_choices)
         assert_equal(output_global, output_local)
@@ -211,7 +211,7 @@ class TestLocallyOptimalStrategy:
         num_params = problem['num_vars']
         groups = problem['groups']
 
-        input_sample = sample_groups(problem, N, num_levels, grid_jump)
+        input_sample = _sample_groups(problem, N, num_levels, grid_jump)
 
         groups = compute_groups_matrix(groups, num_params)
 

@@ -1,8 +1,51 @@
+"""
+Defines a family of algorithms for generating samples
+
+The sample a for use with :class:`SALib.analyze.morris.analyze`,
+encapsulate each one, and makes them interchangeable.
+
+Example
+-------
+>>> localoptimisation = LocalOptimisation()
+>>> context = SampleMorris(localoptimisation)
+>>> context.sample(input_sample, num_samples, num_params, k_choices, groups)
+"""
 import abc
 
 import numpy as np
 from scipy.spatial.distance import cdist
 from itertools import combinations, islice
+
+
+class SampleMorris(object):
+    """Computes the optimum `k_choices` of trajectories from the input_sample.
+
+    Arguments
+    ---------
+    strategy : :class:`Strategy`
+    """
+
+    def __init__(self, strategy):
+        self._strategy = strategy
+
+    def sample(self, input_sample, num_samples, num_params, k_choices, groups):
+        """Computes the optimum k_choices of trajectories
+        from the input_sample.
+
+        Arguments
+        ---------
+        input_sample : numpy.ndarray
+        num_samples : int
+            The number of samples to generate
+        num_params : int
+            The number of parameters
+        k_choices : int
+            The number of optimal trajectories
+        groups : tuple
+            A tuple of (numpy.ndarray, list)
+        """
+        return self._strategy.sample(input_sample, num_samples, num_params,
+                                     k_choices, groups)
 
 
 class Strategy(metaclass=abc.ABCMeta):
@@ -70,6 +113,8 @@ class Strategy(metaclass=abc.ABCMeta):
     def _make_index_list(num_samples, num_params, groups=None):
         """
 
+        For each sample, appends the array of indices
+
         Returns
         -------
         list of numpy.ndarray
@@ -132,22 +177,30 @@ class Strategy(metaclass=abc.ABCMeta):
 
         return distance
 
-    def compute_distance_matrix(self, input_sample, N, num_params, groups=None,
+    def compute_distance_matrix(self, input_sample, num_samples, num_params,
+                                groups=None,
                                 local_optimization=False):
         """Computes the distance between every trajectory
+
+        Each entry in the matrix represents the sum of the geometric distances
+        between all the couples of points of the two fixed trajectories
+
+        If the `groups` argument is filled, then the distances are still
+        calculated for each trajectory,
 
         Arguments
         ---------
         input_sample : numpy.ndarray
             The input sample of trajectories for which to compute
             the distance matrix
-        N : int
-            The number of samples
+        num_samples : int
+            The number of trajectories
         num_params : int
             The number of factors
         groups : tuple, default=None
             the mapping between factors and groups
         local_optimization : bool, default=False
+            If True, fills the lower triangle of the distance matrix
 
         Returns
         -------
@@ -157,18 +210,20 @@ class Strategy(metaclass=abc.ABCMeta):
         num_groups = None
         if groups:
             num_groups = groups[0].shape[1]
-            self.check_input_sample(input_sample, num_groups, N)
+            self.check_input_sample(input_sample, num_groups, num_samples)
         else:
-            self.check_input_sample(input_sample, num_params, N)
+            self.check_input_sample(input_sample, num_params, num_samples)
 
-        index_list = self._make_index_list(N, num_params, num_groups)
-        distance_matrix = np.zeros((N, N), dtype=np.float32)
+        index_list = self._make_index_list(num_samples, num_params, num_groups)
+        distance_matrix = np.zeros(
+            (num_samples, num_samples), dtype=np.float32)
 
-        for j in range(N):
+        for j in range(num_samples):
             input_1 = input_sample[index_list[j]]
-            for k in range(j + 1, N):
+            for k in range(j + 1, num_samples):
                 input_2 = input_sample[index_list[k]]
 
+                # Fills the lower triangle of the matrix
                 if local_optimization is True:
                     distance_matrix[j, k] = self.compute_distance(
                         input_1, input_2)

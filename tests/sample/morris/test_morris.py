@@ -6,7 +6,7 @@ from pytest import raises
 
 import numpy as np
 
-from SALib.sample.morris import sample, compute_optimised_trajectories
+from SALib.sample.morris import sample, _compute_optimised_trajectories
 from SALib.util import read_param_file, compute_groups_matrix
 
 
@@ -94,7 +94,7 @@ def test_find_optimum_trajectories():
     problem = {'num_vars': 2, 'groups': None}
     k_choices = 4
 
-    output = compute_optimised_trajectories(
+    output = _compute_optimised_trajectories(
         problem, input_sample, N, k_choices)
     expected = np.concatenate([input_1, input_3, input_4, input_6])
     np.testing.assert_equal(output, expected)
@@ -114,7 +114,7 @@ def test_catch_inputs_not_in_zero_one_range():
     N = 10
     input_sample *= 10
     with raises(ValueError):
-        compute_optimised_trajectories(problem, input_sample, N, k_choices)
+        _compute_optimised_trajectories(problem, input_sample, N, k_choices)
 
 
 # @raises(ValueError)

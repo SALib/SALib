@@ -46,14 +46,15 @@ class LocalOptimisation(Strategy):
 
         Arguments
         ---------
-        input_sample :
+        input_sample : np.ndarray
         N : int
-            The number of samples to generate
+            The number of trajectories
         num_params : int
+            The number of factors
         k_choices : int
-            The number
-        groups : default=None
-
+            The number of optimal trajectories to return
+        groups : tuple, default=None
+            A tuple containing (group matrix, name list)
         Returns
         -------
         list
@@ -65,7 +66,7 @@ class LocalOptimisation(Strategy):
         tot_indices_list = []
         tot_max_array = np.zeros(k_choices - 1)
 
-        # Loop over `i`, i starts at 1
+        # Loop over `k_choices`, i starts at 1
         for i in range(1, k_choices):
             indices_list = []
             row_maxima_i = np.zeros(len(distance_matrix))
@@ -115,6 +116,10 @@ class LocalOptimisation(Strategy):
         indices : tuple
         distance_matrix : numpy.ndarray (M,M)
 
+        Returns
+        -------
+        numpy.ndarray
+
         Notes
         -----
         This function can perhaps be quickened by calculating the sum of the
@@ -125,8 +130,8 @@ class LocalOptimisation(Strategy):
         combs_tup = np.array(tuple(combinations(indices, 2)))
 
         # Put indices from tuples into two-dimensional array.
-        combs = np.array([[i[0] for i in combs_tup], [i[1]
-                                                      for i in combs_tup]])
+        combs = np.array([[i[0] for i in combs_tup],
+                          [i[1] for i in combs_tup]])
 
         # Calculate distance (vectorized)
         dist = np.sqrt(

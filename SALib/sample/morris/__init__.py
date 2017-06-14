@@ -15,6 +15,7 @@ At present, optimised trajectories is implemented using either a brute-force
 approach, which can be very slow, especially if you require more than four
 trajectories, or a local method based which is much faster. While the former
 implements groups, the latter does not.
+
 Note that the number of factors makes little difference,
 but the ratio between number of optimal trajectories and the sample size
 results in an exponentially increasing number of scores that must be
@@ -23,16 +24,6 @@ no higher than 4 from a pool of 100 samples with the brute force approach.
 With local_optimization = True, it is possible to go higher than the
 previously suggested 4 from 100.
 
-Defines a family of algorithms for generating samples
-
-The sample a for use with :class:`SALib.analyze.morris.analyze`,
-encapsulate each one, and makes them interchangeable.
-
-Example
--------
->>> localoptimisation = LocalOptimisation()
->>> context = SampleMorris(localoptimisation)
->>> context.sample(input_sample, num_samples, num_params, k_choices, groups)
 """
 from __future__ import division
 
@@ -44,6 +35,8 @@ import random as rd
 from . gurobi import GlobalOptimisation
 from . local import LocalOptimisation
 from . brute import BruteForce
+
+from . strategy import SampleMorris
 
 from SALib.sample import common_args
 from SALib.util import scale_samples, read_param_file, compute_groups_matrix
@@ -70,7 +63,7 @@ def sample(problem, N, num_levels, grid_jump, optimal_trajectories=None,
     problem : dict
         The problem definition
     N : int
-        The number of samples to generate
+        The number of trajectories to generate
     num_levels : int
         The number of grid levels
     grid_jump : int
@@ -93,23 +86,23 @@ def sample(problem, N, num_levels, grid_jump, optimal_trajectories=None,
         raise ValueError("grid_jump must be less than num_levels")
 
     if problem.get('groups'):
-        sample = sample_groups(problem, N, num_levels, grid_jump)
+        sample = _sample_groups(problem, N, num_levels, grid_jump)
     else:
-        sample = sample_oat(problem, N, num_levels, grid_jump)
+        sample = _sample_oat(problem, N, num_levels, grid_jump)
 
     if optimal_trajectories:
 
-        sample = compute_optimised_trajectories(problem,
-                                                sample,
-                                                N,
-                                                optimal_trajectories,
-                                                local_optimization)
+        sample = _compute_optimised_trajectories(problem,
+                                                 sample,
+                                                 N,
+                                                 optimal_trajectories,
+                                                 local_optimization)
 
     scale_samples(sample, problem['bounds'])
     return sample
 
 
-def sample_oat(problem, N, num_levels, grid_jump):
+def _sample_oat(problem, N, num_levels, grid_jump):
     """Generate trajectories without groups
 
     Arguments
@@ -165,7 +158,7 @@ def sample_oat(problem, N, num_levels, grid_jump):
     return X
 
 
-def sample_groups(problem, N, num_levels, grid_jump):
+def _sample_groups(problem, N, num_levels, grid_jump):
     """Generate trajectories for groups
 
     Returns an N(g+1)-by-k array of N trajectories;
@@ -201,8 +194,8 @@ def sample_groups(problem, N, num_levels, grid_jump):
     return sample.reshape((N * (g + 1), k))
 
 
-def compute_optimised_trajectories(problem, input_sample, N, k_choices,
-                                   local_optimization=False):
+def _compute_optimised_trajectories(problem, input_sample, N, k_choices,
+                                    local_optimization=False):
     '''
     Calls the procedure to compute the optimum k_choices of trajectories
     from the input_sample.
@@ -249,37 +242,6 @@ def compute_optimised_trajectories(problem, input_sample, N, k_choices,
                             k_choices, groups)
 
     return output
-
-
-class SampleMorris(object):
-    """Computes the optimum `k_choices` of trajectories from the input_sample.
-
-    Arguments
-    ---------
-    strategy : :class:`Strategy`
-    """
-
-    def __init__(self, strategy):
-        self._strategy = strategy
-
-    def sample(self, input_sample, num_samples, num_params, k_choices, groups):
-        """Computes the optimum k_choices of trajectories
-        from the input_sample.
-
-        Arguments
-        ---------
-        input_sample : numpy.ndarray
-        num_samples : int
-            The number of samples to generate
-        num_params : int
-            The number of parameters
-        k_choices : int
-            The number of optimal trajectories
-        groups : tuple
-            A tuple of (numpy.ndarray, list)
-        """
-        return self._strategy.sample(input_sample, num_samples, num_params,
-                                     k_choices, groups)
 
 
 if __name__ == "__main__":

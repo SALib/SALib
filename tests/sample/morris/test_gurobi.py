@@ -8,9 +8,9 @@ from SALib.sample.morris.brute import BruteForce
 from SALib.sample.morris.gurobi import GlobalOptimisation
 from SALib.sample.morris.local import LocalOptimisation
 
-from SALib.sample.morris import sample_oat, \
-    compute_optimised_trajectories, \
-    sample_groups
+from SALib.sample.morris import _sample_oat, \
+    _compute_optimised_trajectories, \
+    _sample_groups
 
 
 from SALib.util import read_param_file
@@ -38,10 +38,10 @@ def test_optimal_sample_with_groups(setup_param_groups_prime):
     k_choices = 4
     num_params = problem['num_vars']
 
-    sample = sample_oat(problem,
-                        N,
-                        num_levels,
-                        grid_jump)
+    sample = _sample_oat(problem,
+                         N,
+                         num_levels,
+                         grid_jump)
 
     strategy = GlobalOptimisation()
     actual = strategy.return_max_combo(sample,
@@ -89,10 +89,10 @@ def test_size_of_trajectories_with_groups(setup_param_groups_prime):
     num_groups = 3
 
     # Test 1. dimensions of sample ignoring groups
-    sample = sample_oat(no_group_problem,
-                        N,
-                        num_levels,
-                        grid_jump)
+    sample = _sample_oat(no_group_problem,
+                         N,
+                         num_levels,
+                         grid_jump)
 
     size_x, size_y = sample.shape
 
@@ -101,10 +101,10 @@ def test_size_of_trajectories_with_groups(setup_param_groups_prime):
 
     # Test 2. dimensions of sample with groups
 
-    group_sample = sample_groups(group_problem,
-                                 N,
-                                 num_levels,
-                                 grid_jump)
+    group_sample = _sample_groups(group_problem,
+                                  N,
+                                  num_levels,
+                                  grid_jump)
 
     size_x, size_y = group_sample.shape
 
@@ -114,10 +114,10 @@ def test_size_of_trajectories_with_groups(setup_param_groups_prime):
     # Test 3. dimensions of optimal sample without groups
 
     optimal_sample_without_groups = \
-        compute_optimised_trajectories(no_group_problem,
-                                       sample,
-                                       N,
-                                       k_choices)
+        _compute_optimised_trajectories(no_group_problem,
+                                        sample,
+                                        N,
+                                        k_choices)
 
     size_x, size_y = optimal_sample_without_groups.shape
 
@@ -126,10 +126,10 @@ def test_size_of_trajectories_with_groups(setup_param_groups_prime):
 
     # Test 4. dimensions of optimal sample with groups
 
-    optimal_sample_with_groups = compute_optimised_trajectories(group_problem,
-                                                                group_sample,
-                                                                N,
-                                                                k_choices)
+    optimal_sample_with_groups = _compute_optimised_trajectories(group_problem,
+                                                                 group_sample,
+                                                                 N,
+                                                                 k_choices)
 
     size_x, size_y = optimal_sample_with_groups.shape
 
@@ -148,7 +148,7 @@ def test_optimal_combinations(setup_function):
     grid_jump = num_levels / 2
     k_choices = 4
 
-    morris_sample = sample_oat(problem, N, num_levels, grid_jump)
+    morris_sample = _sample_oat(problem, N, num_levels, grid_jump)
 
     global_strategy = GlobalOptimisation()
     actual = global_strategy.return_max_combo(morris_sample,
@@ -241,7 +241,7 @@ def test_optimised_trajectories_groups(setup_param_groups_prime):
     num_params = problem['num_vars']
     groups = problem['groups']
 
-    input_sample = sample_groups(problem, N, num_levels, grid_jump)
+    input_sample = _sample_groups(problem, N, num_levels, grid_jump)
 
     # From gurobi optimal trajectories
     strategy = GlobalOptimisation()
@@ -272,9 +272,9 @@ def test_raise_error_if_k_gt_N(setup_function):
     grid_jump = num_levels / 2
     k_choices = 6
 
-    morris_sample = sample_oat(problem, N, num_levels, grid_jump)
+    morris_sample = _sample_oat(problem, N, num_levels, grid_jump)
 
-    compute_optimised_trajectories(problem,
-                                   morris_sample,
-                                   N,
-                                   k_choices)
+    _compute_optimised_trajectories(problem,
+                                    morris_sample,
+                                    N,
+                                    k_choices)
