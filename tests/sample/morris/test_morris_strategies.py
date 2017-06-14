@@ -1,9 +1,8 @@
 """
 """
-from SALib.sample.morris import sample_groups
-from SALib.sample.morris_strategies import (SampleMorris)
-from SALib.sample.morris_strategies.local import LocalOptimisation
-from SALib.sample.morris_strategies.brute import BruteForce
+from SALib.sample.morris import sample_groups, SampleMorris
+from SALib.sample.morris.local import LocalOptimisation
+from SALib.sample.morris.brute import BruteForce
 
 from SALib.util import read_param_file, compute_groups_matrix
 

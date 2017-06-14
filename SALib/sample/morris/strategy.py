@@ -1,50 +1,8 @@
-"""Defines a family of algorithms for generating samples
-
-The sample a for use with :class:`SALib.analyze.morris.analyze`,
-encapsulate each one, and makes them interchangeable.
-
-Example
--------
->>> localoptimisation = LocalOptimisation()
->>> context = SampleMorris(localoptimisation)
->>> context.sample(input_sample, num_samples, num_params, k_choices, groups)
-"""
-
 import abc
+
 import numpy as np
 from scipy.spatial.distance import cdist
 from itertools import combinations, islice
-
-
-class SampleMorris(object):
-    """Computes the optimum `k_choices` of trajectories from the input_sample.
-
-    Arguments
-    ---------
-    strategy : :class:`Strategy`
-    """
-
-    def __init__(self, strategy):
-        self._strategy = strategy
-
-    def sample(self, input_sample, num_samples, num_params, k_choices, groups):
-        """Computes the optimum k_choices of trajectories
-        from the input_sample.
-
-        Arguments
-        ---------
-        input_sample : numpy.ndarray
-        num_samples : int
-            The number of samples to generate
-        num_params : int
-            The number of parameters
-        k_choices : int
-            The number of optimal trajectories
-        groups : tuple
-            A tuple of (numpy.ndarray, list)
-        """
-        return self._strategy.sample(input_sample, num_samples, num_params,
-                                     k_choices, groups)
 
 
 class Strategy(metaclass=abc.ABCMeta):

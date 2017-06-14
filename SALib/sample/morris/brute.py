@@ -1,6 +1,6 @@
 """
 """
-from SALib.sample.morris_strategies import Strategy
+from SALib.sample.morris.strategy import Strategy
 from scipy.misc import comb as nchoosek
 from itertools import combinations, islice
 import sys

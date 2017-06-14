@@ -3,7 +3,7 @@
 from itertools import combinations
 import numpy as np
 
-from . import Strategy
+from . strategy import Strategy
 
 
 class LocalOptimisation(Strategy):

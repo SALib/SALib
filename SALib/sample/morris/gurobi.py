@@ -18,7 +18,7 @@ from datetime import datetime as dt
 import numpy as np
 from scipy.misc import comb as nchoosek
 
-from SALib.sample.morris_strategies import Strategy
+from . strategy import Strategy
 
 from SALib.util import requires_gurobipy
 

@@ -4,15 +4,15 @@ import numpy as np
 from numpy.testing import assert_equal
 from nose.tools import raises
 
-from SALib.sample.morris_strategies.brute import BruteForce
-
-from SALib.sample.morris_strategies.local import LocalOptimisation
+from SALib.sample.morris.brute import BruteForce
+from SALib.sample.morris.gurobi import GlobalOptimisation
+from SALib.sample.morris.local import LocalOptimisation
 
 from SALib.sample.morris import sample_oat, \
     compute_optimised_trajectories, \
     sample_groups
 
-from SALib.sample.morris_strategies.gurobi import GlobalOptimisation
+
 from SALib.util import read_param_file
 
 try:

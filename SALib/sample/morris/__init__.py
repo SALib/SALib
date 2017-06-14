@@ -1,4 +1,5 @@
-"""Generate a sample using the Method of Morris
+"""
+Generate a sample using the Method of Morris
 
 Three variants of Morris' sampling for elementary effects is supported:
 
@@ -21,22 +22,32 @@ computed to find the optimal combination of trajectories.  We suggest going
 no higher than 4 from a pool of 100 samples with the brute force approach.
 With local_optimization = True, it is possible to go higher than the
 previously suggested 4 from 100.
+
+Defines a family of algorithms for generating samples
+
+The sample a for use with :class:`SALib.analyze.morris.analyze`,
+encapsulate each one, and makes them interchangeable.
+
+Example
+-------
+>>> localoptimisation = LocalOptimisation()
+>>> context = SampleMorris(localoptimisation)
+>>> context.sample(input_sample, num_samples, num_params, k_choices, groups)
 """
 from __future__ import division
 
-import random as rd
+
 import numpy as np
 
-from SALib.sample.morris_strategies import SampleMorris
-from SALib.sample.morris_strategies.gurobi import GlobalOptimisation
-from SALib.sample.morris_strategies.local import LocalOptimisation
-from SALib.sample.morris_strategies.brute import BruteForce
+import random as rd
 
-from . import common_args
-from ..util import scale_samples, read_param_file, compute_groups_matrix
+from . gurobi import GlobalOptimisation
+from . local import LocalOptimisation
+from . brute import BruteForce
 
-
-from . morris_util import generate_trajectory
+from SALib.sample import common_args
+from SALib.util import scale_samples, read_param_file, compute_groups_matrix
+from SALib.sample.morris_util import generate_trajectory
 try:
     import gurobipy
 except ImportError:
@@ -238,6 +249,37 @@ def compute_optimised_trajectories(problem, input_sample, N, k_choices,
                             k_choices, groups)
 
     return output
+
+
+class SampleMorris(object):
+    """Computes the optimum `k_choices` of trajectories from the input_sample.
+
+    Arguments
+    ---------
+    strategy : :class:`Strategy`
+    """
+
+    def __init__(self, strategy):
+        self._strategy = strategy
+
+    def sample(self, input_sample, num_samples, num_params, k_choices, groups):
+        """Computes the optimum k_choices of trajectories
+        from the input_sample.
+
+        Arguments
+        ---------
+        input_sample : numpy.ndarray
+        num_samples : int
+            The number of samples to generate
+        num_params : int
+            The number of parameters
+        k_choices : int
+            The number of optimal trajectories
+        groups : tuple
+            A tuple of (numpy.ndarray, list)
+        """
+        return self._strategy.sample(input_sample, num_samples, num_params,
+                                     k_choices, groups)
 
 
 if __name__ == "__main__":
