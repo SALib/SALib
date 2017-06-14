@@ -317,26 +317,3 @@ def compile_output(input_sample, N, num_params, maximum_combo, groups=None):
     for counter, x in enumerate(maximum_combo):
         output[index_list[counter]] = np.array(input_sample[index_list[x]])
     return output
-
-
-def brute_force_most_distant(input_sample, N, num_params, k_choices,
-                             groups=None):
-    """Use brute force method to find most distant trajectories
-
-    Arguments
-    ---------
-    input_sample
-    N : int
-    num_params : int
-    k_choices : int
-    groups : default=None,
-    """
-    scores = find_most_distant(input_sample,
-                               N,
-                               num_params,
-                               k_choices,
-                               groups)
-
-    maximum_combo = find_maximum(scores, N, k_choices)
-
-    return maximum_combo

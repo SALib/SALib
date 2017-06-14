@@ -1,11 +1,12 @@
 """
 """
 from SALib.sample.morris import sample_groups
-from SALib.sample.morris_strategies import (SampleMorris,
-                                            BruteForce)
+from SALib.sample.morris_strategies import (SampleMorris)
 from SALib.sample.morris_strategies.local import LocalOptimisation
+from SALib.sample.morris_strategies.brute import BruteForce
 
-from SALib.sample.morris_util import (find_most_distant, find_maximum,
+from SALib.sample.morris_util import (find_maximum,
+                                      find_most_distant,
                                       compute_distance_matrix)
 
 from SALib.util import read_param_file, compute_groups_matrix
@@ -75,6 +76,7 @@ class TestLocallyOptimalStrategy:
         '''
 
         local_strategy = LocalOptimisation()
+        # brute_strategy = BruteForce()
 
         sample_inputs = setup_input
         N = 6

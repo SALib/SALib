@@ -11,7 +11,7 @@ Example
 """
 
 import abc
-from .. morris_util import brute_force_most_distant, compile_output
+from .. morris_util import compile_output
 
 
 class SampleMorris(object):
@@ -103,13 +103,3 @@ class Strategy(metaclass=abc.ABCMeta):
     def _sample(self, input_sample, num_samples,
                 num_params, k_choices, groups):
         pass
-
-
-class BruteForce(Strategy):
-    """Implements the brute force optimisation strategy
-    """
-
-    def _sample(self, input_sample, num_samples,
-                num_params, k_choices, groups):
-        return brute_force_most_distant(input_sample, num_samples, num_params,
-                                        k_choices, groups)

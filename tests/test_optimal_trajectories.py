@@ -4,8 +4,7 @@ import numpy as np
 from numpy.testing import assert_equal
 from nose.tools import raises
 
-
-from SALib.sample.morris_util import brute_force_most_distant
+from SALib.sample.morris_strategies.brute import BruteForce
 
 from SALib.sample.morris_strategies.local import LocalOptimisation
 
@@ -50,10 +49,11 @@ def test_optimal_sample_with_groups(setup_param_groups_prime):
                                        num_params,
                                        k_choices)
 
-    desired = brute_force_most_distant(sample,
-                                       N,
-                                       num_params,
-                                       k_choices)
+    brute_strategy = BruteForce()
+    desired = brute_strategy.brute_force_most_distant(sample,
+                                                      N,
+                                                      num_params,
+                                                      k_choices)
 
     assert_equal(actual, desired)
 
