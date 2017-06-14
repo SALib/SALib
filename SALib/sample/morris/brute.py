@@ -123,3 +123,41 @@ class BruteForce(Strategy):
         new_scores = np.sqrt(
             np.einsum('ij,ij->i', all_distances, all_distances))
         return new_scores
+
+    def find_maximum(self, scores, N, k_choices):
+        """Finds the `k_choices` maximum scores from `scores`
+
+        Arguments
+        ---------
+        scores : numpy.ndarray
+        N : int
+        k_choices : int
+
+        Returns
+        -------
+        list
+        """
+        if not isinstance(scores, np.ndarray):
+            raise TypeError("Scores input is not a numpy array")
+
+        index_of_maximum = int(scores.argmax())
+        maximum_combo = self.nth(combinations(
+            list(range(N)), k_choices), index_of_maximum, None)
+        return sorted(maximum_combo)
+
+    @staticmethod
+    def nth(iterable, n, default=None):
+        """Returns the nth item or a default value
+
+        Arguments
+        ---------
+        iterable : iterable
+        n : int
+        default : default=None
+            The default value to return
+        """
+
+        if type(n) != int:
+            raise TypeError("n is not an integer")
+
+        return next(islice(iterable, n, None), default)

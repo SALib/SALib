@@ -9,13 +9,12 @@ from SALib.util import read_param_file, compute_groups_matrix
 import numpy as np
 from numpy.testing import assert_equal, assert_allclose
 from pytest import fixture, raises
-import pytest
 
 
 @fixture(scope='function')
 def setup_input():
-    input_2 = [[0, 1 / 3.], [2 / 3., 1 / 3.], [2 / 3., 1.]]
     input_1 = [[0, 1 / 3.], [0, 1.], [2 / 3., 1.]]
+    input_2 = [[0, 1 / 3.], [2 / 3., 1 / 3.], [2 / 3., 1.]]
     input_3 = [[2 / 3., 0], [2 / 3., 2 / 3.], [0, 2 / 3.]]
     input_4 = [[1 / 3., 1.], [1., 1.], [1, 1 / 3.]]
     input_5 = [[1 / 3., 1.], [1 / 3., 1 / 3.], [1, 1 / 3.]]
@@ -25,16 +24,9 @@ def setup_input():
 
 
 @fixture(scope='function')
-def setup_problem():
+def setup_problem(setup_input):
 
-    input_1 = [[0, 1 / 3.], [0, 1.], [2 / 3., 1.]]
-    input_2 = [[0, 1 / 3.], [2 / 3., 1 / 3.], [2 / 3., 1.]]
-    input_3 = [[2 / 3., 0], [2 / 3., 2 / 3.], [0, 2 / 3.]]
-    input_4 = [[1 / 3., 1.], [1., 1.], [1, 1 / 3.]]
-    input_5 = [[1 / 3., 1.], [1 / 3., 1 / 3.], [1, 1 / 3.]]
-    input_6 = [[1 / 3., 2 / 3.], [1 / 3., 0], [1., 0]]
-    input_sample = np.concatenate([input_1, input_2, input_3,
-                                   input_4, input_5, input_6])
+    input_sample = setup_input
     num_samples = 6
     problem = {'num_vars': 2, 'groups': None}
     k_choices = 4
@@ -42,7 +34,13 @@ def setup_problem():
     groups = None
     num_params = problem.get('num_vars')
 
-    expected = np.concatenate([input_1, input_3, input_4, input_6])
+    input_1 = [[0, 1 / 3.], [0, 1.], [2 / 3., 1.]]
+    input_3 = [[2 / 3., 0], [2 / 3., 2 / 3.], [0, 2 / 3.]]
+    input_4 = [[1 / 3., 1.], [1., 1.], [1, 1 / 3.]]
+    input_6 = [[1 / 3., 2 / 3.], [1 / 3., 0], [1., 0]]
+
+    expected = np.concatenate([input_1, input_3,
+                               input_4, input_6])
 
     return (input_sample, num_samples, problem,
             k_choices, groups, num_params, expected)
@@ -157,16 +155,15 @@ class TestSharedMethods:
 
 class TestLocallyOptimalStrategy:
 
-    @pytest.mark.xfail
+    # @pytest.mark.xfail
     def test_local(self, setup_problem):
         (input_sample, num_samples, _,
          k_choices, groups, num_params, expected) = setup_problem
 
-        strategy = LocalOptimisation()
-        context = SampleMorris(strategy)
+        local_strategy = LocalOptimisation()
+        context = SampleMorris(local_strategy)
         actual = context.sample(input_sample, num_samples, num_params,
                                 k_choices, groups)
-
         np.testing.assert_equal(actual, expected)
 
     def test_find_local_maximum_distance(self, setup_input):
@@ -184,15 +181,13 @@ class TestLocallyOptimalStrategy:
         N = 6
         num_params = 2
         k_choices = 4
-        scores_global = brute_strategy.find_most_distant(sample_inputs, N,
-                                                         num_params, k_choices)
-        output_global = brute_strategy.find_maximum(scores_global, N,
-                                                    k_choices)
+        output_global = brute_strategy.brute_force_most_distant(sample_inputs,
+                                                                N, num_params,
+                                                                k_choices)
         output_local = local_strategy.find_local_maximum(sample_inputs, N,
                                                          num_params, k_choices)
         assert_equal(output_global, output_local)
 
-    @pytest.mark.xfail
     def test_local_optimised_groups(self,
                                     setup_param_groups_prime):
         """
@@ -221,11 +216,12 @@ class TestLocallyOptimalStrategy:
         actual = strategy.find_local_maximum(input_sample, N, num_params,
                                              k_choices, groups)
 
-        desired = strategy.locally_optimal_combination(input_sample,
-                                                       N,
-                                                       num_params,
-                                                       k_choices,
-                                                       groups)
+        brute = BruteForce()
+        desired = brute.brute_force_most_distant(input_sample,
+                                                 N,
+                                                 num_params,
+                                                 k_choices,
+                                                 groups)
         assert_equal(actual, desired)
 
 
@@ -237,8 +233,8 @@ class TestLocalMethods:
         '''
         strategy = LocalOptimisation()
 
-        sample_inputs = setup_input
-        dist_matr = strategy.compute_distance_matrix(sample_inputs, 6, 2,
+        dist_matr = strategy.compute_distance_matrix(setup_input, 6, 2,
+                                                     groups=None,
                                                      local_optimization=True)
         indices = (1, 3, 2)
         distance = strategy.sum_distances(indices, dist_matr)
@@ -281,6 +277,22 @@ class TestLocalMethods:
 
         with raises(ValueError):
             strategy.get_max_sum_ind(indices, distances_wrong, 0, 0)
+
+    def test_combo_from_locally_optimal_method(self, setup_input):
+        '''
+        Tests whether the correct combination is picked from the fixture drawn
+        from Saltelli et al. 2008, in the solution to exercise 3a,
+        Chapter 3, page 134.
+        '''
+        sample_inputs = setup_input
+        N = 6
+        num_params = 2
+        k_choices = 4
+        strategy = LocalOptimisation()
+        output = strategy.find_local_maximum(sample_inputs, N,
+                                             num_params, k_choices)
+        expected = [0, 2, 3, 5]  # trajectories 1, 3, 4, 6
+        assert_equal(output, expected)
 
 
 class TestBruteForceStrategy:
@@ -366,4 +378,4 @@ class TestBruteForceMethods:
         actual = strategy._make_index_list(N, num_params, groups)
         desired = [np.array([0, 1, 2]), np.array([3, 4, 5]),
                    np.array([6, 7, 8]), np.array([9, 10, 11])]
-        assert_equal(desired, actual)
+        assert_equal(actual, desired)

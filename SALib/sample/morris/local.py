@@ -12,27 +12,8 @@ class LocalOptimisation(Strategy):
 
     def _sample(self, input_sample, num_samples,
                 num_params, k_choices, groups):
-        return self.locally_optimal_combination(
-            input_sample, num_samples, num_params, k_choices, groups)
-
-    def locally_optimal_combination(self, input_sample, N, num_params,
-                                    k_choices, groups=None):
-        """Use local optimisation to find most distant trajectories
-
-        Arguments
-        ---------
-        input_sample
-        N : int
-        num_params : int
-        k_choices : int
-        groups : default=None,
-        """
-        scores = self.find_local_maximum(
-            input_sample, N, num_params, k_choices, groups)
-
-        maximum_combo = self.find_maximum(scores, N, k_choices)
-
-        return maximum_combo
+        return self.find_local_maximum(input_sample, num_samples, num_params,
+                                       k_choices, groups)
 
     def find_local_maximum(self, input_sample, N, num_params,
                            k_choices, groups=None):
@@ -105,7 +86,7 @@ class LocalOptimisation(Strategy):
 
         tot_max = self.get_max_sum_ind(
             tot_indices_list, tot_max_array, "tot", "tot")
-        return np.array(sorted(list(tot_max)))
+        return sorted(list(tot_max))
 
     def sum_distances(self, indices, distance_matrix):
         """Calculate combinatorial distance between a select group of

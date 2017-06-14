@@ -14,7 +14,6 @@ import abc
 
 import numpy as np
 from scipy.spatial.distance import cdist
-from itertools import combinations, islice
 
 
 class SampleMorris(object):
@@ -43,6 +42,11 @@ class SampleMorris(object):
             The number of optimal trajectories
         groups : tuple
             A tuple of (numpy.ndarray, list)
+
+        Returns
+        -------
+        numpy.ndarray
+            An array of optimal trajectories
         """
         return self._strategy.sample(input_sample, num_samples, num_params,
                                      k_choices, groups)
@@ -60,23 +64,25 @@ class Strategy:
     def _sample(self, input_sample, num_samples,
                 num_params, k_choices, groups):
         """Implement this in your class
+
+        Arguments
+        ---------
+        input_sample : numpy.ndarray
+        num_samples : int
+            The number of samples to generate
+        num_params : int
+            The number of parameters
+        k_choices : int
+            The number of optimal trajectories
+        groups : tuple
+            A tuple of (numpy.ndarray, list)
+
+        Returns
+        -------
+        list
+            A list of trajectory indices
         """
         pass
-
-    @staticmethod
-    def run_checks(number_samples, k_choices):
-        """Runs checks on `k_choices`
-        """
-        assert isinstance(k_choices, int), \
-            "Number of optimal trajectories should be an integer"
-
-        if k_choices < 2:
-            raise ValueError(
-                "The number of optimal trajectories must be set to 2 or more.")
-        if k_choices >= number_samples:
-            msg = "The number of optimal trajectories should be less than the \
-                    number of samples"
-            raise ValueError(msg)
 
     def sample(self, input_sample, num_samples, num_params,
                k_choices, groups):
@@ -94,10 +100,16 @@ class Strategy:
             The number of optimal trajectories
         groups : tuple
             A tuple of (numpy.ndarray, list)
+
+        Returns
+        -------
+        numpy.ndarray
         """
         self.run_checks(num_samples, k_choices)
         maximum_combo = self._sample(input_sample, num_samples,
                                      num_params, k_choices, groups)
+
+        assert isinstance(maximum_combo, list)
 
         num_groups = None
         if groups is not None:
@@ -111,47 +123,97 @@ class Strategy:
         return output
 
     @staticmethod
-    def _make_index_list(num_samples, num_params, groups=None):
+    def run_checks(number_samples, k_choices):
+        """Runs checks on `k_choices`
         """
+        assert isinstance(k_choices, int), \
+            "Number of optimal trajectories should be an integer"
 
-        For each sample, appends the array of indices
+        if k_choices < 2:
+            raise ValueError(
+                "The number of optimal trajectories must be set to 2 or more.")
+        if k_choices >= number_samples:
+            msg = "The number of optimal trajectories should be less than the \
+                    number of samples"
+            raise ValueError(msg)
+
+    @staticmethod
+    def _make_index_list(num_samples, num_params, num_groups=None):
+        """Identify indices of input sample associated with each trajectory
+
+        For each trajectory, identifies the indexes of the input sample which
+        is a function of the number of factors/groups and the number of samples
+
+        Arguments
+        ---------
+        num_samples : int
+            The number of trajectories
+        num_params : int
+            The number of parameters
+        num_groups : int
+            The number of groups
 
         Returns
         -------
         list of numpy.ndarray
+
+        Example
+        -------
+        >>> BruteForce()._make_index_list(num_samples=4, num_params=3,
+            num_groups=2)
+        [np.array([0, 1, 2]), np.array([3, 4, 5]), np.array([6, 7, 8]),
+         np.array([9, 10, 11])]
         """
-        if groups is None:
-            groups = num_params
+        if num_groups is None:
+            num_groups = num_params
 
         index_list = []
         for j in range(num_samples):
-            index_list.append(np.arange(groups + 1) + j * (groups + 1))
+            index_list.append(np.arange(num_groups + 1) + j * (num_groups + 1))
         return index_list
 
     def compile_output(self, input_sample, num_samples, num_params,
-                       maximum_combo, groups=None):
+                       maximum_combo, num_groups=None):
+        """Picks the trajectories from the input
+
+        Arguments
+        ---------
+        input_sample : numpy.ndarray
+        num_samples : int
+        num_params : int
+        maximum_combo : list
+        num_groups : int
+
         """
-        """
 
-        if groups is None:
-            groups = num_params
+        if num_groups is None:
+            num_groups = num_params
 
-        self.check_input_sample(input_sample, groups, num_samples)
+        self.check_input_sample(input_sample, num_groups, num_samples)
 
-        index_list = self._make_index_list(num_samples, num_params, groups)
+        index_list = self._make_index_list(num_samples, num_params, num_groups)
 
-        output = np.zeros((np.size(maximum_combo) * (groups + 1), num_params))
-        for counter, x in enumerate(maximum_combo):
-            output[index_list[counter]] = np.array(input_sample[index_list[x]])
+        output = np.zeros(
+            (np.size(maximum_combo) * (num_groups + 1), num_params))
+        for counter, combo in enumerate(maximum_combo):
+            output[index_list[counter]] = np.array(
+                input_sample[index_list[combo]])
         return output
 
     @staticmethod
     def check_input_sample(input_sample, num_params, num_samples):
-        '''
+        """Check the `input_sample` is valid
+
         Checks input sample is:
             - the correct size
             - values between 0 and 1
-        '''
+
+        Arguments
+        ---------
+        input_sample : numpy.ndarray
+        num_params : int
+        num_samples : int
+        """
         assert type(input_sample) == np.ndarray, \
             "Input sample is not an numpy array"
         assert input_sample.shape[0] == (num_params + 1) * num_samples, \
@@ -181,10 +243,10 @@ class Strategy:
     def compute_distance_matrix(self, input_sample, num_samples, num_params,
                                 groups=None,
                                 local_optimization=False):
-        """Computes the distance between every trajectory
+        """Computes the distance between each and every trajectory
 
         Each entry in the matrix represents the sum of the geometric distances
-        between all the couples of points of the two fixed trajectories
+        between all the pairs of points of the two trajectories
 
         If the `groups` argument is filled, then the distances are still
         calculated for each trajectory,
@@ -231,41 +293,3 @@ class Strategy:
 
                 distance_matrix[k, j] = self.compute_distance(input_1, input_2)
         return distance_matrix
-
-    def find_maximum(self, scores, N, k_choices):
-        """Finds the `k_choices` maximum scores from `scores`
-
-        Arguments
-        ---------
-        scores : numpy.ndarray
-        N : int
-        k_choices : int
-
-        Returns
-        -------
-        list
-        """
-        if not isinstance(scores, np.ndarray):
-            raise TypeError("Scores input is not a numpy array")
-
-        index_of_maximum = int(scores.argmax())
-        maximum_combo = self.nth(combinations(
-            list(range(N)), k_choices), index_of_maximum, None)
-        return sorted(maximum_combo)
-
-    @staticmethod
-    def nth(iterable, n, default=None):
-        """Returns the nth item or a default value
-
-        Arguments
-        ---------
-        iterable : iterable
-        n : int
-        default : default=None
-            The default value to return
-        """
-
-        if type(n) != int:
-            raise TypeError("n is not an integer")
-
-        return next(islice(iterable, n, None), default)
