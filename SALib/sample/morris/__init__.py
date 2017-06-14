@@ -13,16 +13,16 @@ Three variants of Morris' sampling for elementary effects is supported:
 
 At present, optimised trajectories is implemented using either a brute-force
 approach, which can be very slow, especially if you require more than four
-trajectories, or a local method based which is much faster. While the former
-implements groups, the latter does not.
+trajectories, or a local method based which is much faster. Both methods now
+implement working with groups of factors.
 
 Note that the number of factors makes little difference,
 but the ratio between number of optimal trajectories and the sample size
 results in an exponentially increasing number of scores that must be
 computed to find the optimal combination of trajectories.  We suggest going
 no higher than 4 from a pool of 100 samples with the brute force approach.
-With local_optimization = True, it is possible to go higher than the
-previously suggested 4 from 100.
+With local_optimization = True (which is default),
+it is possible to go higher than the previously suggested 4 from 100.
 
 """
 from __future__ import division
@@ -50,7 +50,7 @@ else:
 
 
 def sample(problem, N, num_levels, grid_jump, optimal_trajectories=None,
-           local_optimization=False):
+           local_optimization=True):
     """Generate model inputs using the Method of Morris
 
     Returns a NumPy matrix containing the model inputs required for Method of
@@ -70,10 +70,11 @@ def sample(problem, N, num_levels, grid_jump, optimal_trajectories=None,
         The grid jump size
     optimal_trajectories : int
         The number of optimal trajectories to sample (between 2 and N)
-    local_optimization : bool
+    local_optimization : bool, default=True
         Flag whether to use local optimization according to Ruano et al. (2012)
         Speeds up the process tremendously for bigger N and num_levels.
-        Stating this variable to be true causes the function to ignore gurobi.
+        If set to ``False`` brute force method is used, unless ``gurobipy`` is
+        available
 
     Returns
     -------
