@@ -25,12 +25,12 @@ else:
 
 
 @skipUnless(_has_gurobi, "Gurobi is required for combinatorial optimisation")
-def test_optimal_sample_with_groups(setup_param_file_with_groups_prime):
+def test_optimal_sample_with_groups(setup_param_groups_prime):
     '''
     Tests that the combinatorial optimisation approach matches
     that of the brute force approach
     '''
-    param_file = setup_param_file_with_groups_prime
+    param_file = setup_param_groups_prime
     problem = read_param_file(param_file)
 
     N = 10
@@ -59,7 +59,7 @@ def test_optimal_sample_with_groups(setup_param_file_with_groups_prime):
 
 
 @skipUnless(_has_gurobi, "Gurobi is required for combinatorial optimisation")
-def test_size_of_trajectories_with_groups(setup_param_file_with_groups_prime):
+def test_size_of_trajectories_with_groups(setup_param_groups_prime):
     '''
     Tests that the number of trajectories produced is computed
     correctly (i.e. that the size of the trajectories is a function
@@ -75,7 +75,7 @@ def test_size_of_trajectories_with_groups(setup_param_file_with_groups_prime):
     3. the optimal sample ignoring groups should be of size k*(D+1)-by-D
     4. the optimal sample with groups should be of size k*(G+1)-by-D
     '''
-    param_file = setup_param_file_with_groups_prime
+    param_file = setup_param_groups_prime
     group_problem = read_param_file(param_file)
     no_group_problem = read_param_file(param_file)
     no_group_problem['groups'] = None
@@ -223,7 +223,7 @@ def test_optimised_trajectories_without_groups(setup_function):
 
 
 @skipUnless(_has_gurobi, "Gurobi is required for combinatorial optimisation")
-def test_optimised_trajectories_groups(setup_param_file_with_groups_prime):
+def test_optimised_trajectories_groups(setup_param_groups_prime):
     """
     Tests that the optimisation problem gives
     the same answer as the brute force problem
@@ -232,7 +232,7 @@ def test_optimised_trajectories_groups(setup_param_file_with_groups_prime):
     """
 
     N = 11
-    param_file = setup_param_file_with_groups_prime
+    param_file = setup_param_groups_prime
     problem = read_param_file(param_file)
     num_levels = 4
     grid_jump = num_levels / 2

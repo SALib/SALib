@@ -25,6 +25,15 @@ def make_temporary_file():
 
 
 @pytest.fixture(scope='function')
+def setup_function():
+    filename = make_temporary_file()
+    with open(filename, "w+") as ofile:
+        ofile.write("Test1 0.0 100.0\n")
+        ofile.write("Test2 5.0 51.0\n")
+    return filename
+
+
+@pytest.fixture(scope='function')
 def setup_param_file():
     filename = make_temporary_file()
     with open(filename, "w") as ofile:
@@ -45,7 +54,7 @@ def setup_param_file_with_groups():
 
 
 @pytest.fixture(scope='function')
-def setup_param_file_with_groups_prime():
+def setup_param_groups_prime():
     filename = make_temporary_file()
     with open(filename, "w") as ofile:
         ofile.write("Test 1,0,1.0,Group 1\n")

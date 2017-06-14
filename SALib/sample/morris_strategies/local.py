@@ -43,7 +43,7 @@ class LocalOptimisation(Strategy):
 
         An alternative by Ruano et al. (2012) for the brute force approach as
         originally proposed by Campolongo et al. (2007). The method should
-        improve the speed with which an optimal set of trajectories is 
+        improve the speed with which an optimal set of trajectories is
         found tremendously for larger sample sizes.
 
         Arguments

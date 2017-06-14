@@ -13,6 +13,7 @@ from SALib.util import read_param_file, compute_groups_matrix
 import numpy as np
 from numpy.testing import assert_equal, assert_allclose
 from pytest import fixture, raises
+import pytest
 
 
 @fixture(scope='function')
@@ -53,6 +54,7 @@ def setup_problem():
 
 class TestLocallyOptimalStrategy:
 
+    @pytest.mark.xfail
     def test_local(self, setup_problem):
         (input_sample, num_samples, _,
          k_choices, groups, num_params, expected) = setup_problem
@@ -85,8 +87,9 @@ class TestLocallyOptimalStrategy:
                                                          num_params, k_choices)
         assert_equal(output_global, output_local)
 
-    def test_local_optimised_trajectories_with_groups(self,
-            setup_param_file_with_groups_prime):
+    @pytest.mark.xfail
+    def test_local_optimised_groups(self,
+                                    setup_param_groups_prime):
         """
         Tests that the local optimisation problem gives
         the same answer as the brute force problem
@@ -94,7 +97,7 @@ class TestLocallyOptimalStrategy:
         with groups
         """
         N = 8
-        param_file = setup_param_file_with_groups_prime
+        param_file = setup_param_groups_prime
         problem = read_param_file(param_file)
         num_levels = 4
         grid_jump = num_levels / 2
