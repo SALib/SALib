@@ -231,7 +231,7 @@ def _compute_optimised_trajectories(problem, input_sample, N, k_choices,
     if _has_gurobi and local_optimization is False:
         # Use global optimization method
         strategy = GlobalOptimisation()
-    elif _has_gurobi is False and local_optimization:
+    elif local_optimization:
         # Use local method
         strategy = LocalOptimisation()
     else:

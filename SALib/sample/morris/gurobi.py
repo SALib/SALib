@@ -95,6 +95,10 @@ class GlobalOptimisation(Strategy):
         k_choices : int
             The number of optimal trajectories to select
         groups: tuple, default=None
+
+        Returns
+        -------
+        list
         """
 
         distance_matrix = self.compute_distance_matrix(

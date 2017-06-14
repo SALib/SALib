@@ -2,18 +2,17 @@ from unittest import skipUnless
 
 import numpy as np
 from numpy.testing import assert_equal
-from nose.tools import raises
+from pytest import raises
 
 from SALib.sample.morris.brute import BruteForce
 from SALib.sample.morris.gurobi import GlobalOptimisation
-from SALib.sample.morris.local import LocalOptimisation
 
 from SALib.sample.morris import _sample_oat, \
     _compute_optimised_trajectories, \
     _sample_groups
 
 
-from SALib.util import read_param_file
+from SALib.util import read_param_file, compute_groups_matrix
 
 try:
     import gurobipy
@@ -156,12 +155,11 @@ def test_optimal_combinations(setup_function):
                                               num_params,
                                               k_choices)
 
-    local_strategy = LocalOptimisation()
-    desired = local_strategy.locally_optimal_combination(morris_sample,
-                                                         N,
-                                                         num_params,
-                                                         k_choices)
-
+    brute_strategy = BruteForce()
+    desired = brute_strategy.brute_force_most_distant(morris_sample,
+                                                      N,
+                                                      num_params,
+                                                      k_choices)
     assert_equal(actual, desired)
 
 
@@ -203,7 +201,7 @@ def test_optimised_trajectories_without_groups(setup_function):
                              [1., 0.33333333],
                              [0.33333333, 0.33333333]], dtype=np.float32)
 
-    print(input_sample)
+    # print(input_sample)
 
     # From gurobi optimal trajectories
     strategy = GlobalOptimisation()
@@ -212,12 +210,12 @@ def test_optimised_trajectories_without_groups(setup_function):
                                        num_params,
                                        k_choices)
 
-    local_strategy = LocalOptimisation()
-    desired = local_strategy.locally_optimal_combination(input_sample,
-                                                         N,
-                                                         num_params,
-                                                         k_choices,
-                                                         groups)
+    local_strategy = BruteForce()
+    desired = local_strategy.brute_force_most_distant(input_sample,
+                                                      N,
+                                                      num_params,
+                                                      k_choices,
+                                                      groups)
 
     assert_equal(actual, desired)
 
@@ -239,28 +237,27 @@ def test_optimised_trajectories_groups(setup_param_groups_prime):
     k_choices = 4
 
     num_params = problem['num_vars']
-    groups = problem['groups']
-
+    groups = compute_groups_matrix(problem['groups'], num_params)
     input_sample = _sample_groups(problem, N, num_levels, grid_jump)
 
     # From gurobi optimal trajectories
     strategy = GlobalOptimisation()
-    actual = strategy.return_max_combo(input_sample,
-                                       N,
-                                       num_params,
-                                       k_choices)
+    actual = strategy.sample(input_sample,
+                             N,
+                             num_params,
+                             k_choices,
+                             groups)
 
-    local_strategy = LocalOptimisation()
-    desired = local_strategy.locally_optimal_combination(input_sample,
-                                                         N,
-                                                         num_params,
-                                                         k_choices,
-                                                         groups)
+    brute_strategy = BruteForce()
+    desired = brute_strategy.sample(input_sample,
+                                    N,
+                                    num_params,
+                                    k_choices,
+                                    groups)
     assert_equal(actual, desired)
 
 
 @skipUnless(_has_gurobi, "Gurobi is required for combinatorial optimisation")
-@raises(ValueError)
 def test_raise_error_if_k_gt_N(setup_function):
     """Check that an error is raised if `k_choices` is greater than
     (or equal to) `N`
@@ -274,7 +271,9 @@ def test_raise_error_if_k_gt_N(setup_function):
 
     morris_sample = _sample_oat(problem, N, num_levels, grid_jump)
 
-    _compute_optimised_trajectories(problem,
-                                    morris_sample,
-                                    N,
-                                    k_choices)
+    with raises(ValueError):
+        _compute_optimised_trajectories(problem,
+                                        morris_sample,
+                                        N,
+                                        k_choices,
+                                        local_optimization=False)

@@ -59,7 +59,7 @@ def test_regression_morris_groups_brute_optim():
     problem = read_param_file(param_file)
 
     param_values = sample(problem=problem, N=20,
-                          num_levels=10, grid_jump=5,
+                          num_levels=4, grid_jump=2,
                           optimal_trajectories=8,
                           local_optimization=False)
 
@@ -67,7 +67,7 @@ def test_regression_morris_groups_brute_optim():
 
     Si = morris.analyze(problem, param_values, Y,
                         conf_level=0.95, print_to_console=False,
-                        num_levels=10, grid_jump=5)
+                        num_levels=4, grid_jump=2)
 
     assert_allclose(Si['mu_star'], [7.87, 6.26], rtol=5e-1)
 

@@ -32,6 +32,10 @@ class BruteForce(Strategy):
             The number of optimal trajectories
         groups : tuple
             A tuple of (numpy.ndarray, list)
+
+        Returns
+        -------
+        list
         """
         scores = self.find_most_distant(input_sample,
                                         num_samples,

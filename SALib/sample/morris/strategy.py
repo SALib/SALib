@@ -240,6 +240,10 @@ class Strategy:
         scores : numpy.ndarray
         N : int
         k_choices : int
+
+        Returns
+        -------
+        list
         """
         if not isinstance(scores, np.ndarray):
             raise TypeError("Scores input is not a numpy array")
