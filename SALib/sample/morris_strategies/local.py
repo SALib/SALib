@@ -5,8 +5,6 @@ import numpy as np
 
 from . import Strategy
 
-from .. morris_util import (find_maximum, compute_distance_matrix)
-
 
 class LocalOptimisation(Strategy):
     """Implements the local optimisation algorithm using the Strategy interface
@@ -32,7 +30,7 @@ class LocalOptimisation(Strategy):
         scores = self.find_local_maximum(
             input_sample, N, num_params, k_choices, groups)
 
-        maximum_combo = find_maximum(scores, N, k_choices)
+        maximum_combo = self.find_maximum(scores, N, k_choices)
 
         return maximum_combo
 
@@ -60,9 +58,9 @@ class LocalOptimisation(Strategy):
         -------
         list
         """
-        distance_matrix = compute_distance_matrix(input_sample, N,
-                                                  num_params, groups,
-                                                  local_optimization=True)
+        distance_matrix = self.compute_distance_matrix(input_sample, N,
+                                                       num_params, groups,
+                                                       local_optimization=True)
 
         tot_indices_list = []
         tot_max_array = np.zeros(k_choices - 1)

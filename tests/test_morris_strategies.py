@@ -5,9 +5,6 @@ from SALib.sample.morris_strategies import (SampleMorris)
 from SALib.sample.morris_strategies.local import LocalOptimisation
 from SALib.sample.morris_strategies.brute import BruteForce
 
-from SALib.sample.morris_util import (find_maximum,
-                                      compute_distance_matrix)
-
 from SALib.util import read_param_file, compute_groups_matrix
 
 import numpy as np
@@ -52,6 +49,113 @@ def setup_problem():
             k_choices, groups, num_params, expected)
 
 
+@fixture(scope='function')
+def strategy():
+    return BruteForce()
+
+
+class TestSharedMethods:
+
+    def test_check_input_sample_N(self, strategy, setup_input):
+        input_sample = setup_input
+        num_params = 4
+        N = 5
+        with raises(AssertionError):
+            strategy.check_input_sample(input_sample, num_params, N)
+
+    def test_check_input_sample_num_vars(self, strategy, setup_input):
+        input_sample = setup_input
+        num_params = 3
+        N = 6
+        with raises(AssertionError):
+            strategy.check_input_sample(input_sample, num_params, N)
+
+    def test_check_input_sample_range(self, strategy, setup_input):
+        input_sample = setup_input
+        input_sample *= 100
+        num_params = 4
+        N = 6
+        with raises(AssertionError):
+            strategy.check_input_sample(input_sample, num_params, N)
+
+    def test_find_maximum(self, strategy):
+        scores = np.array(range(15))
+        k_choices = 4
+        N = 6
+        output = strategy.find_maximum(scores, N, k_choices)
+        expected = [2, 3, 4, 5]
+        assert_equal(output, expected)
+
+    def test_distance(self, strategy):
+        '''
+        Tests the computation of the distance of two trajectories
+        '''
+        input_1 = np.matrix(
+            [[0, 1 / 3.], [0, 1.], [2 / 3., 1.]], dtype=np.float32)
+        input_3 = np.matrix([[2 / 3., 0], [2 / 3., 2 / 3.],
+                             [0, 2 / 3.]], dtype=np.float32)
+        output = strategy.compute_distance(input_1, input_3)
+        assert_allclose(output, 6.18, atol=1e-2)
+
+    def test_distance_of_identical_matrices_is_min(self, strategy):
+        input_1 = np.matrix([[1., 1.],
+                             [1., 0.33333333],
+                             [0.33333333, 0.33333333]])
+        input_2 = input_1.copy()
+        actual = strategy.compute_distance(input_1, input_2)
+        desired = 0
+        assert_allclose(actual, desired, atol=1e-2)
+
+    def test_distance_fail_with_difference_size_ip(self, strategy):
+        input_1 = np.matrix([[0, 1 / 3.], [0, 1.]], dtype=np.float32)
+        input_3 = np.matrix([[2 / 3., 0], [2 / 3., 2 / 3.],
+                             [0, 2 / 3.]], dtype=np.float32)
+        try:
+            strategy.compute_distance(input_1, input_3, 2)
+        except:
+            pass
+        else:
+            raise AssertionError(
+                "Different size matrices did not trigger error")
+
+    def test_compute_distance_matrix(self, strategy, setup_input):
+        '''
+        Tests that a distance matrix is computed correctly
+
+        for an input of six trajectories and two parameters
+        '''
+        sample_inputs = setup_input
+        output = strategy.compute_distance_matrix(sample_inputs, 6, 2)
+        expected = np.zeros((6, 6), dtype=np.float32)
+        expected[1, :] = [5.50, 0, 0, 0, 0, 0]
+        expected[2, :] = [6.18, 5.31, 0, 0, 0, 0]
+        expected[3, :] = [6.89, 6.18, 6.57, 0, 0, 0]
+        expected[4, :] = [6.18, 5.31, 5.41, 5.5, 0, 0]
+        expected[5, :] = [7.52, 5.99, 5.52, 7.31, 5.77, 0]
+        assert_allclose(output, expected, rtol=1e-2)
+
+    def test_compute_distance_matrix_local(self, strategy, setup_input):
+        '''
+        Tests that a distance matrix is computed correctly for the
+        local distance optimization.
+        The only change is that the local method needs the upper triangle of
+        the distance matrix instead of the lower one.
+
+        This is for an input of six trajectories and two parameters
+        '''
+        sample_inputs = setup_input
+        output = strategy.compute_distance_matrix(
+            sample_inputs, 6, 2, local_optimization=True)
+        expected = np.zeros((6, 6), dtype=np.float32)
+        expected[0, :] = [0,    5.50, 6.18, 6.89, 6.18, 7.52]
+        expected[1, :] = [5.50, 0,    5.31, 6.18, 5.31, 5.99]
+        expected[2, :] = [6.18, 5.31, 0,    6.57, 5.41, 5.52]
+        expected[3, :] = [6.89, 6.18, 6.57, 0,    5.50, 7.31]
+        expected[4, :] = [6.18, 5.31, 5.41, 5.5,  0,    5.77]
+        expected[5, :] = [7.52, 5.99, 5.52, 7.31, 5.77, 0]
+        assert_allclose(output, expected, rtol=1e-2)
+
+
 class TestLocallyOptimalStrategy:
 
     @pytest.mark.xfail
@@ -83,7 +187,8 @@ class TestLocallyOptimalStrategy:
         k_choices = 4
         scores_global = brute_strategy.find_most_distant(sample_inputs, N,
                                                          num_params, k_choices)
-        output_global = find_maximum(scores_global, N, k_choices)
+        output_global = brute_strategy.find_maximum(
+            scores_global, N, k_choices)
         output_local = local_strategy.find_local_maximum(sample_inputs, N,
                                                          num_params, k_choices)
         assert_equal(output_global, output_local)
@@ -134,8 +239,8 @@ class TestLocalMethods:
         strategy = LocalOptimisation()
 
         sample_inputs = setup_input
-        dist_matr = compute_distance_matrix(sample_inputs, 6, 2,
-                                            local_optimization=True)
+        dist_matr = strategy.compute_distance_matrix(sample_inputs, 6, 2,
+                                                     local_optimization=True)
         indices = (1, 3, 2)
         distance = strategy.sum_distances(indices, dist_matr)
 
@@ -209,7 +314,7 @@ class TestBruteForceMethods:
         strategy = BruteForce()
         scores = strategy.find_most_distant(sample_inputs, N, num_params,
                                             k_choices)
-        output = find_maximum(scores, N, k_choices)
+        output = strategy.find_maximum(scores, N, k_choices)
         expected = [0, 2, 3, 5]  # trajectories 1, 3, 4, 6
         assert_equal(output, expected)
 
@@ -243,3 +348,23 @@ class TestBruteForceMethods:
         strategy = BruteForce()
         with raises(ValueError):
             strategy.find_most_distant(input_sample, N, num_params, k_choices)
+
+    def test_make_index_list(self):
+        N = 4
+        num_params = 2
+        groups = None
+        strategy = BruteForce()
+        actual = strategy._make_index_list(N, num_params, groups)
+        desired = [np.array([0, 1, 2]), np.array([3, 4, 5]),
+                   np.array([6, 7, 8]), np.array([9, 10, 11])]
+        assert_equal(desired, actual)
+
+    def test_make_index_list_with_groups(self):
+        N = 4
+        num_params = 3
+        groups = 2
+        strategy = BruteForce()
+        actual = strategy._make_index_list(N, num_params, groups)
+        desired = [np.array([0, 1, 2]), np.array([3, 4, 5]),
+                   np.array([6, 7, 8]), np.array([9, 10, 11])]
+        assert_equal(desired, actual)

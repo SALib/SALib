@@ -1,7 +1,6 @@
 """
 """
 from SALib.sample.morris_strategies import Strategy
-from .. morris_util import (find_maximum, compute_distance_matrix)
 from scipy.misc import comb as nchoosek
 from itertools import combinations, islice
 import sys
@@ -40,7 +39,7 @@ class BruteForce(Strategy):
                                         k_choices,
                                         groups)
 
-        maximum_combo = find_maximum(scores, num_samples, k_choices)
+        maximum_combo = self.find_maximum(scores, num_samples, k_choices)
 
         return maximum_combo
 
@@ -73,10 +72,10 @@ class BruteForce(Strategy):
 
         # First compute the distance matrix for each possible pairing
         # of trajectories and store in a shared-memory array
-        distance_matrix = compute_distance_matrix(input_sample,
-                                                  num_samples,
-                                                  num_params,
-                                                  groups)
+        distance_matrix = self.compute_distance_matrix(input_sample,
+                                                       num_samples,
+                                                       num_params,
+                                                       groups)
 
         # Initialise the output array
         chunk = int(1e6)

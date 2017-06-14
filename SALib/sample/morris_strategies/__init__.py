@@ -11,7 +11,9 @@ Example
 """
 
 import abc
-from .. morris_util import compile_output
+import numpy as np
+from scipy.spatial.distance import cdist
+from itertools import combinations, islice
 
 
 class SampleMorris(object):
@@ -92,14 +94,163 @@ class Strategy(metaclass=abc.ABCMeta):
         if groups is not None:
             num_groups = groups[0].shape[1]
 
-        output = compile_output(input_sample,
-                                num_samples,
-                                num_params,
-                                maximum_combo,
-                                num_groups)
+        output = self.compile_output(input_sample,
+                                     num_samples,
+                                     num_params,
+                                     maximum_combo,
+                                     num_groups)
         return output
+
+    @staticmethod
+    def _make_index_list(num_samples, num_params, groups=None):
+        """
+
+        Returns
+        -------
+        list of numpy.ndarray
+        """
+        if groups is None:
+            groups = num_params
+
+        index_list = []
+        for j in range(num_samples):
+            index_list.append(np.arange(groups + 1) + j * (groups + 1))
+        return index_list
+
+    def compile_output(self, input_sample, num_samples, num_params,
+                       maximum_combo, groups=None):
+        """
+        """
+
+        if groups is None:
+            groups = num_params
+
+        self.check_input_sample(input_sample, groups, num_samples)
+
+        index_list = self._make_index_list(num_samples, num_params, groups)
+
+        output = np.zeros((np.size(maximum_combo) * (groups + 1), num_params))
+        for counter, x in enumerate(maximum_combo):
+            output[index_list[counter]] = np.array(input_sample[index_list[x]])
+        return output
+
+    @staticmethod
+    def check_input_sample(input_sample, num_params, num_samples):
+        '''
+        Checks input sample is:
+            - the correct size
+            - values between 0 and 1
+        '''
+        assert type(input_sample) == np.ndarray, \
+            "Input sample is not an numpy array"
+        assert input_sample.shape[0] == (num_params + 1) * num_samples, \
+            "Input sample does not match number of parameters or groups"
+        assert np.any((input_sample >= 0) | (input_sample <= 1)), \
+            "Input sample must be scaled between 0 and 1"
+
+    @staticmethod
+    def compute_distance(m, l):
+        '''Compute distance between two trajectories
+
+        Returns
+        -------
+        numpy.ndarray
+        '''
+
+        if np.shape(m) != np.shape(l):
+            raise ValueError("Input matrices are different sizes")
+        if np.array_equal(m, l):
+            print("Trajectory %s and %s are equal" % (m, l))
+            distance = 0
+        else:
+            distance = np.array(np.sum(cdist(m, l)), dtype=np.float32)
+
+        return distance
+
+    def compute_distance_matrix(self, input_sample, N, num_params, groups=None,
+                                local_optimization=False):
+        """Computes the distance between every trajectory
+
+        Arguments
+        ---------
+        input_sample : numpy.ndarray
+            The input sample of trajectories for which to compute
+            the distance matrix
+        N : int
+            The number of samples
+        num_params : int
+            The number of factors
+        groups : tuple, default=None
+            the mapping between factors and groups
+        local_optimization : bool, default=False
+
+        Returns
+        -------
+        distance_matrix : numpy.ndarray
+
+        """
+        num_groups = None
+        if groups:
+            num_groups = groups[0].shape[1]
+            self.check_input_sample(input_sample, num_groups, N)
+        else:
+            self.check_input_sample(input_sample, num_params, N)
+
+        index_list = self._make_index_list(N, num_params, num_groups)
+        distance_matrix = np.zeros((N, N), dtype=np.float32)
+
+        for j in range(N):
+            input_1 = input_sample[index_list[j]]
+            for k in range(j + 1, N):
+                input_2 = input_sample[index_list[k]]
+
+                if local_optimization is True:
+                    distance_matrix[j, k] = self.compute_distance(
+                        input_1, input_2)
+
+                distance_matrix[k, j] = self.compute_distance(input_1, input_2)
+        return distance_matrix
 
     @abc.abstractmethod
     def _sample(self, input_sample, num_samples,
                 num_params, k_choices, groups):
         pass
+
+    def find_maximum(self, scores, N, k_choices):
+        """Finds the `k_choices` maximum scores from `scores`
+
+        Arguments
+        ---------
+        scores : numpy.ndarray
+        N : int
+        k_choices : int
+        """
+        if not isinstance(scores, np.ndarray):
+            raise TypeError("Scores input is not a numpy array")
+
+        index_of_maximum = int(scores.argmax())
+        maximum_combo = self.nth(combinations(
+            list(range(N)), k_choices), index_of_maximum, None)
+        return sorted(maximum_combo)
+
+    @staticmethod
+    def take(n, iterable):
+        "Return first n items of the iterable as a list"
+        return list(islice(iterable, n))
+
+    @staticmethod
+    def nth(iterable, n, default=None):
+        """Returns the nth item or a default value
+
+        Arguments
+        ---------
+        iterable : iterable
+        n : int
+        default : default=None
+            The default value to return
+        """
+
+        if type(n) != int:
+            raise TypeError("n is not an integer")
+
+        return next(islice(iterable, n, None), default)

@@ -21,7 +21,6 @@ from scipy.misc import comb as nchoosek
 from SALib.sample.morris_strategies import Strategy
 
 from ..util import requires_gurobipy
-from .morris_util import compute_distance_matrix
 
 try:
     from gurobipy import Model, quicksum, GRB
@@ -98,7 +97,7 @@ class GlobalOptimisation(Strategy):
         groups: tuple, default=None
         """
 
-        distance_matrix = compute_distance_matrix(
+        distance_matrix = self.compute_distance_matrix(
             input_data, N, num_params, groups)
 
         model = self.global_model(N, k_choices, distance_matrix)
