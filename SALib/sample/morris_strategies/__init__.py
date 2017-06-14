@@ -101,6 +101,13 @@ class Strategy(metaclass=abc.ABCMeta):
                                      num_groups)
         return output
 
+    @abc.abstractmethod
+    def _sample(self, input_sample, num_samples,
+                num_params, k_choices, groups):
+        """Implement this in your class
+        """
+        pass
+
     @staticmethod
     def _make_index_list(num_samples, num_params, groups=None):
         """
@@ -211,11 +218,6 @@ class Strategy(metaclass=abc.ABCMeta):
                 distance_matrix[k, j] = self.compute_distance(input_1, input_2)
         return distance_matrix
 
-    @abc.abstractmethod
-    def _sample(self, input_sample, num_samples,
-                num_params, k_choices, groups):
-        pass
-
     def find_maximum(self, scores, N, k_choices):
         """Finds the `k_choices` maximum scores from `scores`
 
@@ -232,11 +234,6 @@ class Strategy(metaclass=abc.ABCMeta):
         maximum_combo = self.nth(combinations(
             list(range(N)), k_choices), index_of_maximum, None)
         return sorted(maximum_combo)
-
-    @staticmethod
-    def take(n, iterable):
-        "Return first n items of the iterable as a list"
-        return list(islice(iterable, n))
 
     @staticmethod
     def nth(iterable, n, default=None):

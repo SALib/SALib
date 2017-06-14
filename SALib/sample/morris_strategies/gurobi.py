@@ -20,7 +20,7 @@ from scipy.misc import comb as nchoosek
 
 from SALib.sample.morris_strategies import Strategy
 
-from ..util import requires_gurobipy
+from SALib.util import requires_gurobipy
 
 try:
     from gurobipy import Model, quicksum, GRB

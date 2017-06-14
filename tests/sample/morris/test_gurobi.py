@@ -12,7 +12,7 @@ from SALib.sample.morris import sample_oat, \
     compute_optimised_trajectories, \
     sample_groups
 
-from SALib.sample.optimal_trajectories import GlobalOptimisation
+from SALib.sample.morris_strategies.gurobi import GlobalOptimisation
 from SALib.util import read_param_file
 
 try:
