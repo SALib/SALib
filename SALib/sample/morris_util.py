@@ -5,11 +5,8 @@ Helper functions for Morris trajectories
 
 from __future__ import division
 
-from itertools import combinations, islice
-import sys
-
-from scipy.misc import comb as nchoosek
 from scipy.spatial.distance import cdist
+from itertools import combinations, islice
 
 import numpy as np
 import random as rd
@@ -183,60 +180,6 @@ def compute_distance_matrix(input_sample, N, num_params, groups=None,
     return distance_matrix
 
 
-def find_most_distant(input_sample, N, num_params, k_choices, groups=None):
-    """
-    Finds the 'k_choices' most distant choices from the
-    'N' trajectories contained in 'input_sample'
-
-    Returns
-    -------
-    numpy.ndarray
-    """
-    # Now evaluate the (N choose k_choices) possible combinations
-    if nchoosek(N, k_choices) >= sys.maxsize:
-        raise ValueError("Number of combinations is too large")
-    number_of_combinations = int(nchoosek(N, k_choices))
-
-    # First compute the distance matrix for each possible pairing
-    # of trajectories and store in a shared-memory array
-    distance_matrix = compute_distance_matrix(input_sample,
-                                              N,
-                                              num_params,
-                                              groups)
-
-    # Initialise the output array
-    chunk = int(1e6)
-    if chunk > number_of_combinations:
-        chunk = number_of_combinations
-
-    counter = 0
-    # Generate a list of all the possible combinations
-    # combos = np.array([x for x in combinations(range(N),k_choices)])
-    combo_gen = combinations(list(range(N)), k_choices)
-    scores = np.zeros(number_of_combinations, dtype=np.float32)
-    # Generate the pairwise indices once
-    pairwise = np.array([y for y in combinations(list(range(k_choices)), 2)])
-
-    for combos in grouper(chunk, combo_gen):
-        scores[(counter * chunk):((counter + 1) * chunk)] \
-            = mappable(combos, pairwise, distance_matrix)
-        counter += 1
-    return scores
-
-
-def mappable(combos, pairwise, distance_matrix):
-    '''
-    Obtains scores from the distance_matrix for each pairwise combination
-    held in the combos array
-    '''
-    combos = np.array(combos)
-    # Create a list of all pairwise combination for each combo in combos
-    combo_list = combos[:, pairwise[:, ]]
-    all_distances = distance_matrix[[combo_list[:, :, 1], combo_list[:, :, 0]]]
-    new_scores = np.sqrt(np.einsum('ij,ij->i', all_distances, all_distances))
-    return new_scores
-
-
 def find_maximum(scores, N, k_choices):
     """Finds the `k_choices` maximum scores from `scores`
 
@@ -253,15 +196,6 @@ def find_maximum(scores, N, k_choices):
     maximum_combo = nth(combinations(
         list(range(N)), k_choices), index_of_maximum, None)
     return sorted(maximum_combo)
-
-
-def grouper(n, iterable):
-    it = iter(iterable)
-    while True:
-        chunk = tuple(islice(it, n))
-        if not chunk:
-            return
-        yield chunk
 
 
 def take(n, iterable):

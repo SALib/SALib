@@ -6,7 +6,6 @@ from SALib.sample.morris_strategies.local import LocalOptimisation
 from SALib.sample.morris_strategies.brute import BruteForce
 
 from SALib.sample.morris_util import (find_maximum,
-                                      find_most_distant,
                                       compute_distance_matrix)
 
 from SALib.util import read_param_file, compute_groups_matrix
@@ -76,14 +75,14 @@ class TestLocallyOptimalStrategy:
         '''
 
         local_strategy = LocalOptimisation()
-        # brute_strategy = BruteForce()
+        brute_strategy = BruteForce()
 
         sample_inputs = setup_input
         N = 6
         num_params = 2
         k_choices = 4
-        scores_global = find_most_distant(sample_inputs, N,
-                                          num_params, k_choices)
+        scores_global = brute_strategy.find_most_distant(sample_inputs, N,
+                                                         num_params, k_choices)
         output_global = find_maximum(scores_global, N, k_choices)
         output_local = local_strategy.find_local_maximum(sample_inputs, N,
                                                          num_params, k_choices)
@@ -193,3 +192,54 @@ class TestBruteForceStrategy:
                                 k_choices, groups)
 
         np.testing.assert_equal(actual, expected)
+
+
+class TestBruteForceMethods:
+
+    def test_combo_from_find_most_distant(self, setup_input):
+        '''
+        Tests whether the correct combination is picked from the fixture drawn
+        from Saltelli et al. 2008, in the solution to exercise 3a,
+        Chapter 3, page 134.
+        '''
+        sample_inputs = setup_input
+        N = 6
+        num_params = 2
+        k_choices = 4
+        strategy = BruteForce()
+        scores = strategy.find_most_distant(sample_inputs, N, num_params,
+                                            k_choices)
+        output = find_maximum(scores, N, k_choices)
+        expected = [0, 2, 3, 5]  # trajectories 1, 3, 4, 6
+        assert_equal(output, expected)
+
+    def test_scores_from_find_most_distant(self, setup_input):
+        '''
+        Checks whether array of scores from (6 4) is correct.
+
+        Data is derived from Saltelli et al. 2008,
+        in the solution to exercise 3a, Chapter 3, page 134.
+
+        '''
+        sample_inputs = setup_input
+        N = 6
+        num_params = 2
+        k_choices = 4
+        strategy = BruteForce()
+        output = strategy.find_most_distant(sample_inputs, N, num_params,
+                                            k_choices)
+        expected = np.array([15.022, 13.871, 14.815, 14.582, 16.178, 14.912,
+                             15.055, 16.410, 15.685, 16.098, 14.049, 15.146,
+                             14.333, 14.807, 14.825],
+                            dtype=np.float32)
+
+        assert_allclose(output, expected, rtol=1e-1, atol=1e-2)
+
+    def test_catch_combos_too_large(self):
+        N = int(1e6)
+        k_choices = 4
+        num_params = 2
+        input_sample = np.random.random_sample((N, num_params))
+        strategy = BruteForce()
+        with raises(ValueError):
+            strategy.find_most_distant(input_sample, N, num_params, k_choices)

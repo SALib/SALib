@@ -12,7 +12,7 @@ from SALib.sample.morris_util import generate_P_star, \
     generate_trajectory, \
     compute_distance, \
     compute_distance_matrix, \
-    find_most_distant, find_maximum, \
+    find_maximum, \
     make_index_list, \
     check_input_sample
 
@@ -158,43 +158,6 @@ def test_compute_distance_matrix_local():
     assert_allclose(output, expected, rtol=1e-2)
 
 
-def test_combo_from_find_most_distant():
-    '''
-    Tests whether the correct combination is picked from the fixture drawn
-    from Saltelli et al. 2008, in the solution to exercise 3a,
-    Chapter 3, page 134.
-    '''
-    sample_inputs = setup()
-    N = 6
-    num_params = 2
-    k_choices = 4
-    scores = find_most_distant(sample_inputs, N, num_params, k_choices)
-    output = find_maximum(scores, N, k_choices)
-    expected = [0, 2, 3, 5]  # trajectories 1, 3, 4, 6
-    assert_equal(output, expected)
-
-
-def test_scores_from_find_most_distant():
-    '''
-    Checks whether array of scores from (6 4) is correct.
-
-    Data is derived from Saltelli et al. 2008,
-    in the solution to exercise 3a, Chapter 3, page 134.
-
-    '''
-    sample_inputs = setup()
-    N = 6
-    num_params = 2
-    k_choices = 4
-    output = find_most_distant(sample_inputs, N, num_params, k_choices)
-    expected = np.array([15.022, 13.871, 14.815, 14.582, 16.178, 14.912,
-                         15.055, 16.410, 15.685, 16.098, 14.049, 15.146,
-                         14.333, 14.807, 14.825],
-                        dtype=np.float32)
-
-    assert_allclose(output, expected, rtol=1e-1, atol=1e-2)
-
-
 def test_find_maximum():
     scores = np.array(range(15))
     k_choices = 4
@@ -202,21 +165,6 @@ def test_find_maximum():
     output = find_maximum(scores, N, k_choices)
     expected = [2, 3, 4, 5]
     assert_equal(output, expected)
-
-
-def test_catch_combos_too_large():
-    N = int(1e6)
-    k_choices = 4
-    num_params = 2
-    input_sample = np.random.random_sample((N, num_params))
-
-    try:
-        find_most_distant(input_sample, N, num_params, k_choices)
-    except:
-        pass
-    else:
-        raise AssertionError("Test did not fail when number of \
-                             combinations exceeded system size")
 
 
 def test_make_index_list():
