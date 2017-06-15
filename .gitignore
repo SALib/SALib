@@ -39,3 +39,10 @@ docs/api/*
 docs/_build/*
 cover/*
 MANIFEST
+
+# System files
+.DS_Store
+*.lp
+.vscode
+.tex*
+*.ipynb
