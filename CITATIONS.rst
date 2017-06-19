@@ -34,6 +34,9 @@ Software
 * `The City Energy Analyst <https://github.com/architecture-building-systems/CEAforArcGIS>`_
 * `pynoddy <https://github.com/flohorovicic/pynoddy>`_
 * `savvy <https://github.com/houghb/savvy>`_
+* `rhodium <https://github.com/Project-Platypus/Rhodium>`_
+* `pySur <https://github.com/MastenSpace/pysur>`_
+* `EMA workbench <https://github.com/quaquel/EMAworkbench>`_
 
 Blogs
 -----
