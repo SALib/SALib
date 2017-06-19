@@ -27,7 +27,6 @@ it is possible to go higher than the previously suggested 4 from 100.
 """
 from __future__ import division
 
-
 import numpy as np
 
 import random as rd
@@ -40,7 +39,7 @@ from . strategy import SampleMorris
 
 from SALib.sample import common_args
 from SALib.util import scale_samples, read_param_file, compute_groups_matrix
-from SALib.sample.morris_util import generate_trajectory
+
 try:
     import gurobipy
 except ImportError:
@@ -170,7 +169,7 @@ def _sample_groups(problem, N, num_levels, grid_jump):
     problem : dict
         The problem definition
     N : int
-        The number of samples to generate
+        The number of trajectories to generate
     num_levels : int
         The number of grid levels
     grid_jump : int
@@ -180,19 +179,143 @@ def _sample_groups(problem, N, num_levels, grid_jump):
     -------
     numpy.ndarray
     """
-    G, _ = compute_groups_matrix(problem['groups'], problem['num_vars'])
+    group_membership, _ = compute_groups_matrix(problem['groups'],
+                                                problem['num_vars'])
 
-    if G is None:
-        raise ValueError("Please define the matrix G.")
-    if not isinstance(G, np.matrixlib.defmatrix.matrix):
-        raise TypeError("Matrix G should be formatted as a numpy matrix")
+    if group_membership is None:
+        raise ValueError("Please define the matrix group_membership.")
+    if not isinstance(group_membership, np.matrixlib.defmatrix.matrix):
+        raise TypeError("Matrix group_membership should be formatted \
+                         as a numpy matrix")
 
-    k = G.shape[0]
-    g = G.shape[1]
-    sample = np.zeros((N * (g + 1), k))
-    sample = np.array([generate_trajectory(G, num_levels, grid_jump)
+    num_params = group_membership.shape[0]
+    num_groups = group_membership.shape[1]
+    sample = np.zeros((N * (num_groups + 1), num_params))
+    sample = np.array([generate_trajectory(group_membership,
+                                           num_levels,
+                                           grid_jump)
                        for n in range(N)])
-    return sample.reshape((N * (g + 1), k))
+    return sample.reshape((N * (num_groups + 1), num_params))
+
+
+def generate_trajectory(group_membership, num_levels, grid_jump):
+    """Return a single trajectory
+
+    Return a single trajectory of size :math:`(g+1)`-by-:math:`k`
+    where :math:`g` is the number of groups,
+    and :math:`k` is the number of factors,
+    both implied by the dimensions of `group_membership`
+
+    Arguments
+    ---------
+    group_membership : np.ndarray
+        a k-by-g matrix which notes factor membership of groups
+    num_levels : int
+        integer describing number of levels
+    grid_jump : int
+        recommended to be equal to :math:`p / (2(p-1))`
+        where :math:`p` is `num_levels`
+
+    Returns
+    -------
+    np.ndarray
+    """
+
+    delta = compute_delta(num_levels)
+
+    # Infer number of groups `g` and number of params `k` from
+    # `group_membership` matrix
+    num_params = group_membership.shape[0]
+    num_groups = group_membership.shape[1]
+
+    # Matrix B - size (g + 1) * g -  lower triangular matrix
+    B = np.matrix(np.tril(np.ones([num_groups + 1, num_groups],
+                                  dtype=int), -1))
+
+    P_star = np.asmatrix(generate_p_star(num_groups))
+
+    # Matrix J - a (g+1)-by-num_params matrix of ones
+    J = np.matrix(np.ones((num_groups + 1, num_params)))
+
+    # Matrix D* - num_params-by-num_params matrix which decribes whether
+    # factors move up or down
+    D_star = np.diag([rd.choice([-1, 1]) for _ in range(num_params)])
+
+    x_star = np.asmatrix(generate_x_star(num_params, num_levels, grid_jump))
+
+    # Matrix B* - size (num_groups + 1) * num_params
+    B_star = compute_b_star(J, x_star, delta, B,
+                            group_membership, P_star, D_star)
+
+    return B_star
+
+
+def compute_b_star(J, x_star, delta, B, G, P_star, D_star):
+    """
+    """
+    b_star = J[:, 0] * x_star + \
+        (delta / 2) * ((2 * B * (G * P_star).T - J)
+                       * D_star + J)
+    return b_star
+
+
+def generate_p_star(num_groups):
+    """Describe the order in which groups move
+
+    Arguments
+    ---------
+    num_groups : int
+
+    Returns
+    -------
+    np.ndarray
+        Matrix P* - size (g-by-g)
+    """
+    p_star = np.eye(num_groups, num_groups)
+    np.random.shuffle(p_star)
+    return p_star
+
+
+def generate_x_star(num_params, num_levels, grid_step):
+    """Generate an 1-by-num_params array to represent initial position for EE
+
+    This should be a randomly generated array in the p level grid
+    :math:`\omega`
+
+    Arguments
+    ---------
+    num_params : int
+        The number of parameters (factors)
+    num_levels : int
+        The number of levels
+    grid_step : int
+        The grid step used
+
+    """
+    x_star = np.zeros(num_params)
+
+    delta = compute_delta(num_levels)
+    bound = 1 - delta
+    grid = np.linspace(0, bound, grid_step)
+
+    for i in range(num_params):
+        x_star[i] = rd.choice(grid)
+    return x_star
+
+
+def compute_delta(num_levels):
+    """Computes the delta value from number of levels
+
+    Arguments
+    ---------
+    num_levels : int
+        The number of levels
+
+    Returns
+    -------
+    float
+    """
+    return float(num_levels) / (2 * (num_levels - 1))
 
 
 def _compute_optimised_trajectories(problem, input_sample, N, k_choices,

@@ -5,8 +5,8 @@ from numpy.testing import assert_equal, assert_array_equal, \
 
 import numpy as np
 
-from SALib.sample.morris_util import generate_P_star, \
-    compute_B_star, \
+from SALib.sample.morris import generate_p_star, \
+    compute_b_star, \
     compute_delta, \
     generate_trajectory
 
@@ -22,14 +22,14 @@ def setup():
                            input_6])
 
 
-def test_generate_P_star():
+def test_generate_p_star():
     '''
     Matrix P* - size (g * g) - describes order in which groups move
     each row contains one element equal to 1, all others are 0
     no two columns have 1s in the same position
     '''
     for i in range(1, 100):
-        output = generate_P_star(i)
+        output = generate_p_star(i)
         if np.any(np.sum(output, 0) != np.ones(i)):
             raise AssertionError("Not legal P along axis 0")
         elif np.any(np.sum(output, 1) != np.ones(i)):
@@ -76,5 +76,5 @@ def test_compute_B_star():
 
     desired = np.array([[1. / 3, 1, 0], [1, 1, 0], [1, 1. / 3, 2. / 3]])
 
-    output = compute_B_star(J, x_star, delta, B, G, P_star, D_star)
+    output = compute_b_star(J, x_star, delta, B, G, P_star, D_star)
     assert_array_equal(output, desired)
