@@ -29,7 +29,7 @@ from __future__ import division
 
 import numpy as np
 
-import random as rd
+import numpy.random as rd
 
 from . gurobi import GlobalOptimisation
 from . local import LocalOptimisation
@@ -135,7 +135,7 @@ def _sample_oat(problem, N, num_levels, grid_jump):
         DM = np.diag([rd.choice([-1, 1]) for _ in range(D)])
 
         # permutation matrix P
-        perm = np.random.permutation(D)
+        perm = rd.permutation(D)
         P = np.zeros([D, D])
         for i in range(D):
             P[i, perm[i]] = 1
@@ -272,7 +272,7 @@ def generate_p_star(num_groups):
         Matrix P* - size (g-by-g)
     """
     p_star = np.eye(num_groups, num_groups)
-    np.random.shuffle(p_star)
+    rd.shuffle(p_star)
     return p_star
 
 
@@ -387,7 +387,6 @@ if __name__ == "__main__":
                               (Morris with optimization only)')
     args = parser.parse_args()
 
-    np.random.seed(args.seed)
     rd.seed(args.seed)
 
     problem = read_param_file(args.paramfile)

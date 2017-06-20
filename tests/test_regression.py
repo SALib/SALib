@@ -11,7 +11,6 @@ from SALib.sample import finite_diff
 from SALib.sample import latin
 from SALib.sample import saltelli
 import numpy as np
-import random as rd
 
 from SALib.analyze import morris
 from SALib.sample.morris import sample
@@ -30,7 +29,6 @@ def set_seed():
     """
     seed = 123456
     np.random.seed(seed)
-    rd.seed(seed)
 
 
 class TestMorris:
@@ -49,7 +47,7 @@ class TestMorris:
                             conf_level=0.95, print_to_console=False,
                             num_levels=4, grid_jump=2)
 
-        assert_allclose(Si['mu_star'], [7.767792, 7.875, 6.308785],
+        assert_allclose(Si['mu_star'], [7.701555, 7.875, 6.288788],
                         atol=0, rtol=1e-5)
 
     def test_regression_morris_groups(self, set_seed):
@@ -67,7 +65,7 @@ class TestMorris:
                             conf_level=0.95, print_to_console=False,
                             num_levels=4, grid_jump=2)
 
-        assert_allclose(Si['mu_star'], [7.716552, 10.147653],
+        assert_allclose(Si['mu_star'], [7.610322, 10.197014],
                         atol=0, rtol=1e-5)
 
     def test_regression_morris_groups_brute_optim(self, set_seed):
@@ -87,13 +85,13 @@ class TestMorris:
                             conf_level=0.95, print_to_console=False,
                             num_levels=4, grid_jump=2)
 
-        assert_allclose(Si['mu'], [7.704054, np.NaN],
+        assert_allclose(Si['mu'], [9.786986, np.NaN],
                         atol=0, rtol=1e-5)
 
-        assert_allclose(Si['sigma'], [6.845213, np.NaN],
+        assert_allclose(Si['sigma'], [6.453729, np.NaN],
                         atol=0, rtol=1e-5)
 
-        assert_allclose(Si['mu_star'], [7.704054, 7.875],
+        assert_allclose(Si['mu_star'], [9.786986, 7.875],
                         atol=0, rtol=1e-5)
 
     def test_regression_morris_groups_local_optim(self, set_seed):
@@ -141,7 +139,7 @@ class TestMorris:
                             num_levels=4, grid_jump=2)
 
         assert_allclose(Si['mu_star'],
-                        [9.786986, 7.875000, 2.984448e-12],
+                        [9.786986e+00, 7.875000e+00, 2.984617e-12],
                         atol=0,
                         rtol=1e-5)
 

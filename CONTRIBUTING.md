@@ -68,11 +68,11 @@ Contributions not related to new methods are also welcome. These might include n
 
 Most of the sampling techniques make heavy use of pseudo-random number
 generators.
-Two are used primarily, `numpy.random` and the python standard library
-`random`.
-When writing tests for methods which use these random number generators, set
-the seeds using `random.seed(SEED)` and `numpy.random.seed(SEED)` where `SEED`
-is a fixed integer. This will ensure that your tests are repeatable.
+We use primarily `numpy.random` as the python standard library
+`random` library is inconsistent across Python 2 and 3.
+When writing tests for methods which use these random number generators, set the seeds using `numpy.random.seed(SEED)`
+where `SEED` is a fixed integer.
+This will ensure that your tests are repeatable.
 
 ### Notes about scope
 
