@@ -11,23 +11,35 @@ from SALib.sample import finite_diff
 from SALib.sample import latin
 from SALib.sample import saltelli
 import numpy as np
+import random as rd
 
 from SALib.analyze import morris
 from SALib.sample.morris import sample
 from SALib.test_functions import Ishigami
 from SALib.util import read_param_file
 
-import pytest
+from pytest import fixture
+
+
+@fixture(scope='function')
+def set_seed():
+    """Sets seeds for random generators so that tests can be repeated
+
+    It is necessary to set seeds for both the numpy.random, and
+    the stdlib.random libraries.
+    """
+    seed = 123456
+    np.random.seed(seed)
+    rd.seed(seed)
 
 
 class TestMorris:
 
-    @pytest.mark.xfail
-    def test_regression_morris_vanilla(self):
-
+    def test_regression_morris_vanilla(self, set_seed):
+        set_seed
         param_file = 'SALib/test_functions/params/Ishigami.txt'
         problem = read_param_file(param_file)
-        param_values = sample(problem=problem, N=5000,
+        param_values = sample(problem=problem, N=10000,
                               num_levels=4, grid_jump=2,
                               optimal_trajectories=None)
 
@@ -37,15 +49,15 @@ class TestMorris:
                             conf_level=0.95, print_to_console=False,
                             num_levels=4, grid_jump=2)
 
-        assert_allclose(Si['mu_star'], [8.1, 2.2, 5.4], atol=0, rtol=5e-1)
+        assert_allclose(Si['mu_star'], [7.767792, 7.875, 6.308785],
+                        atol=0, rtol=1e-5)
 
-    @pytest.mark.xfail
-    def test_regression_morris_groups(self):
-
+    def test_regression_morris_groups(self, set_seed):
+        set_seed
         param_file = 'SALib/test_functions/params/Ishigami_groups.txt'
         problem = read_param_file(param_file)
 
-        param_values = sample(problem=problem, N=5000,
+        param_values = sample(problem=problem, N=10000,
                               num_levels=4, grid_jump=2,
                               optimal_trajectories=None)
 
@@ -55,11 +67,12 @@ class TestMorris:
                             conf_level=0.95, print_to_console=False,
                             num_levels=4, grid_jump=2)
 
-        assert_allclose(Si['mu_star'], [7.87, 6.26], rtol=5e-1)
+        assert_allclose(Si['mu_star'], [7.716552, 10.147653],
+                        atol=0, rtol=1e-5)
 
-    @pytest.mark.xfail
-    def test_regression_morris_groups_brute_optim(self):
+    def test_regression_morris_groups_brute_optim(self, set_seed):
 
+        set_seed
         param_file = 'SALib/test_functions/params/Ishigami_groups.txt'
         problem = read_param_file(param_file)
 
@@ -74,11 +87,17 @@ class TestMorris:
                             conf_level=0.95, print_to_console=False,
                             num_levels=4, grid_jump=2)
 
-        assert_allclose(Si['mu_star'], [7.87, 6.26], rtol=5e-1)
+        assert_allclose(Si['mu'], [7.704054, np.NaN],
+                        atol=0, rtol=1e-5)
 
-    @pytest.mark.xfail
-    def test_regression_morris_groups_local_optim(self):
+        assert_allclose(Si['sigma'], [6.845213, np.NaN],
+                        atol=0, rtol=1e-5)
 
+        assert_allclose(Si['mu_star'], [7.704054, 7.875],
+                        atol=0, rtol=1e-5)
+
+    def test_regression_morris_groups_local_optim(self, set_seed):
+        set_seed
         param_file = 'SALib/test_functions/params/Ishigami_groups.txt'
         problem = read_param_file(param_file)
 
@@ -93,10 +112,11 @@ class TestMorris:
                             conf_level=0.95, print_to_console=False,
                             num_levels=4, grid_jump=2)
 
-        assert_allclose(Si['mu_star'], [7.87, 6.26], rtol=5e-1)
+        assert_allclose(Si['mu_star'],
+                        [13.95285, 7.875],
+                        rtol=1e-5)
 
-    @pytest.mark.xfail
-    def test_regression_morris_optimal(self):
+    def test_regression_morris_optimal(self, set_seed):
         '''
         Tests the use of optimal trajectories with Morris.
 
@@ -106,6 +126,7 @@ class TestMorris:
         (default is 1e-05) due to the coarse nature of the num_levels
         and grid_jump.
         '''
+        set_seed
         param_file = 'SALib/test_functions/params/Ishigami.txt'
         problem = read_param_file(param_file)
         param_values = sample(problem=problem, N=20,
@@ -119,7 +140,10 @@ class TestMorris:
                             conf_level=0.95, print_to_console=False,
                             num_levels=4, grid_jump=2)
 
-        assert_allclose(Si['mu_star'], [8.1, 2.2, 5.4], rtol=5e-1)
+        assert_allclose(Si['mu_star'],
+                        [9.786986, 7.875000, 2.984448e-12],
+                        atol=0,
+                        rtol=1e-5)
 
 
 def test_regression_sobol():
