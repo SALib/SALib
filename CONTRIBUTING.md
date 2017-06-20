@@ -63,6 +63,17 @@ Finally, submit a pull request. Either @willu47 or @jdherman will review the pul
 
 Contributions not related to new methods are also welcome. These might include new test functions (see [SALib.test_functions](https://github.com/SALib/SALib/tree/master/SALib/test_functions) for how these are set up), or other code that is general across some or all of the methods. This general code is currently included in [SALib.util.\_\_init\_\_.py](https://github.com/SALib/SALib/blob/master/SALib/util/__init__.py).
 
+
+### Other Development Comments
+
+Most of the sampling techniques make heavy use of pseudo-random number
+generators.
+We use primarily `numpy.random` as the python standard library
+`random` library is inconsistent across Python 2 and 3.
+When writing tests for methods which use these random number generators, set the seeds using `numpy.random.seed(SEED)`
+where `SEED` is a fixed integer.
+This will ensure that your tests are repeatable.
+
 ### Notes about scope
 
 * We've had some discussions about moving to an OOP setup. At this point, it would require a pretty big refactor for all of the methods. It's tough to group the methods into classes when they're decoupled, and preserving state would force people to learn a whole API. The current functional(ish) approach is easier to test, and users can do whatever they want with the numpy matrices. That's our preference for now, unless someone sees a clear way to restructure everything into classes.

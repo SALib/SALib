@@ -155,7 +155,6 @@ class TestSharedMethods:
 
 class TestLocallyOptimalStrategy:
 
-    # @pytest.mark.xfail
     def test_local(self, setup_problem):
         (input_sample, num_samples, _,
          k_choices, groups, num_params, expected) = setup_problem

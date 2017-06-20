@@ -17,8 +17,8 @@ def analyze(problem, X, Y,
             num_levels=4):
     """Perform Morris Analysis on model outputs.
 
-    Returns a dictionary with keys 'mu', 'mu_star', 'sigma', and 'mu_star_conf',
-    where each entry is a list of size D (the number of parameters) containing
+    Returns a dictionary with keys 'mu', 'mu_star', 'sigma', and
+    'mu_star_conf', where each entry is a list of parameters containing
     the indices in the same order as the parameter file.
 
     Arguments
@@ -42,6 +42,17 @@ def analyze(problem, X, Y,
     num_levels : int
         The number of grid levels, must be identical to the value
         passed to SALib.sample.morris (default 4)
+
+    Returns
+    -------
+    Si : dict
+        A dictionary of sensitivity indices containing the following entries.
+
+        - `mu` - the mean elementary effect
+        - `mu_star` - the absolute of the mean elementary effect
+        - `sigma` - the standard deviation of the elementary effect
+        - `mu_star_conf` - the bootstrapped confidence interval
+        - `names` - the names of the parameters
 
     References
     ----------
@@ -72,15 +83,17 @@ def analyze(problem, X, Y,
     if (problem.get('groups') is None) & (Y.size % (num_vars + 1) == 0):
         num_trajectories = int(Y.size / (num_vars + 1))
     elif problem.get('groups') is not None:
-        groups, unique_group_names = compute_groups_matrix(problem['groups'], num_vars)
+        groups, unique_group_names = compute_groups_matrix(
+            problem['groups'], num_vars)
         number_of_groups = len(unique_group_names)
         num_trajectories = int(Y.size / (number_of_groups + 1))
     else:
-        raise ValueError("""Number of samples in model output file must be a multiple of (D+1), \
-                            where D is the number of parameters (or groups) in your parameter file. \
-                         """)
+        raise ValueError("Number of samples in model output file must be"
+                         "a multiple of (D+1), where D is the number of"
+                         "parameters (or groups) in your parameter file.")
     ee = np.zeros((num_vars, num_trajectories))
-    ee = compute_elementary_effects(X, Y, int(Y.size / num_trajectories), delta)
+    ee = compute_elementary_effects(
+        X, Y, int(Y.size / num_trajectories), delta)
 
     # Output the Mu, Mu*, and Sigma Values. Also return them in case this is
     # being called from Python
@@ -98,53 +111,55 @@ def analyze(problem, X, Y,
     if groups is None:
         if print_to_console:
             print("{0:<30} {1:>10} {2:>10} {3:>15} {4:>10}".format(
-                                "Parameter",
-                                "Mu_Star",
-                                "Mu",
-                                "Mu_Star_Conf",
-                                "Sigma")
-                  )
+                "Parameter",
+                "Mu_Star",
+                "Mu",
+                "Mu_Star_Conf",
+                "Sigma")
+            )
             for j in list(range(num_vars)):
                 print("{0:30} {1:10.3f} {2:10.3f} {3:15.3f} {4:10.3f}".format(
-                                    Si['names'][j],
-                                    Si['mu_star'][j],
-                                    Si['mu'][j],
-                                    Si['mu_star_conf'][j],
-                                    Si['sigma'][j])
-                      )
+                    Si['names'][j],
+                    Si['mu_star'][j],
+                    Si['mu'][j],
+                    Si['mu_star_conf'][j],
+                    Si['sigma'][j])
+                )
         return Si
     elif groups is not None:
         # if there are groups, then the elementary effects returned need to be
-        # computed over the groups of variables, rather than the individual variables
+        # computed over the groups of variables,
+        # rather than the individual variables
         Si_grouped = dict((k, [None] * num_vars)
-                for k in ['mu_star', 'mu_star_conf'])
+                          for k in ['mu_star', 'mu_star_conf'])
         Si_grouped['mu_star'] = compute_grouped_metric(Si['mu_star'], groups)
         Si_grouped['mu_star_conf'] = compute_grouped_metric(Si['mu_star_conf'],
-                                                             groups)
+                                                            groups)
         Si_grouped['names'] = unique_group_names
         Si_grouped['sigma'] = compute_grouped_sigma(Si['sigma'], groups)
         Si_grouped['mu'] = compute_grouped_sigma(Si['mu'], groups)
 
         if print_to_console:
             print("{0:<30} {1:>10} {2:>10} {3:>15} {4:>10}".format(
-                                "Parameter",
-                                "Mu_Star",
-                                "Mu",
-                                "Mu_Star_Conf",
-                                "Sigma")
-                  )
+                "Parameter",
+                "Mu_Star",
+                "Mu",
+                "Mu_Star_Conf",
+                "Sigma")
+            )
             for j in list(range(number_of_groups)):
                 print("{0:30} {1:10.3f} {2:10.3f} {3:15.3f} {4:10.3f}".format(
-                                    Si_grouped['names'][j],
-                                    Si_grouped['mu_star'][j],
-                                    Si_grouped['mu'][j],
-                                    Si_grouped['mu_star_conf'][j],
-                                    Si_grouped['sigma'][j])
-                      )
+                    Si_grouped['names'][j],
+                    Si_grouped['mu_star'][j],
+                    Si_grouped['mu'][j],
+                    Si_grouped['mu_star_conf'][j],
+                    Si_grouped['sigma'][j])
+                )
 
         return Si_grouped
     else:
-        raise RuntimeError("Could not determine which parameters should be returned")
+        raise RuntimeError(
+            "Could not determine which parameters should be returned")
 
 
 def compute_grouped_sigma(ungrouped_sigma, group_matrix):
@@ -157,11 +172,11 @@ def compute_grouped_sigma(ungrouped_sigma, group_matrix):
     group_matrix = np.array(group_matrix, dtype=np.bool)
 
     sigma_masked = np.ma.masked_array(ungrouped_sigma * group_matrix.T,
-                                        mask=(group_matrix^1).T)
+                                      mask=(group_matrix ^ 1).T)
     sigma_agg = np.ma.mean(sigma_masked, axis=1)
     sigma = np.zeros(group_matrix.shape[1], dtype=np.float)
-    np.copyto(sigma, sigma_agg, where=group_matrix.sum(axis=0)==1 )
-    np.copyto(sigma, np.NAN, where=group_matrix.sum(axis=0)!=1 )
+    np.copyto(sigma, sigma_agg, where=group_matrix.sum(axis=0) == 1)
+    np.copyto(sigma, np.NAN, where=group_matrix.sum(axis=0) != 1)
 
     return sigma
 
@@ -175,7 +190,7 @@ def compute_grouped_metric(ungrouped_metric, group_matrix):
     group_matrix = np.array(group_matrix, dtype=np.bool)
 
     mu_star_masked = np.ma.masked_array(ungrouped_metric * group_matrix.T,
-                                        mask=(group_matrix^1).T)
+                                        mask=(group_matrix ^ 1).T)
     mean_of_mu_star = np.ma.mean(mu_star_masked, axis=1)
 
     return mean_of_mu_star
@@ -201,7 +216,8 @@ def get_decreased_values(op_vec, up, lo):
     return res.T
 
 
-def compute_elementary_effects(model_inputs, model_outputs, trajectory_size, delta):
+def compute_elementary_effects(model_inputs, model_outputs, trajectory_size,
+                               delta):
     '''
     Arguments:
     ----------
@@ -212,6 +228,8 @@ def compute_elementary_effects(model_inputs, model_outputs, trajectory_size, del
         an r-length vector of model outputs
     trajectory_size
         a scalar indicating the number of rows in a trajectory
+    delta : float
+        scaling factor computed from `grid_jump` and `num_levels`
     '''
     num_vars = model_inputs.shape[1]
     num_rows = model_inputs.shape[0]
@@ -235,10 +253,11 @@ def compute_elementary_effects(model_inputs, model_outputs, trajectory_size, del
     return ee
 
 
-def compute_mu_star_confidence(ee, num_trajectories, num_resamples, conf_level):
+def compute_mu_star_confidence(ee, num_trajectories, num_resamples,
+                               conf_level):
     '''
-    Uses bootstrapping where the elementary effects are resampled with replacement
-    to produce a histogram of resampled mu_star metrics.
+    Uses bootstrapping where the elementary effects are resampled with
+    replacement to produce a histogram of resampled mu_star metrics.
     This resample is used to produce a confidence interval.
     '''
     ee_resampled = np.zeros([num_trajectories])
@@ -247,7 +266,8 @@ def compute_mu_star_confidence(ee, num_trajectories, num_resamples, conf_level):
     if not 0 < conf_level < 1:
         raise ValueError("Confidence level must be between 0-1.")
 
-    resample_index = np.random.randint(len(ee), size=(num_resamples, num_trajectories))
+    resample_index = np.random.randint(
+        len(ee), size=(num_resamples, num_trajectories))
     ee_resampled = ee[resample_index]
     # Compute average of the absolute values over each of the resamples
     mu_star_resampled = np.average(np.abs(ee_resampled), axis=1)
@@ -260,8 +280,10 @@ if __name__ == "__main__":
     parser = common_args.create()
     parser.add_argument('-X', '--model-input-file', type=str,
                         required=True, default=None, help='Model input file')
-    parser.add_argument('-r', '--resamples', type=int, required=False, default=1000,
-                        help='Number of bootstrap resamples for Sobol confidence intervals')
+    parser.add_argument('-r', '--resamples', type=int, required=False,
+                        default=1000,
+                        help='Number of bootstrap resamples for Sobol \
+                              confidence intervals')
     parser.add_argument('-l', '--levels', type=int, required=False,
                         default=4, help='Number of grid levels (Morris only)')
     parser.add_argument('--grid-jump', type=int, required=False,
@@ -270,7 +292,8 @@ if __name__ == "__main__":
 
     problem = read_param_file(args.paramfile)
 
-    Y = np.loadtxt(args.model_output_file, delimiter=args.delimiter, usecols=(args.column,))
+    Y = np.loadtxt(args.model_output_file,
+                   delimiter=args.delimiter, usecols=(args.column,))
     X = np.loadtxt(args.model_input_file, delimiter=args.delimiter, ndmin=2)
     if len(X.shape) == 1:
         X = X.reshape((len(X), 1))
