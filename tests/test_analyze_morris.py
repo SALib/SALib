@@ -19,13 +19,14 @@ def test_compute_mu_star_confidence():
     '''
     Tests that compute mu_star_confidence is computed correctly
     '''
-    
+
     ee = np.array([2.52, 2.01, 2.30, 0.66, 0.93, 1.3], dtype=np.float)
     num_trajectories = 6
     num_resamples = 1000
     conf_level = 0.95
-    
-    actual = compute_mu_star_confidence(ee, num_trajectories, num_resamples, conf_level)
+
+    actual = compute_mu_star_confidence(
+        ee, num_trajectories, num_resamples, conf_level)
     expected = 0.5
     assert_allclose(actual, expected, atol=1e-01)
 
@@ -33,27 +34,27 @@ def test_compute_mu_star_confidence():
 def test_analysis_of_morris_results():
     '''
     Tests a one-dimensional vector of results
-    
+
     Taken from the solution to Exercise 4 (p.138) in Saltelli (2008).
     '''
     model_input = np.array([[0, 1. / 3], [0, 1], [2. / 3, 1],
-                             [0, 1. / 3], [2. / 3, 1. / 3], [2. / 3, 1],
-                             [2. / 3, 0], [2. / 3, 2. / 3], [0, 2. / 3],
-                             [1. / 3, 1], [1, 1], [1, 1. / 3],
-                             [1. / 3, 1], [1. / 3, 1. / 3], [1, 1. / 3],
-                             [1. / 3, 2. / 3], [1. / 3, 0], [1, 0]],
+                            [0, 1. / 3], [2. / 3, 1. / 3], [2. / 3, 1],
+                            [2. / 3, 0], [2. / 3, 2. / 3], [0, 2. / 3],
+                            [1. / 3, 1], [1, 1], [1, 1. / 3],
+                            [1. / 3, 1], [1. / 3, 1. / 3], [1, 1. / 3],
+                            [1. / 3, 2. / 3], [1. / 3, 0], [1, 0]],
+                           dtype=np.float)
+
+    model_output = np.array([0.97, 0.71, 2.39, 0.97, 2.30, 2.39,
+                             1.87, 2.40, 0.87, 2.15, 1.71, 1.54,
+                             2.15, 2.17, 1.54, 2.20, 1.87, 1.0],
                             dtype=np.float)
 
-    model_output = np.array([0.97, 0.71, 2.39, 0.97, 2.30, 2.39, 
-                             1.87, 2.40, 0.87, 2.15, 1.71, 1.54, 
-                             2.15, 2.17, 1.54, 2.20, 1.87, 1.0],
-                       dtype=np.float)
-
     problem = {
-     'num_vars': 2,
-     'names': ['Test 1', 'Test 2'],
-     'groups': None,
-     'bounds': [[0.0, 1.0], [0.0, 1.0]]
+        'num_vars': 2,
+        'names': ['Test 1', 'Test 2'],
+        'groups': None,
+        'bounds': [[0.0, 1.0], [0.0, 1.0]]
     }
 
     Si = analyze(problem, model_input, model_output,
@@ -62,16 +63,16 @@ def test_analysis_of_morris_results():
                  print_to_console=False)
 
     desired_mu = np.array([0.66, 0.21])
-    assert_allclose(Si['mu'], desired_mu, rtol=1e-1, 
+    assert_allclose(Si['mu'], desired_mu, rtol=1e-1,
                     err_msg="The values for mu are incorrect")
     desired_mu_star = np.array([1.62, 0.35])
-    assert_allclose(Si['mu_star'], desired_mu_star, rtol=1e-2, 
+    assert_allclose(Si['mu_star'], desired_mu_star, rtol=1e-2,
                     err_msg="The values for mu star are incorrect")
     desired_sigma = np.array([1.79, 0.41])
-    assert_allclose(Si['sigma'], desired_sigma, rtol=1e-2, 
+    assert_allclose(Si['sigma'], desired_sigma, rtol=1e-2,
                     err_msg="The values for sigma are incorrect")
     desired_names = ['Test 1', 'Test 2']
-    assert_equal(Si['names'], desired_names, 
+    assert_equal(Si['names'], desired_names,
                  err_msg="The values for names are incorrect")
 
 
@@ -94,29 +95,39 @@ def test_compute_elementary_effects():
     `desired` is equivalent to column t_1 in table 3.12 on page 145.
     '''
     model_inputs = np.array([
-                            [1.64, -1.64, -1.64, 0.39, -0.39, 0.39, -1.64, -
-                                1.64, -0.39, -0.39, 1.64, 1.64, -0.39, 0.39, 1.64],
-                            [1.64, -1.64, -1.64, 0.39, -0.39, -1.64, -1.64, -
-                                1.64, -0.39, -0.39, 1.64, 1.64, -0.39, 0.39, 1.64],
-                            [1.64, -1.64, -1.64, 0.39, -0.39, -1.64, -1.64, -
-                                1.64, 1.64, -0.39, 1.64, 1.64, -0.39, 0.39, 1.64],
+                            [1.64, -1.64, -1.64, 0.39, -0.39, 0.39, -1.64,
+                             -1.64, -0.39, -0.39, 1.64, 1.64, -0.39, 0.39,
+                             1.64],
                             [1.64, -1.64, -1.64, 0.39, -0.39, -1.64, -1.64,
-                                0.39, 1.64, -0.39, 1.64, 1.64, -0.39, 0.39, 1.64],
+                             -1.64, -0.39, -0.39, 1.64, 1.64, -0.39, 0.39,
+                             1.64],
+                            [1.64, -1.64, -1.64, 0.39, -0.39, -1.64, -1.64,
+                             -1.64, 1.64, -0.39, 1.64, 1.64, -0.39, 0.39,
+                             1.64],
+                            [1.64, -1.64, -1.64, 0.39, -0.39, -1.64, -1.64,
+                             0.39, 1.64, -0.39, 1.64, 1.64, -0.39, 0.39, 1.64],
                             [1.64, -1.64, -1.64, -1.64, -0.39, -1.64, -1.64,
-                                0.39, 1.64, -0.39, 1.64, 1.64, -0.39, 0.39, 1.64],
+                             0.39, 1.64, -0.39, 1.64, 1.64, -0.39, 0.39, 1.64],
                             [1.64, -1.64, -1.64, -1.64, -0.39, -1.64, -1.64,
-                                0.39, 1.64, -0.39, 1.64, -0.39, -0.39, 0.39, 1.64],
+                             0.39, 1.64, -0.39, 1.64, -0.39, -0.39, 0.39,
+                             1.64],
                             [1.64, -1.64, -1.64, -1.64, -0.39, -1.64, -1.64,
-                                0.39, 1.64, -0.39, 1.64, -0.39, -0.39, -1.64, 1.64],
+                             0.39, 1.64, -0.39, 1.64, -0.39, -0.39, -1.64,
+                             1.64],
                             [1.64, 0.39, -1.64, -1.64, -0.39, -1.64, -1.64,
-                                0.39, 1.64, -0.39, 1.64, -0.39, -0.39, -1.64, 1.64],
-                            [1.64, 0.39, -1.64, -1.64, -0.39, -1.64, -1.64, 0.39,
-                                1.64, -0.39, 1.64, -0.39, -0.39, -1.64, -0.39],
+                             0.39, 1.64, -0.39, 1.64, -0.39, -0.39, -1.64,
+                             1.64],
                             [1.64, 0.39, -1.64, -1.64, -0.39, -1.64, -1.64,
-                                0.39, 1.64, 1.64, 1.64, -0.39, -0.39, -1.64, -0.39],
-                            [1.64, 0.39, -1.64, -1.64, 1.64, -1.64, -1.64, 0.39,
+                             0.39, 1.64, -0.39, 1.64, -0.39, -0.39, -1.64,
+                             -0.39],
+                            [1.64, 0.39, -1.64, -1.64, -0.39, -1.64, -1.64,
+                             0.39, 1.64, 1.64, 1.64, -0.39, -0.39, -1.64,
+                             -0.39],
+                            [1.64, 0.39, -1.64, -1.64, 1.64, -1.64, -1.64,
+                             0.39,
                                 1.64, 1.64, 1.64, -0.39, -0.39, -1.64, -0.39],
-                            [1.64, 0.39, -1.64, -1.64, 1.64, -1.64, -1.64, 0.39,
+                            [1.64, 0.39, -1.64, -1.64, 1.64, -1.64, -1.64,
+                             0.39,
                                 1.64, 1.64, -0.39, -0.39, -0.39, -1.64, -0.39],
                             [1.64, 0.39, -1.64, -1.64, 1.64, -1.64, 0.39, 0.39,
                                 1.64, 1.64, -0.39, -0.39, -0.39, -1.64, -0.39],
@@ -124,41 +135,50 @@ def test_compute_elementary_effects():
                                 1.64, 1.64, -0.39, -0.39, -0.39, -1.64, -0.39],
                             [-0.39, 0.39, 0.39, -1.64, 1.64, -1.64, 0.39, 0.39,
                                 1.64, 1.64, -0.39, -0.39, -0.39, -1.64, -0.39],
-                            [-0.39, 0.39, 0.39, -1.64, 1.64, -1.64, 0.39, 0.39, 1.64, 1.64, -0.39, -0.39, 1.64, -1.64, -0.39]],
+                            [-0.39, 0.39, 0.39, -1.64, 1.64, -1.64, 0.39, 0.39,
+                             1.64, 1.64, -0.39, -0.39, 1.64, -1.64, -0.39]],
                             dtype=np.float)
-    model_outputs = np.array([24.9, 22.72, 21.04, 16.01, 10.4, 10.04, 8.6, 13.39, 4.69, 8.02, 9.98, 3.75, 1.33, 2.59, 6.37, 9.99],
+    model_outputs = np.array([24.9, 22.72, 21.04, 16.01, 10.4, 10.04, 8.6,
+                              13.39, 4.69, 8.02, 9.98, 3.75, 1.33, 2.59,
+                              6.37, 9.99],
                              dtype=np.float)
     delta = 2. / 3
 
     actual = compute_elementary_effects(model_inputs, model_outputs, 16, delta)
-    desired = np.array([[-5.67], [7.18], [1.89], [8.42], [2.93], [3.28], [-3.62], [-7.55],
-                        [-2.51], [5.00], [9.34], [0.54], [5.43], [2.15], [13.05]],
+    desired = np.array([[-5.67], [7.18], [1.89], [8.42],
+                        [2.93], [3.28], [-3.62], [-7.55],
+                        [-2.51], [5.00], [9.34], [0.54],
+                        [5.43], [2.15], [13.05]],
                        dtype=np.float)
     assert_allclose(actual, desired, atol=1e-1)
 
 
-
 def test_compute_grouped_elementary_effects():
-    
-    model_inputs = np.array([[.39, -.39, -1.64, 0.39, -0.39, -0.39, 0.39, 0.39, -1.64, -0.39, 0.39, -1.64, 1.64, 1.64, 1.64],
-                             [-1.64, 1.64, 0.39, -1.64, 1.64, 1.64, -1.64, -1.64, -1.64, 1.64, 0.39, -1.64, 1.64, 1.64, 1.64],
-                             [-1.64, 1.64, 0.39, -1.64, 1.64, 1.64, -1.64, -1.64, 0.39, 1.64, -1.64, 0.39, -.39, -.39, -.39]
-                            ])
-    
+
+    model_inputs = np.array([[.39, -.39, -1.64, 0.39, -0.39, -0.39, 0.39, 0.39,
+                              -1.64, -0.39, 0.39, -1.64, 1.64, 1.64, 1.64],
+                             [-1.64, 1.64, 0.39, -1.64, 1.64, 1.64, -1.64,
+                              -1.64, -1.64, 1.64, 0.39, -1.64, 1.64, 1.64,
+                              1.64],
+                             [-1.64, 1.64, 0.39, -1.64, 1.64, 1.64, -1.64,
+                              -1.64, 0.39, 1.64, -1.64, 0.39, -.39, -.39, -.39]
+                             ])
+
     model_results = np.array([13.85, -10.11, 1.12])
-    
-    problem = {'names':['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15'],
-               'bounds':[[]],
-               'groups':(np.matrix('0,0,0,0,0,0,0,0,1,0,1,1,1,1,1;1,1,1,1,1,1,1,1,0,1,0,0,0,0,0'),
-                         ['gp1', 'gp2']),
+
+    problem = {'names': ['1', '2', '3', '4', '5', '6', '7', '8',
+                         '9', '10', '11', '12', '13', '14', '15'],
+               'bounds': [[]],
+               'groups': (np.matrix('0,0,0,0,0,0,0,0,1,0,1,1,1,1,1;1,1,1,\
+                                     1,1,1,1,1,0,1,0,0,0,0,0'),
+                          ['gp1', 'gp2']),
                'num_vars': 15
                }
-    ee = compute_elementary_effects(model_inputs, model_results, 3, 2./3)
+    ee = compute_elementary_effects(model_inputs, model_results, 3, 2. / 3)
     mu_star = np.average(np.abs(ee), axis=1)
     actual = compute_grouped_metric(mu_star, problem['groups'][0].T)
     desired = np.array([16.86, 35.95])
     assert_allclose(actual, desired, atol=1e-1)
-
 
 
 def test_compute_elementary_effects_small():
@@ -174,13 +194,16 @@ def test_compute_elementary_effects_small():
                              [1. / 3, 2. / 3], [1. / 3, 0], [1, 0]],
                             dtype=np.float)
 
-    model_outputs = np.array([0.97, 0.71, 2.39, 0.97, 2.3, 2.39, 1.87, 2.40, 0.87, 2.15, 1.71, 1.54, 2.15, 2.17, 1.54, 2.2, 1.87, 1.0],
+    model_outputs = np.array([0.97, 0.71, 2.39, 0.97, 2.3, 2.39, 1.87, 2.40,
+                              0.87, 2.15, 1.71, 1.54, 2.15, 2.17, 1.54, 2.2,
+                              1.87, 1.0],
                              dtype=np.float)
 
     delta = 2. / 3
     actual = compute_elementary_effects(model_inputs, model_outputs, 3, delta)
     desired = np.array(
-        [[2.52, 2.01, 2.30, -0.66, -0.93, -1.30], [-0.39, 0.13, 0.80, 0.25, -0.02, 0.51]])
+        [[2.52, 2.01, 2.30, -0.66, -0.93, -1.30],
+         [-0.39, 0.13, 0.80, 0.25, -0.02, 0.51]])
     assert_allclose(actual, desired, atol=1e-0)
 
 
@@ -201,7 +224,9 @@ def test_compute_increased_value_for_ee():
                    [[False, True], [False, False]]],
                   dtype=bool)
 
-    model_outputs = np.array([0.97, 0.71, 2.39, 0.97, 2.3, 2.39, 1.87, 2.40, 0.87, 2.15, 1.71, 1.54, 2.15, 2.17, 1.54, 2.2, 1.87, 1.0],
+    model_outputs = np.array([0.97, 0.71, 2.39, 0.97, 2.3, 2.39, 1.87, 2.40,
+                              0.87, 2.15, 1.71, 1.54, 2.15, 2.17, 1.54, 2.2,
+                              1.87, 1.0],
                              dtype=np.float)
     op_vec = model_outputs.reshape(6, 3)
     actual = get_increased_values(op_vec, up, lo)
@@ -228,7 +253,9 @@ def test_compute_decreased_value_for_ee():
                    [[False, True], [False, False]]],
                   dtype=bool)
 
-    model_outputs = np.array([0.97, 0.71, 2.39, 0.97, 2.3, 2.39, 1.87, 2.40, 0.87, 2.15, 1.71, 1.54, 2.15, 2.17, 1.54, 2.2, 1.87, 1.0],
+    model_outputs = np.array([0.97, 0.71, 2.39, 0.97, 2.3, 2.39, 1.87, 2.40,
+                              0.87, 2.15, 1.71, 1.54, 2.15, 2.17, 1.54, 2.2,
+                              1.87, 1.0],
                              dtype=np.float)
     op_vec = model_outputs.reshape(6, 3)
     actual = get_decreased_values(op_vec, up, lo)
@@ -251,19 +278,19 @@ def test_compute_grouped_mu_star():
     actual = compute_grouped_metric(mu_star, group_matrix)
     desired = np.array([1.62, 0.62], dtype=np.float)
     assert_allclose(actual, desired, rtol=1e-1)
-    
-    
+
+
 def test_sigma_returned_for_groups_with_only_one_param():
     '''
     Tests that a value for sigma is returned when the group contains 1 param
-    
+
     Morris groups do not allow a value for sigma to be computed because it
     requires the use of mu (as opposed to mu_star).
-    
-    However, if the group consists of just one parameter, then the sampling will
-    be identical to the situation in which no groups are used, but only for that
-    parameter.
-    
+
+    However, if the group consists of just one parameter, then the sampling
+    will be identical to the situation in which no groups are used,
+    but only for that parameter.
+
     An NA should be returned for all other groups (as opposed to 0, which could
     confuse plotting.morris)
     '''
@@ -275,4 +302,54 @@ def test_sigma_returned_for_groups_with_only_one_param():
     actual = compute_grouped_sigma(sigma, group_matrix)
     desired = np.array([1.79352911, np.NAN], dtype=np.float)
     assert_allclose(actual, desired, rtol=1e-1)
-    
+
+
+@raises(ValueError)
+def test_raise_error_if_not_floats():
+
+    inputs = np.array([[0, 1. / 3], [0, 1], [2. / 3, 1],
+                       [0, 1. / 3], [2. / 3, 1. / 3], [2. / 3, 1],
+                       [2. / 3, 0], [2. / 3, 2. / 3], [0, 2. / 3],
+                       [1. / 3, 1], [1, 1], [1, 1. / 3],
+                       [1. / 3, 1], [1. / 3, 1. / 3], [1, 1. / 3],
+                       [1. / 3, 2. / 3], [1. / 3, 0], [1, 0]],
+                      dtype=np.int)
+
+    outputs = np.array([0.97, 0.71, 2.39, 0.97, 2.30, 2.39,
+                        1.87, 2.40, 0.87, 2.15, 1.71, 1.54,
+                        2.15, 2.17, 1.54, 2.20, 1.87, 1.0],
+                       dtype=np.int)
+
+    problem = {
+        'num_vars': 2,
+        'names': ['Test 1', 'Test 2'],
+        'groups': None,
+        'bounds': [[0.0, 1.0], [0.0, 1.0]]
+    }
+
+    analyze(problem, inputs, outputs)
+
+
+def test_doesnot_raise_error_if_floats():
+
+    inputs = np.array([[0, 1. / 3], [0, 1], [2. / 3, 1],
+                       [0, 1. / 3], [2. / 3, 1. / 3], [2. / 3, 1],
+                       [2. / 3, 0], [2. / 3, 2. / 3], [0, 2. / 3],
+                       [1. / 3, 1], [1, 1], [1, 1. / 3],
+                       [1. / 3, 1], [1. / 3, 1. / 3], [1, 1. / 3],
+                       [1. / 3, 2. / 3], [1. / 3, 0], [1, 0]],
+                      dtype=np.float32)
+
+    outputs = np.array([0.97, 0.71, 2.39, 0.97, 2.30, 2.39,
+                        1.87, 2.40, 0.87, 2.15, 1.71, 1.54,
+                        2.15, 2.17, 1.54, 2.20, 1.87, 1.0],
+                       dtype=np.float32)
+
+    problem = {
+        'num_vars': 2,
+        'names': ['Test 1', 'Test 2'],
+        'groups': None,
+        'bounds': [[0.0, 1.0], [0.0, 1.0]]
+    }
+
+    analyze(problem, inputs, outputs)
