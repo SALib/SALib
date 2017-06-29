@@ -26,9 +26,9 @@ def analyze(problem, X, Y,
     problem : dict
         The problem definition
     X : numpy.matrix
-        The NumPy matrix containing the model inputs
+        The NumPy matrix containing the model inputs of dtype=float
     Y : numpy.array
-        The NumPy array containing the model outputs
+        The NumPy array containing the model outputs of dtype=float
     num_resamples : int
         The number of resamples used to compute the confidence
         intervals (default 1000)
@@ -72,6 +72,12 @@ def analyze(problem, X, Y,
     >>>                     print_to_console=True, num_levels=4, grid_jump=2)
 
     """
+
+    msg = ("dtype of {} array must be 'float', float32 or float64")
+    if X.dtype not in ['float', 'float32', 'float64']:
+        raise ValueError(msg.format('X'))
+    if Y.dtype not in ['float', 'float32', 'float64']:
+        raise ValueError(msg.format('Y'))
 
     # Assume that there are no groups
     groups = None
