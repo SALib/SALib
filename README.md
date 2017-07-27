@@ -42,13 +42,13 @@ problem = {
 }
 
 # Generate samples
-param_values = saltelli.sample(problem, 1000, calc_second_order=True)
+param_values = saltelli.sample(problem, 1000, calc_second_order=False)
 
 # Run model (example)
 Y = Ishigami.evaluate(param_values)
 
 # Perform analysis
-Si = sobol.analyze(problem, Y, print_to_console=False)
+Si = sobol.analyze(problem, Y, print_to_console=True)
 # Returns a dictionary with keys 'S1', 'S1_conf', 'ST', and 'ST_conf'
 # (first and total-order indices with bootstrap confidence intervals)
 ```
