@@ -73,13 +73,13 @@ and copy/paste the code below.
     }
 
     # Generate samples
-    param_values = saltelli.sample(problem, 1000, calc_second_order=True)
+    param_values = saltelli.sample(problem, 1000, calc_second_order=False)
 
     # Run model (example)
     Y = Ishigami.evaluate(param_values)
 
     # Perform analysis
-    Si = sobol.analyze(problem, Y, print_to_console=False)
+    Si = sobol.analyze(problem, Y, print_to_console=True)
 
     # Print the first-order sensitivity indices
     print Si['S1']

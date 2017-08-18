@@ -104,13 +104,13 @@ below.
 
 .. code:: python
 
-    param_values = saltelli.sample(problem, 1000, calc_second_order=True)
+    param_values = saltelli.sample(problem, 1000)
     
 Here, :code:`param_values` is a NumPy matrix.  If we run
 :code:`param_values.shape`, we see that the matrix is 8000 by 3.  The Saltelli
 sampler generated 8000 samples.  The Saltelli sampler generates
 :math:`N*(2D+2)` samples, where in this example N is 1000 (the argument we
-supplied) and D is 3 (the number of model inputs).
+supplied) and D is 3 (the number of model inputs). The keyword argument :code:`calc_second_order=False` will exclude second-order indices, resulting in a smaller sample matrix with :math:`N*(D+2)` rows instead.
 
 Run Model
 ~~~~~~~~~
@@ -157,13 +157,12 @@ first, second, and total-order indices.
 
 .. code:: python
 
-    Si = sobol.analyze(problem, Y, print_to_console=False)
+    Si = sobol.analyze(problem, Y)
     
 :code:`Si` is a Python :code:`dict` with the keys :code:`"S1"`,
 :code:`"S2"`, :code:`"ST"`, :code:`"S1_conf"`, :code:`"S2_conf"`, and
 :code:`"ST_conf"`.  The :code:`_conf` keys store the corresponding confidence
-intervals, typically with a confidence level of 95%.  We can print the
-values as shown below.
+intervals, typically with a confidence level of 95%. Use the keyword argument :code:`print_to_console=True` to print all indices. Or, we can print the individual values from :code:`Si` as shown below.
 
 .. code:: python
 
