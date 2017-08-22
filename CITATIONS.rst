@@ -38,7 +38,7 @@ Software
 * `pySur <https://github.com/MastenSpace/pysur>`_
 * `EMA workbench <https://github.com/quaquel/EMAworkbench>`_
 * `Brain/Circulation Model Developer <https://github.com/bcmd/BCMD>`_
-* `DAE Tools` <http://daetools.com/>`_
+* `DAE Tools <http://daetools.com/>`_
 
 Blogs
 -----
