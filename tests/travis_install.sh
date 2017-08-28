@@ -14,8 +14,8 @@ if [[ "$DISTRIB" == "conda" ]]; then
     # Use the miniconda installer for faster download / install of conda
     # itself
     wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh \
-        -O miniconda.sh
-    chmod +x miniconda.sh && ./miniconda.sh -b -p $HOME/miniconda
+        -O $HOME/miniconda.sh
+    chmod +x $HOME/miniconda.sh && .$HOME/miniconda.sh -b -p $HOME/miniconda
     export PATH=$HOME/miniconda/bin:$PATH
     conda update --yes conda
 
