@@ -19,7 +19,7 @@ if [[ "$DISTRIB" == "conda" ]]; then
         -O $DOWNLOAD_DIR/miniconda.sh
     chmod +x $DOWNLOAD_DIR/miniconda.sh && \
         bash $DOWNLOAD_DIR/miniconda.sh -b -p $HOME/miniconda && \
-        rm -r -d -f $DOWNLOAD_DIR
+        rm -r -f $DOWNLOAD_DIR
     export PATH=$HOME/miniconda/bin:$PATH
     conda update --yes conda
 
