@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env sh
 # This script is meant to be called by the "install" step defined in
 # .travis.yml. See http://docs.travis-ci.com/ for more details.
 # The behavior of the script is controlled by environment variabled defined
@@ -13,9 +13,12 @@ if [[ "$DISTRIB" == "conda" ]]; then
 
     # Use the miniconda installer for faster download / install of conda
     # itself
+    DOWNLOAD_DIR=$HOME/download
+    mkdir -p $DOWNLOAD_DIR
     wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh \
-        -O $HOME/miniconda.sh
-    chmod +x $HOME/miniconda.sh && .$HOME/miniconda.sh -b -p $HOME/miniconda
+        -O $DOWNLOAD_DIR/miniconda.sh
+    chmod +x $DOWNLOAD_DIR/miniconda.sh && \
+        bash $DOWNLOAD_DIR/miniconda.sh -b -p $HOME/miniconda
     export PATH=$HOME/miniconda/bin:$PATH
     conda update --yes conda
 
