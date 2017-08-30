@@ -2,6 +2,36 @@
 Changelog
 =========
 
+Version 1.1.0
+=============
+
+New Features:
+
+- Refactored Method of Morris so the Ruano et al. local approach is default
+
+Bug Fixes:
+
+- Inputs to morris.analyze are provided as floats
+- Removed calls to standard random library as inconsistent between Python 2 & 3
+- First row in Sobol sequences should be zero, not empty
+
+Documentation:
+
+- Added a Code of Conduct
+- Added DAETools, BCMD and others to citations - thanks for using SALib!
+- Removed misleading keyword arguments in docs and readme examples
+- Updated documentation for Method of Morris following refactor
+- Improved existing documentation where lacking e.g. for fractional factorial
+  method
+
+Development Features:
+
+- Implemented automatic deployment to PyPi
+- Fixed a bug preventing automatic deployment to PyPi upon tagging a branch
+- Removed postgres from travis config
+
+
+
 Version 1.0.0
 =============
 
