@@ -34,7 +34,7 @@ def sample(problem, N, calc_second_order=True):
         Dg = problem['num_vars']
     else:
         Dg = len(set(groups))
-        G, group_names = compute_groups_matrix(groups, D)
+        G, group_names = compute_groups_matrix(groups)
 
     # How many values of the Sobol sequence to skip
     skip_values = 1000

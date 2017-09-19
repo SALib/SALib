@@ -184,8 +184,7 @@ def _sample_groups(problem, N, num_levels, grid_jump):
     -------
     numpy.ndarray
     """
-    group_membership, _ = compute_groups_matrix(problem['groups'],
-                                                problem['num_vars'])
+    group_membership, _ = compute_groups_matrix(problem['groups'])
 
     if group_membership is None:
         raise ValueError("Please define the matrix group_membership.")
@@ -351,7 +350,7 @@ def _compute_optimised_trajectories(problem, input_sample, N, k_choices,
         raise ValueError(msg)
 
     num_params = problem['num_vars']
-    groups = compute_groups_matrix(problem['groups'], num_params)
+    groups = compute_groups_matrix(problem['groups'])
 
     if np.any((input_sample < 0) | (input_sample > 1)):
         raise ValueError("Input sample must be scaled between 0 and 1")
