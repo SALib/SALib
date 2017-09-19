@@ -172,7 +172,7 @@ def test_compute_groups_from_parameter_file():
     Tests that a group file is read correctly
     '''
     actual_matrix, actual_unique_names = \
-        compute_groups_matrix(['Group 1', 'Group 2', 'Group 2'], 3)
+        compute_groups_matrix(['Group 1', 'Group 2', 'Group 2'])
 
     assert_equal(actual_matrix, np.matrix('1,0;0,1;0,1', dtype=np.int))
     assert_equal(actual_unique_names, ['Group 1', 'Group 2'])
