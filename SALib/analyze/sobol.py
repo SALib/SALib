@@ -245,7 +245,7 @@ def print_indices(S, problem, calc_second_order):
         D = problem['num_vars']
     else:
         title = 'Group'
-        _,names = compute_groups_matrix(problem['groups'], problem['num_vars'])
+        _,names = compute_groups_matrix(problem['groups'])
         D = len(names)
 
     print('%s S1 S1_conf ST ST_conf' % title)
