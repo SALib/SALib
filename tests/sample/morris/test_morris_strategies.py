@@ -207,7 +207,7 @@ class TestLocallyOptimalStrategy:
 
         input_sample = _sample_groups(problem, N, num_levels, grid_jump)
 
-        groups = compute_groups_matrix(groups, num_params)
+        groups = compute_groups_matrix(groups)
 
         strategy = LocalOptimisation()
 
