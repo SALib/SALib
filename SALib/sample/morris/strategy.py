@@ -27,7 +27,8 @@ class SampleMorris(object):
     def __init__(self, strategy):
         self._strategy = strategy
 
-    def sample(self, input_sample, num_samples, num_params, k_choices, groups):
+    def sample(self, input_sample, num_samples, num_params, k_choices,
+               num_groups):
         """Computes the optimum k_choices of trajectories
         from the input_sample.
 
@@ -40,8 +41,8 @@ class SampleMorris(object):
             The number of parameters
         k_choices : int
             The number of optimal trajectories
-        groups : tuple
-            A tuple of (numpy.ndarray, list)
+        num_groups : int
+            The number of groups
 
         Returns
         -------
@@ -49,7 +50,7 @@ class SampleMorris(object):
             An array of optimal trajectories
         """
         return self._strategy.sample(input_sample, num_samples, num_params,
-                                     k_choices, groups)
+                                     k_choices, num_groups)
 
 
 class Strategy:
@@ -62,7 +63,7 @@ class Strategy:
 
     @abc.abstractmethod
     def _sample(self, input_sample, num_samples,
-                num_params, k_choices, groups):
+                num_params, k_choices, num_groups):
         """Implement this in your class
 
         Arguments
@@ -74,8 +75,8 @@ class Strategy:
             The number of parameters
         k_choices : int
             The number of optimal trajectories
-        groups : tuple
-            A tuple of (numpy.ndarray, list)
+        num_groups : int
+            The number of groups
 
         Returns
         -------
@@ -85,7 +86,7 @@ class Strategy:
         pass
 
     def sample(self, input_sample, num_samples, num_params,
-               k_choices, groups):
+               k_choices, num_groups=None):
         """Computes the optimum k_choices of trajectories
         from the input_sample.
 
@@ -98,8 +99,8 @@ class Strategy:
             The number of parameters
         k_choices : int
             The number of optimal trajectories
-        groups : tuple
-            A tuple of (numpy.ndarray, list)
+        num_groups : int, default=None
+            The number of groups
 
         Returns
         -------
@@ -107,13 +108,9 @@ class Strategy:
         """
         self.run_checks(num_samples, k_choices)
         maximum_combo = self._sample(input_sample, num_samples,
-                                     num_params, k_choices, groups)
+                                     num_params, k_choices, num_groups)
 
         assert isinstance(maximum_combo, list)
-
-        num_groups = None
-        if groups is not None:
-            num_groups = groups[0].shape[1]
 
         output = self.compile_output(input_sample,
                                      num_samples,
@@ -241,7 +238,7 @@ class Strategy:
         return distance
 
     def compute_distance_matrix(self, input_sample, num_samples, num_params,
-                                groups=None,
+                                num_groups=None,
                                 local_optimization=False):
         """Computes the distance between each and every trajectory
 
@@ -260,8 +257,8 @@ class Strategy:
             The number of trajectories
         num_params : int
             The number of factors
-        groups : tuple, default=None
-            the mapping between factors and groups
+        num_groups : int, default=None
+            The number of groups
         local_optimization : bool, default=False
             If True, fills the lower triangle of the distance matrix
 
@@ -270,9 +267,7 @@ class Strategy:
         distance_matrix : numpy.ndarray
 
         """
-        num_groups = None
-        if groups:
-            num_groups = groups[0].shape[1]
+        if num_groups:
             self.check_input_sample(input_sample, num_groups, num_samples)
         else:
             self.check_input_sample(input_sample, num_params, num_samples)

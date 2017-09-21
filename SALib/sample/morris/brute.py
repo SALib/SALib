@@ -12,13 +12,13 @@ class BruteForce(Strategy):
     """
 
     def _sample(self, input_sample, num_samples,
-                num_params, k_choices, groups):
+                num_params, k_choices, num_groups=None):
         return self.brute_force_most_distant(input_sample, num_samples,
-                                             num_params, k_choices, groups)
+                                             num_params, k_choices, num_groups)
 
     def brute_force_most_distant(self, input_sample, num_samples,
                                  num_params, k_choices,
-                                 groups=None):
+                                 num_groups=None):
         """Use brute force method to find most distant trajectories
 
         Arguments
@@ -30,8 +30,8 @@ class BruteForce(Strategy):
             The number of parameters
         k_choices : int
             The number of optimal trajectories
-        groups : tuple
-            A tuple of (numpy.ndarray, list)
+        num_groups : int, default=None
+            The number of groups
 
         Returns
         -------
@@ -41,14 +41,14 @@ class BruteForce(Strategy):
                                         num_samples,
                                         num_params,
                                         k_choices,
-                                        groups)
+                                        num_groups)
 
         maximum_combo = self.find_maximum(scores, num_samples, k_choices)
 
         return maximum_combo
 
     def find_most_distant(self, input_sample, num_samples,
-                          num_params, k_choices, groups=None):
+                          num_params, k_choices, num_groups=None):
         """
         Finds the 'k_choices' most distant choices from the
         'num_samples' trajectories contained in 'input_sample'
@@ -62,8 +62,8 @@ class BruteForce(Strategy):
             The number of parameters
         k_choices : int
             The number of optimal trajectories
-        groups : tuple
-            A tuple of (numpy.ndarray, list)
+        num_groups : int, default=None
+            The number of groups
 
         Returns
         -------
@@ -79,7 +79,7 @@ class BruteForce(Strategy):
         distance_matrix = self.compute_distance_matrix(input_sample,
                                                        num_samples,
                                                        num_params,
-                                                       groups)
+                                                       num_groups)
 
         # Initialise the output array
         chunk = int(1e6)

@@ -43,7 +43,7 @@ def test_group_in_param_file_read(setup_param_file_with_groups):
     parameter_file = setup_param_file_with_groups
     problem = read_param_file(parameter_file)
     groups, group_names = compute_groups_matrix(
-        problem['groups'], problem['num_vars'])
+        problem['groups'])
 
     assert_equal(problem['names'], ["Test 1", "Test 2", "Test 3"])
     assert_equal(groups, np.matrix('1,0;1,0;0,1', dtype=np.int))
