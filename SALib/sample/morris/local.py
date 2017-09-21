@@ -11,12 +11,12 @@ class LocalOptimisation(Strategy):
     """
 
     def _sample(self, input_sample, num_samples,
-                num_params, k_choices, groups):
+                num_params, k_choices, num_groups=None):
         return self.find_local_maximum(input_sample, num_samples, num_params,
-                                       k_choices, groups)
+                                       k_choices, num_groups)
 
     def find_local_maximum(self, input_sample, N, num_params,
-                           k_choices, groups=None):
+                           k_choices, num_groups=None):
         """Find the most different trajectories in the input sample using a
         local approach
 
@@ -34,14 +34,14 @@ class LocalOptimisation(Strategy):
             The number of factors
         k_choices : int
             The number of optimal trajectories to return
-        groups : tuple, default=None
-            A tuple containing (group matrix, name list)
+        num_groups : int, default=None
+            The number of groups
         Returns
         -------
         list
         """
         distance_matrix = self.compute_distance_matrix(input_sample, N,
-                                                       num_params, groups,
+                                                       num_params, num_groups,
                                                        local_optimization=True)
 
         tot_indices_list = []

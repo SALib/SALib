@@ -350,7 +350,6 @@ def _compute_optimised_trajectories(problem, input_sample, N, k_choices,
         raise ValueError(msg)
 
     num_params = problem['num_vars']
-    groups = compute_groups_matrix(problem['groups'])
 
     if np.any((input_sample < 0) | (input_sample > 1)):
         raise ValueError("Input sample must be scaled between 0 and 1")
@@ -365,9 +364,14 @@ def _compute_optimised_trajectories(problem, input_sample, N, k_choices,
         # Use brute force approach
         strategy = BruteForce()
 
+    if problem.get('groups'):
+        num_groups = len(set(problem['groups']))
+    else:
+        num_groups = None
+
     context = SampleMorris(strategy)
     output = context.sample(input_sample, N, num_params,
-                            k_choices, groups)
+                            k_choices, num_groups)
 
     return output
 

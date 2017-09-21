@@ -36,9 +36,9 @@ class GlobalOptimisation(Strategy):
     """
 
     def _sample(self, input_sample, num_samples,
-                num_params, k_choices, groups):
+                num_params, k_choices, num_groups=None):
         return self.return_max_combo(input_sample, num_samples,
-                                     num_params, k_choices, groups)
+                                     num_params, k_choices, num_groups)
 
     @staticmethod
     def global_model(N, k_choices, distance_matrix):
@@ -82,7 +82,7 @@ class GlobalOptimisation(Strategy):
         return model
 
     def return_max_combo(self, input_data, N, num_params,
-                         k_choices, groups=None):
+                         k_choices, num_groups=None):
         """Find the optimal combination of most different trajectories
 
         Arguments
@@ -94,7 +94,8 @@ class GlobalOptimisation(Strategy):
             The number of factors
         k_choices : int
             The number of optimal trajectories to select
-        groups: tuple, default=None
+        num_groups: int, default=None
+            The number of groups
 
         Returns
         -------
@@ -102,7 +103,7 @@ class GlobalOptimisation(Strategy):
         """
 
         distance_matrix = self.compute_distance_matrix(
-            input_data, N, num_params, groups)
+            input_data, N, num_params, num_groups)
 
         model = self.global_model(N, k_choices, distance_matrix)
         model.params.Threads = 0

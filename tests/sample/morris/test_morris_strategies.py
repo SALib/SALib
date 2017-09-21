@@ -4,7 +4,7 @@ from SALib.sample.morris import _sample_groups, SampleMorris
 from SALib.sample.morris.local import LocalOptimisation
 from SALib.sample.morris.brute import BruteForce
 
-from SALib.util import read_param_file, compute_groups_matrix
+from SALib.util import read_param_file
 
 import numpy as np
 from numpy.testing import assert_equal, assert_allclose
@@ -203,24 +203,23 @@ class TestLocallyOptimalStrategy:
         k_choices = 4
 
         num_params = problem['num_vars']
-        groups = problem['groups']
+
+        num_groups = len(set(problem['groups']))
 
         input_sample = _sample_groups(problem, N, num_levels, grid_jump)
-
-        groups = compute_groups_matrix(groups)
 
         strategy = LocalOptimisation()
 
         # From local optimal trajectories
         actual = strategy.find_local_maximum(input_sample, N, num_params,
-                                             k_choices, groups)
+                                             k_choices, num_groups)
 
         brute = BruteForce()
         desired = brute.brute_force_most_distant(input_sample,
                                                  N,
                                                  num_params,
                                                  k_choices,
-                                                 groups)
+                                                 num_groups)
         assert_equal(actual, desired)
 
 
@@ -233,7 +232,7 @@ class TestLocalMethods:
         strategy = LocalOptimisation()
 
         dist_matr = strategy.compute_distance_matrix(setup_input, 6, 2,
-                                                     groups=None,
+                                                     num_groups=None,
                                                      local_optimization=True)
         indices = (1, 3, 2)
         distance = strategy.sum_distances(indices, dist_matr)
