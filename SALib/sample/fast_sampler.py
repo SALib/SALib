@@ -27,7 +27,7 @@ def sample(problem, N, M=4):
         Fourier series decomposition (default 4)
     """
 
-    if N < 4*M**2:
+    if N <= 4*M**2:
         raise ValueError("""
         Sample size N > 4M^2 is required. M=4 by default.""")
 
