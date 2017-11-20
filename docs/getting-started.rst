@@ -73,7 +73,7 @@ and copy/paste the code below.
     }
 
     # Generate samples
-    param_values = saltelli.sample(problem, 1000, calc_second_order=False)
+    param_values = saltelli.sample(problem, 1000)
 
     # Run model (example)
     Y = Ishigami.evaluate(param_values)
