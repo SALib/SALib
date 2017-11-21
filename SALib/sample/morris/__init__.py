@@ -38,7 +38,7 @@ from . brute import BruteForce
 from . strategy import SampleMorris
 
 from SALib.sample import common_args
-from SALib.util import scale_samples,nonuniform_scale_samples, read_param_file, compute_groups_matrix
+from SALib.util import scale_samples,nonuniform_scale_samples, read_param_file, compute_groups_matrix, limit_samples, checkBounds
 
 try:
     import gurobipy
@@ -107,8 +107,18 @@ def sample(problem, N, num_levels, grid_jump, optimal_trajectories=None,
         scale_samples(sample, problem['bounds'])
         return sample
     else:
+        # parsing and validating upper and lower bound if specified in the problem
+        # else fall back on default which is defined as the six sigma range from mean
+        # value for a normal distribution
+        lower_bound,upper_bound = checkBounds(problem)
+
+        # restricting range of variation for sample only if the target distribution requires it
+        limited_sample = limit_samples(sample,upper_bound,lower_bound,problem['dists'])
+
         # scaling values to other distributions based on inverse CDFs
-        scaled_samples = nonuniform_scale_samples(sample, problem['bounds'], problem['dists'])
+        scaled_samples = nonuniform_scale_samples(limited_sample, problem['bounds'], problem['dists'])
+
+
         return scaled_samples
 
 def _sample_oat(problem, N, num_levels, grid_jump):
@@ -379,6 +389,8 @@ def _compute_optimised_trajectories(problem, input_sample, N, k_choices,
                             k_choices, num_groups)
 
     return output
+
+
 
 
 if __name__ == "__main__":

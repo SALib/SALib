@@ -11,3 +11,4 @@ Developers
 * Fernando Rios
 * Dan Hyams
 * xantares
+* Filippo Savi

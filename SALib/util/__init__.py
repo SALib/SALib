@@ -6,7 +6,7 @@ import csv
 from warnings import warn
 
 import numpy as np
-import scipy as sp
+from scipy import stats
 
 __all__ = ["scale_samples", "read_param_file"]
 
@@ -105,7 +105,7 @@ def nonuniform_scale_samples(params, bounds, dists):
                 raise ValueError('''Triangular distribution: Scale must be
                     greater than zero; peak on interval [0,1]''')
             else:
-                conv_params[:, i] = sp.stats.triang.ppf(
+                conv_params[:, i] = stats.triang.ppf(
                     params[:, i], c=b2, scale=b1, loc=0)
 
         elif dists[i] == 'unif':
@@ -119,7 +119,7 @@ def nonuniform_scale_samples(params, bounds, dists):
             if b2 <= 0:
                 raise ValueError('''Normal distribution: stdev must be > 0''')
             else:
-                conv_params[:, i] = sp.stats.norm.ppf(
+                conv_params[:, i] = stats.norm.ppf(
                     params[:, i], loc=b1, scale=b2)
 
         # lognormal distribution (ln-space, not base-10)
@@ -131,7 +131,7 @@ def nonuniform_scale_samples(params, bounds, dists):
                     '''Lognormal distribution: stdev must be > 0''')
             else:
                 conv_params[:, i] = np.exp(
-                    sp.stats.norm.ppf(params[:, i], loc=b1, scale=b2))
+                    stats.norm.ppf(params[:, i], loc=b1, scale=b2))
 
         else:
             valid_dists = ['unif', 'triang', 'norm', 'lognorm']
@@ -280,3 +280,73 @@ def requires_gurobipy(_has_gurobi):
             return result
         return _wrapper
     return _outer_wrapper
+
+
+def limit_samples(samples, upper_bound, lower_bound, dist):
+    '''
+    limits the array of samples passed as first arguments by replacing
+    the values falling outside the range [upper_bound lower_bound] with
+    the bounds themselves
+
+       Arguments
+       ---------
+       samples : ndarray
+           array containing the samples to be limited
+       upper_bound : float
+           the upper bound samples values will be limited to
+       lower_bound : float
+           the lower bound samples values will be limited to
+       dist: list
+           a list of the distributions the samples will be non uniformely scaled to
+       Returns
+       -------
+       limited_samples : ndarray
+           array containing the limited samples
+    '''
+    columns_to_limit = []
+    for i in dist:
+        if i in ['norm', 'lognorm']:
+            columns_to_limit.append(True)
+        else:
+            columns_to_limit.append(False)
+
+    limited_sample = samples
+    for i, val in enumerate(columns_to_limit):
+        if val:
+            limited_sample[samples[:, i] > upper_bound, i] = upper_bound
+            limited_sample[samples[:, i] < lower_bound, i] = lower_bound
+
+    return limited_sample
+
+def checkBounds(problem):
+    """check user supplied distribution bounds for validity
+
+    Arguments
+    ---------
+    problem : dict
+        The problem definition
+
+    Returns
+    -------
+    tuple
+        containing upper and lower bounds
+
+    """
+    if not problem.get('dists_upper_bound'):
+        upper_bound = 0.999999998026825
+    else:
+        upper_bound = problem.get('dists_upper_bound') / 100
+        if 0 < upper_bound < 1:
+            raise ValueError("Nonuniform distribution value range invalid")
+
+    if not problem.get('dists_lower_bound'):
+        lower_bound = 1 - 0.999999998026825
+    else:
+        lower_bound = problem.get('dists-upper-bound') / 100
+        if 0 < lower_bound < 1:
+            raise ValueError("Nonuniform distribution value range invalid")
+
+    if upper_bound < lower_bound:
+        raise ValueError("Upper bound must be greater than lower bound")
+
+    return lower_bound,upper_bound
