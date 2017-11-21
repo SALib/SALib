@@ -5,7 +5,7 @@ import math
 import numpy as np
 
 from . import common_args
-from .. util import scale_samples, read_param_file
+from .. util import nonuniform_scale_samples,scale_samples, read_param_file
 
 
 def sample(problem, N, M=4):
@@ -63,8 +63,15 @@ def sample(problem, N, M=4):
             g = 0.5 + (1 / math.pi) * np.arcsin(np.sin(omega2[j] * s + phi))
             X[l, j] = g
 
-    scale_samples(X, problem['bounds'])
-    return X
+
+    if not problem.get('dists'):
+        # scaling values out of 0-1 range with uniform distributions
+        scale_samples(X, problem['bounds'])
+        return X
+    else:
+        # scaling values to other distributions based on inverse CDFs
+        scaled_X = nonuniform_scale_samples(X, problem['bounds'], problem['dists'])
+        return scaled_X
 
 if __name__ == "__main__":
 

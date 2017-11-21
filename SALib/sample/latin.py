@@ -3,7 +3,7 @@ from __future__ import division
 import numpy as np
 
 from . import common_args
-from ..util import scale_samples, read_param_file
+from ..util import nonuniform_scale_samples, scale_samples, read_param_file
 
 
 def sample(problem, N):
@@ -39,8 +39,15 @@ def sample(problem, N):
         for j in range(N):
             result[j, i] = temp[j]
 
-    scale_samples(result, problem['bounds'])
-    return result
+    if not problem.get('dists'):
+        # scaling values out of 0-1 range with uniform distributions
+        scale_samples(result, problem['bounds'])
+        return result
+    else:
+        # scaling values to other distributions based on inverse CDFs
+        scaled_result = nonuniform_scale_samples(result, problem['bounds'], problem['dists'])
+        return scaled_result
+
 
 if __name__ == "__main__":
 
