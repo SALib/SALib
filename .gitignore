@@ -44,7 +44,13 @@ docs/api/*
 docs/_build/*
 cover/*
 MANIFEST
+.tex*
 
 .coverage.*
 model_input.txt
 model_output.txt
+
+# System files
+*.lp
+files.txt
+.DS_Store

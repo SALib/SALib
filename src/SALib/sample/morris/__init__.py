@@ -40,7 +40,7 @@ from . brute import BruteForce
 from . strategy import SampleMorris
 
 from SALib.sample import common_args
-from SALib.util import scale_samples,nonuniform_scale_samples, read_param_file, compute_groups_matrix
+from SALib.util import scale_samples,nonuniform_scale_samples, read_param_file, compute_groups_matrix, limit_samples, checkBounds
 
 try:
     import gurobipy  # type: ignore
@@ -112,8 +112,18 @@ def sample(problem: Dict, N: int, num_levels: int=4, optimal_trajectories: int=N
         scale_samples(sample, problem['bounds'])
         return sample
     else:
+        # parsing and validating upper and lower bound if specified in the problem
+        # else fall back on default which is defined as the six sigma range from mean
+        # value for a normal distribution
+        lower_bound,upper_bound = checkBounds(problem)
+
+        # restricting range of variation for sample only if the target distribution requires it
+        limited_sample = limit_samples(sample,upper_bound,lower_bound,problem['dists'])
+
         # scaling values to other distributions based on inverse CDFs
-        scaled_samples = nonuniform_scale_samples(sample, problem['bounds'], problem['dists'])
+        scaled_samples = nonuniform_scale_samples(limited_sample, problem['bounds'], problem['dists'])
+
+
         return scaled_samples
 
 def _sample_oat(problem: Dict, N: int, num_levels: int=4) -> np.ndarray:
@@ -350,22 +360,6 @@ def _compute_optimised_trajectories(problem, input_sample, N, k_choices,
                             k_choices, num_groups)
 
     return output
-
-
-def cli_parse(parser):
-    parser.add_argument('-l', '--levels', type=int, required=False,
-                        default=4, help='Number of grid levels \
-                        (Morris only)')
-    parser.add_argument('-k', '--k-optimal', type=int, required=False,
-                        default=None,
-                        help='Number of optimal trajectories \
-                        (Morris only)')
-    parser.add_argument('-lo', '--local', type=bool, required=True,
-                        default=False,
-                        help='Use the local optimisation method \
-                        (Morris with optimization only)')
-    return parser
-
 
 def cli_action(args):
     rd.seed(args.seed)

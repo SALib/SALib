@@ -306,3 +306,73 @@ def requires_gurobipy(_has_gurobi):
             return result
         return _wrapper
     return _outer_wrapper
+
+
+def limit_samples(samples, upper_bound, lower_bound, dist):
+    '''
+    limits the array of samples passed as first arguments by replacing
+    the values falling outside the range [upper_bound lower_bound] with
+    the bounds themselves
+
+       Arguments
+       ---------
+       samples : ndarray
+           array containing the samples to be limited
+       upper_bound : float
+           the upper bound samples values will be limited to
+       lower_bound : float
+           the lower bound samples values will be limited to
+       dist: list
+           a list of the distributions the samples will be non uniformely scaled to
+       Returns
+       -------
+       limited_samples : ndarray
+           array containing the limited samples
+    '''
+    columns_to_limit = []
+    for i in dist:
+        if i in ['norm', 'lognorm']:
+            columns_to_limit.append(True)
+        else:
+            columns_to_limit.append(False)
+
+    limited_sample = samples
+    for i, val in enumerate(columns_to_limit):
+        if val:
+            limited_sample[samples[:, i] > upper_bound, i] = upper_bound
+            limited_sample[samples[:, i] < lower_bound, i] = lower_bound
+
+    return limited_sample
+
+def checkBounds(problem):
+    """check user supplied distribution bounds for validity
+
+    Arguments
+    ---------
+    problem : dict
+        The problem definition
+
+    Returns
+    -------
+    tuple
+        containing upper and lower bounds
+
+    """
+    if not problem.get('dists_upper_bound'):
+        upper_bound = 0.999999998026825
+    else:
+        upper_bound = problem.get('dists_upper_bound') / 100
+        if 0 < upper_bound < 1:
+            raise ValueError("Nonuniform distribution value range invalid")
+
+    if not problem.get('dists_lower_bound'):
+        lower_bound = 1 - 0.999999998026825
+    else:
+        lower_bound = problem.get('dists-upper-bound') / 100
+        if 0 < lower_bound < 1:
+            raise ValueError("Nonuniform distribution value range invalid")
+
+    if upper_bound < lower_bound:
+        raise ValueError("Upper bound must be greater than lower bound")
+
+    return lower_bound,upper_bound

@@ -79,45 +79,33 @@ def generate_contrast(problem):
 
 def sample(problem, seed=None):
     """Generates model inputs using a fractional factorial sample
-
     Returns a NumPy matrix containing the model inputs required for a
     fractional factorial analysis.
     The resulting matrix has D columns, where D is smallest power of 2 that is
     greater than the number of parameters.
     These model inputs are intended to be used with
     :func:`SALib.analyze.ff.analyze`.
-
     The problem file is padded with a number of dummy variables called
     ``dummy_0`` required for this procedure. These dummy variables can be used
     as a check for errors in the analyze procedure.
-
     This algorithm is an implementation of that contained in
     [`Saltelli et al. 2008 <http://www.wiley.com/WileyCDA/WileyTitle/productCd-0470059974.html>`_]
-
     Arguments
     =========
     problem : dict
         The problem definition
-
     Returns
     =======
     sample : :class:`numpy.array`
-
     """
     if seed:
         np.random.seed(seed)
     contrast = generate_contrast(problem)
     sample = np.array((contrast + 1.) / 2, dtype=np.float)
     problem = extend_bounds(problem)
+    scale_samples(sample, problem['bounds'])
+    return sample
 
-    if not problem.get('dists'):
-        # scaling values out of 0-1 range with uniform distributions
-        scale_samples(sample, problem['bounds'])
-        return sample
-    else:
-        # scaling values to other distributions based on inverse CDFs
-        scaled_sample = nonuniform_scale_samples(sample, problem['bounds'], problem['dists'])
-        return sample
 
 
 # No additional CLI options

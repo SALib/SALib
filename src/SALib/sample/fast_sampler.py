@@ -5,7 +5,7 @@ import math
 import numpy as np
 
 from . import common_args
-from .. util import nonuniform_scale_samples,scale_samples, read_param_file
+from .. util import nonuniform_scale_samples,scale_samples, read_param_file, checkBounds, limit_samples
 
 
 def sample(problem, N, M=4, seed=None):
@@ -71,8 +71,16 @@ def sample(problem, N, M=4, seed=None):
         scale_samples(X, problem['bounds'])
         return X
     else:
+        # parsing and validating upper and lower bound if specified in the problem
+        # else fall back on default which is defined as the six sigma range from mean
+        # value for a normal distribution
+        lower_bound, upper_bound = checkBounds(problem)
+
+        # restricting range of variation for sample only if the target distribution requires it
+        limited_X = limit_samples(X, upper_bound, lower_bound, problem['dists'])
+
         # scaling values to other distributions based on inverse CDFs
-        scaled_X = nonuniform_scale_samples(X, problem['bounds'], problem['dists'])
+        scaled_X = nonuniform_scale_samples(limited_X, problem['bounds'], problem['dists'])
         return scaled_X
 
 
