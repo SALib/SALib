@@ -8,7 +8,7 @@ This implementation is based on the formulation put forward in
 from scipy.linalg import hadamard
 import numpy as np
 from . import common_args
-from ..util import scale_samples, read_param_file
+from ..util import nonuniform_scale_samples, scale_samples, read_param_file
 
 
 def find_smallest(num_vars):
@@ -109,8 +109,15 @@ def sample(problem, seed=None):
     contrast = generate_contrast(problem)
     sample = np.array((contrast + 1.) / 2, dtype=np.float)
     problem = extend_bounds(problem)
-    scale_samples(sample, problem['bounds'])
-    return sample
+
+    if not problem.get('dists'):
+        # scaling values out of 0-1 range with uniform distributions
+        scale_samples(sample, problem['bounds'])
+        return sample
+    else:
+        # scaling values to other distributions based on inverse CDFs
+        scaled_sample = nonuniform_scale_samples(sample, problem['bounds'], problem['dists'])
+        return sample
 
 
 # No additional CLI options
