@@ -329,18 +329,15 @@ def limit_samples(samples, upper_bound, lower_bound, dist):
        limited_samples : ndarray
            array containing the limited samples
     '''
-    columns_to_limit = []
+    bounds = []
     for i in dist:
         if i in ['norm', 'lognorm']:
-            columns_to_limit.append(True)
+            bounds.append([lower_bound,upper_bound])
         else:
-            columns_to_limit.append(False)
+            bounds.append([0,1])
 
     limited_sample = samples
-    for i, val in enumerate(columns_to_limit):
-        if val:
-            limited_sample[samples[:, i] > upper_bound, i] = upper_bound
-            limited_sample[samples[:, i] < lower_bound, i] = lower_bound
+    scale_samples(samples,bounds)
 
     return limited_sample
 
@@ -361,15 +358,15 @@ def checkBounds(problem):
     if not problem.get('dists_upper_bound'):
         upper_bound = 0.999999998026825
     else:
-        upper_bound = problem.get('dists_upper_bound') / 100
-        if 0 < upper_bound < 1:
+        upper_bound = problem.get('dists_upper_bound')
+        if not 0 < upper_bound < 1:
             raise ValueError("Nonuniform distribution value range invalid")
 
     if not problem.get('dists_lower_bound'):
         lower_bound = 1 - 0.999999998026825
     else:
-        lower_bound = problem.get('dists-upper-bound') / 100
-        if 0 < lower_bound < 1:
+        lower_bound = problem.get('dists_lower_bound')
+        if not 0 < lower_bound < 1:
             raise ValueError("Nonuniform distribution value range invalid")
 
     if upper_bound < lower_bound:
