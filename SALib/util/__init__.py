@@ -11,8 +11,8 @@ from scipy import stats
 __all__ = ["scale_samples", "read_param_file"]
 
 
-def scale_samples(params, bounds):
-    '''Rescale samples in 0-to-1 range to arbitrary bounds
+def scale_samples(params,problem):
+    '''Rescale samples in 0-to-1 rang eto arbitrary bounds and distribution
 
     Arguments
     ---------
@@ -21,24 +21,77 @@ def scale_samples(params, bounds):
     params : numpy.ndarray
         numpy array of dimensions `num_params`-by-:math:`N`,
         where :math:`N` is the number of samples
+    dists : list
+        list of distributions, one for each parameter
+            unif: uniform with lower and upper bounds
+            triang: triangular with width (scale) and location of peak
+                    location of peak is in percentage of width
+                    lower bound assumed to be zero
+            norm: normal distribution with mean and standard deviation
+            lognorm: lognormal with ln-space mean and standard deviation
     '''
-    # Check bounds are legal (upper bound is greater than lower bound)
+    bounds = problem['bounds']
+
+    try:
+        dists = problem['dists']
+    except KeyError:
+        dists = []
+        for i in range(problem['num_vars']):
+            dists.append('unif')
+
+    lower_bound, upper_bound = check_bounds(problem)
+    limited_params = limit_samples(params, upper_bound, lower_bound, dists)
     b = np.array(bounds)
-    lower_bounds = b[:, 0]
-    upper_bounds = b[:, 1]
 
-    if np.any(lower_bounds >= upper_bounds):
-        raise ValueError("Bounds are not legal")
+    # initializing matrix for converted values
+    conv_params = np.zeros_like(limited_params)
 
-    # This scales the samples in-place, by using the optional output
-    # argument for the numpy ufunctions
-    # The calculation is equivalent to:
-    #   sample * (upper_bound - lower_bound) + lower_bound
-    np.add(np.multiply(params,
-                       (upper_bounds - lower_bounds),
-                       out=params),
-           lower_bounds,
-           out=params)
+    # loop over the parameters
+    for i in range(conv_params.shape[1]):
+        # setting first and second arguments for distributions
+        b1 = b[i][0]
+        b2 = b[i][1]
+
+        if dists[i] == 'triang':
+            # checking for correct parameters
+            if b1 <= 0 or b2 <= 0 or b2 >= 1:
+                raise ValueError('''Triangular distribution: Scale must be
+                       greater than zero; peak on interval [0,1]''')
+            else:
+                conv_params[:, i] = stats.triang.ppf(
+                    limited_params[:, i], c=b2, scale=b1, loc=0)
+
+        elif dists[i] == 'unif':
+            if b1 >= b2:
+                raise ValueError('''Uniform distribution: lower bound
+                       must be less than upper bound''')
+            else:
+                conv_params[:, i] = limited_params[:, i] * (b2 - b1) + b1
+
+        elif dists[i] == 'norm':
+            if b2 <= 0:
+                raise ValueError('''Normal distribution: stdev must be > 0''')
+            else:
+                conv_params[:, i] = stats.norm.ppf(
+                    limited_params[:, i], loc=b1, scale=b2)
+
+        # lognormal distribution (ln-space, not base-10)
+        # paramters are ln-space mean and standard deviation
+        elif dists[i] == 'lognorm':
+            # checking for valid parameters
+            if b2 <= 0:
+                raise ValueError(
+                    '''Lognormal distribution: stdev must be > 0''')
+            else:
+                conv_params[:, i] = np.exp(
+                    stats.norm.ppf(limited_params[:, i], loc=b1, scale=b2))
+
+        else:
+            valid_dists = ['unif', 'triang', 'norm', 'lognorm']
+            raise ValueError('Distributions: choose one of %s' %
+                             ", ".join(valid_dists))
+
+    return conv_params
 
 
 def unscale_samples(params, bounds):
@@ -88,6 +141,7 @@ def nonuniform_scale_samples(params, bounds, dists):
             norm: normal distribution with mean and standard deviation
             lognorm: lognormal with ln-space mean and standard deviation
     """
+
     b = np.array(bounds)
 
     # initializing matrix for converted values
@@ -311,11 +365,19 @@ def limit_samples(samples, upper_bound, lower_bound, dist):
             bounds.append([0,1])
 
     limited_sample = samples
-    scale_samples(samples,bounds)
+
+    lb = np.array(bounds)[:, 0]
+    ub = np.array(bounds)[:, 1]
+
+    np.add(np.multiply(limited_sample,
+                       (ub - lb),
+                       out=limited_sample),
+           lb,
+           out=limited_sample)
 
     return limited_sample
 
-def checkBounds(problem):
+def check_bounds(problem):
     """check user supplied distribution bounds for validity
 
     Arguments
@@ -329,15 +391,19 @@ def checkBounds(problem):
         containing upper and lower bounds
 
     """
+
+    default_upper_bound = 0.999999998026825
+    default_lower_bound = 1-default_upper_bound
+
     if not problem.get('dists_upper_bound'):
-        upper_bound = 0.999999998026825
+        upper_bound = default_upper_bound
     else:
         upper_bound = problem.get('dists_upper_bound')
         if not 0 < upper_bound < 1:
             raise ValueError("Nonuniform distribution value range invalid")
 
     if not problem.get('dists_lower_bound'):
-        lower_bound = 1 - 0.999999998026825
+        lower_bound = default_lower_bound
     else:
         lower_bound = problem.get('dists_lower_bound')
         if not 0 < lower_bound < 1:
