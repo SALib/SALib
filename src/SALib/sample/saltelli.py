@@ -4,7 +4,8 @@ import numpy as np
 
 from . import common_args
 from . import sobol_sequence
-from ..util import scale_samples, nonuniform_scale_samples, read_param_file, compute_groups_matrix
+from ..util import scale_samples, read_param_file, compute_groups_matrix
+
 
 
 def sample(problem, N, calc_second_order=True, seed=None):

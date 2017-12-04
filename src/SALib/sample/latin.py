@@ -3,7 +3,7 @@ from __future__ import division
 import numpy as np
 
 from . import common_args
-from ..util import nonuniform_scale_samples, scale_samples, read_param_file, check_bounds, limit_samples
+from ..util import scale_samples, read_param_file
 
 
 def sample(problem, N, seed=None):
