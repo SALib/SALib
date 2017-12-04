@@ -135,7 +135,7 @@ def test_scale_samples():
 
     desired = np.array(
         [np.arange(10, 21, 1), np.arange(-10, 12, 2)], dtype=np.float).T
-    scale_samples(params, testProblem)
+    params = scale_samples(params, testProblem)
     assert_allclose(params, desired, atol=1e-03, rtol=1e-03)
 
 
@@ -163,7 +163,7 @@ def test_scale_samples_upper_lt_lower():
         'names': ['test1', 'test2'],
         'bounds': [[10, 9], [-10, 10]],
     }
-    scale_samples(params, testProblem)
+    params = scale_samples(params, testProblem)
 
 
 @raises(ValueError)
@@ -177,7 +177,7 @@ def test_scale_samples_upper_eq_lower():
         'names': ['test1', 'test2'],
         'bounds': [[10, 10], [-10, 10]],
     }
-    scale_samples(params, testProblem)
+    params =scale_samples(params, testProblem)
 
 
 def test_compute_groups_from_parameter_file():

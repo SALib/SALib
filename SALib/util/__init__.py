@@ -31,16 +31,19 @@ def scale_samples(params,problem):
             lognorm: lognormal with ln-space mean and standard deviation
     '''
     bounds = problem['bounds']
-
     try:
         dists = problem['dists']
-    except KeyError:
+        if dists == None:
+            raise ValueError;
+        lower_bound, upper_bound = check_bounds(problem)
+        limited_params = limit_samples(params, upper_bound, lower_bound, dists)
+    except (KeyError,ValueError):
         dists = []
         for i in range(problem['num_vars']):
             dists.append('unif')
+        limited_params = params
 
-    lower_bound, upper_bound = check_bounds(problem)
-    limited_params = limit_samples(params, upper_bound, lower_bound, dists)
+
     b = np.array(bounds)
 
     # initializing matrix for converted values

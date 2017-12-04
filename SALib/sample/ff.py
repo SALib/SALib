@@ -8,7 +8,7 @@ This implementation is based on the formulation put forward in
 from scipy.linalg import hadamard
 import numpy as np
 from . import common_args
-from ..util import nonuniform_scale_samples, scale_samples, read_param_file
+from ..util import scale_samples, read_param_file
 
 
 def find_smallest(num_vars):
