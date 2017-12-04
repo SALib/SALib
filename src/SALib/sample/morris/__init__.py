@@ -40,7 +40,7 @@ from . brute import BruteForce
 from . strategy import SampleMorris
 
 from SALib.sample import common_args
-from SALib.util import scale_samples,nonuniform_scale_samples, read_param_file, compute_groups_matrix, limit_samples, checkBounds
+from SALib.util import scale_samples,nonuniform_scale_samples, read_param_file, compute_groups_matrix, limit_samples, check_bounds
 
 try:
     import gurobipy  # type: ignore
@@ -107,24 +107,10 @@ def sample(problem: Dict, N: int, num_levels: int=4, optimal_trajectories: int=N
                                                  optimal_trajectories,
                                                  local_optimization)
 
-    if not problem.get('dists'):
-        # scaling values out of 0-1 range with uniform distributions
-        scale_samples(sample, problem['bounds'])
-        return sample
-    else:
-        # parsing and validating upper and lower bound if specified in the problem
-        # else fall back on default which is defined as the six sigma range from mean
-        # value for a normal distribution
-        lower_bound,upper_bound = checkBounds(problem)
-
-        # restricting range of variation for sample only if the target distribution requires it
-        limited_sample = limit_samples(sample,upper_bound,lower_bound,problem['dists'])
 
         # scaling values to other distributions based on inverse CDFs
-        scaled_samples = nonuniform_scale_samples(limited_sample, problem['bounds'], problem['dists'])
-
-
-        return scaled_samples
+    scaled_samples = scale_samples(sample, problem)
+    return scaled_samples
 
 def _sample_oat(problem: Dict, N: int, num_levels: int=4) -> np.ndarray:
     """Generate trajectories without groups

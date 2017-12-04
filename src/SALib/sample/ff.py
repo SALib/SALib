@@ -79,6 +79,7 @@ def generate_contrast(problem):
 
 def sample(problem, seed=None):
     """Generates model inputs using a fractional factorial sample
+
     Returns a NumPy matrix containing the model inputs required for a
     fractional factorial analysis.
     The resulting matrix has D columns, where D is smallest power of 2 that is
@@ -103,8 +104,8 @@ def sample(problem, seed=None):
     contrast = generate_contrast(problem)
     sample = np.array((contrast + 1.) / 2, dtype=np.float)
     problem = extend_bounds(problem)
-    scale_samples(sample, problem['bounds'])
-    return sample
+    scaled_sample = scale_samples(sample, problem)
+    return scaled_sample
 
 
 

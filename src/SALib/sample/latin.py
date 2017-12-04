@@ -3,7 +3,7 @@ from __future__ import division
 import numpy as np
 
 from . import common_args
-from ..util import nonuniform_scale_samples, scale_samples, read_param_file, checkBounds, limit_samples
+from ..util import nonuniform_scale_samples, scale_samples, read_param_file, check_bounds, limit_samples
 
 
 def sample(problem, N, seed=None):
@@ -38,23 +38,9 @@ def sample(problem, N, seed=None):
         for j in range(N):
             result[j, i] = temp[j]
 
-    if not problem.get('dists'):
-        # scaling values out of 0-1 range with uniform distributions
-        scale_samples(result, problem['bounds'])
-        return result
-    else:
-        # parsing and validating upper and lower bound if specified in the problem
-        # else fall back on default which is defined as the six sigma range from mean
-        # value for a normal distribution
-        lower_bound, upper_bound = checkBounds(problem)
-
-        # restricting range of variation for sample only if the target distribution requires it
-        limited_result = limit_samples(result, upper_bound, lower_bound, problem['dists'])
-
-        # scaling values to other distributions based on inverse CDFs
-        scaled_result = nonuniform_scale_samples(limited_result, problem['bounds'], problem['dists'])
-        return scaled_result
-
+    # scaling values out of 0-1 range with uniform distributions
+    scaled_result = scale_samples(result, problem)
+    return scaled_result
 
 
 # No additional CLI options
