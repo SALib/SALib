@@ -87,7 +87,7 @@ def permute_outputs(Y, X):
 
 def compute_first_order(permuted_outputs, M):
     _, Pxx = periodogram(permuted_outputs)
-    V = np.sum(Pxx)
+    V = np.sum(Pxx[1:])
     D1 = np.sum(Pxx[1: M + 1])
     return D1 / V
 
