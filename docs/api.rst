@@ -13,6 +13,15 @@ FAST - Fourier Amplitude Sensitivity Test
 .. autofunction:: SALib.analyze.fast.analyze
    :noindex:
 
+RBD-FAST - Random Balance Designs Fourier Amplitude Sensitivity Test
+-----------------------------------------
+
+.. autofunction:: SALib.sample.latin.sample
+   :noindex:
+
+.. autofunction:: SALib.analyze.rbd_fast.analyze
+   :noindex:
+
 Method of Morris
 ----------------
 
