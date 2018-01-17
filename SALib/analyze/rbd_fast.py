@@ -8,7 +8,7 @@ from . import common_args
 from ..util import read_param_file
 
 
-def analyze(problem, Y, X, M=4, print_to_console=False):
+def analyze(problem, Y, X, M=10, print_to_console=False):
     """Performs the Random Balanced Design - Fourier Amplitude Sensitivity Test
     (RBD-FAST) on model outputs.
 
