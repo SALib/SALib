@@ -78,6 +78,9 @@ def analyze(problem, Y, X, M=10, print_to_console=False):
 def permute_outputs(Y, X):
     """
     Permute the output according to one of the inputs
+    (Elmar Plischke (2010) "An effective algorithm for computing global
+     sensitivity indices (EASI) Reliability Engineering & System Safety",
+     95:4, 354-360. doi:10.1016/j.ress.2009.11.005)
     """
     permutation_index = np.argsort(X)
     permutation_index = np.concatenate([permutation_index[::2],
