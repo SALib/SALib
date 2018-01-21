@@ -21,7 +21,7 @@ def evaluate(values, a=None):
     gto = np.array(values) > 1
 
     if ltz.any() == True:
-        raise ValueError("Sobol G function called with values less than one")
+        raise ValueError("Sobol G function called with values less than zero")
     elif gto.any() == True:
         raise ValueError("Sobol G function called with values greater than one")
 
