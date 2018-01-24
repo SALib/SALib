@@ -7,8 +7,10 @@ from SALib.sample.morris.brute import BruteForce
 from SALib.util import read_param_file
 
 import numpy as np
+import pytest
 from numpy.testing import assert_equal, assert_allclose
 from pytest import fixture, raises
+import numpy.random as rd
 
 
 @fixture(scope='function')
@@ -156,6 +158,9 @@ class TestSharedMethods:
 class TestLocallyOptimalStrategy:
 
     def test_local(self, setup_problem):
+
+        rd.seed(12345)
+
         (input_sample, num_samples, _,
          k_choices, groups, num_params, expected) = setup_problem
 
@@ -168,10 +173,17 @@ class TestLocallyOptimalStrategy:
     def test_find_local_maximum_distance(self, setup_input):
         '''
         Test whether finding the local maximum distance equals the global
-        maximum distance in a simple case.
+        maximum distance in a simple case for a defined random seed.
         From Saltelli et al. 2008, in the solution to exercise 3a,
         Chapter 3, page 134.
+
+        Note that local and brute force methods are not guaranteed to produce
+        the same results, even for simple problems,
+        hence forcing the seed here.
+
         '''
+
+        rd.seed(12345)
 
         local_strategy = LocalOptimisation()
         brute_strategy = BruteForce()
@@ -187,14 +199,39 @@ class TestLocallyOptimalStrategy:
                                                          num_params, k_choices)
         assert_equal(output_global, output_local)
 
+    def test_random_seed(self, setup_param_groups_prime):
+        """Setting the seed before generating a sample results in two
+        identical samples
+        """
+        N = 8
+        param_file = setup_param_groups_prime
+        problem = read_param_file(param_file)
+        num_levels = 4
+        grid_jump = num_levels / 2
+
+        np.random.seed(12345)
+        expected = _sample_groups(problem, N, num_levels, grid_jump)
+
+        np.random.seed(12345)
+        actual = _sample_groups(problem, N, num_levels, grid_jump)
+
+        assert_equal(actual, expected)
+
+    @pytest.mark.parametrize('execution_number', range(1))
     def test_local_optimised_groups(self,
-                                    setup_param_groups_prime):
+                                    setup_param_groups_prime,
+                                    execution_number):
         """
         Tests that the local optimisation problem gives
         the same answer as the brute force problem
         (for small values of `k_choices` and `N`)
-        with groups
+        with groups for a defined random seed.
+
+        Note that local and brute force methods are not guaranteed to produce
+        exact answers, even for small problems.
         """
+        rd.seed(12345)
+
         N = 8
         param_file = setup_param_groups_prime
         problem = read_param_file(param_file)
@@ -208,11 +245,11 @@ class TestLocallyOptimalStrategy:
 
         input_sample = _sample_groups(problem, N, num_levels, grid_jump)
 
-        strategy = LocalOptimisation()
+        local = LocalOptimisation()
 
         # From local optimal trajectories
-        actual = strategy.find_local_maximum(input_sample, N, num_params,
-                                             k_choices, num_groups)
+        actual = local.find_local_maximum(input_sample, N, num_params,
+                                          k_choices, num_groups)
 
         brute = BruteForce()
         desired = brute.brute_force_most_distant(input_sample,
@@ -220,6 +257,9 @@ class TestLocallyOptimalStrategy:
                                                  num_params,
                                                  k_choices,
                                                  num_groups)
+
+        print("Actual: {}\nDesired: {}\n".format(actual, desired))
+        print(input_sample)
         assert_equal(actual, desired)
 
 
