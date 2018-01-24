@@ -22,6 +22,8 @@ Journal of Open Source Software, 2(9).
 * Sobol Sensitivity Analysis ([Sobol 2001](http://www.sciencedirect.com/science/article/pii/S0378475400002706), [Saltelli 2002](http://www.sciencedirect.com/science/article/pii/S0010465502002801), [Saltelli et al. 2010](http://www.sciencedirect.com/science/article/pii/S0010465509003087))
 * Method of Morris, including groups and optimal trajectories ([Morris 1991](http://www.tandfonline.com/doi/abs/10.1080/00401706.1991.10484804), [Campolongo et al. 2007](http://www.sciencedirect.com/science/article/pii/S1364815206002805))
 * Fourier Amplitude Sensitivity Test (FAST) ([Cukier et al. 1973](http://scitation.aip.org/content/aip/journal/jcp/59/8/10.1063/1.1680571), [Saltelli et al. 1999](http://amstat.tandfonline.com/doi/abs/10.1080/00401706.1999.10485594))
+* Random Balance Designs - Fourier Amplitude Sensitivity Test (RBD-FAST)
+  ([Tarantola et al. 2006](https://hal.archives-ouvertes.fr/hal-01065897/file/Tarantola06RESS_HAL.pdf), [Plischke 2010](https://doi.org/10.1016/j.ress.2009.11.005), [Tissot et al. 2012](https://doi.org/10.1016/j.ress.2012.06.010))
 * Delta Moment-Independent Measure ([Borgonovo 2007](http://www.sciencedirect.com/science/article/pii/S0951832006000883), [Plischke et al. 2013](http://www.sciencedirect.com/science/article/pii/S0377221712008995))
 * Derivative-based Global Sensitivity Measure (DGSM) ([Sobol and Kucherenko 2009](http://www.sciencedirect.com/science/article/pii/S0378475409000354))
 * Fractional Factorial Sensitivity Analysis ([Saltelli et al. 2008](http://www.wiley.com/WileyCDA/WileyTitle/productCd-0470059974.html))
@@ -73,4 +75,4 @@ Lots of other options are included for parameter files, as well as a command-lin
 Also check out the [examples](https://github.com/SALib/SALib/tree/master/examples) for a full description of options for each method.
 
 ### License
-Copyright (C) 2017 Jon Herman, Will Usher, and others. Versions v0.5 and later are released under the [MIT license](LICENSE.md).
+Copyright (C) 2018 Jon Herman, Will Usher, and others. Versions v0.5 and later are released under the [MIT license](LICENSE.md).
