@@ -83,30 +83,26 @@ def sample(problem):
     greater than the number of parameters.
     These model inputs are intended to be used with
     :func:`SALib.analyze.ff.analyze`.
-
     The problem file is padded with a number of dummy variables called
     ``dummy_0`` required for this procedure. These dummy variables can be used
     as a check for errors in the analyze procedure.
-
     This algorithm is an implementation of that contained in
     [`Saltelli et al. 2008 <http://www.wiley.com/WileyCDA/WileyTitle/productCd-0470059974.html>`_]
-
     Arguments
     =========
     problem : dict
         The problem definition
-
     Returns
     =======
     sample : :class:`numpy.array`
-
     """
 
     contrast = generate_contrast(problem)
     sample = np.array((contrast + 1.) / 2, dtype=np.float)
     problem = extend_bounds(problem)
-    scale_samples(sample, problem['bounds'])
-    return sample
+    scaled_sample = scale_samples(sample, problem)
+    return scaled_sample
+
 
 if __name__ == "__main__":
 

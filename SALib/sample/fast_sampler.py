@@ -63,8 +63,11 @@ def sample(problem, N, M=4):
             g = 0.5 + (1 / math.pi) * np.arcsin(np.sin(omega2[j] * s + phi))
             X[l, j] = g
 
-    scale_samples(X, problem['bounds'])
-    return X
+
+
+        # scaling values out of 0-1 range with uniform distributions
+        scaled_X = scale_samples(X, problem)
+        return scaled_X
 
 if __name__ == "__main__":
 

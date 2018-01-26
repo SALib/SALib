@@ -38,7 +38,7 @@ from . brute import BruteForce
 from . strategy import SampleMorris
 
 from SALib.sample import common_args
-from SALib.util import scale_samples, read_param_file, compute_groups_matrix
+from SALib.util import scale_samples,nonuniform_scale_samples, read_param_file, compute_groups_matrix
 
 try:
     import gurobipy
@@ -102,9 +102,10 @@ def sample(problem, N, num_levels, grid_jump, optimal_trajectories=None,
                                                  optimal_trajectories,
                                                  local_optimization)
 
-    scale_samples(sample, problem['bounds'])
-    return sample
 
+        # scaling values to other distributions based on inverse CDFs
+    scaled_samples = scale_samples(sample, problem)
+    return scaled_samples
 
 def _sample_oat(problem, N, num_levels, grid_jump):
     """Generate trajectories without groups
@@ -374,6 +375,8 @@ def _compute_optimised_trajectories(problem, input_sample, N, k_choices,
                             k_choices, num_groups)
 
     return output
+
+
 
 
 if __name__ == "__main__":

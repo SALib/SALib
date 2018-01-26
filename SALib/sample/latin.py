@@ -39,8 +39,9 @@ def sample(problem, N):
         for j in range(N):
             result[j, i] = temp[j]
 
-    scale_samples(result, problem['bounds'])
-    return result
+    # scaling values out of 0-1 range with uniform distributions
+    scaled_result = scale_samples(result, problem)
+    return scaled_result
 
 if __name__ == "__main__":
 
