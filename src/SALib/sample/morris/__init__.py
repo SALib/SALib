@@ -40,7 +40,7 @@ from . brute import BruteForce
 from . strategy import SampleMorris
 
 from SALib.sample import common_args
-from SALib.util import scale_samples,nonuniform_scale_samples, read_param_file, compute_groups_matrix
+from SALib.util import scale_samples, read_param_file, compute_groups_matrix
 
 try:
     import gurobipy  # type: ignore
@@ -106,7 +106,6 @@ def sample(problem: Dict, N: int, num_levels: int=4, optimal_trajectories: int=N
                                                  N,
                                                  optimal_trajectories,
                                                  local_optimization)
-
 
         # scaling values to other distributions based on inverse CDFs
     scaled_samples = scale_samples(sample, problem)

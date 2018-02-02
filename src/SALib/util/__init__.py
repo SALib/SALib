@@ -60,16 +60,15 @@ def scale_samples(params: np.ndarray, problem: Dict):
     bounds = problem['bounds']
     try:
         dists = problem['dists']
-        if dists == None:
-            raise ValueError;
+        if dists is None:
+            raise ValueError
         lower_bound, upper_bound = check_bounds(problem)
         limited_params = limit_samples(params, upper_bound, lower_bound, dists)
-    except (KeyError,ValueError):
+    except (KeyError, ValueError):
         dists = []
         for i in range(problem['num_vars']):
             dists.append('unif')
         limited_params = params
-
 
     b = np.array(bounds)
 
@@ -381,7 +380,8 @@ def limit_samples(samples, upper_bound, lower_bound, dist):
        lower_bound : float
            the lower bound samples values will be limited to
        dist: list
-           a list of the distributions the samples will be non uniformely scaled to
+           a list of the non-uniform distributions the samples will be
+           scaled to
        Returns
        -------
        limited_samples : ndarray
@@ -390,9 +390,9 @@ def limit_samples(samples, upper_bound, lower_bound, dist):
     bounds = []
     for i in dist:
         if i in ['norm', 'lognorm']:
-            bounds.append([lower_bound,upper_bound])
+            bounds.append([lower_bound, upper_bound])
         else:
-            bounds.append([0,1])
+            bounds.append([0, 1])
 
     limited_sample = samples
 
@@ -406,6 +406,7 @@ def limit_samples(samples, upper_bound, lower_bound, dist):
            out=limited_sample)
 
     return limited_sample
+
 
 def check_bounds(problem):
     """check user supplied distribution bounds for validity
@@ -423,7 +424,7 @@ def check_bounds(problem):
     """
 
     default_upper_bound = 0.999999998026825
-    default_lower_bound = 1-default_upper_bound
+    default_lower_bound = 1 - default_upper_bound
 
     if not problem.get('dists_upper_bound'):
         upper_bound = default_upper_bound
@@ -442,4 +443,4 @@ def check_bounds(problem):
     if upper_bound < lower_bound:
         raise ValueError("Upper bound must be greater than lower bound")
 
-    return lower_bound,upper_bound
+    return lower_bound, upper_bound
