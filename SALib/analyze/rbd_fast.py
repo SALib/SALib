@@ -29,7 +29,7 @@ def analyze(problem, Y, X, M=10, print_to_console=False):
         A NumPy array containing the model inputs
     M : int
         The interference parameter, i.e., the number of harmonics to sum in
-        the Fourier series decomposition (default 4)
+        the Fourier series decomposition (default 10)
     print_to_console : bool
         Print results directly to console (default False)
 
