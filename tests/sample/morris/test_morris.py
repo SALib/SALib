@@ -48,7 +48,7 @@ def test_group_in_param_file_read(setup_param_file_with_groups):
         problem['groups'])
 
     assert_equal(problem['names'], ["Test 1", "Test 2", "Test 3"])
-    assert_equal(groups, np.matrix('1,0;1,0;0,1', dtype=np.int))
+    assert_equal(groups, np.array([[1, 0], [1, 0], [0, 1]], dtype=np.int))
     assert_equal(group_names, ['Group 1', 'Group 2'])
 
 
@@ -170,13 +170,13 @@ class TestGroupSampleGeneration:
         k = 3
         g = 2
 
-        x_star = np.matrix(np.array([1. / 3, 1. / 3, 0.]))
-        J = np.matrix(np.ones((g + 1, k)))
-        G = np.matrix('1,0;0,1;0,1')
-        D_star = np.matrix('1,0,0;0,-1,0;0,0,1')
-        P_star = np.matrix('1,0;0,1')
+        x_star = np.array([[1. / 3, 1. / 3, 0.]])
+        J = np.ones((g + 1, k))
+        G = np.array([[1, 0], [0, 1], [0, 1]])
+        D_star = np.array([[1, 0, 0], [0, -1, 0], [0, 0, 1]])
+        P_star = np.array([[1, 0], [0, 1]])
         delta = 2. / 3
-        B = np.matrix(np.tril(np.ones([g + 1, g], dtype=int), -1))
+        B = np.tril(np.ones([g + 1, g], dtype=int), -1)
 
         desired = np.array([[1. / 3, 1, 0], [1, 1, 0], [1, 1. / 3, 2. / 3]])
 
@@ -192,5 +192,5 @@ class TestGroupSampleGeneration:
         np.random.seed(10)
         actual = generate_x_star(num_params, num_levels)
         print(actual)
-        expected = np.matrix([0.333333, 0.333333, 0., 0.333333])
+        expected = np.array([[0.333333, 0.333333, 0., 0.333333]])
         assert_allclose(actual, expected, rtol=1e-05)

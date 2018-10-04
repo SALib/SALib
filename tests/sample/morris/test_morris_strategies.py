@@ -89,26 +89,26 @@ class TestSharedMethods:
         '''
         Tests the computation of the distance of two trajectories
         '''
-        input_1 = np.matrix(
+        input_1 = np.array(
             [[0, 1 / 3.], [0, 1.], [2 / 3., 1.]], dtype=np.float32)
-        input_3 = np.matrix([[2 / 3., 0], [2 / 3., 2 / 3.],
-                             [0, 2 / 3.]], dtype=np.float32)
+        input_3 = np.array([[2 / 3., 0], [2 / 3., 2 / 3.],
+                            [0, 2 / 3.]], dtype=np.float32)
         output = strategy.compute_distance(input_1, input_3)
         assert_allclose(output, 6.18, atol=1e-2)
 
     def test_distance_of_identical_matrices_is_min(self, strategy):
-        input_1 = np.matrix([[1., 1.],
-                             [1., 0.33333333],
-                             [0.33333333, 0.33333333]])
+        input_1 = np.array([[1., 1.],
+                            [1., 0.33333333],
+                            [0.33333333, 0.33333333]])
         input_2 = input_1.copy()
         actual = strategy.compute_distance(input_1, input_2)
         desired = 0
         assert_allclose(actual, desired, atol=1e-2)
 
     def test_distance_fail_with_difference_size_ip(self, strategy):
-        input_1 = np.matrix([[0, 1 / 3.], [0, 1.]], dtype=np.float32)
-        input_3 = np.matrix([[2 / 3., 0], [2 / 3., 2 / 3.],
-                             [0, 2 / 3.]], dtype=np.float32)
+        input_1 = np.array([[0, 1 / 3.], [0, 1.]], dtype=np.float32)
+        input_3 = np.array([[2 / 3., 0], [2 / 3., 2 / 3.],
+                            [0, 2 / 3.]], dtype=np.float32)
         with raises(ValueError) as err:
             strategy.compute_distance(input_1, input_3)
 

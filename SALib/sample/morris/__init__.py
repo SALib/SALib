@@ -152,10 +152,10 @@ def _sample_groups(problem, N, num_levels=4):
     group_membership, _ = compute_groups_matrix(problem['groups'])
 
     if group_membership is None:
-        raise ValueError("Please define the matrix group_membership.")
-    if not isinstance(group_membership, np.matrixlib.defmatrix.matrix):
-        raise TypeError("Matrix group_membership should be formatted \
-                         as a numpy matrix")
+        raise ValueError("Please define the 'group_membership' matrix")
+    if not isinstance(group_membership, np.ndarray):
+        raise TypeError("Argument 'group_membership' should be formatted \
+                         as a numpy ndarray")
 
     num_params = group_membership.shape[0]
     num_groups = group_membership.shape[1]
@@ -194,13 +194,13 @@ def generate_trajectory(group_membership, num_levels=4):
     num_groups = group_membership.shape[1]
 
     # Matrix B - size (g + 1) * g -  lower triangular matrix
-    B = np.matrix(np.tril(np.ones([num_groups + 1, num_groups],
-                                  dtype=int), -1))
+    B = np.tril(np.ones([num_groups + 1, num_groups],
+                        dtype=int), -1)
 
-    P_star = np.asmatrix(generate_p_star(num_groups))
+    P_star = generate_p_star(num_groups)
 
     # Matrix J - a (g+1)-by-num_params matrix of ones
-    J = np.matrix(np.ones((num_groups + 1, num_params)))
+    J = np.ones((num_groups + 1, num_params))
 
     # Matrix D* - num_params-by-num_params matrix which decribes whether
     # factors move up or down
@@ -218,9 +218,12 @@ def generate_trajectory(group_membership, num_levels=4):
 def compute_b_star(J, x_star, delta, B, G, P_star, D_star):
     """
     """
-    b_star = J[:, 0] * x_star + \
-        (delta / 2) * ((2 * B * (G * P_star).T - J)
-                       * D_star + J)
+    element_a = J[0, :] * x_star
+    element_b = (G @ P_star).T
+    element_c = 2 * B @ element_b
+    element_d = (element_c - J) @ D_star
+
+    b_star = element_a + (delta / 2) * (element_d + J)
     return b_star
 
 
@@ -256,18 +259,18 @@ def generate_x_star(num_params, num_levels):
 
     Returns
     -------
-    np.matrix
+    numpy.ndarray
         The initial starting positions of the trajectory
 
     """
-    x_star = np.zeros(num_params)
+    x_star = np.zeros((1, num_params))
     delta = compute_delta(num_levels)
     bound = 1 - delta
     grid = np.linspace(0, bound, 2)
 
     for i in range(num_params):
-        x_star[i] = rd.choice(grid)
-    return np.asmatrix(x_star)
+        x_star[0, i] = rd.choice(grid)
+    return x_star
 
 
 def compute_delta(num_levels):
