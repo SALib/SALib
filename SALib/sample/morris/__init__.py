@@ -219,9 +219,9 @@ def compute_b_star(J, x_star, delta, B, G, P_star, D_star):
     """
     """
     element_a = J[0, :] * x_star
-    element_b = (G @ P_star).T
-    element_c = 2 * B @ element_b
-    element_d = (element_c - J) @ D_star
+    element_b = np.matmul(G, P_star).T
+    element_c = np.matmul(2 * B, element_b)
+    element_d = np.matmul((element_c - J), D_star)
 
     b_star = element_a + (delta / 2) * (element_d + J)
     return b_star
