@@ -10,6 +10,8 @@ from ..util import read_param_file, compute_groups_matrix
 
 from multiprocessing import Pool, cpu_count
 from functools import partial
+from itertools import combinations
+
 try:
     from itertools import zip_longest
 except ImportError:
@@ -62,7 +64,7 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
     >>> X = saltelli.sample(problem, 1000)
     >>> Y = Ishigami.evaluate(X)
     >>> Si = sobol.analyze(problem, Y, print_to_console=True)
-    
+
     """
     # determining if groups are defined and adjusting the number
     # of rows in the cross-sampled matrix accordingly
@@ -85,7 +87,7 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
 
     # normalize the model output
     Y = (Y - Y.mean())/Y.std()
-    
+
     A,B,AB,BA = separate_output_values(Y, D, N, calc_second_order)
     r = np.random.randint(N, size=(N, num_resamples))
     Z = norm.ppf(0.5 + conf_level / 2)
@@ -235,6 +237,54 @@ def Si_list_to_dict(S_list, D, calc_second_order):
             S[s[0]][s[1], s[2]] = s[3]
 
     return S
+
+
+def Si_to_pandas_dict(S_dict, problem):
+    """Convert Si information into Pandas DataFrame compatible dict.
+
+    Parameters
+    ----------
+    S_dict : dict
+        The problem definition
+    problem : dict
+        The problem definition
+
+    See Also
+    ----------
+    Si_list_to_dict
+
+    Returns
+    ----------
+    tuple : dict of first order sensitivities,
+            tuple of parameter name combination and second order sensitivities.
+            If no second order indices found, then returns tuple of (None, None)
+
+    Examples
+    --------
+    >>> X = saltelli.sample(problem, 1000)
+    >>> Y = Ishigami.evaluate(X)
+    >>> Si = sobol.analyze(problem, Y, print_to_console=True)
+    >>> first_Si, (idx, second_Si) = sobol.Si_to_pandas_dict(Si, problem)
+    """
+    first_order = {
+                     'cmd_S1': S_dict['S1'],
+                     'cmd_S1_conf': S_dict['S1_conf'],
+                     'cmd_ST': S_dict['ST'],
+                     'cmd_ST_conf': S_dict['ST_conf']
+                  }
+
+    idx = None
+    second_order = None
+    if 'S2' in S_dict:
+        names = problem['names']
+        idx = list(combinations(names, 2))
+        second_order = {
+            'S2': [S_dict['S2'][names.index(i[0]), names.index(i[1])]
+                   for i in idx],
+            'S2_conf': [S_dict['S2_conf'][names.index(i[0]), names.index(i[1])]
+                        for i in idx]
+        }
+    return first_order, (idx, second_order)
 
 
 def print_indices(S, problem, calc_second_order):
