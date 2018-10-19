@@ -114,12 +114,20 @@ class BruteForce(Strategy):
         '''
         Obtains scores from the distance_matrix for each pairwise combination
         held in the combos array
+
+        Arguments
+        ----------
+        combos : numpy.ndarray
+        pairwise : numpy.ndarray
+        distance_matrix : numpy.ndarray
         '''
         combos = np.array(combos)
         # Create a list of all pairwise combination for each combo in combos
         combo_list = combos[:, pairwise[:, ]]
-        all_distances = distance_matrix[[
-            combo_list[:, :, 1], combo_list[:, :, 0]]]
+
+        addresses = tuple([combo_list[:, :, 1], combo_list[:, :, 0]])
+
+        all_distances = distance_matrix[addresses]
         new_scores = np.sqrt(
             np.einsum('ij,ij->i', all_distances, all_distances))
         return new_scores
