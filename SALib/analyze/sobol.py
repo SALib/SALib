@@ -255,7 +255,7 @@ def Si_to_pandas_dict(S_dict, problem):
 
     Returns
     ----------
-    tuple : dict of first order sensitivities,
+    tuple : dict of first and total order sensitivities,
             tuple of parameter name combination and second order sensitivities.
             If no second order indices found, then returns tuple of (None, None)
 
