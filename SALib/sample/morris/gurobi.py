@@ -47,7 +47,7 @@ class GlobalOptimisation(Strategy):
             raise ValueError("k_choices must be less than N")
 
         model = Model("distance1")
-        I = range(N)
+        trajectories = range(N)
 
         distance_matrix = np.array(
             distance_matrix / distance_matrix.max(), dtype=np.float64)
@@ -55,7 +55,7 @@ class GlobalOptimisation(Strategy):
         dm = distance_matrix ** 2
 
         y, x = {}, {}
-        for i in I:
+        for i in trajectories:
             y[i] = model.addVar(vtype="B", obj=0, name="y[%s]" % i)
             for j in range(i + 1, N):
                 x[i, j] = model.addVar(
@@ -63,19 +63,21 @@ class GlobalOptimisation(Strategy):
         model.update()
 
         model.setObjective(quicksum([x[i, j] * dm[j][i]
-                                     for i in I for j in range(i + 1, N)]))
+                                     for i in trajectories
+                                     for j in range(i + 1, N)]))
 
         # Add constraints to the model
-        model.addConstr(quicksum([y[i] for i in I]) <= k_choices, "27")
+        model.addConstr(quicksum([y[i]
+                                  for i in trajectories]) <= k_choices, "27")
 
-        for i in I:
+        for i in trajectories:
             for j in range(i + 1, N):
                 model.addConstr(x[i, j] <= y[i], "28-%s-%s" % (i, j))
                 model.addConstr(x[i, j] <= y[j], "29-%s-%s" % (i, j))
                 model.addConstr(y[i] + y[j] <= 1 + x[i, j],
                                 "30-%s-%s" % (i, j))
 
-        model.addConstr(quicksum([x[i, j] for i in I
+        model.addConstr(quicksum([x[i, j] for i in trajectories
                                   for j in range(i + 1, N)])
                         <= nchoosek(k_choices, 2), "Cut_1")
         model.update()
@@ -126,13 +128,12 @@ class GlobalOptimisation(Strategy):
         return sorted(maximum_combo)
 
 
-def timestamp(num_params, p_levels, grid_step, k_choices, N):
+def timestamp(num_params, p_levels, k_choices, N):
     """
     Returns a uniform timestamp with parameter values for file identification
     """
     string = "_v%s_l%s_gs%s_k%s_N%s_%s.txt" % (num_params,
                                                p_levels,
-                                               grid_step,
                                                k_choices,
                                                N,
                                                dt.strftime(dt.now(),

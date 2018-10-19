@@ -89,33 +89,30 @@ class TestSharedMethods:
         '''
         Tests the computation of the distance of two trajectories
         '''
-        input_1 = np.matrix(
+        input_1 = np.array(
             [[0, 1 / 3.], [0, 1.], [2 / 3., 1.]], dtype=np.float32)
-        input_3 = np.matrix([[2 / 3., 0], [2 / 3., 2 / 3.],
-                             [0, 2 / 3.]], dtype=np.float32)
+        input_3 = np.array([[2 / 3., 0], [2 / 3., 2 / 3.],
+                            [0, 2 / 3.]], dtype=np.float32)
         output = strategy.compute_distance(input_1, input_3)
         assert_allclose(output, 6.18, atol=1e-2)
 
     def test_distance_of_identical_matrices_is_min(self, strategy):
-        input_1 = np.matrix([[1., 1.],
-                             [1., 0.33333333],
-                             [0.33333333, 0.33333333]])
+        input_1 = np.array([[1., 1.],
+                            [1., 0.33333333],
+                            [0.33333333, 0.33333333]])
         input_2 = input_1.copy()
         actual = strategy.compute_distance(input_1, input_2)
         desired = 0
         assert_allclose(actual, desired, atol=1e-2)
 
     def test_distance_fail_with_difference_size_ip(self, strategy):
-        input_1 = np.matrix([[0, 1 / 3.], [0, 1.]], dtype=np.float32)
-        input_3 = np.matrix([[2 / 3., 0], [2 / 3., 2 / 3.],
-                             [0, 2 / 3.]], dtype=np.float32)
-        try:
-            strategy.compute_distance(input_1, input_3, 2)
-        except:
-            pass
-        else:
-            raise AssertionError(
-                "Different size matrices did not trigger error")
+        input_1 = np.array([[0, 1 / 3.], [0, 1.]], dtype=np.float32)
+        input_3 = np.array([[2 / 3., 0], [2 / 3., 2 / 3.],
+                            [0, 2 / 3.]], dtype=np.float32)
+        with raises(ValueError) as err:
+            strategy.compute_distance(input_1, input_3)
+
+        assert "Input matrices are different sizes" in str(err)
 
     def test_compute_distance_matrix(self, strategy, setup_input):
         '''
@@ -207,13 +204,12 @@ class TestLocallyOptimalStrategy:
         param_file = setup_param_groups_prime
         problem = read_param_file(param_file)
         num_levels = 4
-        grid_jump = num_levels / 2
 
         np.random.seed(12345)
-        expected = _sample_groups(problem, N, num_levels, grid_jump)
+        expected = _sample_groups(problem, N, num_levels)
 
         np.random.seed(12345)
-        actual = _sample_groups(problem, N, num_levels, grid_jump)
+        actual = _sample_groups(problem, N, num_levels)
 
         assert_equal(actual, expected)
 
@@ -236,14 +232,13 @@ class TestLocallyOptimalStrategy:
         param_file = setup_param_groups_prime
         problem = read_param_file(param_file)
         num_levels = 4
-        grid_jump = num_levels / 2
         k_choices = 4
 
         num_params = problem['num_vars']
 
         num_groups = len(set(problem['groups']))
 
-        input_sample = _sample_groups(problem, N, num_levels, grid_jump)
+        input_sample = _sample_groups(problem, N, num_levels)
 
         local = LocalOptimisation()
 

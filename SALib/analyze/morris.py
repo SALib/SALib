@@ -7,13 +7,13 @@ import numpy as np
 
 from . import common_args
 from ..util import read_param_file, compute_groups_matrix
+from ..sample.morris import compute_delta
 
 
 def analyze(problem, X, Y,
             num_resamples=1000,
             conf_level=0.95,
             print_to_console=False,
-            grid_jump=2,
             num_levels=4):
     """Perform Morris Analysis on model outputs.
 
@@ -36,9 +36,6 @@ def analyze(problem, X, Y,
         The confidence interval level (default 0.95)
     print_to_console : bool
         Print results directly to console (default False)
-    grid_jump : int
-        The grid jump size, must be identical to the value passed
-        to :func:`SALib.sample.morris.sample` (default 2)
     num_levels : int
         The number of grid levels, must be identical to the value
         passed to SALib.sample.morris (default 4)
@@ -66,10 +63,10 @@ def analyze(problem, X, Y,
 
     Examples
     --------
-    >>> X = morris.sample(problem, 1000, num_levels=4, grid_jump=2)
+    >>> X = morris.sample(problem, 1000, num_levels=4)
     >>> Y = Ishigami.evaluate(X)
     >>> Si = morris.analyze(problem, X, Y, conf_level=0.95,
-    >>>                     print_to_console=True, num_levels=4, grid_jump=2)
+    >>>                     print_to_console=True, num_levels=4)
 
     """
 
@@ -81,8 +78,7 @@ def analyze(problem, X, Y,
 
     # Assume that there are no groups
     groups = None
-
-    delta = grid_jump / (num_levels - 1)
+    delta = compute_delta(num_levels)
 
     num_vars = problem['num_vars']
 
@@ -235,7 +231,7 @@ def compute_elementary_effects(model_inputs, model_outputs, trajectory_size,
     trajectory_size
         a scalar indicating the number of rows in a trajectory
     delta : float
-        scaling factor computed from `grid_jump` and `num_levels`
+        scaling factor computed from `num_levels`
     '''
     num_vars = model_inputs.shape[1]
     num_rows = model_inputs.shape[0]
@@ -305,4 +301,4 @@ if __name__ == "__main__":
         X = X.reshape((len(X), 1))
 
     analyze(problem, X, Y, num_resamples=args.resamples, print_to_console=True,
-            num_levels=args.levels, grid_jump=args.grid_jump)
+            num_levels=args.levels)

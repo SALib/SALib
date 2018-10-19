@@ -8,8 +8,7 @@ python -m SALib.sample.morris \
        -o model_input.txt \
        --delimiter=' ' \
        --precision=8 \
-       --levels=10 \
-       --grid-jump=5
+       --levels=10
 
 # Options:
 # -p, --paramfile: Your parameter range file
@@ -34,7 +33,7 @@ python -m SALib.sample.morris \
 #                         Each variable will be perturbed by this number of levels
 #                         during each trajectory. Default is 2.
 #
-# -k, --k-optimal (optional): Number of optimal trajectories. 
+# -k, --k-optimal (optional): Number of optimal trajectories.
 #                             Default behavior uses vanilla OAT if --k-optimal is not specified
 
 # Run the model using the inputs sampled above, and save outputs
@@ -49,8 +48,7 @@ python -m SALib.analyze.morris \
        -c 0 \
        -X model_input.txt \
        -r 1000 \
-       -l=10 \
-       --grid-jump=5
+       -l=10
 
 # Options:
 # -p, --paramfile: Your parameter range file
