@@ -245,7 +245,7 @@ def Si_to_pandas_dict(S_dict, problem):
     Parameters
     ----------
     S_dict : dict
-        The problem definition
+        Sobol sensitivity indices
     problem : dict
         The problem definition
 
