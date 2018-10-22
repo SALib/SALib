@@ -8,7 +8,7 @@ import numpy as np
 from scipy.signal import periodogram
 
 from . import common_args
-from ..util import read_param_file
+from ..util import read_param_file, ResultDict
 
 
 def analyze(problem, Y, X, M=10, print_to_console=False):
@@ -67,7 +67,7 @@ def analyze(problem, Y, X, M=10, print_to_console=False):
     # Calculate and Output the First Order Value
     if print_to_console:
         print("Parameter First")
-    Si = dict((k, [None] * D) for k in ['S1'])
+    Si = ResultDict((k, [None] * D) for k in ['S1'])
     for i in range(D):
         S1 = compute_first_order(permute_outputs(Y, X[:, i]), M)
         S1 = unskew_S1(S1, M, N)

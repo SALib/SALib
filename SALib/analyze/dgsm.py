@@ -6,17 +6,17 @@ from scipy.stats import norm
 import numpy as np
 
 from . import common_args
-from ..util import read_param_file
+from ..util import read_param_file, ResultDict
 
 
 def analyze(problem, X, Y, num_resamples=1000,
             conf_level=0.95, print_to_console=False):
     """Calculates Derivative-based Global Sensitivity Measure on model outputs.
-    
+
     Returns a dictionary with keys 'vi', 'vi_std', 'dgsm', and 'dgsm_conf',
     where each entry is a list of size D (the number of parameters) containing
     the indices in the same order as the parameter file.
-          
+
     Parameters
     ----------
     problem : dict
@@ -32,7 +32,7 @@ def analyze(problem, X, Y, num_resamples=1000,
         The confidence interval level (default 0.95)
     print_to_console : bool
         Print results directly to console (default False)
-        
+
     References
     ----------
     .. [1] Sobol, I. M. and S. Kucherenko (2009). "Derivative based global
@@ -65,7 +65,7 @@ def analyze(problem, X, Y, num_resamples=1000,
 
     # First order (+conf.) and Total order (+conf.)
     keys = ('vi', 'vi_std', 'dgsm', 'dgsm_conf')
-    S = dict((k, np.zeros(D)) for k in keys)
+    S = ResultDict((k, np.zeros(D)) for k in keys)
     if print_to_console:
         print("Parameter %s %s %s %s" % keys)
 

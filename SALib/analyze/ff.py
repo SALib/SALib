@@ -7,7 +7,7 @@ Created on 30 Jun 2015
 from __future__ import print_function
 import numpy as np
 from . import common_args
-from SALib.util import read_param_file, unscale_samples
+from SALib.util import read_param_file, unscale_samples, ResultDict
 from SALib.sample.ff import generate_contrast, sample, extend_bounds
 
 def analyze(problem, X, Y, second_order=False, print_to_console=False):
@@ -51,7 +51,7 @@ def analyze(problem, X, Y, second_order=False, print_to_console=False):
 
     main_effect = (1. / (2 * num_vars)) * np.dot(Y, X)
 
-    Si = dict((k, [None] * num_vars)
+    Si = ResultDict((k, [None] * num_vars)
               for k in ['names', 'ME'])
     Si['ME'] = main_effect
     Si['names'] = problem['names']

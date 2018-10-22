@@ -4,9 +4,11 @@ from __future__ import print_function
 from scipy.stats import norm
 
 import numpy as np
+import pandas as pd
 
 from . import common_args
-from ..util import read_param_file, compute_groups_matrix
+from ..util import read_param_file, compute_groups_matrix, ResultDict
+from types import MethodType
 
 from multiprocessing import Pool, cpu_count
 from functools import partial
@@ -125,6 +127,9 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
     if print_to_console:
         print_indices(S, problem, calc_second_order)
 
+    # Add problem context and override conversion method for special case
+    S.problem = problem
+    S.to_df = MethodType(to_df, S)
     return S
 
 
@@ -151,7 +156,7 @@ def second_order(A, ABj, ABk, BAj, B):
 
 def create_Si_dict(D, calc_second_order):
     # initialize empty dict to store sensitivity indices
-    S = dict((k, np.zeros(D)) for k in ('S1', 'S1_conf', 'ST', 'ST_conf'))
+    S = ResultDict((k, np.zeros(D)) for k in ('S1', 'S1_conf', 'ST', 'ST_conf'))
 
     if calc_second_order:
         S['S2'] = np.zeros((D, D))
@@ -239,15 +244,13 @@ def Si_list_to_dict(S_list, D, calc_second_order):
     return S
 
 
-def Si_to_pandas_dict(S_dict, problem):
+def Si_to_pandas_dict(S_dict):
     """Convert Si information into Pandas DataFrame compatible dict.
 
     Parameters
     ----------
-    S_dict : dict
+    S_dict : ResultDict
         Sobol sensitivity indices
-    problem : dict
-        The problem definition
 
     See Also
     ----------
@@ -255,8 +258,11 @@ def Si_to_pandas_dict(S_dict, problem):
 
     Returns
     ----------
-    tuple : dict of first and total order sensitivities,
-            tuple of parameter name combination and second order sensitivities.
+    tuple : of total, first, and second order sensitivities.
+            Total and first order are dicts.
+            Second order sensitivities contain a tuple of parameter name
+            combinations for use as the DataFrame index and second order
+            sensitivities.
             If no second order indices found, then returns tuple of (None, None)
 
     Examples
@@ -264,13 +270,16 @@ def Si_to_pandas_dict(S_dict, problem):
     >>> X = saltelli.sample(problem, 1000)
     >>> Y = Ishigami.evaluate(X)
     >>> Si = sobol.analyze(problem, Y, print_to_console=True)
-    >>> first_Si, (idx, second_Si) = sobol.Si_to_pandas_dict(Si, problem)
+    >>> T_Si, first_Si, (idx, second_Si) = sobol.Si_to_pandas_dict(Si, problem)
     """
+    problem = S_dict.problem
+    total_order = {
+                      'ST': S_dict['ST'],
+                      'ST_conf': S_dict['ST_conf']
+                  }
     first_order = {
-                     'cmd_S1': S_dict['S1'],
-                     'cmd_S1_conf': S_dict['S1_conf'],
-                     'cmd_ST': S_dict['ST'],
-                     'cmd_ST_conf': S_dict['ST_conf']
+                     'S1': S_dict['S1'],
+                     'S1_conf': S_dict['S1_conf']
                   }
 
     idx = None
@@ -284,7 +293,24 @@ def Si_to_pandas_dict(S_dict, problem):
             'S2_conf': [S_dict['S2_conf'][names.index(i[0]), names.index(i[1])]
                         for i in idx]
         }
-    return first_order, (idx, second_order)
+    return total_order, first_order, (idx, second_order)
+
+
+def to_df(self):
+    '''Conversion method to Pandas DataFrame. To be attached to ResultDict.
+
+    Returns
+    ========
+    List : of Pandas DataFrames in order of Total, First, Second
+    '''
+    total, first, (idx, second) = Si_to_pandas_dict(self)
+    ret = [pd.DataFrame(total),
+           pd.DataFrame(first)]
+
+    if second:
+        ret += [pd.DataFrame(second, index=idx)]
+
+    return ret
 
 
 def print_indices(S, problem, calc_second_order):

@@ -6,17 +6,17 @@ from scipy.stats import norm, gaussian_kde, rankdata
 import numpy as np
 
 from . import common_args
-from ..util import read_param_file
+from ..util import read_param_file, ResultDict
 
 
 def analyze(problem, X, Y, num_resamples=10,
             conf_level=0.95, print_to_console=False):
     """Perform Delta Moment-Independent Analysis on model outputs.
-    
+
     Returns a dictionary with keys 'delta', 'delta_conf', 'S1', and 'S1_conf',
     where each entry is a list of size D (the number of parameters) containing
     the indices in the same order as the parameter file.
-    
+
     Parameters
     ----------
     problem : dict
@@ -31,17 +31,17 @@ def analyze(problem, X, Y, num_resamples=10,
         The confidence interval level (default 0.95)
     print_to_console : bool
         Print results directly to console (default False)
-        
+
     References
     ----------
     .. [1] Borgonovo, E. (2007). "A new uncertainty importance measure."
            Reliability Engineering & System Safety, 92(6):771-784,
            doi:10.1016/j.ress.2006.04.015.
-           
+
     .. [2] Plischke, E., E. Borgonovo, and C. L. Smith (2013). "Global
            sensitivity measures from given data." European Journal of
            Operational Research, 226(3):536-550, doi:10.1016/j.ejor.2012.11.047.
-           
+
     Examples
     --------
     >>> X = latin.sample(problem, 1000)
@@ -61,7 +61,7 @@ def analyze(problem, X, Y, num_resamples=10,
     Ygrid = np.linspace(np.min(Y), np.max(Y), 100)
 
     keys = ('delta', 'delta_conf', 'S1', 'S1_conf')
-    S = dict((k, np.zeros(D)) for k in keys)
+    S = ResultDict((k, np.zeros(D)) for k in keys)
     if print_to_console:
         print("Parameter %s %s %s %s" % keys)
 
