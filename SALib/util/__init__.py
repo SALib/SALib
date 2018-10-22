@@ -4,11 +4,12 @@
 from collections import OrderedDict
 import csv
 from warnings import warn
+from .results import ResultDict
 
 import numpy as np
 import scipy as sp
 
-__all__ = ["scale_samples", "read_param_file"]
+__all__ = ["scale_samples", "read_param_file", "ResultDict"]
 
 
 def scale_samples(params, bounds):
@@ -246,7 +247,7 @@ def compute_groups_matrix(groups):
         return None
 
     num_vars = len(groups)
-    
+
     # Get a unique set of the group names
     unique_group_names = list(OrderedDict.fromkeys(groups))
     number_of_groups = len(unique_group_names)
