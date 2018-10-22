@@ -246,7 +246,7 @@ def compute_groups_matrix(groups):
         return None
 
     num_vars = len(groups)
-    
+
     # Get a unique set of the group names
     unique_group_names = list(OrderedDict.fromkeys(groups))
     number_of_groups = len(unique_group_names)
@@ -259,7 +259,7 @@ def compute_groups_matrix(groups):
         group_index = indices[group_membership]
         output[parameter_row, group_index] = 1
 
-    return np.matrix(output), unique_group_names
+    return output, unique_group_names
 
 
 def requires_gurobipy(_has_gurobi):

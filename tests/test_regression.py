@@ -35,20 +35,22 @@ def set_seed():
 class TestMorris:
 
     def test_regression_morris_vanilla(self, set_seed):
+        """Note that this is a poor estimate of the Ishigami
+        function.
+        """
         set_seed
         param_file = 'SALib/test_functions/params/Ishigami.txt'
         problem = read_param_file(param_file)
-        param_values = sample(problem=problem, N=10000,
-                              num_levels=4, grid_jump=2,
+        param_values = sample(problem, 10000, 4,
                               optimal_trajectories=None)
 
         Y = Ishigami.evaluate(param_values)
 
         Si = morris.analyze(problem, param_values, Y,
                             conf_level=0.95, print_to_console=False,
-                            num_levels=4, grid_jump=2)
+                            num_levels=4)
 
-        assert_allclose(Si['mu_star'], [7.701555, 7.875, 6.288788],
+        assert_allclose(Si['mu_star'], [7.536586, 7.875, 6.308785],
                         atol=0, rtol=1e-5)
 
     def test_regression_morris_groups(self, set_seed):
@@ -57,14 +59,14 @@ class TestMorris:
         problem = read_param_file(param_file)
 
         param_values = sample(problem=problem, N=10000,
-                              num_levels=4, grid_jump=2,
+                              num_levels=4,
                               optimal_trajectories=None)
 
         Y = Ishigami.evaluate(param_values)
 
         Si = morris.analyze(problem, param_values, Y,
                             conf_level=0.95, print_to_console=False,
-                            num_levels=4, grid_jump=2)
+                            num_levels=4)
 
         assert_allclose(Si['mu_star'], [7.610322, 10.197014],
                         atol=0, rtol=1e-5)
@@ -76,7 +78,7 @@ class TestMorris:
         problem = read_param_file(param_file)
 
         param_values = sample(problem=problem, N=50,
-                              num_levels=4, grid_jump=2,
+                              num_levels=4,
                               optimal_trajectories=6,
                               local_optimization=False)
 
@@ -84,7 +86,7 @@ class TestMorris:
 
         Si = morris.analyze(problem, param_values, Y,
                             conf_level=0.95, print_to_console=False,
-                            num_levels=4, grid_jump=2)
+                            num_levels=4)
 
         assert_allclose(Si['mu'], [9.786986, np.NaN],
                         atol=0, rtol=1e-5)
@@ -101,7 +103,7 @@ class TestMorris:
         problem = read_param_file(param_file)
 
         param_values = sample(problem=problem, N=500,
-                              num_levels=4, grid_jump=2,
+                              num_levels=4,
                               optimal_trajectories=20,
                               local_optimization=True)
 
@@ -109,7 +111,7 @@ class TestMorris:
 
         Si = morris.analyze(problem, param_values, Y,
                             conf_level=0.95, print_to_console=False,
-                            num_levels=4, grid_jump=2)
+                            num_levels=4)
 
         assert_allclose(Si['mu_star'],
                         [13.95285, 7.875],
@@ -122,25 +124,24 @@ class TestMorris:
         Uses brute force approach
 
         Note that the relative tolerance is set to a very high value
-        (default is 1e-05) due to the coarse nature of the num_levels
-        and grid_jump.
+        (default is 1e-05) due to the coarse nature of the num_levels.
         '''
         set_seed
         param_file = 'SALib/test_functions/params/Ishigami.txt'
         problem = read_param_file(param_file)
         param_values = sample(problem=problem, N=20,
-                              num_levels=4, grid_jump=2,
+                              num_levels=4,
                               optimal_trajectories=9,
-                              local_optimization=False)
+                              local_optimization=True)
 
         Y = Ishigami.evaluate(param_values)
 
         Si = morris.analyze(problem, param_values, Y,
                             conf_level=0.95, print_to_console=False,
-                            num_levels=4, grid_jump=2)
+                            num_levels=4)
 
         assert_allclose(Si['mu_star'],
-                        [9.786986e+00, 7.875000e+00, 2.984617e-12],
+                        [9.786986e+00, 7.875000e+00, 1.388621],
                         atol=0,
                         rtol=1e-5)
 
