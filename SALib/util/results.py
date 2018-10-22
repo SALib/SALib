@@ -8,7 +8,7 @@ class ResultDict(dict):
     by each implementing method
     '''
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(ResultDict, self).__init__(*args, **kwargs)
 
     def to_df(self):
         '''Convert dict structure into Pandas DataFrame.'''
