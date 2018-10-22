@@ -169,9 +169,10 @@ def test_compute_grouped_elementary_effects():
     problem = {'names': ['1', '2', '3', '4', '5', '6', '7', '8',
                          '9', '10', '11', '12', '13', '14', '15'],
                'bounds': [[]],
-               'groups': (np.matrix('0,0,0,0,0,0,0,0,1,0,1,1,1,1,1;1,1,1,\
-                                     1,1,1,1,1,0,1,0,0,0,0,0'),
-                          ['gp1', 'gp2']),
+               'groups':
+               (np.array([[0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1],
+                          [1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0]]),
+                ['gp1', 'gp2']),
                'num_vars': 15
                }
     ee = compute_elementary_effects(model_inputs, model_results, 3, 2. / 3)
@@ -270,7 +271,7 @@ def test_compute_grouped_mu_star():
     Computes mu_star for 3 variables grouped into 2 groups
     There are six trajectories.
     '''
-    group_matrix = np.matrix('1,0;0,1;0,1', dtype=np.int)
+    group_matrix = np.array([[1, 0], [0, 1], [0, 1]], dtype=np.int)
     ee = np.array([[2.52, 2.01, 2.30, -0.66, -0.93, -1.30],
                    [-2.00, 0.13, -0.80, 0.25, -0.02, 0.51],
                    [2.00, -0.13, 0.80, -0.25, 0.02, -0.51]])
@@ -294,7 +295,7 @@ def test_sigma_returned_for_groups_with_only_one_param():
     An NA should be returned for all other groups (as opposed to 0, which could
     confuse plotting.morris)
     '''
-    group_matrix = np.matrix('1,0;0,1;0,1', dtype=np.int)
+    group_matrix = np.array([[1, 0], [0, 1], [0, 1]], dtype=np.int)
     ee = np.array([[2.52, 2.01, 2.30, -0.66, -0.93, -1.30],
                    [-2.00, 0.13, -0.80, 0.25, -0.02, 0.51],
                    [2.00, -0.13, 0.80, -0.25, 0.02, -0.51]])

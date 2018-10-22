@@ -260,7 +260,7 @@ def compute_groups_matrix(groups):
         group_index = indices[group_membership]
         output[parameter_row, group_index] = 1
 
-    return np.matrix(output), unique_group_names
+    return output, unique_group_names
 
 
 def requires_gurobipy(_has_gurobi):
