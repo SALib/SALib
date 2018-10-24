@@ -62,6 +62,8 @@ def analyze(problem, X, Y, num_resamples=10,
 
     keys = ('delta', 'delta_conf', 'S1', 'S1_conf')
     S = ResultDict((k, np.zeros(D)) for k in keys)
+    S['names'] = problem['names']
+
     if print_to_console:
         print("Parameter %s %s %s %s" % keys)
 

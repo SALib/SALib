@@ -73,6 +73,8 @@ def analyze(problem, Y, M=4, print_to_console=False):
     if print_to_console:
         print("Parameter First Total")
     Si = ResultDict((k, [None] * D) for k in ['S1', 'ST'])
+    Si['names'] = problem['names']
+
     for i in range(D):
         l = np.arange(i * N, (i + 1) * N)
         Si['S1'][i] = compute_first_order(Y[l], N, M, omega[0])
@@ -80,6 +82,7 @@ def analyze(problem, Y, M=4, print_to_console=False):
         if print_to_console:
             print("%s %f %f" %
                   (problem['names'][i], Si['S1'][i], Si['ST'][i]))
+
     return Si
 
 

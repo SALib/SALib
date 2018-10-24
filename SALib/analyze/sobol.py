@@ -304,8 +304,9 @@ def to_df(self):
     List : of Pandas DataFrames in order of Total, First, Second
     '''
     total, first, (idx, second) = Si_to_pandas_dict(self)
-    ret = [pd.DataFrame(total),
-           pd.DataFrame(first)]
+    names = self.problem['names']
+    ret = [pd.DataFrame(total, index=names),
+           pd.DataFrame(first, index=names)]
 
     if second:
         ret += [pd.DataFrame(second, index=idx)]

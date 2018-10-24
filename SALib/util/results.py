@@ -12,4 +12,5 @@ class ResultDict(dict):
 
     def to_df(self):
         '''Convert dict structure into Pandas DataFrame.'''
-        return pd.DataFrame(self)
+        return pd.DataFrame({k: v for k, v in self.items() if k is not 'names'},
+                            index=self['names'])

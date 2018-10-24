@@ -68,6 +68,8 @@ def analyze(problem, Y, X, M=10, print_to_console=False):
     if print_to_console:
         print("Parameter First")
     Si = ResultDict((k, [None] * D) for k in ['S1'])
+    Si['names'] = problem['names']
+    
     for i in range(D):
         S1 = compute_first_order(permute_outputs(Y, X[:, i]), M)
         S1 = unskew_S1(S1, M, N)

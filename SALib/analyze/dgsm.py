@@ -66,6 +66,8 @@ def analyze(problem, X, Y, num_resamples=1000,
     # First order (+conf.) and Total order (+conf.)
     keys = ('vi', 'vi_std', 'dgsm', 'dgsm_conf')
     S = ResultDict((k, np.zeros(D)) for k in keys)
+    S['names'] = problem['names']
+    
     if print_to_console:
         print("Parameter %s %s %s %s" % keys)
 
@@ -78,6 +80,8 @@ def analyze(problem, X, Y, num_resamples=1000,
         if print_to_console:
             print("%s %f %f %f %f" % (
                 problem['names'][j], S['vi'][j], S['vi_std'][j], S['dgsm'][j], S['dgsm_conf'][j]))
+
+
 
     return S
 
