@@ -11,8 +11,8 @@ from . import common_args
 import pandas as pd
 from types import MethodType
 
-from SALib.util import read_param_file, unscale_samples, ResultDict
-from SALib.sample.ff import generate_contrast, sample, extend_bounds
+from SALib.util import read_param_file, ResultDict
+from SALib.sample.ff import generate_contrast, extend_bounds
 
 def analyze(problem, X, Y, second_order=False, print_to_console=False):
     """Perform a fractional factorial analysis
