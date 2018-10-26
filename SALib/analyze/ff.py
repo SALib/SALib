@@ -7,6 +7,10 @@ Created on 30 Jun 2015
 from __future__ import print_function
 import numpy as np
 from . import common_args
+
+import pandas as pd
+from types import MethodType
+
 from SALib.util import read_param_file, unscale_samples, ResultDict
 from SALib.sample.ff import generate_contrast, sample, extend_bounds
 
@@ -69,7 +73,34 @@ def analyze(problem, X, Y, second_order=False, print_to_console=False):
         Si['names'].append(interaction_names)
         Si['IE'] = interaction_effects
 
+    Si.to_df = MethodType(to_df, Si)
+
     return Si
+
+
+def to_df(self):
+    '''Conversion method to Pandas DataFrame. To be attached to ResultDict.
+
+    Returns
+    ========
+    List : of Pandas DataFrames in order of Main Effect, Interaction Effect
+           if interaction data is not available, returns (Main Effect, None)
+    '''
+    names = self['names']
+    main_effect = self['ME']
+    interactions = self.get('IE', None)
+
+    inter_effect = None
+    if interactions:
+        # get interaction parameters from names
+        interaction_names = [i for i in names if isinstance(i, list)][0]
+        names = [name for name in names if not isinstance(name, list)]
+        inter_effect = pd.DataFrame({'IE': interactions},
+                                    index=interaction_names)
+
+    main_effect = pd.DataFrame({'ME': main_effect}, index=names)
+
+    return main_effect, inter_effect
 
 
 def interactions(problem, Y, print_to_console=False):
