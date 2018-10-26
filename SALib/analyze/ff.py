@@ -82,9 +82,10 @@ def to_df(self):
     '''Conversion method to Pandas DataFrame. To be attached to ResultDict.
 
     Returns
-    ========
-    List : of Pandas DataFrames in order of Main Effect, Interaction Effect
-           if interaction data is not available, returns (Main Effect, None)
+    -------
+    main_effect, inter_effect: tuple
+        A tuple of DataFrames for main effects and interaction effects.
+        The second element (for interactions) will be `None` if not available.
     '''
     names = self['names']
     main_effect = self['ME']
