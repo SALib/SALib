@@ -156,6 +156,7 @@ def test_ff_to_df():
                    ('x3', 'dummy_0')]
     assert list(inter_effect.index) == inter_index, \
         "Incorrect index in Interaction Effect DataFrame"
+# End test_fast_to_df()
 
 
 def test_rbd_to_df():
@@ -182,3 +183,4 @@ def test_rbd_to_df():
     assert list(Si_df.columns) == col_names, \
         "Unexpected column names in DataFrame. Expected {}, got {}".format(
             col_names, Si_df.columns)
+# End test_fast_to_df()
