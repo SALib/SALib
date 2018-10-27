@@ -31,19 +31,22 @@ def test_morris_to_df():
 
     assert isinstance(Si_df, pd.DataFrame), \
         "Morris Si: Expected DataFrame, got {}".format(type(Si_df))
-    assert list(Si_df.index) == params, "Incorrect index in DataFrame"
+
+    expected_index = set(params)
+    assert set(Si_df.index) == expected_index, "Incorrect index in DataFrame"
 
     col_names = ['mu', 'mu_star', 'sigma', 'mu_star_conf']
-    assert list(Si_df.columns) == col_names, \
+    assert set(Si_df.columns) == set(col_names), \
         "Unexpected column names in DataFrame. Expected {}, got {}".format(
             col_names, Si_df.columns)
 # End test_morris_to_df()
 
 
 def test_sobol_to_df():
+    params = ['x1', 'x2', 'x3']
     problem = {
         'num_vars': 3,
-        'names': ['x1', 'x2', 'x3'],
+        'names': params,
         'bounds': [[-np.pi, np.pi]]*3
     }
 
@@ -59,11 +62,14 @@ def test_sobol_to_df():
     assert isinstance(second, pd.DataFrame), \
         "Second Si: Expected DataFrame, got {}".format(type(second))
 
-    assert list(total.index) == ['x1', 'x2', 'x3'], \
+    expected_index = set(params)
+    assert set(total.index) == expected_index, \
         "Index for Total Si are incorrect"
-    assert list(first.index) == ['x1', 'x2', 'x3'], \
+    assert set(first.index) == expected_index, \
         "Index for first order Si are incorrect"
-    assert list(second.index) == [('x1', 'x2'), ('x1', 'x3'), ('x2', 'x3')], \
+    assert set(second.index) == set([('x1', 'x2'),
+                                     ('x1', 'x3'),
+                                     ('x2', 'x3')]), \
         "Index for second order Si are incorrect"
 # End test_sobol_to_df()
 
@@ -87,10 +93,10 @@ def test_dgsm_to_df():
 
     assert isinstance(Si_df, pd.DataFrame), \
         "DGSM Si: Expected DataFrame, got {}".format(type(Si_df))
-    assert list(Si_df.index) == params, "Incorrect index in DataFrame"
+    assert set(Si_df.index) == set(params), "Incorrect index in DataFrame"
 
     col_names = ['vi', 'vi_std', 'dgsm', 'dgsm_conf']
-    assert list(Si_df.columns) == col_names, \
+    assert set(Si_df.columns) == set(col_names), \
         "Unexpected column names in DataFrame"
 # End test_dgsm_to_df()
 
@@ -112,12 +118,13 @@ def test_fast_to_df():
     Si = fast.analyze(problem, Y, print_to_console=False)
     Si_df = Si.to_df()
 
+    expected_index = set(params)
     assert isinstance(Si_df, pd.DataFrame), \
         "FAST Si: Expected DataFrame, got {}".format(type(Si_df))
-    assert list(Si_df.index) == params, "Incorrect index in DataFrame"
+    assert set(Si_df.index) == expected_index, "Incorrect index in DataFrame"
 
-    col_names = ['S1', 'ST']
-    assert list(Si_df.columns) == col_names, \
+    col_names = set(['S1', 'ST'])
+    assert set(Si_df.columns) == col_names, \
         "Unexpected column names in DataFrame. Expected {}, got {}".format(
             col_names, Si_df.columns)
 # End test_fast_to_df()
@@ -145,16 +152,16 @@ def test_ff_to_df():
         "FF ME: Expected DataFrame, got {}".format(type(main_effect))
     assert isinstance(main_effect, pd.DataFrame), \
         "FF IE: Expected DataFrame, got {}".format(type(inter_effect))
-    assert list(main_effect.index) == main_index, \
+    assert set(main_effect.index) == set(main_index), \
         "Incorrect index in Main Effect DataFrame"
 
-    inter_index = [('x1', 'x2'),
-                   ('x1', 'x3'),
-                   ('x2', 'x3'),
-                   ('x1', 'dummy_0'),
-                   ('x2', 'dummy_0'),
-                   ('x3', 'dummy_0')]
-    assert list(inter_effect.index) == inter_index, \
+    inter_index = set([('x1', 'x2'),
+                       ('x1', 'x3'),
+                       ('x2', 'x3'),
+                       ('x1', 'dummy_0'),
+                       ('x2', 'dummy_0'),
+                       ('x3', 'dummy_0')])
+    assert set(inter_effect.index) == inter_index, \
         "Incorrect index in Interaction Effect DataFrame"
 # End test_fast_to_df()
 
@@ -177,10 +184,10 @@ def test_rbd_to_df():
 
     assert isinstance(Si_df, pd.DataFrame), \
         "RBD Si: Expected DataFrame, got {}".format(type(Si_df))
-    assert list(Si_df.index) == params, "Incorrect index in DataFrame"
+    assert set(Si_df.index) == set(params), "Incorrect index in DataFrame"
 
-    col_names = ['S1']
-    assert list(Si_df.columns) == col_names, \
+    col_names = set(['S1'])
+    assert set(Si_df.columns) == col_names, \
         "Unexpected column names in DataFrame. Expected {}, got {}".format(
             col_names, Si_df.columns)
 # End test_fast_to_df()
