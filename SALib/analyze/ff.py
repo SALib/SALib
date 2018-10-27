@@ -65,12 +65,11 @@ def analyze(problem, X, Y, second_order=False, print_to_console=False):
         for j in range(num_vars):
             print("%s %f" % (problem['names'][j], Si['ME'][j]))
 
-    if second_order == True:
+    if second_order:
         interaction_names, interaction_effects = interactions(problem,
                                                               Y,
                                                               print_to_console)
-
-        Si['names'].append(interaction_names)
+        Si['interaction_names'] = interaction_names
         Si['IE'] = interaction_effects
 
     Si.to_df = MethodType(to_df, Si)
@@ -93,8 +92,7 @@ def to_df(self):
 
     inter_effect = None
     if interactions:
-        # get interaction parameters from names
-        interaction_names = [i for i in names if isinstance(i, list)][0]
+        interaction_names = self.get('interaction_names')
         names = [name for name in names if not isinstance(name, list)]
         inter_effect = pd.DataFrame({'IE': interactions},
                                     index=interaction_names)
@@ -139,7 +137,7 @@ def interactions(problem, Y, print_to_console=False):
     for col in range(X.shape[1]):
         for col_2 in range(col):
             x = X[:, col] * X[:, col_2]
-            var_names = names[col_2] + names[col]
+            var_names = (names[col_2], names[col])
             ie_names.append(var_names)
             IE.append((1. / (2 * num_vars)) * np.dot(Y, x))
     if print_to_console:

@@ -309,7 +309,7 @@ def to_df(self):
            pd.DataFrame(first, index=names)]
 
     if second:
-        ret += [pd.DataFrame(second, index=[i[0] + i[1] for i in idx])]
+        ret += [pd.DataFrame(second, index=idx)]
 
     return ret
 
