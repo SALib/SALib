@@ -41,16 +41,12 @@ def parse_subargs(module, parser, method, opts):
 
     Returns
     ---------
-    method : argparser namespace object
+    subargs : argparser namespace object
     '''
     module.cli_args(parser)
     subargs = parser.parse_args([method]+opts)
     return subargs
 
-
-# Get list of available samplesr and analyzers
-analyzers = avail_approaches(analyze)
-samplers = avail_approaches(sample)
 
 parser = argparse.ArgumentParser(
     description='SALib - Sensitivity Analysis Library')
@@ -60,6 +56,9 @@ subparsers = parser.add_subparsers(help='Sample or Analysis method',
 sample_parser = subparsers.add_parser('sample')
 analyze_parser = subparsers.add_parser('analyze')
 
+# Get list of available samplers and analyzers
+samplers = avail_approaches(sample)
+analyzers = avail_approaches(analyze)
 sample_parser.add_argument('method', choices=samplers)
 analyze_parser.add_argument('method', choices=analyzers)
 
