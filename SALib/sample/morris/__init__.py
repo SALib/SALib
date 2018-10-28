@@ -342,6 +342,34 @@ def _compute_optimised_trajectories(problem, input_sample, N, k_choices,
     return output
 
 
+def cli_args(subparser):
+    common_args.setup(subparser)
+    subparser.add_argument(
+        '-n', '--samples', type=int, required=True, help='Number of Samples')
+    subparser.add_argument('-l', '--levels', type=int, required=False,
+                           default=4, help='Number of grid levels \
+                           (Morris only)')
+    subparser.add_argument('-k', '--k-optimal', type=int, required=False,
+                           default=None,
+                           help='Number of optimal trajectories \
+                           (Morris only)')
+    subparser.add_argument('-o', '--local', type=bool, required=True,
+                           default=False,
+                           help='Use the local optimisation method \
+                           (Morris with optimization only)')
+
+
+def run_sample(args):
+    rd.seed(args.seed)
+
+    problem = read_param_file(args.paramfile)
+    param_values = sample(problem, args.samples, args.levels,
+                          args.k_optimal, args.local)
+
+    np.savetxt(args.output, param_values, delimiter=args.delimiter,
+               fmt='%.' + str(args.precision) + 'e')
+
+
 if __name__ == "__main__":
 
     parser = common_args.create()
@@ -359,11 +387,4 @@ if __name__ == "__main__":
                               (Morris with optimization only)')
     args = parser.parse_args()
 
-    rd.seed(args.seed)
-
-    problem = read_param_file(args.paramfile)
-    param_values = sample(problem, args.samples, args.levels,
-                          args.k_optimal, args.local)
-
-    np.savetxt(args.output, param_values, delimiter=args.delimiter,
-               fmt='%.' + str(args.precision) + 'e')
+    run_sample(args)

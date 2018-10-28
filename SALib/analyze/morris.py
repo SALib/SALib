@@ -277,6 +277,35 @@ def compute_mu_star_confidence(ee, num_trajectories, num_resamples,
     return norm.ppf(0.5 + conf_level / 2) * mu_star_resampled.std(ddof=1)
 
 
+def cli_args(subparser):
+    common_args.setup(subparser)
+    subparser.add_argument('-X', '--model-input-file', type=str,
+                           required=True, default=None,
+                           help='Model input file')
+    subparser.add_argument('-r', '--resamples', type=int, required=False,
+                           default=1000,
+                           help='Number of bootstrap resamples for Sobol \
+                           confidence intervals')
+    subparser.add_argument('-l', '--levels', type=int, required=False,
+                           default=4, help='Number of grid levels \
+                           (Morris only)')
+    subparser.add_argument('--grid-jump', type=int, required=False,
+                           default=2, help='Grid jump size (Morris only)')
+
+
+def run_analysis(args):
+    problem = read_param_file(args.paramfile)
+
+    Y = np.loadtxt(args.model_output_file,
+                   delimiter=args.delimiter, usecols=(args.column,))
+    X = np.loadtxt(args.model_input_file, delimiter=args.delimiter, ndmin=2)
+    if len(X.shape) == 1:
+        X = X.reshape((len(X), 1))
+
+    analyze(problem, X, Y, num_resamples=args.resamples, print_to_console=True,
+            num_levels=args.levels)
+
+
 if __name__ == "__main__":
 
     parser = common_args.create()
@@ -292,13 +321,4 @@ if __name__ == "__main__":
                         default=2, help='Grid jump size (Morris only)')
     args = parser.parse_args()
 
-    problem = read_param_file(args.paramfile)
-
-    Y = np.loadtxt(args.model_output_file,
-                   delimiter=args.delimiter, usecols=(args.column,))
-    X = np.loadtxt(args.model_input_file, delimiter=args.delimiter, ndmin=2)
-    if len(X.shape) == 1:
-        X = X.reshape((len(X), 1))
-
-    analyze(problem, X, Y, num_resamples=args.resamples, print_to_console=True,
-            num_levels=args.levels)
+    run_analysis(args)
