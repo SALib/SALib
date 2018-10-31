@@ -14,14 +14,18 @@ sys.path.append('../..')
 problem = read_param_file('../../SALib/test_functions/params/Sobol_G.txt')
 # or define manually without a parameter file:
 # problem = {
-#  'num_vars': 3,
-#  'names': ['x1', 'x2', 'x3'],
+#  'num_vars': 8,
+#  'names': ['x1', 'x2', 'x3', 'x4', 'x5', 'x6', 'x7', 'x8'],
 #  'groups': None,
-#  'bounds': [[-3.14159265359, 3.14159265359],
-#             [-3.14159265359, 3.14159265359],
-#             [-3.14159265359, 3.14159265359]]
+#  'bounds': [[0.0, 1.0],
+#             [0.0, 1.0],
+#             [0.0, 1.0],
+#             [0.0, 1.0],
+#             [0.0, 1.0],
+#             [0.0, 1.0],
+#             [0.0, 1.0],
+#             [0.0, 1.0]]
 # }
-
 # Files with a 4th column for "group name" will be detected automatically, e.g.
 # param_file = '../../SALib/test_functions/params/Ishigami_groups.txt'
 
