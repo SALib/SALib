@@ -12,11 +12,11 @@ from ..util import read_param_file
 def analyze(problem, X, Y, num_resamples=10,
             conf_level=0.95, print_to_console=False):
     """Perform Delta Moment-Independent Analysis on model outputs.
-    
+
     Returns a dictionary with keys 'delta', 'delta_conf', 'S1', and 'S1_conf',
     where each entry is a list of size D (the number of parameters) containing
     the indices in the same order as the parameter file.
-    
+
     Parameters
     ----------
     problem : dict
@@ -31,17 +31,17 @@ def analyze(problem, X, Y, num_resamples=10,
         The confidence interval level (default 0.95)
     print_to_console : bool
         Print results directly to console (default False)
-        
+
     References
     ----------
     .. [1] Borgonovo, E. (2007). "A new uncertainty importance measure."
            Reliability Engineering & System Safety, 92(6):771-784,
            doi:10.1016/j.ress.2006.04.015.
-           
+
     .. [2] Plischke, E., E. Borgonovo, and C. L. Smith (2013). "Global
            sensitivity measures from given data." European Journal of
            Operational Research, 226(3):536-550, doi:10.1016/j.ejor.2012.11.047.
-           
+
     Examples
     --------
     >>> X = latin.sample(problem, 1000)
@@ -79,6 +79,7 @@ def analyze(problem, X, Y, num_resamples=10,
 
 # Plischke et al. 2013 estimator (eqn 26) for d_hat
 
+
 def calc_delta(Y, Ygrid, X, m):
     N = len(Y)
     fy = gaussian_kde(Y, bw_method='silverman')(Ygrid)
@@ -94,6 +95,7 @@ def calc_delta(Y, Ygrid, X, m):
     return d_hat
 
 # Plischke et al. 2013 bias reduction technique (eqn 30)
+
 
 def bias_reduced_delta(Y, Ygrid, X, m, num_resamples, conf_level):
     d = np.zeros(num_resamples)
@@ -127,18 +129,33 @@ def sobol_first_conf(Y, X, m, num_resamples, conf_level):
 
     return norm.ppf(0.5 + conf_level / 2) * s.std(ddof=1)
 
-if __name__ == "__main__":
-    parser = common_args.create()
-    parser.add_argument('-X', '--model-input-file', type=str,
-                        required=True, default=None, help='Model input file')
-    parser.add_argument('-r', '--resamples', type=int, required=False, default=10,
-                        help='Number of bootstrap resamples for Sobol confidence intervals')
-    args = parser.parse_args()
 
+def cli_args(subparser):
+    common_args.setup(subparser)
+    subparser.add_argument('-X', '--model-input-file', type=str,
+                           required=True, default=None,
+                           help='Model input file')
+    subparser.add_argument('-r', '--resamples', type=int, required=False,
+                           default=10,
+                           help='Number of bootstrap resamples for \
+                           Sobol confidence intervals')
+
+
+def run_analysis(args):
     problem = read_param_file(args.paramfile)
-    Y = np.loadtxt(args.model_output_file, delimiter=args.delimiter, usecols=(args.column,))
+    Y = np.loadtxt(args.model_output_file,
+                   delimiter=args.delimiter, usecols=(args.column,))
     X = np.loadtxt(args.model_input_file, delimiter=args.delimiter, ndmin=2)
     if len(X.shape) == 1:
         X = X.reshape((len(X), 1))
 
     analyze(problem, X, Y, num_resamples=args.resamples, print_to_console=True)
+
+
+if __name__ == "__main__":
+    parser = common_args.create()
+    cli_args(parser)
+
+    args = parser.parse_args()
+
+    run_analysis(args)
