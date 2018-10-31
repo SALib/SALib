@@ -4,12 +4,16 @@ from __future__ import print_function
 from scipy.stats import norm
 
 import numpy as np
+import pandas as pd
 
 from . import common_args
-from ..util import read_param_file, compute_groups_matrix
+from ..util import read_param_file, compute_groups_matrix, ResultDict
+from types import MethodType
 
 from multiprocessing import Pool, cpu_count
 from functools import partial
+from itertools import combinations
+
 try:
     from itertools import zip_longest
 except ImportError:
@@ -62,7 +66,7 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
     >>> X = saltelli.sample(problem, 1000)
     >>> Y = Ishigami.evaluate(X)
     >>> Si = sobol.analyze(problem, Y, print_to_console=True)
-    
+
     """
     # determining if groups are defined and adjusting the number
     # of rows in the cross-sampled matrix accordingly
@@ -85,7 +89,7 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
 
     # normalize the model output
     Y = (Y - Y.mean())/Y.std()
-    
+
     A,B,AB,BA = separate_output_values(Y, D, N, calc_second_order)
     r = np.random.randint(N, size=(N, num_resamples))
     Z = norm.ppf(0.5 + conf_level / 2)
@@ -123,6 +127,9 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
     if print_to_console:
         print_indices(S, problem, calc_second_order)
 
+    # Add problem context and override conversion method for special case
+    S.problem = problem
+    S.to_df = MethodType(to_df, S)
     return S
 
 
@@ -149,7 +156,7 @@ def second_order(A, ABj, ABk, BAj, B):
 
 def create_Si_dict(D, calc_second_order):
     # initialize empty dict to store sensitivity indices
-    S = dict((k, np.zeros(D)) for k in ('S1', 'S1_conf', 'ST', 'ST_conf'))
+    S = ResultDict((k, np.zeros(D)) for k in ('S1', 'S1_conf', 'ST', 'ST_conf'))
 
     if calc_second_order:
         S['S2'] = np.zeros((D, D))
@@ -235,6 +242,76 @@ def Si_list_to_dict(S_list, D, calc_second_order):
             S[s[0]][s[1], s[2]] = s[3]
 
     return S
+
+
+def Si_to_pandas_dict(S_dict):
+    """Convert Si information into Pandas DataFrame compatible dict.
+
+    Parameters
+    ----------
+    S_dict : ResultDict
+        Sobol sensitivity indices
+
+    See Also
+    ----------
+    Si_list_to_dict
+
+    Returns
+    ----------
+    tuple : of total, first, and second order sensitivities.
+            Total and first order are dicts.
+            Second order sensitivities contain a tuple of parameter name
+            combinations for use as the DataFrame index and second order
+            sensitivities.
+            If no second order indices found, then returns tuple of (None, None)
+
+    Examples
+    --------
+    >>> X = saltelli.sample(problem, 1000)
+    >>> Y = Ishigami.evaluate(X)
+    >>> Si = sobol.analyze(problem, Y, print_to_console=True)
+    >>> T_Si, first_Si, (idx, second_Si) = sobol.Si_to_pandas_dict(Si, problem)
+    """
+    problem = S_dict.problem
+    total_order = {
+                      'ST': S_dict['ST'],
+                      'ST_conf': S_dict['ST_conf']
+                  }
+    first_order = {
+                     'S1': S_dict['S1'],
+                     'S1_conf': S_dict['S1_conf']
+                  }
+
+    idx = None
+    second_order = None
+    if 'S2' in S_dict:
+        names = problem['names']
+        idx = list(combinations(names, 2))
+        second_order = {
+            'S2': [S_dict['S2'][names.index(i[0]), names.index(i[1])]
+                   for i in idx],
+            'S2_conf': [S_dict['S2_conf'][names.index(i[0]), names.index(i[1])]
+                        for i in idx]
+        }
+    return total_order, first_order, (idx, second_order)
+
+
+def to_df(self):
+    '''Conversion method to Pandas DataFrame. To be attached to ResultDict.
+
+    Returns
+    ========
+    List : of Pandas DataFrames in order of Total, First, Second
+    '''
+    total, first, (idx, second) = Si_to_pandas_dict(self)
+    names = self.problem['names']
+    ret = [pd.DataFrame(total, index=names),
+           pd.DataFrame(first, index=names)]
+
+    if second:
+        ret += [pd.DataFrame(second, index=idx)]
+
+    return ret
 
 
 def print_indices(S, problem, calc_second_order):

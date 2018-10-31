@@ -6,7 +6,7 @@ from scipy.stats import norm
 import numpy as np
 
 from . import common_args
-from ..util import read_param_file, compute_groups_matrix
+from ..util import read_param_file, compute_groups_matrix, ResultDict
 from ..sample.morris import compute_delta
 
 
@@ -99,7 +99,7 @@ def analyze(problem, X, Y,
 
     # Output the Mu, Mu*, and Sigma Values. Also return them in case this is
     # being called from Python
-    Si = dict((k, [None] * num_vars)
+    Si = ResultDict((k, [None] * num_vars)
               for k in ['names', 'mu', 'mu_star', 'sigma', 'mu_star_conf'])
     Si['mu'] = np.average(ee, 1)
     Si['mu_star'] = np.average(np.abs(ee), 1)
