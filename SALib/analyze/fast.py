@@ -7,16 +7,16 @@ from sys import exit
 import numpy as np
 
 from . import common_args
-from ..util import read_param_file
+from ..util import read_param_file, ResultDict
 
 
 def analyze(problem, Y, M=4, print_to_console=False):
     """Performs the Fourier Amplitude Sensitivity Test (FAST) on model outputs.
-    
+
     Returns a dictionary with keys 'S1' and 'ST', where each entry is a list of
     size D (the number of parameters) containing the indices in the same order
     as the parameter file.
-    
+
     Parameters
     ----------
     problem : dict
@@ -28,19 +28,19 @@ def analyze(problem, Y, M=4, print_to_console=False):
         the Fourier series decomposition (default 4)
     print_to_console : bool
         Print results directly to console (default False)
-        
+
     References
     ----------
     .. [1] Cukier, R. I., C. M. Fortuin, K. E. Shuler, A. G. Petschek, and J. H.
            Schaibly (1973).  "Study of the sensitivity of coupled reaction
            systems to uncertainties in rate coefficients."  J. Chem. Phys.,
            59(8):3873-3878, doi:10.1063/1.1680571.
-           
+
     .. [2] Saltelli, A., S. Tarantola, and K. P.-S. Chan (1999).  "A
           Quantitative Model-Independent Method for Global Sensitivity
           Analysis of Model Output."  Technometrics, 41(1):39-56,
           doi:10.1080/00401706.1999.10485594.
-          
+
     Examples
     --------
     >>> X = fast_sampler.sample(problem, 1000)
@@ -54,7 +54,7 @@ def analyze(problem, Y, M=4, print_to_console=False):
         N = int(Y.size / D)
     else:
         print("""
-            Error: Number of samples in model output file must be a multiple of D, 
+            Error: Number of samples in model output file must be a multiple of D,
             where D is the number of parameters in your parameter file.
           """)
         exit()
@@ -72,14 +72,17 @@ def analyze(problem, Y, M=4, print_to_console=False):
     # Calculate and Output the First and Total Order Values
     if print_to_console:
         print("Parameter First Total")
-    Si = dict((k, [None] * D) for k in ['S1', 'ST'])
+    Si = ResultDict((k, [None] * D) for k in ['S1', 'ST'])
+    Si['names'] = problem['names']
+
     for i in range(D):
         l = np.arange(i * N, (i + 1) * N)
         Si['S1'][i] = compute_first_order(Y[l], N, M, omega[0])
         Si['ST'][i] = compute_total_order(Y[l], N, omega[0])
         if print_to_console:
-            print("%s %f %f" % 
+            print("%s %f %f" %
                   (problem['names'][i], Si['S1'][i], Si['ST'][i]))
+
     return Si
 
 

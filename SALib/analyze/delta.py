@@ -6,7 +6,7 @@ from scipy.stats import norm, gaussian_kde, rankdata
 import numpy as np
 
 from . import common_args
-from ..util import read_param_file
+from ..util import read_param_file, ResultDict
 
 
 def analyze(problem, X, Y, num_resamples=10,
@@ -61,7 +61,9 @@ def analyze(problem, X, Y, num_resamples=10,
     Ygrid = np.linspace(np.min(Y), np.max(Y), 100)
 
     keys = ('delta', 'delta_conf', 'S1', 'S1_conf')
-    S = dict((k, np.zeros(D)) for k in keys)
+    S = ResultDict((k, np.zeros(D)) for k in keys)
+    S['names'] = problem['names']
+
     if print_to_console:
         print("Parameter %s %s %s %s" % keys)
 

@@ -7,8 +7,12 @@ Created on 30 Jun 2015
 from __future__ import print_function
 import numpy as np
 from . import common_args
-from SALib.util import read_param_file, unscale_samples
-from SALib.sample.ff import generate_contrast, sample, extend_bounds
+
+import pandas as pd
+from types import MethodType
+
+from SALib.util import read_param_file, ResultDict
+from SALib.sample.ff import generate_contrast, extend_bounds
 
 def analyze(problem, X, Y, second_order=False, print_to_console=False):
     """Perform a fractional factorial analysis
@@ -51,7 +55,7 @@ def analyze(problem, X, Y, second_order=False, print_to_console=False):
 
     main_effect = (1. / (2 * num_vars)) * np.dot(Y, X)
 
-    Si = dict((k, [None] * num_vars)
+    Si = ResultDict((k, [None] * num_vars)
               for k in ['names', 'ME'])
     Si['ME'] = main_effect
     Si['names'] = problem['names']
@@ -61,15 +65,41 @@ def analyze(problem, X, Y, second_order=False, print_to_console=False):
         for j in range(num_vars):
             print("%s %f" % (problem['names'][j], Si['ME'][j]))
 
-    if second_order == True:
+    if second_order:
         interaction_names, interaction_effects = interactions(problem,
                                                               Y,
                                                               print_to_console)
-
-        Si['names'].append(interaction_names)
+        Si['interaction_names'] = interaction_names
         Si['IE'] = interaction_effects
 
+    Si.to_df = MethodType(to_df, Si)
+
     return Si
+
+
+def to_df(self):
+    '''Conversion method to Pandas DataFrame. To be attached to ResultDict.
+
+    Returns
+    -------
+    main_effect, inter_effect: tuple
+        A tuple of DataFrames for main effects and interaction effects.
+        The second element (for interactions) will be `None` if not available.
+    '''
+    names = self['names']
+    main_effect = self['ME']
+    interactions = self.get('IE', None)
+
+    inter_effect = None
+    if interactions:
+        interaction_names = self.get('interaction_names')
+        names = [name for name in names if not isinstance(name, list)]
+        inter_effect = pd.DataFrame({'IE': interactions},
+                                    index=interaction_names)
+
+    main_effect = pd.DataFrame({'ME': main_effect}, index=names)
+
+    return main_effect, inter_effect
 
 
 def interactions(problem, Y, print_to_console=False):
@@ -107,7 +137,7 @@ def interactions(problem, Y, print_to_console=False):
     for col in range(X.shape[1]):
         for col_2 in range(col):
             x = X[:, col] * X[:, col_2]
-            var_names = names[col_2] + names[col]
+            var_names = (names[col_2], names[col])
             ie_names.append(var_names)
             IE.append((1. / (2 * num_vars)) * np.dot(Y, x))
     if print_to_console:
