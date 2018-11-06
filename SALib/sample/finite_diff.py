@@ -42,6 +42,7 @@ def sample(problem, N, delta=0.01):
 
     return dgsm_sequence
 
+
 if __name__ == "__main__":
 
     parser = common_args.create()
@@ -49,7 +50,7 @@ if __name__ == "__main__":
                         default=0.01, help='Finite difference step size (percent)')
     parser.add_argument(
         '-n', '--samples', type=int, required=True, help='Number of Samples')
-   
+
     args = parser.parse_args()
 
     np.random.seed(args.seed)

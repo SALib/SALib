@@ -42,6 +42,7 @@ def sample(problem, N):
     scale_samples(result, problem['bounds'])
     return result
 
+
 if __name__ == "__main__":
 
     parser = common_args.create()

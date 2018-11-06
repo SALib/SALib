@@ -10,12 +10,12 @@ from .. util import scale_samples, read_param_file
 
 def sample(problem, N, M=4):
     """Generate model inputs for the Fourier Amplitude Sensitivity Test (FAST).
-    
+
     Returns a NumPy matrix containing the model inputs required by the Fourier
     Amplitude sensitivity test.  The resulting matrix contains N rows and D
     columns, where D is the number of parameters.  The samples generated are
     intended to be used by :func:`SALib.analyze.fast.analyze`.
-    
+
     Parameters
     ----------
     problem : dict
@@ -27,7 +27,7 @@ def sample(problem, N, M=4):
         Fourier series decomposition (default 4)
     """
 
-    if N <= 4*M**2:
+    if N <= 4 * M**2:
         raise ValueError("""
         Sample size N > 4M^2 is required. M=4 by default.""")
 
@@ -66,12 +66,13 @@ def sample(problem, N, M=4):
     scale_samples(X, problem['bounds'])
     return X
 
+
 if __name__ == "__main__":
 
     parser = common_args.create()
     parser.add_argument(
         '-n', '--samples', type=int, required=True, help='Number of Samples')
-   
+
     parser.add_argument(
         '-M', type=int, required=False, default=4, help='M coefficient, default 4')
     args = parser.parse_args()

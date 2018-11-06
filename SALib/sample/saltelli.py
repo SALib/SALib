@@ -89,8 +89,10 @@ def sample(problem, N, calc_second_order=True):
         return saltelli_sequence
     else:
         # scaling values to other distributions based on inverse CDFs
-        scaled_saltelli = nonuniform_scale_samples(saltelli_sequence, problem['bounds'], problem['dists'])
+        scaled_saltelli = nonuniform_scale_samples(
+            saltelli_sequence, problem['bounds'], problem['dists'])
         return scaled_saltelli
+
 
 if __name__ == "__main__":
 
@@ -106,6 +108,7 @@ if __name__ == "__main__":
     np.random.seed(args.seed)
     problem = read_param_file(args.paramfile)
 
-    param_values = sample(problem, args.samples, calc_second_order=(args.max_order == 2))
+    param_values = sample(problem, args.samples,
+                          calc_second_order=(args.max_order == 2))
     np.savetxt(args.output, param_values, delimiter=args.delimiter,
                fmt='%.' + str(args.precision) + 'e')

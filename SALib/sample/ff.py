@@ -47,12 +47,14 @@ def extend_bounds(problem):
     names = problem['names']
     if num_dummy_variables > 0:
         bounds.extend([[0, 1] for x in range(num_dummy_variables)])
-        names.extend(["dummy_" + str(var) for var in range(num_dummy_variables)])
+        names.extend(["dummy_" + str(var)
+                      for var in range(num_dummy_variables)])
         problem['bounds'] = bounds
         problem['names'] = names
         problem['num_vars'] = num_ff_vars
 
     return problem
+
 
 def generate_contrast(problem):
     """Generates the raw sample from the problem file
@@ -73,6 +75,7 @@ def generate_contrast(problem):
     contrast = np.vstack([hadamard(k_chosen), -hadamard(k_chosen)])
 
     return contrast
+
 
 def sample(problem):
     """Generates model inputs using a fractional factorial sample
@@ -107,6 +110,7 @@ def sample(problem):
     problem = extend_bounds(problem)
     scale_samples(sample, problem['bounds'])
     return sample
+
 
 if __name__ == "__main__":
 
