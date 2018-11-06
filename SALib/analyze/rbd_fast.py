@@ -115,6 +115,7 @@ def unskew_S1(S1, M, N):
 def cli_args(subparser):
     subparser.add_argument('-X', '--model-input-file',
                            type=str, required=True, help='Model input file')
+    return subparser
 
 
 def run_analysis(args):

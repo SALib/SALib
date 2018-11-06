@@ -44,20 +44,19 @@ def sample(problem, N, delta=0.01):
 
 
 def cli_args(subparser):
-    common_args.setup(subparser)
-
     subparser.add_argument('-d', '--delta', type=float,
                            required=False, default=0.01,
                            help='Finite difference step size (percent)')
     subparser.add_argument('-n', '--samples', type=int,
                            required=True, help='Number of Samples')
+    return subparser
 
 
 def run_sample(args):
     np.random.seed(args.seed)
     problem = read_param_file(args.paramfile)
     param_values = sample(problem, args.samples, args.delta)
-    np.savetxt(args.output, param_values, delimiter=args.delimiter,
+    np.savetxt(args.result, param_values, delimiter=args.delimiter,
                fmt='%.' + str(args.precision) + 'e')
 
 

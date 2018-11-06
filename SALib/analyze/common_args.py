@@ -14,19 +14,20 @@ def setup(parser):
                         default=0, help='Column of output to analyze')
     parser.add_argument('--delimiter', type=str, required=False, default=' ',
                         help='Column delimiter in model output file')
+    return parser
 
 
 def create():
     parser = argparse.ArgumentParser(
         description='Perform sensitivity analysis on model output')
-    setup(parser)
+    parser = setup(parser)
 
     return parser
 
 
 def run_cli(cli_args, run_analysis):
     parser = create()
-    cli_args(parser)
+    parser = cli_args(parser)
     args = parser.parse_args()
 
     run_analysis(args)

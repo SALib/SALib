@@ -116,6 +116,7 @@ def cli_args(subparser):
                            default=1000,
                            help='Number of bootstrap resamples for Sobol \
                            confidence intervals')
+    return subparser
 
 
 def run_analysis(args):

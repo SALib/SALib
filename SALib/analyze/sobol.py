@@ -360,6 +360,7 @@ def cli_args(subparser):
                            default=None,
                            help='Number of processors to be used with the ' +
                            'parallel option.', dest='n_processors')
+    return subparser
 
 
 def run_analysis(args):

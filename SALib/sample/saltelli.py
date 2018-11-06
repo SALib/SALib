@@ -95,7 +95,6 @@ def sample(problem, N, calc_second_order=True):
 
 
 def cli_args(subparser):
-    common_args.setup(subparser)
     subparser.add_argument('-n', '--samples', type=int, required=True,
                            help='Number of Samples')
 
@@ -103,6 +102,7 @@ def cli_args(subparser):
                            choices=[1, 2],
                            help='Maximum order of sensitivity indices \
                            to calculate')
+    return subparser
 
 
 def run_sample(args):
@@ -110,7 +110,7 @@ def run_sample(args):
     problem = read_param_file(args.paramfile)
     param_values = sample(problem, args.samples,
                           calc_second_order=(args.max_order == 2))
-    np.savetxt(args.output, param_values, delimiter=args.delimiter,
+    np.savetxt(args.result, param_values, delimiter=args.delimiter,
                fmt='%.' + str(args.precision) + 'e')
 
 

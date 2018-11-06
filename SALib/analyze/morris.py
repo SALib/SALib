@@ -290,6 +290,7 @@ def cli_args(subparser):
                            (Morris only)')
     subparser.add_argument('--grid-jump', type=int, required=False,
                            default=2, help='Grid jump size (Morris only)')
+    return subparser
 
 
 def run_analysis(args):

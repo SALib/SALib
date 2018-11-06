@@ -154,6 +154,7 @@ def cli_args(subparser):
     subparser.add_argument('--max-order', type=int, required=False, default=2,
                            choices=[1, 2], help='Maximum order of sensitivity \
                            indices to calculate')
+    return subparser
 
 
 def run_analysis(args):

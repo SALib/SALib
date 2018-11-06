@@ -45,7 +45,7 @@ def parse_subargs(module, parser, method, opts):
     subargs : argparser namespace object
     '''
     module.cli_args(parser)
-    subargs = parser.parse_args([method] + opts)
+    subargs = parser.parse_args(opts)
     return subargs
 
 
@@ -72,12 +72,13 @@ if __name__ == '__main__':
         sys.exit()
 
     method_name = known_args.method
+    common_args = importlib.import_module(
+        '.'.join(['SALib', action, 'common_args']))
     module = importlib.import_module('.'.join(['SALib', action, method_name]))
+    parse_obj = common_args.create()
     if action == 'sample':
-        parse_obj = sample_parser
         run_func = module.run_sample
     elif action == 'analyze':
-        parse_obj = analyze_parser
         run_func = module.run_analysis
 
     subargs = parse_subargs(module, parse_obj, method_name, opts)

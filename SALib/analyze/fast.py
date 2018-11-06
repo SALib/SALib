@@ -104,7 +104,7 @@ def compute_total_order(outputs, N, omega):
 
 def cli_args(subparser):
     # No additional arguments required for FAST
-    pass
+    return subparser
 
 
 def run_analysis(args):

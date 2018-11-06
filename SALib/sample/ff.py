@@ -113,19 +113,18 @@ def sample(problem):
 
 
 def cli_args(subparser):
-    common_args.setup(subparser)
-
     subparser.add_argument('-n', '--samples', type=int, required=True,
                            help='Number of Samples')
 
     subparser.add_argument('-M', type=int, required=False, default=4,
                            help='M coefficient, default 4')
+    return subparser
 
 
 def run_sample(args):
     problem = read_param_file(args.paramfile)
     param_values = sample(problem)
-    np.savetxt(args.output, param_values, delimiter=args.delimiter,
+    np.savetxt(args.result, param_values, delimiter=args.delimiter,
                fmt='%.' + str(args.precision) + 'e')
 
 
