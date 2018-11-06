@@ -100,7 +100,7 @@ def analyze(problem, X, Y,
     # Output the Mu, Mu*, and Sigma Values. Also return them in case this is
     # being called from Python
     Si = ResultDict((k, [None] * num_vars)
-              for k in ['names', 'mu', 'mu_star', 'sigma', 'mu_star_conf'])
+                    for k in ['names', 'mu', 'mu_star', 'sigma', 'mu_star_conf'])
     Si['mu'] = np.average(ee, 1)
     Si['mu_star'] = np.average(np.abs(ee), 1)
     Si['sigma'] = np.std(ee, axis=1, ddof=1)

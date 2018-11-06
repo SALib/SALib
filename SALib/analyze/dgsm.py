@@ -67,7 +67,7 @@ def analyze(problem, X, Y, num_resamples=1000,
     keys = ('vi', 'vi_std', 'dgsm', 'dgsm_conf')
     S = ResultDict((k, np.zeros(D)) for k in keys)
     S['names'] = problem['names']
-    
+
     if print_to_console:
         print("Parameter %s %s %s %s" % keys)
 
@@ -80,8 +80,6 @@ def analyze(problem, X, Y, num_resamples=1000,
         if print_to_console:
             print("%s %f %f %f %f" % (
                 problem['names'][j], S['vi'][j], S['vi_std'][j], S['dgsm'][j], S['dgsm_conf'][j]))
-
-
 
     return S
 
@@ -109,6 +107,7 @@ def calc_dgsm(base, perturbed, x_delta, bounds, num_resamples, conf_level):
 
     return dgsm, norm.ppf(0.5 + conf_level / 2) * s.std(ddof=1)
 
+
 if __name__ == "__main__":
     parser = common_args.create()
     parser.add_argument('-X', '--model-input-file', type=str,
@@ -118,7 +117,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     problem = read_param_file(args.paramfile)
 
-    Y = np.loadtxt(args.model_output_file, delimiter=args.delimiter, usecols=(args.column,))
+    Y = np.loadtxt(args.model_output_file,
+                   delimiter=args.delimiter, usecols=(args.column,))
     X = np.loadtxt(args.model_input_file, delimiter=args.delimiter, ndmin=2)
     if len(X.shape) == 1:
         X = X.reshape((len(X), 1))
