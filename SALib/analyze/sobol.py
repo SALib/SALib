@@ -374,6 +374,3 @@ def run_analysis(args):
 
 if __name__ == "__main__":
     common_args.run_cli(cli_args, run_analysis)
-
-
-if __name__ == "__main__":
