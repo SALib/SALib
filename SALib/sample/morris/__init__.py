@@ -371,20 +371,4 @@ def run_sample(args):
 
 
 if __name__ == "__main__":
-
-    parser = common_args.create()
-
-    parser.add_argument(
-        '-n', '--samples', type=int, required=True, help='Number of Samples')
-    parser.add_argument('-l', '--levels', type=int, required=False,
-                        default=4, help='Number of grid levels (Morris only)')
-    parser.add_argument('-k', '--k-optimal', type=int, required=False,
-                        default=None,
-                        help='Number of optimal trajectories (Morris only)')
-    parser.add_argument('-o', '--local', type=bool, required=True,
-                        default=False,
-                        help='Use the local optimisation method \
-                              (Morris with optimization only)')
-    args = parser.parse_args()
-
-    run_sample(args)
+    common_args.run_cli(cli_args, run_sample)

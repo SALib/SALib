@@ -94,21 +94,25 @@ def sample(problem, N, calc_second_order=True):
         return scaled_saltelli
 
 
-if __name__ == "__main__":
+def cli_args(subparser):
+    common_args.setup(subparser)
+    subparser.add_argument('-n', '--samples', type=int, required=True,
+                           help='Number of Samples')
 
-    parser = common_args.create()
+    subparser.add_argument('--max-order', type=int, required=False, default=2,
+                           choices=[1, 2],
+                           help='Maximum order of sensitivity indices \
+                           to calculate')
 
-    parser.add_argument(
-        '-n', '--samples', type=int, required=True, help='Number of Samples')
 
-    parser.add_argument('--max-order', type=int, required=False, default=2,
-                        choices=[1, 2], help='Maximum order of sensitivity indices to calculate')
-    args = parser.parse_args()
-
+def run_sample(args):
     np.random.seed(args.seed)
     problem = read_param_file(args.paramfile)
-
     param_values = sample(problem, args.samples,
                           calc_second_order=(args.max_order == 2))
     np.savetxt(args.output, param_values, delimiter=args.delimiter,
                fmt='%.' + str(args.precision) + 'e')
+
+
+if __name__ == "__main__":
+    common_args.run_cli(cli_args, run_sample)

@@ -43,19 +43,23 @@ def sample(problem, N, delta=0.01):
     return dgsm_sequence
 
 
-if __name__ == "__main__":
+def cli_args(subparser):
+    common_args.setup(subparser)
 
-    parser = common_args.create()
-    parser.add_argument('-d', '--delta', type=float, required=False,
-                        default=0.01, help='Finite difference step size (percent)')
-    parser.add_argument(
-        '-n', '--samples', type=int, required=True, help='Number of Samples')
+    subparser.add_argument('-d', '--delta', type=float,
+                           required=False, default=0.01,
+                           help='Finite difference step size (percent)')
+    subparser.add_argument('-n', '--samples', type=int,
+                           required=True, help='Number of Samples')
 
-    args = parser.parse_args()
 
+def run_sample(args):
     np.random.seed(args.seed)
     problem = read_param_file(args.paramfile)
-
     param_values = sample(problem, args.samples, args.delta)
     np.savetxt(args.output, param_values, delimiter=args.delimiter,
                fmt='%.' + str(args.precision) + 'e')
+
+
+if __name__ == "__main__":
+    common_args.run_cli(cli_args, run_sample)

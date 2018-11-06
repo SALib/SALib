@@ -112,13 +112,22 @@ def sample(problem):
     return sample
 
 
-if __name__ == "__main__":
+def cli_args(subparser):
+    common_args.setup(subparser)
 
-    parser = common_args.create()
-    args = parser.parse_args()
+    subparser.add_argument('-n', '--samples', type=int, required=True,
+                           help='Number of Samples')
 
+    subparser.add_argument('-M', type=int, required=False, default=4,
+                           help='M coefficient, default 4')
+
+
+def run_sample(args):
     problem = read_param_file(args.paramfile)
     param_values = sample(problem)
-
     np.savetxt(args.output, param_values, delimiter=args.delimiter,
                fmt='%.' + str(args.precision) + 'e')
+
+
+if __name__ == "__main__":
+    common_args.run_cli(cli_args, run_sample)
