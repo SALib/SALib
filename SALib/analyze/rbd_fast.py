@@ -112,12 +112,12 @@ def unskew_S1(S1, M, N):
     return S1 - lamb / (1 - lamb) * (1 - S1)
 
 
-if __name__ == "__main__":
+def cli_args(subparser):
+    subparser.add_argument('-X', '--model-input-file',
+                           type=str, required=True, help='Model input file')
 
-    parser = common_args.create()
-    parser.add_argument('-X', '--model-input-file',
-                        type=str, required=True, help='Model input file')
-    args = parser.parse_args()
+
+def run_analysis(args):
     problem = read_param_file(args.paramfile)
     Y = np.loadtxt(args.model_output_file,
                    delimiter=args.delimiter,
@@ -126,3 +126,7 @@ if __name__ == "__main__":
                    delimiter=args.delimiter)
 
     analyze(problem, Y, X, print_to_console=True)
+
+
+if __name__ == "__main__":
+    common_args.run_cli(cli_args, run_analysis)

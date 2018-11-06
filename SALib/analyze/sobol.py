@@ -344,25 +344,25 @@ def print_indices(S, problem, calc_second_order):
                                        S['S2'][j, k], S['S2_conf'][j, k]))
 
 
-if __name__ == "__main__":
-    parser = common_args.create()
-    parser.add_argument('--max-order', type=int, required=False, default=2,
-                        choices=[1, 2],
-                        help='Maximum order of sensitivity indices to '
-                             'calculate')
-    parser.add_argument('-r', '--resamples', type=int, required=False,
-                        default=1000,
-                        help='Number of bootstrap resamples for Sobol '
-                             'confidence intervals')
-    parser.add_argument('--parallel', action='store_true', help='Makes '
-                        'use of parallelization.',
-                        dest='parallel')
-    parser.add_argument('--processors', type=int, required=False,
-                        default=None,
-                        help='Number of processors to be used with the ' +
-                        'parallel option.', dest='n_processors')
-    args = parser.parse_args()
+def cli_args(subparser):
+    subparser.add_argument('--max-order', type=int, required=False, default=2,
+                           choices=[1, 2],
+                           help='Maximum order of sensitivity indices to '
+                           'calculate')
+    subparser.add_argument('-r', '--resamples', type=int, required=False,
+                           default=1000,
+                           help='Number of bootstrap resamples for Sobol '
+                           'confidence intervals')
+    subparser.add_argument('--parallel', action='store_true', help='Makes '
+                           'use of parallelization.',
+                           dest='parallel')
+    subparser.add_argument('--processors', type=int, required=False,
+                           default=None,
+                           help='Number of processors to be used with the ' +
+                           'parallel option.', dest='n_processors')
 
+
+def run_analysis(args):
     problem = read_param_file(args.paramfile)
     Y = np.loadtxt(args.model_output_file, delimiter=args.delimiter,
                    usecols=(args.column,))
@@ -370,3 +370,10 @@ if __name__ == "__main__":
     analyze(problem, Y, (args.max_order == 2),
             num_resamples=args.resamples, print_to_console=True,
             parallel=args.parallel, n_processors=args.n_processors)
+
+
+if __name__ == "__main__":
+    common_args.run_cli(cli_args, run_analysis)
+
+
+if __name__ == "__main__":

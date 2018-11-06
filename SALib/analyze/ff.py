@@ -147,20 +147,24 @@ def interactions(problem, Y, print_to_console=False):
     return ie_names, IE
 
 
-if __name__ == "__main__":
+def cli_args(subparser):
+    subparser.add_argument('-X', '--model-input-file', type=str,
+                           required=True, default=None,
+                           help='Model input file')
+    subparser.add_argument('--max-order', type=int, required=False, default=2,
+                           choices=[1, 2], help='Maximum order of sensitivity \
+                           indices to calculate')
 
-    parser = common_args.create()
-    parser.add_argument('-X', '--model-input-file', type=str,
-                        required=True, default=None, help='Model input file')
-    parser.add_argument('--max-order', type=int, required=False, default=2,
-                        choices=[1, 2], help='Maximum order of sensitivity indices to calculate')
-    args = parser.parse_args()
 
+def run_analysis(args):
     problem = read_param_file(args.paramfile)
-
     Y = np.loadtxt(args.model_output_file,
                    delimiter=args.delimiter, usecols=(args.column,))
     X = np.loadtxt(args.model_input_file, delimiter=args.delimiter, ndmin=2)
     if len(X.shape) == 1:
         X = X.reshape((len(X), 1))
     analyze(problem, X, Y, (args.max_order == 2), print_to_console=True)
+
+
+if __name__ == "__main__":
+    common_args.run_cli(cli_args, run_analysis)

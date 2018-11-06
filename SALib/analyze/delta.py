@@ -133,7 +133,6 @@ def sobol_first_conf(Y, X, m, num_resamples, conf_level):
 
 
 def cli_args(subparser):
-    common_args.setup(subparser)
     subparser.add_argument('-X', '--model-input-file', type=str,
                            required=True, default=None,
                            help='Model input file')
@@ -155,9 +154,4 @@ def run_analysis(args):
 
 
 if __name__ == "__main__":
-    parser = common_args.create()
-    cli_args(parser)
-
-    args = parser.parse_args()
-
-    run_analysis(args)
+    common_args.run_cli(cli_args, run_analysis)

@@ -102,12 +102,18 @@ def compute_total_order(outputs, N, omega):
     return (1 - Dt / V)
 
 
-if __name__ == "__main__":
+def cli_args(subparser):
+    # No additional arguments required for FAST
+    pass
 
-    parser = common_args.create()
-    args = parser.parse_args()
+
+def run_analysis(args):
     problem = read_param_file(args.paramfile)
     Y = np.loadtxt(args.model_output_file,
                    delimiter=args.delimiter, usecols=(args.column,))
 
     analyze(problem, Y, print_to_console=True)
+
+
+if __name__ == "__main__":
+    common_args.run_cli(cli_args, run_analysis)

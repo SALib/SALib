@@ -278,7 +278,6 @@ def compute_mu_star_confidence(ee, num_trajectories, num_resamples,
 
 
 def cli_args(subparser):
-    common_args.setup(subparser)
     subparser.add_argument('-X', '--model-input-file', type=str,
                            required=True, default=None,
                            help='Model input file')
@@ -295,7 +294,6 @@ def cli_args(subparser):
 
 def run_analysis(args):
     problem = read_param_file(args.paramfile)
-
     Y = np.loadtxt(args.model_output_file,
                    delimiter=args.delimiter, usecols=(args.column,))
     X = np.loadtxt(args.model_input_file, delimiter=args.delimiter, ndmin=2)
@@ -307,18 +305,4 @@ def run_analysis(args):
 
 
 if __name__ == "__main__":
-
-    parser = common_args.create()
-    parser.add_argument('-X', '--model-input-file', type=str,
-                        required=True, default=None, help='Model input file')
-    parser.add_argument('-r', '--resamples', type=int, required=False,
-                        default=1000,
-                        help='Number of bootstrap resamples for Sobol \
-                              confidence intervals')
-    parser.add_argument('-l', '--levels', type=int, required=False,
-                        default=4, help='Number of grid levels (Morris only)')
-    parser.add_argument('--grid-jump', type=int, required=False,
-                        default=2, help='Grid jump size (Morris only)')
-    args = parser.parse_args()
-
-    run_analysis(args)
+    common_args.run_cli(cli_args, run_analysis)

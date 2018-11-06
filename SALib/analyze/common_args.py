@@ -22,3 +22,11 @@ def create():
     setup(parser)
 
     return parser
+
+
+def run_cli(cli_args, run_analysis):
+    parser = create()
+    cli_args(parser)
+    args = parser.parse_args()
+
+    run_analysis(args)
