@@ -64,16 +64,19 @@ def horizontal_bar_plot(ax, Si, param_dict, sortby='mu_star', unit=''):
     return out
 
 
-def covariance_plot(ax, Si, param_dict, unit=""):
+def covariance_plot(ax, Si, param_dict, num_vars, unit=""):
     '''Plots mu* against sigma or the 95% confidence interval
 
     '''
+    colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
 
     if Si['sigma'] is not None:
         # sigma is not present if using morris groups
         y = Si['sigma']
-        out = ax.scatter(Si['mu_star'], y, c=u'k', marker=u'o',
+        out_1 = ax.scatter(Si['mu_star'][:8], y[:8], c=colors, marker=u'o',
                          **param_dict)
+        out_2 = ax.scatter(Si['mu_star'][8:16], y[8:16], c=colors, marker=u's',
+                           **param_dict)
         ax.set_ylabel(r'$\sigma$')
 
         ax.set_xlim(0,)
@@ -89,6 +92,7 @@ def covariance_plot(ax, Si, param_dict, unit=""):
                                           r'$\sigma / \mu^{\star} = 0.5$',
                                           r'$\sigma / \mu^{\star} = 0.1$'),
                   loc='best')
+        out = [out_1, out_2]
 
     else:
         y = Si['mu_star_conf']
