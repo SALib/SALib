@@ -102,9 +102,9 @@ def compute_total_order(outputs, N, omega):
     return (1 - Dt / V)
 
 
-def cli_args(subparser):
+def cli_parse(parser):
     # No additional arguments required for FAST
-    return subparser
+    return parser
 
 
 def run_analysis(args):
@@ -116,4 +116,4 @@ def run_analysis(args):
 
 
 if __name__ == "__main__":
-    common_args.run_cli(cli_args, run_analysis)
+    common_args.run_cli(cli_parse, run_analysis)

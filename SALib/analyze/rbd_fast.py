@@ -112,10 +112,10 @@ def unskew_S1(S1, M, N):
     return S1 - lamb / (1 - lamb) * (1 - S1)
 
 
-def cli_args(subparser):
-    subparser.add_argument('-X', '--model-input-file',
-                           type=str, required=True, help='Model input file')
-    return subparser
+def cli_parse(parser):
+    parser.add_argument('-X', '--model-input-file',
+                        type=str, required=True, help='Model input file')
+    return parser
 
 
 def run_analysis(args):
@@ -130,4 +130,4 @@ def run_analysis(args):
 
 
 if __name__ == "__main__":
-    common_args.run_cli(cli_args, run_analysis)
+    common_args.run_cli(cli_parse, run_analysis)

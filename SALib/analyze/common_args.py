@@ -17,17 +17,19 @@ def setup(parser):
     return parser
 
 
-def create():
+def create(cli_parser=None):
     parser = argparse.ArgumentParser(
         description='Perform sensitivity analysis on model output')
     parser = setup(parser)
 
+    if cli_parser:
+        parser = cli_parser(parser)
+
     return parser
 
 
-def run_cli(cli_args, run_analysis):
-    parser = create()
-    parser = cli_args(parser)
-    args = parser.parse_args()
+def run_cli(cli_parser, run_analysis, known_args=None):
+    parser = create(cli_parser)
+    args = parser.parse_args(known_args)
 
     run_analysis(args)

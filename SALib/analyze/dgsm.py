@@ -108,15 +108,15 @@ def calc_dgsm(base, perturbed, x_delta, bounds, num_resamples, conf_level):
     return dgsm, norm.ppf(0.5 + conf_level / 2) * s.std(ddof=1)
 
 
-def cli_args(subparser):
-    subparser.add_argument('-X', '--model-input-file', type=str,
-                           required=True, default=None,
-                           help='Model input file')
-    subparser.add_argument('-r', '--resamples', type=int, required=False,
-                           default=1000,
-                           help='Number of bootstrap resamples for Sobol \
+def cli_parse(parser):
+    parser.add_argument('-X', '--model-input-file', type=str,
+                        required=True, default=None,
+                        help='Model input file')
+    parser.add_argument('-r', '--resamples', type=int, required=False,
+                        default=1000,
+                        help='Number of bootstrap resamples for Sobol \
                            confidence intervals')
-    return subparser
+    return parser
 
 
 def run_analysis(args):
@@ -132,4 +132,4 @@ def run_analysis(args):
 
 
 if __name__ == "__main__":
-    common_args.run_cli(cli_args, run_analysis)
+    common_args.run_cli(cli_parse, run_analysis)

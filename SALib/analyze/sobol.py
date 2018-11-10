@@ -344,23 +344,23 @@ def print_indices(S, problem, calc_second_order):
                                        S['S2'][j, k], S['S2_conf'][j, k]))
 
 
-def cli_args(subparser):
-    subparser.add_argument('--max-order', type=int, required=False, default=2,
-                           choices=[1, 2],
-                           help='Maximum order of sensitivity indices to '
-                           'calculate')
-    subparser.add_argument('-r', '--resamples', type=int, required=False,
-                           default=1000,
-                           help='Number of bootstrap resamples for Sobol '
-                           'confidence intervals')
-    subparser.add_argument('--parallel', action='store_true', help='Makes '
-                           'use of parallelization.',
-                           dest='parallel')
-    subparser.add_argument('--processors', type=int, required=False,
-                           default=None,
-                           help='Number of processors to be used with the ' +
-                           'parallel option.', dest='n_processors')
-    return subparser
+def cli_parse(parser):
+    parser.add_argument('--max-order', type=int, required=False, default=2,
+                        choices=[1, 2],
+                        help='Maximum order of sensitivity indices to '
+                        'calculate')
+    parser.add_argument('-r', '--resamples', type=int, required=False,
+                        default=1000,
+                        help='Number of bootstrap resamples for Sobol '
+                        'confidence intervals')
+    parser.add_argument('--parallel', action='store_true', help='Makes '
+                        'use of parallelization.',
+                        dest='parallel')
+    parser.add_argument('--processors', type=int, required=False,
+                        default=None,
+                        help='Number of processors to be used with the ' +
+                        'parallel option.', dest='n_processors')
+    return parser
 
 
 def run_analysis(args):
@@ -374,4 +374,4 @@ def run_analysis(args):
 
 
 if __name__ == "__main__":
-    common_args.run_cli(cli_args, run_analysis)
+    common_args.run_cli(cli_parse, run_analysis)
