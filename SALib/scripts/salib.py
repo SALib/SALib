@@ -54,7 +54,8 @@ if __name__ == '__main__':
         description='SALib - Sensitivity Analysis Library')
     subparsers = parser.add_subparsers(help='Sample or Analysis method',
                                        dest='action')
-    sample_parser = subparsers.add_parser('sample')
+    sample_parser = subparsers.add_parser(
+        'sample', description='Select one of the sample methods')
     analyze_parser = subparsers.add_parser('analyze')
 
     # Get list of available samplers and analyzers
@@ -68,18 +69,19 @@ if __name__ == '__main__':
     action = known_args.action
     if not action:
         parser.print_help()
-        import sys
-        sys.exit()
+        exit()
 
     method_name = known_args.method
     common_args = importlib.import_module(
         '.'.join(['SALib', action, 'common_args']))
     module = importlib.import_module('.'.join(['SALib', action, method_name]))
-    parse_obj = common_args.create()
-    if action == 'sample':
-        run_func = module.run_sample
-    elif action == 'analyze':
-        run_func = module.run_analysis
 
-    subargs = parse_subargs(module, parse_obj, method_name, opts)
-    run_func(subargs)
+    if len(opts) == 0:
+        cmd_parse = common_args.create(module.cli_parse)
+        cmd_parse.print_help()
+        exit()
+
+    if action == 'sample':
+        common_args.run_cli(module.cli_parse, module.run_sample, opts)
+    elif action == 'analyze':
+        common_args.run_cli(module.cli_parse, module.run_analysis, opts)
