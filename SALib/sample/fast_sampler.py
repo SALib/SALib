@@ -67,16 +67,32 @@ def sample(problem, N, M=4):
     return X
 
 
-def cli_args(subparser):
-    subparser.add_argument('-n', '--samples', type=int, required=True,
-                           help='Number of Samples')
+def cli_parse(parser):
+    """Add method specific options to CLI parser.
 
-    subparser.add_argument('-M', type=int, required=False, default=4,
-                           help='M coefficient, default 4')
-    return subparser
+    Parameters
+    ----------
+    parser : argparse object
+
+    Returns
+    ----------
+    Updated argparse object
+    """
+    parser.add_argument('-n', '--samples', type=int, required=True,
+                        help='Number of Samples')
+
+    parser.add_argument('-M', '--m-coef', type=int, required=False, default=4,
+                        help='M coefficient, default 4', dest='M')
+    return parser
 
 
 def run_sample(args):
+    """Run sampling method
+
+    Parameters
+    ----------
+    args : argparse namespace
+    """
     np.random.seed(args.seed)
     problem = read_param_file(args.paramfile)
     param_values = sample(problem, N=args.samples, M=args.M)
@@ -85,4 +101,4 @@ def run_sample(args):
 
 
 if __name__ == "__main__":
-    common_args.run_cli(cli_args, run_sample)
+    common_args.run_cli(cli_parse, run_sample)
