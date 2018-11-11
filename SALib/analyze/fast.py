@@ -104,6 +104,7 @@ def compute_total_order(outputs, N, omega):
 
 def cli_parse(parser):
     # No additional arguments required for FAST
+    # This method is required to make sure tests pass.
     return parser
 
 
