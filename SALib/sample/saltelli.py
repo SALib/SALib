@@ -126,7 +126,7 @@ def run_sample(args):
     problem = read_param_file(args.paramfile)
     param_values = sample(problem, args.samples,
                           calc_second_order=(args.max_order == 2))
-    np.savetxt(args.result, param_values, delimiter=args.delimiter,
+    np.savetxt(args.output, param_values, delimiter=args.delimiter,
                fmt='%.' + str(args.precision) + 'e')
 
 

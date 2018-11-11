@@ -16,7 +16,8 @@ def setup(parser):
         '-p', '--paramfile', type=str, required=True,
         help='Parameter Range File')
     parser.add_argument(
-        '-r', '--result', type=str, required=True, help='Output File')
+        '-r', '--result', type=str, required=True, help='Output File',
+        dest='output')
     parser.add_argument(
         '-s', '--seed', type=int, required=False, default=None,
         help='Random Seed')

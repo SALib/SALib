@@ -69,7 +69,7 @@ def run_sample(args):
     np.random.seed(args.seed)
     problem = read_param_file(args.paramfile)
     param_values = sample(problem, args.samples)
-    np.savetxt(args.result, param_values, delimiter=args.delimiter,
+    np.savetxt(args.output, param_values, delimiter=args.delimiter,
                fmt='%.' + str(args.precision) + 'e')
 
 

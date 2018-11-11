@@ -104,7 +104,6 @@ def sample(problem):
     sample : :class:`numpy.array`
 
     """
-
     contrast = generate_contrast(problem)
     sample = np.array((contrast + 1.) / 2, dtype=np.float)
     problem = extend_bounds(problem)
@@ -138,9 +137,10 @@ def run_sample(args):
     ----------
     args : argparse namespace
     """
+    np.random.seed(args.seed)
     problem = read_param_file(args.paramfile)
     param_values = sample(problem)
-    np.savetxt(args.result, param_values, delimiter=args.delimiter,
+    np.savetxt(args.output, param_values, delimiter=args.delimiter,
                fmt='%.' + str(args.precision) + 'e')
 
 
