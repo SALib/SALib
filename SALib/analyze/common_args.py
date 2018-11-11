@@ -14,6 +14,9 @@ def setup(parser):
                         default=0, help='Column of output to analyze')
     parser.add_argument('--delimiter', type=str, required=False, default=' ',
                         help='Column delimiter in model output file')
+    parser.add_argument(
+        '-s', '--seed', type=int, required=False, default=None,
+        help='Random Seed')
     return parser
 
 
