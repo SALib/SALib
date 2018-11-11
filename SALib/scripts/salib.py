@@ -49,7 +49,7 @@ def parse_subargs(module, parser, method, opts):
     return subargs
 
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser(
         description='SALib - Sensitivity Analysis Library')
     subparsers = parser.add_subparsers(help='Sample or Analysis method',
@@ -82,6 +82,12 @@ if __name__ == '__main__':
         exit()
 
     if action == 'sample':
-        common_args.run_cli(module.cli_parse, module.run_sample, opts)
+        action_func = module.run_sample
     elif action == 'analyze':
-        common_args.run_cli(module.cli_parse, module.run_analysis, opts)
+        action_func = module.run_analysis
+
+    common_args.run_cli(module.cli_parse, action_func, opts)
+
+
+if __name__ == '__main__':
+    main()
