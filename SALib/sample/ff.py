@@ -77,7 +77,7 @@ def generate_contrast(problem):
     return contrast
 
 
-def sample(problem):
+def sample(problem, seed=None):
     """Generates model inputs using a fractional factorial sample
 
     Returns a NumPy matrix containing the model inputs required for a
@@ -104,6 +104,8 @@ def sample(problem):
     sample : :class:`numpy.array`
 
     """
+    if seed:
+        np.random.seed(seed)
     contrast = generate_contrast(problem)
     sample = np.array((contrast + 1.) / 2, dtype=np.float)
     problem = extend_bounds(problem)
@@ -137,9 +139,8 @@ def run_sample(args):
     ----------
     args : argparse namespace
     """
-    np.random.seed(args.seed)
     problem = read_param_file(args.paramfile)
-    param_values = sample(problem)
+    param_values = sample(problem, seed=args.seed)
     np.savetxt(args.output, param_values, delimiter=args.delimiter,
                fmt='%.' + str(args.precision) + 'e')
 

@@ -8,7 +8,7 @@ from . import common_args
 from .. util import scale_samples, read_param_file
 
 
-def sample(problem, N, M=4):
+def sample(problem, N, M=4, seed=None):
     """Generate model inputs for the Fourier Amplitude Sensitivity Test (FAST).
 
     Returns a NumPy matrix containing the model inputs required by the Fourier
@@ -26,6 +26,8 @@ def sample(problem, N, M=4):
         The interference parameter, i.e., the number of harmonics to sum in the
         Fourier series decomposition (default 4)
     """
+    if seed:
+        np.random.seed(seed)
 
     if N <= 4 * M**2:
         raise ValueError("""
@@ -93,9 +95,8 @@ def run_sample(args):
     ----------
     args : argparse namespace
     """
-    np.random.seed(args.seed)
     problem = read_param_file(args.paramfile)
-    param_values = sample(problem, N=args.samples, M=args.M)
+    param_values = sample(problem, N=args.samples, M=args.M, seed=args.seed)
     np.savetxt(args.output, param_values, delimiter=args.delimiter,
                fmt='%.' + str(args.precision) + 'e')
 

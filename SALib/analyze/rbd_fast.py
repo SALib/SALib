@@ -11,7 +11,7 @@ from . import common_args
 from ..util import read_param_file, ResultDict
 
 
-def analyze(problem, Y, X, M=10, print_to_console=False):
+def analyze(problem, Y, X, M=10, print_to_console=False, seed=None):
     """Performs the Random Balanced Design - Fourier Amplitude Sensitivity Test
     (RBD-FAST) on model outputs.
 
@@ -60,6 +60,8 @@ def analyze(problem, Y, X, M=10, print_to_console=False):
     >>> Y = Ishigami.evaluate(X)
     >>> Si = rbd_fast.analyze(problem, Y, X, print_to_console=False)
     """
+    if seed:
+        np.random.seed(seed)
 
     D = problem['num_vars']
     N = Y.size
@@ -119,7 +121,6 @@ def cli_parse(parser):
 
 
 def run_analysis(args):
-    np.random.seed(args.seed)
     problem = read_param_file(args.paramfile)
     Y = np.loadtxt(args.model_output_file,
                    delimiter=args.delimiter,
@@ -127,7 +128,7 @@ def run_analysis(args):
     X = np.loadtxt(args.model_input_file,
                    delimiter=args.delimiter)
 
-    analyze(problem, Y, X, print_to_console=True)
+    analyze(problem, Y, X, print_to_console=True, seed=args.seed)
 
 
 if __name__ == "__main__":

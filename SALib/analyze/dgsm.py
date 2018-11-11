@@ -10,7 +10,7 @@ from ..util import read_param_file, ResultDict
 
 
 def analyze(problem, X, Y, num_resamples=1000,
-            conf_level=0.95, print_to_console=False):
+            conf_level=0.95, print_to_console=False, seed=None):
     """Calculates Derivative-based Global Sensitivity Measure on model outputs.
 
     Returns a dictionary with keys 'vi', 'vi_std', 'dgsm', and 'dgsm_conf',
@@ -40,6 +40,8 @@ def analyze(problem, X, Y, num_resamples=1000,
            indices." Mathematics and Computers in Simulation, 79(10):3009-3017,
            doi:10.1016/j.matcom.2009.01.023.
     """
+    if seed:
+        np.random.seed(seed)
 
     D = problem['num_vars']
 
@@ -120,7 +122,6 @@ def cli_parse(parser):
 
 
 def run_analysis(args):
-    np.random.seed(args.seed)
     problem = read_param_file(args.paramfile)
 
     Y = np.loadtxt(args.model_output_file,
@@ -129,7 +130,8 @@ def run_analysis(args):
     if len(X.shape) == 1:
         X = X.reshape((len(X), 1))
 
-    analyze(problem, X, Y, num_resamples=args.resamples, print_to_console=True)
+    analyze(problem, X, Y, num_resamples=args.resamples, print_to_console=True,
+            seed=args.seed)
 
 
 if __name__ == "__main__":

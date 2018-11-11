@@ -14,7 +14,8 @@ def analyze(problem, X, Y,
             num_resamples=1000,
             conf_level=0.95,
             print_to_console=False,
-            num_levels=4):
+            num_levels=4,
+            seed=None):
     """Perform Morris Analysis on model outputs.
 
     Returns a dictionary with keys 'mu', 'mu_star', 'sigma', and
@@ -69,6 +70,8 @@ def analyze(problem, X, Y,
     >>>                     print_to_console=True, num_levels=4)
 
     """
+    if seed:
+        np.random.seed(seed)
 
     msg = ("dtype of {} array must be 'float', float32 or float64")
     if X.dtype not in ['float', 'float32', 'float64']:
@@ -294,7 +297,6 @@ def cli_parse(parser):
 
 
 def run_analysis(args):
-    np.random.seed(args.seed)
     problem = read_param_file(args.paramfile)
     Y = np.loadtxt(args.model_output_file,
                    delimiter=args.delimiter, usecols=(args.column,))
@@ -303,7 +305,7 @@ def run_analysis(args):
         X = X.reshape((len(X), 1))
 
     analyze(problem, X, Y, num_resamples=args.resamples, print_to_console=True,
-            num_levels=args.levels)
+            num_levels=args.levels, seed=args.seed)
 
 
 if __name__ == "__main__":

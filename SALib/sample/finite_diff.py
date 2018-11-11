@@ -9,7 +9,9 @@ from ..util import scale_samples, read_param_file
 
 # Generate matrix of samples for derivative-based global sensitivity measure (dgsm)
 # start from a QMC (sobol) sequence and finite difference with delta % steps
-def sample(problem, N, delta=0.01):
+def sample(problem, N, delta=0.01, seed=None):
+    if seed:
+        np.random.seed(seed)
 
     D = problem['num_vars']
 
@@ -69,9 +71,8 @@ def run_sample(args):
     ----------
     args : argparse namespace
     """
-    np.random.seed(args.seed)
     problem = read_param_file(args.paramfile)
-    param_values = sample(problem, args.samples, args.delta)
+    param_values = sample(problem, args.samples, args.delta, seed=args.seed)
     np.savetxt(args.output, param_values, delimiter=args.delimiter,
                fmt='%.' + str(args.precision) + 'e')
 

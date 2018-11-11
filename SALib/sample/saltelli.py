@@ -7,7 +7,7 @@ from . import sobol_sequence
 from ..util import scale_samples, nonuniform_scale_samples, read_param_file, compute_groups_matrix
 
 
-def sample(problem, N, calc_second_order=True):
+def sample(problem, N, calc_second_order=True, seed=True):
     """Generates model inputs using Saltelli's extension of the Sobol sequence.
 
     Returns a NumPy matrix containing the model inputs using Saltelli's sampling
@@ -27,6 +27,9 @@ def sample(problem, N, calc_second_order=True):
     calc_second_order : bool
         Calculate second-order sensitivities (default True)
     """
+    if seed:
+        np.random.seed(seed)
+
     D = problem['num_vars']
     groups = problem.get('groups')
 
@@ -122,10 +125,10 @@ def run_sample(args):
     ----------
     args : argparse namespace
     """
-    np.random.seed(args.seed)
     problem = read_param_file(args.paramfile)
     param_values = sample(problem, args.samples,
-                          calc_second_order=(args.max_order == 2))
+                          calc_second_order=(args.max_order == 2),
+                          seed=args.seed)
     np.savetxt(args.output, param_values, delimiter=args.delimiter,
                fmt='%.' + str(args.precision) + 'e')
 

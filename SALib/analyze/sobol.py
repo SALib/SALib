@@ -23,7 +23,7 @@ except ImportError:
 
 def analyze(problem, Y, calc_second_order=True, num_resamples=100,
             conf_level=0.95, print_to_console=False, parallel=False,
-            n_processors=None):
+            n_processors=None, seed=None):
     """Perform Sobol Analysis on model outputs.
 
     Returns a dictionary with keys 'S1', 'S1_conf', 'ST', and 'ST_conf', where
@@ -68,6 +68,8 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
     >>> Si = sobol.analyze(problem, Y, print_to_console=True)
 
     """
+    if seed:
+        np.random.seed(seed)
     # determining if groups are defined and adjusting the number
     # of rows in the cross-sampled matrix accordingly
     if not problem.get('groups'):
@@ -364,14 +366,14 @@ def cli_parse(parser):
 
 
 def run_analysis(args):
-    np.random.seed(args.seed)
     problem = read_param_file(args.paramfile)
     Y = np.loadtxt(args.model_output_file, delimiter=args.delimiter,
                    usecols=(args.column,))
 
     analyze(problem, Y, (args.max_order == 2),
             num_resamples=args.resamples, print_to_console=True,
-            parallel=args.parallel, n_processors=args.n_processors)
+            parallel=args.parallel, n_processors=args.n_processors,
+            seed=args.seed)
 
 
 if __name__ == "__main__":

@@ -10,7 +10,7 @@ from . import common_args
 from ..util import read_param_file, ResultDict
 
 
-def analyze(problem, Y, M=4, print_to_console=False):
+def analyze(problem, Y, M=4, print_to_console=False, seed=None):
     """Performs the Fourier Amplitude Sensitivity Test (FAST) on model outputs.
 
     Returns a dictionary with keys 'S1' and 'ST', where each entry is a list of
@@ -47,6 +47,8 @@ def analyze(problem, Y, M=4, print_to_console=False):
     >>> Y = Ishigami.evaluate(X)
     >>> Si = fast.analyze(problem, Y, print_to_console=False)
     """
+    if seed:
+        np.random.seed(seed)
 
     D = problem['num_vars']
 
@@ -109,12 +111,11 @@ def cli_parse(parser):
 
 
 def run_analysis(args):
-    np.random.seed(args.seed)
     problem = read_param_file(args.paramfile)
     Y = np.loadtxt(args.model_output_file,
                    delimiter=args.delimiter, usecols=(args.column,))
 
-    analyze(problem, Y, print_to_console=True)
+    analyze(problem, Y, print_to_console=True, seed=args.seed)
 
 
 if __name__ == "__main__":

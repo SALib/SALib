@@ -15,7 +15,8 @@ from SALib.util import read_param_file, ResultDict
 from SALib.sample.ff import generate_contrast, extend_bounds
 
 
-def analyze(problem, X, Y, second_order=False, print_to_console=False):
+def analyze(problem, X, Y, second_order=False, print_to_console=False,
+            seed=None):
     """Perform a fractional factorial analysis
 
     Returns a dictionary with keys 'ME' (main effect) and 'IE' (interaction
@@ -48,6 +49,8 @@ def analyze(problem, X, Y, second_order=False, print_to_console=False):
     >>> Y = X[:, 0] + (0.1 * X[:, 1]) + ((1.2 * X[:, 2]) * (0.2 + X[:, 0]))
     >>> analyze(problem, X, Y, second_order=True, print_to_console=True)
     """
+    if seed:
+        np.random.seed(seed)
 
     problem = extend_bounds(problem)
     num_vars = problem['num_vars']
@@ -158,14 +161,14 @@ def cli_parse(parser):
 
 
 def run_analysis(args):
-    np.random.seed(args.seed)
     problem = read_param_file(args.paramfile)
     Y = np.loadtxt(args.model_output_file,
                    delimiter=args.delimiter, usecols=(args.column,))
     X = np.loadtxt(args.model_input_file, delimiter=args.delimiter, ndmin=2)
     if len(X.shape) == 1:
         X = X.reshape((len(X), 1))
-    analyze(problem, X, Y, (args.max_order == 2), print_to_console=True)
+    analyze(problem, X, Y, (args.max_order == 2), print_to_console=True,
+            seed=args.seed)
 
 
 if __name__ == "__main__":

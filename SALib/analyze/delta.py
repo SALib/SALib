@@ -10,7 +10,7 @@ from ..util import read_param_file, ResultDict
 
 
 def analyze(problem, X, Y, num_resamples=10,
-            conf_level=0.95, print_to_console=False):
+            conf_level=0.95, print_to_console=False, seed=None):
     """Perform Delta Moment-Independent Analysis on model outputs.
 
     Returns a dictionary with keys 'delta', 'delta_conf', 'S1', and 'S1_conf',
@@ -48,6 +48,8 @@ def analyze(problem, X, Y, num_resamples=10,
     >>> Y = Ishigami.evaluate(X)
     >>> Si = delta.analyze(problem, X, Y, print_to_console=True)
     """
+    if seed:
+        np.random.seed(seed)
 
     D = problem['num_vars']
     N = Y.size
@@ -144,7 +146,6 @@ def cli_parse(parser):
 
 
 def run_analysis(args):
-    np.random.seed(args.seed)
     problem = read_param_file(args.paramfile)
     Y = np.loadtxt(args.model_output_file,
                    delimiter=args.delimiter, usecols=(args.column,))
@@ -152,7 +153,8 @@ def run_analysis(args):
     if len(X.shape) == 1:
         X = X.reshape((len(X), 1))
 
-    analyze(problem, X, Y, num_resamples=args.resamples, print_to_console=True)
+    analyze(problem, X, Y, num_resamples=args.resamples, print_to_console=True,
+            seed=args.seed)
 
 
 if __name__ == "__main__":
