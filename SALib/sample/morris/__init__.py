@@ -342,21 +342,21 @@ def _compute_optimised_trajectories(problem, input_sample, N, k_choices,
     return output
 
 
-def cli_args(subparser):
-    common_args.setup(subparser)
-    subparser.add_argument(
-        '-n', '--samples', type=int, required=True, help='Number of Samples')
-    subparser.add_argument('-l', '--levels', type=int, required=False,
-                           default=4, help='Number of grid levels \
-                           (Morris only)')
-    subparser.add_argument('-k', '--k-optimal', type=int, required=False,
-                           default=None,
-                           help='Number of optimal trajectories \
-                           (Morris only)')
-    subparser.add_argument('-o', '--local', type=bool, required=True,
-                           default=False,
-                           help='Use the local optimisation method \
-                           (Morris with optimization only)')
+def cli_parse(parser):
+    parser.add_argument('-n', '--samples', type=int, required=True,
+                        help='Number of Samples')
+    parser.add_argument('-l', '--levels', type=int, required=False,
+                        default=4, help='Number of grid levels \
+                        (Morris only)')
+    parser.add_argument('-k', '--k-optimal', type=int, required=False,
+                        default=None,
+                        help='Number of optimal trajectories \
+                        (Morris only)')
+    parser.add_argument('-o', '--local', type=bool, required=True,
+                        default=False,
+                        help='Use the local optimisation method \
+                        (Morris with optimization only)')
+    return parser
 
 
 def run_sample(args):
@@ -371,4 +371,4 @@ def run_sample(args):
 
 
 if __name__ == "__main__":
-    common_args.run_cli(cli_args, run_sample)
+    common_args.run_cli(cli_parse, run_sample)
