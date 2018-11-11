@@ -7,7 +7,8 @@ python -m SALib.sample.latin \
 	   -p ./SALib/test_functions/params/Ishigami.txt \
 	   -o model_input.txt \
 	   --delimiter=' ' \
-	   --precision=8
+	   --precision=8 \
+		 --seed=100
 
 # Options:
 # -p, --paramfile: Your parameter range file (3 columns: parameter name, lower bound, upper bound)
@@ -22,6 +23,8 @@ python -m SALib.sample.latin \
 # --precision (optional): Digits of precision in the output file. Default is 8.
 #
 # -M: RBD-FAST M coefficient, default 4
+#
+# -s, --seed (optional): Seed value for random number generation
 
 # Run the model using the inputs sampled above, and save outputs
 python -c "from SALib.test_functions import Ishigami; import numpy as np; np.savetxt('model_output.txt', Ishigami.evaluate(np.loadtxt('model_input.txt')))"
@@ -32,7 +35,8 @@ python -c "from SALib.test_functions import Ishigami; import numpy as np; np.sav
 python -m SALib.analyze.rbd_fast \
      -p ./SALib/test_functions/params/Ishigami.txt \
      -Y model_output.txt \
-     -X model_input.txt
+     -X model_input.txt \
+		 --seed=100
 
 # Options:
 # -p, --paramfile: Your parameter range file (3 columns: parameter name, lower bound, upper bound)
@@ -41,3 +45,5 @@ python -m SALib.analyze.rbd_fast \
 # -X, --model-input-file: File of model input values to analyze
 #
 # --delimiter (optional): Model output file delimiter.
+#
+# -s, --seed (optional): Seed value for random number generation

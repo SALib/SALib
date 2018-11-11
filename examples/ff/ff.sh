@@ -4,9 +4,10 @@
 cd ../../ # hack
 python -m SALib.sample.ff \
        -p ./SALib/test_functions/params/Ishigami.txt \
-       -o model_input.txt \
+       -r model_input.txt \
        --delimiter=' ' \
-       --precision=8
+       --precision=8 \
+       --seed=100
 
 # Options:
 # -p, --paramfile: Your parameter range file
@@ -20,6 +21,8 @@ python -m SALib.sample.ff \
 #
 # --precision (optional): Digits of precision in the output file. Default is 8.
 #
+# -s, --seed (optional): Seed value for random number generation
+
 # Run the model using the inputs sampled above, and save outputs
 python -c "from SALib.test_functions import Ishigami; import numpy as np; np.savetxt('model_output.txt', Ishigami.evaluate(np.loadtxt('model_input.txt')))"
 
@@ -31,6 +34,7 @@ python -m SALib.analyze.ff \
        -Y model_output.txt \
        -c 0 \
        -X model_input.txt \
+       --seed=100
 
 # Options:
 # -p, --paramfile: Your parameter range file
@@ -46,3 +50,5 @@ python -m SALib.analyze.ff \
 # --delimiter (optional): Model output file delimiter.
 #
 # -X, --model-input-file: File of model input values (parameter samples).
+#
+# -s, --seed (optional): Seed value for random number generation

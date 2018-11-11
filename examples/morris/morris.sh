@@ -5,10 +5,11 @@ cd ../../ # hack
 python -m SALib.sample.morris \
        -n 100 \
        -p ./SALib/test_functions/params/Ishigami.txt \
-       -o model_input.txt \
+       -r model_input.txt \
        --delimiter=' ' \
        --precision=8 \
-       --levels=10
+       --levels=10 \
+       --seed=100
 
 # Options:
 # -p, --paramfile: Your parameter range file
@@ -35,6 +36,8 @@ python -m SALib.sample.morris \
 #
 # -k, --k-optimal (optional): Number of optimal trajectories.
 #                             Default behavior uses vanilla OAT if --k-optimal is not specified
+#
+# -s, --seed (optional): Seed value for random number generation
 
 # Run the model using the inputs sampled above, and save outputs
 python -c "from SALib.test_functions import Ishigami; import numpy as np; np.savetxt('model_output.txt', Ishigami.evaluate(np.loadtxt('model_input.txt')))"
@@ -48,7 +51,8 @@ python -m SALib.analyze.morris \
        -c 0 \
        -X model_input.txt \
        -r 1000 \
-       -l=10
+       -l=10 \
+       --seed=100
 
 # Options:
 # -p, --paramfile: Your parameter range file
@@ -67,3 +71,5 @@ python -m SALib.analyze.morris \
 #
 # -r, --resamples (optional): Number of bootstrap resamples used to calculate confidence
 #                             intervals on indices. Default 1000.
+#
+# -s, --seed (optional): Seed value for random number generation
