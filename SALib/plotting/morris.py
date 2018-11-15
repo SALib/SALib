@@ -65,10 +65,11 @@ def horizontal_bar_plot(ax, Si, param_dict, sortby='mu_star', unit=''):
     return out
 
 
-def covariance_plot(ax, Si, param_dict, num_vars, plot_var='mu_star', unit=""):
+def covariance_plot(ax, Si, plot_var='mu_star', unit=""):
     '''Plots mu* against sigma or the 95% confidence interval
 
     '''
+    num_vars = len(Si['names'])
     colors = create_marker_styles(num_vars)[0]
     markers = create_marker_styles(num_vars)[1]
 
@@ -99,7 +100,7 @@ def covariance_plot(ax, Si, param_dict, num_vars, plot_var='mu_star', unit=""):
         plt.gca().add_artist(line_legend)
 
         ax.legend(handles=output,
-                  labels=param_dict,
+                  labels=Si['names'],
                   scatterpoints=1,
                   loc='best',
                   ncol=2,
@@ -107,8 +108,7 @@ def covariance_plot(ax, Si, param_dict, num_vars, plot_var='mu_star', unit=""):
 
     else:
         y = Si['mu_star_conf']
-        output = ax.scatter(Si['mu_star'], y, c=u'k', marker=u'o',
-                         **param_dict)
+        output = ax.scatter(Si['mu_star'], y, c=u'k', marker=u'o')
         ax.set_ylabel(r'$95\% CI$')
 
     ax.set_xlabel(r'$\mu^\star$ ' + unit)
