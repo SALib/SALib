@@ -20,6 +20,7 @@ The procedures should build upon and return an axes instance::
     p.show()
 '''
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def _sort_Si(Si, key, sortby='mu_star'):
@@ -64,19 +65,20 @@ def horizontal_bar_plot(ax, Si, param_dict, sortby='mu_star', unit=''):
     return out
 
 
-def covariance_plot(ax, Si, param_dict, num_vars, unit=""):
+def covariance_plot(ax, Si, param_dict, num_vars, plot_var='mu_star', unit=""):
     '''Plots mu* against sigma or the 95% confidence interval
 
     '''
-    colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
+    colors = create_marker_styles(num_vars)[0]
+    markers = create_marker_styles(num_vars)[1]
 
     if Si['sigma'] is not None:
         # sigma is not present if using morris groups
         y = Si['sigma']
-        out_1 = ax.scatter(Si['mu_star'][:8], y[:8], c=colors, marker=u'o',
-                         **param_dict)
-        out_2 = ax.scatter(Si['mu_star'][8:16], y[8:16], c=colors, marker=u's',
-                           **param_dict)
+        output = [0] * num_vars
+        for i in range(num_vars):
+            output[i] = ax.scatter(Si[plot_var][i], y[i], c=colors[i], marker=markers[i])
+
         ax.set_ylabel(r'$\sigma$')
 
         ax.set_xlim(0,)
@@ -88,22 +90,31 @@ def covariance_plot(ax, Si, param_dict, num_vars, unit=""):
         line2, = ax.plot(x_axis_bounds, 0.5 * x_axis_bounds, 'k--')
         line3, = ax.plot(x_axis_bounds, 0.1 * x_axis_bounds, 'k-.')
 
-        ax.legend((line1, line2, line3), (r'$\sigma / \mu^{\star} = 1.0$',
-                                          r'$\sigma / \mu^{\star} = 0.5$',
-                                          r'$\sigma / \mu^{\star} = 0.1$'),
-                  loc='best')
-        out = [out_1, out_2]
+        line_legend = ax.legend(handles=(line1, line2, line3),
+                                labels=(r'$\sigma / \mu^{\star} = 1.0$',
+                                        r'$\sigma / \mu^{\star} = 0.5$',
+                                        r'$\sigma / \mu^{\star} = 0.1$'),
+                                loc='best')
+
+        plt.gca().add_artist(line_legend)
+
+        ax.legend(handles=output,
+                  labels=param_dict,
+                  scatterpoints=1,
+                  loc='best',
+                  ncol=2,
+                  fontsize=8)
 
     else:
         y = Si['mu_star_conf']
-        out = ax.scatter(Si['mu_star'], y, c=u'k', marker=u'o',
+        output = ax.scatter(Si['mu_star'], y, c=u'k', marker=u'o',
                          **param_dict)
         ax.set_ylabel(r'$95\% CI$')
 
     ax.set_xlabel(r'$\mu^\star$ ' + unit)
     ax.set_ylim(0-(0.01 * np.array(ax.get_ylim()[1])), )
 
-    return out
+    return output
 
 
 def sample_histograms(fig, input_sample, problem, param_dict):
@@ -140,6 +151,34 @@ def sample_histograms(fig, input_sample, problem, param_dict):
                            labelleft='off')  # labels along the left edge off)
 
     return out
+
+
+def create_marker_styles(num_vars):
+    """Create pairs of colors and shapes for covariance plot markers.
+
+    Sufficient for 4*7=28 variables.
+    """
+    markers = ['o', 's', '^', '*']
+    colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
+    styles = []
+
+    for marker in markers:
+        for color in colors:
+            styles.append((color, marker))
+
+    all_colors = []
+    all_markers = []
+
+    for style in styles:
+        all_colors.append(style[0])
+        all_markers.append(style[1])
+
+    out_colors = all_colors[:num_vars]
+    out_markers = all_markers[:num_vars]
+
+    pairs = [out_colors, out_markers]
+
+    return pairs
 
 
 if __name__ == '__main__':
