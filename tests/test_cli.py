@@ -1,4 +1,6 @@
 import subprocess
+import importlib
+from SALib.util import avail_approaches
 
 
 def test_cli_usage():
@@ -23,5 +25,22 @@ def test_cli_setup():
         "Unimplemented method selected but no error outputted!"
 
 
+def test_cli_avail_methods():
+    method_types = ['sample', 'analyze']
+
+    for method in method_types:
+        module = importlib.import_module('.'.join(['SALib', method]))
+        actions = avail_approaches(module)
+        for act in actions:
+            approach = importlib.import_module('.'.join(
+                ['SALib', method, act]))
+
+            # Just try to access the functions - raises error on failure
+            approach.cli_parse
+            approach.cli_action
+
+
 if __name__ == '__main__':
+    test_cli_usage()
     test_cli_setup()
+    test_cli_avail_methods()
