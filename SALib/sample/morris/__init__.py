@@ -359,7 +359,7 @@ def cli_parse(parser):
     return parser
 
 
-def run_sample(args):
+def cli_action(args):
     rd.seed(args.seed)
 
     problem = read_param_file(args.paramfile)
@@ -371,4 +371,4 @@ def run_sample(args):
 
 
 if __name__ == "__main__":
-    common_args.run_cli(cli_parse, run_sample)
+    common_args.run_cli(cli_parse, cli_action)

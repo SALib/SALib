@@ -1,28 +1,8 @@
 '''Command-line utility for SALib'''
 import importlib
 import argparse
-import pkgutil
 from SALib import (analyze, sample)
-
-
-def avail_approaches(pkg):
-    '''Create list of available modules.
-
-    Arguments
-    ---------
-    pkg : module
-        name of module to inspect
-
-    Returns
-    ---------
-    method : list
-        A list of available submodules
-    '''
-    methods = [modname for importer, modname, ispkg in
-               pkgutil.walk_packages(path=pkg.__path__)
-               if modname not in
-               ['common_args', 'directions', 'sobol_sequence']]
-    return methods
+from SALib.util import avail_approaches
 
 
 def parse_subargs(module, parser, method, opts):
@@ -81,12 +61,7 @@ def main():
         cmd_parse.print_help()
         exit()
 
-    if action == 'sample':
-        action_func = module.run_sample
-    elif action == 'analyze':
-        action_func = module.run_analysis
-
-    common_args.run_cli(module.cli_parse, action_func, opts)
+    common_args.run_cli(module.cli_parse, module.cli_action, opts)
 
 
 if __name__ == '__main__':

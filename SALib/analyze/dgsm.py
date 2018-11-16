@@ -121,7 +121,7 @@ def cli_parse(parser):
     return parser
 
 
-def run_analysis(args):
+def cli_action(args):
     problem = read_param_file(args.paramfile)
 
     Y = np.loadtxt(args.model_output_file,
@@ -135,4 +135,4 @@ def run_analysis(args):
 
 
 if __name__ == "__main__":
-    common_args.run_cli(cli_parse, run_analysis)
+    common_args.run_cli(cli_parse, cli_action)
