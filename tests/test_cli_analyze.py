@@ -1,3 +1,4 @@
+import sys
 import subprocess
 from SALib.test_functions import Ishigami
 import numpy as np
@@ -5,6 +6,9 @@ import re
 
 salib_cli = "./SALib/scripts/salib.py"
 ishigami_fp = "./SALib/test_functions/params/Ishigami.txt"
+
+if sys.version_info[0] == 2:
+    subprocess.run = subprocess.call
 
 
 def test_delta():
