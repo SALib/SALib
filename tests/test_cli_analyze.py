@@ -3,8 +3,8 @@ from SALib.test_functions import Ishigami
 import numpy as np
 import re
 
-salib_cli = "../SALib/scripts/salib.py"
-ishigami_fp = "../SALib/test_functions/params/Ishigami.txt"
+salib_cli = "./SALib/scripts/salib.py"
+ishigami_fp = "./SALib/test_functions/params/Ishigami.txt"
 
 
 def test_delta():
