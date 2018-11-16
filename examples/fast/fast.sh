@@ -11,6 +11,16 @@ python -m SALib.sample.fast_sampler \
      -M 4 \
 		 --seed=100
 
+salib sample fast_sampler \
+	-n 1000 \
+	-p ./SALib/test_functions/params/Ishigami.txt \
+	-o model_input.txt \
+	--delimiter=' ' \
+	--precision=8 \
+	-M 4 \
+	--seed=100
+
+
 # Options:
 # -p, --paramfile: Your parameter range file (3 columns: parameter name, lower bound, upper bound)
 #
@@ -38,6 +48,12 @@ python -m SALib.analyze.fast \
      -Y model_output.txt \
      -c 0 \
 		 --seed=100
+
+salib analyze fast \
+	-p ./SALib/test_functions/params/Ishigami.txt \
+	-Y model_output.txt \
+	-c 0 \
+	--seed=100
 
 # Options:
 # -p, --paramfile: Your parameter range file (3 columns: parameter name, lower bound, upper bound)

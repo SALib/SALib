@@ -10,6 +10,14 @@ python -m SALib.sample.latin \
 	   --precision=8 \
 		 --seed=100
 
+# salib sample latin \
+# 	   -n 1000 \
+# 	   -p ./SALib/test_functions/params/Ishigami.txt \
+# 	   -o model_input.txt \
+# 	   --delimiter=' ' \
+# 	   --precision=8 \
+# 		 --seed=100
+
 # Options:
 # -p, --paramfile: Your parameter range file (3 columns: parameter name, lower bound, upper bound)
 #
@@ -37,6 +45,12 @@ python -m SALib.analyze.rbd_fast \
      -Y model_output.txt \
      -X model_input.txt \
 		 --seed=100
+
+# salib analyze rbd_fast \
+# 		-p ./SALib/test_functions/params/Ishigami.txt \
+# 		-Y model_output.txt \
+# 		-X model_input.txt \
+# 		--seed=100
 
 # Options:
 # -p, --paramfile: Your parameter range file (3 columns: parameter name, lower bound, upper bound)

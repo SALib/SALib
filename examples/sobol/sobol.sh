@@ -11,6 +11,15 @@ python -m SALib.sample.saltelli \
      --max-order=2 \
      --seed=100
 
+# salib sample saltelli \
+#     -n 1000 \
+#     -p ./SALib/test_functions/params/Ishigami.txt \
+#     -r model_input.txt \
+#     --delimiter=' ' \
+#     --precision=8 \
+#     --max-order=2 \
+#     --seed=100
+
 # Options:
 # -p, --paramfile: Your parameter range file (3 columns: parameter name, lower bound, upper bound)
 #
@@ -43,6 +52,14 @@ python -m SALib.analyze.sobol \
      --max-order=2 \
      -r 1000 \
      --seed=100
+
+# salib analyze sobol \
+#     -p ./SALib/test_functions/params/Ishigami.txt \
+#     -Y model_output.txt \
+#     -c 0 \
+#     --max-order=2 \
+#     -r 1000 \
+#     --seed=100
 
 # Options:
 # -p, --paramfile: Your parameter range file (3 columns: parameter name, lower bound, upper bound)

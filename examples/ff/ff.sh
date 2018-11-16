@@ -9,6 +9,13 @@ python -m SALib.sample.ff \
        --precision=8 \
        --seed=100
 
+# salib sample ff \
+#   -p ./SALib/test_functions/params/Ishigami.txt \
+#   -r model_input.txt \
+#   --delimiter=' ' \
+#   --precision=8 \
+#   --seed=100
+
 # Options:
 # -p, --paramfile: Your parameter range file
 #                  (3 columns: parameter name,
@@ -35,6 +42,13 @@ python -m SALib.analyze.ff \
        -c 0 \
        -X model_input.txt \
        --seed=100
+
+# salib analyze ff \
+#       -p ./SALib/test_functions/params/Ishigami.txt \
+#       -Y model_output.txt \
+#       -c 0 \
+#       -X model_input.txt \
+#       --seed=100
 
 # Options:
 # -p, --paramfile: Your parameter range file
