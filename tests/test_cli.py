@@ -19,10 +19,16 @@ def test_cli_setup():
         "Could not use salib as command line utility!"
 
     cmd = ["salib", "sample", "unknown_method"]
-    out = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
-    out = out.decode()
-    assert len(str(out)) > 0 and "invalid choice" in out.lower(), \
-        "Unimplemented method selected but no error outputted!"
+    try:
+        out = subprocess.check_output(
+            cmd, shell=True, stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as e:
+        pass
+    else:
+        # if no error raised, check the returned string
+        out = out.decode()
+        assert len(str(out)) > 0 and "invalid choice" in out.lower(), \
+            "Unimplemented method selected but no error outputted!"
 
 
 def test_cli_avail_methods():
