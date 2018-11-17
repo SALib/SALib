@@ -12,23 +12,24 @@ if sys.version_info[0] == 2:
 
 
 def test_delta():
-    cmd = "python {cli} sample saltelli -p {fn} -r model_input.txt -n 1000\
-    --delimiter \" \" --precision 8 --max-order 2 --seed 100".format(cli=salib_cli,
-                                                                     fn=ishigami_fp)
-
-    subprocess.run(cmd)
+    cmd = "python {cli} sample saltelli -p {fn} -r model_input.txt -n 1000"\
+          .format(cli=salib_cli, fn=ishigami_fp) +\
+          " --precision 8 --max-order 2 --seed=100"
+    subprocess.run(cmd.split())
 
     # Run model and save output
     np.savetxt('model_output.txt', Ishigami.evaluate(
         np.loadtxt('model_input.txt')))
 
     analyze_cmd = "python {cli} analyze delta -p {fn} -X model_input.txt \
-    -Y model_output.txt -c 0 -r 10 --seed {seed}".format(
-        cli=salib_cli, fn=ishigami_fp, seed=100)
+    -Y model_output.txt -c 0 -r 10 --seed=100".format(cli=salib_cli,
+                                                      fn=ishigami_fp).split()
 
-    result = subprocess.check_output(analyze_cmd)
-    expected_output = b'Parameter delta delta_conf S1 S1_conf\r\nx1 0.210478 0.006091 0.311362 0.012291\r\nx2 0.354023 0.006238 0.428365 0.017972\r\nx3 0.160986 0.004718 0.001111 0.002995\r\n'
-    assert len(result) > 0 and result == expected_output, \
+    result = subprocess.check_output(analyze_cmd, universal_newlines=True)
+    result = re.sub(r'[\n\t\s]*', '', result)
+
+    expected_output = 'Parameterdeltadelta_confS1S1_confx10.2104780.0060910.3113620.012291x20.3540230.0062380.4283650.017972x30.1609860.0047180.0011110.002995'
+    assert len(result) > 0 and result in expected_output, \
         "Results did not match expected values:\n\n Expected: \n{} \n\n Got: \n{}".format(
             expected_output, result)
 
@@ -36,9 +37,8 @@ def test_delta():
 def test_dgsm():
     # Generate inputs
     cmd = "python {cli} sample finite_diff -p {fn} -r model_input.txt -d 0.001\
-    --delimiter \" \" --precision=8 -n 1000 --seed=100"\
-    .format(cli=salib_cli, fn=ishigami_fp)
-
+    --precision=8 -n 1000 --seed=100".format(cli=salib_cli,
+                                             fn=ishigami_fp).split()
     subprocess.run(cmd)
 
     # Run model and save output
@@ -47,11 +47,11 @@ def test_dgsm():
 
     analyze_cmd = "python {cli} analyze dgsm -p {fn} -X model_input.txt\
     -Y model_output.txt -c 0 -r 1000 --seed=100"\
-     .format(cli=salib_cli, fn=ishigami_fp)
+     .format(cli=salib_cli, fn=ishigami_fp).split()
 
     # run analysis and use regex to strip all whitespace from result
-    result = subprocess.check_output(analyze_cmd)
-    result = re.sub(r'[\s+]', '', result.decode())
+    result = subprocess.check_output(analyze_cmd, universal_newlines=True)
+    result = re.sub(r'[\n\t\s]*', '', result)
 
     expected = "Parametervivi_stddgsmdgsm_confx17.62237816.1981232.2075541.034173x224.48775717.3385567.0920191.090835x311.18125824.0621273.2382591.477114"
 
@@ -63,9 +63,8 @@ def test_dgsm():
 def test_fast():
     # Generate inputs
     cmd = "python {cli} sample fast_sampler -p {fn} -r model_input.txt \
-    --delimiter \" \" --precision=8 -n 1000 -M 4 --seed=100"\
-    .format(cli=salib_cli, fn=ishigami_fp)
-
+    --precision=8 -n 1000 -M 4 --seed=100".format(cli=salib_cli,
+                                                  fn=ishigami_fp).split()
     subprocess.run(cmd)
 
     # Run model and save output
@@ -74,11 +73,11 @@ def test_fast():
 
     analyze_cmd = "python {cli} analyze fast -p {fn} \
     -Y model_output.txt -c 0 --seed=100"\
-     .format(cli=salib_cli, fn=ishigami_fp)
+     .format(cli=salib_cli, fn=ishigami_fp).split()
 
     # run analysis and use regex to strip all whitespace from result
-    result = subprocess.check_output(analyze_cmd)
-    result = re.sub(r'[\s+]', '', result.decode())
+    result = subprocess.check_output(analyze_cmd, universal_newlines=True)
+    result = re.sub(r'[\n\t\s]*', '', result)
 
     expected = "ParameterFirstTotalx10.3104030.555603x20.4425530.469546x30.0000000.239155"
 
@@ -90,9 +89,8 @@ def test_fast():
 def test_ff():
     # Generate inputs
     cmd = "python {cli} sample ff -p {fn} -r model_input.txt \
-    --delimiter \" \" --precision=8 -n 1000 --seed=100"\
-    .format(cli=salib_cli, fn=ishigami_fp)
-
+    --precision=8 -n 1000 --seed=100".format(cli=salib_cli,
+                                             fn=ishigami_fp).split()
     subprocess.run(cmd)
 
     # Run model and save output
@@ -101,11 +99,11 @@ def test_ff():
 
     analyze_cmd = "python {cli} analyze ff -p {fn} -X model_input.txt\
     -Y model_output.txt -c 0 --seed=100"\
-     .format(cli=salib_cli, fn=ishigami_fp)
+     .format(cli=salib_cli, fn=ishigami_fp).split()
 
     # run analysis and use regex to strip all whitespace from result
-    result = subprocess.check_output(analyze_cmd)
-    result = re.sub(r'[\s+]', '', result.decode())
+    result = subprocess.check_output(analyze_cmd, universal_newlines=True)
+    result = re.sub(r'[\n\t\s]*', '', result)
 
     expected = "ParameterMEx10.000000x20.000000x30.000000dummy_00.000000('x1','x2')0.000000('x1','x3')0.000000('x2','x3')0.000000('x1','dummy_0')0.000000('x2','dummy_0')0.000000('x3','dummy_0')0.000000"
 
@@ -118,8 +116,8 @@ def test_morris():
 
     # Generate inputs
     cmd = "python {cli} sample morris -p {fn} -r model_input.txt -n 100\
-    --delimiter \" \" --precision=8 --levels=10 --seed=100 -o False"\
-    .format(cli=salib_cli, fn=ishigami_fp)
+    --precision=8 --levels=10 --seed=100 -o False"\
+    .format(cli=salib_cli, fn=ishigami_fp).split()
 
     subprocess.run(cmd)
 
@@ -130,14 +128,12 @@ def test_morris():
     # run analysis
     analyze_cmd = "python {cli} analyze morris -p {fn} -X model_input.txt\
     -Y model_output.txt -c 0 -r 1000 -l 10 --seed=100"\
-     .format(cli=salib_cli, fn=ishigami_fp)
+     .format(cli=salib_cli, fn=ishigami_fp).split()
 
-    result = subprocess.check_output(analyze_cmd)
+    result = subprocess.check_output(analyze_cmd, universal_newlines=True)
+    result = re.sub(r'[\n\t\s]*', '', result)
 
     expected_output = """ParameterMu_StarMuMu_Star_ConfSigmax13.3753.3750.5903.003x21.4740.1180.0001.477x32.6980.4200.5954.020"""
-
-    # using regex to strip all whitespace
-    result = re.sub(r'[\s+]', '', result.decode())
 
     assert len(result) > 0 and result == expected_output, \
         "Results did not match expected values:\n\n Expected: \n{} \n\n Got: \n{}".format(
@@ -145,11 +141,9 @@ def test_morris():
 
 
 def test_rbd_fast():
-    pass
     # Generate inputs
     cmd = "python {cli} sample ff -p {fn} -r model_input.txt \
-    --delimiter \" \" --precision=8 --seed=100"\
-    .format(cli=salib_cli, fn=ishigami_fp)
+    --precision=8 --seed=100".format(cli=salib_cli, fn=ishigami_fp).split()
 
     subprocess.run(cmd)
 
@@ -159,11 +153,11 @@ def test_rbd_fast():
 
     analyze_cmd = "python {cli} analyze rbd_fast -p {fn} -X model_input.txt\
     -Y model_output.txt --seed=100"\
-     .format(cli=salib_cli, fn=ishigami_fp)
+     .format(cli=salib_cli, fn=ishigami_fp).split()
 
     # run analysis and use regex to strip all whitespace from result
-    result = subprocess.check_output(analyze_cmd)
-    result = re.sub(r'[\s+]', '', result.decode())
+    result = subprocess.check_output(analyze_cmd, universal_newlines=True)
+    result = re.sub(r'[\n\t\s]*', '', result)
 
     expected = "ParameterFirstx10.437313x20.129825x30.000573789"
 
@@ -175,17 +169,22 @@ def test_rbd_fast():
 def test_sobol():
     # Generate inputs
     cmd = "python {cli} sample saltelli -p {fn} -r model_input.txt -n 1000\
-    --delimiter \" \" --precision 8 --max-order 2 --seed 100".format(cli=salib_cli,
-                                                                     fn=ishigami_fp)
-    result = subprocess.check_output(cmd)
+    --precision 8 --max-order 2 --seed=100".format(cli=salib_cli,
+                                                   fn=ishigami_fp)
+    cmd = cmd.split()
+
+    result = subprocess.check_output(cmd, universal_newlines=True)
     np.savetxt('model_output.txt', Ishigami.evaluate(
         np.loadtxt('model_input.txt')))
 
-    analyze_cmd = "python {cli} analyze sobol -p {fn} -Y model_output.txt\
-     -c 0 --max-order 2 -r 1000 --seed=100".format(cli=salib_cli, fn=ishigami_fp)
+    analyze_cmd = "python {cli} analyze sobol -p {fn}\
+    -Y model_output.txt -c 0 --max-order 2\
+    -r 1000 --seed=100".format(cli=salib_cli, fn=ishigami_fp).split()
 
-    result = subprocess.check_output(analyze_cmd)
-    expected_output = b'Parameter S1 S1_conf ST ST_conf\r\nx1 0.307975 0.063047 0.560137 0.091908\r\nx2 0.447767 0.053323 0.438722 0.040634\r\nx3 -0.004255 0.059667 0.242845 0.026578\r\n\r\nParameter_1 Parameter_2 S2 S2_conf\r\nx1 x2 0.012205 0.086177\r\nx1 x3 0.251526 0.108147\r\nx2 x3 -0.009954 0.065569\r\n'
+    result = subprocess.check_output(analyze_cmd, universal_newlines=True)
+    result = re.sub(r'[\n\t\s]*', '', result)
+
+    expected_output = 'ParameterS1S1_confSTST_confx10.3079750.0630470.5601370.091908x20.4477670.0533230.4387220.040634x3-0.0042550.0596670.2428450.026578Parameter_1Parameter_2S2S2_confx1x20.0122050.086177x1x30.2515260.108147x2x3-0.0099540.065569'
     assert len(result) > 0 and result == expected_output, \
         "Results did not match expected values:\n\n Expected: \n{} \n\n Got: \n{}".format(
             expected_output, result)

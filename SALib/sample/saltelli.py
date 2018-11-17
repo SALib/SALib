@@ -7,7 +7,7 @@ from . import sobol_sequence
 from ..util import scale_samples, nonuniform_scale_samples, read_param_file, compute_groups_matrix
 
 
-def sample(problem, N, calc_second_order=True, seed=True):
+def sample(problem, N, calc_second_order=True, seed=None):
     """Generates model inputs using Saltelli's extension of the Sobol sequence.
 
     Returns a NumPy matrix containing the model inputs using Saltelli's sampling

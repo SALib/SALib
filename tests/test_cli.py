@@ -5,30 +5,17 @@ from SALib.util import avail_approaches
 
 def test_cli_usage():
     cmd = ["salib"]
-    out = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
-    out = out.decode()
-    assert len(out) > 0 and "usage" in out.lower(), \
-        "Incorrect message returned from utility"
-
-
-def test_cli_setup():
-    cmd = ["salib", "sample", "morris"]
-    out = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
-    out = out.decode()
-    assert len(out) > 0 and "error" not in out.lower(), \
-        "Could not use salib as command line utility!"
-
-    cmd = ["salib", "sample", "unknown_method"]
     try:
-        out = subprocess.check_output(
-            cmd, shell=True, stderr=subprocess.STDOUT)
+        out = subprocess.check_output(cmd,
+                                      stderr=subprocess.STDOUT,
+                                      shell=True,
+                                      universal_newlines=True)
     except subprocess.CalledProcessError as e:
         pass
     else:
         # if no error raised, check the returned string
-        out = out.decode()
-        assert len(str(out)) > 0 and "invalid choice" in out.lower(), \
-            "Unimplemented method selected but no error outputted!"
+        assert len(out) > 0 and "usage" in out.lower(), \
+            "Incorrect message returned from utility"
 
 
 def test_cli_avail_methods():
@@ -48,5 +35,4 @@ def test_cli_avail_methods():
 
 if __name__ == '__main__':
     test_cli_usage()
-    test_cli_setup()
     test_cli_avail_methods()
