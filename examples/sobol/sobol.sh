@@ -40,7 +40,7 @@ salib sample saltelli \
 # -s, --seed (optional): Seed value for random number generation
 
 # Run the model using the inputs sampled above, and save outputs
-python -c "from SALib.test_functions import Ishigami; import numpy as np; np.savetxt('model_output.txt', Ishigami.evaluate(np.loadtxt('model_input.txt')))"
+python -c "from SALib.test_functions import Ishigami; import numpy as np; np.savetxt('../data/model_output.txt', Ishigami.evaluate(np.loadtxt('../data/model_input.txt')))"
 
 # Then use the output to run the analysis.
 # Sensitivity indices will print to command line. Use ">" to write to file.
