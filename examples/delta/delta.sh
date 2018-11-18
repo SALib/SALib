@@ -1,17 +1,6 @@
 #!/bin/bash
 
-# cd ../../ # hack
-# Then use the output to run the analysis.
 # Sensitivity indices will print to command line. Use ">" to write to file.
-
-# python -m SALib.analyze.delta \
-#      -p ../../SALib/test_functions/params/Ishigami.txt \
-#      -X ../data/model_input.txt \
-#      -Y ../data/model_output.txt \
-#      -c 0 \
-#      -r 10 \
-#      --seed=100
-
 salib analyze delta \
   -p ../../SALib/test_functions/params/Ishigami.txt \
   -X ../data/model_input.txt \
@@ -19,6 +8,17 @@ salib analyze delta \
   -c 0 \
   -r 10 \
   --seed=100
+
+# Then use the output to run the analysis.
+
+# You can also use the module directly through Python
+# python -m SALib.analyze.delta \
+#      -p ../../SALib/test_functions/params/Ishigami.txt \
+#      -X ../data/model_input.txt \
+#      -Y ../data/model_output.txt \
+#      -c 0 \
+#      -r 10 \
+#      --seed=100
 
 # Options:
 # -p, --paramfile: Your parameter range file (3 columns: parameter name, lower bound, upper bound)
