@@ -4,8 +4,8 @@
 # cd ../../ # hack
 # python -m SALib.sample.finite_diff \
 #      -n 1000 \
-#      -p ./SALib/test_functions/params/Ishigami.txt \
-#      -r model_input.txt \
+#      -p ../../SALib/test_functions/params/Ishigami.txt \
+#      -r ../data/model_input.txt \
 #      -d 0.001 \
 #      --delimiter=' ' \
 #      --precision=8 \
@@ -14,7 +14,7 @@
 salib sample finite_diff \
   -n 1000 \
   -p ../../SALib/test_functions/params/Ishigami.txt \
-  -r model_input.txt \
+  -r ../data/model_input.txt \
   -d 0.001 \
   --delimiter=' ' \
   --precision=8 \
@@ -45,8 +45,8 @@ python -c "from SALib.test_functions import Ishigami; import numpy as np; np.sav
 
 python -m SALib.analyze.dgsm \
      -p ../../SALib/test_functions/params/Ishigami.txt \
-     -X model_input.txt \
-     -Y model_output.txt \
+     -X ../data/model_input.txt \
+     -Y ../data/model_output.txt \
      -c 0 \
      -r 1000 \
      --seed=100
