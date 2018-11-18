@@ -1,20 +1,20 @@
 #!/bin/bash
 
 # Example: generating samples from the command line
-cd ../../ # hack
-python -m SALib.sample.ff \
-       -p ./SALib/test_functions/params/Ishigami.txt \
-       -r model_input.txt \
-       --delimiter=' ' \
-       --precision=8 \
-       --seed=100
+# cd ../../ # hack
+# python -m SALib.sample.ff \
+#        -p ./SALib/test_functions/params/Ishigami.txt \
+#        -r model_input.txt \
+#        --delimiter=' ' \
+#        --precision=8 \
+#        --seed=100
 
-# salib sample ff \
-#   -p ./SALib/test_functions/params/Ishigami.txt \
-#   -r model_input.txt \
-#   --delimiter=' ' \
-#   --precision=8 \
-#   --seed=100
+salib sample ff \
+  -p ../../SALib/test_functions/params/Ishigami.txt \
+  -r model_input.txt \
+  --delimiter=' ' \
+  --precision=8 \
+  --seed=100
 
 # Options:
 # -p, --paramfile: Your parameter range file

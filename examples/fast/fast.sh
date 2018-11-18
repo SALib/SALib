@@ -1,24 +1,24 @@
 #!/bin/bash
 
 # Example: generating samples from the command line
-cd ../../ # hack
-python -m SALib.sample.fast_sampler \
-	   -n 1000 \
-	   -p ./SALib/test_functions/params/Ishigami.txt \
-	   -o model_input.txt \
-	   --delimiter=' ' \
-	   --precision=8 \
-     -M 4 \
-		 --seed=100
+# cd ../../ # hack
+# python -m SALib.sample.fast_sampler \
+# 	   -n 1000 \
+# 	   -p ./SALib/test_functions/params/Ishigami.txt \
+# 	   -o model_input.txt \
+# 	   --delimiter=' ' \
+# 	   --precision=8 \
+#      -M 4 \
+# 		 --seed=100
 
-# salib sample fast_sampler \
-# 	-n 1000 \
-# 	-p ./SALib/test_functions/params/Ishigami.txt \
-# 	-o model_input.txt \
-# 	--delimiter=' ' \
-# 	--precision=8 \
-# 	-M 4 \
-# 	--seed=100
+salib sample fast_sampler \
+	-n 1000 \
+	-p ../../SALib/test_functions/params/Ishigami.txt \
+	-o model_input.txt \
+	--delimiter=' ' \
+	--precision=8 \
+	-M 4 \
+	--seed=100
 
 
 # Options:

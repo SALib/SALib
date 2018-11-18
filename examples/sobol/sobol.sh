@@ -1,24 +1,24 @@
 #!/bin/bash
 
 # Example: generating samples from the command line
-cd ../../ # hack
-python -m SALib.sample.saltelli \
-     -n 1000 \
-     -p ./SALib/test_functions/params/Ishigami.txt \
-     -r model_input.txt \
-     --delimiter=' ' \
-     --precision=8 \
-     --max-order=2 \
-     --seed=100
+# cd ../../ # hack
+# python -m SALib.sample.saltelli \
+#      -n 1000 \
+#      -p ./SALib/test_functions/params/Ishigami.txt \
+#      -r model_input.txt \
+#      --delimiter=' ' \
+#      --precision=8 \
+#      --max-order=2 \
+#      --seed=100
 
-# salib sample saltelli \
-#     -n 1000 \
-#     -p ./SALib/test_functions/params/Ishigami.txt \
-#     -r model_input.txt \
-#     --delimiter=' ' \
-#     --precision=8 \
-#     --max-order=2 \
-#     --seed=100
+salib sample saltelli \
+    -n 1000 \
+    -p ../../SALib/test_functions/params/Ishigami.txt \
+    -r model_input.txt \
+    --delimiter=' ' \
+    --precision=8 \
+    --max-order=2 \
+    --seed=100
 
 # Options:
 # -p, --paramfile: Your parameter range file (3 columns: parameter name, lower bound, upper bound)
