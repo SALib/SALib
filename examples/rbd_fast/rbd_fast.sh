@@ -5,7 +5,7 @@
 # python -m SALib.sample.latin \
 # 	   -n 1000 \
 # 	   -p ./SALib/test_functions/params/Ishigami.txt \
-# 	   -o model_input.txt \
+# 	   -r model_input.txt \
 # 	   --delimiter=' ' \
 # 	   --precision=8 \
 # 		 --seed=100
@@ -13,7 +13,7 @@
 salib sample latin \
 	-n 1000 \
 	-p ../../SALib/test_functions/params/Ishigami.txt \
-	-o ../data/model_input.txt \
+	-r ../data/model_input.txt \
 	--delimiter=' ' \
 	--precision=8 \
 	--seed=100
@@ -35,7 +35,7 @@ salib sample latin \
 # -s, --seed (optional): Seed value for random number generation
 
 # Run the model using the inputs sampled above, and save outputs
-python -c "from SALib.test_functions import Ishigami; import numpy as np; np.savetxt('model_output.txt', Ishigami.evaluate(np.loadtxt('model_input.txt')))"
+python -c "from SALib.test_functions import Ishigami; import numpy as np; np.savetxt('../data/model_output.txt', Ishigami.evaluate(np.loadtxt('../data/model_input.txt')))"
 
 # Then use the output to run the analysis.
 # Sensitivity indices will print to command line. Use ">" to write to file.

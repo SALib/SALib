@@ -6,6 +6,7 @@
 #        -n 100 \
 #        -p ../../SALib/test_functions/params/Ishigami.txt \
 #        -r ../data/model_input.txt \
+#        -o True \
 #        --delimiter=' ' \
 #        --precision=8 \
 #        --levels=10 \
@@ -15,6 +16,7 @@ salib sample morris \
   -n 100 \
   -p ../../SALib/test_functions/params/Ishigami.txt \
   -r ../data/model_input.txt \
+  -o True \
   --delimiter=' ' \
   --precision=8 \
   --levels=10 \
@@ -29,7 +31,9 @@ salib sample morris \
 # -n, --samples: Sample size.
 #				 Number of model runs is N(D + 1)
 #
-# -o, --output: File to output your samples into.
+# -r, --result: File to output your samples into.
+#
+# -o --local: Use local optimization
 #
 # --delimiter (optional): Output file delimiter.
 #
