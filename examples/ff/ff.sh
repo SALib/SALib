@@ -37,11 +37,11 @@ python -c "from SALib.test_functions import Ishigami; import numpy as np; np.sav
 # Sensitivity indices will print to command line. Use ">" to write to file.
 
 python -m SALib.analyze.ff \
-       -p ./SALib/test_functions/params/Ishigami.txt \
-       -Y model_output.txt \
-       -c 0 \
-       -X model_input.txt \
-       --seed=100
+  -p ../../SALib/test_functions/params/Ishigami.txt \
+  -Y model_output.txt \
+  -c 0 \
+  -X model_input.txt \
+  --seed=100
 
 # salib analyze ff \
 #       -p ./SALib/test_functions/params/Ishigami.txt \

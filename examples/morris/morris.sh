@@ -12,13 +12,13 @@
 #        --seed=100
 
 salib sample morris \
-      -n 100 \
-      -p ../../SALib/test_functions/params/Ishigami.txt \
-      -r model_input.txt \
-      --delimiter=' ' \
-      --precision=8 \
-      --levels=10 \
-      --seed=100
+  -n 100 \
+  -p ../../SALib/test_functions/params/Ishigami.txt \
+  -r model_input.txt \
+  --delimiter=' ' \
+  --precision=8 \
+  --levels=10 \
+  --seed=100
 
 # Options:
 # -p, --paramfile: Your parameter range file
@@ -55,13 +55,13 @@ python -c "from SALib.test_functions import Ishigami; import numpy as np; np.sav
 # Sensitivity indices will print to command line. Use ">" to write to file.
 
 python -m SALib.analyze.morris \
-       -p ./SALib/test_functions/params/Ishigami.txt \
-       -Y model_output.txt \
-       -c 0 \
-       -X model_input.txt \
-       -r 1000 \
-       -l=10 \
-       --seed=100
+  -p ../../SALib/test_functions/params/Ishigami.txt \
+  -Y model_output.txt \
+  -c 0 \
+  -X model_input.txt \
+  -r 1000 \
+  -l=10 \
+  --seed=100
 
 # salib analyze morris \
 #       -p ./SALib/test_functions/params/Ishigami.txt \
