@@ -26,7 +26,7 @@ salib sample latin \
 # -n, --samples: Sample size.
 #				 Number of model runs is N
 #
-# -o, --output: File to output your samples into.
+# -r, --result: File to output your samples into.
 #
 # --delimiter (optional): Output file delimiter.
 #

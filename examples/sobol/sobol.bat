@@ -27,7 +27,7 @@ REM -n, --samples: Sample size.
 REM				 Number of model runs is N(2D + 2) if calculating second-order indices (default)
 REM        or N(D + 2) otherwise.
 REM
-REM -o, --output: File to output your samples into.
+REM -r, --result: File to output your samples into.
 REM
 REM --delimiter (optional): Output file delimiter.
 REM

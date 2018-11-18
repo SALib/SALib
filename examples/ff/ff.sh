@@ -24,7 +24,7 @@ salib sample ff \
 #                              lower bound,
 #                              upper bound) with an optional 4th "group" column for Morris only
 #
-# -o, --output: File to output your samples into.
+# -r, --result: File to output your samples into.
 #
 # --delimiter (optional): Output file delimiter.
 #

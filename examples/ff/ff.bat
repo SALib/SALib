@@ -24,7 +24,7 @@ REM                  (3 columns: parameter name,
 REM                              lower bound,
 REM                              upper bound) with an optional 4th "group" column for Morris only
 REM
-REM -o, --output: File to output your samples into.
+REM -r, --result: File to output your samples into.
 REM
 REM --delimiter (optional): Output file delimiter.
 REM

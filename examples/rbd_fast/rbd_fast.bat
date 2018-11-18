@@ -26,7 +26,7 @@ REM
 REM -n, --samples: Sample size.
 REM				 Number of model runs is N
 REM
-REM -o, --output: File to output your samples into.
+REM -r, --result: File to output your samples into.
 REM
 REM --delimiter (optional): Output file delimiter.
 REM

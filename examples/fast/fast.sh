@@ -26,7 +26,7 @@ salib sample fast_sampler \
 # -n, --samples: Sample size.
 #				 Number of model runs is ND ; must choose N > 4M^2 (N > 64 under default settings)
 #
-# -o, --output: File to output your samples into.
+# -r, --result: File to output your samples into.
 #
 # --delimiter (optional): Output file delimiter.
 #

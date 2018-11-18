@@ -27,7 +27,7 @@ salib sample saltelli \
 #				 Number of model runs is N(2D + 2) if calculating second-order indices (default)
 #        or N(D + 2) otherwise.
 #
-# -o, --output: File to output your samples into.
+# -r, --result: File to output your samples into.
 #
 # --delimiter (optional): Output file delimiter.
 #
