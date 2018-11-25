@@ -19,7 +19,7 @@ Parameter files can also be comma-delimited if your parameter names or group nam
 python -m SALib.sample.saltelli \
      -n 1000 \
      -p ./SALib/test_functions/params/Ishigami.txt \
-     -r model_input.txt \
+     -o model_input.txt \
 ```
 
 **Run the model** this will usually be a user-defined model, maybe even in another language. Just save the outputs.

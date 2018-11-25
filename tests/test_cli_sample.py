@@ -13,7 +13,7 @@ def test_cli_entry():
 
 
 def test_ff():
-    cmd = "python {cli} sample ff -p {fn} -r {test_data} -n 100".format(
+    cmd = "python {cli} sample ff -p {fn} -o {test_data} -n 100".format(
         cli=salib_cli,
         fn=ishigami_fp,
         test_data=test_data).split()
@@ -22,7 +22,7 @@ def test_ff():
 
 
 def test_fast():
-    cmd = "python {cli} sample fast_sampler -p {fn} -r {test_data} -n 100".format(
+    cmd = "python {cli} sample fast_sampler -p {fn} -o {test_data} -n 100".format(
         cli=salib_cli,
         fn=ishigami_fp,
         test_data=test_data).split()
@@ -31,7 +31,7 @@ def test_fast():
 
 
 def test_finite_diff():
-    cmd = "python {cli} sample finite_diff -p {fn} -r {test_data} -n 100".format(
+    cmd = "python {cli} sample finite_diff -p {fn} -o {test_data} -n 100".format(
         cli=salib_cli,
         fn=ishigami_fp,
         test_data=test_data).split()
@@ -40,7 +40,7 @@ def test_finite_diff():
 
 
 def test_latin():
-    cmd = "python {cli} sample latin -p {fn} -r {test_data} -n 100".format(
+    cmd = "python {cli} sample latin -p {fn} -o {test_data} -n 100".format(
         cli=salib_cli,
         fn=ishigami_fp,
         test_data=test_data).split()
@@ -49,7 +49,7 @@ def test_latin():
 
 
 def test_saltelli():
-    cmd = "python {cli} sample latin -p {fn} -r {test_data} -n 100".format(
+    cmd = "python {cli} sample latin -p {fn} -o {test_data} -n 100".format(
         cli=salib_cli,
         fn=ishigami_fp,
         test_data=test_data).split()

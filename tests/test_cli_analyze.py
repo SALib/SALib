@@ -12,7 +12,7 @@ if sys.version_info[0] == 2:
 
 
 def test_delta():
-    cmd = "python {cli} sample saltelli -p {fn} -r model_input.txt -n 1000"\
+    cmd = "python {cli} sample saltelli -p {fn} -o model_input.txt -n 1000"\
           .format(cli=salib_cli, fn=ishigami_fp) +\
           " --precision 8 --max-order 2 --seed=100"
     subprocess.run(cmd.split())
@@ -36,7 +36,7 @@ def test_delta():
 
 def test_dgsm():
     # Generate inputs
-    cmd = "python {cli} sample finite_diff -p {fn} -r model_input.txt -d 0.001\
+    cmd = "python {cli} sample finite_diff -p {fn} -o model_input.txt -d 0.001\
     --precision=8 -n 1000 --seed=100".format(cli=salib_cli,
                                              fn=ishigami_fp).split()
     subprocess.run(cmd)
@@ -62,7 +62,7 @@ def test_dgsm():
 
 def test_fast():
     # Generate inputs
-    cmd = "python {cli} sample fast_sampler -p {fn} -r model_input.txt \
+    cmd = "python {cli} sample fast_sampler -p {fn} -o model_input.txt \
     --precision=8 -n 1000 -M 4 --seed=100".format(cli=salib_cli,
                                                   fn=ishigami_fp).split()
     subprocess.run(cmd)
@@ -88,7 +88,7 @@ def test_fast():
 
 def test_ff():
     # Generate inputs
-    cmd = "python {cli} sample ff -p {fn} -r model_input.txt \
+    cmd = "python {cli} sample ff -p {fn} -o model_input.txt \
     --precision=8 -n 1000 --seed=100".format(cli=salib_cli,
                                              fn=ishigami_fp).split()
     subprocess.run(cmd)
@@ -115,8 +115,8 @@ def test_ff():
 def test_morris():
 
     # Generate inputs
-    cmd = "python {cli} sample morris -p {fn} -r model_input.txt -n 100\
-    --precision=8 --levels=10 --seed=100 -o False"\
+    cmd = "python {cli} sample morris -p {fn} -o model_input.txt -n 100\
+    --precision=8 --levels=10 --seed=100 -lo False"\
     .format(cli=salib_cli, fn=ishigami_fp).split()
 
     subprocess.run(cmd)
@@ -142,7 +142,7 @@ def test_morris():
 
 def test_rbd_fast():
     # Generate inputs
-    cmd = "python {cli} sample ff -p {fn} -r model_input.txt \
+    cmd = "python {cli} sample ff -p {fn} -o model_input.txt \
     --precision=8 --seed=100".format(cli=salib_cli, fn=ishigami_fp).split()
 
     subprocess.run(cmd)
@@ -168,7 +168,7 @@ def test_rbd_fast():
 
 def test_sobol():
     # Generate inputs
-    cmd = "python {cli} sample saltelli -p {fn} -r model_input.txt -n 1000\
+    cmd = "python {cli} sample saltelli -p {fn} -o model_input.txt -n 1000\
     --precision 8 --max-order 2 --seed=100".format(cli=salib_cli,
                                                    fn=ishigami_fp)
     cmd = cmd.split()
