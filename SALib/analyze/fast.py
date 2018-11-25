@@ -10,7 +10,7 @@ from . import common_args
 from ..util import read_param_file, ResultDict
 
 
-def analyze(problem, Y, M=4, print_to_console=False):
+def analyze(problem, Y, M=4, print_to_console=False, seed=None):
     """Performs the Fourier Amplitude Sensitivity Test (FAST) on model outputs.
 
     Returns a dictionary with keys 'S1' and 'ST', where each entry is a list of
@@ -47,6 +47,8 @@ def analyze(problem, Y, M=4, print_to_console=False):
     >>> Y = Ishigami.evaluate(X)
     >>> Si = fast.analyze(problem, Y, print_to_console=False)
     """
+    if seed:
+        np.random.seed(seed)
 
     D = problem['num_vars']
 
@@ -88,7 +90,7 @@ def analyze(problem, Y, M=4, print_to_console=False):
 
 def compute_first_order(outputs, N, M, omega):
     f = np.fft.fft(outputs)
-    Sp = np.power(np.absolute(f[np.arange(1, int((N+1)/2))]) / N, 2)
+    Sp = np.power(np.absolute(f[np.arange(1, int((N + 1) / 2))]) / N, 2)
     V = 2 * np.sum(Sp)
     D1 = 2 * np.sum(Sp[np.arange(1, M + 1) * int(omega) - 1])
     return D1 / V
@@ -96,16 +98,25 @@ def compute_first_order(outputs, N, M, omega):
 
 def compute_total_order(outputs, N, omega):
     f = np.fft.fft(outputs)
-    Sp = np.power(np.absolute(f[np.arange(1, int((N+1)/2))]) / N, 2)
+    Sp = np.power(np.absolute(f[np.arange(1, int((N + 1) / 2))]) / N, 2)
     V = 2 * np.sum(Sp)
     Dt = 2 * sum(Sp[np.arange(int(omega / 2))])
     return (1 - Dt / V)
 
-if __name__ == "__main__":
 
-    parser = common_args.create()
-    args = parser.parse_args()
+def cli_parse(parser):
+    # No additional arguments required for FAST
+    # This method is required to make sure tests pass.
+    return parser
+
+
+def cli_action(args):
     problem = read_param_file(args.paramfile)
-    Y = np.loadtxt(args.model_output_file, delimiter=args.delimiter, usecols=(args.column,))
+    Y = np.loadtxt(args.model_output_file,
+                   delimiter=args.delimiter, usecols=(args.column,))
 
-    analyze(problem, Y, print_to_console=True)
+    analyze(problem, Y, print_to_console=True, seed=args.seed)
+
+
+if __name__ == "__main__":
+    common_args.run_cli(cli_parse, cli_action)

@@ -10,7 +10,7 @@ from ..util import read_param_file, ResultDict
 
 
 def analyze(problem, X, Y, num_resamples=1000,
-            conf_level=0.95, print_to_console=False):
+            conf_level=0.95, print_to_console=False, seed=None):
     """Calculates Derivative-based Global Sensitivity Measure on model outputs.
 
     Returns a dictionary with keys 'vi', 'vi_std', 'dgsm', and 'dgsm_conf',
@@ -40,6 +40,8 @@ def analyze(problem, X, Y, num_resamples=1000,
            indices." Mathematics and Computers in Simulation, 79(10):3009-3017,
            doi:10.1016/j.matcom.2009.01.023.
     """
+    if seed:
+        np.random.seed(seed)
 
     D = problem['num_vars']
 
@@ -67,7 +69,7 @@ def analyze(problem, X, Y, num_resamples=1000,
     keys = ('vi', 'vi_std', 'dgsm', 'dgsm_conf')
     S = ResultDict((k, np.zeros(D)) for k in keys)
     S['names'] = problem['names']
-    
+
     if print_to_console:
         print("Parameter %s %s %s %s" % keys)
 
@@ -80,8 +82,6 @@ def analyze(problem, X, Y, num_resamples=1000,
         if print_to_console:
             print("%s %f %f %f %f" % (
                 problem['names'][j], S['vi'][j], S['vi_std'][j], S['dgsm'][j], S['dgsm_conf'][j]))
-
-
 
     return S
 
@@ -109,18 +109,30 @@ def calc_dgsm(base, perturbed, x_delta, bounds, num_resamples, conf_level):
 
     return dgsm, norm.ppf(0.5 + conf_level / 2) * s.std(ddof=1)
 
-if __name__ == "__main__":
-    parser = common_args.create()
+
+def cli_parse(parser):
     parser.add_argument('-X', '--model-input-file', type=str,
-                        required=True, default=None, help='Model input file')
-    parser.add_argument('-r', '--resamples', type=int, required=False, default=1000,
-                        help='Number of bootstrap resamples for Sobol confidence intervals')
-    args = parser.parse_args()
+                        required=True, default=None,
+                        help='Model input file')
+    parser.add_argument('-r', '--resamples', type=int, required=False,
+                        default=1000,
+                        help='Number of bootstrap resamples for Sobol \
+                           confidence intervals')
+    return parser
+
+
+def cli_action(args):
     problem = read_param_file(args.paramfile)
 
-    Y = np.loadtxt(args.model_output_file, delimiter=args.delimiter, usecols=(args.column,))
+    Y = np.loadtxt(args.model_output_file,
+                   delimiter=args.delimiter, usecols=(args.column,))
     X = np.loadtxt(args.model_input_file, delimiter=args.delimiter, ndmin=2)
     if len(X.shape) == 1:
         X = X.reshape((len(X), 1))
 
-    analyze(problem, X, Y, num_resamples=args.resamples, print_to_console=True)
+    analyze(problem, X, Y, num_resamples=args.resamples, print_to_console=True,
+            seed=args.seed)
+
+
+if __name__ == "__main__":
+    common_args.run_cli(cli_parse, cli_action)

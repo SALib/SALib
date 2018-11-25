@@ -23,7 +23,7 @@ except ImportError:
 
 def analyze(problem, Y, calc_second_order=True, num_resamples=100,
             conf_level=0.95, print_to_console=False, parallel=False,
-            n_processors=None):
+            n_processors=None, seed=None):
     """Perform Sobol Analysis on model outputs.
 
     Returns a dictionary with keys 'S1', 'S1_conf', 'ST', and 'ST_conf', where
@@ -68,6 +68,8 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
     >>> Si = sobol.analyze(problem, Y, print_to_console=True)
 
     """
+    if seed:
+        np.random.seed(seed)
     # determining if groups are defined and adjusting the number
     # of rows in the cross-sampled matrix accordingly
     if not problem.get('groups'):
@@ -88,9 +90,9 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
         raise RuntimeError("Confidence level must be between 0-1.")
 
     # normalize the model output
-    Y = (Y - Y.mean())/Y.std()
+    Y = (Y - Y.mean()) / Y.std()
 
-    A,B,AB,BA = separate_output_values(Y, D, N, calc_second_order)
+    A, B, AB, BA = separate_output_values(Y, D, N, calc_second_order)
     r = np.random.randint(N, size=(N, num_resamples))
     Z = norm.ppf(0.5 + conf_level / 2)
 
@@ -99,9 +101,9 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
 
         for j in range(D):
             S['S1'][j] = first_order(A, AB[:, j], B)
-            S['S1_conf'][j] = Z * first_order(A[r], AB[r,j], B[r]).std(ddof=1)
+            S['S1_conf'][j] = Z * first_order(A[r], AB[r, j], B[r]).std(ddof=1)
             S['ST'][j] = total_order(A, AB[:, j], B)
-            S['ST_conf'][j] = Z * total_order(A[r], AB[r,j], B[r]).std(ddof=1)
+            S['ST_conf'][j] = Z * total_order(A[r], AB[r, j], B[r]).std(ddof=1)
 
         # Second order (+conf.)
         if calc_second_order:
@@ -110,10 +112,11 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
                     S['S2'][j, k] = second_order(
                         A, AB[:, j], AB[:, k], BA[:, j], B)
                     S['S2_conf'][j, k] = Z * second_order(A[r], AB[r, j],
-                        AB[r, k], BA[r, j], B[r]).std(ddof=1)
+                                                          AB[r, k], BA[r, j], B[r]).std(ddof=1)
 
     else:
-        tasks, n_processors = create_task_list(D, calc_second_order, n_processors)
+        tasks, n_processors = create_task_list(
+            D, calc_second_order, n_processors)
 
         func = partial(sobol_parallel, Z, A, AB, BA, B, r)
         pool = Pool(n_processors)
@@ -156,7 +159,8 @@ def second_order(A, ABj, ABk, BAj, B):
 
 def create_Si_dict(D, calc_second_order):
     # initialize empty dict to store sensitivity indices
-    S = ResultDict((k, np.zeros(D)) for k in ('S1', 'S1_conf', 'ST', 'ST_conf'))
+    S = ResultDict((k, np.zeros(D))
+                   for k in ('S1', 'S1_conf', 'ST', 'ST_conf'))
 
     if calc_second_order:
         S['S2'] = np.zeros((D, D))
@@ -179,12 +183,12 @@ def separate_output_values(Y, D, N, calc_second_order):
         if calc_second_order:
             BA[:, j] = Y[(j + 1 + D):Y.size:step]
 
-    return A,B,AB,BA
+    return A, B, AB, BA
 
 
 def sobol_parallel(Z, A, AB, BA, B, r, tasks):
     sobol_indices = []
-    for d,j,k in tasks:
+    for d, j, k in tasks:
         if d == 'S1':
             s = first_order(A, AB[:, j], B)
         elif d == 'S1_conf':
@@ -197,7 +201,7 @@ def sobol_parallel(Z, A, AB, BA, B, r, tasks):
             s = second_order(A, AB[:, j], AB[:, k], BA[:, j], B)
         elif d == 'S2_conf':
             s = Z * second_order(A[r], AB[r, j], AB[r, k],
-                                               BA[r, j], B[r]).std(ddof=1)
+                                 BA[r, j], B[r]).std(ddof=1)
         sobol_indices.append([d, j, k, s])
 
     return sobol_indices
@@ -206,16 +210,18 @@ def sobol_parallel(Z, A, AB, BA, B, r, tasks):
 def create_task_list(D, calc_second_order, n_processors):
     # Create list with one entry (key, parameter 1, parameter 2) per sobol
     # index (+conf.). This is used to supply parallel tasks to multiprocessing.Pool
-    tasks_first_order = [[d, j, None] for j in range(D) for d in ('S1', 'S1_conf', 'ST', 'ST_conf')]
+    tasks_first_order = [[d, j, None] for j in range(
+        D) for d in ('S1', 'S1_conf', 'ST', 'ST_conf')]
 
     # Add second order (+conf.) to tasks
     tasks_second_order = []
     if calc_second_order:
         tasks_second_order = [[d, j, k] for j in range(D) for k in
-                            range(j + 1, D) for d in ('S2', 'S2_conf')]
+                              range(j + 1, D) for d in ('S2', 'S2_conf')]
 
     if n_processors is None:
-        n_processors = min(cpu_count(), len(tasks_first_order) + len(tasks_second_order))
+        n_processors = min(cpu_count(), len(
+            tasks_first_order) + len(tasks_second_order))
 
     if not calc_second_order:
         tasks = np.array_split(tasks_first_order, n_processors)
@@ -223,7 +229,7 @@ def create_task_list(D, calc_second_order, n_processors):
         # merges both lists alternating its elements and splits the resulting list into n_processors sublists
         tasks = np.array_split([v for v in sum(
             zip_longest(tasks_first_order[::-1], tasks_second_order), ())
-                if v is not None], n_processors)
+            if v is not None], n_processors)
 
     return tasks, n_processors
 
@@ -232,7 +238,7 @@ def Si_list_to_dict(S_list, D, calc_second_order):
     # Convert the parallel output into the regular dict format for printing/returning
     S = create_Si_dict(D, calc_second_order)
     L = []
-    for l in S_list: # first reformat to flatten
+    for l in S_list:  # first reformat to flatten
         L += l
 
     for s in L:  # First order (+conf.)
@@ -274,13 +280,13 @@ def Si_to_pandas_dict(S_dict):
     """
     problem = S_dict.problem
     total_order = {
-                      'ST': S_dict['ST'],
-                      'ST_conf': S_dict['ST_conf']
-                  }
+        'ST': S_dict['ST'],
+        'ST_conf': S_dict['ST_conf']
+    }
     first_order = {
-                     'S1': S_dict['S1'],
-                     'S1_conf': S_dict['S1_conf']
-                  }
+        'S1': S_dict['S1'],
+        'S1_conf': S_dict['S1_conf']
+    }
 
     idx = None
     second_order = None
@@ -322,7 +328,7 @@ def print_indices(S, problem, calc_second_order):
         D = problem['num_vars']
     else:
         title = 'Group'
-        _,names = compute_groups_matrix(problem['groups'])
+        _, names = compute_groups_matrix(problem['groups'])
         D = len(names)
 
     print('%s S1 S1_conf ST ST_conf' % title)
@@ -332,23 +338,23 @@ def print_indices(S, problem, calc_second_order):
             j], S['S1_conf'][j], S['ST'][j], S['ST_conf'][j]))
 
     if calc_second_order:
-        print('\n%s_1 %s_2 S2 S2_conf' % (title,title))
+        print('\n%s_1 %s_2 S2 S2_conf' % (title, title))
 
         for j in range(D):
             for k in range(j + 1, D):
                 print("%s %s %f %f" % (names[j], names[k],
-                    S['S2'][j, k], S['S2_conf'][j, k]))
+                                       S['S2'][j, k], S['S2_conf'][j, k]))
 
-if __name__ == "__main__":
-    parser = common_args.create()
+
+def cli_parse(parser):
     parser.add_argument('--max-order', type=int, required=False, default=2,
                         choices=[1, 2],
                         help='Maximum order of sensitivity indices to '
-                             'calculate')
+                        'calculate')
     parser.add_argument('-r', '--resamples', type=int, required=False,
                         default=1000,
                         help='Number of bootstrap resamples for Sobol '
-                             'confidence intervals')
+                        'confidence intervals')
     parser.add_argument('--parallel', action='store_true', help='Makes '
                         'use of parallelization.',
                         dest='parallel')
@@ -356,12 +362,19 @@ if __name__ == "__main__":
                         default=None,
                         help='Number of processors to be used with the ' +
                         'parallel option.', dest='n_processors')
-    args = parser.parse_args()
+    return parser
 
+
+def cli_action(args):
     problem = read_param_file(args.paramfile)
     Y = np.loadtxt(args.model_output_file, delimiter=args.delimiter,
                    usecols=(args.column,))
 
     analyze(problem, Y, (args.max_order == 2),
             num_resamples=args.resamples, print_to_console=True,
-            parallel=args.parallel, n_processors=args.n_processors)
+            parallel=args.parallel, n_processors=args.n_processors,
+            seed=args.seed)
+
+
+if __name__ == "__main__":
+    common_args.run_cli(cli_parse, cli_action)

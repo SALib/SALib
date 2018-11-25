@@ -14,7 +14,9 @@ from types import MethodType
 from SALib.util import read_param_file, ResultDict
 from SALib.sample.ff import generate_contrast, extend_bounds
 
-def analyze(problem, X, Y, second_order=False, print_to_console=False):
+
+def analyze(problem, X, Y, second_order=False, print_to_console=False,
+            seed=None):
     """Perform a fractional factorial analysis
 
     Returns a dictionary with keys 'ME' (main effect) and 'IE' (interaction
@@ -47,6 +49,8 @@ def analyze(problem, X, Y, second_order=False, print_to_console=False):
     >>> Y = X[:, 0] + (0.1 * X[:, 1]) + ((1.2 * X[:, 2]) * (0.2 + X[:, 0]))
     >>> analyze(problem, X, Y, second_order=True, print_to_console=True)
     """
+    if seed:
+        np.random.seed(seed)
 
     problem = extend_bounds(problem)
     num_vars = problem['num_vars']
@@ -56,7 +60,7 @@ def analyze(problem, X, Y, second_order=False, print_to_console=False):
     main_effect = (1. / (2 * num_vars)) * np.dot(Y, X)
 
     Si = ResultDict((k, [None] * num_vars)
-              for k in ['names', 'ME'])
+                    for k in ['names', 'ME'])
     Si['ME'] = main_effect
     Si['names'] = problem['names']
 
@@ -141,23 +145,31 @@ def interactions(problem, Y, print_to_console=False):
             ie_names.append(var_names)
             IE.append((1. / (2 * num_vars)) * np.dot(Y, x))
     if print_to_console:
-        [print('%s %f' % (n, i) ) for (n, i) in zip(ie_names, IE) ]
+        [print('%s %f' % (n, i)) for (n, i) in zip(ie_names, IE)]
 
     return ie_names, IE
 
-if __name__ == "__main__":
 
-    parser = common_args.create()
+def cli_parse(parser):
     parser.add_argument('-X', '--model-input-file', type=str,
-                        required=True, default=None, help='Model input file')
+                        required=True, default=None,
+                        help='Model input file')
     parser.add_argument('--max-order', type=int, required=False, default=2,
-                    choices=[1, 2], help='Maximum order of sensitivity indices to calculate')
-    args = parser.parse_args()
+                        choices=[1, 2], help='Maximum order of sensitivity \
+                           indices to calculate')
+    return parser
 
+
+def cli_action(args):
     problem = read_param_file(args.paramfile)
-
-    Y = np.loadtxt(args.model_output_file, delimiter=args.delimiter, usecols=(args.column,))
+    Y = np.loadtxt(args.model_output_file,
+                   delimiter=args.delimiter, usecols=(args.column,))
     X = np.loadtxt(args.model_input_file, delimiter=args.delimiter, ndmin=2)
     if len(X.shape) == 1:
         X = X.reshape((len(X), 1))
-    analyze(problem, X, Y, (args.max_order == 2), print_to_console=True)
+    analyze(problem, X, Y, (args.max_order == 2), print_to_console=True,
+            seed=args.seed)
+
+
+if __name__ == "__main__":
+    common_args.run_cli(cli_parse, cli_action)

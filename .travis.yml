@@ -15,6 +15,7 @@ install:
 - source tests/travis_install.sh
 - pip install -r test-requirements.txt
 script:
+- python setup.py develop
 - python setup.py test
 after_success:
 - if [[ "$COVERAGE" == "true" ]]; then coveralls || echo "failed"; fi

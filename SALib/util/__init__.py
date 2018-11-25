@@ -5,11 +5,34 @@ from collections import OrderedDict
 import csv
 from warnings import warn
 from .results import ResultDict
+import pkgutil
 
 import numpy as np
 import scipy as sp
 
-__all__ = ["scale_samples", "read_param_file", "ResultDict"]
+
+__all__ = ["scale_samples", "read_param_file",
+           "ResultDict", "avail_approaches"]
+
+
+def avail_approaches(pkg):
+    '''Create list of available modules.
+
+    Arguments
+    ---------
+    pkg : module
+        module to inspect
+
+    Returns
+    ---------
+    method : list
+        A list of available submodules
+    '''
+    methods = [modname for importer, modname, ispkg in
+               pkgutil.walk_packages(path=pkg.__path__)
+               if modname not in
+               ['common_args', 'directions', 'sobol_sequence']]
+    return methods
 
 
 def scale_samples(params, bounds):

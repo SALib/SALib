@@ -11,7 +11,7 @@ from . import common_args
 from ..util import read_param_file, ResultDict
 
 
-def analyze(problem, Y, X, M=10, print_to_console=False):
+def analyze(problem, Y, X, M=10, print_to_console=False, seed=None):
     """Performs the Random Balanced Design - Fourier Amplitude Sensitivity Test
     (RBD-FAST) on model outputs.
 
@@ -60,6 +60,8 @@ def analyze(problem, Y, X, M=10, print_to_console=False):
     >>> Y = Ishigami.evaluate(X)
     >>> Si = rbd_fast.analyze(problem, Y, X, print_to_console=False)
     """
+    if seed:
+        np.random.seed(seed)
 
     D = problem['num_vars']
     N = Y.size
@@ -69,7 +71,7 @@ def analyze(problem, Y, X, M=10, print_to_console=False):
         print("Parameter First")
     Si = ResultDict((k, [None] * D) for k in ['S1'])
     Si['names'] = problem['names']
-    
+
     for i in range(D):
         S1 = compute_first_order(permute_outputs(Y, X[:, i]), M)
         S1 = unskew_S1(S1, M, N)
@@ -112,12 +114,13 @@ def unskew_S1(S1, M, N):
     return S1 - lamb / (1 - lamb) * (1 - S1)
 
 
-if __name__ == "__main__":
-
-    parser = common_args.create()
+def cli_parse(parser):
     parser.add_argument('-X', '--model-input-file',
                         type=str, required=True, help='Model input file')
-    args = parser.parse_args()
+    return parser
+
+
+def cli_action(args):
     problem = read_param_file(args.paramfile)
     Y = np.loadtxt(args.model_output_file,
                    delimiter=args.delimiter,
@@ -125,4 +128,8 @@ if __name__ == "__main__":
     X = np.loadtxt(args.model_input_file,
                    delimiter=args.delimiter)
 
-    analyze(problem, Y, X, print_to_console=True)
+    analyze(problem, Y, X, print_to_console=True, seed=args.seed)
+
+
+if __name__ == "__main__":
+    common_args.run_cli(cli_parse, cli_action)

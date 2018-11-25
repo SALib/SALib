@@ -10,7 +10,7 @@ from ..util import read_param_file, ResultDict
 
 
 def analyze(problem, X, Y, num_resamples=10,
-            conf_level=0.95, print_to_console=False):
+            conf_level=0.95, print_to_console=False, seed=None):
     """Perform Delta Moment-Independent Analysis on model outputs.
 
     Returns a dictionary with keys 'delta', 'delta_conf', 'S1', and 'S1_conf',
@@ -48,6 +48,8 @@ def analyze(problem, X, Y, num_resamples=10,
     >>> Y = Ishigami.evaluate(X)
     >>> Si = delta.analyze(problem, X, Y, print_to_console=True)
     """
+    if seed:
+        np.random.seed(seed)
 
     D = problem['num_vars']
     N = Y.size
@@ -81,6 +83,7 @@ def analyze(problem, X, Y, num_resamples=10,
 
 # Plischke et al. 2013 estimator (eqn 26) for d_hat
 
+
 def calc_delta(Y, Ygrid, X, m):
     N = len(Y)
     fy = gaussian_kde(Y, bw_method='silverman')(Ygrid)
@@ -96,6 +99,7 @@ def calc_delta(Y, Ygrid, X, m):
     return d_hat
 
 # Plischke et al. 2013 bias reduction technique (eqn 30)
+
 
 def bias_reduced_delta(Y, Ygrid, X, m, num_resamples, conf_level):
     d = np.zeros(num_resamples)
@@ -129,18 +133,29 @@ def sobol_first_conf(Y, X, m, num_resamples, conf_level):
 
     return norm.ppf(0.5 + conf_level / 2) * s.std(ddof=1)
 
-if __name__ == "__main__":
-    parser = common_args.create()
-    parser.add_argument('-X', '--model-input-file', type=str,
-                        required=True, default=None, help='Model input file')
-    parser.add_argument('-r', '--resamples', type=int, required=False, default=10,
-                        help='Number of bootstrap resamples for Sobol confidence intervals')
-    args = parser.parse_args()
 
+def cli_parse(parser):
+    parser.add_argument('-X', '--model-input-file', type=str,
+                        required=True, default=None,
+                        help='Model input file')
+    parser.add_argument('-r', '--resamples', type=int, required=False,
+                        default=10,
+                        help='Number of bootstrap resamples for \
+                           Sobol confidence intervals')
+    return parser
+
+
+def cli_action(args):
     problem = read_param_file(args.paramfile)
-    Y = np.loadtxt(args.model_output_file, delimiter=args.delimiter, usecols=(args.column,))
+    Y = np.loadtxt(args.model_output_file,
+                   delimiter=args.delimiter, usecols=(args.column,))
     X = np.loadtxt(args.model_input_file, delimiter=args.delimiter, ndmin=2)
     if len(X.shape) == 1:
         X = X.reshape((len(X), 1))
 
-    analyze(problem, X, Y, num_resamples=args.resamples, print_to_console=True)
+    analyze(problem, X, Y, num_resamples=args.resamples, print_to_console=True,
+            seed=args.seed)
+
+
+if __name__ == "__main__":
+    common_args.run_cli(cli_parse, cli_action)

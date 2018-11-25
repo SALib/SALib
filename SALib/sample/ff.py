@@ -47,12 +47,14 @@ def extend_bounds(problem):
     names = problem['names']
     if num_dummy_variables > 0:
         bounds.extend([[0, 1] for x in range(num_dummy_variables)])
-        names.extend(["dummy_" + str(var) for var in range(num_dummy_variables)])
+        names.extend(["dummy_" + str(var)
+                      for var in range(num_dummy_variables)])
         problem['bounds'] = bounds
         problem['names'] = names
         problem['num_vars'] = num_ff_vars
 
     return problem
+
 
 def generate_contrast(problem):
     """Generates the raw sample from the problem file
@@ -74,7 +76,8 @@ def generate_contrast(problem):
 
     return contrast
 
-def sample(problem):
+
+def sample(problem, seed=None):
     """Generates model inputs using a fractional factorial sample
 
     Returns a NumPy matrix containing the model inputs required for a
@@ -101,20 +104,46 @@ def sample(problem):
     sample : :class:`numpy.array`
 
     """
-
+    if seed:
+        np.random.seed(seed)
     contrast = generate_contrast(problem)
     sample = np.array((contrast + 1.) / 2, dtype=np.float)
     problem = extend_bounds(problem)
     scale_samples(sample, problem['bounds'])
     return sample
 
-if __name__ == "__main__":
 
-    parser = common_args.create()
-    args = parser.parse_args()
+def cli_parse(parser):
+    """Add method specific options to CLI parser.
 
+    Parameters
+    ----------
+    parser : argparse object
+
+    Returns
+    ----------
+    Updated argparse object
+    """
+    parser.add_argument('-n', '--samples', type=int, required=True,
+                        help='Number of Samples')
+
+    parser.add_argument('-M', type=int, required=False, default=4,
+                        help='M coefficient, default 4')
+    return parser
+
+
+def cli_action(args):
+    """Run sampling method
+
+    Parameters
+    ----------
+    args : argparse namespace
+    """
     problem = read_param_file(args.paramfile)
-    param_values = sample(problem)
-
+    param_values = sample(problem, seed=args.seed)
     np.savetxt(args.output, param_values, delimiter=args.delimiter,
                fmt='%.' + str(args.precision) + 'e')
+
+
+if __name__ == "__main__":
+    common_args.run_cli(cli_parse, cli_action)

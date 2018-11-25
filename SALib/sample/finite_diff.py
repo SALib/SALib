@@ -9,7 +9,9 @@ from ..util import scale_samples, read_param_file
 
 # Generate matrix of samples for derivative-based global sensitivity measure (dgsm)
 # start from a QMC (sobol) sequence and finite difference with delta % steps
-def sample(problem, N, delta=0.01):
+def sample(problem, N, delta=0.01, seed=None):
+    if seed:
+        np.random.seed(seed)
 
     D = problem['num_vars']
 
@@ -42,19 +44,38 @@ def sample(problem, N, delta=0.01):
 
     return dgsm_sequence
 
-if __name__ == "__main__":
 
-    parser = common_args.create()
-    parser.add_argument('-d', '--delta', type=float, required=False,
-                        default=0.01, help='Finite difference step size (percent)')
-    parser.add_argument(
-        '-n', '--samples', type=int, required=True, help='Number of Samples')
-   
-    args = parser.parse_args()
+def cli_parse(parser):
+    """Add method specific options to CLI parser.
 
-    np.random.seed(args.seed)
+    Parameters
+    ----------
+    parser : argparse object
+
+    Returns
+    ----------
+    Updated argparse object
+    """
+    parser.add_argument('-d', '--delta', type=float,
+                        required=False, default=0.01,
+                        help='Finite difference step size (percent)')
+    parser.add_argument('-n', '--samples', type=int,
+                        required=True, help='Number of Samples')
+    return parser
+
+
+def cli_action(args):
+    """Run sampling method
+
+    Parameters
+    ----------
+    args : argparse namespace
+    """
     problem = read_param_file(args.paramfile)
-
-    param_values = sample(problem, args.samples, args.delta)
+    param_values = sample(problem, args.samples, args.delta, seed=args.seed)
     np.savetxt(args.output, param_values, delimiter=args.delimiter,
                fmt='%.' + str(args.precision) + 'e')
+
+
+if __name__ == "__main__":
+    common_args.run_cli(cli_parse, cli_action)

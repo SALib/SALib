@@ -14,7 +14,8 @@ def analyze(problem, X, Y,
             num_resamples=1000,
             conf_level=0.95,
             print_to_console=False,
-            num_levels=4):
+            num_levels=4,
+            seed=None):
     """Perform Morris Analysis on model outputs.
 
     Returns a dictionary with keys 'mu', 'mu_star', 'sigma', and
@@ -69,6 +70,8 @@ def analyze(problem, X, Y,
     >>>                     print_to_console=True, num_levels=4)
 
     """
+    if seed:
+        np.random.seed(seed)
 
     msg = ("dtype of {} array must be 'float', float32 or float64")
     if X.dtype not in ['float', 'float32', 'float64']:
@@ -100,7 +103,7 @@ def analyze(problem, X, Y,
     # Output the Mu, Mu*, and Sigma Values. Also return them in case this is
     # being called from Python
     Si = ResultDict((k, [None] * num_vars)
-              for k in ['names', 'mu', 'mu_star', 'sigma', 'mu_star_conf'])
+                    for k in ['names', 'mu', 'mu_star', 'sigma', 'mu_star_conf'])
     Si['mu'] = np.average(ee, 1)
     Si['mu_star'] = np.average(np.abs(ee), 1)
     Si['sigma'] = np.std(ee, axis=1, ddof=1)
@@ -277,23 +280,24 @@ def compute_mu_star_confidence(ee, num_trajectories, num_resamples,
     return norm.ppf(0.5 + conf_level / 2) * mu_star_resampled.std(ddof=1)
 
 
-if __name__ == "__main__":
-
-    parser = common_args.create()
+def cli_parse(parser):
     parser.add_argument('-X', '--model-input-file', type=str,
-                        required=True, default=None, help='Model input file')
+                        required=True, default=None,
+                        help='Model input file')
     parser.add_argument('-r', '--resamples', type=int, required=False,
                         default=1000,
                         help='Number of bootstrap resamples for Sobol \
-                              confidence intervals')
+                           confidence intervals')
     parser.add_argument('-l', '--levels', type=int, required=False,
-                        default=4, help='Number of grid levels (Morris only)')
+                        default=4, help='Number of grid levels \
+                           (Morris only)')
     parser.add_argument('--grid-jump', type=int, required=False,
                         default=2, help='Grid jump size (Morris only)')
-    args = parser.parse_args()
+    return parser
 
+
+def cli_action(args):
     problem = read_param_file(args.paramfile)
-
     Y = np.loadtxt(args.model_output_file,
                    delimiter=args.delimiter, usecols=(args.column,))
     X = np.loadtxt(args.model_input_file, delimiter=args.delimiter, ndmin=2)
@@ -301,4 +305,8 @@ if __name__ == "__main__":
         X = X.reshape((len(X), 1))
 
     analyze(problem, X, Y, num_resamples=args.resamples, print_to_console=True,
-            num_levels=args.levels)
+            num_levels=args.levels, seed=args.seed)
+
+
+if __name__ == "__main__":
+    common_args.run_cli(cli_parse, cli_action)

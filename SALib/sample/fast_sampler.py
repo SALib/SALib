@@ -8,14 +8,14 @@ from . import common_args
 from .. util import scale_samples, read_param_file
 
 
-def sample(problem, N, M=4):
+def sample(problem, N, M=4, seed=None):
     """Generate model inputs for the Fourier Amplitude Sensitivity Test (FAST).
-    
+
     Returns a NumPy matrix containing the model inputs required by the Fourier
     Amplitude sensitivity test.  The resulting matrix contains N rows and D
     columns, where D is the number of parameters.  The samples generated are
     intended to be used by :func:`SALib.analyze.fast.analyze`.
-    
+
     Parameters
     ----------
     problem : dict
@@ -26,8 +26,10 @@ def sample(problem, N, M=4):
         The interference parameter, i.e., the number of harmonics to sum in the
         Fourier series decomposition (default 4)
     """
+    if seed:
+        np.random.seed(seed)
 
-    if N <= 4*M**2:
+    if N <= 4 * M**2:
         raise ValueError("""
         Sample size N > 4M^2 is required. M=4 by default.""")
 
@@ -66,19 +68,38 @@ def sample(problem, N, M=4):
     scale_samples(X, problem['bounds'])
     return X
 
-if __name__ == "__main__":
 
-    parser = common_args.create()
-    parser.add_argument(
-        '-n', '--samples', type=int, required=True, help='Number of Samples')
-   
-    parser.add_argument(
-        '-M', type=int, required=False, default=4, help='M coefficient, default 4')
-    args = parser.parse_args()
+def cli_parse(parser):
+    """Add method specific options to CLI parser.
 
-    np.random.seed(args.seed)
+    Parameters
+    ----------
+    parser : argparse object
+
+    Returns
+    ----------
+    Updated argparse object
+    """
+    parser.add_argument('-n', '--samples', type=int, required=True,
+                        help='Number of Samples')
+
+    parser.add_argument('-M', '--m-coef', type=int, required=False, default=4,
+                        help='M coefficient, default 4', dest='M')
+    return parser
+
+
+def cli_action(args):
+    """Run sampling method
+
+    Parameters
+    ----------
+    args : argparse namespace
+    """
     problem = read_param_file(args.paramfile)
-
-    param_values = sample(problem, N=args.samples, M=args.M)
+    param_values = sample(problem, N=args.samples, M=args.M, seed=args.seed)
     np.savetxt(args.output, param_values, delimiter=args.delimiter,
                fmt='%.' + str(args.precision) + 'e')
+
+
+if __name__ == "__main__":
+    common_args.run_cli(cli_parse, cli_action)

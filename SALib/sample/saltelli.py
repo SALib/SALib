@@ -7,7 +7,7 @@ from . import sobol_sequence
 from ..util import scale_samples, nonuniform_scale_samples, read_param_file, compute_groups_matrix
 
 
-def sample(problem, N, calc_second_order=True):
+def sample(problem, N, calc_second_order=True, seed=None):
     """Generates model inputs using Saltelli's extension of the Sobol sequence.
 
     Returns a NumPy matrix containing the model inputs using Saltelli's sampling
@@ -27,6 +27,9 @@ def sample(problem, N, calc_second_order=True):
     calc_second_order : bool
         Calculate second-order sensitivities (default True)
     """
+    if seed:
+        np.random.seed(seed)
+
     D = problem['num_vars']
     groups = problem.get('groups')
 
@@ -89,23 +92,46 @@ def sample(problem, N, calc_second_order=True):
         return saltelli_sequence
     else:
         # scaling values to other distributions based on inverse CDFs
-        scaled_saltelli = nonuniform_scale_samples(saltelli_sequence, problem['bounds'], problem['dists'])
+        scaled_saltelli = nonuniform_scale_samples(
+            saltelli_sequence, problem['bounds'], problem['dists'])
         return scaled_saltelli
 
-if __name__ == "__main__":
 
-    parser = common_args.create()
+def cli_parse(parser):
+    """Add method specific options to CLI parser.
 
-    parser.add_argument(
-        '-n', '--samples', type=int, required=True, help='Number of Samples')
+    Parameters
+    ----------
+    parser : argparse object
+
+    Returns
+    ----------
+    Updated argparse object
+    """
+    parser.add_argument('-n', '--samples', type=int, required=True,
+                        help='Number of Samples')
 
     parser.add_argument('--max-order', type=int, required=False, default=2,
-                        choices=[1, 2], help='Maximum order of sensitivity indices to calculate')
-    args = parser.parse_args()
+                        choices=[1, 2],
+                        help='Maximum order of sensitivity indices \
+                           to calculate')
+    return parser
 
-    np.random.seed(args.seed)
+
+def cli_action(args):
+    """Run sampling method
+
+    Parameters
+    ----------
+    args : argparse namespace
+    """
     problem = read_param_file(args.paramfile)
-
-    param_values = sample(problem, args.samples, calc_second_order=(args.max_order == 2))
+    param_values = sample(problem, args.samples,
+                          calc_second_order=(args.max_order == 2),
+                          seed=args.seed)
     np.savetxt(args.output, param_values, delimiter=args.delimiter,
                fmt='%.' + str(args.precision) + 'e')
+
+
+if __name__ == "__main__":
+    common_args.run_cli(cli_parse, cli_action)
