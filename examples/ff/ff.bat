@@ -3,7 +3,7 @@
 REM Example: generating samples from the command line
 salib sample ff ^
   -p ../../SALib/test_functions/params/Ishigami.txt ^
-  -r ../data/model_input.txt ^
+  -o ../data/model_input.txt ^
   -n 100 ^
   --delimiter=" " ^
   --precision=8 ^
@@ -12,7 +12,7 @@ salib sample ff ^
 REM You can also use the module directly through Python
 REM python -m SALib.sample.ff ^
 REM        -p ../../SALib/test_functions/params/Ishigami.txt ^
-REM        -r ../data/model_input.txt ^
+REM        -o ../data/model_input.txt ^
 REM        -n 100 ^
 REM        --delimiter=" " ^
 REM        --precision=8 ^
@@ -24,7 +24,7 @@ REM                  (3 columns: parameter name,
 REM                              lower bound,
 REM                              upper bound) with an optional 4th "group" column for Morris only
 REM
-REM -r, --result: File to output your samples into.
+REM -o, --output: File to output your samples into.
 REM
 REM --delimiter (optional): Output file delimiter.
 REM

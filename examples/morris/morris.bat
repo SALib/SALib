@@ -4,8 +4,8 @@ REM Example: generating samples from the command line
 salib sample morris ^
   -n 100 ^
   -p ../../SALib/test_functions/params/Ishigami.txt ^
-  -r ../data/model_input.txt ^
-  -o True ^
+  -o ../data/model_input.txt ^
+  -lo True ^
   --delimiter=" " ^
   --precision=8 ^
   --levels=10 ^
@@ -15,8 +15,8 @@ REM You can also use the module directly through Python
 REM python -m SALib.sample.morris ^
 REM        -n 100 ^
 REM        -p ../../SALib/test_functions/params/Ishigami.txt ^
-REM        -r ../data/model_input.txt ^
-REM        -o True ^
+REM        -o ../data/model_input.txt ^
+REM        -lo True ^
 REM        --delimiter=" " ^
 REM        --precision=8 ^
 REM        --levels=10 ^
@@ -31,9 +31,9 @@ REM
 REM -n, --samples: Sample size.
 REM				 Number of model runs is N(D + 1)
 REM
-REM -r, --result: File to output your samples into.
+REM -o, --output: File to output your samples into.
 REM
-REM -o --local: Use local optimization
+REM -lo --local: Use local optimization
 REM
 REM --delimiter (optional): Output file delimiter.
 REM

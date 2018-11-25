@@ -4,7 +4,7 @@ REM Example: generating samples from the command line
 salib sample fast_sampler ^
 	-n 1000 ^
 	-p ../../SALib/test_functions/params/Ishigami.txt ^
-	-r ../data/model_input.txt ^
+	-o ../data/model_input.txt ^
 	--delimiter=" " ^
 	--precision=8 ^
 	-M 4 ^
@@ -14,7 +14,7 @@ REM You can also use the module directly through Python
 REM python -m SALib.sample.fast_sampler ^
 REM 	   -n 1000 ^
 REM 	   -p ../../SALib/test_functions/params/Ishigami.txt ^
-REM 	   -r ../data/model_input.txt ^
+REM 	   -o ../data/model_input.txt ^
 REM 	   --delimiter=' ' ^
 REM 	   --precision=8 ^
 REM      -M 4 ^
@@ -26,7 +26,7 @@ REM
 REM -n, --samples: Sample size.
 REM				 Number of model runs is ND ; must choose N > 4M^2 (N > 64 under default settings)
 REM
-REM -r, --result: File to output your samples into.
+REM -o, --output: File to output your samples into.
 REM
 REM --delimiter (optional): Output file delimiter.
 REM

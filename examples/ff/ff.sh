@@ -3,7 +3,7 @@
 # Example: generating samples from the command line
 salib sample ff \
   -p ../../SALib/test_functions/params/Ishigami.txt \
-  -r ../data/model_input.txt \
+  -o ../data/model_input.txt \
   -n 100 \
   --delimiter=' ' \
   --precision=8 \
@@ -12,7 +12,7 @@ salib sample ff \
 # You can also use the module directly through Python
 # python -m SALib.sample.ff \
 #        -p ../../SALib/test_functions/params/Ishigami.txt \
-#        -r ../data/model_input.txt \
+#        -o ../data/model_input.txt \
 #        -n 100 \
 #        --delimiter=' ' \
 #        --precision=8 \
@@ -24,7 +24,7 @@ salib sample ff \
 #                              lower bound,
 #                              upper bound) with an optional 4th "group" column for Morris only
 #
-# -r, --result: File to output your samples into.
+# -o, --output: File to output your samples into.
 #
 # --delimiter (optional): Output file delimiter.
 #

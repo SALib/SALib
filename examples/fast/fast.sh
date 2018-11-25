@@ -4,7 +4,7 @@
 salib sample fast_sampler \
 	-n 1000 \
 	-p ../../SALib/test_functions/params/Ishigami.txt \
-	-r ../data/model_input.txt \
+	-o ../data/model_input.txt \
 	--delimiter=' ' \
 	--precision=8 \
 	-M 4 \
@@ -14,7 +14,7 @@ salib sample fast_sampler \
 # python -m SALib.sample.fast_sampler \
 # 	   -n 1000 \
 # 	   -p ../../SALib/test_functions/params/Ishigami.txt \
-# 	   -r ../data/model_input.txt \
+# 	   -o ../data/model_input.txt \
 # 	   --delimiter=' ' \
 # 	   --precision=8 \
 #      -M 4 \
@@ -26,7 +26,7 @@ salib sample fast_sampler \
 # -n, --samples: Sample size.
 #				 Number of model runs is ND ; must choose N > 4M^2 (N > 64 under default settings)
 #
-# -r, --result: File to output your samples into.
+# -o, --output: File to output your samples into.
 #
 # --delimiter (optional): Output file delimiter.
 #

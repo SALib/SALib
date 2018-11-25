@@ -4,7 +4,7 @@
 salib sample finite_diff \
   -n 1000 \
   -p ../../SALib/test_functions/params/Ishigami.txt \
-  -r ../data/model_input.txt \
+  -o ../data/model_input.txt \
   -d 0.001 \
   --delimiter=' ' \
   --precision=8 \
@@ -14,7 +14,7 @@ salib sample finite_diff \
 # python -m SALib.sample.finite_diff \
 #      -n 1000 \
 #      -p ../../SALib/test_functions/params/Ishigami.txt \
-#      -r ../data/model_input.txt \
+#      -o ../data/model_input.txt \
 #      -d 0.001 \
 #      --delimiter=' ' \
 #      --precision=8 \
@@ -27,7 +27,7 @@ salib sample finite_diff \
 #				 Number of model runs is N(2D + 2) if calculating second-order indices (default)
 #        or N(D + 2) otherwise.
 #
-# -r, --result: File to output your samples into.
+# -o, --output: File to output your samples into.
 #
 # -d, --delta (optional): Finite difference step size (percent). Default is 0.01.
 #

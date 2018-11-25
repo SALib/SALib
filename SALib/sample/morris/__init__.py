@@ -352,7 +352,7 @@ def cli_parse(parser):
                         default=None,
                         help='Number of optimal trajectories \
                         (Morris only)')
-    parser.add_argument('-o', '--local', type=bool, required=True,
+    parser.add_argument('-lo', '--local', type=bool, required=True,
                         default=False,
                         help='Use the local optimisation method \
                         (Morris with optimization only)')

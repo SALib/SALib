@@ -19,8 +19,6 @@ def sample(problem, N, seed=None):
         The problem definition
     N : int
         The number of samples to generate
-    calc_second_order : bool
-        Calculate second-order sensitivities (default True)
     """
     if seed:
         np.random.seed(seed)

@@ -4,7 +4,7 @@ REM Example: generating samples from the command line
 salib sample saltelli ^
   -n 1000 ^
   -p ../../SALib/test_functions/params/Ishigami.txt ^
-  -r ../data/model_input.txt ^
+  -o ../data/model_input.txt ^
   --delimiter=" " ^
   --precision=8 ^
   --max-order=2 ^
@@ -14,7 +14,7 @@ REM You can also use the module directly through Python
 REM python -m SALib.sample.saltelli ^
 REM      -n 1000 ^
 REM      -p ../../SALib/test_functions/params/Ishigami.txt ^
-REM      -r ../data/model_input.txt ^
+REM      -o ../data/model_input.txt ^
 REM      --delimiter=" " ^
 REM      --precision=8 ^
 REM      --max-order=2 ^
@@ -27,7 +27,7 @@ REM -n, --samples: Sample size.
 REM				 Number of model runs is N(2D + 2) if calculating second-order indices (default)
 REM        or N(D + 2) otherwise.
 REM
-REM -r, --result: File to output your samples into.
+REM -o, --output: File to output your samples into.
 REM
 REM --delimiter (optional): Output file delimiter.
 REM

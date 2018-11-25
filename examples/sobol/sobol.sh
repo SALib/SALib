@@ -4,7 +4,7 @@
 salib sample saltelli \
   -n 1000 \
   -p ../../SALib/test_functions/params/Ishigami.txt \
-  -r ../data/model_input.txt \
+  -o ../data/model_input.txt \
   --delimiter=' ' \
   --precision=8 \
   --max-order=2 \
@@ -14,7 +14,7 @@ salib sample saltelli \
 # python -m SALib.sample.saltelli \
 #      -n 1000 \
 #      -p ../../SALib/test_functions/params/Ishigami.txt \
-#      -r ../data/model_input.txt \
+#      -o ../data/model_input.txt \
 #      --delimiter=' ' \
 #      --precision=8 \
 #      --max-order=2 \
@@ -27,7 +27,7 @@ salib sample saltelli \
 #				 Number of model runs is N(2D + 2) if calculating second-order indices (default)
 #        or N(D + 2) otherwise.
 #
-# -r, --result: File to output your samples into.
+# -o, --output: File to output your samples into.
 #
 # --delimiter (optional): Output file delimiter.
 #

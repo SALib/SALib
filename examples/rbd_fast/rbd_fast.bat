@@ -4,7 +4,7 @@ REM Example: generating samples from the command line
 salib sample latin ^
 	-n 1000 ^
 	-p ../../SALib/test_functions/params/Ishigami.txt ^
-	-r ../data/model_input.txt ^
+	-o ../data/model_input.txt ^
 	--delimiter=" " ^
 	--precision=8 ^
 	--seed=100
@@ -13,7 +13,7 @@ REM You can also use the module directly through Python
 REM python -m SALib.sample.latin ^
 REM 	   -n 1000 ^
 REM 	   -p ./SALib/test_functions/params/Ishigami.txt ^
-REM 	   -r model_input.txt ^
+REM 	   -o model_input.txt ^
 REM 	   --delimiter=" " ^
 REM 	   --precision=8 ^
 REM 		 --seed=100
@@ -26,7 +26,7 @@ REM
 REM -n, --samples: Sample size.
 REM				 Number of model runs is N
 REM
-REM -r, --result: File to output your samples into.
+REM -o, --output: File to output your samples into.
 REM
 REM --delimiter (optional): Output file delimiter.
 REM

@@ -4,7 +4,7 @@
 salib sample latin \
 	-n 1000 \
 	-p ../../SALib/test_functions/params/Ishigami.txt \
-	-r ../data/model_input.txt \
+	-o ../data/model_input.txt \
 	--delimiter=' ' \
 	--precision=8 \
 	--seed=100
@@ -13,7 +13,7 @@ salib sample latin \
 # python -m SALib.sample.latin \
 # 	   -n 1000 \
 # 	   -p ./SALib/test_functions/params/Ishigami.txt \
-# 	   -r model_input.txt \
+# 	   -o model_input.txt \
 # 	   --delimiter=' ' \
 # 	   --precision=8 \
 # 		 --seed=100
@@ -26,7 +26,7 @@ salib sample latin \
 # -n, --samples: Sample size.
 #				 Number of model runs is N
 #
-# -r, --result: File to output your samples into.
+# -o, --output: File to output your samples into.
 #
 # --delimiter (optional): Output file delimiter.
 #
