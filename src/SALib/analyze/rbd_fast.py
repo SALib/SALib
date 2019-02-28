@@ -85,7 +85,7 @@ def analyze(problem, Y, X, M=10, print_to_console=False, seed=None):
 def permute_outputs(Y, X):
     """
     Permute the output according to one of the inputs as in [_2]
-    
+
     References
     ----------
     .. [2] Elmar Plischke (2010) "An effective algorithm for computing global
