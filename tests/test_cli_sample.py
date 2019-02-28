@@ -1,8 +1,8 @@
 from os.path import join as pth_join
 import subprocess
 
-salib_cli = "./SALib/scripts/salib.py"
-ishigami_fp = "./SALib/test_functions/params/Ishigami.txt"
+salib_cli = "./src/SALib/scripts/salib.py"
+ishigami_fp = "./src/SALib/test_functions/params/Ishigami.txt"
 test_data = pth_join('tests', 'data', 'test.txt')
 
 

@@ -12,7 +12,7 @@ from SALib.util import read_param_file
 
 
 def setup_samples(N = 500, calc_second_order = True):
-    param_file = 'SALib/test_functions/params/Ishigami.txt'
+    param_file = 'src/SALib/test_functions/params/Ishigami.txt'
     problem = read_param_file(param_file)
     param_values = saltelli.sample(problem, N=N, calc_second_order=calc_second_order)
     return problem,param_values

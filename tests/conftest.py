@@ -1,16 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""
-    Dummy conftest.py for salib.
-
-    If you don't know what this is for, just leave it empty.
-    Read more about conftest.py under:
-    https://pytest.org/latest/plugins.html
-"""
 from __future__ import print_function, absolute_import, division
-import tempfile
-import pytest
 
+import pytest
+import tempfile
 
 def make_temporary_file():
     """ Returns a temporary file name

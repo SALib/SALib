@@ -2,7 +2,7 @@
 
 REM Sensitivity indices will print to command line. Use ">" to write to file.
 salib analyze delta ^
-  -p ../../SALib/test_functions/params/Ishigami.txt ^
+  -p ../../src/SALib/test_functions/params/Ishigami.txt ^
   -X ../data/model_input.txt ^
   -Y ../data/model_output.txt ^
   -c 0 ^
@@ -13,7 +13,7 @@ REM Then use the output to run the analysis.
 
 REM You can also use the module directly through Python
 REM python -m SALib.analyze.delta ^
-REM      -p ../../SALib/test_functions/params/Ishigami.txt ^
+REM      -p ../../src/SALib/test_functions/params/Ishigami.txt ^
 REM      -X ../data/model_input.txt ^
 REM      -Y ../data/model_output.txt ^
 REM      -c 0 ^
