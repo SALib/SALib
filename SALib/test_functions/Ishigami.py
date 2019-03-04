@@ -6,7 +6,8 @@ import numpy as np
 
 
 # Non-monotonic Ishigami Function (3 parameters)
-# First-order indices expected with Saltelli sampling:
+# Using Saltelli sampling with a sample size of ~1000
+# the expected first-order indices would be:
 # x1: 0.3139
 # x2: 0.4424
 # x3: 0.0
