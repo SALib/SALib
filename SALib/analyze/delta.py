@@ -48,6 +48,11 @@ def analyze(problem, X, Y, num_resamples=10,
     >>> Y = Ishigami.evaluate(X)
     >>> Si = delta.analyze(problem, X, Y, print_to_console=True)
     """
+    if np.linalg.cond(X) < 1/np.finfo(X.dtype).eps:
+        msg = "Singular matrix detected\n\
+            Sample size of {} may be too small".format(Y.size)
+        raise ValueError(msg)
+
     if seed:
         np.random.seed(seed)
 
