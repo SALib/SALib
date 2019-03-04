@@ -11,11 +11,12 @@ exogenous factors on outputs of interest.
 `SciPy <http://www.scipy.org/>`__,
 `matplotlib <http://matplotlib.org/>`__
 
-**Installation:** ``pip install SALib`` or ``python setup.py install``
+**Installation:** ``pip install SALib`` or ``python setup.py install`` or ``conda install SALib``
 
 **Build Status:** |Build Status| **Test Coverage:** |Coverage Status|
 
 **SALib Paper:** |status|
+
 ``Herman, J. and Usher, W. (2017) SALib: An open-source Python library for sensitivity analysis.  Journal of Open Source Software, 2(9).``
 
 **Methods included:** 
