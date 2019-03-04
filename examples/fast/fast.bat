@@ -3,7 +3,7 @@
 REM Example: generating samples from the command line
 salib sample fast_sampler ^
 	-n 1000 ^
-	-p ../../SALib/test_functions/params/Ishigami.txt ^
+	-p ../../src/SALib/test_functions/params/Ishigami.txt ^
 	-o ../data/model_input.txt ^
 	--delimiter=" " ^
 	--precision=8 ^
@@ -13,7 +13,7 @@ salib sample fast_sampler ^
 REM You can also use the module directly through Python
 REM python -m SALib.sample.fast_sampler ^
 REM 	   -n 1000 ^
-REM 	   -p ../../SALib/test_functions/params/Ishigami.txt ^
+REM 	   -p ../../src/SALib/test_functions/params/Ishigami.txt ^
 REM 	   -o ../data/model_input.txt ^
 REM 	   --delimiter=' ' ^
 REM 	   --precision=8 ^
@@ -43,13 +43,13 @@ REM Then use the output to run the analysis.
 REM Sensitivity indices will print to command line. Use ">" to write to file.
 
 salib analyze fast ^
-	-p ../../SALib/test_functions/params/Ishigami.txt ^
+	-p ../../src/SALib/test_functions/params/Ishigami.txt ^
 	-Y ../data/model_output.txt ^
 	-c 0 ^
 	--seed=100
 
 REM python -m SALib.analyze.fast ^
-REM 	-p ../../SALib/test_functions/params/Ishigami.txt ^
+REM 	-p ../../src/SALib/test_functions/params/Ishigami.txt ^
 REM 	-Y ../data/model_output.txt ^
 REM 	-c 0 ^
 REM 	--seed=100

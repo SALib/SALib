@@ -39,7 +39,7 @@ class TestMorris:
         function.
         """
         set_seed
-        param_file = 'SALib/test_functions/params/Ishigami.txt'
+        param_file = 'src/SALib/test_functions/params/Ishigami.txt'
         problem = read_param_file(param_file)
         param_values = sample(problem, 10000, 4,
                               optimal_trajectories=None)
@@ -55,7 +55,7 @@ class TestMorris:
 
     def test_regression_morris_groups(self, set_seed):
         set_seed
-        param_file = 'SALib/test_functions/params/Ishigami_groups.txt'
+        param_file = 'src/SALib/test_functions/params/Ishigami_groups.txt'
         problem = read_param_file(param_file)
 
         param_values = sample(problem=problem, N=10000,
@@ -74,7 +74,7 @@ class TestMorris:
     def test_regression_morris_groups_brute_optim(self, set_seed):
 
         set_seed
-        param_file = 'SALib/test_functions/params/Ishigami_groups.txt'
+        param_file = 'src/SALib/test_functions/params/Ishigami_groups.txt'
         problem = read_param_file(param_file)
 
         param_values = sample(problem=problem, N=50,
@@ -99,7 +99,7 @@ class TestMorris:
 
     def test_regression_morris_groups_local_optim(self, set_seed):
         set_seed
-        param_file = 'SALib/test_functions/params/Ishigami_groups.txt'
+        param_file = 'src/SALib/test_functions/params/Ishigami_groups.txt'
         problem = read_param_file(param_file)
 
         param_values = sample(problem=problem, N=500,
@@ -127,7 +127,7 @@ class TestMorris:
         (default is 1e-05) due to the coarse nature of the num_levels.
         '''
         set_seed
-        param_file = 'SALib/test_functions/params/Ishigami.txt'
+        param_file = 'src/SALib/test_functions/params/Ishigami.txt'
         problem = read_param_file(param_file)
         param_values = sample(problem=problem, N=20,
                               num_levels=4,
@@ -147,7 +147,7 @@ class TestMorris:
 
 
 def test_regression_sobol():
-    param_file = 'SALib/test_functions/params/Ishigami.txt'
+    param_file = 'src/SALib/test_functions/params/Ishigami.txt'
     problem = read_param_file(param_file)
     param_values = saltelli.sample(problem, 10000, calc_second_order=True)
 
@@ -164,7 +164,7 @@ def test_regression_sobol():
 
 
 def test_regression_sobol_parallel():
-    param_file = 'SALib/test_functions/params/Ishigami.txt'
+    param_file = 'src/SALib/test_functions/params/Ishigami.txt'
     problem = read_param_file(param_file)
     param_values = saltelli.sample(problem, 10000, calc_second_order=True)
 
@@ -220,7 +220,7 @@ def test_regression_sobol_groups_dists():
 
 
 def test_regression_fast():
-    param_file = 'SALib/test_functions/params/Ishigami.txt'
+    param_file = 'src/SALib/test_functions/params/Ishigami.txt'
     problem = read_param_file(param_file)
     param_values = fast_sampler.sample(problem, 10000)
 
@@ -232,7 +232,7 @@ def test_regression_fast():
 
 
 def test_regression_rbd_fast():
-    param_file = 'SALib/test_functions/params/Ishigami.txt'
+    param_file = 'src/SALib/test_functions/params/Ishigami.txt'
     problem = read_param_file(param_file)
     param_values = latin.sample(problem, 10000)
 
@@ -243,7 +243,7 @@ def test_regression_rbd_fast():
 
 
 def test_regression_dgsm():
-    param_file = 'SALib/test_functions/params/Ishigami.txt'
+    param_file = 'src/SALib/test_functions/params/Ishigami.txt'
     problem = read_param_file(param_file)
     param_values = finite_diff.sample(problem, 10000, delta=0.001)
 
@@ -256,7 +256,7 @@ def test_regression_dgsm():
 
 
 def test_regression_delta():
-    param_file = 'SALib/test_functions/params/Ishigami.txt'
+    param_file = 'src/SALib/test_functions/params/Ishigami.txt'
     problem = read_param_file(param_file)
     param_values = latin.sample(problem, 10000)
 

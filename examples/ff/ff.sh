@@ -2,7 +2,7 @@
 
 # Example: generating samples from the command line
 salib sample ff \
-  -p ../../SALib/test_functions/params/Ishigami.txt \
+  -p ../../src/SALib/test_functions/params/Ishigami.txt \
   -o ../data/model_input.txt \
   -n 100 \
   --delimiter=' ' \
@@ -11,7 +11,7 @@ salib sample ff \
 
 # You can also use the module directly through Python
 # python -m SALib.sample.ff \
-#        -p ../../SALib/test_functions/params/Ishigami.txt \
+#        -p ../../src/SALib/test_functions/params/Ishigami.txt \
 #        -o ../data/model_input.txt \
 #        -n 100 \
 #        --delimiter=' ' \
@@ -39,14 +39,14 @@ python -c "from SALib.test_functions import Ishigami; import numpy as np; np.sav
 # Sensitivity indices will print to command line. Use ">" to write to file.
 
 salib analyze ff \
-  -p ../../SALib/test_functions/params/Ishigami.txt \
+  -p ../../src/SALib/test_functions/params/Ishigami.txt \
   -Y ../data/model_output.txt \
   -c 0 \
   -X ../data/model_input.txt \
   --seed=100
 
 # python -m SALib.analyze.ff \
-#   -p ../../SALib/test_functions/params/Ishigami.txt \
+#   -p ../../src/SALib/test_functions/params/Ishigami.txt \
 #   -Y ../data/model_output.txt \
 #   -c 0 \
 #   -X ../data/model_input.txt \

@@ -3,7 +3,7 @@
 REM Example: generating samples from the command line
 salib sample finite_diff ^
   -n 1000 ^
-  -p ../../SALib/test_functions/params/Ishigami.txt ^
+  -p ../../src/SALib/test_functions/params/Ishigami.txt ^
   -o ../data/model_input.txt ^
   -d 0.001 ^
   --delimiter=" " ^
@@ -13,7 +13,7 @@ salib sample finite_diff ^
 REM You can also use the module directly through Python
 REM python -m SALib.sample.finite_diff ^
 REM      -n 1000 ^
-REM      -p ../../SALib/test_functions/params/Ishigami.txt ^
+REM      -p ../../src/SALib/test_functions/params/Ishigami.txt ^
 REM      -o ../data/model_input.txt ^
 REM      -d 0.001 ^
 REM      --delimiter=' ' ^
@@ -43,7 +43,7 @@ python -c "from SALib.test_functions import Ishigami; import numpy as np; np.sav
 REM Then use the output to run the analysis.
 REM Sensitivity indices will print to command line. Use ">" to write to file.
 salib analyze dgsm ^
-  -p ../../SALib/test_functions/params/Ishigami.txt ^
+  -p ../../src/SALib/test_functions/params/Ishigami.txt ^
   -X ../data/model_input.txt ^
   -Y ../data/model_output.txt ^
   -c 0 ^
@@ -51,7 +51,7 @@ salib analyze dgsm ^
   --seed=100
 
 REM python -m SALib.analyze.dgsm ^
-REM      -p ../../SALib/test_functions/params/Ishigami.txt ^
+REM      -p ../../src/SALib/test_functions/params/Ishigami.txt ^
 REM      -X ../data/model_input.txt ^
 REM      -Y ../data/model_output.txt ^
 REM      -c 0 ^
