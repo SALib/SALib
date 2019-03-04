@@ -9,7 +9,8 @@ exogenous factors on outputs of interest.
 
 **Requirements:** `NumPy <http://www.numpy.org/>`__,
 `SciPy <http://www.scipy.org/>`__,
-`matplotlib <http://matplotlib.org/>`__
+`matplotlib <http://matplotlib.org/>`__,
+Python 3 (from SALib v1.2 onwards SALib does not officially support Python 2)
 
 **Installation:** ``pip install SALib`` or ``python setup.py install`` or ``conda install SALib``
 
@@ -17,7 +18,7 @@ exogenous factors on outputs of interest.
 
 **SALib Paper:** |status|
 
-``Herman, J. and Usher, W. (2017) SALib: An open-source Python library for sensitivity analysis.  Journal of Open Source Software, 2(9).``
+``Herman, J., Usher, W., (2017), SALib: An open-source Python library for Sensitivity Analysis, Journal of Open Source Software, 2(9), 97, doi:10.21105/joss.00097``
 
 **Methods included:** 
 
@@ -105,7 +106,7 @@ full description of options for each method.
 License
 ~~~~~~~
 
-Copyright (C) 2018 Jon Herman, Will Usher, and others. Versions v0.5 and
+Copyright (C) 2012-2019 Jon Herman, Will Usher, and others. Versions v0.5 and
 later are released under the `MIT license <LICENSE.md>`__.
 
 .. |Build Status| image:: https://travis-ci.org/SALib/SALib.svg?branch=master
