@@ -48,11 +48,6 @@ def analyze(problem, X, Y, num_resamples=10,
     >>> Y = Ishigami.evaluate(X)
     >>> Si = delta.analyze(problem, X, Y, print_to_console=True)
     """
-    if np.linalg.cond(X) < 1/np.finfo(X.dtype).eps:
-        msg = "Singular matrix detected\n\
-            Sample size of {} may be too small".format(Y.size)
-        raise ValueError(msg)
-
     if seed:
         np.random.seed(seed)
 
@@ -74,15 +69,20 @@ def analyze(problem, X, Y, num_resamples=10,
     if print_to_console:
         print("Parameter %s %s %s %s" % keys)
 
-    for i in range(D):
-        S['delta'][i], S['delta_conf'][i] = bias_reduced_delta(
-            Y, Ygrid, X[:, i], m, num_resamples, conf_level)
-        S['S1'][i] = sobol_first(Y, X[:, i], m)
-        S['S1_conf'][i] = sobol_first_conf(
-            Y, X[:, i], m, num_resamples, conf_level)
-        if print_to_console:
-            print("%s %f %f %f %f" % (problem['names'][i], S['delta'][
-                  i], S['delta_conf'][i], S['S1'][i], S['S1_conf'][i]))
+    try:
+        for i in range(D):
+            S['delta'][i], S['delta_conf'][i] = bias_reduced_delta(
+                Y, Ygrid, X[:, i], m, num_resamples, conf_level)
+            S['S1'][i] = sobol_first(Y, X[:, i], m)
+            S['S1_conf'][i] = sobol_first_conf(
+                Y, X[:, i], m, num_resamples, conf_level)
+            if print_to_console:
+                print("%s %f %f %f %f" % (problem['names'][i], S['delta'][
+                    i], S['delta_conf'][i], S['S1'][i], S['S1_conf'][i]))
+    except np.linalg.LinAlgError as e:
+        msg = "Singular matrix detected\n\
+             Sample size of {} may be too small".format(Y.size)
+        raise np.linalg.LinAlgError(msg)
 
     return S
 
