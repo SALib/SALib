@@ -82,3 +82,8 @@ salib analyze sobol \
 # --parallel (optional): Flag to enable parallel execution with multiprocessing
 #
 # --processors (optional, int): Number of processors to be used with the parallel option
+
+# First-order indices expected with Saltelli sampling:
+# x1: 0.3139
+# x2: 0.4424
+# x3: 0.0

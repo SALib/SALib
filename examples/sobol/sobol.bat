@@ -82,3 +82,8 @@ REM
 REM --parallel (optional): Flag to enable parallel execution with multiprocessing
 REM
 REM --processors (optional, int): Number of processors to be used with the parallel option
+
+REM First-order indices expected with Saltelli sampling:
+REM x1: 0.3139
+REM x2: 0.4424
+REM x3: 0.0

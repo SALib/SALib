@@ -6,7 +6,7 @@ import numpy as np
 
 
 # Non-monotonic Ishigami Function (3 parameters)
-# First-order indices:
+# First-order indices expected with Saltelli sampling:
 # x1: 0.3139
 # x2: 0.4424
 # x3: 0.0
