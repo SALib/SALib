@@ -29,7 +29,8 @@ notifications:
 
 jobs:
   include:
-    - stage: PyPI release
+    - stage: "deploy"
+      name: "Deploy to PyPI"
       if: tag =~ ^v
       env: PYTHON_VERSION="3.6" COVERAGE="false"
       install:
