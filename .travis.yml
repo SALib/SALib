@@ -32,7 +32,7 @@ jobs:
     - stage: "deploy"
       name: "Deploy to PyPI"
       if: tag =~ ^v
-      env: PYTHON_VERSION="3.6" COVERAGE="false"
+      env: DISTRIB="conda" PYTHON_VERSION="3.6" COVERAGE="false"
       install:
       - source tests/travis_install.sh
       - pip install -r requirements.txt
