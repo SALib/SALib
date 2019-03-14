@@ -33,6 +33,8 @@ deploy:
     secure: KiUygZVHWMR2a+fk092xeHh8J2c61VGrgq4v1l3bq41MxcZO745H7CLJJ3rfqo+G5/pqy4/tm+q3p8fHhbUmwMcuSC3vjRN6WAYjuNPs0FMVXiIkMQtevv2LdVF1zVKFBdYTuNrfugtZ/GXh/ReCydjEBWTrTaNYeNM4ZRIaj0Q=
   on:
     tags: true
-    distributions: sdist bdist_wheel
+    branch: master
+    distributions: "sdist bdist_wheel"
+    repo: SALib/SALib
   skip_upload_docs: true
   skip_existing: true
