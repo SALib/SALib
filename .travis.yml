@@ -26,12 +26,23 @@ after_success:
 - if [[ "$COVERAGE" == "true" ]]; then coveralls || echo "failed"; fi
 notifications:
   email: false
-deploy:
-  provider: pypi
-  user: jdherman
-  password:
-    secure: KiUygZVHWMR2a+fk092xeHh8J2c61VGrgq4v1l3bq41MxcZO745H7CLJJ3rfqo+G5/pqy4/tm+q3p8fHhbUmwMcuSC3vjRN6WAYjuNPs0FMVXiIkMQtevv2LdVF1zVKFBdYTuNrfugtZ/GXh/ReCydjEBWTrTaNYeNM4ZRIaj0Q=
-  on:
-    tags: true
-    distributions: sdist bdist_wheel
-  skip_upload_docs: true
+
+jobs:
+  include:
+    - stage: "deploy"
+      name: "Deploy to PyPI"
+      if: tag =~ ^v
+      env: PYTHON_VERSION="3.6" COVERAGE="false"
+      install:
+      - source tests/travis_install.sh
+      - pip install -r requirements.txt
+      script: echo "Deploying to PyPI"
+      deploy:
+        provider: pypi
+        user: jdherman
+        password:
+          secure: KiUygZVHWMR2a+fk092xeHh8J2c61VGrgq4v1l3bq41MxcZO745H7CLJJ3rfqo+G5/pqy4/tm+q3p8fHhbUmwMcuSC3vjRN6WAYjuNPs0FMVXiIkMQtevv2LdVF1zVKFBdYTuNrfugtZ/GXh/ReCydjEBWTrTaNYeNM4ZRIaj0Q=
+        on:
+          tags: true
+          all_branches: true
+        skip_cleanup: true
