@@ -18,7 +18,7 @@ Parameter files can also be comma-delimited if your parameter names or group nam
 ```
 salib sample saltelli \
      -n 1000 \
-     -p ./SALib/test_functions/params/Ishigami.txt \
+     -p ./src/SALib/test_functions/params/Ishigami.txt \
      -o model_input.txt
 ```
 
@@ -27,7 +27,7 @@ salib sample saltelli \
 **Run the analysis**
 ```
 salib analyze sobol \
-     -p ./SALib/test_functions/params/Ishigami.txt \
+     -p ./src/SALib/test_functions/params/Ishigami.txt \
      -Y model_output.txt \
      -c 0
 ```

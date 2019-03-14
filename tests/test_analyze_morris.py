@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import division
 
-from nose.tools import raises
+from pytest import raises
 from numpy.testing import assert_allclose, assert_equal
 
 import numpy as np
@@ -76,15 +76,16 @@ def test_analysis_of_morris_results():
                  err_msg="The values for names are incorrect")
 
 
-@raises(ValueError)
 def test_conf_level_within_zero_one_bounds():
     ee = [0, 0, 0]
     N = 1
     num_resamples = 2
     conf_level_too_low = -1
-    compute_mu_star_confidence(ee, N, num_resamples, conf_level_too_low)
+    with raises(ValueError):
+        compute_mu_star_confidence(ee, N, num_resamples, conf_level_too_low)
     conf_level_too_high = 2
-    compute_mu_star_confidence(ee, N, num_resamples, conf_level_too_high)
+    with raises(ValueError):
+        compute_mu_star_confidence(ee, N, num_resamples, conf_level_too_high)
 
 
 def test_compute_elementary_effects():
@@ -305,7 +306,6 @@ def test_sigma_returned_for_groups_with_only_one_param():
     assert_allclose(actual, desired, rtol=1e-1)
 
 
-@raises(ValueError)
 def test_raise_error_if_not_floats():
 
     inputs = np.array([[0, 1. / 3], [0, 1], [2. / 3, 1],
@@ -328,7 +328,8 @@ def test_raise_error_if_not_floats():
         'bounds': [[0.0, 1.0], [0.0, 1.0]]
     }
 
-    analyze(problem, inputs, outputs)
+    with raises(ValueError):
+        analyze(problem, inputs, outputs)
 
 
 def test_doesnot_raise_error_if_floats():

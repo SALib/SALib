@@ -224,8 +224,8 @@ def get_decreased_values(op_vec, up, lo):
 def compute_elementary_effects(model_inputs, model_outputs, trajectory_size,
                                delta):
     '''
-    Arguments:
-    ----------
+    Arguments
+    ---------
     model_inputs : matrix of inputs to the model under analysis.
         x-by-r where x is the number of variables and
         r is the number of rows (a function of x and num_trajectories)

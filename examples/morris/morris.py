@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 sys.path.append('../..')
 
 # Read the parameter range file and generate samples
-problem = read_param_file('../../SALib/test_functions/params/Sobol_G.txt')
+problem = read_param_file('../../src/SALib/test_functions/params/Sobol_G.txt')
 # or define manually without a parameter file:
 # problem = {
 #  'num_vars': 8,
@@ -27,7 +27,7 @@ problem = read_param_file('../../SALib/test_functions/params/Sobol_G.txt')
 #             [0.0, 1.0]]
 # }
 # Files with a 4th column for "group name" will be detected automatically, e.g.
-# param_file = '../../SALib/test_functions/params/Ishigami_groups.txt'
+# param_file = '../../src/SALib/test_functions/params/Ishigami_groups.txt'
 
 # Generate samples
 param_values = sample(problem, N=1000, num_levels=4,
