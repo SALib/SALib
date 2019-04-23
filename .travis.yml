@@ -5,10 +5,10 @@ env:
   - DISTRIB="conda" PYTHON_VERSION="3.5" COVERAGE="true"
   - DISTRIB="conda" PYTHON_VERSION="3.6" COVERAGE="false"
   - DISTRIB="conda" PYTHON_VERSION="3.7" COVERAGE="false"
-  - DISTRIB="conda" PYTHON_VERSION="3.8-dev" COVERAGE="false"
+  - DISTRIB="conda" PYTHON_VERSION="3.8" COVERAGE="false"
 matrix:
   allow_failures:
-    - env: DISTRIB="conda" PYTHON_VERSION="3.8-dev" COVERAGE="false"
+    - env: DISTRIB="conda" PYTHON_VERSION="3.8" COVERAGE="false"
 addons:
   apt:
     packages:
