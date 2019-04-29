@@ -60,6 +60,10 @@ def analyze(problem, Y, X, M=10, print_to_console=False, seed=None):
     >>> Y = Ishigami.evaluate(X)
     >>> Si = rbd_fast.analyze(problem, Y, X, print_to_console=False)
     """
+    # Check for nans in Y
+    if np.any(np.isnan(Y)):
+        raise ValueError ('''Nan values are present in the model results''')    
+        
     if seed:
         np.random.seed(seed)
 

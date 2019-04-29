@@ -148,3 +148,4 @@ def test_Sobol_G_using_sobol():
 #     assert_allclose(Si['ST'], expected)
     expected = Sobol_G.sensitivity_index(a)
     assert_allclose(Si['S1'], expected, atol=1e-2, rtol=1e-6)
+    

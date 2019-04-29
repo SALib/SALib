@@ -49,6 +49,10 @@ def analyze(problem, X, Y, second_order=False, print_to_console=False,
     >>> Y = X[:, 0] + (0.1 * X[:, 1]) + ((1.2 * X[:, 2]) * (0.2 + X[:, 0]))
     >>> analyze(problem, X, Y, second_order=True, print_to_console=True)
     """
+    # Check for nans in Y
+    if np.any(np.isnan(Y)):
+        raise ValueError ('''Nan values are present in the model results''')
+        
     if seed:
         np.random.seed(seed)
 

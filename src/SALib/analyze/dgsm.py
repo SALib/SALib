@@ -40,6 +40,10 @@ def analyze(problem, X, Y, num_resamples=1000,
            indices." Mathematics and Computers in Simulation, 79(10):3009-3017,
            doi:10.1016/j.matcom.2009.01.023.
     """
+    # Check for nans in Y
+    if np.any(np.isnan(Y)):
+        raise ValueError ('''Nan values are present in the model results''')
+        
     if seed:
         np.random.seed(seed)
 

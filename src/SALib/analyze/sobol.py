@@ -23,7 +23,7 @@ except ImportError:
 
 def analyze(problem, Y, calc_second_order=True, num_resamples=100,
             conf_level=0.95, print_to_console=False, parallel=False,
-            n_processors=None, seed=None):
+            n_processors=None, seed=None, ignore_nans=False):
     """Perform Sobol Analysis on model outputs.
 
     Returns a dictionary with keys 'S1', 'S1_conf', 'ST', and 'ST_conf', where
@@ -68,6 +68,14 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
     >>> Si = sobol.analyze(problem, Y, print_to_console=True)
 
     """
+    
+    # Check for nans in Y
+    if ignore_nans is False:
+        if np.any(np.isnan(Y)):
+            raise ValueError ('''Nan values are present in the model results.
+                              Either set ignore_nans flag to True, or check 
+                              your model results''')        
+        
     if seed:
         np.random.seed(seed)
     # determining if groups are defined and adjusting the number

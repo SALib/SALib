@@ -48,6 +48,10 @@ def analyze(problem, X, Y, num_resamples=10,
     >>> Y = Ishigami.evaluate(X)
     >>> Si = delta.analyze(problem, X, Y, print_to_console=True)
     """
+    # Check for nans in Y
+    if np.any(np.isnan(Y)):
+        raise ValueError ('''Nan values are present in the model results''')    
+        
     if seed:
         np.random.seed(seed)
 
