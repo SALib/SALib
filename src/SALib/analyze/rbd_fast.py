@@ -58,7 +58,7 @@ def analyze(problem, X, Y, M=10, print_to_console=False, seed=None):
     --------
     >>> X = latin.sample(problem, 1000)
     >>> Y = Ishigami.evaluate(X)
-    >>> Si = rbd_fast.analyze(problem, Y, X, print_to_console=False)
+    >>> Si = rbd_fast.analyze(problem, X, Y, print_to_console=False)
     """
     if seed:
         np.random.seed(seed)
