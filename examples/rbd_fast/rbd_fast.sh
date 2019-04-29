@@ -44,14 +44,14 @@ python -c "from SALib.test_functions import Ishigami; import numpy as np; np.sav
 
 salib analyze rbd_fast \
 	-p ../../src/SALib/test_functions/params/Ishigami.txt \
-	-Y ../data/model_output.txt \
 	-X ../data/model_input.txt \
+	-Y ../data/model_output.txt \
 	--seed=100
 
 # python -m SALib.analyze.rbd_fast \
 # 	-p ../../src/SALib/test_functions/params/Ishigami.txt \
-# 	-Y ../data/model_output.txt \
 # 	-X ../data/model_input.txt \
+# 	-Y ../data/model_output.txt \
 # 	--seed=100
 
 # Options:
