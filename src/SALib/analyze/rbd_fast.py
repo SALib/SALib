@@ -11,7 +11,7 @@ from . import common_args
 from ..util import read_param_file, ResultDict
 
 
-def analyze(problem, Y, X, M=10, print_to_console=False, seed=None):
+def analyze(problem, X, Y, M=10, print_to_console=False, seed=None):
     """Performs the Random Balanced Design - Fourier Amplitude Sensitivity Test
     (RBD-FAST) on model outputs.
 
@@ -23,10 +23,10 @@ def analyze(problem, Y, X, M=10, print_to_console=False, seed=None):
     ----------
     problem : dict
         The problem definition
-    Y : numpy.array
-        A NumPy array containing the model outputs
     X : numpy.array
         A NumPy array containing the model inputs
+    Y : numpy.array
+        A NumPy array containing the model outputs
     M : int
         The interference parameter, i.e., the number of harmonics to sum in
         the Fourier series decomposition (default 10)
@@ -58,7 +58,7 @@ def analyze(problem, Y, X, M=10, print_to_console=False, seed=None):
     --------
     >>> X = latin.sample(problem, 1000)
     >>> Y = Ishigami.evaluate(X)
-    >>> Si = rbd_fast.analyze(problem, Y, X, print_to_console=False)
+    >>> Si = rbd_fast.analyze(problem, X, Y, print_to_console=False)
     """
     # Check for nans in Y
     if np.any(np.isnan(Y)):
@@ -77,7 +77,7 @@ def analyze(problem, Y, X, M=10, print_to_console=False, seed=None):
     Si['names'] = problem['names']
 
     for i in range(D):
-        S1 = compute_first_order(permute_outputs(Y, X[:, i]), M)
+        S1 = compute_first_order(permute_outputs(X[:, i], Y), M)
         S1 = unskew_S1(S1, M, N)
         Si['S1'][i] = S1
         if print_to_console:
@@ -86,7 +86,7 @@ def analyze(problem, Y, X, M=10, print_to_console=False, seed=None):
     return Si
 
 
-def permute_outputs(Y, X):
+def permute_outputs(X, Y):
     """
     Permute the output according to one of the inputs as in [_2]
 
@@ -130,13 +130,12 @@ def cli_parse(parser):
 
 def cli_action(args):
     problem = read_param_file(args.paramfile)
+    X = np.loadtxt(args.model_input_file,
+                   delimiter=args.delimiter)
     Y = np.loadtxt(args.model_output_file,
                    delimiter=args.delimiter,
                    usecols=(args.column,))
-    X = np.loadtxt(args.model_input_file,
-                   delimiter=args.delimiter)
-
-    analyze(problem, Y, X, print_to_console=True, seed=args.seed)
+    analyze(problem, X, Y, print_to_console=True, seed=args.seed)
 
 
 if __name__ == "__main__":

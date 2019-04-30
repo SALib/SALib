@@ -238,7 +238,7 @@ def test_regression_rbd_fast():
 
     Y = Ishigami.evaluate(param_values)
 
-    Si = rbd_fast.analyze(problem, Y, param_values, print_to_console=False)
+    Si = rbd_fast.analyze(problem, param_values, Y, print_to_console=False)
     assert_allclose(Si['S1'], [0.31, 0.44, 0.00], atol=5e-2, rtol=1e-1)
 
 
