@@ -44,21 +44,21 @@ REM Sensitivity indices will print to command line. Use ">" to write to file.
 
 salib analyze rbd_fast ^
 	-p ../../src/SALib/test_functions/params/Ishigami.txt ^
-	-Y ../data/model_output.txt ^
 	-X ../data/model_input.txt ^
+	-Y ../data/model_output.txt ^
 	--seed=100
 
 REM python -m SALib.analyze.rbd_fast ^
 REM 	-p ../../src/SALib/test_functions/params/Ishigami.txt ^
-REM 	-Y ../data/model_output.txt ^
 REM 	-X ../data/model_input.txt ^
+REM 	-Y ../data/model_output.txt ^
 REM 	--seed=100
 
 REM Options:
 REM -p, --paramfile: Your parameter range file (3 columns: parameter name, lower bound, upper bound)
 REM
-REM -Y, --model-output-file: File of model output values to analyze
 REM -X, --model-input-file: File of model input values to analyze
+REM -Y, --model-output-file: File of model output values to analyze
 REM
 REM --delimiter (optional): Model output file delimiter.
 REM
