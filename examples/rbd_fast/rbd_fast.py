@@ -7,7 +7,7 @@ from SALib.test_functions import Ishigami
 from SALib.util import read_param_file
 
 # Read the parameter range file and generate samples
-problem = read_param_file('../../SALib/test_functions/params/Ishigami.txt')
+problem = read_param_file('../../src/SALib/test_functions/params/Ishigami.txt')
 
 # Generate samples
 param_values = latin.sample(problem, 1000)
@@ -18,7 +18,7 @@ Y = Ishigami.evaluate(param_values)
 
 # Perform the sensitivity analysis using the model output
 # Specify which column of the output file to analyze (zero-indexed)
-Si = rbd_fast.analyze(problem, Y, param_values, print_to_console=False)
+Si = rbd_fast.analyze(problem, param_values, Y, print_to_console=False)
 # Returns a dictionary with keys 'S1' and 'ST'
 # e.g. Si['S1'] contains the first-order index for each parameter, in the
 # same order as the parameter file

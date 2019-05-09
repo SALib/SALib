@@ -1,11 +1,14 @@
 sudo: false
 language: python
-virtualenv:
-  system_site_packages: true
 env:
   matrix:
-  - DISTRIB="conda" PYTHON_VERSION="2.7" COVERAGE="true"
-  - DISTRIB="conda" PYTHON_VERSION="3.5" COVERAGE="false"
+  - DISTRIB="conda" PYTHON_VERSION="3.5" COVERAGE="true"
+  - DISTRIB="conda" PYTHON_VERSION="3.6" COVERAGE="false"
+  - DISTRIB="conda" PYTHON_VERSION="3.7" COVERAGE="false"
+  - DISTRIB="conda" PYTHON_VERSION="3.8" COVERAGE="false"
+matrix:
+  allow_failures:
+    - env: DISTRIB="conda" PYTHON_VERSION="3.8" COVERAGE="false"
 addons:
   apt:
     packages:
@@ -15,17 +18,29 @@ install:
 - source tests/travis_install.sh
 - pip install -r test-requirements.txt
 script:
+- python setup.py develop
 - python setup.py test
 after_success:
 - if [[ "$COVERAGE" == "true" ]]; then coveralls || echo "failed"; fi
 notifications:
   email: false
-deploy:
-  provider: pypi
-  user: jdherman
-  password:
-    secure: KiUygZVHWMR2a+fk092xeHh8J2c61VGrgq4v1l3bq41MxcZO745H7CLJJ3rfqo+G5/pqy4/tm+q3p8fHhbUmwMcuSC3vjRN6WAYjuNPs0FMVXiIkMQtevv2LdVF1zVKFBdYTuNrfugtZ/GXh/ReCydjEBWTrTaNYeNM4ZRIaj0Q=
-  on:
-    tags: true
-    distributions: sdist bdist_wheel
-  skip_upload_docs: true
+
+jobs:
+  include:
+    - stage: "deploy"
+      name: "Deploy to PyPI"
+      if: tag =~ ^v
+      env: DISTRIB="conda" PYTHON_VERSION="3.6" COVERAGE="false"
+      install:
+      - source tests/travis_install.sh
+      - pip install -r requirements.txt
+      script: echo "Deploying to PyPI"
+      deploy:
+        provider: pypi
+        user: jdherman
+        password:
+          secure: KiUygZVHWMR2a+fk092xeHh8J2c61VGrgq4v1l3bq41MxcZO745H7CLJJ3rfqo+G5/pqy4/tm+q3p8fHhbUmwMcuSC3vjRN6WAYjuNPs0FMVXiIkMQtevv2LdVF1zVKFBdYTuNrfugtZ/GXh/ReCydjEBWTrTaNYeNM4ZRIaj0Q=
+        on:
+          tags: true
+          all_branches: true
+        skip_cleanup: true

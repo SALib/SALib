@@ -8,13 +8,10 @@ SALib - Sensitivity Analysis Library in Python
 
 .. image:: https://travis-ci.org/SALib/SALib.svg?branch=master
     :target: https://travis-ci.org/SALib/SALib
+    :alt: Continuous Integration Status
 
 .. image:: https://coveralls.io/repos/github/SALib/SALib/badge.svg?branch=master
   :target: https://coveralls.io/github/SALib/SALib?branch=master
-
-.. image:: https://www.quantifiedcode.com/api/v1/project/ed62e70f899e4ec8af4ea6b2212d4b30/badge.svg
-  :target: https://www.quantifiedcode.com/app/project/ed62e70f899e4ec8af4ea6b2212d4b30
-  :alt: Code issues
 
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.160164.svg
    :target: https://doi.org/10.5281/zenodo.160164
@@ -53,7 +50,7 @@ Supported Methods
    License <license>
    Authors <authors>
    Projects that use SALib <citations>
-   Changes <changes>
+   Changes <changelog>
    Complete Module Reference <api/modules>
 
 

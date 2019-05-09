@@ -16,28 +16,28 @@ Parameter files can also be comma-delimited if your parameter names or group nam
 
 **Generate samples** (the `-p` flag is the parameter file)
 ```
-python -m SALib.sample.saltelli \
+salib sample saltelli \
      -n 1000 \
-     -p ./SALib/test_functions/params/Ishigami.txt \
-     -o model_input.txt \
+     -p ./src/SALib/test_functions/params/Ishigami.txt \
+     -o model_input.txt
 ```
 
 **Run the model** this will usually be a user-defined model, maybe even in another language. Just save the outputs.
 
 **Run the analysis**
 ```
-python -m SALib.analyze.sobol \
-     -p ./SALib/test_functions/params/Ishigami.txt \
+salib analyze sobol \
+     -p ./src/SALib/test_functions/params/Ishigami.txt \
      -Y model_output.txt \
-     -c 0 \
+     -c 0
 ```
 
 This will print indices and confidence intervals to the command line. You can redirect to a file using the `>` operator.
 
 ### Parallel indices calculation (Sobol method only)
 ```python
-Si = sobol.analyze(problem, Y,
-                       calc_second_order=True, conf_level=0.95, print_to_console=False, parallel=True, n_processors=4)
+Si = sobol.analyze(problem, Y, calc_second_order=True, conf_level=0.95,
+                   print_to_console=False, parallel=True, n_processors=4)
 ```
 
 Other methods include Morris, FAST, Delta-MIM, and DGSM. For an explanation of all command line options for each method, [see the examples here](https://github.com/SALib/SALib/tree/master/examples).
@@ -83,5 +83,8 @@ Group_1 Group_2 S2 S2_conf
 Group_1 Group_2 0.242964 0.124229
 ```
 
+The output can then be converted to a Pandas DataFrame for further analysis.
 
-
+```python
+total_Si, first_Si, second_Si = Si.to_df()
+```
