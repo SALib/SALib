@@ -3,7 +3,7 @@
 REM Example: generating samples from the command line
 salib sample saltelli ^
   -n 1000 ^
-  -p ../../SALib/test_functions/params/Ishigami.txt ^
+  -p ../../src/SALib/test_functions/params/Ishigami.txt ^
   -o ../data/model_input.txt ^
   --delimiter=" " ^
   --precision=8 ^
@@ -13,7 +13,7 @@ salib sample saltelli ^
 REM You can also use the module directly through Python
 REM python -m SALib.sample.saltelli ^
 REM      -n 1000 ^
-REM      -p ../../SALib/test_functions/params/Ishigami.txt ^
+REM      -p ../../src/SALib/test_functions/params/Ishigami.txt ^
 REM      -o ../data/model_input.txt ^
 REM      --delimiter=" " ^
 REM      --precision=8 ^
@@ -46,7 +46,7 @@ REM Then use the output to run the analysis.
 REM Sensitivity indices will print to command line. Use ">" to write to file.
 
 salib analyze sobol ^
-  -p ../../SALib/test_functions/params/Ishigami.txt ^
+  -p ../../src/SALib/test_functions/params/Ishigami.txt ^
   -Y ../data/model_output.txt ^
   -c 0 ^
   --max-order=2 ^
@@ -54,7 +54,7 @@ salib analyze sobol ^
   --seed=100
 
 REM python -m SALib.analyze.sobol ^
-REM   -p ../../SALib/test_functions/params/Ishigami.txt ^
+REM   -p ../../src/SALib/test_functions/params/Ishigami.txt ^
 REM   -Y ../data/model_output.txt ^
 REM   -c 0 ^
 REM   --max-order=2 ^
@@ -82,3 +82,8 @@ REM
 REM --parallel (optional): Flag to enable parallel execution with multiprocessing
 REM
 REM --processors (optional, int): Number of processors to be used with the parallel option
+
+REM First-order indices expected with Saltelli sampling:
+REM x1: 0.3139
+REM x2: 0.4424
+REM x3: 0.0

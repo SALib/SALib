@@ -3,7 +3,7 @@
 # Example: generating samples from the command line
 salib sample finite_diff \
   -n 1000 \
-  -p ../../SALib/test_functions/params/Ishigami.txt \
+  -p ../../src/SALib/test_functions/params/Ishigami.txt \
   -o ../data/model_input.txt \
   -d 0.001 \
   --delimiter=' ' \
@@ -13,7 +13,7 @@ salib sample finite_diff \
 # You can also use the module directly through Python
 # python -m SALib.sample.finite_diff \
 #      -n 1000 \
-#      -p ../../SALib/test_functions/params/Ishigami.txt \
+#      -p ../../src/SALib/test_functions/params/Ishigami.txt \
 #      -o ../data/model_input.txt \
 #      -d 0.001 \
 #      --delimiter=' ' \
@@ -43,7 +43,7 @@ python -c "from SALib.test_functions import Ishigami; import numpy as np; np.sav
 # Then use the output to run the analysis.
 # Sensitivity indices will print to command line. Use ">" to write to file.
 salib analyze dgsm \
-  -p ../../SALib/test_functions/params/Ishigami.txt \
+  -p ../../src/SALib/test_functions/params/Ishigami.txt \
   -X ../data/model_input.txt \
   -Y ../data/model_output.txt \
   -c 0 \
@@ -51,7 +51,7 @@ salib analyze dgsm \
   --seed=100
 
 # python -m SALib.analyze.dgsm \
-#      -p ../../SALib/test_functions/params/Ishigami.txt \
+#      -p ../../src/SALib/test_functions/params/Ishigami.txt \
 #      -X ../data/model_input.txt \
 #      -Y ../data/model_output.txt \
 #      -c 0 \

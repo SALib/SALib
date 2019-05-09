@@ -3,7 +3,7 @@
 # Example: generating samples from the command line
 salib sample morris \
   -n 100 \
-  -p ../../SALib/test_functions/params/Ishigami.txt \
+  -p ../../src/SALib/test_functions/params/Ishigami.txt \
   -o ../data/model_input.txt \
   -lo True \
   --delimiter=' ' \
@@ -14,7 +14,7 @@ salib sample morris \
 # You can also use the module directly through Python
 # python -m SALib.sample.morris \
 #        -n 100 \
-#        -p ../../SALib/test_functions/params/Ishigami.txt \
+#        -p ../../src/SALib/test_functions/params/Ishigami.txt \
 #        -o ../data/model_input.txt \
 #        -lo True \
 #        --delimiter=' ' \
@@ -59,7 +59,7 @@ python -c "from SALib.test_functions import Ishigami; import numpy as np; np.sav
 # Sensitivity indices will print to command line. Use ">" to write to file.
 
 salib analyze morris \
-  -p ../../SALib/test_functions/params/Ishigami.txt \
+  -p ../../src/SALib/test_functions/params/Ishigami.txt \
   -Y ../data/model_output.txt \
   -c 0 \
   -X ../data/model_input.txt \
@@ -68,7 +68,7 @@ salib analyze morris \
   --seed=100
 
 # python -m SALib.analyze.morris \
-#   -p ../../SALib/test_functions/params/Ishigami.txt \
+#   -p ../../src/SALib/test_functions/params/Ishigami.txt \
 #   -Y ../data/model_output.txt \
 #   -c 0 \
 #   -X ../data/model_input.txt \

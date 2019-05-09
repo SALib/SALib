@@ -1,7 +1,7 @@
 # .coveragerc to control coverage.py
 [run]
 branch = True
-source = SALib
+source = src/SALib/*
 omit = tests/*
 
 [report]

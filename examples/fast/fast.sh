@@ -3,7 +3,7 @@
 # Example: generating samples from the command line
 salib sample fast_sampler \
 	-n 1000 \
-	-p ../../SALib/test_functions/params/Ishigami.txt \
+	-p ../../src/SALib/test_functions/params/Ishigami.txt \
 	-o ../data/model_input.txt \
 	--delimiter=' ' \
 	--precision=8 \
@@ -13,7 +13,7 @@ salib sample fast_sampler \
 # You can also use the module directly through Python
 # python -m SALib.sample.fast_sampler \
 # 	   -n 1000 \
-# 	   -p ../../SALib/test_functions/params/Ishigami.txt \
+# 	   -p ../../src/SALib/test_functions/params/Ishigami.txt \
 # 	   -o ../data/model_input.txt \
 # 	   --delimiter=' ' \
 # 	   --precision=8 \
@@ -43,13 +43,13 @@ python -c "from SALib.test_functions import Ishigami; import numpy as np; np.sav
 # Sensitivity indices will print to command line. Use ">" to write to file.
 
 salib analyze fast \
-	-p ../../SALib/test_functions/params/Ishigami.txt \
+	-p ../../src/SALib/test_functions/params/Ishigami.txt \
 	-Y ../data/model_output.txt \
 	-c 0 \
 	--seed=100
 
 # python -m SALib.analyze.fast \
-# 	-p ../../SALib/test_functions/params/Ishigami.txt \
+# 	-p ../../src/SALib/test_functions/params/Ishigami.txt \
 # 	-Y ../data/model_output.txt \
 # 	-c 0 \
 # 	--seed=100

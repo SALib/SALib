@@ -11,7 +11,7 @@ sys.path.append('../..')
 # Read the parameter range file and generate samples
 # Since this is "given data", the bounds in the parameter file will not be used
 # but the columns are still expected
-problem = read_param_file('../../SALib/test_functions/params/Ishigami.txt')
+problem = read_param_file('../../src/SALib/test_functions/params/Ishigami.txt')
 X = np.loadtxt('model_input.txt')
 Y = np.loadtxt('model_output.txt')
 

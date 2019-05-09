@@ -27,6 +27,7 @@ if [[ "$DISTRIB" == "conda" ]]; then
     # provided versions
     conda create -n testenv --yes python=$PYTHON_VERSION pip numpy matplotlib scipy
     source activate testenv
+    conda update setuptools
 fi
 
 if [[ "$COVERAGE" == "true" ]]; then

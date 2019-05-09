@@ -3,7 +3,7 @@
 # Example: generating samples from the command line
 salib sample saltelli \
   -n 1000 \
-  -p ../../SALib/test_functions/params/Ishigami.txt \
+  -p ../../src/SALib/test_functions/params/Ishigami.txt \
   -o ../data/model_input.txt \
   --delimiter=' ' \
   --precision=8 \
@@ -13,7 +13,7 @@ salib sample saltelli \
 # You can also use the module directly through Python
 # python -m SALib.sample.saltelli \
 #      -n 1000 \
-#      -p ../../SALib/test_functions/params/Ishigami.txt \
+#      -p ../../src/SALib/test_functions/params/Ishigami.txt \
 #      -o ../data/model_input.txt \
 #      --delimiter=' ' \
 #      --precision=8 \
@@ -46,7 +46,7 @@ python -c "from SALib.test_functions import Ishigami; import numpy as np; np.sav
 # Sensitivity indices will print to command line. Use ">" to write to file.
 
 salib analyze sobol \
-  -p ../../SALib/test_functions/params/Ishigami.txt \
+  -p ../../src/SALib/test_functions/params/Ishigami.txt \
   -Y ../data/model_output.txt \
   -c 0 \
   --max-order=2 \
@@ -54,7 +54,7 @@ salib analyze sobol \
   --seed=100
 
 # python -m SALib.analyze.sobol \
-#   -p ../../SALib/test_functions/params/Ishigami.txt \
+#   -p ../../src/SALib/test_functions/params/Ishigami.txt \
 #   -Y ../data/model_output.txt \
 #   -c 0 \
 #   --max-order=2 \
@@ -82,3 +82,8 @@ salib analyze sobol \
 # --parallel (optional): Flag to enable parallel execution with multiprocessing
 #
 # --processors (optional, int): Number of processors to be used with the parallel option
+
+# First-order indices expected with Saltelli sampling:
+# x1: 0.3139
+# x2: 0.4424
+# x3: 0.0

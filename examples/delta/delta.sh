@@ -2,7 +2,7 @@
 
 # Sensitivity indices will print to command line. Use ">" to write to file.
 salib analyze delta \
-  -p ../../SALib/test_functions/params/Ishigami.txt \
+  -p ../../src/SALib/test_functions/params/Ishigami.txt \
   -X ../data/model_input.txt \
   -Y ../data/model_output.txt \
   -c 0 \
@@ -13,7 +13,7 @@ salib analyze delta \
 
 # You can also use the module directly through Python
 # python -m SALib.analyze.delta \
-#      -p ../../SALib/test_functions/params/Ishigami.txt \
+#      -p ../../src/SALib/test_functions/params/Ishigami.txt \
 #      -X ../data/model_input.txt \
 #      -Y ../data/model_output.txt \
 #      -c 0 \

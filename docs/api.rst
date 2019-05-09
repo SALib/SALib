@@ -14,7 +14,7 @@ FAST - Fourier Amplitude Sensitivity Test
    :noindex:
 
 RBD-FAST - Random Balance Designs Fourier Amplitude Sensitivity Test
------------------------------------------
+--------------------------------------------------------------------
 
 .. autofunction:: SALib.sample.latin.sample
    :noindex:
