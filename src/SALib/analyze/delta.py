@@ -98,8 +98,14 @@ def calc_delta(Y, Ygrid, X, m):
     for j in range(len(m) - 1):
         ix = np.where((xr > m[j]) & (xr <= m[j + 1]))[0]
         nm = len(ix)
-        fyc = gaussian_kde(Y[ix], bw_method='silverman')(Ygrid)
-        d_hat += (nm / (2 * N)) * np.trapz(np.abs(fy - fyc), Ygrid)
+
+        if Y[ix].any():
+            fyc = gaussian_kde(Y[ix], bw_method='silverman')(Ygrid)
+            abs_fy = np.abs(fy - fyc)
+        else:
+            abs_fy = np.abs(fy)
+        
+        d_hat += (nm / (2 * N)) * np.trapz(abs_fy, Ygrid)
 
     return d_hat
 
