@@ -80,8 +80,11 @@ def analyze(problem, X, Y, num_resamples=10,
                 print("%s %f %f %f %f" % (problem['names'][i], S['delta'][
                     i], S['delta_conf'][i], S['S1'][i], S['S1_conf'][i]))
     except np.linalg.LinAlgError as e:
-        msg = "Singular matrix detected\n\
-             Sample size of {} may be too small".format(Y.size)
+        msg = "Singular matrix detected\n"
+        msg += "This may be due to the sample size ({}) being too small\n".format(Y.size)
+        msg += "If this is not the case, please raise an issue with the\n"
+        msg += "SALib team"
+
         raise np.linalg.LinAlgError(msg)
 
     return S
