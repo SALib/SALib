@@ -1,12 +1,13 @@
-from nose.tools import assert_almost_equal, assert_equal, raises
+from pytest import raises
 
 from numpy.testing import assert_allclose
 import numpy as np
 
 from SALib.test_functions.Sobol_G import evaluate, total_variance, \
-                                     partial_first_order_variance, \
-                                     sensitivity_index, \
-                                     total_sensitivity_index
+    partial_first_order_variance, \
+    sensitivity_index, \
+    total_sensitivity_index
+
 
 def test_Sobol_G():
     '''
@@ -17,35 +18,34 @@ def test_Sobol_G():
     assert_allclose(actual, expected, atol=1e-4, rtol=1e-4)
 
 
-@raises(ValueError)
 def test_Sobol_G_raises_error_if_values_wrong_size():
     """
     Tests that a value error is raised if the Sobol G function is called with
     the wrong number of variables
     """
     a = [1, 2, 3, 4, 5, 6, 7, 8]
-    evaluate(np.array([1, 2, 3, 4, 5, 6, 7]), a)
+    with raises(ValueError):
+        evaluate(np.array([1, 2, 3, 4, 5, 6, 7]), a)
 
 
-@raises(ValueError)
 def test_Sobol_G_raises_error_if_values_gt_one():
     """
     Tests that a value error is raised if the Sobol G function is called with
     values greater than one
     """
-    evaluate(np.array([0, 1, .02, 0.23, 1.234, 0.02848848, 0, 0.78]))
+    with raises(ValueError):
+        evaluate(np.array([0, 1, .02, 0.23, 1.234, 0.02848848, 0, 0.78]))
 
 
-@raises(ValueError)
 def test_Sobol_G_raises_error_if_values_lt_zero():
     """
     Tests that a value error is raised if the Sobol G function is called with
     values less than zero.
     """
-    evaluate(np.array([0, -1, -.02, 1, 1, -0.1, -0, -12]))
+    with raises(ValueError):
+        evaluate(np.array([0, -1, -.02, 1, 1, -0.1, -0, -12]))
 
 
-@raises(TypeError)
 def test_Sobol_G_raises_error_if_values_not_numpy_array():
     """
     Tests that a type error is raised if the Sobol G function is called with
@@ -53,7 +53,8 @@ def test_Sobol_G_raises_error_if_values_not_numpy_array():
     """
     fixture = [list(range(8)), str(12345678)]
     for x in fixture:
-        evaluate(x)
+        with raises(TypeError):
+            evaluate(x)
 
 
 def test_total_variance():
@@ -71,9 +72,10 @@ def test_partial_first_order_variance():
     actual = partial_first_order_variance(a)
     expected = (len(a),)
 
-    assert_equal(a.shape, expected)
+    assert a.shape == expected
 
-    expected = np.array([0.000053, 0.001972, 0.148148, 0.037037, 0.000035, 0.000288])
+    expected = np.array([0.000053, 0.001972, 0.148148,
+                         0.037037, 0.000035, 0.000288])
 
     assert_allclose(actual, expected, atol=1e-4, rtol=1e-4)
 

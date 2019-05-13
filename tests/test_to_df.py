@@ -179,7 +179,7 @@ def test_rbd_to_df():
 
     param_values = latin.sample(problem, 1000)
     Y = Ishigami.evaluate(param_values)
-    Si = rbd_fast.analyze(problem, Y, param_values, print_to_console=False)
+    Si = rbd_fast.analyze(problem, param_values, Y, print_to_console=False)
     Si_df = Si.to_df()
 
     assert isinstance(Si_df, pd.DataFrame), \

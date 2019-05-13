@@ -1,6 +1,6 @@
 from __future__ import division
 
-from nose.tools import raises
+from pytest import raises
 from numpy.testing import assert_equal, assert_allclose
 
 import numpy as np
@@ -147,24 +147,24 @@ def test_unscale_samples():
     assert_allclose(params, desired, atol=1e-03, rtol=1e-03)
 
 
-@raises(ValueError)
 def test_scale_samples_upper_lt_lower():
     '''
     Raise ValueError if upper bound lower than lower bound
     '''
     params = np.array([[0, 0], [0.1, 0.1], [0.2, 0.2]])
     bounds = [[10, 9], [-10, 10]]
-    scale_samples(params, bounds)
+    with raises(ValueError):
+        scale_samples(params, bounds)
 
 
-@raises(ValueError)
 def test_scale_samples_upper_eq_lower():
     '''
     Raise ValueError if upper bound lower equal to lower bound
     '''
     params = np.array([[0, 0], [0.1, 0.1], [0.2, 0.2]])
     bounds = [[10, 10], [-10, 10]]
-    scale_samples(params, bounds)
+    with raises(ValueError):
+        scale_samples(params, bounds)
 
 
 def test_compute_groups_from_parameter_file():
