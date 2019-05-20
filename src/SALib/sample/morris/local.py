@@ -108,11 +108,9 @@ class LocalOptimisation(Strategy):
         are only used in a relative way. Purely summing distances would lead
         to the same result, at a perhaps quicker rate.
         """
-        combs_tup = np.array(tuple(combinations(indices, 2)))
+        combs_tup = tuple(combinations(indices, 2))
 
-        # Put indices from tuples into two-dimensional array.
-        combs = np.array([[i[0] for i in combs_tup],
-                          [i[1] for i in combs_tup]])
+        combs = np.array(tuple(zip(*combs_tup)))
 
         # Calculate distance (vectorized)
         dist = np.sqrt(
