@@ -16,7 +16,11 @@ import re
 from datetime import datetime as dt
 
 import numpy as np
-from scipy.misc import comb as nchoosek
+
+try:
+    from scipy.misc import comb as nchoosek
+except ImportError:
+    from scipy.special import comb as nchoosek
 
 from . strategy import Strategy
 
