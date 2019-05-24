@@ -10,7 +10,7 @@ import numpy as np
 from . strategy import Strategy
 
 class RepeatedSampling(Strategy):
-    """Hacked together this strategy, I had to work around some of the checks.
+    """Implements the repeated sampling algorithm using the Strategy interface    
     """
     @classmethod
     def run_checks(self, number_samples, k_choices):
@@ -21,15 +21,41 @@ class RepeatedSampling(Strategy):
     def check_input_sample(self,input_sample, num_params, num_samples):
         pass
 
-    def _sample(self, input_sample, num_samples,
-                num_params, k_choices, num_groups):
-        #Notice that we replace num_samples with sample4uniformity and k_choices with num_samples
-        return self.find_most_distant(input_sample, num_samples, 
-                          num_params, k_choices, num_groups)
+    def _sample(self, input_sample, sample4uniformity,
+                num_params, num_samples, num_groups):
+        #Notice that we replace num_samples with sample4uniformity 
+        #and k_choices with num_samples
+        return self.find_most_distant(input_sample, sample4uniformity, 
+                          num_params, num_samples, num_groups)
     
     def find_most_distant(self, input_sample, sample4uniformity,
                           num_params, num_samples, num_groups):
+        """Find the most distant group in Q groups of uniformly sampled trajectories
         
+        In this sampling strategy (see Khare et al 2015), samples are created 
+        by repeatedly creating groups of n_trajectories. For each group,
+        the total Eucledian distance is calculated after which the sample with 
+        the maximum Eucledian distance is chosen. The upside of this method is 
+        that it scales better, making it faster and uniformity of start points 
+        is preserved. The downside is that the eucledian distance amongst 
+        trajectories is not as high as with the Campolongo 2007 brute forcing.
+        
+        Arguments
+        ---------
+        input_sample : np.ndarray
+        sample4uniformity : int
+            The number of times the experiment should be repeated
+        N : int
+            The number of trajectories
+        num_params : int
+            The number of factors
+        num_groups : int, default=None
+            The number of groups
+        Returns
+        -------
+        list
+        """
+ 
         D = num_params
         
         distances = np.zeros(sample4uniformity)
@@ -38,9 +64,12 @@ class RepeatedSampling(Strategy):
         
         for i in range(sample4uniformity):
             index_list = ranges + i * num_samples * (D + 1)
-            distance_matrix = self.compute_distance_matrix(input_sample[index_list, :], 
-                                                           num_samples, num_params, local_optimization=True)
-            distances[i] = self.sum_distances(np.arange(num_samples), distance_matrix)
+            distance_matrix = self.compute_distance_matrix(
+                    input_sample[index_list, :], num_samples, num_params, 
+                    local_optimization=True
+                    )
+            distances[i] = self.sum_distances(np.arange(num_samples), 
+                     distance_matrix)
         
         max_ind = np.argsort(distances)[-1:]
         index_list = ranges + max_ind * num_samples * (D+1)
