@@ -266,7 +266,7 @@ def generate_x_star(num_params, num_levels):
     x_star = np.zeros((1, num_params))
     delta = compute_delta(num_levels)
     bound = 1 - delta
-    grid = np.linspace(0, bound, 2)
+    grid = np.linspace(0, bound, int(num_levels / 2))
 
     for i in range(num_params):
         x_star[0, i] = rd.choice(grid)
