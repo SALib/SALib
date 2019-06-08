@@ -80,8 +80,11 @@ def analyze(problem, X, Y, num_resamples=10,
                 print("%s %f %f %f %f" % (problem['names'][i], S['delta'][
                     i], S['delta_conf'][i], S['S1'][i], S['S1_conf'][i]))
     except np.linalg.LinAlgError as e:
-        msg = "Singular matrix detected\n\
-             Sample size of {} may be too small".format(Y.size)
+        msg = "Singular matrix detected\n"
+        msg += "This may be due to the sample size ({}) being too small\n".format(Y.size)
+        msg += "If this is not the case, check Y values or raise an issue with the\n"
+        msg += "SALib team"
+
         raise np.linalg.LinAlgError(msg)
 
     return S
@@ -92,14 +95,22 @@ def analyze(problem, X, Y, num_resamples=10,
 def calc_delta(Y, Ygrid, X, m):
     N = len(Y)
     fy = gaussian_kde(Y, bw_method='silverman')(Ygrid)
+    abs_fy = np.abs(fy)
     xr = rankdata(X, method='ordinal')
 
     d_hat = 0
     for j in range(len(m) - 1):
         ix = np.where((xr > m[j]) & (xr <= m[j + 1]))[0]
         nm = len(ix)
-        fyc = gaussian_kde(Y[ix], bw_method='silverman')(Ygrid)
-        d_hat += (nm / (2 * N)) * np.trapz(np.abs(fy - fyc), Ygrid)
+
+        Y_ix = Y[ix]
+        if not np.all(np.equal(Y_ix, Y_ix[0])):
+            fyc = gaussian_kde(Y_ix, bw_method='silverman')(Ygrid)
+            fy_ = np.abs(fy - fyc)
+        else:
+            fy_ = abs_fy
+        
+        d_hat += (nm / (2 * N)) * np.trapz(fy_, Ygrid)
 
     return d_hat
 
@@ -110,8 +121,9 @@ def bias_reduced_delta(Y, Ygrid, X, m, num_resamples, conf_level):
     d = np.zeros(num_resamples)
     d_hat = calc_delta(Y, Ygrid, X, m)
 
+    N = len(Y)
     for i in range(num_resamples):
-        r = np.random.randint(len(Y), size=len(Y))
+        r = np.random.randint(N, size=N)
         d[i] = calc_delta(Y[r], Ygrid, X[r], m)
 
     d = 2 * d_hat - d
@@ -132,8 +144,9 @@ def sobol_first(Y, X, m):
 def sobol_first_conf(Y, X, m, num_resamples, conf_level):
     s = np.zeros(num_resamples)
 
+    N = len(Y)
     for i in range(num_resamples):
-        r = np.random.randint(len(Y), size=len(Y))
+        r = np.random.randint(N, size=N)
         s[i] = sobol_first(Y[r], X[r], m)
 
     return norm.ppf(0.5 + conf_level / 2) * s.std(ddof=1)
