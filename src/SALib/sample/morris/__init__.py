@@ -10,6 +10,9 @@ Three variants of Morris' sampling for elementary effects is supported:
 - Groups with optimised trajectories when ``optimal_trajectories=True`` and
     the problem definition specifies groups (note that ``local_optimization``
     must be ``False``)
+- Sample for Uniformity following Khare et al. (2015). Provide an integer to
+    sample4uniformity to start. This specifies how often the experiment 
+    should be repeated. Currently only works without groups.
 
 At present, optimised trajectories is implemented using either a brute-force
 approach, which can be very slow, especially if you require more than four
@@ -34,6 +37,7 @@ import numpy.random as rd
 from . gurobi import GlobalOptimisation
 from . local import LocalOptimisation
 from . brute import BruteForce
+from . repeatedsampling import RepeatedSampling
 
 from . strategy import SampleMorris
 
@@ -47,11 +51,9 @@ except ImportError:
 else:
     _has_gurobi = True
 
-__all__ = ['sample']
 
-
-def sample(problem, N, num_levels=4, optimal_trajectories=None,
-           local_optimization=True):
+def sample(problem, N, num_levels, grid_jump, optimal_trajectories=None,
+           local_optimization=True, sample4uniformity = None):
     """Generate model inputs using the Method of Morris
 
     Returns a NumPy matrix containing the model inputs required for Method of
@@ -69,8 +71,10 @@ def sample(problem, N, num_levels=4, optimal_trajectories=None,
         The problem definition
     N : int
         The number of trajectories to generate
-    num_levels : int, default=4
+    num_levels : int
         The number of grid levels
+    grid_jump : int
+        The grid jump size
     optimal_trajectories : int
         The number of optimal trajectories to sample (between 2 and N)
     local_optimization : bool, default=True
@@ -78,6 +82,10 @@ def sample(problem, N, num_levels=4, optimal_trajectories=None,
         Speeds up the process tremendously for bigger N and num_levels.
         If set to ``False`` brute force method is used, unless ``gurobipy`` is
         available
+    sample4uniformity : int
+        Integer indicating how often a sample for uniformity experiment should 
+        be repeated. See Khare et al. (2015), this is the parameter Q 
+        in their paper.
 
     Returns
     -------
@@ -86,24 +94,134 @@ def sample(problem, N, num_levels=4, optimal_trajectories=None,
         of Morris. The resulting matrix has :math:`(G/D+1)*N/T` rows and
         :math:`D` columns, where :math:`D` is the number of parameters.
     """
-    if problem.get('groups'):
-        sample = _sample_groups(problem, N, num_levels)
+    if grid_jump >= num_levels:
+        raise ValueError("grid_jump must be less than num_levels")
+
+    if (optimal_trajectories is not None) & (sample4uniformity is not None):
+        raise ValueError(
+                "optimal trajectories and sample4uniformity are not compatible"
+                )
+
+    if sample4uniformity is not None:
+        sample = _sample_for_uniformity(problem, N, num_levels, 
+                                        grid_jump, sample4uniformity)
+
     else:
-        sample = _sample_oat(problem, N, num_levels)
-
-    if optimal_trajectories:
-
-        sample = _compute_optimised_trajectories(problem,
-                                                 sample,
-                                                 N,
-                                                 optimal_trajectories,
-                                                 local_optimization)
+        if problem.get('groups'):
+            sample = _sample_groups(problem, N, num_levels, grid_jump)
+        else:
+            sample = _sample_oat(problem, N, num_levels, grid_jump)
+    
+        if optimal_trajectories:
+    
+            sample = _compute_optimised_trajectories(problem,
+                                                     sample,
+                                                     N,
+                                                     optimal_trajectories,
+                                                     local_optimization)
 
     scale_samples(sample, problem['bounds'])
     return sample
 
+def _sample_for_uniformity(problem, N, num_levels, 
+                           grid_jump, sample4uniformity):
+    """Create random trajectories from a set of uniformly sampled starting points
+    
+    Arguments
+    ---------
+    problem : dict
+        The problem definition        
+    N : int
+        The number of samples to generate
+    num_levels : int
+        The number of grid levels
+    grid_jump : int
+        The grid jump size        
+    sample4uniformity : int
+        Integer indicating how often a sample for uniformity experiment should 
+        be repeated.
+        
+    Returns
+    -------
+    sample : numpy.ndarray     
+        Returns a numpy.ndarray containing the model inputs required for Method
+        of Morris. The resulting matrix has :math:`(G/D+1)*N/T` rows and
+        :math:`D` columns, where :math:`D` is the number of parameters.    
+    """
+    
+    
+    D = problem['num_vars']
+    sample = np.zeros([sample4uniformity * N * (D + 1), D])
+    
+    for i in range(sample4uniformity):
+        starts = _sample_uniform_start_points(D, N, num_levels)
+        index_list = np.arange(N * (D + 1)) + i * N * (D + 1)
+        sample[index_list, :] = _sample_oat(problem, N, num_levels, 
+              grid_jump, starts=starts)
+    
+    sample = _compute_optimised_trajectories(problem, sample, 
+                                             sample4uniformity, N, 
+                                             sample_uniform=True)
+    return(sample)
 
-def _sample_oat(problem, N, num_levels=4):
+def _uniform_start_points_par(N, num_levels):
+    """Generate uniformly distributed starting points for 1 var
+    
+    Arguments
+    ---------
+    N : int
+        The number of samples to generate
+    num_levels : int
+        The number of grid levels
+
+    Returns
+    -------
+    strt : numpy.ndarray 
+        1D array of starting points for 1 var
+
+    Notes
+    -----
+    This function is more generic and should be faster 
+    than the original MATLAB function as we avoid unnecessary
+    while loops
+    """
+    #Intentionally create too large array if N % num_levels != 0
+    strt = np.zeros(np.ceil(N/num_levels).astype(np.int64)*num_levels)
+    for i in range(num_levels):
+        lev = i/(num_levels-1)
+        strt[i::num_levels] = lev
+    #Shuffle to create random start points
+    #Shuffling is inplace
+    np.random.shuffle(strt)
+    #Cut off fraction that is too large if N % num_levels != 0
+    strt = strt[:N]
+    return(strt)
+
+def _sample_uniform_start_points(num_vars, N, num_levels):
+    """Generate uniformly distributed starting points for all vars
+
+    Arguments
+    ---------
+    num_vars : int
+        The number of variables
+    N : int
+        The number of samples to generate
+    num_levels : int
+        The number of grid levels
+
+    Returns
+    -------
+    starts : numpy.ndarray 
+        2D array of uniform starting points for all vars
+    """
+    starts = np.zeros((N, num_vars))
+
+    for var in range(num_vars):
+        starts[:, var] = _uniform_start_points_par(N, num_levels)
+    
+    return(starts)
+
+def _sample_oat(problem, N, num_levels, grid_jump, starts=None):
     """Generate trajectories without groups
 
     Arguments
@@ -112,21 +230,73 @@ def _sample_oat(problem, N, num_levels=4):
         The problem definition
     N : int
         The number of samples to generate
-    num_levels : int, default=4
+    num_levels : int
         The number of grid levels
+    grid_jump : int
+        The grid jump size
+    starts : np.ndarray
+        2D array of uniform starting points for all vars. 
     """
-    group_membership = np.asmatrix(np.identity(problem['num_vars'],
-                                               dtype=int))
 
-    num_params = group_membership.shape[0]
-    sample = np.zeros((N * (num_params + 1), num_params))
-    sample = np.array([generate_trajectory(group_membership,
-                                           num_levels)
-                       for n in range(N)])
-    return sample.reshape((N * (num_params + 1), num_params))
+    D = problem['num_vars']
+
+    # orientation matrix B: lower triangular (1) + upper triangular (-1)
+    B = np.tril(np.ones([D + 1, D], dtype=int), -1) + \
+        np.triu(-1 * np.ones([D + 1, D], dtype=int))
+
+    # grid step delta, and final sample matrix X
+    delta = grid_jump / (num_levels - 1)
+    X = np.zeros([N * (D + 1), D])
+    
+    if starts is not None:
+        #Provides direction the trajectory should change.
+        if delta < 0.5:
+            raise Warning(
+                    "Sampling for uniformity is mainly useful when: " \
+                        + "grid_jump / (num_levels - 1) >= 0.5, "\
+                        + "especially given this implementation")
+        O = np.sign(starts - 0.5) * -1
+
+    # Create N trajectories. Each trajectory contains D+1 parameter sets.
+    # (Starts at a base point, and then changes one parameter at a time)
+    for j in range(N):
+
+        # directions matrix DM - diagonal matrix of either +1 or -1
+        DM = np.diag([rd.choice([-1, 1]) for _ in range(D)])
+
+        # permutation matrix P
+        perm = rd.permutation(D)
+        P = np.zeros([D, D])
+        for i in range(D):
+            P[i, perm[i]] = 1
+
+        # starting point for this trajectory
+        x_base = np.zeros([D + 1, D])
+        for i in range(D):
+            x_base[:, i] = (
+                rd.choice(np.arange(num_levels - grid_jump))) \
+                / (num_levels - 1)
+
+        # Indices to be assigned to X, corresponding to this trajectory
+        index_list = np.arange(D + 1) + j * (D + 1)
+        delta_diag = np.diag([delta for _ in range(D)])
+
+        A = 0.5 * \
+            (np.mat(B) * np.mat(P) * np.mat(DM) + 1)
+
+        if starts is not None:
+            #Normalize A so that it's starting at 0 everywhere. 
+            #Adding the starts later.
+            X[index_list, :] = np.abs((A - A[0, :])) * \
+                np.diag(O[j, :]) * delta_diag + starts[j, :]
+        else:
+            X[index_list, :] = A * \
+                np.mat(delta_diag) + np.mat(x_base)
+
+    return X
 
 
-def _sample_groups(problem, N, num_levels=4):
+def _sample_groups(problem, N, num_levels, grid_jump):
     """Generate trajectories for groups
 
     Returns an :math:`N(g+1)`-by-:math:`k` array of `N` trajectories,
@@ -139,34 +309,34 @@ def _sample_groups(problem, N, num_levels=4):
         The problem definition
     N : int
         The number of trajectories to generate
-    num_levels : int, default=4
+    num_levels : int
         The number of grid levels
+    grid_jump : int
+        The grid jump size
 
     Returns
     -------
     numpy.ndarray
     """
-    if len(problem['groups']) != problem['num_vars']:
-        raise ValueError("Groups do not match to number of variables")
-
     group_membership, _ = compute_groups_matrix(problem['groups'])
 
     if group_membership is None:
-        raise ValueError("Please define the 'group_membership' matrix")
-    if not isinstance(group_membership, np.ndarray):
-        raise TypeError("Argument 'group_membership' should be formatted \
-                         as a numpy ndarray")
+        raise ValueError("Please define the matrix group_membership.")
+    if not isinstance(group_membership, np.matrixlib.defmatrix.matrix):
+        raise TypeError("Matrix group_membership should be formatted \
+                         as a numpy matrix")
 
     num_params = group_membership.shape[0]
     num_groups = group_membership.shape[1]
     sample = np.zeros((N * (num_groups + 1), num_params))
     sample = np.array([generate_trajectory(group_membership,
-                                           num_levels)
+                                           num_levels,
+                                           grid_jump)
                        for n in range(N)])
     return sample.reshape((N * (num_groups + 1), num_params))
 
 
-def generate_trajectory(group_membership, num_levels=4):
+def generate_trajectory(group_membership, num_levels, grid_jump):
     """Return a single trajectory
 
     Return a single trajectory of size :math:`(g+1)`-by-:math:`k`
@@ -178,8 +348,11 @@ def generate_trajectory(group_membership, num_levels=4):
     ---------
     group_membership : np.ndarray
         a k-by-g matrix which notes factor membership of groups
-    num_levels : int, default=4
-        The number of levels in the grid
+    num_levels : int
+        integer describing number of levels
+    grid_jump : int
+        recommended to be equal to :math:`p / (2(p-1))`
+        where :math:`p` is `num_levels`
 
     Returns
     -------
@@ -194,19 +367,19 @@ def generate_trajectory(group_membership, num_levels=4):
     num_groups = group_membership.shape[1]
 
     # Matrix B - size (g + 1) * g -  lower triangular matrix
-    B = np.tril(np.ones([num_groups + 1, num_groups],
-                        dtype=int), -1)
+    B = np.matrix(np.tril(np.ones([num_groups + 1, num_groups],
+                                  dtype=int), -1))
 
-    P_star = generate_p_star(num_groups)
+    P_star = np.asmatrix(generate_p_star(num_groups))
 
     # Matrix J - a (g+1)-by-num_params matrix of ones
-    J = np.ones((num_groups + 1, num_params))
+    J = np.matrix(np.ones((num_groups + 1, num_params)))
 
     # Matrix D* - num_params-by-num_params matrix which decribes whether
     # factors move up or down
     D_star = np.diag([rd.choice([-1, 1]) for _ in range(num_params)])
 
-    x_star = generate_x_star(num_params, num_levels)
+    x_star = np.asmatrix(generate_x_star(num_params, num_levels, grid_jump))
 
     # Matrix B* - size (num_groups + 1) * num_params
     B_star = compute_b_star(J, x_star, delta, B,
@@ -218,12 +391,9 @@ def generate_trajectory(group_membership, num_levels=4):
 def compute_b_star(J, x_star, delta, B, G, P_star, D_star):
     """
     """
-    element_a = J[0, :] * x_star
-    element_b = np.matmul(G, P_star).T
-    element_c = np.matmul(2 * B, element_b)
-    element_d = np.matmul((element_c - J), D_star)
-
-    b_star = element_a + (delta / 2) * (element_d + J)
+    b_star = J[:, 0] * x_star + \
+        (delta / 2) * ((2 * B * (G * P_star).T - J)
+                       * D_star + J)
     return b_star
 
 
@@ -244,7 +414,7 @@ def generate_p_star(num_groups):
     return p_star
 
 
-def generate_x_star(num_params, num_levels):
+def generate_x_star(num_params, num_levels, grid_step):
     """Generate an 1-by-num_params array to represent initial position for EE
 
     This should be a randomly generated array in the p level grid
@@ -256,20 +426,18 @@ def generate_x_star(num_params, num_levels):
         The number of parameters (factors)
     num_levels : int
         The number of levels
-
-    Returns
-    -------
-    numpy.ndarray
-        The initial starting positions of the trajectory
+    grid_step : int
+        The grid step used
 
     """
-    x_star = np.zeros((1, num_params))
+    x_star = np.zeros(num_params)
+
     delta = compute_delta(num_levels)
     bound = 1 - delta
-    grid = np.linspace(0, bound, 2)
+    grid = np.linspace(0, bound, grid_step)
 
     for i in range(num_params):
-        x_star[0, i] = rd.choice(grid)
+        x_star[i] = rd.choice(grid)
     return x_star
 
 
@@ -288,8 +456,9 @@ def compute_delta(num_levels):
     return float(num_levels) / (2 * (num_levels - 1))
 
 
-def _compute_optimised_trajectories(problem, input_sample, N, k_choices,
-                                    local_optimization=False):
+def _compute_optimised_trajectories(problem, input_sample, N, 
+                                    k_choices, local_optimization=False, 
+                                    sample_uniform=False):
     '''
     Calls the procedure to compute the optimum k_choices of trajectories
     from the input_sample.
@@ -307,9 +476,12 @@ def _compute_optimised_trajectories(problem, input_sample, N, k_choices,
         The number of optimal trajectories
     local_optimization : bool, default=False
         If true, uses local optimisation heuristic
+    sample_uniform : bool, default=False
+        If true, uses RepeatedSampling
     '''
     if _has_gurobi is False \
             and local_optimization is False \
+            and sample_uniform is False\
             and k_choices > 10:
         msg = "Running optimal trajectories greater than values of 10 \
                 will take a long time."
@@ -320,9 +492,12 @@ def _compute_optimised_trajectories(problem, input_sample, N, k_choices,
     if np.any((input_sample < 0) | (input_sample > 1)):
         raise ValueError("Input sample must be scaled between 0 and 1")
 
-    if _has_gurobi and local_optimization is False:
+    if _has_gurobi and (local_optimization is False) \
+    and (sample_uniform is False):
         # Use global optimization method
         strategy = GlobalOptimisation()
+    elif sample_uniform:
+        strategy = RepeatedSampling()
     elif local_optimization:
         # Use local method
         strategy = LocalOptimisation()
@@ -342,33 +517,30 @@ def _compute_optimised_trajectories(problem, input_sample, N, k_choices,
     return output
 
 
-def cli_parse(parser):
-    parser.add_argument('-n', '--samples', type=int, required=True,
-                        help='Number of Samples')
+if __name__ == "__main__":
+
+    parser = common_args.create()
+
+    parser.add_argument(
+        '-n', '--samples', type=int, required=True, help='Number of Samples')
     parser.add_argument('-l', '--levels', type=int, required=False,
-                        default=4, help='Number of grid levels \
-                        (Morris only)')
+                        default=4, help='Number of grid levels (Morris only)')
+    parser.add_argument('--grid-jump', type=int, required=False,
+                        default=2, help='Grid jump size (Morris only)')
     parser.add_argument('-k', '--k-optimal', type=int, required=False,
                         default=None,
-                        help='Number of optimal trajectories \
-                        (Morris only)')
-    parser.add_argument('-lo', '--local', type=bool, required=True,
+                        help='Number of optimal trajectories (Morris only)')
+    parser.add_argument('-o', '--local', type=bool, required=True,
                         default=False,
                         help='Use the local optimisation method \
-                        (Morris with optimization only)')
-    return parser
+                              (Morris with optimization only)')
+    args = parser.parse_args()
 
-
-def cli_action(args):
     rd.seed(args.seed)
 
     problem = read_param_file(args.paramfile)
     param_values = sample(problem, args.samples, args.levels,
-                          args.k_optimal, args.local)
+                          args.grid_jump, args.k_optimal, args.local)
 
     np.savetxt(args.output, param_values, delimiter=args.delimiter,
                fmt='%.' + str(args.precision) + 'e')
-
-
-if __name__ == "__main__":
-    common_args.run_cli(cli_parse, cli_action)
