@@ -53,13 +53,11 @@ class LocalOptimisation(Strategy):
             indices_list = []
             row_maxima_i = maxima_template.copy()
 
-            row_nr = 0
-            for row in distance_matrix:
+            for row_nr, row in enumerate(distance_matrix):
                 indices = tuple(row.argsort()[-i:][::-1]) + (row_nr,)
                 row_maxima_i[row_nr] = self.sum_distances(
                     indices, distance_matrix)
                 indices_list.append(indices)
-                row_nr += 1
 
             # Find the indices belonging to the maximum distance
             i_max_ind = self.get_max_sum_ind(indices_list, row_maxima_i, i, 0)
