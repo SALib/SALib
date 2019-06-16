@@ -119,7 +119,6 @@ def _sample_oat(problem, N, num_levels=4):
                                                dtype=int))
 
     num_params = group_membership.shape[0]
-    sample = np.zeros((N * (num_params + 1), num_params))
     sample = np.array([generate_trajectory(group_membership,
                                            num_levels)
                        for n in range(N)])
@@ -220,10 +219,10 @@ def compute_b_star(J, x_star, delta, B, G, P_star, D_star):
     """
     element_a = J[0, :] * x_star
     element_b = np.matmul(G, P_star).T
-    element_c = np.matmul(2 * B, element_b)
+    element_c = np.matmul(2.0 * B, element_b)
     element_d = np.matmul((element_c - J), D_star)
 
-    b_star = element_a + (delta / 2) * (element_d + J)
+    b_star = element_a + (delta / 2.0) * (element_d + J)
     return b_star
 
 
