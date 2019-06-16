@@ -204,7 +204,7 @@ def generate_trajectory(group_membership, num_levels=4):
 
     # Matrix D* - num_params-by-num_params matrix which decribes whether
     # factors move up or down
-    D_star = np.diag([rd.choice([-1, 1]) for _ in range(num_params)])
+    D_star = np.diag(rd.choice([-1, 1], num_params))
 
     x_star = generate_x_star(num_params, num_levels)
 
@@ -268,8 +268,8 @@ def generate_x_star(num_params, num_levels):
     bound = 1 - delta
     grid = np.linspace(0, bound, 2)
 
-    for i in range(num_params):
-        x_star[0, i] = rd.choice(grid)
+    x_star[0, :] = rd.choice(grid, num_params)
+
     return x_star
 
 
@@ -285,7 +285,7 @@ def compute_delta(num_levels):
     -------
     float
     """
-    return float(num_levels) / (2 * (num_levels - 1))
+    return num_levels / (2.0 * (num_levels - 1))
 
 
 def _compute_optimised_trajectories(problem, input_sample, N, k_choices,
