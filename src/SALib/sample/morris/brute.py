@@ -88,15 +88,16 @@ class BruteForce(Strategy):
 
         counter = 0
         # Generate a list of all the possible combinations
-        combo_gen = combinations(list(range(num_samples)), k_choices)
+        combo_gen = combinations(range(num_samples), k_choices)
         scores = np.zeros(number_of_combinations, dtype=np.float32)
         # Generate the pairwise indices once
         pairwise = np.array(
-            [y for y in combinations(list(range(k_choices)), 2)])
+            [y for y in combinations(range(k_choices), 2)])
 
+        mappable = self.mappable
         for combos in self.grouper(chunk, combo_gen):
             scores[(counter * chunk):((counter + 1) * chunk)] \
-                = self.mappable(combos, pairwise, distance_matrix)
+                = mappable(combos, pairwise, distance_matrix)
             counter += 1
         return scores
 
@@ -125,7 +126,7 @@ class BruteForce(Strategy):
         # Create a list of all pairwise combination for each combo in combos
         combo_list = combos[:, pairwise[:, ]]
 
-        addresses = tuple([combo_list[:, :, 1], combo_list[:, :, 0]])
+        addresses = [combo_list[:, :, 1], combo_list[:, :, 0]]
 
         all_distances = distance_matrix[addresses]
         new_scores = np.sqrt(
@@ -150,7 +151,7 @@ class BruteForce(Strategy):
 
         index_of_maximum = int(scores.argmax())
         maximum_combo = self.nth(combinations(
-            list(range(N)), k_choices), index_of_maximum, None)
+            range(N), k_choices), index_of_maximum, None)
         return sorted(maximum_combo)
 
     @staticmethod

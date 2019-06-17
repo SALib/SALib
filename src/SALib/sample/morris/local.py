@@ -47,18 +47,17 @@ class LocalOptimisation(Strategy):
         tot_indices_list = []
         tot_max_array = np.zeros(k_choices - 1)
 
+        maxima_template = np.zeros(len(distance_matrix))
         # Loop over `k_choices`, i starts at 1
         for i in range(1, k_choices):
             indices_list = []
-            row_maxima_i = np.zeros(len(distance_matrix))
+            row_maxima_i = maxima_template.copy()
 
-            row_nr = 0
-            for row in distance_matrix:
+            for row_nr, row in enumerate(distance_matrix):
                 indices = tuple(row.argsort()[-i:][::-1]) + (row_nr,)
                 row_maxima_i[row_nr] = self.sum_distances(
                     indices, distance_matrix)
                 indices_list.append(indices)
-                row_nr += 1
 
             # Find the indices belonging to the maximum distance
             i_max_ind = self.get_max_sum_ind(indices_list, row_maxima_i, i, 0)
@@ -71,9 +70,11 @@ class LocalOptimisation(Strategy):
             while m <= k_choices - i - 1:
                 m_ind = self.add_indices(m_max_ind, distance_matrix)
 
-                m_maxima = np.zeros(len(m_ind))
+                len_m_ind = len(m_ind)
 
-                for n in range(0, len(m_ind)):
+                m_maxima = np.zeros(len_m_ind)
+
+                for n in range(len_m_ind):
                     m_maxima[n] = self.sum_distances(m_ind[n], distance_matrix)
 
                 m_max_ind = self.get_max_sum_ind(m_ind, m_maxima, i, m)
@@ -86,7 +87,7 @@ class LocalOptimisation(Strategy):
 
         tot_max = self.get_max_sum_ind(
             tot_indices_list, tot_max_array, "tot", "tot")
-        return sorted(list(tot_max))
+        return sorted(tot_max)
 
     def sum_distances(self, indices, distance_matrix):
         """Calculate combinatorial distance between a select group of
@@ -141,7 +142,7 @@ class LocalOptimisation(Strategy):
             raise ValueError(msg.format(
                 len(indices_list), len(distances), i, m))
 
-        max_index = tuple(distances.argsort()[-1:][::-1])
+        max_index = distances.argsort()[-1:][::-1]
         return indices_list[max_index[0]]
 
     def add_indices(self, indices, distance_matrix):
@@ -159,7 +160,7 @@ class LocalOptimisation(Strategy):
 
         '''
         list_new_indices = []
-        for i in range(0, len(distance_matrix)):
+        for i in range(len(distance_matrix)):
             if i not in indices:
                 list_new_indices.append(indices + (i,))
         return list_new_indices

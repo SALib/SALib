@@ -11,28 +11,27 @@ import numpy as np
 # x4: 0.0072
 # x5-x8: 0.0001
 def evaluate(values, a=None):
-
     if type(values) != np.ndarray:
         raise TypeError("The argument `values` must be a numpy ndarray")
     if a is None:
         a = [0, 1, 4.5, 9, 99, 99, 99, 99]
 
-    ltz = np.array(values) < 0
-    gto = np.array(values) > 1
+    ltz = values < 0
+    gto = values > 1
 
     if ltz.any() == True:
         raise ValueError("Sobol G function called with values less than zero")
     elif gto.any() == True:
         raise ValueError("Sobol G function called with values greater than one")
 
-    Y = np.zeros([values.shape[0]])
+    Y = np.ones([values.shape[0]])
 
+    len_a = len(a)
     for i, row in enumerate(values):
-        Y[i] = 1.0
-
-        for j in range(len(a)):
+        for j in range(len_a):
             x = row[j]
-            Y[i] *= (abs(4 * x - 2) + a[j]) / (1 + a[j])
+            a_j = a[j]
+            Y[i] *= (np.abs(4 * x - 2) + a_j) / (1 + a_j)
 
     return Y
 
