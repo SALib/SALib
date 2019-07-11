@@ -120,7 +120,7 @@ def sample_histograms(fig, input_sample, problem, param_dict):
         ax = fig.add_subplot(framing + variable)
         out.append(ax.hist(input_sample[:, variable],
                            bins=num_levels,
-                           normed=False,
+                           density=False,
                            label=None,
                            **param_dict))
 
