@@ -14,7 +14,7 @@ class ResultDict(dict):
         '''Convert dict structure into Pandas DataFrame.'''
         return pd.DataFrame({k: v for k, v in self.items() if k is not 'names'},
                             index=self['names'])
-    
+
     def plot(self):
         '''Create bar chart of results'''
         Si_df = self.to_df()
