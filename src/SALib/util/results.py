@@ -19,7 +19,7 @@ class ResultDict(dict):
         '''Create bar chart of results'''
         Si_df = self.to_df()
 
-        if isinstance(Si_df, list):
+        if isinstance(Si_df, (list, tuple)):
             import matplotlib.pyplot as plt
 
             fig, axes = plt.subplots(1, len(Si_df))
