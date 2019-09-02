@@ -109,10 +109,10 @@ class TestSharedMethods:
         input_1 = np.array([[0, 1 / 3.], [0, 1.]], dtype=np.float32)
         input_3 = np.array([[2 / 3., 0], [2 / 3., 2 / 3.],
                             [0, 2 / 3.]], dtype=np.float32)
-        with raises(ValueError) as err:
+        
+        expected_err = ".*Input matrices are different sizes.*"
+        with raises(ValueError, match=expected_err):
             strategy.compute_distance(input_1, input_3)
-
-        assert "Input matrices are different sizes" in str(err)
 
     def test_compute_distance_matrix(self, strategy, setup_input):
         '''
