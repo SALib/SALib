@@ -74,10 +74,16 @@ def analyze(problem, X, Y, num_resamples=1000,
         print("Parameter %s %s %s %s" % keys)
 
     for j in range(D):
-        S['vi'][j], S['vi_std'][j] = calc_vi(
-            base, perturbed[:, j], X_perturbed[:, j] - X_base[:, j])
-        S['dgsm'][j], S['dgsm_conf'][j] = calc_dgsm(base, perturbed[:, j], X_perturbed[
-                                                    :, j] - X_base[:, j], problem['bounds'][j], num_resamples, conf_level)
+        diff = X_perturbed[:, j] - X_base[:, j]
+        S['vi'][j], S['vi_std'][j] = calc_vi(base,
+                                             perturbed[:, j],
+                                             diff)
+        S['dgsm'][j], S['dgsm_conf'][j] = calc_dgsm(base,
+                                                    perturbed[:, j],
+                                                    diff,
+                                                    problem['bounds'][j],
+                                                    num_resamples,
+                                                    conf_level)
 
         if print_to_console:
             print("%s %f %f %f %f" % (
@@ -102,9 +108,10 @@ def calc_dgsm(base, perturbed, x_delta, bounds, num_resamples, conf_level):
     vi, _ = calc_vi(base, perturbed, x_delta)
     dgsm = vi * (bounds[1] - bounds[0]) ** 2 / (D * np.pi ** 2)
 
+    len_base = len(base)
     s = np.zeros(num_resamples)
     for i in range(num_resamples):
-        r = np.random.randint(len(base), size=len(base))
+        r = np.random.randint(len_base, size=len_base)
         s[i], _ = calc_vi(base[r], perturbed[r], x_delta[r])
 
     return dgsm, norm.ppf(0.5 + conf_level / 2) * s.std(ddof=1)
