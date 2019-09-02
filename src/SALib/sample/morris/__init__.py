@@ -342,8 +342,6 @@ def _compute_optimised_trajectories(problem, input_sample, N, k_choices,
 
 
 def cli_parse(parser):
-    parser.add_argument('-n', '--samples', type=int, required=True,
-                        help='Number of Samples')
     parser.add_argument('-l', '--levels', type=int, required=False,
                         default=4, help='Number of grid levels \
                         (Morris only)')

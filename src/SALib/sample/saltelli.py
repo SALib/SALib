@@ -108,9 +108,6 @@ def cli_parse(parser):
     ----------
     Updated argparse object
     """
-    parser.add_argument('-n', '--samples', type=int, required=True,
-                        help='Number of Samples')
-
     parser.add_argument('--max-order', type=int, required=False, default=2,
                         choices=[1, 2],
                         help='Maximum order of sensitivity indices \

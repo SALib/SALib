@@ -80,9 +80,6 @@ def cli_parse(parser):
     ----------
     Updated argparse object
     """
-    parser.add_argument('-n', '--samples', type=int, required=True,
-                        help='Number of Samples')
-
     parser.add_argument('-M', '--m-coef', type=int, required=False, default=4,
                         help='M coefficient, default 4', dest='M')
     return parser
