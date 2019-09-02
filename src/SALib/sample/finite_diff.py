@@ -59,8 +59,6 @@ def cli_parse(parser):
     parser.add_argument('-d', '--delta', type=float,
                         required=False, default=0.01,
                         help='Finite difference step size (percent)')
-    parser.add_argument('-n', '--samples', type=int,
-                        required=True, help='Number of Samples')
     return parser
 
 

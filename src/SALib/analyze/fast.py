@@ -104,10 +104,8 @@ def compute_total_order(outputs, N, omega):
     return (1 - Dt / V)
 
 
-def cli_parse(parser):
-    # No additional arguments required for FAST
-    # This method is required to make sure tests pass.
-    return parser
+# No additional arguments required for FAST
+cli_parse = None
 
 
 def cli_action(args):

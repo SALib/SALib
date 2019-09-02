@@ -12,7 +12,7 @@ def sample(problem, N, M=4, seed=None):
     """Generate model inputs for the Fourier Amplitude Sensitivity Test (FAST).
 
     Returns a NumPy matrix containing the model inputs required by the Fourier
-    Amplitude sensitivity test.  The resulting matrix contains N rows and D
+    Amplitude sensitivity test.  The resulting matrix contains N * D rows and D
     columns, where D is the number of parameters.  The samples generated are
     intended to be used by :func:`SALib.analyze.fast.analyze`.
 
@@ -80,9 +80,6 @@ def cli_parse(parser):
     ----------
     Updated argparse object
     """
-    parser.add_argument('-n', '--samples', type=int, required=True,
-                        help='Number of Samples')
-
     parser.add_argument('-M', '--m-coef', type=int, required=False, default=4,
                         help='M coefficient, default 4', dest='M')
     return parser
