@@ -75,11 +75,12 @@ def analyze(problem, X, Y, num_resamples=1000,
 
     for j in range(D):
         diff = X_perturbed[:, j] - X_base[:, j]
+        perturbed_j = perturbed[:, j]
         S['vi'][j], S['vi_std'][j] = calc_vi(base,
-                                             perturbed[:, j],
+                                             perturbed_j,
                                              diff)
         S['dgsm'][j], S['dgsm_conf'][j] = calc_dgsm(base,
-                                                    perturbed[:, j],
+                                                    perturbed_j,
                                                     diff,
                                                     problem['bounds'][j],
                                                     num_resamples,
