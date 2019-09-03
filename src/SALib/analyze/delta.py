@@ -153,8 +153,8 @@ def sobol_first_conf(Y, X, m, num_resamples, conf_level):
 
 
 def cli_parse(parser):
-    parser.add_argument('-X', '--model-input-file', type=str,
-                        required=True, default=None,
+    parser.add_argument('-X', '--model-input-file', type=str, required=True,
+                        default=None,
                         help='Model input file')
     parser.add_argument('-r', '--resamples', type=int, required=False,
                         default=10,

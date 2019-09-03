@@ -43,20 +43,8 @@ def sample(problem, N, seed=None):
     return result
 
 
-def cli_parse(parser):
-    """Add method specific options to CLI parser.
-
-    Parameters
-    ----------
-    parser : argparse object
-
-    Returns
-    ----------
-    Updated argparse object
-    """
-    parser.add_argument('-n', '--samples', type=int, required=True,
-                        help='Number of Samples')
-    return parser
+# No additional CLI options
+cli_parse = None
 
 
 def cli_action(args):
@@ -73,4 +61,5 @@ def cli_action(args):
 
 
 if __name__ == "__main__":
+    cli_parse = None  # No additional options
     common_args.run_cli(cli_parse, cli_action)
