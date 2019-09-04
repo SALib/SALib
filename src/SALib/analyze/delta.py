@@ -58,12 +58,12 @@ def analyze(problem, X, Y, num_resamples=10,
         raise RuntimeError("Confidence level must be between 0-1.")
 
     # equal frequency partition
-    M = min(np.ceil(N ** (2 / (7 + np.tanh((1500 - N) / 500)))), 48)
+    M = min(int(np.ceil(N ** (2 / (7 + np.tanh((1500 - N) / 500))))), 48)
     m = np.linspace(0, N, M + 1)
     Ygrid = np.linspace(np.min(Y), np.max(Y), 100)
 
     keys = ('delta', 'delta_conf', 'S1', 'S1_conf')
-    S = ResultDict((k, np.zeros(D)) for k in keys)
+    S = ResultDict((k, np.empty(D)) for k in keys)
     S['names'] = problem['names']
 
     if print_to_console:
@@ -119,7 +119,7 @@ def calc_delta(Y, Ygrid, X, m):
 
 
 def bias_reduced_delta(Y, Ygrid, X, m, num_resamples, conf_level):
-    d = np.zeros(num_resamples)
+    d = np.empty(num_resamples)
     d_hat = calc_delta(Y, Ygrid, X, m)
 
     N = len(Y)
@@ -145,7 +145,7 @@ def sobol_first(Y, X, m):
 
 
 def sobol_first_conf(Y, X, m, num_resamples, conf_level):
-    s = np.zeros(num_resamples)
+    s = np.empty(num_resamples)
 
     N = len(Y)
     r = np.random.randint(N, size=(num_resamples, N))
