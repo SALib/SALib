@@ -115,7 +115,7 @@ def nonuniform_scale_samples(params, bounds, dists):
     b = np.array(bounds)
 
     # initializing matrix for converted values
-    conv_params = np.zeros_like(params)
+    conv_params = np.empty_like(params)
 
     # loop over the parameters
     for i in range(conv_params.shape[1]):
