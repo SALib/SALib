@@ -23,10 +23,10 @@ def sample(problem: Dict, N: int,
         SALib problem specification
 
     N : int
-        the number of sample sets to generate
+        The number of sample sets to generate
 
     seed : int
-        the number of parameters
+        Seed value to use for np.random.seed
 
     Returns
     ---------
