@@ -13,14 +13,21 @@ def sample(problem, N, delta=0.01, seed=None):
 
     Parameters
     ----------
-    * problem : dict, SALib problem specification
-    * N : int, number of samples
-    * delta : float, Finite difference step size (percent)
-    * seed : int or None, random seed value
+    problem : dict
+        SALib problem specification
+
+    N : int
+        number of samples
+
+    delta : float
+        Finite difference step size (percent)
+    
+    seed : int or None
+        random seed value
 
     Returns
     ----------
-    * np.array, DGSM sequence
+    np.array : DGSM sequence
     """
     if seed:
         np.random.seed(seed)
