@@ -235,6 +235,11 @@ def compute_elementary_effects(model_inputs, model_outputs, trajectory_size,
         a scalar indicating the number of rows in a trajectory
     delta : float
         scaling factor computed from `num_levels`
+
+    Returns
+    ---------
+    ee : np.array
+        Elementary Effects for each parameter
     '''
     num_vars = model_inputs.shape[1]
     num_rows = model_inputs.shape[0]
@@ -265,15 +270,13 @@ def compute_mu_star_confidence(ee, num_trajectories, num_resamples,
     replacement to produce a histogram of resampled mu_star metrics.
     This resample is used to produce a confidence interval.
     '''
-    ee_resampled = np.zeros([num_trajectories])
-    mu_star_resampled = np.zeros([num_resamples])
-
     if not 0 < conf_level < 1:
         raise ValueError("Confidence level must be between 0-1.")
 
     resample_index = np.random.randint(
         len(ee), size=(num_resamples, num_trajectories))
     ee_resampled = ee[resample_index]
+
     # Compute average of the absolute values over each of the resamples
     mu_star_resampled = np.average(np.abs(ee_resampled), axis=1)
 
