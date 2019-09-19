@@ -6,7 +6,7 @@ from ..util import ResultDict
 
 __all__ = ['analyze']
 
-def analyze(problem: Dict, Y: np.array, sample_sets: int,
+def analyze(problem: Dict, X: np.array, Y: np.array, sample_sets: int,
             num_resamples: int = 1000,
             conf_level: float = 0.95,
             seed: Optional[int] = None) -> Dict:
@@ -19,6 +19,9 @@ def analyze(problem: Dict, Y: np.array, sample_sets: int,
     ---------
     problem : dict
         The SALib problem specification
+    
+    X : np.array
+        An array containing the model inputs of dtype=float
 
     Y : np.array
         An array containing the model outputs of dtype=float
@@ -39,7 +42,13 @@ def analyze(problem: Dict, Y: np.array, sample_sets: int,
     --------
     Si : dict
     """
-    p = problem['num_vars']
+    num_vars = problem['num_vars']
+
+    assert X.shape[0] == Y.shape[0], \
+        "X and Y must be of corresponding size (number of X values must match number of Y values)"
+
+    assert (X.shape[0] / sample_sets) == p+1, \
+        "Number of parameter set groups must match number of parameters + 1"
 
     assert (Y.shape[0] / sample_sets) == p+1, \
         "Number of result set groups must match number of parameters + 1"
@@ -47,14 +56,14 @@ def analyze(problem: Dict, Y: np.array, sample_sets: int,
     if seed:
         np.random.set_seed(seed)
 
-    ee = np.empty((p, sample_sets))
+    ee = np.empty((num_vars, sample_sets))
 
     # Each `n`th item from 0-position is the baseline for
     # that N group.
-    nth = p+1
+    nth = num_vars + 1
     X_base = X[0::nth]
     Y_base = Y[0::nth]
-    for i in range(p):
+    for i in range(num_vars):
         pos = i + 1
 
         # Collect every `n`th element
@@ -63,7 +72,7 @@ def analyze(problem: Dict, Y: np.array, sample_sets: int,
         ee[i] = (Y[pos::nth] - Y_base) / x_tmp[x_tmp != 0.0]
     # End for
 
-    Si = ResultDict((k, [None] * p)
+    Si = ResultDict((k, [None] * num_vars)
                     for k in ['names', 'mu', 'mu_star', 'sigma'])
 
     Si['mu'] = np.average(ee, axis=1)
