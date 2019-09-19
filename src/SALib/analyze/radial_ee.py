@@ -20,7 +20,7 @@ def analyze(problem: Dict, Y: np.array, sample_sets: int,
     problem : dict
         The SALib problem specification
 
-    Y : numpy.array
+    Y : np.array
         An array containing the model outputs of dtype=float
 
     sample_sets : int

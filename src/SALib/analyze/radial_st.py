@@ -20,8 +20,8 @@ def analyze(problem: Dict, Y: np.array, sample_sets: int,
     problem : dict
         The SALib problem specification
 
-    X : np.array
-        An array containing the model inputs of dtype=float
+    Y : np.array
+        An array containing the model outputs of dtype=float
 
     sample_sets : int
         The number of sample sets used to create `X`
@@ -31,7 +31,7 @@ def analyze(problem: Dict, Y: np.array, sample_sets: int,
 
     conf_level : float
         The confidence interval level (default 0.95)
-        
+
     seed : int
         Seed value to use for np.random.seed
 
