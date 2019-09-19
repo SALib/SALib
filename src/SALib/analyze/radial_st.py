@@ -41,12 +41,6 @@ def analyze(problem: Dict, Y: np.array, sample_sets: int,
     """
     p = problem['num_vars']
 
-    assert X.shape[0] == Y.shape[0], \
-        "X and Y must be of corresponding size (number of X values must match number of Y values)"
-
-    assert (X.shape[0] / sample_sets) == p+1, \
-        "Number of parameter set groups must match number of parameters + 1"
-
     assert (Y.shape[0] / sample_sets) == p+1, \
         "Number of result set groups must match number of parameters + 1"
 
@@ -69,7 +63,6 @@ def analyze(problem: Dict, Y: np.array, sample_sets: int,
 
     Si = ResultDict((k, [None] * p)
                     for k in ['names', 'ST', 'ST_conf'])
-
 
     Si['ST'] = ((1.0/(2.0*r)) * np.sum(st**2, axis=1))
     Si['ST_conf'] = compute_radial_si_confidence(st, r, num_resamples,
