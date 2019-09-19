@@ -64,7 +64,7 @@ def analyze(problem: Dict, Y: np.array, sample_sets: int,
     Si = ResultDict((k, [None] * p)
                     for k in ['names', 'ST', 'ST_conf'])
 
-    Si['ST'] = ((1.0/(2.0*r)) * np.sum(st**2, axis=1))
+    Si['ST'] = ((1.0/(2.0*r)) * np.sum((st**2), axis=1))
     Si['ST_conf'] = compute_radial_si_confidence(st, r, num_resamples,
                                                  conf_level)
     Si['names'] = problem['names']
@@ -107,6 +107,6 @@ def compute_radial_si_confidence(si: np.array, N: int, num_resamples: int,
     resample_index = np.random.randint(tmp_si.shape[0], size=(num_resamples, N))
 
     si_resampled = tmp_si[resample_index]
-    res = np.var(si_resampled, axis=0) - ((1.0/(2.0*N)) * np.sum(si_resampled**2, axis=0))
+    res = np.var(si_resampled, axis=0) - ((1.0/(2.0*N)) * np.sum((si_resampled**2), axis=0))
 
     return norm.ppf(0.5 + conf_level / 2.0) * res.std(ddof=1, axis=0)
