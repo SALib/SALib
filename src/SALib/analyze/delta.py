@@ -58,7 +58,7 @@ def analyze(problem, X, Y, num_resamples=10,
         raise RuntimeError("Confidence level must be between 0-1.")
 
     # equal frequency partition
-    M = min(int(np.ceil(N ** (2 / (7 + np.tanh((1500 - N) / 500))))), 48)
+    M = min(int(np.ceil((N**(2 / (7 + np.tanh((1500 - N) / 500)))))), 48)
     m = np.linspace(0, N, M + 1)
     Ygrid = np.linspace(np.min(Y), np.max(Y), 100)
 
@@ -140,7 +140,7 @@ def sobol_first(Y, X, m):
     for j in range(len(m) - 1):
         ix = np.where((xr > m[j]) & (xr <= m[j + 1]))[0]
         nm = len(ix)
-        Vi += (nm / N) * (Y[ix].mean() - Y_mean)**2
+        Vi += (nm / N) * ((Y[ix].mean() - Y_mean)**2)
     return Vi / np.var(Y)
 
 
