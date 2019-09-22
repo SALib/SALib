@@ -39,40 +39,45 @@ def analyze(problem: Dict, Y: np.array, sample_sets: int,
     --------
     Si : dict
     """
-    p = problem['num_vars']
+    num_vars = problem['num_vars']
 
-    assert (Y.shape[0] / sample_sets) == p+1, \
+    assert (Y.shape[0] / sample_sets) == num_vars + 1, \
         "Number of result set groups must match number of parameters + 1"
 
     if seed:
         np.random.set_seed(seed)
 
-    st = np.empty((p, sample_sets))
+    st = np.empty((num_vars, sample_sets))
 
     # Each `n`th item from 0-position is the baseline for
     # that N group.
-    nth = p+1
+    nth = num_vars + 1
     Y_base = Y[0::nth]
+
+    base_variance = np.var(Y_base)
     r = sample_sets
-    for i in range(p):
+    for i in range(num_vars):
         pos = i + 1
 
         # Collect change for every `n`th element
         st[i] = Y_base - Y[pos::nth]
     # End for
 
-    Si = ResultDict((k, [None] * p)
+    Si = ResultDict((k, [None] * num_vars)
                     for k in ['names', 'ST', 'ST_conf'])
 
-    Si['ST'] = ((1.0/(2.0*r)) * np.sum((st**2), axis=1))
-    Si['ST_conf'] = compute_radial_si_confidence(st, r, num_resamples,
+    jansen_estim = jansen_estimator(r, st.T)
+    Si['ST'] = (jansen_estim / base_variance)
+    Si['ST_conf'] = compute_radial_si_confidence(st, base_variance, r, num_resamples,
                                                  conf_level)
     Si['names'] = problem['names']
 
     return Si
 
 
-def compute_radial_si_confidence(si: np.array, N: int, num_resamples: int,
+def compute_radial_si_confidence(si: np.array, base_var: np.array, 
+                                 N: int, 
+                                 num_resamples: int,
                                  conf_level: float = 0.95) -> np.array:
     '''Uses bootstrapping where the elementary effects are resampled with
     replacement to produce a histogram of resampled mu_star metrics.
@@ -107,6 +112,18 @@ def compute_radial_si_confidence(si: np.array, N: int, num_resamples: int,
     resample_index = np.random.randint(tmp_si.shape[0], size=(num_resamples, N))
 
     si_resampled = tmp_si[resample_index]
-    res = np.var(si_resampled, axis=0) - ((1.0/(2.0*N)) * np.sum((si_resampled**2), axis=0))
+    res = (jansen_estimator(N, si_resampled) / base_var)
 
     return norm.ppf(0.5 + conf_level / 2.0) * res.std(ddof=1, axis=0)
+
+
+def jansen_estimator(N: int, si: np.array):
+    """
+    Arguments
+    ---------
+    N : int
+        Number of sample sets (repetitions)
+    si : np.array
+        1D array
+    """
+    return (1.0/(2.0*N)) * np.sum((si**2), axis=0)

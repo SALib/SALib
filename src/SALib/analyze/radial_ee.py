@@ -44,23 +44,24 @@ def analyze(problem: Dict, X: np.array, Y: np.array, sample_sets: int,
     """
     num_vars = problem['num_vars']
 
+    # Each `n`th item from 0-position is the baseline for
+    # that N group.
+    nth = num_vars + 1
+
     assert X.shape[0] == Y.shape[0], \
         "X and Y must be of corresponding size (number of X values must match number of Y values)"
 
-    assert (X.shape[0] / sample_sets) == p+1, \
+    assert (X.shape[0] / sample_sets) == nth, \
         "Number of parameter set groups must match number of parameters + 1"
 
-    assert (Y.shape[0] / sample_sets) == p+1, \
+    assert (Y.shape[0] / sample_sets) == nth, \
         "Number of result set groups must match number of parameters + 1"
 
     if seed:
         np.random.set_seed(seed)
 
-    ee = np.empty((num_vars, sample_sets))
-
-    # Each `n`th item from 0-position is the baseline for
-    # that N group.
-    nth = num_vars + 1
+    ee = np.empty((sample_sets, num_vars))
+    
     X_base = X[0::nth]
     Y_base = Y[0::nth]
     for i in range(num_vars):
@@ -68,19 +69,19 @@ def analyze(problem: Dict, X: np.array, Y: np.array, sample_sets: int,
 
         # Collect every `n`th element
         # which is the perturbation point
-        x_tmp = (X[pos::nth] - X_base)
-        ee[i] = (Y[pos::nth] - Y_base) / x_tmp[x_tmp != 0.0]
+        x_tmp = (X_base[:, i] - X[pos::nth, i])
+        ee[:, i] = (Y_base - Y[pos::nth]) / x_tmp
     # End for
 
     Si = ResultDict((k, [None] * num_vars)
                     for k in ['names', 'mu', 'mu_star', 'sigma'])
 
-    Si['mu'] = np.average(ee, axis=1)
-    Si['mu_star'] = np.average(np.abs(ee), axis=1)
+    Si['mu'] = np.average(ee, axis=0)
+    Si['mu_star'] = np.average(np.abs(ee), axis=0)
 
     Si['mu_star_conf'] = compute_radial_ee_confidence(ee, sample_sets, num_resamples, conf_level)
 
-    Si['sigma'] = np.std(ee, ddof=1, axis=1)
+    Si['sigma'] = np.std(ee, ddof=1, axis=0)
 
     Si['names'] = problem['names']
 
@@ -116,7 +117,7 @@ def compute_radial_ee_confidence(ee: np.array, N: int, num_resamples: int,
     conf : np.array
         Confidence bounds for mu_star for each parameter
     '''
-    tmp_ee = ee.T
+    tmp_ee = ee
     if not 0 < conf_level < 1:
         raise ValueError("Confidence level must be between 0-1.")
 
