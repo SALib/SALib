@@ -1,15 +1,17 @@
 
 import numpy as np
-from . import sobol_sequence
+from .. import sobol_sequence
 from SALib.util import scale_samples
 from typing import Dict, Optional
+
+from .radial_funcs import combine_samples
 
 __all__ = ['sample']
 
 
 def sample(problem: Dict, N: int, 
            seed: Optional[int] = None):
-    """Generates `N` samples for a radial OAT approach.
+    """Generates `N` monte carlo samples for a radial OAT approach.
 
     Campolongo, F., Saltelli, A., Cariboni, J., 2011. 
     From screening to quantitative sensitivity analysis: A unified approach. 
@@ -59,32 +61,18 @@ def sample(problem: Dict, N: int,
     num_vars = problem['num_vars']
     bounds = problem['bounds']
 
-    # Generate the "nominal" values and their perturbations.
-    # "We obtain good results by systematically discarding four points (R = r + 4)" 
-    # (Campolongo et al. 2011, p 5)
-    # in this context, `N := r`
-    discard = 4
-    R = N + discard
-
     # Generate the 'nominal' parameter positions
     # Total number of parameter sets = N*(p+1)
-    base_sequence = sobol_sequence.sample(R, num_vars)
-    subsetted_base = base_sequence[discard:]
-    scale_samples(subsetted_base, bounds)
+    sequence = np.random.uniform(-1.0, 1.0000001, size=(N, num_vars*2))
 
-    group = num_vars+1
-    sample_set = np.repeat(subsetted_base, repeats=group, axis=0)
+    # Use first N cols as baseline points
+    baseline = sequence[:, :num_vars]
+    scale_samples(baseline, bounds)
 
-    perturbations = sobol_sequence.sample(R+N, num_vars)
-    perturbations = perturbations[R:]
-    scale_samples(perturbations, bounds)
+    # Use next N cols as perturbation points
+    perturb = sequence[:, num_vars:]
+    scale_samples(perturb, bounds)
 
-    grp_start = 0
-    for i in range(perturbations.shape[0]):
-        mod = np.diag(perturbations[i])
-
-        np.copyto(sample_set[grp_start+1:grp_start+num_vars+1], mod, where=mod != 0.0)
-        grp_start += num_vars + 1
-    # End for
+    sample_set = combine_samples(baseline, perturb)
 
     return sample_set
