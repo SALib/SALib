@@ -27,7 +27,7 @@ salib=SALib.scripts.salib:main
 def setup_package():
     needs_sphinx = {'build_sphinx', 'upload_docs'}.intersection(sys.argv)
     sphinx = ['sphinx'] if needs_sphinx else []
-    setup(setup_requires=['pyscaffold>=3.3,<4'] + sphinx,
+    setup(setup_requires=['pyscaffold>=3.2,<4'] + sphinx,
           entry_points=entry_points,
           scripts=scripts,
           use_pyscaffold=True)
