@@ -34,9 +34,9 @@ m_result = m_analyze(problem, m_X, m_Y, num_resamples=1000)
 r_result = ree_analyze(problem, r_X, r_Y, sample_sets, num_resamples=1000)
 rmc_result = ree_analyze(problem, rmc_X, rmc_Y, 50000, num_resamples=1000)
 
-rst_X = r_sample(problem, 500)
+rst_X = r_sample(problem, 1000)
 rst_Y = Ishigami.evaluate(rst_X)
-rst_result = rst_analyze(problem, rst_Y, 500, num_resamples=100)
+rst_result = rst_analyze(problem, rst_Y, 1000, num_resamples=100)
 
 l_X = s_sample(problem, 1000)
 l_Y = Ishigami.evaluate(l_X)
