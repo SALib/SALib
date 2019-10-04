@@ -40,11 +40,12 @@ def scale_samples(params, bounds):
 
     Arguments
     ---------
-    bounds : list
-        list of lists of dimensions `num_params`-by-2
     params : numpy.ndarray
         numpy array of dimensions `num_params`-by-:math:`N`,
         where :math:`N` is the number of samples
+
+    bounds : list
+        list of lists of dimensions `num_params`-by-2
     '''
     # Check bounds are legal (upper bound is greater than lower bound)
     b = np.array(bounds)
@@ -115,7 +116,7 @@ def nonuniform_scale_samples(params, bounds, dists):
     b = np.array(bounds)
 
     # initializing matrix for converted values
-    conv_params = np.zeros_like(params)
+    conv_params = np.empty_like(params)
 
     # loop over the parameters
     for i in range(conv_params.shape[1]):
