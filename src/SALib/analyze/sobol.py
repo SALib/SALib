@@ -23,7 +23,7 @@ except ImportError:
 
 def analyze(problem, Y, calc_second_order=True, num_resamples=100,
             conf_level=0.95, print_to_console=False, parallel=False,
-            n_processors=None, seed=None):
+            n_processors=None, seed=None, ignore_nans=False):
     """Perform Sobol Analysis on model outputs.
 
     Returns a dictionary with keys 'S1', 'S1_conf', 'ST', and 'ST_conf', where
@@ -68,6 +68,14 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
     >>> Si = sobol.analyze(problem, Y, print_to_console=True)
 
     """
+    
+    # Check for nans in Y
+    if ignore_nans is False:
+        if np.any(np.isnan(Y)):
+            raise ValueError ('''Nan values are present in the model results.
+                              Either set ignore_nans flag to True, or check 
+                              your model results''')        
+        
     if seed:
         np.random.seed(seed)
     # determining if groups are defined and adjusting the number
@@ -90,7 +98,7 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
         raise RuntimeError("Confidence level must be between 0-1.")
 
     # normalize the model output
-    Y = (Y - Y.mean()) / Y.std()
+    Y = (Y - np.nanmean(Y)) / np.nanstd(Y)
 
     A, B, AB, BA = separate_output_values(Y, D, N, calc_second_order)
     r = np.random.randint(N, size=(N, num_resamples))
@@ -139,18 +147,18 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
 def first_order(A, AB, B):
     # First order estimator following Saltelli et al. 2010 CPC, normalized by
     # sample variance
-    return np.mean(B * (AB - A), axis=0) / np.var(np.r_[A, B], axis=0)
+    return np.nanmean(B * (AB - A), axis=0) / np.nanvar(np.r_[A, B], axis=0)
 
 
 def total_order(A, AB, B):
     # Total order estimator following Saltelli et al. 2010 CPC, normalized by
     # sample variance
-    return 0.5 * np.mean((A - AB) ** 2, axis=0) / np.var(np.r_[A, B], axis=0)
+    return 0.5 * np.nanmean((A - AB) ** 2, axis=0) / np.nanvar(np.r_[A, B], axis=0)
 
 
 def second_order(A, ABj, ABk, BAj, B):
     # Second order estimator following Saltelli 2002
-    Vjk = np.mean(BAj * ABk - A * B, axis=0) / np.var(np.r_[A, B], axis=0)
+    Vjk = np.nanmean(BAj * ABk - A * B, axis=0) / np.nanvar(np.r_[A, B], axis=0)
     Sj = first_order(A, ABj, B)
     Sk = first_order(A, ABk, B)
 

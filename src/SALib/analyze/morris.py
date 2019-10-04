@@ -70,6 +70,10 @@ def analyze(problem, X, Y,
     >>>                     print_to_console=True, num_levels=4)
 
     """
+    # Check for nans in Y
+    if np.any(np.isnan(Y)):
+        raise ValueError ('''Nan values are present in the model results''')
+        
     if seed:
         np.random.seed(seed)
 

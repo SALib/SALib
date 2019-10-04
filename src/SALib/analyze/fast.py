@@ -47,6 +47,10 @@ def analyze(problem, Y, M=4, print_to_console=False, seed=None):
     >>> Y = Ishigami.evaluate(X)
     >>> Si = fast.analyze(problem, Y, print_to_console=False)
     """
+    # Check for nans in Y
+    if np.any(np.isnan(Y)):
+        raise ValueError ('''Nan values are present in the model results''')
+        
     if seed:
         np.random.seed(seed)
 

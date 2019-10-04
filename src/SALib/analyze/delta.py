@@ -48,6 +48,10 @@ def analyze(problem, X, Y, num_resamples=10,
     >>> Y = Ishigami.evaluate(X)
     >>> Si = delta.analyze(problem, X, Y, print_to_console=True)
     """
+    # Check for nans in Y
+    if np.any(np.isnan(Y)):
+        raise ValueError ('''Nan values are present in the model results''')    
+        
     if seed:
         np.random.seed(seed)
 
@@ -60,7 +64,7 @@ def analyze(problem, X, Y, num_resamples=10,
     # equal frequency partition
     M = min(np.ceil(N ** (2 / (7 + np.tanh((1500 - N) / 500)))), 48)
     m = np.linspace(0, N, M + 1)
-    Ygrid = np.linspace(np.min(Y), np.max(Y), 100)
+    Ygrid = np.linspace(np.nanmin(Y), np.nanmax(Y), 100)
 
     keys = ('delta', 'delta_conf', 'S1', 'S1_conf')
     S = ResultDict((k, np.zeros(D)) for k in keys)
@@ -137,8 +141,8 @@ def sobol_first(Y, X, m):
     for j in range(len(m) - 1):
         ix = np.where((xr > m[j]) & (xr <= m[j + 1]))[0]
         nm = len(ix)
-        Vi += (nm / N) * (Y[ix].mean() - Y.mean()) ** 2
-    return Vi / np.var(Y)
+        Vi += (nm / N) * (np.nanmean(Y[ix]) - np.nanmean(Y)) ** 2
+    return Vi / np.nanvar(Y)
 
 
 def sobol_first_conf(Y, X, m, num_resamples, conf_level):

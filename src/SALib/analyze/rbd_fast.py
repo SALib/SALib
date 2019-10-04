@@ -60,6 +60,10 @@ def analyze(problem, X, Y, M=10, print_to_console=False, seed=None):
     >>> Y = Ishigami.evaluate(X)
     >>> Si = rbd_fast.analyze(problem, X, Y, print_to_console=False)
     """
+    # Check for nans in Y
+    if np.any(np.isnan(Y)):
+        raise ValueError ('''Nan values are present in the model results''')    
+        
     if seed:
         np.random.seed(seed)
 
@@ -101,8 +105,8 @@ def permute_outputs(X, Y):
 
 def compute_first_order(permuted_outputs, M):
     _, Pxx = periodogram(permuted_outputs)
-    V = np.sum(Pxx[1:])
-    D1 = np.sum(Pxx[1: M + 1])
+    V = np.nansum(Pxx[1:])
+    D1 = np.nansum(Pxx[1: M + 1])
     return D1 / V
 
 
