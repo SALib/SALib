@@ -11,13 +11,15 @@ __all__ = ['sample']
 
 def sample(problem: Dict, N: int, 
            seed: Optional[int] = None):
-    """Generates `N` monte carlo samples for a radial OAT approach.
+    """Generates `N` monte carlo samples for a Radial OAT approach.
 
-    Campolongo, F., Saltelli, A., Cariboni, J., 2011. 
-    From screening to quantitative sensitivity analysis: A unified approach. 
-    Computer Physics Communications 182, 978–988.
-    https://www.sciencedirect.com/science/article/pii/S0010465510005321
-    DOI: 10.1016/j.cpc.2010.12.039
+    References
+    ----------
+    .. [1] Campolongo, F., Saltelli, A., Cariboni, J., 2011. 
+           From screening to quantitative sensitivity analysis: A unified approach. 
+           Computer Physics Communications 182, 978–988.
+           https://www.sciencedirect.com/science/article/pii/S0010465510005321
+           DOI: 10.1016/j.cpc.2010.12.039
 
     Arguments
     ---------
@@ -45,8 +47,8 @@ def sample(problem: Dict, N: int,
     [x_{N,1}, b_{N,2}, ..., x_{N,p}]
     [x_{N,1}, x_{N,2}, ..., b_{N,p}]]
 
-    where `p` denotes the number of parameters as
-    specified in `problem`
+    where `p` denotes the number of parameters as specified in
+    `problem` and `N` is the number of samples.
 
     We can now run the model using the values in `X`. 
     The total number of model evaluations will be `N(p+1)`.

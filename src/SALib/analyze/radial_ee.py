@@ -96,7 +96,7 @@ def compute_radial_ee_confidence(ee: np.array, N: int, num_resamples: int,
     This resample is used to produce a confidence interval.
 
     Largely identical to `morris.compute_mu_star_confidence`.
-    Modified calculate conf for all parameters in one go
+    Modified to calculate confidence for all parameters in one go.
 
     Arguments
     ---------
@@ -117,12 +117,11 @@ def compute_radial_ee_confidence(ee: np.array, N: int, num_resamples: int,
     conf : np.array
         Confidence bounds for mu_star for each parameter
     '''
-    tmp_ee = ee
     if not 0 < conf_level < 1:
         raise ValueError("Confidence level must be between 0-1.")
 
-    resample_index = np.random.randint(tmp_ee.shape[0], size=(num_resamples, N))
-    ee_resampled = tmp_ee[resample_index]
+    resample_index = np.random.randint(ee.shape[0], size=(num_resamples, N))
+    ee_resampled = ee[resample_index]
 
     # Compute average of the absolute values over each of the resamples
     mu_star_resampled = np.average(np.abs(ee_resampled), axis=1)

@@ -9,6 +9,7 @@ def combine_samples(baseline, perturb):
     ---------
     baseline : np.array
         baseline sample for one of `N` samples
+
     perturb : np.array
         perturbation value for a parameter
 
@@ -27,8 +28,8 @@ def combine_samples(baseline, perturb):
     [x_{N,1}, b_{N,2}, ..., x_{N,p}]
     [x_{N,1}, x_{N,2}, ..., b_{N,p}]]
 
-    where `p` denotes the number of parameters as
-    specified in `problem`
+    where `p` denotes the number of parameters as specified in
+    `problem` and `N` is the number of samples.
 
     We can now run the model using the values in `X`. 
     The total number of model evaluations will be `N(p+1)`.
@@ -43,8 +44,6 @@ def combine_samples(baseline, perturb):
     nrows, num_vars = baseline.shape
     group = num_vars+1
     sample_set = np.repeat(baseline, repeats=group, axis=0)
-
-    import ipdb
 
     grp_start = 0
     for i in range(nrows):
