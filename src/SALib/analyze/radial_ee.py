@@ -13,7 +13,7 @@ def analyze(problem: Dict, X: np.array, Y: np.array, sample_sets: int,
     """Radial Elementary Effects Analysis.
 
     Calculates `mu`, `mu_star`, `sigma` and `mu_star_conf` as with
-    Morris OAT.
+    Morris OAT using results from `radial_sobol` sampler.
 
     Arguments
     ---------

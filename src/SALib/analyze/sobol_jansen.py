@@ -10,10 +10,31 @@ def analyze(problem: Dict, Y: np.array, sample_sets: int,
             num_resamples: int = 1000,
             conf_level: float = 0.95,
             seed: Optional[int] = None) -> Dict:
-    """Global Sensitivity Index for `radial` approach.
+    """Global Sensitivity Index for Radial OAT approach using the Jansen
+    Sensitivity Estimator.
 
-    Sample size must be of a compatible number, or else results
-    will not be sane.
+    Sample size must be of a sufficiently large number in order to obtain
+    reliable estimates. See references below for further detail.
+
+    References
+    ----------
+    .. [1] Campolongo, F., Saltelli, A., Cariboni, J., 2011. 
+           From screening to quantitative sensitivity analysis: A unified 
+           approach. Computer Physics Communications 182, 978–988.
+           https://www.sciencedirect.com/science/article/pii/S0010465510005321
+           DOI: 10.1016/j.cpc.2010.12.039
+
+    .. [2] M.J.W. Jansen, Analysis of variance designs for model output, 
+           Computer Physics Communication 117 (1999) 35–43.
+           https://www.sciencedirect.com/science/article/pii/S0010465598001544
+           DOI: 10.1016/S0010-4655(98)00154-4
+
+    .. [3] M.J.W. Jansen, W.A.H. Rossing, R.A. Daamen, Monte Carlo estimation 
+           of uncertainty contributions from several independent multivariate sources, 
+           in: J. Gasmanand, G. van Straten (Eds.), Predictability and Nonlinear 
+           Modelling in Natural Sciences and Economics, Kluwer Academic Publishers, 
+           Dordrecht, 1994, pp. 334–343
+           DOI: 10.1007/978-94-011-0962-8_28
 
     Arguments
     ---------
@@ -66,8 +87,7 @@ def analyze(problem: Dict, Y: np.array, sample_sets: int,
     Si = ResultDict((k, [None] * num_vars)
                     for k in ['names', 'ST', 'ST_conf'])
 
-    jansen_estim = jansen_estimator(r, st.T)
-    Si['ST'] = (jansen_estim / base_variance)
+    Si['ST'] = (jansen_estimator(r, st.T) / base_variance)
     Si['ST_conf'] = compute_radial_si_confidence(st, base_variance, r, num_resamples,
                                                  conf_level)
     Si['names'] = problem['names']

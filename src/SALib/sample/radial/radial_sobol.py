@@ -14,7 +14,9 @@ def sample(problem: Dict, N: int,
            seed: Optional[int] = None):
     """Generates `N` sobol samples for a Radial OAT approach based on sobol sequences.
 
-    Results can be analyzed using the `sobol_jansen` analysis method.
+    Results can be analyzed using 
+    * `sobol_jansen`
+    * `radial_ee`
 
     References
     ----------
