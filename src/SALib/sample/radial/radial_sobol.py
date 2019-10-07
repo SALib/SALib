@@ -10,14 +10,19 @@ __all__ = ['sample']
 
 
 def sample(problem: Dict, N: int, 
+           skip_num=0,
            seed: Optional[int] = None):
-    """Generates `N` sobol samples for a radial OAT approach.
+    """Generates `N` sobol samples for a Radial OAT approach based on sobol sequences.
 
-    Campolongo, F., Saltelli, A., Cariboni, J., 2011. 
-    From screening to quantitative sensitivity analysis: A unified approach. 
-    Computer Physics Communications 182, 978–988.
-    https://www.sciencedirect.com/science/article/pii/S0010465510005321
-    DOI: 10.1016/j.cpc.2010.12.039
+    Results can be analyzed using the `sobol_jansen` analysis method.
+
+    References
+    ----------
+    .. [1] Campolongo, F., Saltelli, A., Cariboni, J., 2011. 
+           From screening to quantitative sensitivity analysis: A unified approach. 
+           Computer Physics Communications 182, 978–988.
+           https://www.sciencedirect.com/science/article/pii/S0010465510005321
+           DOI: 10.1016/j.cpc.2010.12.039
 
     Arguments
     ---------
@@ -26,6 +31,11 @@ def sample(problem: Dict, N: int,
 
     N : int
         The number of sample sets to generate
+
+    skip_num : int
+        Number of sobol sequence values to skip
+        When conducting a sequential sensitivity analysis, this is the 
+        previous number of samples used
 
     seed : int
         Seed value to use for np.random.seed
@@ -71,7 +81,9 @@ def sample(problem: Dict, N: int,
     # and use the second half of the array (N:, num_vars:)
     # as the perturbation set.
 
-    sequence = sobol_sequence.sample(N*2, (num_vars*2))
+    skip_N = skip_num * 2
+    sequence = sobol_sequence.sample(skip_N+(N*2), (num_vars*2))
+    sequence = sequence[skip_N:, :]
 
     # Use first N rows and `num_vars` cols as baseline points
     # and next `num_vars` cols and N rows as perturbation points
