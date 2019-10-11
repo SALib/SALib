@@ -77,7 +77,7 @@ def evaluate(values, a=None, delta=None, alpha=None):
         integral = np.modf(shift_of_x)[1]
         mod_x = shift_of_x - integral
         temp_y = (np.abs(2 * mod_x - 1)**alpha)
-        y_elements = ((1 + alpha) * temp_y + a)  / (1 + a)
+        y_elements = ((1 + alpha) * temp_y + a) / (1 + a)
         Y[i] = np.prod(y_elements)
 
     return Y
@@ -104,12 +104,12 @@ def total_variance(a=None, alpha=None):
     return np.add(-1, np.product(1 + partial_first_order_variance(a, alpha), axis=0))
 
 
-def sensitivity_index(a, alpha):
+def sensitivity_index(a, alpha=None):
     a = np.array(a)
     return np.divide(partial_first_order_variance(a, alpha), total_variance(a, alpha))
 
 
-def total_sensitivity_index(a, alpha):
+def total_sensitivity_index(a, alpha=None):
     a = np.array(a)
     
     pv = partial_first_order_variance(a, alpha)
