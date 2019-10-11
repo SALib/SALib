@@ -23,24 +23,24 @@ def evaluate(values, a=None, delta=None, alpha=None):
 
     Parameters
     ----------
-    values : ndarray, input variables
-    a : np.array,
-    delta : np.array, of delta coefficients.
-    alpha : np.array, of alpha coefficients
+    values : ndarray
+        input variables
+    a : np.array
+        parameter values
+    delta : np.array
+        shift parameters
+    alpha : np.array
+        curvature parameters
 
     Returns
     -------
-    y : Scalar of G-function result.
+    Y : Result of G-function
     """
     if type(values) != np.ndarray:
         raise TypeError("The argument `values` must be a numpy ndarray")
-    if delta and not isinstance(delta, np.ndarray):
-        raise TypeError("The argument `delta` must be given as a numpy ndarray")
-    if alpha and not isinstance(alpha, np.ndarray):
-        raise TypeError("The argument `alpha` must be given as a numpy ndarray")
-
+  
     if a is None:
-        a = [0, 1, 4.5, 9, 99, 99, 99, 99]
+        a = np.array([0, 1, 4.5, 9, 99, 99, 99, 99])
 
     if delta is None:
         delta = np.zeros_like(a)
@@ -48,7 +48,7 @@ def evaluate(values, a=None, delta=None, alpha=None):
         if not isinstance(delta, np.ndarray):
             raise TypeError("The argument `delta` must be given as a numpy ndarray")
 
-        delta_inbetween = (delta < 0) or (delta > 1)
+        delta_inbetween = delta[(delta < 0) | (delta > 1)]
         if delta_inbetween.any():
             raise ValueError("Sobol G function called with delta values less than zero or greater than one")
 
@@ -62,7 +62,6 @@ def evaluate(values, a=None, delta=None, alpha=None):
         if alpha_gto.any():
             raise ValueError("Sobol G function called with alpha values less than or equal to zero")
 
-
     ltz = values < 0
     gto = values > 1
 
@@ -73,47 +72,48 @@ def evaluate(values, a=None, delta=None, alpha=None):
 
     Y = np.ones([values.shape[0]])
 
-    len_a = len(a)
     for i, row in enumerate(values):
-        for j in range(len_a):
-            x = row[j]
-            a_j = a[j]
-            alpha_j = alpha[j]
-
-            shift_of_x = x + delta[j]
-            integral = np.modf(shift_of_x)[1]
-            mod_x = shift_of_x - integral
-            
-            temp_y = (np.abs(2 * mod_x - 1)**alpha_j)
-            Y[i] *= ((1 + alpha_j) * temp_y + a_j)  / (1 + a_j)
+        shift_of_x = row + delta
+        integral = np.modf(shift_of_x)[1]
+        mod_x = shift_of_x - integral
+        temp_y = (np.abs(2 * mod_x - 1)**alpha)
+        y_elements = ((1 + alpha) * temp_y + a)  / (1 + a)
+        Y[i] = np.prod(y_elements)
 
     return Y
 
 
-def partial_first_order_variance(a=None):
+
+def partial_first_order_variance(a=None, alpha=None):
     if a is None:
         a = [0, 1, 4.5, 9, 99, 99, 99, 99]
-    a = np.array(a)
-    return np.divide(1, np.multiply(3, np.square(1 + a)))
-
-
-def total_variance(a=None):
-    if a is None:
-        a = [0, 1, 4.5, 9, 99, 99, 99, 99]
-    a = np.array(a)
-    return np.add(-1, np.product(1 + partial_first_order_variance(a), axis=0))
-
-
-def sensitivity_index(a):
-    a = np.array(a)
-    return np.divide(partial_first_order_variance(a), total_variance(a))
-
-
-def total_sensitivity_index(a):
+    if alpha is None:
+        alpha = np.ones_like(a)
     a = np.array(a)
     
-    pv = partial_first_order_variance(a)
-    tv = total_variance(a)
+    return np.divide((alpha**2), np.multiply((1 + 2 * alpha), np.square(1 + a)))
+
+
+def total_variance(a=None, alpha=None):
+    if a is None:
+        a = [0, 1, 4.5, 9, 99, 99, 99, 99]
+    if alpha is None:
+        alpha = np.ones_like(a)
+
+    a = np.array(a)
+    return np.add(-1, np.product(1 + partial_first_order_variance(a, alpha), axis=0))
+
+
+def sensitivity_index(a, alpha):
+    a = np.array(a)
+    return np.divide(partial_first_order_variance(a, alpha), total_variance(a, alpha))
+
+
+def total_sensitivity_index(a, alpha):
+    a = np.array(a)
+    
+    pv = partial_first_order_variance(a, alpha)
+    tv = total_variance(a, alpha)
     
     sum_pv = pv.sum(axis=0)
     
