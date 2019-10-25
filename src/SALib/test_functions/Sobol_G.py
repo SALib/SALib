@@ -23,13 +23,13 @@ def evaluate(values, a=None, delta=None, alpha=None):
 
     Parameters
     ----------
-    values : ndarray
+    values : numpy.ndarray
         input variables
-    a : np.array
+    a : numpy.ndarray
         parameter values
-    delta : np.array
+    delta : numpy.ndarray
         shift parameters
-    alpha : np.array
+    alpha : numpy.ndarray
         curvature parameters
 
     Returns
@@ -84,7 +84,7 @@ def evaluate(values, a=None, delta=None, alpha=None):
 
 
 
-def partial_first_order_variance(a=None, alpha=None):
+def _partial_first_order_variance(a=None, alpha=None):
     if a is None:
         a = [0, 1, 4.5, 9, 99, 99, 99, 99]
     if alpha is None:
@@ -94,26 +94,26 @@ def partial_first_order_variance(a=None, alpha=None):
     return np.divide((alpha**2), np.multiply((1 + 2 * alpha), np.square(1 + a)))
 
 
-def total_variance(a=None, alpha=None):
+def _total_variance(a=None, alpha=None):
     if a is None:
         a = [0, 1, 4.5, 9, 99, 99, 99, 99]
     if alpha is None:
         alpha = np.ones_like(a)
 
     a = np.array(a)
-    return np.add(-1, np.product(1 + partial_first_order_variance(a, alpha), axis=0))
+    return np.add(-1, np.product(1 + _partial_first_order_variance(a, alpha), axis=0))
 
 
 def sensitivity_index(a, alpha=None):
     a = np.array(a)
-    return np.divide(partial_first_order_variance(a, alpha), total_variance(a, alpha))
+    return np.divide(_partial_first_order_variance(a, alpha), _total_variance(a, alpha))
 
 
 def total_sensitivity_index(a, alpha=None):
     a = np.array(a)
     
-    pv = partial_first_order_variance(a, alpha)
-    tv = total_variance(a, alpha)
+    pv = _partial_first_order_variance(a, alpha)
+    tv = _total_variance(a, alpha)
     
     sum_pv = pv.sum(axis=0)
     
