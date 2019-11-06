@@ -24,15 +24,14 @@ def sample(problem, N, seed=None):
         np.random.seed(seed)
     D = problem['num_vars']
 
-    result = np.zeros([N, D])
-    temp = np.zeros([N])
+    result = np.empty([N, D])
+    temp = np.empty([N])
     d = 1.0 / N
 
     for i in range(D):
-
         for j in range(N):
-            temp[j] = np.random.uniform(
-                low=j * d, high=(j + 1) * d, size=1)[0]
+            temp[j] = np.random.uniform(low=j * d, 
+                                        high=(j + 1) * d)
 
         np.random.shuffle(temp)
 
@@ -43,20 +42,8 @@ def sample(problem, N, seed=None):
     return result
 
 
-def cli_parse(parser):
-    """Add method specific options to CLI parser.
-
-    Parameters
-    ----------
-    parser : argparse object
-
-    Returns
-    ----------
-    Updated argparse object
-    """
-    parser.add_argument('-n', '--samples', type=int, required=True,
-                        help='Number of Samples')
-    return parser
+# No additional CLI options
+cli_parse = None
 
 
 def cli_action(args):
@@ -73,4 +60,5 @@ def cli_action(args):
 
 
 if __name__ == "__main__":
+    cli_parse = None  # No additional options
     common_args.run_cli(cli_parse, cli_action)

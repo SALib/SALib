@@ -113,23 +113,8 @@ def sample(problem, seed=None):
     return sample
 
 
-def cli_parse(parser):
-    """Add method specific options to CLI parser.
-
-    Parameters
-    ----------
-    parser : argparse object
-
-    Returns
-    ----------
-    Updated argparse object
-    """
-    parser.add_argument('-n', '--samples', type=int, required=True,
-                        help='Number of Samples')
-
-    parser.add_argument('-M', type=int, required=False, default=4,
-                        help='M coefficient, default 4')
-    return parser
+# No additional CLI options
+cli_parse = None
 
 
 def cli_action(args):

@@ -150,9 +150,10 @@ def test_group_sample_fails_with_wrong_G_matrix():
     problem = {'bounds': [[0., 1.], [0., 1.], [0., 1.], [0., 1.]],
                'num_vars': 4,
                'groups': list([1, 2, 3])}
-    with raises(ValueError) as err:
-        sample(problem, N, num_levels)
 
+    with raises(ValueError):
+        sample(problem, N, num_levels)
+        
     assert "Groups do not match to number of variables" in str(err.value)
 
 

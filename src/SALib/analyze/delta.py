@@ -58,7 +58,8 @@ def analyze(problem, X, Y, num_resamples=10,
         raise RuntimeError("Confidence level must be between 0-1.")
 
     # equal frequency partition
-    M = min(np.ceil(N ** (2 / (7 + np.tanh((1500 - N) / 500)))), 48)
+    exp = (2 / (7 + np.tanh((1500 - N) / 500)))
+    M = min(int(np.ceil(N**exp)), 48)
     m = np.linspace(0, N, M + 1)
     Ygrid = np.linspace(np.min(Y), np.max(Y), 100)
 
@@ -71,13 +72,14 @@ def analyze(problem, X, Y, num_resamples=10,
 
     try:
         for i in range(D):
+            X_i = X[:, i]
             S['delta'][i], S['delta_conf'][i] = bias_reduced_delta(
-                Y, Ygrid, X[:, i], m, num_resamples, conf_level)
-            S['S1'][i] = sobol_first(Y, X[:, i], m)
+                Y, Ygrid, X_i, m, num_resamples, conf_level)
+            S['S1'][i] = sobol_first(Y, X_i, m)
             S['S1_conf'][i] = sobol_first_conf(
-                Y, X[:, i], m, num_resamples, conf_level)
+                Y, X_i, m, num_resamples, conf_level)
             if print_to_console:
-                print("%s %f %f %f %f" % (problem['names'][i], S['delta'][
+                print("%s %f %f %f %f" % (S['names'][i], S['delta'][
                     i], S['delta_conf'][i], S['S1'][i], S['S1_conf'][i]))
     except np.linalg.LinAlgError as e:
         msg = "Singular matrix detected\n"
@@ -114,17 +116,17 @@ def calc_delta(Y, Ygrid, X, m):
 
     return d_hat
 
-# Plischke et al. 2013 bias reduction technique (eqn 30)
-
 
 def bias_reduced_delta(Y, Ygrid, X, m, num_resamples, conf_level):
+    """Plischke et al. 2013 bias reduction technique (eqn 30)"""
     d = np.zeros(num_resamples)
     d_hat = calc_delta(Y, Ygrid, X, m)
 
     N = len(Y)
+    r = np.random.randint(N, size=(num_resamples, N))
     for i in range(num_resamples):
-        r = np.random.randint(N, size=N)
-        d[i] = calc_delta(Y[r], Ygrid, X[r], m)
+        r_i = r[i, :]
+        d[i] = calc_delta(Y[r_i], Ygrid, X[r_i], m)
 
     d = 2 * d_hat - d
     return (d.mean(), norm.ppf(0.5 + conf_level / 2) * d.std(ddof=1))
@@ -134,10 +136,11 @@ def sobol_first(Y, X, m):
     xr = rankdata(X, method='ordinal')
     Vi = 0
     N = len(Y)
+    Y_mean = Y.mean()
     for j in range(len(m) - 1):
         ix = np.where((xr > m[j]) & (xr <= m[j + 1]))[0]
         nm = len(ix)
-        Vi += (nm / N) * (Y[ix].mean() - Y.mean()) ** 2
+        Vi += (nm / N) * ((Y[ix].mean() - Y_mean)**2)
     return Vi / np.var(Y)
 
 
@@ -145,16 +148,17 @@ def sobol_first_conf(Y, X, m, num_resamples, conf_level):
     s = np.zeros(num_resamples)
 
     N = len(Y)
+    r = np.random.randint(N, size=(num_resamples, N))
     for i in range(num_resamples):
-        r = np.random.randint(N, size=N)
-        s[i] = sobol_first(Y[r], X[r], m)
+        r_i = r[i, :]
+        s[i] = sobol_first(Y[r_i], X[r_i], m)
 
     return norm.ppf(0.5 + conf_level / 2) * s.std(ddof=1)
 
 
 def cli_parse(parser):
-    parser.add_argument('-X', '--model-input-file', type=str,
-                        required=True, default=None,
+    parser.add_argument('-X', '--model-input-file', type=str, required=True,
+                        default=None,
                         help='Model input file')
     parser.add_argument('-r', '--resamples', type=int, required=False,
                         default=10,
