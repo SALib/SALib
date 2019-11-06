@@ -263,7 +263,6 @@ def generate_x_star(num_params, num_levels):
     -------
     numpy.ndarray
         The initial starting positions of the trajectory
-
     """
     x_star = np.zeros((1, num_params))
     delta = compute_delta(num_levels)
