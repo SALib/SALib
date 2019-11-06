@@ -201,7 +201,7 @@ def read_param_file(filename, delimiter=None):
     num_vars = 0
     fieldnames = ['name', 'lower_bound', 'upper_bound', 'group', 'dist']
 
-    with open(filename, 'rU') as csvfile:
+    with open(filename, 'r') as csvfile:
         dialect = csv.Sniffer().sniff(csvfile.read(1024), delimiters=delimiter)
         csvfile.seek(0)
         reader = csv.DictReader(
