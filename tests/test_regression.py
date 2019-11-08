@@ -5,6 +5,7 @@ from numpy.testing import assert_allclose
 from SALib.analyze import delta
 from SALib.analyze import dgsm
 from SALib.analyze import fast
+from SALib.analyze import hdmr
 from SALib.analyze import rbd_fast
 from SALib.analyze import sobol
 from SALib.sample import fast_sampler
@@ -229,6 +230,16 @@ def test_regression_fast():
     Si = fast.analyze(problem, Y, print_to_console=False)
     assert_allclose(Si['S1'], [0.31, 0.44, 0.00], atol=5e-2, rtol=1e-1)
     assert_allclose(Si['ST'], [0.55, 0.44, 0.24], atol=5e-2, rtol=1e-1)
+
+def test_regression_hdmr():
+    param_file = 'src/SALib/test_functions/params/Ishigami.txt'
+    problem = read_param_file(param_file)
+    X = latin.sample(problem, 10000)
+    Y = Ishigami.evaluate(X)
+    options = {'graphics': 0,'maxorder': 2,'maxiter': 100,'m': 4,'K': 1,'R': 10000,'alfa': 0.95,'lambdax': 0.01,'print_to_console': 0} 
+    Si = hdmr.analyze(problem, X, Y, options)
+    assert_allclose(Si['Sa'][0:problem['num_vars']], [0.31, 0.44, 0.00], atol=5e-2, rtol=1e-1)
+    assert_allclose(Si['ST'][0:problem['num_vars']], [0.55, 0.44, 0.24], atol=5e-2, rtol=1e-1)
 
 
 def test_regression_rbd_fast():
