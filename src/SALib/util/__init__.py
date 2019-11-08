@@ -116,7 +116,7 @@ def nonuniform_scale_samples(params, bounds, dists):
     b = np.array(bounds)
 
     # initializing matrix for converted values
-    conv_params = np.zeros_like(params)
+    conv_params = np.empty_like(params)
 
     # loop over the parameters
     for i in range(conv_params.shape[1]):
@@ -201,7 +201,7 @@ def read_param_file(filename, delimiter=None):
     num_vars = 0
     fieldnames = ['name', 'lower_bound', 'upper_bound', 'group', 'dist']
 
-    with open(filename, 'rU') as csvfile:
+    with open(filename, 'r') as csvfile:
         dialect = csv.Sniffer().sniff(csvfile.read(1024), delimiters=delimiter)
         csvfile.seek(0)
         reader = csv.DictReader(

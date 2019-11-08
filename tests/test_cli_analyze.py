@@ -133,7 +133,7 @@ def test_morris():
     result = subprocess.check_output(analyze_cmd, universal_newlines=True)
     result = re.sub(r'[\n\t\s]*', '', result)
 
-    expected_output = """ParameterMu_StarMuMu_Star_ConfSigmax13.3753.3750.5903.003x21.4740.1180.0001.477x32.6980.4200.5954.020"""
+    expected_output = """ParameterMu_StarMuMu_Star_ConfSigmax17.4997.4991.8019.330x22.215-0.4700.3482.776x35.4240.8641.1487.862"""
 
     assert len(result) > 0 and result == expected_output, \
         "Results did not match expected values:\n\n Expected: \n{} \n\n Got: \n{}".format(
@@ -159,7 +159,7 @@ def test_rbd_fast():
     result = subprocess.check_output(analyze_cmd, universal_newlines=True)
     result = re.sub(r'[\n\t\s]*', '', result)
 
-    expected = "ParameterFirstx10.437313x20.129825x30.000573789"
+    expected = "ParameterFirstx10.39223x20.299578x30.0342307"
 
     assert len(result) > 0 and result == expected, \
         "Unexpected RBD-FAST results.\n\nExpected:\n{}\n\nGot:{}"\
