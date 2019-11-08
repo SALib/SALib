@@ -317,6 +317,6 @@ def test_regression_delta_svm():
 
     test_res = delta.bias_reduced_delta(Y, Ygrid, X, m, num_resamples, conf_level)
 
-    assert np.all(np.isclose(test_res, 
-        (0.6335098491949687, 0.026640611898969522))
-    ), "Unexpected result, got {}".format(test_res)
+    np.testing.assert_allclose(test_res, 
+        (0.6335098491949687, 0.026640611898969522), 
+        atol=0.005)
