@@ -50,13 +50,13 @@ except FileNotFoundError:
 
 try:
     import sphinx
-    from distutils.version import LooseVersion
+    from pkg_resources import parse_version
 
     cmd_line_template = "sphinx-apidoc -f -o {outputdir} {moduledir}"
     cmd_line = cmd_line_template.format(outputdir=output_dir, moduledir=module_dir)
 
     args = cmd_line.split(" ")
-    if LooseVersion(sphinx.__version__) >= LooseVersion('1.7'):
+    if parse_version(sphinx.__version__) >= parse_version('1.7'):
         args = args[1:]
 
     apidoc.main(args)
@@ -72,7 +72,7 @@ except Exception as e:
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.intersphinx', 'sphinx.ext.todo',
               'sphinx.ext.autosummary', 'sphinx.ext.viewcode', 'sphinx.ext.coverage',
-              'sphinx.ext.doctest', 'sphinx.ext.ifconfig', 'sphinx.ext.imgmath',
+              'sphinx.ext.doctest', 'sphinx.ext.ifconfig', 'sphinx.ext.mathjax',
               'sphinx.ext.napoleon']
 
 # Add any paths that contain templates here, relative to this directory.
@@ -89,7 +89,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'SALib'
-copyright = u'2017-2019, Jon Herman, Will Usher and others'
+copyright = u'2019, Jon Herman, Will Usher and others'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -147,7 +147,10 @@ html_theme = 'alabaster'
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-# html_theme_options = {}
+html_theme_options = {
+    'sidebar_width': '300px',
+    'page_width': '1200px'
+}
 
 # Add any paths that contain custom themes here, relative to this directory.
 # html_theme_path = []
@@ -220,7 +223,7 @@ html_static_path = ['_static']
 # html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'SALib-doc'
+htmlhelp_basename = 'salib-doc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -240,7 +243,7 @@ latex_elements = {
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
   ('index', 'user_guide.tex', u'SALib Documentation',
-   u'2017, Jon Herman, Will Usher and others', 'manual'),
+   u'Jon Herman, Will Usher and others', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
