@@ -97,8 +97,7 @@ def compute_radial_ee_confidence(ee: np.array, N: int, num_resamples: int,
     replacement to produce a histogram of resampled mu_star metrics.
     This resample is used to produce a confidence interval.
 
-    Largely identical to `morris.compute_mu_star_confidence`.
-    Modified to calculate confidence for all parameters in one go.
+    Based on, and largely identical to, `morris.compute_mu_star_confidence`.
 
     Arguments
     ---------

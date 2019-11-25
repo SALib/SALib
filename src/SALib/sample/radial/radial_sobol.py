@@ -104,8 +104,11 @@ def sample(problem: Dict, N: int,
     return sample_set
 
 
-# No additional CLI options
-cli_parse = None
+def cli_parse(parser):
+    parser.add_argument('-k', '--skip_num', type=int, required=False,
+                        default=0,
+                        help='Number of Sobol values to skip (default 0)')
+    return parser
 
 
 def cli_action(args):
@@ -117,16 +120,7 @@ def cli_action(args):
     """
     problem = read_param_file(args.paramfile)
 
-    problem: Dict, N: int, 
-           skip_num=0,
-           seed: Optional[int] = None):
-
-    try:
-        skip_num = args.skip_num
-    except AttributeError:
-        skip_num = 0
-
-    param_values = sample(problem, args.samples, skip_num=skip_num, 
+    param_values = sample(problem, args.samples, skip_num=args.skip_num, 
                           seed=args.seed)
     np.savetxt(args.output, param_values, delimiter=args.delimiter,
                fmt='%.' + str(args.precision) + 'e')
