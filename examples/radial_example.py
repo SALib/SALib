@@ -6,7 +6,6 @@ from SALib.sample.saltelli import sample as s_sample
 from SALib.analyze.sobol import analyze as s_analyze
 from SALib.analyze.morris import analyze as m_analyze
 from SALib.analyze.radial_ee import analyze as ree_analyze
-from SALib.analyze.radial_st import analyze as rst_analyze
 
 from SALib.test_functions import Ishigami
 
@@ -34,10 +33,6 @@ m_result = m_analyze(problem, m_X, m_Y, num_resamples=1000)
 r_result = ree_analyze(problem, r_X, r_Y, sample_sets, num_resamples=1000)
 rmc_result = ree_analyze(problem, rmc_X, rmc_Y, 50000, num_resamples=1000)
 
-rst_X = r_sample(problem, 1000)
-rst_Y = Ishigami.evaluate(rst_X)
-rst_result = rst_analyze(problem, rst_Y, 1000, num_resamples=100)
-
 l_X = s_sample(problem, 1000)
 l_Y = Ishigami.evaluate(l_X)
 s_result = s_analyze(problem, l_Y, calc_second_order=True, conf_level=0.95, print_to_console=False)
@@ -49,9 +44,6 @@ print(rmc_result.to_df())
 
 print("Morris results")
 print(m_result.to_df())
-
-print("Radial ST results")
-print(rst_result.to_df())
 
 print("Sobol/Saltelli result")
 print(s_result.to_df()[0])
