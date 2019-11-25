@@ -4,7 +4,7 @@ import numpy as np
 
 from SALib.util import scale_samples, read_param_file
 from .. import sobol_sequence
-from . import common_args
+from SALib.sample import common_args
 from .radial_funcs import combine_samples
 
 
