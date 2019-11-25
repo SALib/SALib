@@ -1,8 +1,10 @@
+from typing import Dict, Optional
 import numpy as np
 from scipy.stats import norm
-from typing import Dict, Optional
 
+from . import common_args
 from ..util import ResultDict
+
 
 __all__ = ['analyze']
 
@@ -127,3 +129,32 @@ def compute_radial_ee_confidence(ee: np.array, N: int, num_resamples: int,
     mu_star_resampled = np.average(np.abs(ee_resampled), axis=1)
 
     return norm.ppf(0.5 + conf_level / 2.0) * mu_star_resampled.std(ddof=1, axis=0)
+
+
+def cli_parse(parser):
+    parser.add_argument('-X', '--model-input-file', type=str, required=True,
+                        default=None,
+                        help='Model input file')
+    parser.add_argument('-r', '--resamples', type=int, required=False,
+                        default=10,
+                        help='Number of bootstrap resamples for \
+                              confidence intervals')
+    return parser
+
+
+def cli_action(args):
+    problem = read_param_file(args.paramfile)
+
+    X = np.loadtxt(args.model_input_file,
+                   delimiter=args.delimiter)
+
+    Y = np.loadtxt(args.model_output_file, delimiter=args.delimiter,
+                   usecols=(args.column,))
+
+    analyze(problem, X, Y, args.samples,
+            num_resamples=args.resamples, conf_level=args.conf_level,
+            seed=args.seed)
+
+
+if __name__ == '__main__':
+    common_args.run_cli(cli_parse, cli_action)

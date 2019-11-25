@@ -1,7 +1,7 @@
 
 import numpy as np
 from .. import sobol_sequence
-from SALib.util import scale_samples
+from SALib.util import scale_samples, read_param_file
 from typing import Dict, Optional
 
 from .radial_funcs import combine_samples
@@ -78,3 +78,24 @@ def sample(problem: Dict, N: int,
     sample_set = combine_samples(baseline, perturb)
 
     return sample_set
+
+
+# No additional CLI options
+cli_parse = None
+
+
+def cli_action(args):
+    """Run sampling method
+
+    Parameters
+    ----------
+    args : argparse namespace
+    """
+    problem = read_param_file(args.paramfile)
+
+    param_values = sample(problem, args.samples, seed=args.seed)
+    np.savetxt(args.output, param_values, delimiter=args.delimiter,
+               fmt='%.' + str(args.precision) + 'e')
+
+if __name__ == '__main__':
+    common_args.run_cli(cli_parse, cli_action)

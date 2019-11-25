@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def combine_samples(baseline, perturb):
     """Combine baseline and perturbation samples in order.
 
