@@ -17,6 +17,8 @@ import numpy as np
 from SALib.analyze import morris
 from SALib.sample.morris import sample
 from SALib.test_functions import Ishigami
+from SALib.test_functions import linear_model_1
+from SALib.test_functions import linear_model_2
 from SALib.util import read_param_file
 
 from pytest import fixture
@@ -231,7 +233,7 @@ def test_regression_fast():
     assert_allclose(Si['S1'], [0.31, 0.44, 0.00], atol=5e-2, rtol=1e-1)
     assert_allclose(Si['ST'], [0.55, 0.44, 0.24], atol=5e-2, rtol=1e-1)
 
-def test_regression_hdmr():
+def test_regression_hdmr_ishigami():
     param_file = 'src/SALib/test_functions/params/Ishigami.txt'
     problem = read_param_file(param_file)
     X = latin.sample(problem, 10000)
@@ -240,6 +242,84 @@ def test_regression_hdmr():
     Si = hdmr.analyze(problem, X, Y, options)
     assert_allclose(Si['Sa'][0:problem['num_vars']], [0.31, 0.44, 0.00], atol=5e-2, rtol=1e-1)
     assert_allclose(Si['ST'][0:problem['num_vars']], [0.55, 0.44, 0.24], atol=5e-2, rtol=1e-1)
+
+
+def test_regression_hdmr_case1():
+    problem = {
+        'num_vars': 5,
+        'names': ['x1', 'x2', 'x3', 'x4', 'x5'],
+        'bounds': [[0, 1]*5]
+    }
+    X = latin.sample(problem, 10000)
+    Y = linear_model_1.evaluate(X)
+    options = {
+        'graphics': 0,
+        'maxorder': 2,
+        'maxiter': 100,
+        'm': 2,
+        'K': 1,
+        'R': 10000,
+        'alfa': 0.95,
+        'lambdax': 0.01,
+        'print_to_console': 0
+    } 
+    Si = hdmr.analyze(problem, X, Y, options)
+    assert_allclose(Si['Sa'][0:problem['num_vars']], [0.20] * 5, atol=5e-2, rtol=1e-1)
+    assert_allclose(Si['ST'][0:problem['num_vars']], [0.20] * 5, atol=5e-2, rtol=1e-1)
+
+
+def test_regression_hdmr_case2():
+    problem = {
+        'num_vars': 5,
+        'names': ['x1', 'x2', 'x3', 'x4', 'x5'],
+        'bounds': [[0, 1]*5]
+    }
+    # Generate correlated samples
+    mean = np.zeros((problem['num_vars']))
+    cov = [[1,0.6,0.2,0,0],[0.6,1,0.2,0,0],[0.2,0.2,1,0,0],[0,0,0,1,0.2],[0,0,0,0.2,1]]
+    X = np.random.multivariate_normal(mean, cov, 10000)
+    Y = linear_model_1.evaluate(X)
+    options = {
+            'graphics': 0,
+            'maxorder': 2,
+            'maxiter': 100,
+            'm': 2,
+            'K': 1,
+            'R': 10000,
+            'alfa': 0.95,
+            'lambdax': 0.01,
+            'print_to_console': 0
+        } 
+    Si = hdmr.analyze(problem, X, Y, options)
+    assert_allclose(Si['Sa'][0:problem['num_vars']], [0.13] * 5, atol=5e-2, rtol=1e-1)
+    assert_allclose(Si['Sb'][0:problem['num_vars']], [0.11, 0.11, 0.06, 0.03, 0.03], atol=5e-2, rtol=1e-1)
+
+
+def test_regression_hdmr_case3():
+    problem = {
+        'num_vars': 5,
+        'names': ['x1', 'x2', 'x3', 'x4', 'x5'],
+        'bounds': [[0, 1]*5]
+    }
+    # Generate correlated samples
+    mean = np.zeros((problem['num_vars']))
+    cov = [[1,0.6,0.2,0,0],[0.6,1,0.2,0,0],[0.2,0.2,1,0,0],[0,0,0,1,0.2],[0,0,0,0.2,1]]
+    X = np.random.multivariate_normal(mean, cov, 10000)
+    Y = linear_model_2.evaluate(X)
+    options = {
+            'graphics': 0,
+            'maxorder': 2,
+            'maxiter': 100,
+            'm': 2,
+            'K': 1,
+            'R': 10000,
+            'alfa': 0.95,
+            'lambdax': 0.01,
+            'print_to_console': 0
+        } 
+    Si = hdmr.analyze(problem, X, Y, options)
+    assert_allclose(Si['Sa'][0:problem['num_vars']], [0.28, 0,17, 0.10, 0.04, 0.02], atol=5e-2, rtol=1e-1)
+    assert_allclose(Si['Sb'][0:problem['num_vars']], [0.16, 0.16, 0.06, 0.00, 0.00], atol=5e-2, rtol=1e-1)
 
 
 def test_regression_rbd_fast():

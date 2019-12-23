@@ -2,9 +2,9 @@
 
 # Sensitivity indices will print to command line. Use ">" to write to file.
 salib analyze hdmr \
-  -p ../../../src/SALib/test_functions/params/case2.txt \
-  -X ../../data/case2_input.txt \
-  -Y ../../data/case2_output.txt \
+  -p ../../../src/SALib/test_functions/params/Ishigami.txt \
+  -X ../../data/model_input.txt \
+  -Y ../../data/model_output.txt \
   -c 0 \
   -g 1 \
   -mor 2 \
@@ -20,18 +20,18 @@ salib analyze hdmr \
 
 # You can also use the module directly through Python
 # python -m SALib.analyze.hdmr \
-#      -p ../../../src/SALib/test_functions/params/case2.txt \
-#      -X ../../data/case2_input.txt \
-#      -Y ../../data/case2_output.txt \
+#      -p ../../../src/SALib/test_functions/params/case4.txt \
+#      -X ../../data/case4_input.txt \
+#      -Y ../../data/case4_output.txt \
 #      -c 0 \
-#      -g 1 \
+#      -g 0 \
 #      -mor 2 \
 #      -mit 100 \
 #      -m 2 \
 #      -K 20 \
-#      -R 500 \
+#      -R Y // 2 \
 #      -a 0.95 \
-#      -lambda 0.05 \
+#      -lambda 0.01 \
 #      -print 1
 
 # Options:

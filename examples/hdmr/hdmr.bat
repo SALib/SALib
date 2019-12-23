@@ -2,16 +2,16 @@
 
 REM Sensitivity indices will print to command line. Use ">" to write to file.
 salib analyze hdmr ^
-  -p ../../../src/SALib/test_functions/params/case2.txt ^
-  -X ../../data/case2_input.txt ^
-  -Y ../../data/case2_output.txt ^
+  -p ../../../src/SALib/test_functions/params/Ishigami.txt ^
+  -X ../../data/model_input.txt ^
+  -Y ../../data/model_output.txt ^
   -c 0 ^
   -g 1 ^
   -mor 2 ^
   -mit 100 ^
-  -m 2 ^
-  -K 20 ^
-  -R 500 ^
+  -m 4 ^
+  -K 1 ^
+  -R 1000 ^
   -a 0.95 ^
   -lambda 0.05 ^
   -print 1
@@ -21,18 +21,18 @@ REM Then use the output to run the analysis.
 
 REM You can also use the module directly through Python
 REM python -m SALib.analyze.hdmr ^
-REM      -p ../../../src/SALib/test_functions/params/case2.txt ^
-REM      -X ../../data/case2_input.txt ^
-REM      -Y ../../data/case2_output.txt ^
+REM      -p ../../../src/SALib/test_functions/params/Ishigami.txtt ^
+REM      -X ../../data/case4_input.txt ^
+REM      -Y ../../data/case4_output.txt ^
 REM      -c 0 ^
-REM      -g 1 ^
+REM      -g 0 ^
 REM      -mor 2 ^
 REM      -mit 100 ^
 REM      -m 2 ^
 REM      -K 20 ^
-REM      -R 500 ^
+REM      -R Y // 2 ^
 REM      -a 0.95 ^
-REM      -lambda 0.05 ^
+REM      -lambda 0.01 ^
 REM      -print 1
 
 REM Options:
@@ -62,5 +62,3 @@ REM
 REM -lambda, --lambdax (optional): Regularization constant. Default is 0.01
 REM
 REM -print, --print-to-console (optional): Whether to print out results to the screen or not (1,0). Default is 1.
-
-

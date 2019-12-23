@@ -1,3 +1,5 @@
+import sys
+sys.path.append('../../src')
 import numpy as np
 from SALib.analyze import hdmr
 from SALib.sample import latin
@@ -18,7 +20,19 @@ problem = {
 X = latin.sample(problem, 1000)
 # Run the "model" and save the output in a text file
 Y = Ishigami.evaluate(X)
+# Add random error
+sigma = np.var(Y) / 100
 # SALib-HDMR options 
-options = {'graphics': 1,'maxorder': 2,'maxiter': 100,'m': 4,'K': 20,'R': 500,'alfa': 0.95,'lambdax': 0.01,'print_to_console': 1} 
+options = {
+  'graphics': 1,
+  'maxorder': 2,
+  'maxiter': 100,
+  'm': 4,
+  'K': 1,
+  'R': 500,
+  'alfa': 0.95,
+  'lambdax': 0.01,
+  'print_to_console': 1
+} 
 # Run SALib-HDMR
 Si = hdmr.analyze(problem,X,Y,options)
