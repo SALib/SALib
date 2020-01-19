@@ -8,18 +8,17 @@ from SALib.sample import common_args
 from .radial_funcs import combine_samples
 
 
-
 __all__ = ['sample']
 
 
-def sample(problem: Dict, N: int, 
-           skip_num=0,
+def sample(problem: Dict, N: int, R=4,
+           skip_num: int = 0,
            seed: Optional[int] = None):
-    """Generates `N` sobol samples for a Radial OAT approach based on sobol sequences.
+    """Generates `N` sobol samples for a Radial OAT approach.
 
     Results can be analyzed using 
-    * `sobol_jansen`
-    * `radial_ee`
+    * `sobol_jansen` - the Jansen sensitivity estimator
+    * `radial_ee` - Elementary Effects
 
     References
     ----------
@@ -35,7 +34,12 @@ def sample(problem: Dict, N: int,
         SALib problem specification
 
     N : int
-        The number of sample sets to generate
+        The number of sample sets to generate.
+        It is assumed here that `N = r`, where `r` is the number of points/trajectories.
+    
+    R : int
+        Number of rows in Sobol random matrix to shift downwards.
+        Defaults to 4 (as given in [1])
 
     skip_num : int
         Number of sobol sequence values to skip
@@ -45,23 +49,29 @@ def sample(problem: Dict, N: int,
     seed : int
         Seed value to use for np.random.seed
 
-    Example
-    -------
+    Usage Example
+    -------------
+    ```python
     >>> X = sample(problem, N, seed)
+    ```
     
     `X` will now hold:
-    [[x_{1,1}, x_{1,2}, ..., x_{1,p}]
-    [b_{1,1}, x_{1,2}, ..., x_{1,p}]
-    [x_{1,1}, b_{1,2}, ..., x_{1,p}]
-    [x_{1,1}, x_{1,2}, ..., b_{1,p}]
-    ...
-    [x_{N,1}, x_{N,2}, ..., x_{N,p}]
-    [b_{N,1}, x_{N,2}, ..., x_{N,p}]
-    [x_{N,1}, b_{N,2}, ..., x_{N,p}]
-    [x_{N,1}, x_{N,2}, ..., b_{N,p}]]
+    [
+        [x_{1,1}, x_{1,2}, ..., x_{1,p}]
+        [b_{1,1}, x_{1,2}, ..., x_{1,p}]
+        [x_{1,1}, b_{1,2}, ..., x_{1,p}]
+        [x_{1,1}, x_{1,2}, ..., b_{1,p}]
+        ...
+        [x_{N,1}, x_{N,2}, ..., x_{N,p}]
+        [b_{N,1}, x_{N,2}, ..., x_{N,p}]
+        [x_{N,1}, b_{N,2}, ..., x_{N,p}]
+        [x_{N,1}, x_{N,2}, ..., b_{N,p}]
+    ]
 
-    where `p` denotes the number of parameters as
-    specified in `problem`
+    where `p` denotes the number of parameters as specified in `problem` and
+    `b` represents perturbed values.
+
+    The first parameter set in each sample set acts as the baseline.
 
     We can now run the model using the values in `X`. 
     The total number of model evaluations will be `N(p+1)`.
@@ -76,31 +86,20 @@ def sample(problem: Dict, N: int,
     num_vars = problem['num_vars']
     bounds = problem['bounds']
 
-    # "we need to generate a quasi-random matrix of Sobol’ numbers of 
-    # size (R,2k), with R > r"
-    # "We obtain good results by systematically discarding 
-    # four points (R = r + 4)" (Campolongo et al. 2011, p 981)
-    # 
-    # In this context, `N := r`
-    # Given that R > N, we create an array of (N*2, `num_vars`*2)
-    # and use the second half of the array (N:, num_vars:)
-    # as the perturbation set.
-
-    skip_N = skip_num * 2
-    sequence = sobol_sequence.sample(skip_N+(N*2), (num_vars*2))
+    skip_N = (skip_num * 2)
+    sequence = sobol_sequence.sample(skip_N+(N*2)+R, (num_vars*2))
     sequence = sequence[skip_N:, :]
 
     # Use first N rows and `num_vars` cols as baseline points
     # and next `num_vars` cols and N rows as perturbation points
     baseline = sequence[:N, :num_vars]
     scale_samples(baseline, bounds)
-    
-    perturb = sequence[N:, num_vars:]
+
+    perturb = sequence[N+R:, num_vars:]
     scale_samples(perturb, bounds)
 
     # Total number of parameter sets = `N*(num_vars+1)`
     sample_set = combine_samples(baseline, perturb)
-
     return sample_set
 
 

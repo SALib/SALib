@@ -60,9 +60,9 @@ def analyze(problem: Dict, X: np.array, Y: np.array, sample_sets: int,
         "Number of result set groups must match number of parameters + 1"
 
     if seed:
-        np.random.set_seed(seed)
+        np.random.seed(seed)
 
-    ee = np.empty((sample_sets, num_vars))
+    ee = np.zeros((sample_sets, num_vars))
     
     X_base = X[0::nth]
     Y_base = Y[0::nth]
@@ -92,8 +92,7 @@ def analyze(problem: Dict, X: np.array, Y: np.array, sample_sets: int,
 
 def compute_radial_ee_confidence(ee: np.array, N: int, num_resamples: int,
                                  conf_level: float = 0.95) -> np.array:
-    '''
-    Uses bootstrapping where the elementary effects are resampled with
+    '''Uses bootstrapping where the elementary effects are resampled with
     replacement to produce a histogram of resampled mu_star metrics.
     This resample is used to produce a confidence interval.
 
@@ -135,7 +134,7 @@ def cli_parse(parser):
                         default=None,
                         help='Model input file')
     parser.add_argument('-r', '--resamples', type=int, required=False,
-                        default=10,
+                        default=100,
                         help='Number of bootstrap resamples for \
                               confidence intervals')
     return parser
