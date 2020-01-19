@@ -4,22 +4,16 @@ from .. import sobol_sequence
 from SALib.util import scale_samples, read_param_file
 from typing import Dict, Optional
 
+from .. import common_args
 from .radial_funcs import combine_samples
+
 
 __all__ = ['sample']
 
 
-def sample(problem: Dict, N: int, 
+def sample(problem: Dict, N: int,
            seed: Optional[int] = None):
-    """Generates `N` monte carlo samples for a Radial OAT approach.
-
-    References
-    ----------
-    .. [1] Campolongo, F., Saltelli, A., Cariboni, J., 2011. 
-           From screening to quantitative sensitivity analysis: A unified approach. 
-           Computer Physics Communications 182, 978–988.
-           https://www.sciencedirect.com/science/article/pii/S0010465510005321
-           DOI: 10.1016/j.cpc.2010.12.039
+    """Generates `N` monte carlo samples for a Radial OAT approach using a uniform distribution.
 
     Arguments
     ---------
@@ -32,30 +26,46 @@ def sample(problem: Dict, N: int,
     seed : int
         Seed value to use for np.random.seed
 
-    Example
-    -------
+    Returns
+    ---------
+    numpy.ndarray : An array of samples
+
+
+    Usage Example
+    -------------
+    ```python
     >>> X = sample(problem, N, seed)
+    ```
     
     `X` will now hold:
-    [[x_{1,1}, x_{1,2}, ..., x_{1,p}]
-    [b_{1,1}, x_{1,2}, ..., x_{1,p}]
-    [x_{1,1}, b_{1,2}, ..., x_{1,p}]
-    [x_{1,1}, x_{1,2}, ..., b_{1,p}]
-    ...
-    [x_{N,1}, x_{N,2}, ..., x_{N,p}]
-    [b_{N,1}, x_{N,2}, ..., x_{N,p}]
-    [x_{N,1}, b_{N,2}, ..., x_{N,p}]
-    [x_{N,1}, x_{N,2}, ..., b_{N,p}]]
+    [
+        [x_{1,1}, x_{1,2}, ..., x_{1,p}]
+        [b_{1,1}, x_{1,2}, ..., x_{1,p}]
+        [x_{1,1}, b_{1,2}, ..., x_{1,p}]
+        [x_{1,1}, x_{1,2}, ..., b_{1,p}]
+        ...
+        [x_{N,1}, x_{N,2}, ..., x_{N,p}]
+        [b_{N,1}, x_{N,2}, ..., x_{N,p}]
+        [x_{N,1}, b_{N,2}, ..., x_{N,p}]
+        [x_{N,1}, x_{N,2}, ..., b_{N,p}]
+    ]
 
-    where `p` denotes the number of parameters as specified in
-    `problem` and `N` is the number of samples.
+    where `p` denotes the number of parameters as specified in `problem` and
+    `b` represents perturbed values.
+
+    The first parameter set in each sample set acts as the baseline.
 
     We can now run the model using the values in `X`. 
     The total number of model evaluations will be `N(p+1)`.
 
-    Returns
-    ---------
-    numpy.ndarray : An array of samples
+
+    References
+    ----------
+    .. [1] Campolongo, F., Saltelli, A., Cariboni, J., 2011. 
+           From screening to quantitative sensitivity analysis: A unified approach. 
+           Computer Physics Communications 182, 978–988.
+           https://www.sciencedirect.com/science/article/pii/S0010465510005321
+           DOI: 10.1016/j.cpc.2010.12.039
     """
     if seed:
         np.random.seed(seed)
@@ -65,7 +75,9 @@ def sample(problem: Dict, N: int,
 
     # Generate the 'nominal' parameter positions
     # Total number of parameter sets = N*(p+1)
-    sequence = np.random.uniform(-1.0, 1.0000001, size=(N, num_vars*2))
+    min_bnds = [lb[0] for lb in bounds]
+    max_bnds = [lb[1] for lb in bounds]
+    sequence = np.random.uniform(min_bnds, max_bnds, size=(N, num_vars*2))
 
     # Use first N cols as baseline points
     baseline = sequence[:, :num_vars]
