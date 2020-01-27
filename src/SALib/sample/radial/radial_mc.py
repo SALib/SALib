@@ -15,6 +15,10 @@ def sample(problem: Dict, N: int,
            seed: Optional[int] = None):
     """Generates `N` monte carlo samples for a Radial OAT approach using a uniform distribution.
 
+    Compatible with:
+    * `radial_ee`
+    * `sobol_jansen`
+
     Arguments
     ---------
     problem : dict

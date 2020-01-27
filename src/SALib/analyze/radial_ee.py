@@ -3,7 +3,7 @@ import numpy as np
 from scipy.stats import norm
 
 from . import common_args
-from ..util import ResultDict
+from ..util import read_param_file, ResultDict
 
 
 __all__ = ['analyze']
@@ -15,7 +15,9 @@ def analyze(problem: Dict, X: np.array, Y: np.array, sample_sets: int,
     """Radial Elementary Effects Analysis.
 
     Calculates `mu`, `mu_star`, `sigma` and `mu_star_conf` as with
-    Morris OAT using results from `radial_sobol` sampler.
+    Morris OAT using results from
+    * `radial_sobol`
+    * `radial_mc`
 
     Arguments
     ---------
@@ -133,10 +135,15 @@ def cli_parse(parser):
     parser.add_argument('-X', '--model-input-file', type=str, required=True,
                         default=None,
                         help='Model input file')
+    parser.add_argument('-n', '--sample_sets',
+                        type=int, required=True, help='Number of sample sets used')
     parser.add_argument('-r', '--resamples', type=int, required=False,
-                        default=100,
+                        default=1000,
                         help='Number of bootstrap resamples for \
                               confidence intervals')
+    parser.add_argument('-L', '--conf_level', type=float, required=False,
+                        default=0.95,
+                        help='The confidence interval level (default: 0.95)')
     return parser
 
 
@@ -148,9 +155,11 @@ def cli_action(args):
 
     Y = np.loadtxt(args.model_output_file, delimiter=args.delimiter,
                    usecols=(args.column,))
+    num_samples = args.sample_sets
 
-    analyze(problem, X, Y, args.samples,
-            num_resamples=args.resamples, conf_level=args.conf_level,
+    analyze(problem, X, Y, num_samples,
+            num_resamples=args.num_resamples, 
+            conf_level=args.conf_level,
             seed=args.seed)
 
 
