@@ -2,7 +2,8 @@ import numpy as np
 from scipy.stats import norm
 from typing import Dict, Optional
 
-from ..util import ResultDict
+from SALib.sample import common_args
+from ..util import read_param_file, ResultDict
 
 __all__ = ['analyze']
 
@@ -12,6 +13,10 @@ def analyze(problem: Dict, Y: np.array,
             conf_level: float = 0.95,
             seed: Optional[int] = None) -> Dict:
     """Estimation of Total Sensitivity Index using the Jansen Sensitivity Estimator.
+
+    Compatible with:
+    * `radial_sobol`
+    * `radial_mc`
 
     Arguments
     ---------
@@ -157,3 +162,34 @@ def jansen_estimator(N: int, si: np.array):
         Values of (Y_base - Y_perturbed)
     """
     return (1.0/(2.0*N)) * np.sum((si**2), axis=0)
+
+
+def cli_parse(parser):
+    parser.add_argument('-n', '--sample_sets',
+                        type=int, required=True, help='Number of sample sets used')
+    parser.add_argument('-r', '--num_resamples', type=int, required=False,
+                        default=1000,
+                        help='Number of bootstrap resamples for confidence intervals')
+    parser.add_argument('-L', '--conf_level', type=float, required=False,
+                        default=0.95,
+                        help='The confidence interval level (default: 0.95)')
+    return parser
+
+
+def cli_action(args):
+    problem = read_param_file(args.paramfile)
+    Y = np.loadtxt(args.model_output_file,
+                   delimiter=args.delimiter,
+                   usecols=(args.column,))
+    num_samples = args.sample_sets
+    num_resamples = args.num_resamples
+    conf_level = args.conf_level
+
+    analyze(problem, Y, num_samples, 
+            conf_level=conf_level,
+            num_resamples=num_resamples,
+            print_to_console=True, seed=args.seed)
+
+
+if __name__ == "__main__":
+    common_args.run_cli(cli_parse, cli_action)
