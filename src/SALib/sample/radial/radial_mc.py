@@ -81,16 +81,11 @@ def sample(problem: Dict, N: int,
     # Total number of parameter sets = N*(p+1)
     min_bnds = [lb[0] for lb in bounds]
     max_bnds = [lb[1] for lb in bounds]
-    sequence = np.random.uniform(min_bnds, max_bnds, size=(N, num_vars*2))
 
-    # Use first N cols as baseline points
-    baseline = sequence[:, :num_vars]
-    scale_samples(baseline, bounds)
+    baselines = np.random.uniform(min_bnds, max_bnds, size=(N*2, num_vars))
 
-    # Use next N cols as perturbation points
-    perturb = sequence[:, num_vars:]
-    scale_samples(perturb, bounds)
-
+    perturb = baselines[N:]
+    baseline = baselines[:N]
     sample_set = combine_samples(baseline, perturb)
 
     return sample_set

@@ -124,5 +124,6 @@ def cli_action(args):
     np.savetxt(args.output, param_values, delimiter=args.delimiter,
                fmt='%.' + str(args.precision) + 'e')
 
+
 if __name__ == '__main__':
     common_args.run_cli(cli_parse, cli_action)
