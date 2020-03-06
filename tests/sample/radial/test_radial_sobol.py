@@ -29,15 +29,15 @@ def test_radial_jansen_G4():
            https://www.sciencedirect.com/science/article/pii/S0010465510005321
            DOI: 10.1016/j.cpc.2010.12.039
     """
-    num_sample_sets = 15000
+    num_sample_sets = 12500
     problem, alpha, a, analytic_vals = setup_G4()
 
     delta = np.random.rand(20)
-    r_X = r_sample(problem, num_sample_sets)
+    r_X = r_sample(problem, num_sample_sets, seed=101)
     r_Y = Sobol_G.evaluate(r_X, a, alpha=alpha, delta=delta)
 
     g4_result = j_analyze(problem, r_Y, num_sample_sets,
-                          num_resamples=1000)
+                          num_resamples=1000, seed=101)
     ST_res = g4_result['ST'].round(4)
 
     assert_allclose(analytic_vals, ST_res, atol=0.04, rtol=0.04)
@@ -64,15 +64,15 @@ def test_radial_jansen_G10():
            https://www.sciencedirect.com/science/article/pii/S0010465510005321
            DOI: 10.1016/j.cpc.2010.12.039
     """
-    num_sample_sets = 20000
+    num_sample_sets = 17500
     problem, alpha, a, analytic_vals = setup_G10()
 
     delta = np.random.rand(20)
-    r_X = r_sample(problem, num_sample_sets)
+    r_X = r_sample(problem, num_sample_sets, seed=101)
     r_Y = Sobol_G.evaluate(r_X, a, alpha=alpha, delta=delta)
 
     g10_result = j_analyze(problem, r_Y, num_sample_sets,
-                           num_resamples=1000)
+                           num_resamples=1000, seed=101)
     ST_res = g10_result['ST'].round(4)
 
     assert_allclose(analytic_vals, ST_res, atol=0.04, rtol=0.04)

@@ -32,7 +32,7 @@ def test_sobol_oat():
     num_sample_sets = 1
     problem, _, _, _ = setup_G4()
 
-    r_X = r_sample(problem, num_sample_sets)
+    r_X = r_sample(problem, num_sample_sets, seed=101)
 
     assert len(r_X) == 21, "Number of parameter sets should equal `N*(p+1)`"
 
@@ -71,6 +71,7 @@ def test_mc_oat():
 
     assert np.array_equal(np.where(analytic_vals > 0.05), np.where(scaled > 0.15)), \
         "Mismatch in identified vs expected sensitive parameters."
+
 
 if __name__ == '__main__':
     test_sobol_oat()

@@ -1,5 +1,8 @@
+import os
 from os.path import join as pth_join
 import subprocess
+import pytest
+
 
 salib_cli = "./src/SALib/scripts/salib.py"
 ishigami_fp = "./src/SALib/test_functions/params/Ishigami.txt"
@@ -18,6 +21,7 @@ def test_ff():
         fn=ishigami_fp,
         test_data=test_data).split()
     result = subprocess.check_output(cmd)
+    
     assert len(result) == 0, "Error occurred!"
 
 
@@ -27,6 +31,7 @@ def test_fast():
         fn=ishigami_fp,
         test_data=test_data).split()
     result = subprocess.check_output(cmd)
+    
     assert len(result) == 0, "Error occurred!"
 
 
@@ -36,6 +41,7 @@ def test_finite_diff():
         fn=ishigami_fp,
         test_data=test_data).split()
     result = subprocess.check_output(cmd)
+    
     assert len(result) == 0, "Error occurred!"
 
 
@@ -45,16 +51,37 @@ def test_latin():
         fn=ishigami_fp,
         test_data=test_data).split()
     result = subprocess.check_output(cmd)
+    
     assert len(result) == 0, "Error occurred!"
 
 
-def test_saltelli():
-    cmd = "python {cli} sample latin -p {fn} -o {test_data} -n 100".format(
+# This test identical to the one above...
+# def test_saltelli():
+#     cmd = "python {cli} sample latin -p {fn} -o {test_data} -n 100".format(
+#         cli=salib_cli,
+#         fn=ishigami_fp,
+#         test_data=test_data).split()
+#     result = subprocess.check_output(cmd)
+#     assert len(result) == 0, "Error occurred!"
+
+
+def test_radial_sobol():
+    """Only Sobol-based radial sample is offered from the CLI for now."""
+    cmd = "python {cli} sample radial -p {fn} -o {test_data} -n 100".format(
         cli=salib_cli,
         fn=ishigami_fp,
         test_data=test_data).split()
     result = subprocess.check_output(cmd)
+    
     assert len(result) == 0, "Error occurred!"
+    
+
+@pytest.fixture(scope="session", autouse=True)
+def cleanup():
+    try:
+        os.remove(test_data)
+    except:
+        pass
 
 
 if __name__ == '__main__':
@@ -63,4 +90,4 @@ if __name__ == '__main__':
     test_fast()
     test_finite_diff()
     test_latin()
-    test_saltelli()
+    test_radial_sobol()
