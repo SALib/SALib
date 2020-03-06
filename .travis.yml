@@ -20,7 +20,7 @@ install:
 - pip install -r test-requirements.txt
 script:
 - python setup.py develop
-- python setup.py test
+- pytest
 after_success:
 - if [[ "$COVERAGE" == "true" ]]; then coveralls || echo "failed"; fi
 notifications:
