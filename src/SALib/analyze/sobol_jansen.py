@@ -11,7 +11,7 @@ def analyze(problem: Dict, Y: np.array,
             sample_sets: int,
             num_resamples: int = 1000,
             conf_level: float = 0.95,
-            seed: Optional[int] = None) -> Dict:
+            seed: Optional[int] = None) -> ResultDict:
     """Estimation of Total Sensitivity Index using the Jansen Sensitivity Estimator.
 
     Compatible with:
@@ -40,19 +40,17 @@ def analyze(problem: Dict, Y: np.array,
 
     Returns
     --------
-    Si : dict
+    Si : ResultDict
 
 
     Usage Example
     -------------
-
     ```python
     >>> from SALib.sample.radial.radial_sobol import sample
     >>> X = sample(problem, N, seed)
     >>> r_Y = Sobol_G.evaluate(X)
-    >>> sobol_jansen.analyze(problem, Y, num_resamples=1000)
+    >>> sobol_jansen.analyze(problem, Y, N, num_resamples=1000)
     ```
-
 
     References
     ----------
@@ -67,11 +65,11 @@ def analyze(problem: Dict, Y: np.array,
            https://www.sciencedirect.com/science/article/pii/S0010465598001544
            DOI: 10.1016/S0010-4655(98)00154-4
 
-    .. [3] M.J.W. Jansen, W.A.H. Rossing, R.A. Daamen, Monte Carlo estimation 
-           of uncertainty contributions from several independent multivariate sources, 
-           in: J. Gasmanand, G. van Straten (Eds.), Predictability and Nonlinear 
-           Modelling in Natural Sciences and Economics, Kluwer Academic Publishers, 
-           Dordrecht, 1994, pp. 334–343
+    .. [3] M.J.W. Jansen, W.A.H. Rossing, R.A. Daamen, Monte Carlo estimation
+           of uncertainty contributions from several independent multivariate
+           sources, in: J. Gasmanand, G. van Straten (Eds.), Predictability
+           and Nonlinear Modelling in Natural Sciences and Economics,
+           Kluwer Academic Publishers, Dordrecht, 1994, pp. 334–343
            DOI: 10.1007/978-94-011-0962-8_28
     """
     num_vars = problem['num_vars']
@@ -84,8 +82,7 @@ def analyze(problem: Dict, Y: np.array,
 
     st = np.zeros((sample_sets, num_vars))
 
-    # Each `n`th item from 0-position is the baseline for
-    # that N group.
+    # Each `n`th item from 0-position is the baseline for that N group.
     nth = num_vars + 1
     Y_base = Y[0::nth]
 
@@ -95,25 +92,27 @@ def analyze(problem: Dict, Y: np.array,
 
         # Collect change for every `n`th element
         st[:, i] = Y_base - Y[pos::nth]
-    # End for
+
 
     Si = ResultDict((k, [None] * num_vars)
                     for k in ['names', 'ST', 'ST_conf'])
 
     Si['ST'] = (jansen_estimator(sample_sets, st) / base_variance)
-    Si['ST_conf'] = compute_radial_si_confidence(Si['ST'], num_resamples,
+    Si['ST_conf'] = compute_radial_si_confidence(st, sample_sets,
+                                                 base_variance,
+                                                 num_resamples,
                                                  conf_level)
     Si['names'] = problem['names']
-    ###
 
     return Si
 
 
-def compute_radial_si_confidence(si: np.array,
+def compute_radial_si_confidence(si: np.array, N: int,
+                                 base_variance: np.array,
                                  num_resamples: int = 1000,
                                  conf_level: float = 0.95) -> np.array:
     '''Uses bootstrapping where the sensitivity are resampled with
-    replacement to produce a histogram of resampled mu_star metrics.
+    replacement to produce a histogram of resampled metrics.
     This resample is used to produce a confidence interval.
 
     Largely identical to `morris.compute_mu_star_confidence`.
@@ -124,8 +123,11 @@ def compute_radial_si_confidence(si: np.array,
     si : np.array
         The sensitivity effect for each parameter
 
+    N : int
+        The number of sample sets used to create `si`
+
     num_resamples : int
-        The number of resamples to calculate `ST` (default 1000)
+        The number of bootstrap resamples of `ST` (default 1000)
 
     conf_level : float
         The confidence interval level (default 0.95)
@@ -139,20 +141,20 @@ def compute_radial_si_confidence(si: np.array,
         raise ValueError("Confidence level must be between 0 and 1.")
 
     if len(si.shape) > 1:
-        vals = si.shape[0]
         num_params = si.shape[1]
     else:
-        vals = si
-        num_params = len(si)
+        num_params = 1
 
-    idx = np.random.randint(len(vals), size=(num_resamples, num_params))
-    resampled = np.average(np.abs(vals[idx]), axis=0)
+    idx = np.random.randint(len(si), size=(num_resamples, num_params))
 
+    resampled = jansen_estimator(N, si[idx]) / base_variance
     return norm.ppf(0.5 + conf_level / 2.0) * resampled.std(ddof=1, axis=0)
 
 
-def jansen_estimator(N: int, si: np.array):
+def jansen_estimator(N: int, si: np.array) -> np.array:
     """
+    Jansen sensitivity estimator.
+
     Arguments
     ---------
     N : int
@@ -160,6 +162,10 @@ def jansen_estimator(N: int, si: np.array):
 
     si : np.array
         Values of (Y_base - Y_perturbed)
+    
+    Returns
+    -------
+    jansen estimates : np.array
     """
     return (1.0/(2.0*N)) * np.sum((si**2), axis=0)
 
@@ -181,14 +187,11 @@ def cli_action(args):
     Y = np.loadtxt(args.model_output_file,
                    delimiter=args.delimiter,
                    usecols=(args.column,))
-    num_samples = args.sample_sets
-    num_resamples = args.num_resamples
-    conf_level = args.conf_level
 
-    analyze(problem, Y, num_samples, 
-            conf_level=conf_level,
-            num_resamples=num_resamples,
-            print_to_console=True, seed=args.seed)
+    analyze(problem, Y, args.sample_sets,
+            conf_level=args.conf_level,
+            num_resamples=args.num_resamples,
+            seed=args.seed)
 
 
 if __name__ == "__main__":
