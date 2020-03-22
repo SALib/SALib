@@ -30,8 +30,6 @@ Development Features:
 - Fixed a bug preventing automatic deployment to PyPi upon tagging a branch
 - Removed postgres from travis config
 
-
-
 Version 1.0.0
 =============
 
@@ -50,8 +48,8 @@ Version 0.7.1
 Improvements to Morris sampling and Sobol groups/distributions
 
 - Adds improved sampling for the Morris method
-(thanks to @JoerivanEngelen) and group sampling/analysis for the Sobol method
-(thanks to @calvinwhealton).
+  (thanks to @JoerivanEngelen) and group sampling/analysis for the Sobol method
+  (thanks to @calvinwhealton).
 - @calvinwhealton has also added non-uniform distributions to the Sobol
   sampling.  This will be a baseline for adding this to the other methods in
   the future.
@@ -83,10 +81,10 @@ using a Digital Object Identifier (DOI), which can be found in the readme.
 Some minor updates are included:
 
 - morris: sigma has been removed from the grouped-morris results and plots,
-replaced by mu_star_conf - a bootstrapped confidence interval.
-Mu_star_conf is not equivalent to sigma when used in the non-grouped method of
-morris, but its all we have when using groups.
--  some minor updates to the tests in the plotting module
+  replaced by mu_star_conf - a bootstrapped confidence interval.
+  Mu_star_conf is not equivalent to sigma when used in the non-grouped method of
+  morris, but its all we have when using groups.
+- some minor updates to the tests in the plotting module
 
 Version 0.6.0
 =============
