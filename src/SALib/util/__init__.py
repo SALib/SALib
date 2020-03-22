@@ -9,6 +9,7 @@ import pkgutil
 
 import numpy as np  # type: ignore
 import scipy as sp  # type: ignore
+from typing import List
 
 
 __all__ = ["scale_samples", "read_param_file",
@@ -35,7 +36,7 @@ def avail_approaches(pkg):
     return methods
 
 
-def scale_samples(params, bounds):
+def scale_samples(params: np.ndarray, bounds: List):
     '''Rescale samples in 0-to-1 range to arbitrary bounds
 
     Arguments
