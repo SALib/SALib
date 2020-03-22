@@ -1,10 +1,11 @@
 """
 """
 from SALib.sample.morris.strategy import Strategy
-from scipy.special import comb as nchoosek
+from scipy.special import comb as nchoosek  # type: ignore
 from itertools import combinations, islice
 import sys
-import numpy as np
+import numpy as np  # type: ignore
+from typing import List
 
 
 class BruteForce(Strategy):
@@ -16,9 +17,9 @@ class BruteForce(Strategy):
         return self.brute_force_most_distant(input_sample, num_samples,
                                              num_params, k_choices, num_groups)
 
-    def brute_force_most_distant(self, input_sample, num_samples,
-                                 num_params, k_choices,
-                                 num_groups=None):
+    def brute_force_most_distant(self, input_sample: np.ndarray, num_samples: int,
+                                 num_params: int, k_choices: int,
+                                 num_groups: int=None) -> List:
         """Use brute force method to find most distant trajectories
 
         Arguments
@@ -47,8 +48,8 @@ class BruteForce(Strategy):
 
         return maximum_combo
 
-    def find_most_distant(self, input_sample, num_samples,
-                          num_params, k_choices, num_groups=None):
+    def find_most_distant(self, input_sample: np.ndarray, num_samples: int,
+                          num_params: int, k_choices:int, num_groups: int=None) -> np.ndarray:
         """
         Finds the 'k_choices' most distant choices from the
         'num_samples' trajectories contained in 'input_sample'

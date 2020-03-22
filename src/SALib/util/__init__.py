@@ -7,8 +7,8 @@ from warnings import warn
 from .results import ResultDict
 import pkgutil
 
-import numpy as np
-import scipy as sp
+import numpy as np  # type: ignore
+import scipy as sp  # type: ignore
 
 
 __all__ = ["scale_samples", "read_param_file",

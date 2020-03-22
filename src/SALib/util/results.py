@@ -1,4 +1,4 @@
-import pandas as pd
+import pandas as pd  # type: ignore
 from SALib.plotting.bar import plot as barplot
 
 class ResultDict(dict):
@@ -20,7 +20,7 @@ class ResultDict(dict):
         Si_df = self.to_df()
 
         if isinstance(Si_df, (list, tuple)):
-            import matplotlib.pyplot as plt
+            import matplotlib.pyplot as plt  # type: ignore
 
             fig, axes = plt.subplots(1, len(Si_df))
             for idx, f in enumerate(Si_df):
