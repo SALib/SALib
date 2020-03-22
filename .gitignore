@@ -18,6 +18,8 @@ __pycache__/*
 .pydevproject
 .settings
 .idea
+.vscode
+*.code-workspace
 
 # Package files
 *.egg
