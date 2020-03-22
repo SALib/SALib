@@ -118,8 +118,7 @@ def _sample_oat(problem, N, num_levels=4):
     num_levels : int, default=4
         The number of grid levels
     """
-    group_membership = np.asmatrix(np.identity(problem['num_vars'],
-                                               dtype=int))
+    group_membership = np.identity(problem['num_vars'], dtype=int)
 
     num_params = group_membership.shape[0]
     sample = np.array([generate_trajectory(group_membership,

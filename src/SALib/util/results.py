@@ -12,7 +12,7 @@ class ResultDict(dict):
 
     def to_df(self):
         '''Convert dict structure into Pandas DataFrame.'''
-        return pd.DataFrame({k: v for k, v in self.items() if k is not 'names'},
+        return pd.DataFrame({k: v for k, v in self.items() if k != 'names'},
                             index=self['names'])
 
     def plot(self):

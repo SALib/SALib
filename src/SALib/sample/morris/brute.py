@@ -126,7 +126,7 @@ class BruteForce(Strategy):
         # Create a list of all pairwise combination for each combo in combos
         combo_list = combos[:, pairwise[:, ]]
 
-        addresses = [combo_list[:, :, 1], combo_list[:, :, 0]]
+        addresses = (combo_list[:, :, 1], combo_list[:, :, 0])
 
         all_distances = distance_matrix[addresses]
         new_scores = np.sqrt(
