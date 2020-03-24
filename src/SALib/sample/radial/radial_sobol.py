@@ -87,7 +87,7 @@ def sample(problem: Dict, N: int, R=4,
     bounds = problem['bounds']
 
     skip_N = (skip_num * 2)
-    sequence = sobol_sequence.sample(skip_N+(N*2)+R, (num_vars*2))
+    sequence = sobol_sequence.sample(skip_N+N+R, (num_vars*2))
     sequence = sequence[skip_N:, :]
 
     # Use first N rows and `num_vars` cols as baseline points
@@ -95,7 +95,7 @@ def sample(problem: Dict, N: int, R=4,
     baseline = sequence[:N, :num_vars]
     scale_samples(baseline, bounds)
 
-    perturb = sequence[N+R:, num_vars:]
+    perturb = sequence[R:, num_vars:]
     scale_samples(perturb, bounds)
 
     # Total number of parameter sets = `N*(num_vars+1)`
