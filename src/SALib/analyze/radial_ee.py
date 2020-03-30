@@ -74,7 +74,11 @@ def analyze(problem: Dict, X: np.array, Y: np.array, sample_sets: int,
         # Collect every `n`th element
         # which is the perturbation point
         x_tmp = (X_base[:, i] - X[pos::nth, i])
-        ee[:, i] = (Y_base - Y[pos::nth]) / x_tmp
+
+        try:
+            ee[:, i] = (Y_base - Y[pos::nth]) / x_tmp
+        except ZeroDivisionError:
+            continue
     # End for
 
     Si = ResultDict((k, [None] * num_vars)
