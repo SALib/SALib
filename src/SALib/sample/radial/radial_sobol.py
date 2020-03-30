@@ -86,15 +86,16 @@ def sample(problem: Dict, N: int, R=4,
     num_vars = problem['num_vars']
     bounds = problem['bounds']
 
-    skip_N = (skip_num * 2)
-    sequence = sobol_sequence.sample(skip_N+N+R, (num_vars*2))
-    sequence = sequence[skip_N:, :]
+    sequence = sobol_sequence.sample(skip_num+N+R, (num_vars*2))
+    sequence = sequence[skip_num:, :]
 
     # Use first N rows and `num_vars` cols as baseline points
     # and next `num_vars` cols and N rows as perturbation points
     baseline = sequence[:N, :num_vars]
     scale_samples(baseline, bounds)
 
+    # Use right-most columns for perturbation points, 
+    # starting from row `R`.
     perturb = sequence[R:, num_vars:]
     scale_samples(perturb, bounds)
 
