@@ -19,15 +19,15 @@ def combine_samples(baseline, perturb):
     >>> X = combine_samples(baseline, perturb)
     
     `X` will now hold:
-    [[x_{1,1}, x_{1,2}, ..., x_{1,p}]
-    [b_{1,1}, x_{1,2}, ..., x_{1,p}]
-    [x_{1,1}, b_{1,2}, ..., x_{1,p}]
-    [x_{1,1}, x_{1,2}, ..., b_{1,p}]
-    ...
-    [x_{N,1}, x_{N,2}, ..., x_{N,p}]
-    [b_{N,1}, x_{N,2}, ..., x_{N,p}]
-    [x_{N,1}, b_{N,2}, ..., x_{N,p}]
-    [x_{N,1}, x_{N,2}, ..., b_{N,p}]]
+        [[x_{1,1}, x_{1,2}, ..., x_{1,p}]
+        [b_{1,1}, x_{1,2}, ..., x_{1,p}]
+        [x_{1,1}, b_{1,2}, ..., x_{1,p}]
+        [x_{1,1}, x_{1,2}, ..., b_{1,p}]
+        ...
+        [x_{N,1}, x_{N,2}, ..., x_{N,p}]
+        [b_{N,1}, x_{N,2}, ..., x_{N,p}]
+        [x_{N,1}, b_{N,2}, ..., x_{N,p}]
+        [x_{N,1}, x_{N,2}, ..., b_{N,p}]]
 
     where `p` denotes the number of parameters as specified in
     `problem` and `N` is the number of samples.
