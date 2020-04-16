@@ -126,13 +126,18 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
 
         S = Si_list_to_dict(S_list.get(), D, calc_second_order)
 
-    # Print results to console
-    if print_to_console:
-        print_indices(S, problem, calc_second_order)
-
+    
     # Add problem context and override conversion method for special case
     S.problem = problem
     S.to_df = MethodType(to_df, S)
+
+    # Print results to console
+    if print_to_console:
+        res = S.to_df()
+        for df in res:
+            print(df.to_string())
+
+        # print_indices(S, problem, calc_second_order)
     return S
 
 
