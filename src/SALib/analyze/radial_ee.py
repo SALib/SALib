@@ -90,12 +90,12 @@ def analyze(problem: Dict, X: np.array, Y: np.array, sample_sets: int,
 
     Si['mu'] = np.average(ee, axis=0)
     Si['mu_star'] = np.average(np.abs(ee), axis=0)
-
     Si['mu_star_conf'] = compute_radial_ee_confidence(ee, sample_sets, num_resamples, conf_level)
-
     Si['sigma'] = np.std(ee, ddof=1, axis=0)
-
     Si['names'] = problem['names']
+
+    if print_to_console:
+        print(Si.to_df())
 
     return Si
 
@@ -168,6 +168,7 @@ def cli_action(args):
     analyze(problem, X, Y, num_samples,
             num_resamples=args.num_resamples, 
             conf_level=args.conf_level,
+            print_to_console=True,
             seed=args.seed)
 
 
