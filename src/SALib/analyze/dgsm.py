@@ -69,9 +69,6 @@ def analyze(problem, X, Y, num_resamples=100,
     S = ResultDict((k, np.empty(D)) for k in keys)
     S['names'] = problem['names']
 
-    if print_to_console:
-        print("Parameter %s %s %s %s" % keys)
-
     bounds = problem['bounds']
     for j in range(D):
         perturbed[:, j] = Y[(j + 1):Y_size:step]
@@ -88,10 +85,9 @@ def analyze(problem, X, Y, num_resamples=100,
                                                     bounds[j],
                                                     num_resamples,
                                                     conf_level)
-
-        if print_to_console:
-            print("%s %f %f %f %f" % (
-                S['names'][j], S['vi'][j], S['vi_std'][j], S['dgsm'][j], S['dgsm_conf'][j]))
+    
+    if print_to_console:
+        print(S.to_df().to_string())
 
     return S
 
