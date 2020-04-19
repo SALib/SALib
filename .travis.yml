@@ -9,7 +9,7 @@ addons:
     - python-pip
 
 notifications:
-      email: false
+  email: false
 
 jobs:
   allow_failures:
