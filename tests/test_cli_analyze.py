@@ -2,6 +2,9 @@ import sys
 import subprocess
 from SALib.test_functions import Ishigami
 import numpy as np
+import pandas as pd
+from io import StringIO
+
 import re
 
 salib_cli = "./src/SALib/scripts/salib.py"
@@ -77,13 +80,36 @@ def test_fast():
 
     # run analysis and use regex to strip all whitespace from result
     result = subprocess.check_output(analyze_cmd, universal_newlines=True)
-    result = re.sub(r'[\n\t\s]*', '', result)
 
-    expected = "S1STx13.104027e-010.555603x24.425532e-010.469546x36.340153e-340.239155"
+    expected = """              S1        ST
+x1  3.104027e-01  0.555603
+x2  4.425532e-01  0.469546
+x3  6.340153e-34  0.239155"""
 
-    assert len(result) > 0 and result == expected, \
+    data = StringIO(expected)
+    df1 = pd.read_csv(data, sep="\t")
+
+    df1 = df1.iloc[:, 0].str.split(expand=True)
+    df1.columns = ["Name", "S1", "ST"]
+    df1 = df1.iloc[:, 1:].values.astype('float64')
+
+    data = StringIO(result)
+    df2 = pd.read_csv(data, sep="\t")
+
+    df2 = df2.iloc[:, 0].str.split(expand=True)
+    df2.columns = ["Name", "S1", "ST"]
+    df2 = df2.iloc[:, 1:].values.astype('float64')
+
+    assert np.allclose(df1, df2), \
         "Unexpected FAST results.\n\nExpected:\n{}\n\nGot:{}"\
         .format(expected, result)
+    
+    # expected = "S1STx13.104027e-010.555603x24.425532e-010.469546x36.340153e-340.239155"
+    # expected = "S1STx13.104027e-010.555603x24.425532e-010.469546x35.105568e-340.239155"
+
+    # assert len(result) > 0 and result == expected, \
+    #     "Unexpected FAST results.\n\nExpected:\n{}\n\nGot:{}"\
+    #     .format(expected, result)
 
 
 def test_ff():
