@@ -147,8 +147,12 @@ def compute_grouped_sigma(ungrouped_sigma, group_matrix):
                                       mask=(group_matrix ^ 1).T)
     sigma_agg = np.ma.mean(sigma_masked, axis=1)
     sigma = np.zeros(group_matrix.shape[1], dtype=np.float)
-    np.copyto(sigma, sigma_agg, where=group_matrix.sum(axis=0) == 1)
-    np.copyto(sigma, np.NAN, where=group_matrix.sum(axis=0) != 1)
+
+    group_sum = group_matrix.sum(axis=0)
+    np.copyto(sigma, sigma_agg, where=group_sum >= 1)
+    np.copyto(sigma, np.NAN, where=group_sum < 1)
+    # np.copyto(sigma, sigma_agg, where=group_matrix.sum(axis=0) == 1)
+    # np.copyto(sigma, np.NAN, where=group_matrix.sum(axis=0) != 1)
 
     return sigma
 
