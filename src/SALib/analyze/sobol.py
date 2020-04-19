@@ -136,8 +136,7 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
         res = S.to_df()
         for df in res:
             print(df.to_string())
-
-        # print_indices(S, problem, calc_second_order)
+    
     return S
 
 
@@ -311,8 +310,13 @@ def to_df(self):
     '''Conversion method to Pandas DataFrame. To be attached to ResultDict.
 
     Returns
-    ========
+    --------
     List : of Pandas DataFrames in order of Total, First, Second
+
+    Example
+    -------
+    >>> Si = sobol.analyze(problem, Y, print_to_console=True)
+    >>> total_Si, first_Si, second_Si = Si.to_df()
     '''
     total, first, (idx, second) = Si_to_pandas_dict(self)
     names = self.problem['names']
