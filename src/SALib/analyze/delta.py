@@ -67,9 +67,6 @@ def analyze(problem, X, Y, num_resamples=100,
     S = ResultDict((k, np.zeros(D)) for k in keys)
     S['names'] = problem['names']
 
-    if print_to_console:
-        print("Parameter %s %s %s %s" % keys)
-
     try:
         for i in range(D):
             X_i = X[:, i]
@@ -78,9 +75,6 @@ def analyze(problem, X, Y, num_resamples=100,
             S['S1'][i] = sobol_first(Y, X_i, m)
             S['S1_conf'][i] = sobol_first_conf(
                 Y, X_i, m, num_resamples, conf_level)
-            if print_to_console:
-                print("%s %f %f %f %f" % (S['names'][i], S['delta'][
-                    i], S['delta_conf'][i], S['S1'][i], S['S1_conf'][i]))
     except np.linalg.LinAlgError as e:
         msg = "Singular matrix detected\n"
         msg += "This may be due to the sample size ({}) being too small\n".format(Y.size)
@@ -88,6 +82,9 @@ def analyze(problem, X, Y, num_resamples=100,
         msg += "SALib team"
 
         raise np.linalg.LinAlgError(msg)
+
+    if print_to_console:
+        print(S.to_df().to_string())
 
     return S
 
