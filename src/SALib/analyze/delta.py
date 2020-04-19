@@ -84,7 +84,7 @@ def analyze(problem, X, Y, num_resamples=100,
         raise np.linalg.LinAlgError(msg)
 
     if print_to_console:
-        print(S.to_df().to_string())
+        print(S.to_df())
 
     return S
 
