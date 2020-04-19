@@ -1,33 +1,35 @@
-sudo: false
+os: linux
 language: python
-env:
-  matrix:
-  - DISTRIB="conda" PYTHON_VERSION="3.5" COVERAGE="false"
-  - DISTRIB="conda" PYTHON_VERSION="3.6" COVERAGE="true"
-  - DISTRIB="conda" PYTHON_VERSION="3.7" COVERAGE="false"
-  - DISTRIB="conda" PYTHON_VERSION="3.8" COVERAGE="false"
-matrix:
-  allow_failures:
-    - env: DISTRIB="conda" PYTHON_VERSION="3.5" COVERAGE="false"
-    - env: DISTRIB="conda" PYTHON_VERSION="3.8" COVERAGE="false"
+dist: xenial
+
 addons:
   apt:
     packages:
     - git
     - python-pip
-install:
-- source tests/travis_install.sh
-- pip install -r test-requirements.txt
-script:
-- python setup.py develop
-- pytest
-after_success:
-- if [[ "$COVERAGE" == "true" ]]; then coveralls || echo "failed"; fi
-notifications:
-  email: false
 
 jobs:
+  allow_failures:
+    - env: DISTRIB="conda" PYTHON_VERSION="3.5" COVERAGE="false"
   include:
+    - stage: "test"
+      name: "Test the SALib package"
+      env:
+      - DISTRIB="conda" PYTHON_VERSION="3.5" COVERAGE="false"
+      - DISTRIB="conda" PYTHON_VERSION="3.6" COVERAGE="true"
+      - DISTRIB="conda" PYTHON_VERSION="3.7" COVERAGE="false"
+      - DISTRIB="conda" PYTHON_VERSION="3.8" COVERAGE="false"
+      install:
+      - source tests/travis_install.sh
+      - pip install -r test-requirements.txt
+      script:
+      - python setup.py develop
+      - pytest
+      after_success:
+      - if [[ "$COVERAGE" == "true" ]]; then coveralls || echo "failed"; fi
+      notifications:
+        email: false
+
     - stage: "deploy"
       name: "Deploy to PyPI"
       if: tag =~ ^v
