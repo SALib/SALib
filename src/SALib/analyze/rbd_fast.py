@@ -67,8 +67,6 @@ def analyze(problem, X, Y, M=10, print_to_console=False, seed=None):
     N = Y.size
 
     # Calculate and Output the First Order Value
-    if print_to_console:
-        print("Parameter First")
     Si = ResultDict((k, [None] * D) for k in ['S1'])
     Si['names'] = problem['names']
 
@@ -76,9 +74,10 @@ def analyze(problem, X, Y, M=10, print_to_console=False, seed=None):
         S1 = compute_first_order(permute_outputs(X[:, i], Y), M)
         S1 = unskew_S1(S1, M, N)
         Si['S1'][i] = S1
-        if print_to_console:
-            print("%s %g" %
-                  (problem['names'][i].ljust(9), Si['S1'][i]))
+    
+    if print_to_console:
+        print(Si.to_df().to_string())
+
     return Si
 
 
