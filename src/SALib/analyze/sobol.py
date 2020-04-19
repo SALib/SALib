@@ -329,32 +329,6 @@ def to_df(self):
     return ret
 
 
-def print_indices(S, problem, calc_second_order):
-    # Output to console
-    if not problem.get('groups'):
-        title = 'Parameter'
-        names = problem['names']
-        D = problem['num_vars']
-    else:
-        title = 'Group'
-        _, names = compute_groups_matrix(problem['groups'])
-        D = len(names)
-
-    print('%s S1 S1_conf ST ST_conf' % title)
-
-    for j in range(D):
-        print('%s %f %f %f %f' % (names[j], S['S1'][
-            j], S['S1_conf'][j], S['ST'][j], S['ST_conf'][j]))
-
-    if calc_second_order:
-        print('\n%s_1 %s_2 S2 S2_conf' % (title, title))
-
-        for j in range(D):
-            for k in range(j + 1, D):
-                print("%s %s %f %f" % (names[j], names[k],
-                                       S['S2'][j, k], S['S2_conf'][j, k]))
-
-
 def cli_parse(parser):
     parser.add_argument('--max-order', type=int, required=False, default=2,
                         choices=[1, 2],
