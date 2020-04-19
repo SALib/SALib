@@ -148,11 +148,13 @@ def compute_grouped_sigma(ungrouped_sigma, group_matrix):
     sigma_agg = np.ma.mean(sigma_masked, axis=1)
     sigma = np.zeros(group_matrix.shape[1], dtype=np.float)
 
+    # Sigma for Morris groups require mu rather than mu_star.
+    # Only calculate sigma for groups that have only 1 parameter as
+    # sigma requires mu rather than mu_star.
+    # All others should be NaN.
     group_sum = group_matrix.sum(axis=0)
-    np.copyto(sigma, sigma_agg, where=group_sum >= 1)
-    np.copyto(sigma, np.NAN, where=group_sum < 1)
-    # np.copyto(sigma, sigma_agg, where=group_matrix.sum(axis=0) == 1)
-    # np.copyto(sigma, np.NAN, where=group_matrix.sum(axis=0) != 1)
+    np.copyto(sigma, sigma_agg, where=group_sum == 1)
+    np.copyto(sigma, np.NAN, where=group_sum != 1)
 
     return sigma
 
