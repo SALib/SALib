@@ -64,19 +64,16 @@ def analyze(problem, X, Y, second_order=False, print_to_console=False,
     Si['ME'] = main_effect
     Si['names'] = problem['names']
 
-    if print_to_console:
-        print("Parameter ME")
-        for j in range(num_vars):
-            print("%s %f" % (problem['names'][j], Si['ME'][j]))
-
     if second_order:
-        interaction_names, interaction_effects = interactions(problem,
-                                                              Y,
-                                                              print_to_console)
+        interaction_names, interaction_effects = interactions(problem, Y)
         Si['interaction_names'] = interaction_names
         Si['IE'] = interaction_effects
 
     Si.to_df = MethodType(to_df, Si)
+
+    if print_to_console:
+        for S in Si.to_df():
+            print(S.to_string())
 
     return Si
 
@@ -106,7 +103,7 @@ def to_df(self):
     return main_effect, inter_effect
 
 
-def interactions(problem, Y, print_to_console=False):
+def interactions(problem, Y):
     """Computes the second order effects
 
     Computes the second order effects (interactions) between
@@ -127,9 +124,7 @@ def interactions(problem, Y, print_to_console=False):
         The names of the interaction pairs
     IE: list
         The sensitivity indices for the pairwise interactions
-
     """
-
     names = problem['names']
     num_vars = problem['num_vars']
 
@@ -144,8 +139,6 @@ def interactions(problem, Y, print_to_console=False):
             var_names = (names[col_2], names[col])
             ie_names.append(var_names)
             IE.append((1. / (2 * num_vars)) * np.dot(Y, x))
-    if print_to_console:
-        [print('%s %f' % (n, i)) for (n, i) in zip(ie_names, IE)]
 
     return ie_names, IE
 
