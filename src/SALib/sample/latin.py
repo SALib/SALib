@@ -60,5 +60,4 @@ def cli_action(args):
 
 
 if __name__ == "__main__":
-    cli_parse = None  # No additional options
     common_args.run_cli(cli_parse, cli_action)
