@@ -8,6 +8,9 @@ addons:
     - git
     - python-pip
 
+notifications:
+      email: false
+
 jobs:
   allow_failures:
     - env: DISTRIB="conda" PYTHON_VERSION="3.5" COVERAGE="false"
@@ -27,8 +30,6 @@ jobs:
       - pytest
       after_success:
       - if [[ "$COVERAGE" == "true" ]]; then coveralls || echo "failed"; fi
-      notifications:
-        email: false
 
     - stage: "deploy"
       name: "Deploy to PyPI"
@@ -40,10 +41,10 @@ jobs:
       script: echo "Deploying to PyPI"
       deploy:
         provider: pypi
-        user: jdherman
+        username: jdherman
         password:
           secure: KiUygZVHWMR2a+fk092xeHh8J2c61VGrgq4v1l3bq41MxcZO745H7CLJJ3rfqo+G5/pqy4/tm+q3p8fHhbUmwMcuSC3vjRN6WAYjuNPs0FMVXiIkMQtevv2LdVF1zVKFBdYTuNrfugtZ/GXh/ReCydjEBWTrTaNYeNM4ZRIaj0Q=
         on:
           tags: true
           all_branches: true
-        skip_cleanup: true
+        cleanup: false
