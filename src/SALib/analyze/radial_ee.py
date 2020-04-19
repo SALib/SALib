@@ -9,8 +9,9 @@ from ..util import read_param_file, ResultDict
 __all__ = ['analyze']
 
 def analyze(problem: Dict, X: np.array, Y: np.array, sample_sets: int,
-            num_resamples: int = 1000,
+            num_resamples: int = 100,
             conf_level: float = 0.95,
+            print_to_console: bool = False,
             seed: Optional[int] = None) -> Dict:
     """Radial Elementary Effects Analysis.
 
@@ -34,10 +35,13 @@ def analyze(problem: Dict, X: np.array, Y: np.array, sample_sets: int,
         The number of sample sets used to create result set `Y`
 
     num_resamples : int
-        The number of resamples to calculate `mu_star_conf` (default 1000)
+        The number of resamples to calculate `mu_star_conf` (default 100)
 
     conf_level : float
         The confidence interval level (default 0.95)
+
+    print_to_console : bool
+        Print results directly to console (default False)
 
     seed : int
         Seed value to use for np.random.seed
