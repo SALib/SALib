@@ -135,7 +135,7 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
     if print_to_console:
         res = S.to_df()
         for df in res:
-            print(df.to_string())
+            print(df)
     
     return S
 

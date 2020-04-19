@@ -76,7 +76,7 @@ def analyze(problem, X, Y, M=10, print_to_console=False, seed=None):
         Si['S1'][i] = S1
     
     if print_to_console:
-        print(Si.to_df().to_string())
+        print(Si.to_df())
 
     return Si
 

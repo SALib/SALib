@@ -129,7 +129,7 @@ def analyze(problem, X, Y,
         Si = Si_grouped
     
     if print_to_console:
-        print(Si.to_df().to_string())
+        print(Si.to_df())
 
     return Si
 

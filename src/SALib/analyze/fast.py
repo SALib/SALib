@@ -81,7 +81,7 @@ def analyze(problem, Y, M=4, print_to_console=False, seed=None):
         Si['ST'][i] = compute_total_order(Y[l], N, omega[0])
     
     if print_to_console:
-        print(Si.to_df().to_string())
+        print(Si.to_df())
 
     return Si
 

@@ -73,7 +73,7 @@ def analyze(problem, X, Y, second_order=False, print_to_console=False,
 
     if print_to_console:
         for S in Si.to_df():
-            print(S.to_string())
+            print(S)
 
     return Si
 
