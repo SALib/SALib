@@ -103,13 +103,6 @@ x3  6.340153e-34  0.239155"""
     assert np.allclose(df1, df2), \
         "Unexpected FAST results.\n\nExpected:\n{}\n\nGot:{}"\
         .format(expected, result)
-    
-    # expected = "S1STx13.104027e-010.555603x24.425532e-010.469546x36.340153e-340.239155"
-    # expected = "S1STx13.104027e-010.555603x24.425532e-010.469546x35.105568e-340.239155"
-
-    # assert len(result) > 0 and result == expected, \
-    #     "Unexpected FAST results.\n\nExpected:\n{}\n\nGot:{}"\
-    #     .format(expected, result)
 
 
 def test_ff():
