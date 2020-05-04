@@ -50,7 +50,7 @@ To test your installation of SALib, run the following command
 
 ::
 
-    python setup.py test
+    pytest
 
 Alternatively, if you’d like also like a taste of what SALib provides,
 start a new interactive Python session
@@ -82,7 +82,7 @@ and copy/paste the code below.
     Si = sobol.analyze(problem, Y, print_to_console=True)
 
     # Print the first-order sensitivity indices
-    print Si['S1']
+    print(Si['S1'])
 
 If installed correctly, the last line above will print three values, similar
 to :code:`[ 0.30644324  0.44776661 -0.00104936]`.

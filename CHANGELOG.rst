@@ -2,6 +2,35 @@
 Changelog
 =========
 
+Version 1.3
+===========
+
+New Features:
+
+- Various minor performance enhancements (PR #253 #264)
+- Added some visualisation methods (PR #259)
+- Tidying up of the Command Line Interfance, and num samples (PR #260 #291)
+- Improved efficiency of summing distances in local optimization (PR #246)
+- Revamped fast method for consistency (PR #239)
+- Updated Sobol-G function to modified G-function (#269)
+
+Bug Fixes:
+
+- Method of morris didn't adjust with levels above 4 (PR #252)
+- Add missing seed option for morris sampling
+- Handle singular value matrix cases (PR #251)
+- Fixed typo (#205)
+- Updated import of scipy comb function (PR #243)
+
+Documentation:
+
+- Update documentation for Morris and DSGM methods (#261 #266)
+
+Development Features:
+
+- Updated PyScaffold to version 3.2.2 (#267)
+- Updated Travis and package config (#285)
+
 Version 1.1.0
 =============
 
@@ -29,8 +58,6 @@ Development Features:
 - Implemented automatic deployment to PyPi
 - Fixed a bug preventing automatic deployment to PyPi upon tagging a branch
 - Removed postgres from travis config
-
-
 
 Version 1.0.0
 =============
