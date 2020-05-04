@@ -4,6 +4,7 @@
 from collections import OrderedDict
 import csv
 from warnings import warn
+from .problem import ProblemSpec
 from .results import ResultDict
 import pkgutil
 
