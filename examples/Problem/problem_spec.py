@@ -17,14 +17,14 @@ if __name__ == '__main__':
     })
 
     start = time.perf_counter()
-    (sp.sample(saltelli.sample, 200000, calc_second_order=True)
+    (sp.sample(saltelli.sample, 75000, calc_second_order=True)
         .run(Ishigami.evaluate)
         .analyze(sobol.analyze, calc_second_order=True, conf_level=0.95))
     print("Single:", time.perf_counter() - start)
 
     start = time.perf_counter()
-    (sp.sample(saltelli.sample, 200000, calc_second_order=True)
-        .run_parallel(Ishigami.evaluate)
+    (sp.sample(saltelli.sample, 75000, calc_second_order=True)
+        .run_parallel(Ishigami.evaluate, nprocs=3)
         .analyze(sobol.analyze, calc_second_order=True, conf_level=0.95))
     print("Multi:", time.perf_counter() - start)
 
