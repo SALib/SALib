@@ -44,30 +44,52 @@ class ProblemSpec(dict):
 
         return self
     
-    def run_parallel(self, func, *args, **kwargs):
+    def run_parallel(self, func, *args, nprocs=None, **kwargs):
+        """Run model in parallel.
+
+        Conditions:
+        * Provided function needs to accept a numpy array of inputs as 
+          its first parameter
+
+        All detected processors will be used if nprocs is not specified.
+        """
+        if self._samples is None:
+            raise RuntimeError("Sampling not yet conducted")
+        
+        if nprocs is None:
+            nprocs = cpu_count()
 
         # Create wrapped partial function to allow passing of additional args
-        partial_f = partial(func, *args, **kwargs)
-        def tmp_f(X_i):
-            """Helper function to run each sample independently"""
-            return partial_f(X_i)
+        if (len(args) == 0) and (len(kwargs) == 0):
+            tmp_f = func
+        else:
+            partial_f = partial(func, *args, **kwargs)
+            def tmp_f(X_i):
+                """Helper function to run each sample independently"""
+                return partial_f(X_i)
 
         # Split into even chunks
-        nprocs = cpu_count()
         chunks = np.array_split(self._samples, int(nprocs), axis=0)
 
-        final_res = np.array([])
+        # Set up result array
+        if len(self['outputs']) - 1 > 1:
+            final_res = np.empty((len(self._samples), len(self['outputs'])))
+        else:
+            final_res = np.empty(len(self._samples))
+
         if ptqdm_available:
-            # Display progress bar
+            # Display progress bar if available
             res = p_imap(tmp_f, chunks, num_cpus=nprocs)
-            for r in res:
-                final_res = np.concatenate((final_res, r))
         else:
             with Pool(nprocs) as pool:
-                res = pool.imap(tmp_f, chunks)
-                for r in res:
-                    final_res = np.concatenate((final_res, r))
-        
+                res = list(pool.imap(tmp_f, chunks))
+
+        i = 0
+        for r in res:
+            r_len = len(r)
+            final_res[i:i+r_len] = r
+            i += r_len
+
         self._model_output = final_res
 
         return self
