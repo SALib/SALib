@@ -1,6 +1,14 @@
 from multiprocess import Pool, cpu_count
 from functools import partial
+import importlib
+import pkgutil
+
 import numpy as np
+
+import SALib
+import SALib.sample as samplers
+import SALib.analyze as analyzers
+from SALib.util import avail_approaches
 
 from .results import ResultDict
 
@@ -23,6 +31,9 @@ class ProblemSpec(dict):
         self._analysis = None
 
         self['num_vars'] = len(self['names'])
+
+        self._add_samplers()
+        self._add_analyzers()
 
     def sample(self, func, *args, **kwargs):
         """Create sample using given function.
@@ -119,6 +130,16 @@ class ProblemSpec(dict):
             return [an.to_df() for an in list(an_res.values())]
         
         raise RuntimeError("Analysis not yet conducted")
+
+    def _add_samplers(self):
+        for sampler in avail_approaches(samplers):
+            func = getattr(importlib.import_module('SALib.sample.{}'.format(sampler)), 'sample')
+            self.__setattr__("sample_{}".format(sampler.replace('_sampler', '')), func)
+    
+    def _add_analyzers(self):
+        for analyzer in avail_approaches(analyzers):
+            func = getattr(importlib.import_module('SALib.analyze.{}'.format(analyzer)), 'analyze')
+            self.__setattr__("analyze_{}".format(analyzer.replace('_analyzer', '')), func)
 
     def __repr__(self):
         if self._samples is not None:
