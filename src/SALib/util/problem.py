@@ -1,5 +1,5 @@
 from multiprocess import Pool, cpu_count
-from functools import partial
+from functools import partial, wraps
 import importlib
 import pkgutil
 
@@ -10,13 +10,15 @@ import SALib.sample as samplers
 import SALib.analyze as analyzers
 from SALib.util import avail_approaches
 
-from .results import ResultDict
+from SALib.util.results import ResultDict
 
 ptqdm_available = True
 try:
     from p_tqdm import p_imap
 except ImportError:
     ptqdm_available = False
+
+__all__ = ['ProblemSpec']
 
 
 class ProblemSpec(dict):
@@ -27,7 +29,7 @@ class ProblemSpec(dict):
         super(ProblemSpec, self).__init__(*args, **kwargs)
 
         self._samples = None
-        self._model_output = None
+        self._results = None
         self._analysis = None
 
         self['num_vars'] = len(self['names'])
@@ -51,7 +53,7 @@ class ProblemSpec(dict):
 
         The target model must accept the samples as the first parameter.
         """
-        self._model_output = func(self._samples, *args, **kwargs)
+        self._results = func(self._samples, *args, **kwargs)
 
         return self
     
@@ -101,7 +103,7 @@ class ProblemSpec(dict):
             final_res[i:i+r_len] = r
             i += r_len
 
-        self._model_output = final_res
+        self._results = final_res
 
         return self
 
@@ -110,44 +112,62 @@ class ProblemSpec(dict):
 
         Analysis function must accept the problem spec as the first parameter.
         """
-        # TODO: Analyze function signature to see if X and Y are both needed...
+        if 'X' in func.__code__.co_varnames:
+            # enforce passing of X if expected
+            func = partial(func, *args, X=self._samples, **kwargs)
+
         if len(self['outputs']) > 1:
             self._analysis = {}
             for i, out in enumerate(self['outputs']):
-                self._analysis[out] = func(self, self._model_output[:, i], *args, **kwargs)
+                self._analysis[out] = func(self, *args, Y=self._results[:, i], **kwargs)
         else:
-            self._analysis = func(self, self._model_output, *args, **kwargs)
+            self._analysis = func(self, *args, Y=self._results, **kwargs)
 
         return self
 
     def to_df(self):
+        """Convert results to Pandas DataFrame."""
         an_res = self._analysis
         is_rd_type = isinstance(an_res, ResultDict)
         if is_rd_type:
             return an_res.to_df()
         elif isinstance(an_res, dict):
-            # is a dict of ResultDicts
+            # case where analysis result is a dict of ResultDicts
             return [an.to_df() for an in list(an_res.values())]
         
         raise RuntimeError("Analysis not yet conducted")
 
     def _add_samplers(self):
+        """Dynamically add available SALib samplers as ProblemSpec methods."""
         for sampler in avail_approaches(samplers):
             func = getattr(importlib.import_module('SALib.sample.{}'.format(sampler)), 'sample')
-            self.__setattr__("sample_{}".format(sampler.replace('_sampler', '')), func)
+
+            @wraps(func)
+            def modfunc(*args, **kwargs):
+                self.sample(func, *args, **kwargs)
+                return self
+
+            self.__setattr__("sample_{}".format(sampler.replace('_sampler', '')), modfunc)
     
     def _add_analyzers(self):
+        """Dynamically add available SALib analyzers as ProblemSpec methods."""
         for analyzer in avail_approaches(analyzers):
             func = getattr(importlib.import_module('SALib.analyze.{}'.format(analyzer)), 'analyze')
-            self.__setattr__("analyze_{}".format(analyzer.replace('_analyzer', '')), func)
+            
+            @wraps(func)
+            def modfunc(*args, **kwargs):
+                self.analyze(func, *args, **kwargs)
+                return self
+
+            self.__setattr__("analyze_{}".format(analyzer.replace('_analyzer', '')), modfunc)
 
     def __repr__(self):
         if self._samples is not None:
             print('Samples:', self._samples.shape, "\n")
-        if self._model_output is not None:
-            print('Outputs:', self._model_output.shape, "\n")
+        if self._results is not None:
+            print('Outputs:', self._results.shape, "\n")
         if self._analysis is not None:
-            print('Analysis:\n')  # , self._model_output.shape, "\n")
+            print('Analysis:\n')  # , self._results.shape, "\n")
             an_res = self._analysis
             if isinstance(an_res, ResultDict):
                 for df in an_res.to_df():
