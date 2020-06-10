@@ -169,7 +169,11 @@ def hdmr_compute(X, Y, settings, init_vars):
 def hdmr_setup(X: np.array, Y: np.array, options: Dict) -> list:
     # Get dimensionality of numpy arrays
     N, d = X.shape
-    y_row, _ = Y.shape
+
+    if len(Y.shape) > 1:
+        y_row, _ = Y.shape
+    else:
+        y_row = Y.shape[0]
 
     # Now check input-output mismatch
     if d == 1:
