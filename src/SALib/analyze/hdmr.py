@@ -280,8 +280,10 @@ def hdmr_setup(X: np.array, Y: np.array, options: Dict) -> list:
 
 def hdmr_init(X, Y, settings):
     N, d, graphics, maxorder, maxiter, m, K, R, alfa, lambdax, ptc = settings
+
     # Random Seed
     np.random.seed(1 + round(100 * np.random.rand()))
+
     # Setup Bootstrap (if K > 1)
     if (K == 1):
         # No Bootstrap
@@ -293,14 +295,17 @@ def hdmr_init(X, Y, settings):
     # Compute normalized X-values
     X_n = (X - np.tile(X.min(0), (N, 1))) / \
         np.tile((X.max(0)) - X.min(0), (N, 1))
+
     # DICT Em: Important variables
     n2 = 0
     n3 = 0
     c2 = np.empty
     c3 = np.empty
+
     # determine all combinations of parameters (coefficients) for each order
     c1 = np.arange(0, d)
     n1 = d
+
     # now return based on maxorder used
     if maxorder > 1:
         c2 = np.asarray(list(itertools.combinations(np.arange(0, d), 2)))
@@ -308,13 +313,16 @@ def hdmr_init(X, Y, settings):
     if maxorder == 3:
         c3 = np.asarray(list(itertools.combinations(np.arange(0, d), 3)))
         n3 = c3.shape[0]
+
     # calulate total number of coefficients
     n = n1 + n2 + n3
+
     # Initialize m1, m2 and m3 - number of coefficients first, second, third
     # order
     m1 = m + 3
     m2 = m1**2
     m3 = m1**3
+
     # STRUCTURE Em: Initialization
     if (maxorder == 1):
         Em = {'nterms': np.zeros(K), 'RMSE': np.zeros(K), 'm': m, 'Y_e': np.zeros((R, K)), 'f0': np.zeros(K),
@@ -328,6 +336,7 @@ def hdmr_init(X, Y, settings):
         Em = {'nterms': np.zeros(K), 'RMSE': np.zeros(K), 'm': m, 'Y_e': np.zeros((R, K)), 'f0': np.zeros(K),
               'c1': c1, 'n1': n1, 'c2': c2, 'n2': n2, 'c3': c3, 'n3': n3, 'n': n, 'maxorder': maxorder, 'select': np.zeros((n, K)),
               'B1': np.zeros((N, m1, n1)), 'B2': np.zeros((N, m2, n2)), 'B3': np.zeros((N, m3, n3))}
+
     # Compute B-Splines
     Em['B1'] = B_spline(X_n, N, d, m)
 
@@ -349,10 +358,11 @@ def hdmr_init(X, Y, settings):
                                                 Em['B1'][:, beta[j, 2], Em['c3'][k, 2]])
 
     # DICT SA: Sensitivity analysis and analysis of variance decomposition
+    em_k = np.zeros((Em['n'], K))
     SA = {
-        'S': np.zeros((Em['n'], K)),
-        'Sa': np.zeros((Em['n'], K)),
-        'Sb': np.zeros((Em['n'], K)),
+        'S': em_k,
+        'Sa': em_k,
+        'Sb': em_k,
         'ST': np.zeros((d, K)),
         'V_Y': np.zeros((K, 1))
     }
