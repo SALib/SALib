@@ -1,3 +1,5 @@
+from typing import Dict, List, Optional
+
 import itertools
 import time
 import numpy as np
@@ -8,7 +10,8 @@ from ..util import read_param_file, ResultDict
 from matplotlib import pyplot as plt
 
 
-def analyze(problem, X, Y, options=None):
+def analyze(problem: Dict, X: np.array, Y: np.array, 
+            options: Optional[Dict] = None) -> Dict:
     """High-Dimensional Model Representation (HDMR) using B-spline functions.
 
     HDMR is used for variance-based global sensitivity analysis (GSA) with 
@@ -163,21 +166,21 @@ def hdmr_compute(X, Y, settings, init_vars):
     return (SA, Em, RT, Y_em, idx)
 
 
-def hdmr_setup(X, Y, options={}):
-    # Get dimensionality of Numpy Array
-    Sx = X.shape
-    Sy = Y.shape
+def hdmr_setup(X: np.array, Y: np.array, options: Dict) -> list:
+    # Get dimensionality of numpy arrays
+    N, d = X.shape
+    y_row, _ = Y.shape
+
     # Now check input-output mismatch
-    if Sx[1] == 1:
+    if d == 1:
         raise RuntimeError("Matrix X contains only a single column: No point to do sensitivity analysis when d = 1.")
-    if Sx[0] < 300:
-        raise RuntimeError("Number of samples, N, of N x d matrix X is insufficient.")
-    if Sx[0] != Sy[0]:
-        raise RuntimeError("Dimension mismatch. The number of rows, N of Y should match number of rows of X.")
-    if Y.size != Sx[0]:
+    if N < 300:
+        raise RuntimeError(f"Number of samples in matrix X, {N}, is insufficient. Need at least 300.")
+    if N != y_row:
+        raise RuntimeError(f"Dimension mismatch. The number of outputs ({y_row}) should match number of samples ({N})")
+    if Y.size != N:
         raise RuntimeError("Y should be a N x 1 vector with one simulated output for each N parameter vectors.")
-    N = Sx[0]
-    d = Sx[1]
+
     # Default options will be used if user does not define at least one option
     def_options = {
         'graphics': 0, 
@@ -185,16 +188,19 @@ def hdmr_setup(X, Y, options={}):
         'maxiter': 100, 
         'm': 2, 
         'K': 20,
-        'R': Sy[0] // 2, 
+        'R': y_row // 2, 
         'alfa': 0.95, 
         'lambdax': 0.01, 
         'print_to_console': 1
     }
 
+    if options is None:
+        options = {}
+
     # Unpack the options
     if ('graphics' in options):
         graphics = options['graphics']
-        if ismember(graphics, (0, 1))!=True:
+        if not ismember(graphics, (0, 1)):
             raise RuntimeError("Field \"graphics\" of options should take on the value of 0 or 1.")
     else:
         graphics = def_options['graphics']
@@ -202,14 +208,14 @@ def hdmr_setup(X, Y, options={}):
     # Unpack the options
     if ('print_to_console' in options):
         print_to_console = options['print_to_console']
-        if ismember(print_to_console, (0, 1))!=True:
+        if not ismember(print_to_console, (0, 1)):
             raise RuntimeError("Field \"print_to_console\" of options should take on the value of 0 or 1.")
     else:
         print_to_console = def_options['print_to_console']
 
     if 'maxorder' in options:
         maxorder = options['maxorder']
-        if ismember(maxorder, (1,2,3))!=True:
+        if not ismember(maxorder, (1,2,3)):
             raise RuntimeError("Field \"maxorder\" of options should be an integer with values of 1, 2 or 3.")
     else:
         maxorder = def_options['maxorder']
@@ -221,34 +227,34 @@ def hdmr_setup(X, Y, options={}):
 
     if 'maxiter' in options:
         maxiter = options['maxiter']
-        if ismember(maxiter, np.arange(1, 1001))!=True:
+        if not ismember(maxiter, np.arange(1, 1001)):
             raise RuntimeError("Field \"maxiter\" of options should be an integer between 1 to 1000.")
     else:
         maxiter = def_options['maxiter']
 
     if 'm' in options:
         m = options['m']
-        if ismember(m, np.arange(1, 6))!=True:
+        if not ismember(m, np.arange(1, 6)):
             raise RuntimeError("Field \"m\" of options should be an integer between 1 to 5.")
     else:
         m = def_options['m']
 
     if 'K' in options:
         K = options['K']
-        if ismember(K, np.arange(1, 101))!=True:
+        if not ismember(K, np.arange(1, 101)):
             raise RuntimeError("Field \"K\" of options should be an integer between 1 to 100.")
     else:
         K = def_options['K']
 
     if 'R' in options:
         R = options['R']
-        if ismember(R, np.arange(300, N + 1))!=True:
+        if not ismember(R, np.arange(300, N + 1)):
             raise RuntimeError("Field \"R\" of options should be an integer between 300 and N, number of rows matrix X.")
     else:
         R = def_options['R']
 
-    if (K == 1) and (R != Sy[0]):
-        R = Sy[0]
+    if (K == 1) and (R != y_row):
+        R = y_row
 
     if 'alfa' in options:
         alfa = options['alfa']
