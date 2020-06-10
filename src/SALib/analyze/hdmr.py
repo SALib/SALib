@@ -10,12 +10,13 @@ from ..util import read_param_file, ResultDict
 from matplotlib import pyplot as plt
 
 
-def analyze(problem, X, Y, options={}):
-    """High-Dimensional Model Representation (HDMR) using B-spline functions
-    for variance-based global sensitivity analysis (GSA) with correlated
-    and uncorrelated inputs. This function uses as input a N x d matrix
-    of N different d-vectors of model inputs (factors/parameters) and a
-    N x 1 vector of corresponding model outputs and returns to the user
+def analyze(problem, X, Y, options=None):
+    """High-Dimensional Model Representation (HDMR) using B-spline functions.
+
+    HDMR is used for variance-based global sensitivity analysis (GSA) with 
+    correlated and uncorrelated inputs. This function uses as input a N x d 
+    matrix of N different d-vectors of model inputs (factors/parameters) and 
+    a N x 1 vector of corresponding model outputs and returns to the user
     each factor's first, second, and third order sensitivity coefficient
     (separated in total, structural and correlative contributions), an
     estimate of their 95% confidence intervals (from bootstrap method)
