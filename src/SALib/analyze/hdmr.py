@@ -366,14 +366,18 @@ def hdmr_init(X, Y, settings):
         'ST': np.zeros((d, K)),
         'V_Y': np.zeros((K, 1))
     }
+
     # Return runtime
     RT = np.zeros((1, K))
+
     # Initialize emulator matrix
     Y_em = np.zeros((R, Em['n']))
+
     # Initialize index of first, second and third order terms (columns of Y_em)
     j1 = range(n1)
     j2 = range(n1, n1 + n2)
     j3 = range(n1 + n2, n1 + n2 + n3)
+
     # Initialize temporary Y_id for bootstrap
     Y_id = np.zeros((R, 1))
 
@@ -387,8 +391,10 @@ def ismember(A, B):
 def B_spline(X, R, d, m):
     # Initialize B-Spline Matrix
     B = np.zeros((R, m + 3, d))
+
     # Calculate the interval
     h1 = 1 / m
+
     # Now loop over each parameter of X through each interval
     for i in range(d):
         for j in range(m + 3):
@@ -406,6 +412,7 @@ def B_spline(X, R, d, m):
                     B[r, j, i] = ((k + 2) * h1 - X[r, i])**3 - 4 * ((k + 1) * h1 - X[r, i])**3 + \
                         6 * (k * h1 - X[r, i])**3 - 4 * \
                         ((k - 1) * h1 - X[r, i])**3
+
     # Multiply B with m^3
     B *= m**3
 
@@ -417,16 +424,19 @@ def hdmr_first_order(B1, Y_res, R, n1, m1, maxiter, lambdax):
     Y_i = np.zeros((R, n1))       # Initialize 1st order contributions
     T1 = np.zeros((m1, R, n1))     # Initialize T(emporary) matrix - 1st
     it = 0                       # Initialize iteration counter
+
     # First order individual estimation
     for j in range(n1):
         # Regularized least squares inversion ( minimize || C1 ||_2 )
         B11 = np.matmul(np.transpose(B1[:, :, j]), B1[:, :, j])
+
         if (np.linalg.det(B11) == 0):
             C1[:, j] = 0  # Ill-defined
             # print("SALib-HDMR Warning: Matrix B11 is ill-defined. Try to decrease b-spline interval \"m\". Solution, C1, is set to zero.")
         else:
             T1[:, :, j] = np.linalg.solve(np.add(B11, np.multiply(
                 lambdax, np.identity(m1))), np.transpose(B1[:, :, j]))
+
         C1[:, j] = np.matmul(T1[:, :, j], Y_res).reshape(m1,)
         Y_i[:, j] = np.matmul(B1[:, :, j], C1[:, j])
 
@@ -440,14 +450,18 @@ def hdmr_first_order(B1, Y_res, R, n1, m1, maxiter, lambdax):
                 if j != z:
                     Y_r = np.subtract(Y_r, np.matmul(
                         B1[:, :, z], C1[:, z]).reshape(R, 1))
+
             C1[:, j] = np.matmul(T1[:, :, j], Y_r).reshape(m1,)
+
         var1b_new = np.sum(np.square(C1), axis=0)
         varmax = np.max(np.absolute(np.subtract(var1b_new, var1b_old)))
         var1b_old = var1b_new
         it += 1
+
     # Now compute first-order terms
     for j in range(n1):
         Y_i[:, j] = np.matmul(B1[:, :, j], C1[:, j])
+
         # Subtract each first order term from residuals
         Y_res = np.subtract(Y_res, Y_i[:, j].reshape(R, 1))
 
@@ -458,10 +472,12 @@ def hdmr_second_order(B2, Y_res, R, n2, m2, lambdax):
     C2 = np.zeros((m2, n2))       # Initialize coefficients
     Y_ij = np.zeros((R, n2))      # Initialize 1st order contributions
     T2 = np.zeros((m2, R, n2))    # Initialize T(emporary) matrix - 1st
+
     # First order individual estimation
     for j in range(n2):
         # Regularized least squares inversion ( minimize || C1 ||_2 )
         B22 = np.matmul(np.transpose(B2[:, :, j]), B2[:, :, j])
+
         if (np.linalg.det(B22) == 0):
             C2[:, j] = 0  # Ill-defined
             # print("SALib-HDMR Warning: Matrix B22 is ill-defined. Try to decrease b-spline interval \"m\". Solution, C2, is set to zero. \n")
@@ -470,12 +486,14 @@ def hdmr_second_order(B2, Y_res, R, n2, m2, lambdax):
             # MATLAB's Solver
             T2[:, :, j] = np.linalg.solve(np.add(B22, np.multiply(
                 lambdax, np.identity(m2))), np.transpose(B2[:, :, j]))
+
         C2[:, j] = np.matmul(T2[:, :, j], Y_res).reshape(m2,)
         Y_ij[:, j] = np.matmul(B2[:, :, j], C2[:, j])
 
     # Now compute first-order terms
     for j in range(n2):
         Y_ij[:, j] = np.matmul(B2[:, :, j], C2[:, j])
+
         # Subtract each first order term from residuals
         Y_res = np.subtract(Y_res, Y_ij[:, j].reshape(R, 1))
 
@@ -486,6 +504,7 @@ def hdmr_third_order(B3, Y_res, R, n3, m3, lambdax):
     C3 = np.zeros((m3, n3))        # Initialize coefficients
     Y_ijk = np.zeros((R, n3))      # Initialize 1st order contributions
     T3 = np.zeros((m3, R, n3))     # Initialize T(emporary) matrix - 1st
+
     # First order individual estimation
     for j in range(n3):
         # Regularized least squares inversion ( minimize || C1 ||_2 )
@@ -498,6 +517,7 @@ def hdmr_third_order(B3, Y_res, R, n3, m3, lambdax):
             # MATLAB's Solver
             T3[:, :, j] = np.linalg.solve(np.add(B33, np.multiply(
                 lambdax, np.identity(m3))), np.transpose(B3[:, :, j]))
+
         C3[:, j] = np.matmul(T3[:, :, j], Y_res).reshape(m3,)
         Y_ijk[:, j] = np.matmul(B3[:, :, j], C3[:, j])
 
@@ -508,6 +528,7 @@ def f_test(Y, f0, Y_em, R, alfa, m1, m2, m3, n1, n2, n3, n):
     # Model selection using the F test
     # Initialize ind with zeros (all terms insignificant)
     select = np.zeros((n, 1))
+
     # Determine the significant components of the HDMR model via the F-test
     Y_res0 = Y - f0
     SSR0 = np.sum(np.square(Y_res0))
@@ -515,6 +536,7 @@ def f_test(Y, f0, Y_em, R, alfa, m1, m2, m3, n1, n2, n3, n):
     for i in range(n):
         # model with ith term included
         Y_res1 = Y_res0 - Y_em[:, i].reshape(R, 1)
+
         # Number of parameters of proposed model (order dependent)
         if i <= n1:
             p1 = m1        # 1st order
@@ -522,12 +544,16 @@ def f_test(Y, f0, Y_em, R, alfa, m1, m2, m3, n1, n2, n3, n):
             p1 = m2        # 2nd order
         else:
             p1 = m3        # 3rd order
+
         # Calculate SSR of Y1
         SSR1 = np.sum(np.square(Y_res1))
+
         # Now calculate the F_stat (F_stat > 0 -> SSR1 < SSR0 )
         F_stat = ((SSR0 - SSR1) / (p1 - p0)) / (SSR1 / (R - p1))
+
         # Now calculate critical F value
         F_crit = stats.f.ppf(q=alfa, dfn=p1 - p0, dfd=R - p1)
+
         # Now determine whether to accept ith component into model
         if F_stat > F_crit:
             # ith term is significant and should be included in model
@@ -539,6 +565,7 @@ def f_test(Y, f0, Y_em, R, alfa, m1, m2, m3, n1, n2, n3, n):
 def ancova(Y, Y_em, V_Y, R, n):
     # Compute the sum of all Y_em terms
     Y0 = np.sum(Y_em[:, :], axis=1)
+
     # Initialize each variable
     S, S_a, S_b = [np.zeros((n,)) for _ in range(3)]
 
@@ -546,12 +573,16 @@ def ancova(Y, Y_em, V_Y, R, n):
     for j in range(n):
         # Covariance matrix of jth term of Y_em and actual Y
         C = np.cov(np.stack((Y_em[:, j], Y.reshape(R,)), axis=0))
+
         # Total sensitivity of jth term         ( = Eq. 19 of Li et al )
         S[j] = C[0, 1] / V_Y
+
         # Covariance matrix of jth term with emulator Y without jth term
         C = np.cov(np.stack((Y_em[:, j], Y0 - Y_em[:, j]), axis=0))
+
         # Structural contribution of jth term   ( = Eq. 20 of Li et al )
         S_a[j] = C[0, 0] / V_Y
+        
         # Correlative contribution of jth term  ( = Eq. 21 of Li et al )
         S_b[j] = C[0, 1] / V_Y
 
@@ -591,10 +622,13 @@ def hdmr_finalize(problem, SA, Em, settings, init_vars):
     Si['Term'] = [None] * Em['n']
     Si['ST'] = np.zeros(d)
     Si['ST_CI'] = np.zeros(d)
+
     # Z score
     def z(p): return (-1) * np.sqrt(2) * special.erfcinv(p * 2)
+
     # Multiplier for confidence interval
     mult = z(alfa + (1 - alfa) / 2)
+
     # Compute the total sensitivity of each parameter/coefficient
     for r in range(Em['n1']):
         if maxorder == 1:
@@ -610,18 +644,22 @@ def hdmr_finalize(problem, SA, Em, settings, init_vars):
         Si['ST'][r] = np.mean(TS)
         Si['ST_CI'][r] = mult * np.std(TS)
     ct = 0
+
     # Fill Expansion Terms
     for i in range(Em['n1']):
         Si['Term'][ct] = problem['names'][i]
         ct += 1
+
     for i in range(Em['n2']):
         Si['Term'][ct] = '/'.join([problem['names'][Em['c2'][i, 0]],
                                    problem['names'][Em['c2'][i, 1]]])
         ct += 1
+
     for i in range(Em['n3']):
         Si['Term'][ct] = '/'.join([problem['names'][Em['c3'][i, 0]],
                                    problem['names'][Em['c3'][i, 1]], problem['names'][Em['c3'][i, 2]]])
         ct += 1
+
     # Assign Bootstrap Results to Si Dict
     Si['Sa'] = np.mean(SA['Sa'], axis=1)
     Si['Sb'] = np.mean(SA['Sb'], axis=1)
@@ -629,6 +667,7 @@ def hdmr_finalize(problem, SA, Em, settings, init_vars):
     Si['Sa_sum'] = np.mean(np.sum(SA['Sa'], axis=0))
     Si['Sb_sum'] = np.mean(np.sum(SA['Sb'], axis=0))
     Si['S_sum'] = np.mean(np.sum(SA['S'], axis=0))
+
     # Compute Confidence Interval
     Si['Sa_CI'] = mult * np.std(SA['Sa'], axis=1)
     Si['Sb_CI'] = mult * np.std(SA['Sb'], axis=1)
@@ -636,6 +675,7 @@ def hdmr_finalize(problem, SA, Em, settings, init_vars):
     Si['Sa_sum_CI'] = mult * np.std(np.sum(SA['Sa']))
     Si['Sb_sum_CI'] = mult * np.std(np.sum(SA['Sb']))
     Si['S_sum_CI'] = mult * np.std(np.sum(SA['S']))
+
     # F-test # of selection to print out
     Si['select'] = Em['select']
 
@@ -722,8 +762,10 @@ def cli_action(args):
     p = args.print_to_console
     options = options = {'graphics': g, 'maxorder': mor, 'maxiter': mit, 'm': m,
                          'K': K, 'R': R, 'alfa': alfa, 'lambdax': lambdax, 'print_to_console': p}
+    
     if len(X.shape) == 1:
         X = X.reshape((len(X), 1))
+
     # Default option is already defined under hdmr_setup function
     analyze(problem, X, Y, options)
 
