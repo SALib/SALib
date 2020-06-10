@@ -1,5 +1,3 @@
-from __future__ import division
-from __future__ import print_function
 import itertools
 import time
 import numpy as np
@@ -30,63 +28,76 @@ def analyze(problem, X, Y, options=None):
     to a single index (= structural contribution), consistent with their
     values derived from commonly used variance-based GSA methods.
 
-    INPUT ARGUMENTS
-     problem     Problem definition dictionary
-      ['names']     parameter names
-      ['num_vars']  model dimensioniality
-      ['bounds']    parameter bounds
-     X           Nxd matrix: N vectors of d parameters
-     Y           Nx1 vector: single model output for each row of X
-     options     (optional) dictionary: Fields specify HDMR variables
-      ['graphics']  integer [0,1]: graphical output?             (def: 0)
-      ['maxorder']  integer [1-3]: HDMR expansion max order      (def: 2)
-      ['maxiter']   integer [1-1000]: max iterations backfitting (def: 100)
-      ['m']         integer [2-5]: # B-spline intervals          (def: 2)
-      ['K']         integer [1-100] # bootstrap iterations       (def: 20)
-      ['R']         integer [100-N/2] # bootstrap samples        (def: N/2)
-      ['alfa']      real [0.5-1]: confidence interval F-test     (def: 0.95)
-      ['lambdax']   real [0-10]: regularization term             (def: 0.01)
-      ['print_to_console'] integer [0,1]: print results?         (def: 1)
+    Parameters
+    ----------
+    problem : dict
+        The problem definition
 
-    OUTPUT ARGUMENTS
-     Si (Sensitivity Indices) Python Dictionary
-      ['Sa']       Uncorrelated contribution
-      ['Sa_CI']    Confidence interval of Sa
-      ['Sb']       Correlated contribution
-      ['Sb_CI']    Confidence interval of Sb
-      ['S']        Total contribution of a particular term
-      ['S_CI']     Confidence interval of S
-      ['ST']       Total contribution of a particular dimension/parameter
-      ['ST_CI']    Confidence interval of ST
-      ['Sa']       Uncorrelated contribution
-      ['select']   Number of selection (F-Test)
+    X : numpy.matrix
+        The NumPy matrix containing the model inputs, N rows by d columns
 
-    MAIN REFERENCE
-       Genyuan Li, H. Rabitz, P.E. Yelvington, O.O. Oluwole, F. Bacon,
-       C.E. Kolb, and J. Schoendorf, "Global Sensitivity Analysis for
-       Systems with Independent and/or Correlated Inputs", Journal of
-       Physical Chemistry A, Vol. 114 (19), pp. 6022 - 6032, 2010
+    Y : numpy.array
+        The NumPy array containing the model outputs for each row of X
 
+    options : dict (optional), 
+        dict[str, [int, float]] of fields specifying HDMR variables
+
+        graphics: boolean int (default: 0), graphical output
+        maxorder: int (1-3, default: 2), maximum HDMR expansion order
+        maxiter: int (1-1000, default: 100), max iterations backfitting
+        m: int (2-5, default: 2), number of B-spline intervals
+        K: int (1-100, default: 20), number of bootstrap iterations
+        R: int (100-N/2, default: N/2), number of bootstrap samples
+        alfa: float (0.5-1): confidence interval F-test
+        lambdax: float (0-10, default: 0.01), regularization term
+        print_to_console: boolean int (default: 1), print results to console
+
+    Returns
+    -------
+    Si : dict,
+        Sa: Uncorrelated contribution
+        Sa_CI: Confidence interval of Sa
+        Sb: Correlated contribution
+        Sb_CI: Confidence interval of Sb
+        S: Total contribution of a particular term
+        S_CI: Confidence interval of S
+        ST: Total contribution of a particular dimension/parameter
+        ST_CI: Confidence interval of ST
+        Sa: Uncorrelated contribution
+        select: Number of selection (F-Test)
+
+    References
+    ---------
+    .. [1] Genyuan Li, H. Rabitz, P.E. Yelvington, O.O. Oluwole, F. Bacon,
+            C.E. Kolb, and J. Schoendorf, "Global Sensitivity Analysis for
+            Systems with Independent and/or Correlated Inputs", Journal of
+            Physical Chemistry A, Vol. 114 (19), pp. 6022 - 6032, 2010,
+            https://doi.org/10.1021/jp9096919
+       
     Examples
-       --------
-       >>> X = saltelli.sample(problem, 1000)
-       >>> Y = Ishigami.evaluate(X)
-       >>> Si = hdmr.analyze(problem,X,Y,options)
-    
-    Written by:
-                @sahin-abdullah
-                sahina@uci.edu
+    --------
+        >>> X = saltelli.sample(problem, 1000)
+        >>> Y = Ishigami.evaluate(X)
+        >>> Si = hdmr.analyze(problem, X, Y, options)
+
+    Contributed by
+    --------------
+        @sahin-abdullah (sahina@uci.edu)
     """
     # Initial part: Check input arguments and define HDMR variables
     settings = hdmr_setup(X, Y, options)
     init_vars = hdmr_init(X, Y, settings)
+
     # Sensitivity Analysis Computation with/without bootstraping
     SA, Em, RT, Y_em, idx = hdmr_compute(X, Y, settings, init_vars)
+
     # Finalize results
     Si = hdmr_finalize(problem, SA, Em, (settings[i] for i in [
                        1, 8, 3]), (init_vars[i] for i in [0, 2]))
+
     # Print results to console
     hdmr_print(Si, settings[1], settings[-1])
+
     # Now, print the figures
     if settings[2] == 1:
         hdmr.figures(problem, Si, Em, RT, X, Y, Y_em, idx)
@@ -99,43 +110,55 @@ def hdmr_compute(X, Y, settings, init_vars):
     Em, idx, SA, RT, Y_em, Y_id, m1, m2, m3, j1, j2, j3 = init_vars
     printProgressBar(0, K, prefix='SALib-HDMR :',
                      suffix='Completed', length=50)
+
     # DYNAMIC PART: Bootstrap for confidence intervals
     for k in range(K):
-        # Start timer
-        tic = time.time()
+        tic = time.time()  # Start timer
+
         # Extract the "right" Y values
         Y_id[:, 0] = Y[idx[:, k]]
+
         # Compute the variance of the model output
         SA['V_Y'][k, 0] = np.var(Y_id)
+
         # Mean of the output
         Em['f0'][k] = np.sum(Y_id[:, 0]) / R
+
         # Compute residuals
         Y_res = Y_id - Em['f0'][k]
+
         # 1st order component functions: ind/backfitting
         Y_em[:, j1], Y_res = hdmr_first_order(Em['B1'][idx[:, k], :, :], Y_res, R, Em['n1'],
                                               m1, maxiter, lambdax)
+
         # 2nd order component functions: individual
         if (maxorder > 1):
             Y_em[:, j2], Y_res = hdmr_second_order(Em['B2'][idx[:, k], :, :], Y_res, R, Em['n2'],
                                                    m2, lambdax)
+
         # 3rd order component functions: individual
         if (maxorder == 3):
             Y_em[:, j3] = hdmr_third_order(Em['B3'][idx[:, k], :, :], Y_res, R, Em['n3'],
                                            m3, lambdax)
+
         # Identify significant and insignificant terms
         Em['select'][:, k] = f_test(Y_id, Em['f0'][k], Y_em, R, alfa, m1, m2, m3, Em['n1'], Em['n2'],
                                     Em['n3'], Em['n'])
+
         # Store the emulated output
         Em['Y_e'][:, k] = Em['f0'][k] + np.sum(Y_em, axis=1)
+
         # RMSE of emulator
         Em['RMSE'][k] = np.sqrt(np.sum(np.square(Y_id - Em['Y_e'][:, k])) / R)
+
         # Compute sensitivity indices
         SA['S'][:, k], SA['Sa'][:, k], SA['Sb'][:, k] = ancova(Y_id, Y_em, SA['V_Y'][k],
                                                                R, Em['n'])
+
         # Print progress bar
         printProgressBar(k + 1, K, prefix='SALib-HDMR :', suffix='Completed', length=50)
-        # Compute CPU time kth emulator
-        RT[0, k] = time.time() - tic
+
+        RT[0, k] = time.time() - tic  # Compute CPU time kth emulator
 
     return (SA, Em, RT, Y_em, idx)
 
