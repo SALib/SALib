@@ -388,8 +388,8 @@ def B_spline(X, R, d, m):
 def hdmr_first_order(B1, Y_res, R, n1, m1, maxiter, lambdax):
     C1 = np.zeros((m1, n1))       # Initialize coefficients
     Y_i = np.zeros((R, n1))       # Initialize 1st order contributions
-    T1 = np.zeros((m1, R, n1))     # Initialize T(emporary) matrix - 1st
-    it = 0                       # Initialize iteration counter
+    T1 = np.zeros((m1, R, n1))    # Initialize T(emporary) matrix - 1st
+    it = 0                        # Initialize iteration counter
 
     # First order individual estimation
     for j in range(n1):
@@ -506,7 +506,7 @@ def f_test(Y, f0, Y_em, R, alfa, m1, m2, m3, n1, n2, n3, n):
         # Number of parameters of proposed model (order dependent)
         if i <= n1:
             p1 = m1        # 1st order
-        elif i > n1 and i <= n1 + n2:
+        elif i > n1 and i <= (n1 + n2):
             p1 = m2        # 2nd order
         else:
             p1 = m3        # 3rd order
@@ -586,8 +586,8 @@ def hdmr_finalize(problem, SA, Em, settings, init_vars):
             'Sa_sum', 'Sa_sum_CI', 'Sb_sum', 'Sb_sum_CI', 'S_sum', 'S_sum_CI')
     Si = ResultDict((k, np.zeros(Em['n'])) for k in keys)
     Si['Term'] = [None] * Em['n']
-    Si['ST'] = np.zeros(d)
-    Si['ST_CI'] = np.zeros(d)
+    Si['ST'] = [np.nan, ] * Em['n']
+    Si['ST_CI'] = [np.nan, ] * Em['n']
 
     # Z score
     def z(p): return (-1) * np.sqrt(2) * special.erfcinv(p * 2)
@@ -643,34 +643,39 @@ def hdmr_finalize(problem, SA, Em, settings, init_vars):
     Si['S_sum_CI'] = mult * np.std(np.sum(SA['S']))
 
     # F-test # of selection to print out
-    Si['select'] = Em['select']
+    Si['select'] = Em['select'].flatten()
+
+    Si['names'] = Si['Term']
 
     return Si
 
 
-def hdmr_print(Si, d, print_to_console):
-    if print_to_console == 1:
-        print("\n")
-        Si['names'] = ['Inputs', 'Sa', 'Sb', 'S', 'ST']
-        print(
-            'Term    \t      Sa            Sb             S             ST         #select ')
-        print('------------------------------------------------------------------------------------')
-        format1 = (
-            "%-11s   \t %5.2f (\261%.2f) %5.2f (\261%.2f) %5.2f (\261%.2f) %5.2f (\261%.2f)    %-3.0f")
-        format2 = (
-            "%-11s   \t %5.2f (\261%.2f) %5.2f (\261%.2f) %5.2f (\261%.2f)                  %-3.0f")
-        for i in range(len(Si['Sa'])):
-            if i < d:
-                print(format1 % (Si['Term'][i], Si['Sa'][i], Si['Sa_CI'][i], Si['Sb'][i], Si['Sb_CI'][i], Si['S'][i],
-                                 Si['S_CI'][i], Si['ST'][i], Si['ST_CI'][i], np.sum(Si['select'][i])))
-            else:
-                print(format2 % (Si['Term'][i], Si['Sa'][i], Si['Sa_CI'][i], Si['Sb'][i], Si['Sb_CI'][i], Si['S'][i],
-                                 Si['S_CI'][i], np.sum(Si['select'][i])))
-        print('------------------------------------------------------------------------------------')
-        format3 = (
-            "%-11s   \t %5.2f (\261%.2f) %5.2f (\261%.2f) %5.2f (\261%.2f)")
-        print(format3 % ('Sum', Si['Sa_sum'], Si['Sa_sum_CI'],
-                         Si['Sb_sum'], Si['Sb_sum_CI'], Si['S_sum'], Si['S_sum_CI']))
+def hdmr_print(Si, d):
+    print("\n")
+    print(
+        'Term    \t      Sa            Sb             S             ST         #select ')
+    print('------------------------------------------------------------------------------------')
+
+    format1 = (
+        "%-11s   \t %5.2f (\261%.2f) %5.2f (\261%.2f) %5.2f (\261%.2f) %5.2f (\261%.2f)    %-3.0f")
+    format2 = (
+        "%-11s   \t %5.2f (\261%.2f) %5.2f (\261%.2f) %5.2f (\261%.2f)                  %-3.0f")
+
+    for i in range(len(Si['Sa'])):
+        if i < d:
+            print(format1 % (Si['Term'][i], Si['Sa'][i], Si['Sa_CI'][i], Si['Sb'][i], Si['Sb_CI'][i], Si['S'][i],
+                                Si['S_CI'][i], Si['ST'][i], Si['ST_CI'][i], np.sum(Si['select'][i])))
+        else:
+            print(format2 % (Si['Term'][i], Si['Sa'][i], Si['Sa_CI'][i], Si['Sb'][i], Si['Sb_CI'][i], Si['S'][i],
+                                Si['S_CI'][i], np.sum(Si['select'][i])))
+
+    print('------------------------------------------------------------------------------------')
+
+    format3 = (
+        "%-11s   \t %5.2f (\261%.2f) %5.2f (\261%.2f) %5.2f (\261%.2f)")
+    print(format3 % ('Sum', Si['Sa_sum'], Si['Sa_sum_CI'],
+                        Si['Sb_sum'], Si['Sb_sum_CI'], Si['S_sum'], Si['S_sum_CI']))
+    
     keys = ('Sa_sum', 'Sb_sum', 'S_sum', 'Sa_sum_CI', 'Sb_sum_CI', 'S_sum_CI')
     for k in keys:
         Si.pop(k, None)
@@ -732,8 +737,7 @@ def cli_action(args):
     if len(X.shape) == 1:
         X = X.reshape((len(X), 1))
 
-    # Default option is already defined under hdmr_setup function
-    analyze(problem, X, Y, options)
+    analyze(problem, X, Y, **options)
 
 
 if __name__ == "__main__":
