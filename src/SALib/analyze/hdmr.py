@@ -11,7 +11,10 @@ from matplotlib import pyplot as plt
 
 
 def analyze(problem: Dict, X: np.array, Y: np.array, 
-            options: Optional[Dict] = None) -> Dict:
+            maxorder: int = 2, maxiter: int = 100, 
+            m: int = 2, K: int = 20, R: int = None, alfa: float = 0.95,
+            lambdax: float = 0.01,
+            print_to_console: bool = True, graphics: bool = False, seed: int = None) -> Dict:
     """High-Dimensional Model Representation (HDMR) using B-spline functions.
 
     HDMR is used for variance-based global sensitivity analysis (GSA) with 
@@ -42,18 +45,35 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
     Y : numpy.array
         The NumPy array containing the model outputs for each row of X
 
-    options : dict (optional), 
-        dict[str, [int, float]] of fields specifying HDMR variables
+    maxorder : int (1-3, default: 2) 
+        Maximum HDMR expansion order
 
-        graphics: boolean int (default: 0), graphical output
-        maxorder: int (1-3, default: 2), maximum HDMR expansion order
-        maxiter: int (1-1000, default: 100), max iterations backfitting
-        m: int (2-5, default: 2), number of B-spline intervals
-        K: int (1-100, default: 20), number of bootstrap iterations
-        R: int (100-N/2, default: N/2), number of bootstrap samples
-        alfa: float (0.5-1): confidence interval F-test
-        lambdax: float (0-10, default: 0.01), regularization term
-        print_to_console: boolean int (default: 1), print results to console
+    maxiter : int (1-1000, default: 100)
+        Max iterations backfitting
+
+    m : int (2-5, default: 2)
+        Number of B-spline intervals
+
+    K : int (1-100, default: 20)
+        Number of bootstrap iterations
+
+    R : int (100-N/2, default: N/2)
+        Number of bootstrap samples
+
+    alfa : float (0.5-1) 
+        Confidence interval F-test
+
+    lambdax : float (0-10, default: 0.01)
+        Regularization term
+
+    print_to_console : bool
+        Print results directly to console (default False)
+
+    graphics : bool
+        Display plots
+    
+    seed : bool
+        Set a seed value
 
     Returns
     -------
@@ -96,20 +116,71 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
 
     # Finalize results
     Si = hdmr_finalize(problem, SA, Em, (settings[i] for i in [
-                       1, 8, 3]), (init_vars[i] for i in [0, 2]))
+                       1, 7, 2]), (init_vars[i] for i in [0, 2]))
 
     # Print results to console
-    hdmr_print(Si, settings[1], settings[-1])
+    if print_to_console:
+        hdmr_print(Si, settings[1])
 
     # Now, print the figures
-    if settings[2] == 1:
+    if graphics:
         hdmr.figures(problem, Si, Em, RT, X, Y, Y_em, idx)
 
     return Si
 
+def _check_settings(X, Y, maxorder, maxiter, m, K, R, alfa, lambdax):  
+    # Get dimensionality of numpy arrays
+    N, d = X.shape
+    y_row = Y.shape[0]
+
+    # Now check input-output mismatch
+    if d == 1:
+        raise RuntimeError("Matrix X contains only a single column: No point to do sensitivity analysis when d = 1.")
+    if N < 300:
+        raise RuntimeError(f"Number of samples in matrix X, {N}, is insufficient. Need at least 300.")
+    if N != y_row:
+        raise RuntimeError(f"Dimension mismatch. The number of outputs ({y_row}) should match number of samples ({N})")
+    if Y.size != N:
+        raise RuntimeError("Y should be a N x 1 vector with one simulated output for each N parameter vectors.")
+
+    if not ismember(maxorder, (1,2,3)):
+        raise RuntimeError("Field \"maxorder\" of options should be an integer with values of 1, 2 or 3.")
+
+    # Important next check for maxorder - as maxorder relates to d
+    if (d == 2) and (maxorder > 2):
+        raise RuntimeError("SALib-HDMR ERRROR: Field \"maxorder\" of options has to be 2 as d = 2 (X has two columns)")
+
+    if not ismember(maxiter, np.arange(1, 1001)):
+        raise RuntimeError("Field \"maxiter\" of options should be an integer between 1 to 1000.")
+    
+    if not ismember(m, np.arange(1, 6)):
+        raise RuntimeError("Field \"m\" of options should be an integer between 1 to 5.")
+
+    if not ismember(K, np.arange(1, 101)):
+        raise RuntimeError("Field \"K\" of options should be an integer between 1 to 100.")
+
+    if R is None:
+        R = y_row // 2
+    elif not ismember(R, np.arange(300, N + 1)):
+        raise RuntimeError("Field \"R\" of options should be an integer between 300 and N, number of rows matrix X.")
+
+    if (K == 1) and (R != y_row):
+        R = y_row
+    
+    if alfa < 0.5 or alfa > 1.0:
+        raise RuntimeError("Field \"alfa\" of options should be an integer between 0.5 to 1.0")
+
+    if lambdax > 10.0:
+        raise RuntimeError("SALib-HDMR WARNING: Field \"lambdax\" of options set rather large. Default: lambdax = 0.01")
+    elif lambdax < 0.0:
+        raise RuntimeError("Field \"lambdax\" (regularization term) of options cannot be smaller than zero. Default: 0.01")
+
+    return [N, d, maxorder, maxiter,
+            m, K, R, alfa, lambdax]
+
 
 def hdmr_compute(X, Y, settings, init_vars):
-    N, d, graphics, maxorder, maxiter, m, K, R, alfa, lambdax, print_to_console = settings
+    N, d, maxorder, maxiter, m, K, R, alfa, lambdax = settings
     Em, idx, SA, RT, Y_em, Y_id, m1, m2, m3, j1, j2, j3 = init_vars
     printProgressBar(0, K, prefix='SALib-HDMR :',
                      suffix='Completed', length=50)
@@ -166,127 +237,8 @@ def hdmr_compute(X, Y, settings, init_vars):
     return (SA, Em, RT, Y_em, idx)
 
 
-def hdmr_setup(X: np.array, Y: np.array, options: Dict) -> list:
-    # Get dimensionality of numpy arrays
-    N, d = X.shape
-
-    if len(Y.shape) > 1:
-        y_row, _ = Y.shape
-    else:
-        y_row = Y.shape[0]
-
-    # Now check input-output mismatch
-    if d == 1:
-        raise RuntimeError("Matrix X contains only a single column: No point to do sensitivity analysis when d = 1.")
-    if N < 300:
-        raise RuntimeError(f"Number of samples in matrix X, {N}, is insufficient. Need at least 300.")
-    if N != y_row:
-        raise RuntimeError(f"Dimension mismatch. The number of outputs ({y_row}) should match number of samples ({N})")
-    if Y.size != N:
-        raise RuntimeError("Y should be a N x 1 vector with one simulated output for each N parameter vectors.")
-
-    # Default options will be used if user does not define at least one option
-    def_options = {
-        'graphics': 0, 
-        'maxorder': 2, 
-        'maxiter': 100, 
-        'm': 2, 
-        'K': 20,
-        'R': y_row // 2, 
-        'alfa': 0.95, 
-        'lambdax': 0.01, 
-        'print_to_console': 1
-    }
-
-    if options is None:
-        options = {}
-
-    # Unpack the options
-    if ('graphics' in options):
-        graphics = options['graphics']
-        if not ismember(graphics, (0, 1)):
-            raise RuntimeError("Field \"graphics\" of options should take on the value of 0 or 1.")
-    else:
-        graphics = def_options['graphics']
-
-    # Unpack the options
-    if ('print_to_console' in options):
-        print_to_console = options['print_to_console']
-        if not ismember(print_to_console, (0, 1)):
-            raise RuntimeError("Field \"print_to_console\" of options should take on the value of 0 or 1.")
-    else:
-        print_to_console = def_options['print_to_console']
-
-    if 'maxorder' in options:
-        maxorder = options['maxorder']
-        if not ismember(maxorder, (1,2,3)):
-            raise RuntimeError("Field \"maxorder\" of options should be an integer with values of 1, 2 or 3.")
-    else:
-        maxorder = def_options['maxorder']
-
-    # Important next check for maxorder - as maxorder relates to d
-    if (d == 2):
-        if (maxorder > 2):
-            raise RuntimeError("SALib-HDMR ERRROR: Field \"maxorder\" of options has to be 2 as d = 2 (X has two columns)")
-
-    if 'maxiter' in options:
-        maxiter = options['maxiter']
-        if not ismember(maxiter, np.arange(1, 1001)):
-            raise RuntimeError("Field \"maxiter\" of options should be an integer between 1 to 1000.")
-    else:
-        maxiter = def_options['maxiter']
-
-    if 'm' in options:
-        m = options['m']
-        if not ismember(m, np.arange(1, 6)):
-            raise RuntimeError("Field \"m\" of options should be an integer between 1 to 5.")
-    else:
-        m = def_options['m']
-
-    if 'K' in options:
-        K = options['K']
-        if not ismember(K, np.arange(1, 101)):
-            raise RuntimeError("Field \"K\" of options should be an integer between 1 to 100.")
-    else:
-        K = def_options['K']
-
-    if 'R' in options:
-        R = options['R']
-        if not ismember(R, np.arange(300, N + 1)):
-            raise RuntimeError("Field \"R\" of options should be an integer between 300 and N, number of rows matrix X.")
-    else:
-        R = def_options['R']
-
-    if (K == 1) and (R != y_row):
-        R = y_row
-
-    if 'alfa' in options:
-        alfa = options['alfa']
-        if alfa < 0.5 or alfa > 1.0:
-            raise RuntimeError("Field \"alfa\" of options should be an integer between 0.5 to 1.")
-    else:
-        alfa = def_options['alfa']
-
-    if 'lambdax' in options:
-        lambdax = options['lambdax']
-        if isinstance(lambdax, str):
-            raise RuntimeError("Field \"lambdax\" (regularization term) of options should not be a string but a numerical value")
-        if lambdax > 10:
-            raise RuntimeError("SALib-HDMR WARNING: Field \"lambdax\" of options set rather large. Default: lambdax = 0.01")
-        if lambdax < 0:
-            raise RuntimeError("Field \"lambdax\" (regularization term) of options cannot be smaller than zero. Default: 0.01")
-    else:
-        lambdax = def_options['lambdax']
-
-    return [N, d, graphics, maxorder, maxiter,
-            m, K, R, alfa, lambdax, print_to_console]
-
-
 def hdmr_init(X, Y, settings):
-    N, d, graphics, maxorder, maxiter, m, K, R, alfa, lambdax, ptc = settings
-
-    # Random Seed
-    np.random.seed(1 + round(100 * np.random.rand()))
+    N, d, maxorder, maxiter, m, K, R, alfa, lambdax = settings
 
     # Setup Bootstrap (if K > 1)
     if (K == 1):
