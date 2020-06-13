@@ -284,18 +284,14 @@ def hdmr_init(X, Y, settings):
     m3 = m1**3
 
     # STRUCTURE Em: Initialization
-    if (maxorder == 1):
-        Em = {'nterms': np.zeros(K), 'RMSE': np.zeros(K), 'm': m, 'Y_e': np.zeros((R, K)), 'f0': np.zeros(K),
-              'c1': c1, 'n1': n1, 'c2': c2, 'n2': n2, 'c3': c3, 'n3': n3, 'n': n, 'maxorder': maxorder, 'select': np.zeros((n, K)),
-              'B1': np.zeros((N, m1, n1))}
-    elif (maxorder == 2):
-        Em = {'nterms': np.zeros(K), 'RMSE': np.zeros(K), 'm': m, 'Y_e': np.zeros((R, K)), 'f0': np.zeros(K),
-              'c1': c1, 'n1': n1, 'c2': c2, 'n2': n2, 'c3': c3, 'n3': n3, 'n': n, 'maxorder': maxorder, 'select': np.zeros((n, K)),
-              'B1': np.zeros((N, m1, n1)), 'B2': np.zeros((N, m2, n2))}
-    elif (maxorder == 3):
-        Em = {'nterms': np.zeros(K), 'RMSE': np.zeros(K), 'm': m, 'Y_e': np.zeros((R, K)), 'f0': np.zeros(K),
-              'c1': c1, 'n1': n1, 'c2': c2, 'n2': n2, 'c3': c3, 'n3': n3, 'n': n, 'maxorder': maxorder, 'select': np.zeros((n, K)),
-              'B1': np.zeros((N, m1, n1)), 'B2': np.zeros((N, m2, n2)), 'B3': np.zeros((N, m3, n3))}
+    Em = {'nterms': np.zeros(K), 'RMSE': np.zeros(K), 'm': m, 'Y_e': np.zeros((R, K)), 'f0': np.zeros(K),
+            'c1': c1, 'n': n, 'n1': n1, 'n2': n2, 'n3': n3, 'maxorder': maxorder, 'select': np.zeros((n, K)),
+            'B1': np.zeros((N, m1, n1))}
+
+    if (maxorder >= 2):
+        Em.update({'c2': c2, 'B2': np.zeros((N, m2, n2))})
+    if (maxorder >= 3):
+        Em.update({'c3': c3, 'B3': np.zeros((N, m3, n3))})
 
     # Compute B-Splines
     Em['B1'] = B_spline(X_n, N, d, m)
@@ -303,19 +299,23 @@ def hdmr_init(X, Y, settings):
     # Now compute B values for second order
     if (maxorder > 1):
         beta = np.array(list(itertools.product(range(m1), repeat=2)))
-        for k in range(n2):
-            for j in range(m2):
-                Em['B2'][:, j, k] = np.multiply(
-                    Em['B1'][:, beta[j, 0], Em['c2'][k, 0]], Em['B1'][:, beta[j, 1], Em['c2'][k, 1]])
+        for k, j in itertools.product(range(n2), range(m2)):
+            Em['B2'][:, j, k] = np.multiply(
+                Em['B1'][:, beta[j, 0], Em['c2'][k, 0]], 
+                Em['B1'][:, beta[j, 1], Em['c2'][k, 1]])
 
     # Compute B values for third order
     if (maxorder == 3):
         # Now compute B values for third order
         beta = np.array(list(itertools.product(range(m1), repeat=3)))
-        for k in range(n3):
-            for j in range(m3):
-                Em['B3'][:, j, k] = np.multiply(np.multiply(Em['B1'][:, beta[j, 0], Em['c3'][k, 0]], Em['B1'][:, beta[j, 1], Em['c3'][k, 1]]),
-                                                Em['B1'][:, beta[j, 2], Em['c3'][k, 2]])
+        EmB1 = Em['B1']
+
+        for k, j in itertools.product(range(n3), range(m3)):
+            Emc3_k = Em['c3'][k]
+            beta_j = beta[j]
+            Em['B3'][:, j, k] = np.multiply(np.multiply(EmB1[:, beta_j[0], Emc3_k[0]], 
+                                                        EmB1[:, beta_j[1], Emc3_k[1]]),
+                                            EmB1[:, beta_j[2], Emc3_k[2]])
 
     # DICT SA: Sensitivity analysis and analysis of variance decomposition
     em_k = np.zeros((Em['n'], K))
@@ -356,22 +356,28 @@ def B_spline(X, R, d, m):
     h1 = 1 / m
 
     # Now loop over each parameter of X through each interval
-    for i in range(d):
-        for j in range(m + 3):
-            k = j - 1
-            for r in range(R):
-                if (X[r, i] > (k + 1) * h1 and X[r, i] <= (k + 2) * h1):
-                    B[r, j, i] = ((k + 2) * h1 - X[r, i])**3
-                if (X[r, i] > k * h1 and X[r, i] <= (k + 1) * h1):
-                    B[r, j, i] = ((k + 2) * h1 - X[r, i])**3 - \
-                        4 * ((k + 1) * h1 - X[r, i])**3
-                if (X[r, i] > (k - 1) * h1 and X[r, i] <= k * h1):
-                    B[r, j, i] = ((k + 2) * h1 - X[r, i])**3 - 4 * ((k + 1) * h1 - X[r, i])**3 + \
-                        6 * (k * h1 - X[r, i])**3
-                if (X[r, i] > (k - 2) * h1 and X[r, i] <= (k - 1) * h1):
-                    B[r, j, i] = ((k + 2) * h1 - X[r, i])**3 - 4 * ((k + 1) * h1 - X[r, i])**3 + \
-                        6 * (k * h1 - X[r, i])**3 - 4 * \
-                        ((k - 1) * h1 - X[r, i])**3
+    for i, j in itertools.product(range(d), range(m+3)):
+        k = j - 1
+        for r in range(R):
+            X_ri = X[r, i]
+            _k1 = (k - 1)
+            k1 = (k + 1)
+            k2 = (k + 2)
+
+            if (X_ri > k1 * h1 and X_ri <= k2 * h1):
+                B[r, j, i] = (k2 * h1 - X_ri)**3
+            if (X_ri > k * h1 and X_ri <= k1 * h1):
+                B[r, j, i] = (k2 * h1 - X_ri)**3 - \
+                    4 * (k1 * h1 - X_ri)**3
+            if (X_ri > _k1 * h1 and X_ri <= k * h1):
+                B[r, j, i] = (k2 * h1 - X_ri)**3 - \
+                                4 * (k1 * h1 - X_ri)**3 + \
+                                6 * (k * h1 - X_ri)**3
+            if (X_ri > (k - 2) * h1 and X_ri <= _k1 * h1):
+                B[r, j, i] = (k2 * h1 - X_ri)**3 - 4 * \
+                                (k1 * h1 - X_ri)**3 + \
+                                6 * (k * h1 - X_ri)**3 - 4 * \
+                                (_k1 * h1 - X_ri)**3
 
     # Multiply B with m^3
     B *= m**3
