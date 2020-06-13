@@ -101,14 +101,18 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
     --------
         >>> X = saltelli.sample(problem, 1000)
         >>> Y = Ishigami.evaluate(X)
-        >>> Si = hdmr.analyze(problem, X, Y, options)
+        >>> Si = hdmr.analyze(problem, X, Y, **options)
 
     Contributed by
     --------------
         @sahin-abdullah (sahina@uci.edu)
     """
+    # Random Seed
+    if seed:
+        np.random.seed(seed)
+
     # Initial part: Check input arguments and define HDMR variables
-    settings = hdmr_setup(X, Y, options)
+    settings = _check_settings(X, Y, maxorder, maxiter, m, K, R, alfa, lambdax)
     init_vars = hdmr_init(X, Y, settings)
 
     # Sensitivity Analysis Computation with/without bootstraping
