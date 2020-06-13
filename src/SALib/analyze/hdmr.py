@@ -609,9 +609,9 @@ def hdmr_finalize(problem, SA, Em, settings, init_vars):
             TS = np.sum(SA['S'][np.append(r, np.append(ij, ijk)), :], axis=0)
         Si['ST'][r] = np.mean(TS)
         Si['ST_CI'][r] = mult * np.std(TS)
-    ct = 0
 
     # Fill Expansion Terms
+    ct = 0
     for i in range(Em['n1']):
         Si['Term'][ct] = problem['names'][i]
         ct += 1
