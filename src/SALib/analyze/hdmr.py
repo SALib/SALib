@@ -58,7 +58,7 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
         Number of bootstrap iterations
 
     R : int (100-N/2, default: N/2)
-        Number of bootstrap samples
+        Number of bootstrap samples. Will be set to length of `Y` if `K` is set to 1.
 
     alfa : float (0.5-1) 
         Confidence interval F-test
