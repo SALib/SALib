@@ -10,6 +10,9 @@ from ..util import read_param_file, ResultDict
 from matplotlib import pyplot as plt
 
 
+__all__ = ['analyze', 'cli_parse', 'cli_action']
+
+
 def analyze(problem: Dict, X: np.array, Y: np.array, 
             maxorder: int = 2, maxiter: int = 100, 
             m: int = 2, K: int = 20, R: int = None, alfa: float = 0.95,
@@ -113,18 +116,18 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
 
     # Initial part: Check input arguments and define HDMR variables
     settings = _check_settings(X, Y, maxorder, maxiter, m, K, R, alfa, lambdax)
-    init_vars = hdmr_init(X, Y, settings)
+    init_vars = _init(X, Y, settings)
 
     # Sensitivity Analysis Computation with/without bootstraping
-    SA, Em, RT, Y_em, idx = hdmr_compute(X, Y, settings, init_vars)
+    SA, Em, RT, Y_em, idx = _compute(X, Y, settings, init_vars)
 
     # Finalize results
-    Si = hdmr_finalize(problem, SA, Em, (settings[i] for i in [
+    Si = _finalize(problem, SA, Em, (settings[i] for i in [
                        1, 7, 2]), (init_vars[i] for i in [0, 2]))
 
     # Print results to console
     if print_to_console:
-        hdmr_print(Si, settings[1])
+        _print(Si, settings[1])
 
     # Now, print the figures
     if graphics:
@@ -183,7 +186,7 @@ def _check_settings(X, Y, maxorder, maxiter, m, K, R, alfa, lambdax):
             m, K, R, alfa, lambdax]
 
 
-def hdmr_compute(X, Y, settings, init_vars):
+def _compute(X, Y, settings, init_vars):
     N, d, maxorder, maxiter, m, K, R, alfa, lambdax = settings
     Em, idx, SA, RT, Y_em, Y_id, m1, m2, m3, j1, j2, j3 = init_vars
     printProgressBar(0, K, prefix='SALib-HDMR :',
@@ -206,17 +209,17 @@ def hdmr_compute(X, Y, settings, init_vars):
         Y_res = Y_id - Em['f0'][k]
 
         # 1st order component functions: ind/backfitting
-        Y_em[:, j1], Y_res = hdmr_first_order(Em['B1'][idx[:, k], :, :], Y_res, R, Em['n1'],
+        Y_em[:, j1], Y_res = _first_order(Em['B1'][idx[:, k], :, :], Y_res, R, Em['n1'],
                                               m1, maxiter, lambdax)
 
         # 2nd order component functions: individual
         if (maxorder > 1):
-            Y_em[:, j2], Y_res = hdmr_second_order(Em['B2'][idx[:, k], :, :], Y_res, R, Em['n2'],
+            Y_em[:, j2], Y_res = _second_order(Em['B2'][idx[:, k], :, :], Y_res, R, Em['n2'],
                                                    m2, lambdax)
 
         # 3rd order component functions: individual
         if (maxorder == 3):
-            Y_em[:, j3] = hdmr_third_order(Em['B3'][idx[:, k], :, :], Y_res, R, Em['n3'],
+            Y_em[:, j3] = _third_order(Em['B3'][idx[:, k], :, :], Y_res, R, Em['n3'],
                                            m3, lambdax)
 
         # Identify significant and insignificant terms
@@ -241,7 +244,7 @@ def hdmr_compute(X, Y, settings, init_vars):
     return (SA, Em, RT, Y_em, idx)
 
 
-def hdmr_init(X, Y, settings):
+def _init(X, Y, settings):
     N, d, maxorder, maxiter, m, K, R, alfa, lambdax = settings
 
     # Setup Bootstrap (if K > 1)
@@ -385,7 +388,7 @@ def B_spline(X, R, d, m):
     return B
 
 
-def hdmr_first_order(B1, Y_res, R, n1, m1, maxiter, lambdax):
+def _first_order(B1, Y_res, R, n1, m1, maxiter, lambdax):
     C1 = np.zeros((m1, n1))       # Initialize coefficients
     Y_i = np.zeros((R, n1))       # Initialize 1st order contributions
     T1 = np.zeros((m1, R, n1))    # Initialize T(emporary) matrix - 1st
@@ -434,7 +437,7 @@ def hdmr_first_order(B1, Y_res, R, n1, m1, maxiter, lambdax):
     return (Y_i, Y_res)
 
 
-def hdmr_second_order(B2, Y_res, R, n2, m2, lambdax):
+def _second_order(B2, Y_res, R, n2, m2, lambdax):
     C2 = np.zeros((m2, n2))       # Initialize coefficients
     Y_ij = np.zeros((R, n2))      # Initialize 1st order contributions
     T2 = np.zeros((m2, R, n2))    # Initialize T(emporary) matrix - 1st
@@ -466,7 +469,7 @@ def hdmr_second_order(B2, Y_res, R, n2, m2, lambdax):
     return (Y_ij, Y_res)
 
 
-def hdmr_third_order(B3, Y_res, R, n3, m3, lambdax):
+def _third_order(B3, Y_res, R, n3, m3, lambdax):
     C3 = np.zeros((m3, n3))        # Initialize coefficients
     Y_ijk = np.zeros((R, n3))      # Initialize 1st order contributions
     T3 = np.zeros((m3, R, n3))     # Initialize T(emporary) matrix - 1st
@@ -578,7 +581,7 @@ def printProgressBar(iteration, total, prefix='', suffix='',
         print()
 
 
-def hdmr_finalize(problem, SA, Em, settings, init_vars):
+def _finalize(problem, SA, Em, settings, init_vars):
     d, alfa, maxorder = settings
     Em, SA = init_vars
     # Create Sensitivity Indices Result Dictionary
@@ -650,7 +653,7 @@ def hdmr_finalize(problem, SA, Em, settings, init_vars):
     return Si
 
 
-def hdmr_print(Si, d):
+def _print(Si, d):
     print("\n")
     print(
         'Term    \t      Sa            Sb             S             ST         #select ')
