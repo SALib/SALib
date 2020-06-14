@@ -323,7 +323,7 @@ def _init(X, Y, settings):
     # DICT SA: Sensitivity analysis and analysis of variance decomposition
     em_k = np.zeros((Em['n'], K))
     SA = {
-        'S': em_k.copy(),
+        'S': em_k,
         'Sa': em_k.copy(),
         'Sb': em_k.copy(),
         'ST': np.zeros((d, K)),
