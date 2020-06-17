@@ -21,7 +21,7 @@ def sample(problem, N, delta=0.01, seed=None):
 
     delta : float
         Finite difference step size (percent)
-    
+
     seed : int or None
         random seed value
 
@@ -41,7 +41,7 @@ def sample(problem, N, delta=0.01, seed=None):
     # Create base sequence - could be any type of sampling
     base_sequence = sobol_sequence.sample(N + skip_values, D)
     # scale before finite differencing
-    scale_samples(base_sequence, bounds)
+    scale_samples(base_sequence, problem)
     dgsm_sequence = np.empty([N * (D + 1), D])
 
     index = 0

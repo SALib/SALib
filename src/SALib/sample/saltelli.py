@@ -4,8 +4,8 @@ import numpy as np
 
 from . import common_args
 from . import sobol_sequence
-from ..util import scale_samples, read_param_file, compute_groups_matrix
-
+from ..util import (scale_samples, read_param_file,
+                    compute_groups_matrix, nonuniform_scale_samples)
 
 
 def sample(problem, N, calc_second_order=True, seed=None):
@@ -75,7 +75,8 @@ def sample(problem, N, calc_second_order=True, seed=None):
         if calc_second_order:
             for k in range(Dg):
                 for j in range(D):
-                    if (not groups and j == k) or (groups and group_names[k] == groups[j]):
+                    if (not groups and j == k) or \
+                            (groups and group_names[k] == groups[j]):
                         saltelli_sequence[index, j] = base_sequence[i, j]
                     else:
                         saltelli_sequence[index, j] = base_sequence[i, j + D]
@@ -89,7 +90,7 @@ def sample(problem, N, calc_second_order=True, seed=None):
         index += 1
     if not problem.get('dists'):
         # scaling values out of 0-1 range with uniform distributions
-        scale_samples(saltelli_sequence, problem['bounds'])
+        scale_samples(saltelli_sequence, problem)
         return saltelli_sequence
     else:
         # scaling values to other distributions based on inverse CDFs

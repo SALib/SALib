@@ -52,8 +52,8 @@ else:
 __all__ = ['sample']
 
 
-def sample(problem: Dict, N: int, num_levels: int=4, optimal_trajectories: int=None,
-           local_optimization: bool=True, seed=None) -> np.array:
+def sample(problem: Dict, N: int, num_levels: int = 4, optimal_trajectories: int = None,
+           local_optimization: bool = True, seed=None) -> np.array:
     """Generate model inputs using the Method of Morris
 
     Returns a NumPy matrix containing the model inputs required for Method of
@@ -93,7 +93,8 @@ def sample(problem: Dict, N: int, num_levels: int=4, optimal_trajectories: int=N
         np.random.seed(seed)
 
     if not num_levels % 2 == 0:
-        warnings.warn("num_levels should be an even number, sample may be biased")
+        warnings.warn(
+            "num_levels should be an even number, sample may be biased")
     if problem.get('groups'):
         sample = _sample_groups(problem, N, num_levels)
     else:
@@ -107,11 +108,12 @@ def sample(problem: Dict, N: int, num_levels: int=4, optimal_trajectories: int=N
                                                  optimal_trajectories,
                                                  local_optimization)
 
-        # scaling values to other distributions based on inverse CDFs
+    # scaling values to other distributions based on inverse CDFs
     scaled_samples = scale_samples(sample, problem)
     return scaled_samples
 
-def _sample_oat(problem: Dict, N: int, num_levels: int=4) -> np.ndarray:
+
+def _sample_oat(problem: Dict, N: int, num_levels: int = 4) -> np.ndarray:
     """Generate trajectories without groups
 
     Arguments
@@ -345,6 +347,22 @@ def _compute_optimised_trajectories(problem, input_sample, N, k_choices,
                             k_choices, num_groups)
 
     return output
+
+
+def cli_parse(parser):
+    parser.add_argument('-l', '--levels', type=int, required=False,
+                        default=4, help='Number of grid levels \
+                        (Morris only)')
+    parser.add_argument('-k', '--k-optimal', type=int, required=False,
+                        default=None,
+                        help='Number of optimal trajectories \
+                        (Morris only)')
+    parser.add_argument('-lo', '--local', type=bool, required=True,
+                        default=False,
+                        help='Use the local optimisation method \
+                        (Morris with optimization only)')
+    return parser
+
 
 def cli_action(args):
     rd.seed(args.seed)

@@ -125,8 +125,6 @@ def test_scale_samples():
     '''
 
     params = np.arange(0, 1.1, 0.1).repeat(2).reshape((11, 2))
-
-    bounds = [[10, 20], [-10, 10]]
     testProblem = {
         'num_vars': 2,
         'names': ['test1', 'test2'],
@@ -157,14 +155,14 @@ def test_scale_samples_upper_lt_lower():
     Raise ValueError if upper bound lower than lower bound
     '''
     params = np.array([[0, 0], [0.1, 0.1], [0.2, 0.2]])
-    testProblem = {
+    problem = {
         'num_vars': 2,
         'names': ['test1', 'test2'],
         'bounds': [[10, 9], [-10, 10]],
         'dist': ['unif', 'unif']
     }
     with raises(ValueError):
-        scale_samples(params, bounds)
+        scale_samples(params, problem)
 
 
 def test_scale_samples_upper_eq_lower():
@@ -172,14 +170,14 @@ def test_scale_samples_upper_eq_lower():
     Raise ValueError if upper bound lower equal to lower bound
     '''
     params = np.array([[0, 0], [0.1, 0.1], [0.2, 0.2]])
-    testProblem = {
+    problem = {
         'num_vars': 2,
         'names': ['test1', 'test2'],
         'bounds': [[10, 10], [-10, 10]],
         'dist': ['unif', 'unif']
     }
     with raises(ValueError):
-        scale_samples(params, bounds)
+        scale_samples(params, problem)
 
 
 def test_compute_groups_from_parameter_file():

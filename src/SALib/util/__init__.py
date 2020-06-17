@@ -45,11 +45,11 @@ def scale_samples(params: np.ndarray, problem: Dict):
         numpy array of dimensions `num_params`-by-:math:`N`,
         where :math:`N` is the number of samples
     problem: dict
-    
+
     Notes
     -----
     Problem dict contains list of distributions, one for each parameter
-    
+
     - unif: uniform with lower and upper bounds
     - triang: triangular with width (scale) and location of peak
               location of peak is in percentage of width
@@ -87,7 +87,7 @@ def scale_samples(params: np.ndarray, problem: Dict):
                 raise ValueError("""Triangular distribution: Scale must be
                        greater than zero; peak on interval [0,1]""")
             else:
-                conv_params[:, i] = stats.triang.ppf(
+                conv_params[:, i] = sp.stats.triang.ppf(
                     limited_params[:, i], c=b2, scale=b1, loc=0)
 
         elif dists[i] == 'unif':
@@ -101,7 +101,7 @@ def scale_samples(params: np.ndarray, problem: Dict):
             if b2 <= 0:
                 raise ValueError("""Normal distribution: stdev must be > 0""")
             else:
-                conv_params[:, i] = stats.norm.ppf(
+                conv_params[:, i] = sp.stats.norm.ppf(
                     limited_params[:, i], loc=b1, scale=b2)
 
         # lognormal distribution (ln-space, not base-10)
@@ -113,7 +113,7 @@ def scale_samples(params: np.ndarray, problem: Dict):
                     """Lognormal distribution: stdev must be > 0""")
             else:
                 conv_params[:, i] = np.exp(
-                    stats.norm.ppf(limited_params[:, i], loc=b1, scale=b2))
+                    sp.stats.norm.ppf(limited_params[:, i], loc=b1, scale=b2))
 
         else:
             valid_dists = ['unif', 'triang', 'norm', 'lognorm']
@@ -151,16 +151,17 @@ def unscale_samples(params, bounds):
               out=params)
 
 
-def nonuniform_scale_samples(params, bounds, dists):
+def nonuniform_scale_samples(params: np.ndarray,
+                             bounds: List,
+                             dists: List) -> np.ndarray:
     """Rescale samples in 0-to-1 range to other distributions
 
     Arguments
     ---------
-    problem : dict
-        problem definition including bounds
     params : numpy.ndarray
         numpy array of dimensions num_params-by-N,
         where N is the number of samples
+    bounds : list
     dists : list
         list of distributions, one for each parameter
             unif: uniform with lower and upper bounds
