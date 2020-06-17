@@ -11,7 +11,7 @@ from ..sample.morris import compute_delta
 
 
 def analyze(problem, X, Y,
-            num_resamples=1000,
+            num_resamples=100,
             conf_level=0.95,
             print_to_console=False,
             num_levels=4,
