@@ -129,6 +129,7 @@ def test_scale_samples():
         'num_vars': 2,
         'names': ['test1', 'test2'],
         'bounds': [[10, 20], [-10, 10]],
+        'dists': ['unif', 'unif']
     }
 
     desired = np.array(

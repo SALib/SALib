@@ -230,9 +230,9 @@ def read_param_file(filename, delimiter=None):
 
     Reads a parameter file of format::
 
-        Param1,0,1,Group1,dist1
-        Param2,0,1,Group2,dist2
-        Param3,0,1,Group3,dist3
+        Param1,0,1,Group1,dist1,unif
+        Param2,0,1,Group2,dist2,triang
+        Param3,0,1,Group3,dist3,norm
 
     (Group and Dist columns are optional)
 
@@ -258,7 +258,7 @@ def read_param_file(filename, delimiter=None):
     groups = []
     dists = []
     num_vars = 0
-    fieldnames = ['name', 'lower_bound', 'upper_bound', 'group', 'dist']
+    fieldnames = ['name', 'lower_bound', 'upper_bound', 'group', 'dists']
 
     with open(filename, 'r') as csvfile:
         dialect = csv.Sniffer().sniff(csvfile.read(1024), delimiters=delimiter)
@@ -285,10 +285,10 @@ def read_param_file(filename, delimiter=None):
 
                 # If the fifth column does not contain a distribution
                 # use uniform
-                if row['dist'] is None:
+                if row['dists'] is None:
                     dists.append('unif')
                 else:
-                    dists.append(row['dist'])
+                    dists.append(row['dists'])
 
     if groups == names:
         groups = None
