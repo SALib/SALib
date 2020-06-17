@@ -9,7 +9,7 @@ from . import common_args
 from ..util import read_param_file, ResultDict
 
 
-def analyze(problem, X, Y, num_resamples=10,
+def analyze(problem, X, Y, num_resamples=100,
             conf_level=0.95, print_to_console=False, seed=None):
     """Perform Delta Moment-Independent Analysis on model outputs.
 
