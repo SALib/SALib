@@ -7,8 +7,9 @@ from . import common_args
 from ..util import read_param_file, ResultDict
 
 
-def analyze(problem, X, Y, num_resamples=100,
-            conf_level=0.95, print_to_console=False, seed=None):
+def analyze(problem: Dict, X: np.array, Y: np.array, 
+            num_resamples: int = 100, conf_level: float = 0.95,
+            print_to_console: bool = False, seed: int = None) -> Dict:
     """Perform Delta Moment-Independent Analysis on model outputs.
 
     Returns a dictionary with keys 'delta', 'delta_conf', 'S1', and 'S1_conf',
