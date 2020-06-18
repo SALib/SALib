@@ -94,12 +94,11 @@ def sample(problem, number_trajectories, num_levels=4,
 
     problem = define_problem_with_groups(problem)
 
-
-
     sample = _sample_morris(problem, number_trajectories, num_levels)
 
     if optimal_trajectories:
-        sample = _compute_optimised_trajectories(problem, sample, number_trajectories,
+        sample = _compute_optimised_trajectories(problem, sample,
+                                                 number_trajectories,
                                                  optimal_trajectories,
                                                  local_optimization)
 
@@ -107,7 +106,7 @@ def sample(problem, number_trajectories, num_levels=4,
     return sample
 
 
-def _sample_morris(problem, N, num_levels=4):
+def _sample_morris(problem, number_trajectories, num_levels=4):
     """Generate trajectories for groups
 
     Returns an :math:`N(g+1)`-by-:math:`k` array of `N` trajectories,
@@ -118,7 +117,7 @@ def _sample_morris(problem, N, num_levels=4):
     ---------
     problem : dict
         The problem definition
-    N : int
+    number_trajectories : int
         The number of trajectories to generate
     num_levels : int, default=4
         The number of grid levels
@@ -129,20 +128,15 @@ def _sample_morris(problem, N, num_levels=4):
     """
 
     group_membership, _ = compute_groups_matrix(problem['groups'])
-
-    if group_membership is None:
-        raise ValueError("Please define the 'group_membership' matrix")
-    if not isinstance(group_membership, np.ndarray):
-        raise TypeError("Argument 'group_membership' should be formatted \
-                         as a numpy ndarray")
+    check_group_membership(group_membership)
 
     num_params = group_membership.shape[0]
     num_groups = group_membership.shape[1]
 
     sample = np.array([generate_trajectory(group_membership,
                                            num_levels)
-                       for n in range(N)])
-    return sample.reshape((N * (num_groups + 1), num_params))
+                       for n in range(number_trajectories)])
+    return sample.reshape((number_trajectories * (num_groups + 1), num_params))
 
 
 def generate_trajectory(group_membership, num_levels=4):
@@ -357,6 +351,20 @@ def check_if_num_levels_is_even(num_levels: int):
         warnings.warn("num_levels should be an even number, "
                       "sample may be biased")
 
+
+def check_group_membership(group_membership):
+    """
+    Checks if the group_membership matrix was correctly defined
+    Parameters
+    ----------
+    group_membership: np.array
+        Group membership matrix (NOTE: type hints can't use np arrays yet)
+    """
+    if group_membership is None:
+        raise ValueError("Please define the 'group_membership' matrix")
+    if not isinstance(group_membership, np.ndarray):
+        raise TypeError("Argument 'group_membership' should be formatted \
+                         as a numpy np.ndarray")
 
 def cli_parse(parser):
     parser.add_argument('-l', '--levels', type=int, required=False,

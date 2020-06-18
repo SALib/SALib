@@ -2,7 +2,7 @@ from __future__ import division
 
 from numpy.testing import assert_equal, assert_allclose
 
-from pytest import raises, fixture, warns
+from pytest import raises, fixture, warns, mark
 
 import numpy as np
 import warnings
@@ -17,7 +17,7 @@ from SALib.sample.morris import (sample,
 from SALib.util import read_param_file, compute_groups_matrix
 
 from src.SALib.sample.morris import define_problem_with_groups, \
-    check_if_num_levels_is_even
+    check_if_num_levels_is_even, check_group_membership
 
 
 @fixture(scope='function')
@@ -282,9 +282,45 @@ class TestGroupSampleGeneration:
 
     def test_check_if_num_levels_is_even_check_even(self):
         """
-        Checks if a warn is not raised when the number of tests is even
+        Checks if a warn is not raised when the number of tests is even.
         """
         with warns(None) as record:
             check_if_num_levels_is_even(4)
 
         assert not record
+
+    @mark.xfail()
+    def test_check_group_membership_all_ok(self):
+        """
+        Checks if no errors are raised when group_membership is defined
+        correctly. This test is expected to fail, and the message XFAIL should
+        be displayed by pycharm.
+        """
+        # Creates a dummy variable
+        group_membership = np.empty((3, 3), dtype=np.int)
+
+        with raises(ValueError):
+            assert check_group_membership(group_membership)
+
+        with raises(TypeError):
+            assert check_group_membership(group_membership)
+
+    def test_check_group_membership_type_error(self):
+        """
+        Checks if an error is raised if group_membership has a wrong type.
+        """
+        # Creates a dummy variable
+        group_membership = 1.0
+
+        with raises(TypeError):
+            assert check_group_membership(group_membership)
+
+    def test_check_group_membership_value_error(self):
+        """
+        Checks if an error is raised if group_membership has None type.
+        """
+        # Creates a dummy variable
+        group_membership = None
+
+        with raises(ValueError):
+            assert check_group_membership(group_membership)
