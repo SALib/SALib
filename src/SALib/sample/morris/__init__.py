@@ -96,9 +96,10 @@ def sample(problem, N, num_levels=4, optimal_trajectories=None,
         problem['groups'] = problem['names']
 
     if not num_levels % 2 == 0:
-        warnings.warn("num_levels should be an even number, sample may be biased")
+        warnings.warn("num_levels should be an even number, "
+                      "sample may be biased")
 
-    sample = _sample_groups(problem, N, num_levels)
+    sample = _sample_morris(problem, N, num_levels)
 
     if optimal_trajectories:
 
@@ -112,7 +113,7 @@ def sample(problem, N, num_levels=4, optimal_trajectories=None,
     return sample
 
 
-def _sample_groups(problem, N, num_levels=4):
+def _sample_morris(problem, N, num_levels=4):
     """Generate trajectories for groups
 
     Returns an :math:`N(g+1)`-by-:math:`k` array of `N` trajectories,
