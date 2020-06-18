@@ -90,10 +90,9 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
 
     return S
 
-# Plischke et al. 2013 estimator (eqn 26) for d_hat
-
 
 def calc_delta(Y, Ygrid, X, m):
+    """Plischke et al. (2013) delta index estimator (eqn 26) for d_hat."""
     N = len(Y)
     fy = gaussian_kde(Y, bw_method='silverman')(Ygrid)
     abs_fy = np.abs(fy)
