@@ -1,5 +1,4 @@
-from __future__ import division
-from __future__ import print_function
+from typing import Dict
 
 from scipy.stats import norm, gaussian_kde, rankdata
 
