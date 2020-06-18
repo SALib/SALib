@@ -90,12 +90,15 @@ def sample(problem, N, num_levels=4, optimal_trajectories=None,
     if seed:
         np.random.seed(seed)
 
+    # If the user doesn't define groups, make the number of groups equal to the
+    # number of input variables
+    if not problem.get('groups'):
+        problem['groups'] = problem['names']
+
     if not num_levels % 2 == 0:
         warnings.warn("num_levels should be an even number, sample may be biased")
-    if problem.get('groups'):
-        sample = _sample_groups(problem, N, num_levels)
-    else:
-        sample = _sample_oat(problem, N, num_levels)
+
+    sample = _sample_groups(problem, N, num_levels)
 
     if optimal_trajectories:
 
@@ -107,28 +110,6 @@ def sample(problem, N, num_levels=4, optimal_trajectories=None,
 
     scale_samples(sample, problem['bounds'])
     return sample
-
-
-def _sample_oat(problem, N, num_levels=4):
-    """Generate trajectories without groups
-
-    Arguments
-    ---------
-    problem : dict
-        The problem definition
-    N : int
-        The number of samples to generate
-    num_levels : int, default=4
-        The number of grid levels
-    """
-    group_membership = np.asmatrix(np.identity(problem['num_vars'],
-                                               dtype=int))
-
-    num_params = group_membership.shape[0]
-    sample = np.array([generate_trajectory(group_membership,
-                                           num_levels)
-                       for n in range(N)])
-    return sample.reshape((N * (num_params + 1), num_params))
 
 
 def _sample_groups(problem, N, num_levels=4):
