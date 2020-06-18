@@ -82,18 +82,18 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
     -------
     Si : dict,
         Sa: Uncorrelated contribution
-        Sa_CI: Confidence interval of Sa
+        Sa_conf: Confidence interval of Sa
         Sb: Correlated contribution
-        Sb_CI: Confidence interval of Sb
+        Sb_conf: Confidence interval of Sb
         S: Total contribution of a particular term
-        S_CI: Confidence interval of S
+        S_conf: Confidence interval of S
         ST: Total contribution of a particular dimension/parameter
-        ST_CI: Confidence interval of ST
+        ST_conf: Confidence interval of ST
         Sa: Uncorrelated contribution
         select: Number of selection (F-Test)
 
     References
-    ---------
+    ----------
     .. [1] Genyuan Li, H. Rabitz, P.E. Yelvington, O.O. Oluwole, F. Bacon,
             C.E. Kolb, and J. Schoendorf, "Global Sensitivity Analysis for
             Systems with Independent and/or Correlated Inputs", Journal of
@@ -585,12 +585,12 @@ def _finalize(problem, SA, Em, settings, init_vars):
     d, alfa, maxorder = settings
     Em, SA = init_vars
     # Create Sensitivity Indices Result Dictionary
-    keys = ('Sa', 'Sa_CI', 'Sb', 'Sb_CI', 'S', 'S_CI', 'select',
-            'Sa_sum', 'Sa_sum_CI', 'Sb_sum', 'Sb_sum_CI', 'S_sum', 'S_sum_CI')
+    keys = ('Sa', 'Sa_conf', 'Sb', 'Sb_conf', 'S', 'S_conf', 'select',
+            'Sa_sum', 'Sa_sum_conf', 'Sb_sum', 'Sb_sum_conf', 'S_sum', 'S_sum_conf')
     Si = ResultDict((k, np.zeros(Em['n'])) for k in keys)
     Si['Term'] = [None] * Em['n']
     Si['ST'] = [np.nan, ] * Em['n']
-    Si['ST_CI'] = [np.nan, ] * Em['n']
+    Si['ST_conf'] = [np.nan, ] * Em['n']
 
     # Z score
     def z(p): return (-1) * np.sqrt(2) * special.erfcinv(p * 2)
@@ -611,7 +611,7 @@ def _finalize(problem, SA, Em, settings, init_vars):
                 np.where(np.sum(Em['c3'] == r, axis=1) == 1)[0]
             TS = np.sum(SA['S'][np.append(r, np.append(ij, ijk)), :], axis=0)
         Si['ST'][r] = np.mean(TS)
-        Si['ST_CI'][r] = mult * np.std(TS)
+        Si['ST_conf'][r] = mult * np.std(TS)
 
     # Fill Expansion Terms
     ct = 0
@@ -638,12 +638,12 @@ def _finalize(problem, SA, Em, settings, init_vars):
     Si['S_sum'] = np.mean(np.sum(SA['S'], axis=0))
 
     # Compute Confidence Interval
-    Si['Sa_CI'] = mult * np.std(SA['Sa'], axis=1)
-    Si['Sb_CI'] = mult * np.std(SA['Sb'], axis=1)
-    Si['S_CI'] = mult * np.std(SA['S'], axis=1)
-    Si['Sa_sum_CI'] = mult * np.std(np.sum(SA['Sa']))
-    Si['Sb_sum_CI'] = mult * np.std(np.sum(SA['Sb']))
-    Si['S_sum_CI'] = mult * np.std(np.sum(SA['S']))
+    Si['Sa_conf'] = mult * np.std(SA['Sa'], axis=1)
+    Si['Sb_conf'] = mult * np.std(SA['Sb'], axis=1)
+    Si['S_conf'] = mult * np.std(SA['S'], axis=1)
+    Si['Sa_sum_conf'] = mult * np.std(np.sum(SA['Sa']))
+    Si['Sb_sum_conf'] = mult * np.std(np.sum(SA['Sb']))
+    Si['S_sum_conf'] = mult * np.std(np.sum(SA['S']))
 
     # F-test # of selection to print out
     Si['select'] = Em['select'].flatten()
@@ -666,20 +666,20 @@ def _print(Si, d):
 
     for i in range(len(Si['Sa'])):
         if i < d:
-            print(format1 % (Si['Term'][i], Si['Sa'][i], Si['Sa_CI'][i], Si['Sb'][i], Si['Sb_CI'][i], Si['S'][i],
-                                Si['S_CI'][i], Si['ST'][i], Si['ST_CI'][i], np.sum(Si['select'][i])))
+            print(format1 % (Si['Term'][i], Si['Sa'][i], Si['Sa_conf'][i], Si['Sb'][i], Si['Sb_conf'][i], Si['S'][i],
+                                Si['S_conf'][i], Si['ST'][i], Si['ST_conf'][i], np.sum(Si['select'][i])))
         else:
-            print(format2 % (Si['Term'][i], Si['Sa'][i], Si['Sa_CI'][i], Si['Sb'][i], Si['Sb_CI'][i], Si['S'][i],
-                                Si['S_CI'][i], np.sum(Si['select'][i])))
+            print(format2 % (Si['Term'][i], Si['Sa'][i], Si['Sa_conf'][i], Si['Sb'][i], Si['Sb_conf'][i], Si['S'][i],
+                                Si['S_conf'][i], np.sum(Si['select'][i])))
 
     print('------------------------------------------------------------------------------------')
 
     format3 = (
         "%-11s   \t %5.2f (\261%.2f) %5.2f (\261%.2f) %5.2f (\261%.2f)")
-    print(format3 % ('Sum', Si['Sa_sum'], Si['Sa_sum_CI'],
-                        Si['Sb_sum'], Si['Sb_sum_CI'], Si['S_sum'], Si['S_sum_CI']))
+    print(format3 % ('Sum', Si['Sa_sum'], Si['Sa_sum_conf'],
+                        Si['Sb_sum'], Si['Sb_sum_conf'], Si['S_sum'], Si['S_sum_conf']))
     
-    keys = ('Sa_sum', 'Sb_sum', 'S_sum', 'Sa_sum_CI', 'Sb_sum_CI', 'S_sum_CI')
+    keys = ('Sa_sum', 'Sb_sum', 'S_sum', 'Sa_sum_conf', 'Sb_sum_conf', 'S_sum_conf')
     for k in keys:
         Si.pop(k, None)
 
