@@ -2,7 +2,7 @@ from __future__ import division
 
 from numpy.testing import assert_equal, assert_allclose
 
-from pytest import raises, fixture
+from pytest import raises, fixture, warns
 
 import numpy as np
 import warnings
@@ -13,10 +13,11 @@ from SALib.sample.morris import (sample,
                                  compute_b_star,
                                  compute_delta,
                                  generate_trajectory,
-                                 generate_x_star)
+                                 generate_x_star,)
 from SALib.util import read_param_file, compute_groups_matrix
 
-from src.SALib.sample.morris import define_problem_with_groups
+from src.SALib.sample.morris import define_problem_with_groups, \
+    check_if_num_levels_is_even
 
 
 @fixture(scope='function')
@@ -42,7 +43,6 @@ def expected_sample():
 
 
 def test_odd_num_levels_raises_warning(setup_param_file_with_groups):
-
     parameter_file = setup_param_file_with_groups
     problem = read_param_file(parameter_file)
     with warnings.catch_warnings(record=True) as w:
@@ -53,11 +53,11 @@ def test_odd_num_levels_raises_warning(setup_param_file_with_groups):
         # Verify some things
         assert len(w) == 1
         assert issubclass(w[-1].category, UserWarning)
-        assert "num_levels should be an even number, sample may be biased" in str(w[-1].message)
+        assert "num_levels should be an even number, sample may be biased" in str(
+            w[-1].message)
 
 
 def test_even_num_levels_no_warning(setup_param_file_with_groups):
-
     parameter_file = setup_param_file_with_groups
     problem = read_param_file(parameter_file)
     with warnings.catch_warnings(record=True) as w:
@@ -84,7 +84,6 @@ def test_group_in_param_file_read(setup_param_file_with_groups):
 
 
 def test_optimal_trajectories_lt_samples(setup_param_file):
-
     parameter_file = setup_param_file
     problem = read_param_file(parameter_file)
 
@@ -97,7 +96,6 @@ def test_optimal_trajectories_lt_samples(setup_param_file):
 
 
 def test_optimal_trajectories_lt_10(setup_param_file):
-
     parameter_file = setup_param_file
     problem = read_param_file(parameter_file)
 
@@ -111,7 +109,6 @@ def test_optimal_trajectories_lt_10(setup_param_file):
 
 
 def test_optimal_trajectories_gte_one(setup_param_file):
-
     parameter_file = setup_param_file
     problem = read_param_file(parameter_file)
 
@@ -125,7 +122,6 @@ def test_optimal_trajectories_gte_one(setup_param_file):
 
 
 def test_find_optimum_trajectories(setup_input, expected_sample):
-
     N = 6
     problem = {'num_vars': 2, 'groups': None}
     k_choices = 4
@@ -275,3 +271,20 @@ class TestGroupSampleGeneration:
         with raises(ValueError):
             define_problem_with_groups(problem)
 
+    def test_check_if_num_levels_is_even_check_odd(self):
+        """
+        Checks if a warn is raised when the number of tests is odd
+        """
+        with warns(None) as record:
+            check_if_num_levels_is_even(5)
+
+        assert record
+
+    def test_check_if_num_levels_is_even_check_even(self):
+        """
+        Checks if a warn is not raised when the number of tests is even
+        """
+        with warns(None) as record:
+            check_if_num_levels_is_even(4)
+
+        assert not record

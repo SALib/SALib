@@ -90,11 +90,11 @@ def sample(problem, number_trajectories, num_levels=4,
     if seed:
         np.random.seed(seed)
 
+    check_if_num_levels_is_even(num_levels)
+
     problem = define_problem_with_groups(problem)
 
-    if not num_levels % 2 == 0:
-        warnings.warn("num_levels should be an even number, "
-                      "sample may be biased")
+
 
     sample = _sample_morris(problem, number_trajectories, num_levels)
 
@@ -343,6 +343,19 @@ def define_problem_with_groups(problem: dict) -> dict:
         raise ValueError("Number of entries in \'groups\' should be the same "
                          "as in \'names\'")
     return problem
+
+
+def check_if_num_levels_is_even(num_levels: int):
+    """
+    Checks if the number of levels is even. If not, raises a warn.
+    Parameters
+    ----------
+    num_levels: int
+        Number of levels
+    """
+    if not num_levels % 2 == 0:
+        warnings.warn("num_levels should be an even number, "
+                      "sample may be biased")
 
 
 def cli_parse(parser):
