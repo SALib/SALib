@@ -190,6 +190,22 @@ def generate_trajectory(group_membership, num_levels=4):
 
 def compute_b_star(J, x_star, delta, B, G, P_star, D_star):
     """
+    Compute the random sampling matrix B*.
+
+    Parameters
+    ----------
+    J: matrix of 1's
+    x_star: randomly chosen "base value" of x
+    delta: parameters variation
+    B: sampling matrix (not random)
+    G: groups matrix
+    P_star: random permutation matrix
+    D_star: diagonal matrix with each element being +1 or -1, with equal
+            probability
+
+    Returns
+    -------
+    Random sampling matrix B*
     """
     element_a = J[0, :] * x_star
     element_b = np.matmul(G, P_star).T
@@ -365,6 +381,7 @@ def check_group_membership(group_membership):
     if not isinstance(group_membership, np.ndarray):
         raise TypeError("Argument 'group_membership' should be formatted \
                          as a numpy np.ndarray")
+
 
 def cli_parse(parser):
     parser.add_argument('-l', '--levels', type=int, required=False,
