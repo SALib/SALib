@@ -7,7 +7,7 @@ from . import sobol_sequence
 from ..util import scale_samples, nonuniform_scale_samples, read_param_file, compute_groups_matrix
 
 
-def sample(problem, N, calc_second_order=True, seed=None):
+def sample(problem, N, calc_second_order=True, seed=None, skip_values=1000):
     """Generates model inputs using Saltelli's extension of the Sobol sequence.
 
     Returns a NumPy matrix containing the model inputs using Saltelli's sampling
@@ -38,9 +38,6 @@ def sample(problem, N, calc_second_order=True, seed=None):
     else:
         Dg = len(set(groups))
         G, group_names = compute_groups_matrix(groups)
-
-    # How many values of the Sobol sequence to skip
-    skip_values = 1000
 
     # Create base sequence - could be any type of sampling
     base_sequence = sobol_sequence.sample(N + skip_values, 2 * D)
