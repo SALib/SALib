@@ -90,10 +90,7 @@ def sample(problem, N, num_levels=4, optimal_trajectories=None,
     if seed:
         np.random.seed(seed)
 
-    # If the user doesn't define groups, make the number of groups equal to the
-    # number of input variables
-    if not problem.get('groups'):
-        problem['groups'] = problem['names']
+    problem = define_problem_with_groups(problem)
 
     if not num_levels % 2 == 0:
         warnings.warn("num_levels should be an even number, "
@@ -102,10 +99,7 @@ def sample(problem, N, num_levels=4, optimal_trajectories=None,
     sample = _sample_morris(problem, N, num_levels)
 
     if optimal_trajectories:
-
-        sample = _compute_optimised_trajectories(problem,
-                                                 sample,
-                                                 N,
+        sample = _compute_optimised_trajectories(problem, sample, N,
                                                  optimal_trajectories,
                                                  local_optimization)
 
@@ -133,8 +127,6 @@ def _sample_morris(problem, N, num_levels=4):
     -------
     numpy.ndarray
     """
-    if len(problem['groups']) != problem['num_vars']:
-        raise ValueError("Groups do not match to number of variables")
 
     group_membership, _ = compute_groups_matrix(problem['groups'])
 
@@ -146,7 +138,7 @@ def _sample_morris(problem, N, num_levels=4):
 
     num_params = group_membership.shape[0]
     num_groups = group_membership.shape[1]
-    sample = np.zeros((N * (num_groups + 1), num_params))
+
     sample = np.array([generate_trajectory(group_membership,
                                            num_levels)
                        for n in range(N)])
@@ -328,6 +320,31 @@ def _compute_optimised_trajectories(problem, input_sample, N, k_choices,
     return output
 
 
+def define_problem_with_groups(problem: dict) -> dict:
+    """
+    Checks if the user defined the 'groups' key in the problem dictionary.
+    If not, makes the 'groups' key equal to the variables names. In other
+    words, the number of groups will be equal to the number of variables, which
+    is equivalent to don't use groups at all.
+    Parameters
+    ----------
+    problem : dict
+        The problem definition
+
+    Returns
+    -------
+    problem : dict
+        The problem definition with the 'groups' key, even if the user doesn't
+        define it
+    """
+    if 'groups' not in problem:
+        problem['groups'] = problem['names']
+    elif len(problem['groups']) != problem['num_vars']:
+        raise ValueError("Number of entries in \'groups\' should be the same "
+                         "as in \'names\'")
+    return problem
+
+
 def cli_parse(parser):
     parser.add_argument('-l', '--levels', type=int, required=False,
                         default=4, help='Number of grid levels \
@@ -356,3 +373,4 @@ def cli_action(args):
 
 if __name__ == "__main__":
     common_args.run_cli(cli_parse, cli_action)
+

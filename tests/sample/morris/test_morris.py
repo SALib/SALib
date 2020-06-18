@@ -16,6 +16,8 @@ from SALib.sample.morris import (sample,
                                  generate_x_star)
 from SALib.util import read_param_file, compute_groups_matrix
 
+from src.SALib.sample.morris import define_problem_with_groups
+
 
 @fixture(scope='function')
 def setup_input():
@@ -224,3 +226,52 @@ class TestGroupSampleGeneration:
         print(actual)
         expected = np.array([[0.333333, 0.333333, 0., 0.333333]])
         assert_allclose(actual, expected, rtol=1e-05)
+
+    def test_define_problem_with_groups_all_ok(self):
+        """
+        Checks if the function works when the user defines different groups for
+        each variable.
+        """
+        problem = {
+            'num_vars': 8,
+            'names': ['x1', 'x2', 'x3', 'x4', 'x5', 'x6', 'x7', 'x8'],
+            'groups': ['G1', 'G1', 'G1', 'G2', 'G2', 'G2', 'G3', 'G3']}
+
+        expected = problem
+
+        result = define_problem_with_groups(problem)
+
+        assert expected == result
+
+    def test_define_problem_with_groups_no_group_definition(self):
+        """
+        Checks if the function works when the user doesn't define groups at
+        all.
+        """
+        problem = {
+            'num_vars': 8,
+            'names': ['x1', 'x2', 'x3', 'x4', 'x5', 'x6', 'x7', 'x8']}
+
+        expected = {
+            'num_vars': 8,
+            'names': ['x1', 'x2', 'x3', 'x4', 'x5', 'x6', 'x7', 'x8'],
+            'groups': ['x1', 'x2', 'x3', 'x4', 'x5', 'x6', 'x7', 'x8']}
+
+        result = define_problem_with_groups(problem)
+
+        assert expected == result
+
+    def test_define_problem_with_groups_exception(self):
+        """
+        Checks if the function raises an exception when the user makes an
+        inconsistent definition of groups, i.e, only define groups for some
+        variables.
+        """
+        problem = {
+            'num_vars': 8,
+            'names': ['x1', 'x2', 'x3', 'x4', 'x5', 'x6', 'x7', 'x8'],
+            'groups': ['G1', 'G1', 'G1', 'G2', 'G2', 'G2']}
+
+        with raises(ValueError):
+            define_problem_with_groups(problem)
+
