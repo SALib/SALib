@@ -1,5 +1,4 @@
 from typing import Dict
-
 from scipy.stats import norm, gaussian_kde, rankdata
 
 import numpy as np
@@ -43,9 +42,9 @@ def analyze(problem, X, Y, num_resamples=100,
 
     Examples
     --------
-    >>> X = latin.sample(problem, 1000)
-    >>> Y = Ishigami.evaluate(X)
-    >>> Si = delta.analyze(problem, X, Y, print_to_console=True)
+        >>> X = latin.sample(problem, 1000)
+        >>> Y = Ishigami.evaluate(X)
+        >>> Si = delta.analyze(problem, X, Y, print_to_console=True)
     """
     if seed:
         np.random.seed(seed)
