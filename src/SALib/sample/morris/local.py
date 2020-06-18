@@ -1,7 +1,8 @@
 """
 """
 from itertools import combinations
-import numpy as np
+import numpy as np  # type: ignore
+from typing import List, Tuple, Union
 
 from . strategy import Strategy
 
@@ -15,8 +16,8 @@ class LocalOptimisation(Strategy):
         return self.find_local_maximum(input_sample, num_samples, num_params,
                                        k_choices, num_groups)
 
-    def find_local_maximum(self, input_sample, N, num_params,
-                           k_choices, num_groups=None):
+    def find_local_maximum(self, input_sample: np.ndarray, N: int, num_params: int,
+                           k_choices: int, num_groups: int=None) -> List:
         """Find the most different trajectories in the input sample using a
         local approach
 
@@ -89,7 +90,7 @@ class LocalOptimisation(Strategy):
             tot_indices_list, tot_max_array, "tot", "tot")
         return sorted(tot_max)
 
-    def sum_distances(self, indices, distance_matrix):
+    def sum_distances(self, indices: Tuple, distance_matrix: np.ndarray) -> np.ndarray:
         """Calculate combinatorial distance between a select group of
         trajectories, indicated by indices
 
@@ -119,7 +120,8 @@ class LocalOptimisation(Strategy):
 
         return dist
 
-    def get_max_sum_ind(self, indices_list, distances, i, m):
+    def get_max_sum_ind(self, indices_list: List[Tuple], distances: np.ndarray,
+                        i: Union[str, int], m: Union[str, int]) -> Tuple:
         '''Get the indices that belong to the maximum distance in `distances`
 
         Arguments
@@ -143,9 +145,9 @@ class LocalOptimisation(Strategy):
                 len(indices_list), len(distances), i, m))
 
         max_index = distances.argsort()[-1:][::-1]
-        return indices_list[max_index[0]]
+        return tuple(indices_list[max_index[0]])
 
-    def add_indices(self, indices, distance_matrix):
+    def add_indices(self, indices: Tuple, distance_matrix: np.ndarray) -> List:
         '''Adds extra indices for the combinatorial problem.
 
         Arguments
