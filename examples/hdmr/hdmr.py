@@ -16,12 +16,16 @@ problem = {
   'names': ['x1', 'x2', 'x3'],
   'bounds': [[-np.pi, np.pi]]*3
 }
+
 # Generate samples
 X = latin.sample(problem, 1000, seed=101)
+
 # Run the "model" and save the output in a text file
 Y = Ishigami.evaluate(X)
+
 # Add random error
 sigma = np.var(Y) / 100
+
 # SALib-HDMR options 
 options = {
   'graphics': True,
