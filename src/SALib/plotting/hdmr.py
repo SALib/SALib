@@ -30,7 +30,6 @@ def plot(Si):
     col = 5
 
     try:
-        # fig = plt.figure(frameon=False)
         ax = Si._plot()
     except AttributeError:
         # basic bar plot not found or is not available
@@ -65,6 +64,7 @@ def plot(Si):
     # Now plot regression lines of component functions
     row = 3
     col = 1
+    last_bootstrap = idx[:, -1]
     for i in range(problem['num_vars']):
         if (i % (row * col) == 0) or (i == 0):
             fig = plt.figure(frameon=False)
@@ -72,8 +72,8 @@ def plot(Si):
         title_str = 'Regression of parameter ' + \
             problem['names'][i] + r'$^{(Last Trial)}$'
         ax = fig.add_subplot(row, col, it, frameon=True, title=title_str)
-        ax.plot(X[idx[:, -1], i], Y[idx], 'r.')
-        ax.plot(X[idx[:, -1], i], np.mean(Em['f0']) + Y_em[:, i], 'k.')
+        ax.plot(X[last_bootstrap, i], Y[last_bootstrap], 'r.')
+        ax.plot(X[last_bootstrap, i], np.mean(Em['f0']) + Y_em[:, i], 'k.')
         ax.legend([r'$\widetilde{Y}$', '$f_' +
                    str(i + 1) + '$'], loc='upper left', bbox_to_anchor=(1.04, 1.0))
         it += 1

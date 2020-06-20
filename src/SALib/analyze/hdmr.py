@@ -20,7 +20,7 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
             maxorder: int = 2, maxiter: int = 100, 
             m: int = 2, K: int = 20, R: int = None, alpha: float = 0.95,
             lambdax: float = 0.01,
-            print_to_console: bool = True, graphics: bool = False, seed: int = None) -> Dict:
+            print_to_console: bool = True, seed: int = None) -> Dict:
     """High-Dimensional Model Representation (HDMR) using B-spline functions.
 
     HDMR is used for variance-based global sensitivity analysis (GSA) with 
@@ -131,10 +131,6 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
     # Print results to console
     if print_to_console:
         _print(Si, settings[1])
-
-    # Now, print the figures
-    if graphics:
-        hdmr_plot(Si)
 
     return Si
 
@@ -646,7 +642,7 @@ def _finalize(problem, SA, Em, settings, init_vars, RT, Y_em, bootstrap_idx, X, 
     Si.problem = problem
     Si.to_df = MethodType(to_df, Si)
 
-    Si._plot = Si.plot  # MethodType(Si.plot, Si)
+    Si._plot = Si.plot
     Si.plot = MethodType(plot, Si)
 
     return Si

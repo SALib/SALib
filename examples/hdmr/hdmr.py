@@ -28,11 +28,10 @@ sigma = np.var(Y) / 100
 
 # SALib-HDMR options 
 options = {
-  'graphics': True,
   'maxorder': 2,
   'maxiter': 100,
   'm': 4,
-  'K': 1,
+  'K': 10,
   'R': 500,
   'alpha': 0.95,
   'lambdax': 0.01,
@@ -41,3 +40,5 @@ options = {
 } 
 # Run SALib-HDMR
 Si = hdmr.analyze(problem, X, Y, **options)
+
+Si.plot()
