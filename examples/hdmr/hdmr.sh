@@ -56,7 +56,7 @@ salib analyze hdmr \
 #
 # -R, --R-subsample (optional): Subsample size. Default is N/2.
 #
-# -a, --alfa (optional): Confidence interval. Default is 0.95
+# -a, --alpha (optional): Confidence interval. Default is 0.95
 #
 # -lambda, --lambdax (optional): Regularization constant. Default is 0.01
 #

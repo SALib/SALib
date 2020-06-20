@@ -30,7 +30,7 @@ options = {
   'm': 4,
   'K': 1,
   'R': 500,
-  'alfa': 0.95,
+  'alpha': 0.95,
   'lambdax': 0.01,
   'print_to_console': True,
   'seed': 101
