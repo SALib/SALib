@@ -189,8 +189,6 @@ def _check_settings(X, Y, maxorder, maxiter, m, K, R, alfa, lambdax):
 def _compute(X, Y, settings, init_vars):
     N, d, maxorder, maxiter, m, K, R, alfa, lambdax = settings
     Em, idx, SA, RT, Y_em, Y_id, m1, m2, m3, j1, j2, j3 = init_vars
-    printProgressBar(0, K, prefix='SALib-HDMR :',
-                     suffix='Completed', length=50)
 
     # DYNAMIC PART: Bootstrap for confidence intervals
     for k in range(K):
@@ -235,9 +233,6 @@ def _compute(X, Y, settings, init_vars):
         # Compute sensitivity indices
         SA['S'][:, k], SA['Sa'][:, k], SA['Sb'][:, k] = ancova(Y_id, Y_em, SA['V_Y'][k],
                                                                R, Em['n'])
-
-        # Print progress bar
-        printProgressBar(k + 1, K, prefix='SALib-HDMR :', suffix='Completed', length=50)
 
         RT[0, k] = time.time() - tic  # Compute CPU time kth emulator
 
@@ -556,29 +551,6 @@ def ancova(Y, Y_em, V_Y, R, n):
         S_b[j] = C[0, 1] / V_Y
 
     return (S, S_a, S_b)
-
-
-def printProgressBar(iteration, total, prefix='', suffix='',
-                     decimals=1, length=100, fill='█', printEnd="\r"):
-    """Call in a loop to create terminal progress bar
-     Input params:
-         iteration   - Required  : current iteration (Int)
-         total       - Required  : total iterations (Int)
-         prefix      - Optional  : prefix string (Str)
-         suffix      - Optional  : suffix string (Str)
-         decimals    - Optional  : positive number of decimals in percent complete (Int)
-         length      - Optional  : character length of bar (Int)
-         fill        - Optional  : bar fill character (Str)
-         printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
-    """
-    percent = ("{0:." + str(decimals) + "f}").format(100 *
-                                                     (iteration / float(total)))
-    filledLength = int(length * iteration // total)
-    bar = fill * filledLength + '-' * (length - filledLength)
-    print('\r%s |%s| %s%% %s' % (prefix, bar, percent, suffix), end=printEnd)
-    # Print New Line on Complete
-    if iteration == total:
-        print()
 
 
 def _finalize(problem, SA, Em, settings, init_vars):
