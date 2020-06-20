@@ -1,10 +1,13 @@
 from typing import Dict, List, Optional
+from types import MethodType
 
 import itertools
 import time
 import numpy as np
-from SALib.plotting import hdmr
+import pandas as pd
+from SALib.plotting.hdmr import plot as hdmr_plot
 from scipy import (stats, special, interpolate)
+
 from . import common_args
 from ..util import read_param_file, ResultDict
 from matplotlib import pyplot as plt
@@ -123,7 +126,7 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
 
     # Finalize results
     Si = _finalize(problem, SA, Em, (settings[i] for i in [
-                       1, 7, 2]), (init_vars[i] for i in [0, 2]))
+                       1, 7, 2]), (init_vars[i] for i in [0, 2]), RT, Y_em, idx, X, Y)
 
     # Print results to console
     if print_to_console:
@@ -131,7 +134,7 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
 
     # Now, print the figures
     if graphics:
-        hdmr.figures(problem, Si, Em, RT, X, Y, Y_em, idx)
+        hdmr_plot(Si)
 
     return Si
 
@@ -561,7 +564,7 @@ def ancova(Y, Y_em, V_Y, R, n):
     return (S, S_a, S_b)
 
 
-def _finalize(problem, SA, Em, settings, init_vars):
+def _finalize(problem, SA, Em, settings, init_vars, RT, Y_em, bootstrap_idx, X, Y):
     """Creates ResultDict to be returned."""
     d, alpha, maxorder = settings
     Em, SA = init_vars
@@ -632,7 +635,40 @@ def _finalize(problem, SA, Em, settings, init_vars):
 
     Si['names'] = Si['Term']
 
+    # Additional data for plotting.
+    Si['Em'] = Em
+    Si['RT'] = RT
+    Si['Y_em'] = Y_em
+    Si['idx'] = bootstrap_idx
+    Si['X'] = X
+    Si['Y'] = Y
+
+    Si.problem = problem
+    Si.to_df = MethodType(to_df, Si)
+
+    Si._plot = Si.plot  # MethodType(Si.plot, Si)
+    Si.plot = MethodType(plot, Si)
+
     return Si
+
+
+def to_df(self):
+    '''Conversion method to Pandas DataFrame. To be attached to ResultDict.
+
+    Returns
+    ========
+    Pandas DataFrame
+    '''
+    names = self['names']
+    exclude_list = ['select', 'Em', 'RT', 'Y_em', 'idx', 'X', 'Y', 'Term', 'names']
+    new_spec = {k: v for k, v in self.items() if k not in exclude_list}
+
+    return pd.DataFrame(new_spec, index=names)
+
+
+def plot(self):
+    """HDMR specific plotting."""
+    hdmr_plot(self)
 
 
 def _print(Si, d):
