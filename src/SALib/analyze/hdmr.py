@@ -15,7 +15,7 @@ __all__ = ['analyze', 'cli_parse', 'cli_action']
 
 def analyze(problem: Dict, X: np.array, Y: np.array, 
             maxorder: int = 2, maxiter: int = 100, 
-            m: int = 2, K: int = 20, R: int = None, alfa: float = 0.95,
+            m: int = 2, K: int = 20, R: int = None, alpha: float = 0.95,
             lambdax: float = 0.01,
             print_to_console: bool = True, graphics: bool = False, seed: int = None) -> Dict:
     """High-Dimensional Model Representation (HDMR) using B-spline functions.
@@ -63,7 +63,7 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
     R : int (100-N/2, default: N/2)
         Number of bootstrap samples. Will be set to length of `Y` if `K` is set to 1.
 
-    alfa : float (0.5-1) 
+    alpha : float (0.5-1) 
         Confidence interval F-test
 
     lambdax : float (0-10, default: 0.01)
@@ -115,7 +115,7 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
         np.random.seed(seed)
 
     # Initial part: Check input arguments and define HDMR variables
-    settings = _check_settings(X, Y, maxorder, maxiter, m, K, R, alfa, lambdax)
+    settings = _check_settings(X, Y, maxorder, maxiter, m, K, R, alpha, lambdax)
     init_vars = _init(X, Y, settings)
 
     # Sensitivity Analysis Computation with/without bootstraping
@@ -135,7 +135,7 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
 
     return Si
 
-def _check_settings(X, Y, maxorder, maxiter, m, K, R, alfa, lambdax):  
+def _check_settings(X, Y, maxorder, maxiter, m, K, R, alpha, lambdax):  
     # Get dimensionality of numpy arrays
     N, d = X.shape
     y_row = Y.shape[0]
@@ -174,8 +174,8 @@ def _check_settings(X, Y, maxorder, maxiter, m, K, R, alfa, lambdax):
     if (K == 1) and (R != y_row):
         R = y_row
     
-    if alfa < 0.5 or alfa > 1.0:
-        raise RuntimeError("Field \"alfa\" of options should be an integer between 0.5 to 1.0")
+    if alpha < 0.5 or alpha > 1.0:
+        raise RuntimeError("Field \"alpha\" of options should be an integer between 0.5 to 1.0")
 
     if lambdax > 10.0:
         raise RuntimeError("SALib-HDMR WARNING: Field \"lambdax\" of options set rather large. Default: lambdax = 0.01")
@@ -183,11 +183,11 @@ def _check_settings(X, Y, maxorder, maxiter, m, K, R, alfa, lambdax):
         raise RuntimeError("Field \"lambdax\" (regularization term) of options cannot be smaller than zero. Default: 0.01")
 
     return [N, d, maxorder, maxiter,
-            m, K, R, alfa, lambdax]
+            m, K, R, alpha, lambdax]
 
 
 def _compute(X, Y, settings, init_vars):
-    N, d, maxorder, maxiter, m, K, R, alfa, lambdax = settings
+    N, d, maxorder, maxiter, m, K, R, alpha, lambdax = settings
     Em, idx, SA, RT, Y_em, Y_id, m1, m2, m3, j1, j2, j3 = init_vars
 
     # DYNAMIC PART: Bootstrap for confidence intervals
@@ -221,7 +221,7 @@ def _compute(X, Y, settings, init_vars):
                                            m3, lambdax)
 
         # Identify significant and insignificant terms
-        Em['select'][:, k] = f_test(Y_id, Em['f0'][k], Y_em, R, alfa, m1, m2, m3, Em['n1'], Em['n2'],
+        Em['select'][:, k] = f_test(Y_id, Em['f0'][k], Y_em, R, alpha, m1, m2, m3, Em['n1'], Em['n2'],
                                     Em['n3'], Em['n'])
 
         # Store the emulated output
@@ -240,7 +240,7 @@ def _compute(X, Y, settings, init_vars):
 
 
 def _init(X, Y, settings):
-    N, d, maxorder, maxiter, m, K, R, alfa, lambdax = settings
+    N, d, maxorder, maxiter, m, K, R, alpha, lambdax = settings
 
     # Setup Bootstrap (if K > 1)
     if (K == 1):
@@ -488,7 +488,7 @@ def _third_order(B3, Y_res, R, n3, m3, lambdax):
     return Y_ijk
 
 
-def f_test(Y, f0, Y_em, R, alfa, m1, m2, m3, n1, n2, n3, n):
+def f_test(Y, f0, Y_em, R, alpha, m1, m2, m3, n1, n2, n3, n):
     # Model selection using the F test
     # Initialize ind with zeros (all terms insignificant)
     select = np.zeros((n, 1))
@@ -516,7 +516,7 @@ def f_test(Y, f0, Y_em, R, alfa, m1, m2, m3, n1, n2, n3, n):
         F_stat = ((SSR0 - SSR1) / (p1 - p0)) / (SSR1 / (R - p1))
 
         # Now calculate critical F value
-        F_crit = stats.f.ppf(q=alfa, dfn=p1 - p0, dfd=R - p1)
+        F_crit = stats.f.ppf(q=alpha, dfn=p1 - p0, dfd=R - p1)
 
         # Now determine whether to accept ith component into model
         if F_stat > F_crit:
@@ -554,7 +554,7 @@ def ancova(Y, Y_em, V_Y, R, n):
 
 
 def _finalize(problem, SA, Em, settings, init_vars):
-    d, alfa, maxorder = settings
+    d, alpha, maxorder = settings
     Em, SA = init_vars
     # Create Sensitivity Indices Result Dictionary
     keys = ('Sa', 'Sa_conf', 'Sb', 'Sb_conf', 'S', 'S_conf', 'select',
@@ -568,7 +568,7 @@ def _finalize(problem, SA, Em, settings, init_vars):
     def z(p): return (-1) * np.sqrt(2) * special.erfcinv(p * 2)
 
     # Multiplier for confidence interval
-    mult = z(alfa + (1 - alfa) / 2)
+    mult = z(alpha + (1 - alpha) / 2)
 
     # Compute the total sensitivity of each parameter/coefficient
     for r in range(Em['n1']):
@@ -680,7 +680,7 @@ def cli_parse(parser):
     parser.add_argument('-R', '--R-subsample', type=int, required=False,
                         default=None,
                         help='Subsample size')
-    parser.add_argument('-a', '--alfa', type=float, required=False,
+    parser.add_argument('-a', '--alpha', type=float, required=False,
                         default=0.95,
                         help='Confidence interval')
     parser.add_argument('-lambda', '--lambdax', type=float, required=False,
@@ -703,11 +703,11 @@ def cli_action(args):
     m = args.m_int
     K = args.K_bootstrap
     R = args.R_subsample
-    alfa = args.alfa
+    alpha = args.alpha
     lambdax = args.lambdax
     p = args.print_to_console
     options = options = {'graphics': g, 'maxorder': mor, 'maxiter': mit, 'm': m,
-                         'K': K, 'R': R, 'alfa': alfa, 'lambdax': lambdax, 'print_to_console': p}
+                         'K': K, 'R': R, 'alpha': alpha, 'lambdax': lambdax, 'print_to_console': p}
     
     if len(X.shape) == 1:
         X = X.reshape((len(X), 1))
