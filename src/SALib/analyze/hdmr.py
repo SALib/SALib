@@ -135,7 +135,8 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
 
     return Si
 
-def _check_settings(X, Y, maxorder, maxiter, m, K, R, alpha, lambdax):  
+def _check_settings(X, Y, maxorder, maxiter, m, K, R, alpha, lambdax):
+    """Perform checks to ensure all parameters are within usable/expected ranges."""
     # Get dimensionality of numpy arrays
     N, d = X.shape
     y_row = Y.shape[0]
@@ -169,7 +170,7 @@ def _check_settings(X, Y, maxorder, maxiter, m, K, R, alpha, lambdax):
     if R is None:
         R = y_row // 2
     elif not ismember(R, np.arange(300, N + 1)):
-        raise RuntimeError("Field \"R\" of options should be an integer between 300 and N, number of rows matrix X.")
+        raise RuntimeError(f"Field \"R\" of options should be an integer between 300 and {N}, the number of rows matrix X.")
 
     if (K == 1) and (R != y_row):
         R = y_row
@@ -187,6 +188,7 @@ def _check_settings(X, Y, maxorder, maxiter, m, K, R, alpha, lambdax):
 
 
 def _compute(X, Y, settings, init_vars):
+    """Compute HDMR"""
     N, d, maxorder, maxiter, m, K, R, alpha, lambdax = settings
     Em, idx, SA, RT, Y_em, Y_id, m1, m2, m3, j1, j2, j3 = init_vars
 
@@ -240,6 +242,7 @@ def _compute(X, Y, settings, init_vars):
 
 
 def _init(X, Y, settings):
+    """Initialize HDMR variables."""
     N, d, maxorder, maxiter, m, K, R, alpha, lambdax = settings
 
     # Setup Bootstrap (if K > 1)
@@ -384,6 +387,7 @@ def B_spline(X, R, d, m):
 
 
 def _first_order(B1, Y_res, R, n1, m1, maxiter, lambdax):
+    """Compute first order sensitivities."""
     C1 = np.zeros((m1, n1))       # Initialize coefficients
     Y_i = np.zeros((R, n1))       # Initialize 1st order contributions
     T1 = np.zeros((m1, R, n1))    # Initialize T(emporary) matrix - 1st
@@ -433,6 +437,7 @@ def _first_order(B1, Y_res, R, n1, m1, maxiter, lambdax):
 
 
 def _second_order(B2, Y_res, R, n2, m2, lambdax):
+    """Compute second order sensitivities."""
     C2 = np.zeros((m2, n2))       # Initialize coefficients
     Y_ij = np.zeros((R, n2))      # Initialize 1st order contributions
     T2 = np.zeros((m2, R, n2))    # Initialize T(emporary) matrix - 1st
@@ -444,7 +449,8 @@ def _second_order(B2, Y_res, R, n2, m2, lambdax):
 
         if (np.linalg.det(B22) == 0):
             C2[:, j] = 0  # Ill-defined
-            # print("SALib-HDMR Warning: Matrix B22 is ill-defined. Try to decrease b-spline interval \"m\". Solution, C2, is set to zero. \n")
+            # print("SALib-HDMR Warning: Matrix B22 is ill-defined. 
+            # Try to decrease b-spline interval \"m\". Solution, C2, is set to zero. \n")
         else:
             # CHECK: Numpy Linear Algebra Solver slightly differentiate with
             # MATLAB's Solver
@@ -454,7 +460,7 @@ def _second_order(B2, Y_res, R, n2, m2, lambdax):
         C2[:, j] = np.matmul(T2[:, :, j], Y_res).reshape(m2,)
         Y_ij[:, j] = np.matmul(B2[:, :, j], C2[:, j])
 
-    # Now compute first-order terms
+    # Now compute second-order terms
     for j in range(n2):
         Y_ij[:, j] = np.matmul(B2[:, :, j], C2[:, j])
 
@@ -465,6 +471,7 @@ def _second_order(B2, Y_res, R, n2, m2, lambdax):
 
 
 def _third_order(B3, Y_res, R, n3, m3, lambdax):
+    """Compute third order sensitivities."""
     C3 = np.zeros((m3, n3))        # Initialize coefficients
     Y_ijk = np.zeros((R, n3))      # Initialize 1st order contributions
     T3 = np.zeros((m3, R, n3))     # Initialize T(emporary) matrix - 1st
@@ -489,7 +496,7 @@ def _third_order(B3, Y_res, R, n3, m3, lambdax):
 
 
 def f_test(Y, f0, Y_em, R, alpha, m1, m2, m3, n1, n2, n3, n):
-    # Model selection using the F test
+    """Use F-test for model selection."""
     # Initialize ind with zeros (all terms insignificant)
     select = np.zeros((n, 1))
 
@@ -527,6 +534,7 @@ def f_test(Y, f0, Y_em, R, alpha, m1, m2, m3, n1, n2, n3, n):
 
 
 def ancova(Y, Y_em, V_Y, R, n):
+    """Analysis of Covariance."""
     # Compute the sum of all Y_em terms
     Y0 = np.sum(Y_em[:, :], axis=1)
 
@@ -554,8 +562,10 @@ def ancova(Y, Y_em, V_Y, R, n):
 
 
 def _finalize(problem, SA, Em, settings, init_vars):
+    """Creates ResultDict to be returned."""
     d, alpha, maxorder = settings
     Em, SA = init_vars
+
     # Create Sensitivity Indices Result Dictionary
     keys = ('Sa', 'Sa_conf', 'Sb', 'Sb_conf', 'S', 'S_conf', 'select',
             'Sa_sum', 'Sa_sum_conf', 'Sb_sum', 'Sb_sum_conf', 'S_sum', 'S_sum_conf')
