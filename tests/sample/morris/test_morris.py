@@ -16,8 +16,10 @@ from SALib.sample.morris import (sample,
                                  generate_x_star,)
 from SALib.util import read_param_file, compute_groups_matrix
 
-from src.SALib.sample.morris.morris import check_group_membership, \
-    check_if_num_levels_is_even, define_problem_with_groups
+from src.SALib.sample.morris.morris import (check_group_membership,
+                                            check_if_num_levels_is_even,
+                                            define_problem_with_groups)
+
 
 
 @fixture(scope='function')
