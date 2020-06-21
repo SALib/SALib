@@ -16,8 +16,8 @@ from SALib.sample.morris import (sample,
                                  generate_x_star,)
 from SALib.util import read_param_file, compute_groups_matrix
 
-from src.SALib.sample.morris import define_problem_with_groups, \
-    check_if_num_levels_is_even, check_group_membership
+from src.SALib.sample.morris import check_group_membership, \
+    check_if_num_levels_is_even, define_problem_with_groups
 
 
 @fixture(scope='function')
@@ -305,7 +305,7 @@ class TestGroupSampleGeneration:
         with raises(TypeError):
             assert check_group_membership(group_membership)
 
-    def test_check_group_membership_type_error(self):
+    def test_check_group_membership_error(self):
         """
         Checks if an error is raised if group_membership has a wrong type.
         """
@@ -315,11 +315,6 @@ class TestGroupSampleGeneration:
         with raises(TypeError):
             assert check_group_membership(group_membership)
 
-    def test_check_group_membership_value_error(self):
-        """
-        Checks if an error is raised if group_membership has None type.
-        """
-        # Creates a dummy variable
         group_membership = None
 
         with raises(ValueError):
