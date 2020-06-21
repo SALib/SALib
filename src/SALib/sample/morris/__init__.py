@@ -109,7 +109,8 @@ def sample(problem: dict, N: int, num_levels: int = 4,
     return sample
 
 
-def _sample_morris(problem, number_trajectories, num_levels=4):
+def _sample_morris(problem: dict, number_trajectories: int,
+                   num_levels: int = 4) -> np.ndarray:
     """Generate trajectories for groups
 
     Returns an :math:`N(g+1)`-by-:math:`k` array of `N` trajectories,
@@ -142,7 +143,8 @@ def _sample_morris(problem, number_trajectories, num_levels=4):
     return sample.reshape((number_trajectories * (num_groups + 1), num_params))
 
 
-def generate_trajectory(group_membership, num_levels=4):
+def generate_trajectory(group_membership: np.ndarray,
+                        num_levels: int = 4) -> np.ndarray:
     """Return a single trajectory
 
     Return a single trajectory of size :math:`(g+1)`-by-:math:`k`
@@ -191,7 +193,9 @@ def generate_trajectory(group_membership, num_levels=4):
     return B_star
 
 
-def compute_b_star(J, x_star, delta, B, G, P_star, D_star):
+def compute_b_star(J: np.ndarray, x_star: np.ndarray, delta: float,
+                   B: np.ndarray, G: np.ndarray, P_star: np.ndarray,
+                   D_star: np.ndarray) -> np.ndarray:
     """
     Compute the random sampling matrix B*.
 
@@ -219,7 +223,7 @@ def compute_b_star(J, x_star, delta, B, G, P_star, D_star):
     return b_star
 
 
-def generate_p_star(num_groups):
+def generate_p_star(num_groups: int) -> np.ndarray:
     """Describe the order in which groups move
 
     Parameters
@@ -236,7 +240,7 @@ def generate_p_star(num_groups):
     return p_star
 
 
-def generate_x_star(num_params, num_levels):
+def generate_x_star(num_params: int, num_levels: int) -> np.ndarray:
     """Generate an 1-by-num_params array to represent initial position for EE
 
     This should be a randomly generated array in the p level grid
@@ -264,7 +268,7 @@ def generate_x_star(num_params, num_levels):
     return x_star
 
 
-def compute_delta(num_levels):
+def compute_delta(num_levels: int) -> float:
     """Computes the delta value from number of levels
 
     Parameters
@@ -279,8 +283,9 @@ def compute_delta(num_levels):
     return num_levels / (2.0 * (num_levels - 1))
 
 
-def _compute_optimised_trajectories(problem, input_sample, N, k_choices,
-                                    local_optimization=False):
+def _compute_optimised_trajectories(problem: dict, input_sample: int, N: int,
+                                    k_choices: int,
+                                    local_optimization: bool = False) -> np.ndarray:
     '''
     Calls the procedure to compute the optimum k_choices of trajectories
     from the input_sample.
@@ -377,7 +382,7 @@ def check_group_membership(group_membership):
     Parameters
     ----------
     group_membership: np.array
-        Group membership matrix (NOTE: type hints can't use np arrays yet)
+        Group membership matrix
     """
     if group_membership is None:
         raise ValueError("Please define the 'group_membership' matrix")
