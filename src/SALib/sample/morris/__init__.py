@@ -51,8 +51,9 @@ else:
 __all__ = ['sample']
 
 
-def sample(problem, N, num_levels=4,
-           optimal_trajectories=None, local_optimization=True, seed=None):
+def sample(problem: dict, N: int, num_levels: int = 4,
+           optimal_trajectories: int = None, local_optimization: bool = True,
+           seed: int = None) -> np.ndarray:
     """Generate model inputs using the Method of Morris
 
     Returns a NumPy matrix containing the model inputs required for Method of
@@ -79,6 +80,8 @@ def sample(problem, N, num_levels=4,
         Speeds up the process tremendously for bigger N and num_levels.
         If set to ``False`` brute force method is used, unless ``gurobipy`` is
         available
+    seed : int
+        Seed to generate a random number
 
     Returns
     -------
@@ -113,7 +116,7 @@ def _sample_morris(problem, number_trajectories, num_levels=4):
     where :math:`g` is the number of groups and :math:`k` is the number
     of factors
 
-    Arguments
+    Parameters
     ---------
     problem : dict
         The problem definition
@@ -147,7 +150,7 @@ def generate_trajectory(group_membership, num_levels=4):
     and :math:`k` is the number of factors,
     both implied by the dimensions of `group_membership`
 
-    Arguments
+    Parameters
     ---------
     group_membership : np.ndarray
         a k-by-g matrix which notes factor membership of groups
@@ -219,7 +222,7 @@ def compute_b_star(J, x_star, delta, B, G, P_star, D_star):
 def generate_p_star(num_groups):
     """Describe the order in which groups move
 
-    Arguments
+    Parameters
     ---------
     num_groups : int
 
@@ -239,7 +242,7 @@ def generate_x_star(num_params, num_levels):
     This should be a randomly generated array in the p level grid
     :math:`\omega`
 
-    Arguments
+    Parameters
     ---------
     num_params : int
         The number of parameters (factors)
@@ -264,7 +267,7 @@ def generate_x_star(num_params, num_levels):
 def compute_delta(num_levels):
     """Computes the delta value from number of levels
 
-    Arguments
+    Parameters
     ---------
     num_levels : int
         The number of levels
@@ -284,7 +287,7 @@ def _compute_optimised_trajectories(problem, input_sample, N, k_choices,
     If there are groups, then this procedure allocates the groups to the
     correct call here.
 
-    Arguments
+    Parameters
     ---------
     problem : dict
         The problem definition
