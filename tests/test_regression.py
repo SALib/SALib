@@ -238,8 +238,8 @@ def test_regression_hdmr_ishigami():
     problem = read_param_file(param_file)
     X = latin.sample(problem, 10000)
     Y = Ishigami.evaluate(X)
-    options = {'graphics': 0,'maxorder': 2,'maxiter': 100,'m': 4,'K': 1,'R': 10000,'alfa': 0.95,'lambdax': 0.01,'print_to_console': 0} 
-    Si = hdmr.analyze(problem, X, Y, options)
+    options = {'maxorder': 2,'maxiter': 100,'m': 4,'K': 1,'R': 10000,'alpha': 0.95,'lambdax': 0.01,'print_to_console': False} 
+    Si = hdmr.analyze(problem, X, Y, **options)
     assert_allclose(Si['Sa'][0:problem['num_vars']], [0.31, 0.44, 0.00], atol=5e-2, rtol=1e-1)
     assert_allclose(Si['ST'][0:problem['num_vars']], [0.55, 0.44, 0.24], atol=5e-2, rtol=1e-1)
 
@@ -253,17 +253,16 @@ def test_regression_hdmr_case1():
     X = latin.sample(problem, 10000)
     Y = linear_model_1.evaluate(X)
     options = {
-        'graphics': 0,
         'maxorder': 2,
         'maxiter': 100,
         'm': 2,
         'K': 1,
         'R': 10000,
-        'alfa': 0.95,
+        'alpha': 0.95,
         'lambdax': 0.01,
-        'print_to_console': 0
+        'print_to_console': False
     } 
-    Si = hdmr.analyze(problem, X, Y, options)
+    Si = hdmr.analyze(problem, X, Y, **options)
     assert_allclose(Si['Sa'][0:problem['num_vars']], [0.20] * 5, atol=5e-2, rtol=1e-1)
     assert_allclose(Si['ST'][0:problem['num_vars']], [0.20] * 5, atol=5e-2, rtol=1e-1)
 
@@ -280,17 +279,16 @@ def test_regression_hdmr_case2():
     X = np.random.multivariate_normal(mean, cov, 10000)
     Y = linear_model_1.evaluate(X)
     options = {
-            'graphics': 0,
             'maxorder': 2,
             'maxiter': 100,
             'm': 2,
             'K': 1,
             'R': 10000,
-            'alfa': 0.95,
+            'alpha': 0.95,
             'lambdax': 0.01,
-            'print_to_console': 0
+            'print_to_console': False
         } 
-    Si = hdmr.analyze(problem, X, Y, options)
+    Si = hdmr.analyze(problem, X, Y, **options)
     assert_allclose(Si['Sa'][0:problem['num_vars']], [0.13] * 5, atol=5e-2, rtol=1e-1)
     assert_allclose(Si['Sb'][0:problem['num_vars']], [0.11, 0.11, 0.06, 0.03, 0.03], atol=5e-2, rtol=1e-1)
 

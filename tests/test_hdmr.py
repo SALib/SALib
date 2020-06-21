@@ -20,49 +20,35 @@ def test_insufficient_sample_size():
     problem, X = setup_samples()
     Y = Ishigami.evaluate(X)
     with raises(RuntimeError):
-        hdmr.analyze(problem,X[:200],Y[:200],options={})
+        hdmr.analyze(problem, X[:200], Y[:200])
 
 
 def test_bad_conf_level():
     problem, X = setup_samples()
     Y = Ishigami.evaluate(X)
     with raises(RuntimeError):
-        hdmr.analyze(problem,X,Y,options={'alfa': 1.02})
+        hdmr.analyze(problem, X, Y, alpha=1.02)
 
 
 def test_incorrect_maxorder():
     problem, X = setup_samples()
     Y = Ishigami.evaluate(X)
     with raises(RuntimeError):
-        hdmr.analyze(problem,X,Y,options={'maxorder': 4})
+        hdmr.analyze(problem, X, Y, maxorder=4)
 
 
 def test_incorrect_maxiter():
     problem, X = setup_samples()
     Y = Ishigami.evaluate(X)
     with raises(RuntimeError):
-        hdmr.analyze(problem,X,Y,options={'maxiter': 1005})
+        hdmr.analyze(problem, X, Y, maxiter=1005)
 
 
 def test_over_bootstrap_sample_size():
     problem, X = setup_samples()
     Y = Ishigami.evaluate(X)
     with raises(RuntimeError):
-        hdmr.analyze(problem,X,Y,options={'R': 10001})
-
-
-def test_incorrect_graphics():
-    problem, X = setup_samples()
-    Y = Ishigami.evaluate(X)
-    with raises(RuntimeError):
-        hdmr.analyze(problem,X,Y,options={'graphics': 3})
-
-
-def test_incorrect_print():
-    problem, X = setup_samples()
-    Y = Ishigami.evaluate(X)
-    with raises(RuntimeError):
-        hdmr.analyze(problem,X,Y,options={'print_to_console': 2})
+        hdmr.analyze(problem, X, Y, R=10001)
 
 
 def test_incorrect_maxorder_setting():
@@ -74,14 +60,14 @@ def test_incorrect_maxorder_setting():
     X = latin.sample(problem, 10000)
     Y = linear_model_1.evaluate(X)
     with raises(RuntimeError):
-        hdmr.analyze(problem,X,Y,options={'maxiter': 3})
+        hdmr.analyze(problem, X, Y, maxorder=5)
 
 
 def test_incorrect_lambdax():
     problem, X = setup_samples()
     Y = Ishigami.evaluate(X)
     with raises(RuntimeError):
-        hdmr.analyze(problem,X,Y,options={'lambdax': 11})
+        hdmr.analyze(problem, X, Y, lambdax=11)
 
 
 def test_dim_mismatch():
@@ -93,4 +79,4 @@ def test_dim_mismatch():
     X = latin.sample(problem, 10000)
     Y = linear_model_1.evaluate(X)
     with raises(RuntimeError):
-        hdmr.analyze(problem,X,Y[:-2],options={})
+        hdmr.analyze(problem, X, Y[:-2])
