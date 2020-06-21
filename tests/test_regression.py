@@ -318,7 +318,7 @@ def test_regression_hdmr_case3():
             'print_to_console': 0
         } 
     Si = hdmr.analyze(problem, X, Y, options)
-    assert_allclose(Si['Sa'][0:problem['num_vars']], [0.28, 0,17, 0.10, 0.04, 0.02], atol=5e-2, rtol=1e-1)
+    assert_allclose(Si['Sa'][0:problem['num_vars']], [0.28, 0.17, 0.10, 0.04, 0.02], atol=5e-2, rtol=1e-1)
     assert_allclose(Si['Sb'][0:problem['num_vars']], [0.16, 0.16, 0.06, 0.00, 0.00], atol=5e-2, rtol=1e-1)
 
 
