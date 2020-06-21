@@ -60,7 +60,7 @@ def test_incorrect_maxorder_setting():
     X = latin.sample(problem, 10000)
     Y = linear_model_1.evaluate(X)
     with raises(RuntimeError):
-        hdmr.analyze(problem,X,Y,options={'maxiter': 3})
+        hdmr.analyze(problem, X, Y, maxorder=5)
 
 
 def test_incorrect_lambdax():
