@@ -343,7 +343,8 @@ def define_problem_with_groups(problem: dict) -> dict:
     Checks if the user defined the 'groups' key in the problem dictionary.
     If not, makes the 'groups' key equal to the variables names. In other
     words, the number of groups will be equal to the number of variables, which
-    is equivalent to don't use groups at all.
+    is equivalent to no groups.
+
     Parameters
     ----------
     problem : dict
@@ -366,6 +367,7 @@ def define_problem_with_groups(problem: dict) -> dict:
 def check_if_num_levels_is_even(num_levels: int):
     """
     Checks if the number of levels is even. If not, raises a warn.
+
     Parameters
     ----------
     num_levels: int
@@ -379,6 +381,7 @@ def check_if_num_levels_is_even(num_levels: int):
 def check_group_membership(group_membership):
     """
     Checks if the group_membership matrix was correctly defined
+
     Parameters
     ----------
     group_membership: np.array
