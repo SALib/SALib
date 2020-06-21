@@ -51,7 +51,7 @@ else:
 __all__ = ['sample']
 
 
-def sample(problem, number_trajectories, num_levels=4,
+def sample(problem, N, num_levels=4,
            optimal_trajectories=None, local_optimization=True, seed=None):
     """Generate model inputs using the Method of Morris
 
@@ -68,7 +68,7 @@ def sample(problem, number_trajectories, num_levels=4,
     ----------
     problem : dict
         The problem definition
-    number_trajectories : int
+    N : int
         The number of trajectories to generate
     num_levels : int, default=4
         The number of grid levels (should be even)
@@ -94,11 +94,11 @@ def sample(problem, number_trajectories, num_levels=4,
 
     problem = define_problem_with_groups(problem)
 
-    sample = _sample_morris(problem, number_trajectories, num_levels)
+    sample = _sample_morris(problem, N, num_levels)
 
     if optimal_trajectories:
         sample = _compute_optimised_trajectories(problem, sample,
-                                                 number_trajectories,
+                                                 N,
                                                  optimal_trajectories,
                                                  local_optimization)
 
