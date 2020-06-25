@@ -147,25 +147,25 @@ def _check_settings(X, Y, maxorder, maxiter, m, K, R, alpha, lambdax):
     if Y.size != N:
         raise RuntimeError("Y should be a N x 1 vector with one simulated output for each N parameter vectors.")
 
-    if not ismember(maxorder, (1,2,3)):
-        raise RuntimeError("Field \"maxorder\" of options should be an integer with values of 1, 2 or 3.")
+    if maxorder not in (1,2,3):
+        raise RuntimeError(f"Field \"maxorder\" of options should be an integer with values of 1, 2 or 3, got {maxorder}")
 
     # Important next check for maxorder - as maxorder relates to d
     if (d == 2) and (maxorder > 2):
         raise RuntimeError("SALib-HDMR ERRROR: Field \"maxorder\" of options has to be 2 as d = 2 (X has two columns)")
 
-    if not ismember(maxiter, np.arange(1, 1001)):
+    if maxiter not in np.arange(1, 1001):
         raise RuntimeError("Field \"maxiter\" of options should be an integer between 1 to 1000.")
     
-    if not ismember(m, np.arange(1, 6)):
+    if m not in np.arange(1, 6):
         raise RuntimeError("Field \"m\" of options should be an integer between 1 to 5.")
 
-    if not ismember(K, np.arange(1, 101)):
+    if K not in np.arange(1, 101):
         raise RuntimeError("Field \"K\" of options should be an integer between 1 to 100.")
 
     if R is None:
         R = y_row // 2
-    elif not ismember(R, np.arange(300, N + 1)):
+    elif R not in np.arange(300, N+1):
         raise RuntimeError(f"Field \"R\" of options should be an integer between 300 and {N}, the number of rows matrix X.")
 
     if (K == 1) and (R != y_row):
@@ -339,10 +339,6 @@ def _init(X, Y, settings):
     Y_id = np.zeros((R, 1))
 
     return [Em, idx, SA, RT, Y_em, Y_id, m1, m2, m3, j1, j2, j3]
-
-
-def ismember(A, B):
-    return A in B
 
 
 def B_spline(X, R, d, m):
