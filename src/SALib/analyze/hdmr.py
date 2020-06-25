@@ -74,9 +74,6 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
 
     print_to_console : bool
         Print results directly to console (default False)
-
-    graphics : bool
-        Display plots
     
     seed : bool
         Set a seed value
