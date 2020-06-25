@@ -305,17 +305,16 @@ def test_regression_hdmr_case3():
     X = np.random.multivariate_normal(mean, cov, 10000)
     Y = linear_model_2.evaluate(X)
     options = {
-            'graphics': 0,
             'maxorder': 2,
             'maxiter': 100,
             'm': 2,
             'K': 1,
             'R': 10000,
-            'alfa': 0.95,
+            'alpha': 0.95,
             'lambdax': 0.01,
-            'print_to_console': 0
+            'print_to_console': False
         } 
-    Si = hdmr.analyze(problem, X, Y, options)
+    Si = hdmr.analyze(problem, X, Y, **options)
     assert_allclose(Si['Sa'][0:problem['num_vars']], [0.28, 0.17, 0.10, 0.04, 0.02], atol=5e-2, rtol=1e-1)
     assert_allclose(Si['Sb'][0:problem['num_vars']], [0.16, 0.16, 0.06, 0.00, 0.00], atol=5e-2, rtol=1e-1)
 
