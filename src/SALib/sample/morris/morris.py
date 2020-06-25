@@ -356,7 +356,8 @@ def define_problem_with_groups(problem: dict) -> dict:
         The problem definition with the 'groups' key, even if the user doesn't
         define it
     """
-    if 'groups' not in problem:
+    # Checks if there isn't a key 'groups' or if it exists and is set to 'None'
+    if 'groups' not in problem or not problem['groups']:
         problem['groups'] = problem['names']
     elif len(problem['groups']) != problem['num_vars']:
         raise ValueError("Number of entries in \'groups\' should be the same "
