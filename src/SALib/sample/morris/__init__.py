@@ -1,0 +1,1 @@
+from .morris import sample
