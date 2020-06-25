@@ -4,8 +4,11 @@ from numpy import log, sqrt
 from scipy.optimize import brentq
 
 
-def lake_problem(X: float, a: float = 0.1, q: float = 2.0, b: float = 0.42,
-                 eps: float = 0.02) -> float:
+FLOAT_OR_ARRAY = Union[float, np.array]
+
+def lake_problem(X: FLOAT_OR_ARRAY, a: FLOAT_OR_ARRAY = 0.1, q: FLOAT_OR_ARRAY = 2.0, 
+                 b: FLOAT_OR_ARRAY = 0.42,
+                 eps: FLOAT_OR_ARRAY = 0.02) -> float:
     """Lake Problem as given in [1] and [2] modified for use as a test function.
 
     The `mean` and `stdev` parameters control the log normal distribution of
@@ -68,7 +71,8 @@ def evaluate_lake(values: np.ndarray) -> np.ndarray:
 
     Parameters
     ----------
-    values : np.ndarray, of model inputs in the (column) order of
+    values : np.ndarray, 
+             model inputs in the (column) order of
              a, q, b, mean, stdev
 
              where 
@@ -80,7 +84,7 @@ def evaluate_lake(values: np.ndarray) -> np.ndarray:
 
     Returns
     -------
-    * np.ndarray, of Phosphorus pollution over time `t`
+    np.ndarray, of Phosphorus pollution over time `t`
     """
     nvars = values.shape[0]
 
@@ -100,25 +104,22 @@ def evaluate_lake(values: np.ndarray) -> np.ndarray:
     return Y
 
 
-def evaluate(values: np.ndarray, nvars=100):
+def evaluate(values: np.ndarray, nvars: int = 100):
     """Evaluate the Lake Problem with an array of parameter values.
 
     Parameters
     ----------
-    values : np.ndarray, of model inputs in the (column) order of
+    values : np.ndarray, 
+             model inputs in the (column) order of
              a, q, b, mean, stdev, delta, alpha
 
     nvars : int, 
             number of decision variables to simulate (default: 100)
     
 
-    # delta : float or np.ndarray, 
-    #         discount rate (0.93 to 0.99, default: 0.98)
-    
-
     Returns
     -------
-    * np.ndarray : max_P, utility, inertia, reliability
+    np.ndarray : max_P, utility, inertia, reliability
     """
     a, q, b, _, __, delta, alpha = values.T
 
@@ -138,7 +139,7 @@ def evaluate(values: np.ndarray, nvars=100):
         utility = np.sum(alpha[i]*a_i*np.power(delta[i], np.arange(nvars)))
 
         # In practice, `a` will be set by a separate decision model
-        # See [2] in `lake_problem`
+        # See [2] in docstring for `lake_problem()`
         # Here, it is a constant for a given scenario.
         # The value for `tau` (0.02) is taken from [2].
         inertia = len(a_i[a_i < 0.02]) / nvars
@@ -162,10 +163,10 @@ if __name__ == '__main__':
         'outputs': ['max_P', 'Utility', 'Inertia', 'Reliability']
     }
 
-    latin_samples = latin.sample(LAKE_SPEC, 2000, seed=SEED_VAL)
+    latin_samples = latin.sample(LAKE_SPEC, 1000, seed=SEED_VAL)
     Y = evaluate(latin_samples)
 
     for i, name in enumerate(LAKE_SPEC['outputs']):
-        print(name)
         Si = delta.analyze(LAKE_SPEC, latin_samples, Y[:, i])
+        print(name)
         print(Si.to_df())
