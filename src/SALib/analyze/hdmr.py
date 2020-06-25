@@ -697,9 +697,6 @@ def cli_parse(parser):
     parser.add_argument('-X', '--model-input-file', type=str, required=True,
                         default=None,
                         help='Model input file')
-    parser.add_argument('-g', '--graphics', type=int, required=False,
-                        default=1,
-                        help='1: Prints graphics, 0: Does not print graphics')
     parser.add_argument('-mor', '--maxorder', type=int, required=False,
                         default=2,
                         help='Maximum order of expansion 1-3')
@@ -721,9 +718,6 @@ def cli_parse(parser):
     parser.add_argument('-lambda', '--lambdax', type=float, required=False,
                         default=0.01,
                         help='Regularization constant')
-    parser.add_argument('-print', '--print-to-console', type=int, required=False,
-                        default=1,
-                        help='1: Prints to console, 0: Does not print to console')
     return parser
 
 
@@ -732,7 +726,6 @@ def cli_action(args):
     Y = np.loadtxt(args.model_output_file,
                    delimiter=args.delimiter, usecols=(args.column,))
     X = np.loadtxt(args.model_input_file, delimiter=args.delimiter, ndmin=2)
-    g = args.graphics
     mor = args.maxorder
     mit = args.maxiter
     m = args.m_int
@@ -740,9 +733,8 @@ def cli_action(args):
     R = args.R_subsample
     alpha = args.alpha
     lambdax = args.lambdax
-    p = args.print_to_console
-    options = options = {'graphics': g, 'maxorder': mor, 'maxiter': mit, 'm': m,
-                         'K': K, 'R': R, 'alpha': alpha, 'lambdax': lambdax, 'print_to_console': p}
+    options = options = {'maxorder': mor, 'maxiter': mit, 'm': m,
+                         'K': K, 'R': R, 'alpha': alpha, 'lambdax': lambdax, 'print_to_console': True}
     
     if len(X.shape) == 1:
         X = X.reshape((len(X), 1))
