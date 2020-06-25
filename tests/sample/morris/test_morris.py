@@ -7,19 +7,18 @@ from pytest import raises, fixture, warns, mark
 import numpy as np
 import warnings
 
-from SALib.sample.morris import (sample,
-                                 _compute_optimised_trajectories,
-                                 generate_p_star,
-                                 compute_b_star,
-                                 compute_delta,
-                                 generate_trajectory,
-                                 generate_x_star,)
+from SALib.sample.morris import (sample)
+from SALib.sample.morris.morris import (check_group_membership,
+                                        check_if_num_levels_is_even,
+                                        define_problem_with_groups,
+                                        _compute_optimised_trajectories,
+                                        generate_p_star,
+                                        compute_b_star,
+                                        compute_delta,
+                                        generate_trajectory,
+                                        generate_x_star,)
+
 from SALib.util import read_param_file, compute_groups_matrix
-
-from src.SALib.sample.morris.morris import (check_group_membership,
-                                            check_if_num_levels_is_even,
-                                            define_problem_with_groups)
-
 
 
 @fixture(scope='function')
@@ -154,7 +153,8 @@ def test_group_sample_fails_with_wrong_G_matrix():
     with raises(ValueError) as err:
         sample(problem, N, num_levels)
 
-    assert "Groups do not match to number of variables" in str(err.value)
+    assert "Number of entries in \'groups\' should be the same as in " \
+           "\'names\'" in str(err.value)
 
 
 class TestGroupSampleGeneration:
