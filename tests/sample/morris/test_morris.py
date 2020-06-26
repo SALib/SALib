@@ -302,10 +302,10 @@ class TestGroupSampleGeneration:
         group_membership = np.empty((3, 3), dtype=np.int)
 
         with raises(ValueError):
-            assert check_group_membership(group_membership)
+            check_group_membership(group_membership)
 
         with raises(TypeError):
-            assert check_group_membership(group_membership)
+            check_group_membership(group_membership)
 
     def test_check_group_membership_error(self):
         """
@@ -315,9 +315,9 @@ class TestGroupSampleGeneration:
         group_membership = 1.0
 
         with raises(TypeError):
-            assert check_group_membership(group_membership)
+            check_group_membership(group_membership)
 
         group_membership = None
 
         with raises(ValueError):
-            assert check_group_membership(group_membership)
+            check_group_membership(group_membership)
