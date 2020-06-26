@@ -295,8 +295,7 @@ class TestGroupSampleGeneration:
     def test_check_group_membership_all_ok(self):
         """
         Checks if no errors are raised when group_membership is defined
-        correctly. This test is expected to fail, and the message XFAIL should
-        be displayed by pycharm.
+        correctly. This test is expected to fail.
         """
         # Creates a dummy variable
         group_membership = np.empty((3, 3), dtype=np.int)
