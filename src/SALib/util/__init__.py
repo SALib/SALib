@@ -7,8 +7,9 @@ from warnings import warn
 from .results import ResultDict
 import pkgutil
 
-import numpy as np
-import scipy as sp
+import numpy as np  # type: ignore
+import scipy as sp  # type: ignore
+from typing import List
 
 
 __all__ = ["scale_samples", "read_param_file",
@@ -35,7 +36,7 @@ def avail_approaches(pkg):
     return methods
 
 
-def scale_samples(params, bounds):
+def scale_samples(params: np.ndarray, bounds: List):
     '''Rescale samples in 0-to-1 range to arbitrary bounds
 
     Arguments
@@ -219,7 +220,7 @@ def read_param_file(filename, delimiter=None):
                 # the parameter name
                 if row['group'] is None:
                     groups.append(row['name'])
-                elif row['group'] is 'NA':
+                elif row['group'] == 'NA':
                     groups.append(row['name'])
                 else:
                     groups.append(row['group'])

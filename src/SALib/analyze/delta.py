@@ -9,7 +9,7 @@ from . import common_args
 from ..util import read_param_file, ResultDict
 
 
-def analyze(problem, X, Y, num_resamples=100,
+def analyze(problem, X, Y, num_resamples=10,
             conf_level=0.95, print_to_console=False, seed=None):
     """Perform Delta Moment-Independent Analysis on model outputs.
 
@@ -59,7 +59,7 @@ def analyze(problem, X, Y, num_resamples=100,
 
     # equal frequency partition
     exp = (2 / (7 + np.tanh((1500 - N) / 500)))
-    M = min(int(np.ceil(N**exp)), 48)
+    M = int(np.round( min(int(np.ceil(N**exp)), 48) ))
     m = np.linspace(0, N, M + 1)
     Ygrid = np.linspace(np.min(Y), np.max(Y), 100)
 
