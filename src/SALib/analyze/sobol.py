@@ -12,13 +12,7 @@ from types import MethodType
 
 from multiprocessing import Pool, cpu_count
 from functools import partial
-from itertools import combinations
-
-try:
-    from itertools import zip_longest
-except ImportError:
-    # Python 2
-    from itertools import izip_longest as zip_longest
+from itertools import combinations, zip_longest
 
 
 def analyze(problem, Y, calc_second_order=True, num_resamples=100,
@@ -112,7 +106,8 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
                     S['S2'][j, k] = second_order(
                         A, AB[:, j], AB[:, k], BA[:, j], B)
                     S['S2_conf'][j, k] = Z * second_order(A[r], AB[r, j],
-                                                          AB[r, k], BA[r, j], B[r]).std(ddof=1)
+                                                          AB[r, k], BA[r, j],
+                                                          B[r]).std(ddof=1)
 
     else:
         tasks, n_processors = create_task_list(
@@ -209,7 +204,8 @@ def sobol_parallel(Z, A, AB, BA, B, r, tasks):
 
 def create_task_list(D, calc_second_order, n_processors):
     # Create list with one entry (key, parameter 1, parameter 2) per sobol
-    # index (+conf.). This is used to supply parallel tasks to multiprocessing.Pool
+    # index (+conf.). This is used to supply parallel tasks to
+    # multiprocessing.Pool
     tasks_first_order = [[d, j, None] for j in range(
         D) for d in ('S1', 'S1_conf', 'ST', 'ST_conf')]
 
@@ -226,7 +222,8 @@ def create_task_list(D, calc_second_order, n_processors):
     if not calc_second_order:
         tasks = np.array_split(tasks_first_order, n_processors)
     else:
-        # merges both lists alternating its elements and splits the resulting list into n_processors sublists
+        # merges both lists alternating its elements and splits the
+        # resulting lists into n_processors sublists
         tasks = np.array_split([v for v in sum(
             zip_longest(tasks_first_order[::-1], tasks_second_order), ())
             if v is not None], n_processors)
@@ -235,7 +232,8 @@ def create_task_list(D, calc_second_order, n_processors):
 
 
 def Si_list_to_dict(S_list, D, calc_second_order):
-    # Convert the parallel output into the regular dict format for printing/returning
+    # Convert the parallel output into the regular dict format for
+    # printing/returning
     S = create_Si_dict(D, calc_second_order)
     L = []
     for l in S_list:  # first reformat to flatten
@@ -269,7 +267,8 @@ def Si_to_pandas_dict(S_dict):
             Second order sensitivities contain a tuple of parameter name
             combinations for use as the DataFrame index and second order
             sensitivities.
-            If no second order indices found, then returns tuple of (None, None)
+            If no second order indices found, then returns tuple of
+            (None, None)
 
     Examples
     --------

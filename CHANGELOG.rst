@@ -2,6 +2,35 @@
 Changelog
 =========
 
+Version 1.3
+===========
+
+New Features:
+
+- Various minor performance enhancements (PR #253 #264)
+- Added some visualisation methods (PR #259)
+- Tidying up of the Command Line Interfance, and num samples (PR #260 #291)
+- Improved efficiency of summing distances in local optimization (PR #246)
+- Revamped fast method for consistency (PR #239)
+- Updated Sobol-G function to modified G-function (#269)
+
+Bug Fixes:
+
+- Method of morris didn't adjust with levels above 4 (PR #252)
+- Add missing seed option for morris sampling
+- Handle singular value matrix cases (PR #251)
+- Fixed typo (#205)
+- Updated import of scipy comb function (PR #243)
+
+Documentation:
+
+- Update documentation for Morris and DSGM methods (#261 #266)
+
+Development Features:
+
+- Updated PyScaffold to version 3.2.2 (#267)
+- Updated Travis and package config (#285)
+
 Version 1.1.0
 =============
 
@@ -30,8 +59,6 @@ Development Features:
 - Fixed a bug preventing automatic deployment to PyPi upon tagging a branch
 - Removed postgres from travis config
 
-
-
 Version 1.0.0
 =============
 
@@ -50,8 +77,8 @@ Version 0.7.1
 Improvements to Morris sampling and Sobol groups/distributions
 
 - Adds improved sampling for the Morris method
-(thanks to @JoerivanEngelen) and group sampling/analysis for the Sobol method
-(thanks to @calvinwhealton).
+  (thanks to @JoerivanEngelen) and group sampling/analysis for the Sobol method
+  (thanks to @calvinwhealton).
 - @calvinwhealton has also added non-uniform distributions to the Sobol
   sampling.  This will be a baseline for adding this to the other methods in
   the future.
@@ -83,10 +110,10 @@ using a Digital Object Identifier (DOI), which can be found in the readme.
 Some minor updates are included:
 
 - morris: sigma has been removed from the grouped-morris results and plots,
-replaced by mu_star_conf - a bootstrapped confidence interval.
-Mu_star_conf is not equivalent to sigma when used in the non-grouped method of
-morris, but its all we have when using groups.
--  some minor updates to the tests in the plotting module
+  replaced by mu_star_conf - a bootstrapped confidence interval.
+  Mu_star_conf is not equivalent to sigma when used in the non-grouped method of
+  morris, but its all we have when using groups.
+- some minor updates to the tests in the plotting module
 
 Version 0.6.0
 =============

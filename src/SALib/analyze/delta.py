@@ -59,7 +59,7 @@ def analyze(problem, X, Y, num_resamples=10,
 
     # equal frequency partition
     exp = (2 / (7 + np.tanh((1500 - N) / 500)))
-    M = min(int(np.ceil(N**exp)), 48)
+    M = int(np.round( min(int(np.ceil(N**exp)), 48) ))
     m = np.linspace(0, N, M + 1)
     Ygrid = np.linspace(np.min(Y), np.max(Y), 100)
 
