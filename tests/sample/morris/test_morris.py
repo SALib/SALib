@@ -7,8 +7,8 @@ from pytest import raises, fixture, warns, mark
 import numpy as np
 import warnings
 
-from SALib.sample.morris import (sample)
-from SALib.sample.morris.morris import (check_group_membership,
+from SALib.sample.morris.morris import (sample,
+                                        check_group_membership,
                                         check_if_num_levels_is_even,
                                         define_problem_with_groups,
                                         _compute_optimised_trajectories,
@@ -16,7 +16,7 @@ from SALib.sample.morris.morris import (check_group_membership,
                                         compute_b_star,
                                         compute_delta,
                                         generate_trajectory,
-                                        generate_x_star,)
+                                        generate_x_star)
 
 from SALib.util import read_param_file, compute_groups_matrix
 
