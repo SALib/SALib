@@ -161,7 +161,7 @@ def cli_parse(parser):
                         default=None,
                         help='Model input file')
     parser.add_argument('-r', '--resamples', type=int, required=False,
-                        default=10,
+                        default=100,
                         help='Number of bootstrap resamples for \
                            Sobol confidence intervals')
     return parser

@@ -118,3 +118,21 @@ def total_sensitivity_index(a, alpha=None):
     sum_pv = pv.sum(axis=0)
     
     return np.subtract(1, np.divide(np.subtract(sum_pv, pv.T), tv))
+
+
+def V_Ti_regular(V: np.array, i: int):
+    result = 1.0
+    for j in range(len(V)):
+        if j != i:
+            result = result * (1.0 + V[j])
+    return result * V[i]
+
+
+def _calc_analytic(a: np.array, alpha: np.array, num_params: int):
+    """Calculate analytic values for modified Sobol_G function
+    """
+    V_total = _total_variance(a, alpha)
+    V_partial = _partial_first_order_variance(a, alpha)
+
+    return np.array([np.round(V_Ti_regular(V_partial, i) / V_total, decimals=4)
+                     for i in range(num_params)])

@@ -1,8 +1,12 @@
 import sys
 import subprocess
+import os
+
 from SALib.test_functions import Ishigami
 import numpy as np
 import re
+import pytest
+
 
 salib_cli = "./src/SALib/scripts/salib.py"
 ishigami_fp = "./src/SALib/test_functions/params/Ishigami.txt"
@@ -113,7 +117,6 @@ def test_ff():
 
 
 def test_morris():
-
     # Generate inputs
     cmd = "python {cli} sample morris -p {fn} -o model_input.txt -n 100\
     --precision=8 --levels=10 --seed=100 -lo False"\
@@ -148,8 +151,9 @@ def test_rbd_fast():
     subprocess.run(cmd)
 
     # Run model and save output
-    np.savetxt('model_output.txt', Ishigami.evaluate(
-        np.loadtxt('model_input.txt')))
+    np.savetxt('model_output.txt', 
+               Ishigami.evaluate(np.loadtxt('model_input.txt'))
+    )
 
     analyze_cmd = "python {cli} analyze rbd_fast -p {fn} -X model_input.txt\
     -Y model_output.txt --seed=100"\
@@ -188,6 +192,15 @@ def test_sobol():
     assert len(result) > 0 and result == expected_output, \
         "Results did not match expected values:\n\n Expected: \n{} \n\n Got: \n{}".format(
             expected_output, result)
+
+
+@pytest.fixture(scope="session", autouse=True)
+def cleanup():
+    try:
+        os.remove("model_input.txt")
+        os.remove("model_output.txt")
+    except:
+        pass
 
 
 if __name__ == '__main__':
