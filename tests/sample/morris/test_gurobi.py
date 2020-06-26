@@ -7,9 +7,8 @@ from pytest import raises
 from SALib.sample.morris.brute import BruteForce
 from SALib.sample.morris.gurobi import GlobalOptimisation
 
-from SALib.sample.morris import _sample_oat, \
-    _compute_optimised_trajectories, \
-    _sample_groups
+from SALib.sample.morris.morris import (_compute_optimised_trajectories,
+                                        _sample_morris)
 
 
 from SALib.util import read_param_file, compute_groups_matrix
@@ -36,7 +35,7 @@ def test_optimal_sample_with_groups(setup_param_groups_prime):
     k_choices = 4
     num_params = problem['num_vars']
 
-    sample = _sample_oat(problem,
+    sample = _sample_morris(problem,
                          N,
                          num_levels)
 
@@ -85,7 +84,7 @@ def test_size_of_trajectories_with_groups(setup_param_groups_prime):
     num_groups = 3
 
     # Test 1. dimensions of sample ignoring groups
-    sample = _sample_oat(no_group_problem,
+    sample = _sample_morris(no_group_problem,
                          N,
                          num_levels)
 
@@ -96,7 +95,7 @@ def test_size_of_trajectories_with_groups(setup_param_groups_prime):
 
     # Test 2. dimensions of sample with groups
 
-    group_sample = _sample_groups(group_problem,
+    group_sample = _sample_morris(group_problem,
                                   N,
                                   num_levels)
 
@@ -141,7 +140,7 @@ def test_optimal_combinations(setup_function):
     num_levels = 10
     k_choices = 4
 
-    morris_sample = _sample_oat(problem, N, num_levels)
+    morris_sample = _sample_morris(problem, N, num_levels)
 
     global_strategy = GlobalOptimisation()
     actual = global_strategy.return_max_combo(morris_sample,
@@ -231,7 +230,7 @@ def test_optimised_trajectories_groups(setup_param_groups_prime):
 
     num_params = problem['num_vars']
     groups = compute_groups_matrix(problem['groups'], num_params)
-    input_sample = _sample_groups(problem, N, num_levels)
+    input_sample = _sample_morris(problem, N, num_levels)
 
     # From gurobi optimal trajectories
     strategy = GlobalOptimisation()
@@ -261,7 +260,7 @@ def test_raise_error_if_k_gt_N(setup_function):
     num_levels = 4
     k_choices = 6
 
-    morris_sample = _sample_oat(problem, N, num_levels)
+    morris_sample = _sample_morris(problem, N, num_levels)
 
     with raises(ValueError):
         _compute_optimised_trajectories(problem,

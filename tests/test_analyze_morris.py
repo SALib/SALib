@@ -1,18 +1,17 @@
 # -*- coding: utf-8 -*-
-from __future__ import division
 
 from pytest import raises
-from numpy.testing import assert_allclose, assert_equal
 
 import numpy as np
+from numpy.testing import assert_allclose, assert_equal
 
-from SALib.analyze.morris import analyze, \
-    compute_mu_star_confidence, \
-    compute_elementary_effects, \
-    get_increased_values, \
-    get_decreased_values, \
-    compute_grouped_metric, \
-    compute_grouped_sigma
+from SALib.analyze.morris import (analyze,
+                                  compute_mu_star_confidence,
+                                  compute_elementary_effects,
+                                  get_increased_values,
+                                  get_decreased_values,
+                                  compute_grouped_metric,
+                                  compute_grouped_sigma)
 
 
 def test_compute_mu_star_confidence():

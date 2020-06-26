@@ -7,8 +7,8 @@ from pytest import raises, fixture, warns, mark
 import numpy as np
 import warnings
 
-from SALib.sample.morris import (sample)
-from SALib.sample.morris.morris import (check_group_membership,
+from SALib.sample.morris.morris import (sample,
+                                        check_group_membership,
                                         check_if_num_levels_is_even,
                                         define_problem_with_groups,
                                         _compute_optimised_trajectories,
@@ -16,7 +16,7 @@ from SALib.sample.morris.morris import (check_group_membership,
                                         compute_b_star,
                                         compute_delta,
                                         generate_trajectory,
-                                        generate_x_star,)
+                                        generate_x_star)
 
 from SALib.util import read_param_file, compute_groups_matrix
 
@@ -295,17 +295,16 @@ class TestGroupSampleGeneration:
     def test_check_group_membership_all_ok(self):
         """
         Checks if no errors are raised when group_membership is defined
-        correctly. This test is expected to fail, and the message XFAIL should
-        be displayed by pycharm.
+        correctly. This test is expected to fail.
         """
         # Creates a dummy variable
         group_membership = np.empty((3, 3), dtype=np.int)
 
         with raises(ValueError):
-            assert check_group_membership(group_membership)
+            check_group_membership(group_membership)
 
         with raises(TypeError):
-            assert check_group_membership(group_membership)
+            check_group_membership(group_membership)
 
     def test_check_group_membership_error(self):
         """
@@ -315,9 +314,9 @@ class TestGroupSampleGeneration:
         group_membership = 1.0
 
         with raises(TypeError):
-            assert check_group_membership(group_membership)
+            check_group_membership(group_membership)
 
         group_membership = None
 
         with raises(ValueError):
-            assert check_group_membership(group_membership)
+            check_group_membership(group_membership)

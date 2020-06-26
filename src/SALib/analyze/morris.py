@@ -135,8 +135,8 @@ def analyze(problem, X, Y,
         # if there are groups, then the elementary effects returned need to be
         # computed over the groups of variables,
         # rather than the individual variables
-        Si_grouped = dict((k, [None] * num_vars)
-                          for k in ['mu_star', 'mu_star_conf'])
+        Si_grouped = ResultDict((k, [None] * num_vars)
+                                for k in ['mu_star', 'mu_star_conf'])
         Si_grouped['mu_star'] = compute_grouped_metric(Si['mu_star'], groups)
         Si_grouped['mu_star_conf'] = compute_grouped_metric(Si['mu_star_conf'],
                                                             groups)
