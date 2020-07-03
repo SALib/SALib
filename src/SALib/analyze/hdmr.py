@@ -92,6 +92,11 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
         Sa: Uncorrelated contribution
         select: Number of selection (F-Test)
 
+    C  : tuple of numpy arrays,
+        C1: First order coefficient 
+        C2: Second order coefficient
+        C3: Third Order coefficient
+
     References
     ----------
     .. [1] Genyuan Li, H. Rabitz, P.E. Yelvington, O.O. Oluwole, F. Bacon,
@@ -128,7 +133,7 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
     if print_to_console:
         _print(Si, problem['num_vars'])
 
-    return Si
+    return Si, (Em['C1'], Em['C2'], Em['C3'])
 
 def _check_settings(X, Y, maxorder, maxiter, m, K, R, alpha, lambdax):
     """Perform checks to ensure all parameters are within usable/expected ranges."""
@@ -204,18 +209,20 @@ def _compute(X, Y, settings, init_vars):
         Y_res = Y_id - Em['f0'][k]
 
         # 1st order component functions: ind/backfitting
-        Y_em[:, j1], Y_res = _first_order(Em['B1'][idx[:, k], :, :], Y_res, R, Em['n1'],
-                                              m1, maxiter, lambdax)
+        Y_em[:, j1], Y_res, Em['C1'][:, :, k] = _first_order(Em['B1'][idx[:, k], :, :], Y_res, 
+                                                             Em['C1'][:, :, k], R, Em['n1'], m1,
+                                                             maxiter, lambdax)
 
         # 2nd order component functions: individual
         if (maxorder > 1):
-            Y_em[:, j2], Y_res = _second_order(Em['B2'][idx[:, k], :, :], Y_res, R, Em['n2'],
-                                                   m2, lambdax)
+            Y_em[:, j2], Y_res, Em['C2'][:, :, k] = _second_order(Em['B2'][idx[:, k], :, :], Y_res, 
+                                                                  Em['C2'][:, :, k], R, Em['n2'],
+                                                                  m2, lambdax)
 
         # 3rd order component functions: individual
         if (maxorder == 3):
-            Y_em[:, j3] = _third_order(Em['B3'][idx[:, k], :, :], Y_res, R, Em['n3'],
-                                           m3, lambdax)
+            Y_em[:, j3], Em['C3'][:, :, k] = _third_order(Em['B3'][idx[:, k], :, :], Y_res, 
+                                                          Em['C3'][:, :, k], R, Em['n3'], m3, lambdax)
 
         # Identify significant and insignificant terms
         Em['select'][:, k] = f_test(Y_id, Em['f0'][k], Y_em, R, alpha, m1, m2, m3, Em['n1'], Em['n2'],
@@ -281,23 +288,17 @@ def _init(X, Y, settings):
 
     # STRUCTURE Em: Initialization
     Em = {'nterms': np.zeros(K), 'RMSE': np.zeros(K), 'm': m, 'Y_e': np.zeros((R, K)), 'f0': np.zeros(K),
-            'c1': c1, 'n': n, 'n1': n1, 'n2': n2, 'n3': n3, 'maxorder': maxorder, 'select': np.zeros((n, K)),
+            'c1': c1, 'C1': np.zeros((m1, n1, K)), 'C2': np.zeros((1, 1, K)), 'C3': np.zeros((1, 1, K)), 
+            'n': n, 'n1': n1, 'n2': n2, 'n3': n3, 'maxorder': maxorder, 'select': np.zeros((n, K)),
             'B1': np.zeros((N, m1, n1))}
 
     if (maxorder >= 2):
-        Em.update({'c2': c2, 'B2': np.zeros((N, m2, n2))})
+        Em.update({'c2': c2, 'B2': np.zeros((N, m2, n2)), 'C2': np.zeros((m2, n2, K))})
     if (maxorder >= 3):
-        Em.update({'c3': c3, 'B3': np.zeros((N, m3, n3))})
+        Em.update({'c3': c3, 'B3': np.zeros((N, m3, n3)), 'C3': np.zeros((m3, n3, K))})
 
-    # Cubic basis-spline settings (Li's paper)
-    k = np.arange(-1, m+2)
-    yk = lambda x: np.arange(x-2, x+3)
-    # Compute B-Splines
-    for j in range(d):
-        for i in range(m1):
-            t = yk(k[i]) / m
-            t = interpolate.BSpline.basis_element(t)(X_n[:,j]) * np.power(m,3) 
-            Em['B1'][:, i, j] = np.where(t < 0, 0, t) 
+    # Compute cubic B-spline
+    Em['B1'] = B_spline(X_n, m, d)
 
     # Now compute B values for second order
     if (maxorder > 1):
@@ -347,9 +348,25 @@ def _init(X, Y, settings):
     return [Em, idx, SA, RT, Y_em, Y_id, m1, m2, m3, j1, j2, j3]
 
 
-def _first_order(B1, Y_res, R, n1, m1, maxiter, lambdax):
+def B_spline(X, m, d):
+    '''Generate cubic B-splines using scipy built-in basis_element
+    method. Knot points, t, are automatically determined. '''
+    # Initialize B matrix
+    B = np.zeros((X.shape[0], m+3, d))
+    # Cubic basis-spline settings
+    k = np.arange(-1, m+2)
+    def yk(x): return np.arange(x-2, x+3)
+    # Compute B-Splines
+    for j, i in itertools.product(range(d), range(m+3)):
+        t = yk(k[i]) / m
+        temp = interpolate.BSpline.basis_element(t)(X[:,j]) * np.power(m,3)
+        B[:, i, j] = np.where(temp < 0, 0, temp)
+    
+    return B
+
+
+def _first_order(B1, Y_res, C1, R, n1, m1, maxiter, lambdax):
     """Compute first order sensitivities."""
-    C1 = np.zeros((m1, n1))       # Initialize coefficients
     Y_i = np.zeros((R, n1))       # Initialize 1st order contributions
     T1 = np.zeros((m1, R, n1))    # Initialize T(emporary) matrix - 1st
     it = 0                        # Initialize iteration counter
@@ -361,7 +378,6 @@ def _first_order(B1, Y_res, R, n1, m1, maxiter, lambdax):
 
         if (np.linalg.det(B11) == 0):
             C1[:, j] = 0  # Ill-defined
-            # print("SALib-HDMR Warning: Matrix B11 is ill-defined. Try to decrease b-spline interval \"m\". Solution, C1, is set to zero.")
         else:
             T1[:, :, j] = np.linalg.solve(np.add(B11, np.multiply(
                 lambdax, np.identity(m1))), np.transpose(B1[:, :, j]))
@@ -394,12 +410,11 @@ def _first_order(B1, Y_res, R, n1, m1, maxiter, lambdax):
         # Subtract each first order term from residuals
         Y_res = np.subtract(Y_res, Y_i[:, j].reshape(R, 1))
 
-    return (Y_i, Y_res)
+    return (Y_i, Y_res, C1)
 
 
-def _second_order(B2, Y_res, R, n2, m2, lambdax):
+def _second_order(B2, Y_res, C2, R, n2, m2, lambdax):
     """Compute second order sensitivities."""
-    C2 = np.zeros((m2, n2))       # Initialize coefficients
     Y_ij = np.zeros((R, n2))      # Initialize 1st order contributions
     T2 = np.zeros((m2, R, n2))    # Initialize T(emporary) matrix - 1st
 
@@ -410,11 +425,7 @@ def _second_order(B2, Y_res, R, n2, m2, lambdax):
 
         if (np.linalg.det(B22) == 0):
             C2[:, j] = 0  # Ill-defined
-            # print("SALib-HDMR Warning: Matrix B22 is ill-defined. 
-            # Try to decrease b-spline interval \"m\". Solution, C2, is set to zero. \n")
         else:
-            # CHECK: Numpy Linear Algebra Solver slightly differentiate with
-            # MATLAB's Solver
             T2[:, :, j] = np.linalg.solve(np.add(B22, np.multiply(
                 lambdax, np.identity(m2))), np.transpose(B2[:, :, j]))
 
@@ -428,12 +439,11 @@ def _second_order(B2, Y_res, R, n2, m2, lambdax):
         # Subtract each first order term from residuals
         Y_res = np.subtract(Y_res, Y_ij[:, j].reshape(R, 1))
 
-    return (Y_ij, Y_res)
+    return (Y_ij, Y_res, C2)
 
 
-def _third_order(B3, Y_res, R, n3, m3, lambdax):
+def _third_order(B3, Y_res, C3, R, n3, m3, lambdax):
     """Compute third order sensitivities."""
-    C3 = np.zeros((m3, n3))        # Initialize coefficients
     Y_ijk = np.zeros((R, n3))      # Initialize 1st order contributions
     T3 = np.zeros((m3, R, n3))     # Initialize T(emporary) matrix - 1st
 
@@ -443,17 +453,14 @@ def _third_order(B3, Y_res, R, n3, m3, lambdax):
         B33 = np.matmul(np.transpose(B3[:, :, j]), B3[:, :, j])
         if (np.linalg.det(B33) == 0):
             C3[:, j] = 0  # Ill-defined
-            # print("SALib-HDMR Warning: Matrix B33 is ill-defined. Try to decrease b-spline interval \"m\". Solution, C3, is set to zero. \n")
         else:
-            # CHECK: Numpy Linear Algebra Solver slightly differentiate with
-            # MATLAB's Solver
             T3[:, :, j] = np.linalg.solve(np.add(B33, np.multiply(
                 lambdax, np.identity(m3))), np.transpose(B3[:, :, j]))
 
         C3[:, j] = np.matmul(T3[:, :, j], Y_res).reshape(m3,)
         Y_ijk[:, j] = np.matmul(B3[:, :, j], C3[:, j])
 
-    return Y_ijk
+    return (Y_ijk, C3)
 
 
 def f_test(Y, f0, Y_em, R, alpha, m1, m2, m3, n1, n2, n3, n):
@@ -605,7 +612,100 @@ def _finalize(problem, SA, Em, d, alpha, maxorder, RT, Y_em, bootstrap_idx, X, Y
     Si._plot = Si.plot
     Si.plot = MethodType(plot, Si)
 
+    Si.emulate = MethodType(emulate, Si)
+
     return Si
+
+
+def emulate(self, C, X, Y):
+    '''Emulates model output with new input data. Generates B-Splines 
+    with new input matrix, X, and multiplies it with coefficient matrix,
+    C. Compares emulated results with observed vector, Y.
+    '''
+    # Dimensionality
+    N, d = X.shape
+
+    # Expand C
+    C1, C2, C3 = C
+
+    # Take average coefficient
+    C1 = np.mean(C1, axis=2)
+    C2 = np.mean(C2, axis=2)
+    C3 = np.mean(C3, axis=2)
+
+    # Get maxorder and other information from C matrix
+    m = C1.shape[0] - 3
+    m1 = m+3
+    n1 = d
+    n2 = 0
+    n3 = 0
+    if C2.shape[0] != 1:
+        maxorder = 2
+        m2 = C2.shape[0]
+        c2 = np.asarray(list(itertools.combinations(np.arange(0, d), 2)))
+        n2 = c2.shape[0]
+    if C3.shape[0] != 1:
+        maxorder = 3
+        m3 = C3.shape[0]
+        c3 = np.asarray(list(itertools.combinations(np.arange(0, d), 3)))
+        n3 = c3.shape[0]
+    
+    # Initialize emulated Y's
+    Y_em = np.zeros((N, n1+n2+n3))
+
+    # Compute normalized X-values
+    X_n = (X - np.tile(X.min(0), (N, 1))) / \
+        np.tile((X.max(0)) - X.min(0), (N, 1))
+
+    # Now compute B values
+    B1 = B_spline(X_n, m, d)
+    if (maxorder > 1):
+        B2 = np.zeros((N, m2, n2))
+        beta = np.array(list(itertools.product(range(m1), repeat=2)))
+        for k, j in itertools.product(range(n2), range(m2)):
+            B2[:, j, k] = np.multiply(B1[:, beta[j, 0], c2[k, 0]], 
+                                      B1[:, beta[j, 1], c2[k, 1]])
+    if (maxorder == 3):
+        B3 = np.zeros((N, m3, n3))
+        beta = np.array(list(itertools.product(range(m1), repeat=3)))
+        for k, j in itertools.product(range(n3), range(m3)):
+            Emc3_k = c3[k]
+            beta_j = beta[j]
+            B3[:, j, k] = np.multiply(np.multiply(B1[:, beta_j[0], Emc3_k[0]], 
+                                                        B1[:, beta_j[1], Emc3_k[1]]),
+                                            B1[:, beta_j[2], Emc3_k[2]])
+
+    # Calculate emulated output: First Order
+    for j in range(0, n1):
+        Y_em[:, j] = np.matmul(B1[:, :, j], C1[:, j])
+
+    # Second Order
+    if maxorder > 1:
+        for j in range(n1, n1+n2):
+            Y_em[:, j] = np.matmul(B2[:, :, j-n1], C2[:, j-n1])
+
+    # Third Order
+    if maxorder == 3:
+        for j in range(n1+n2, n1+n2+n3):
+            Y_em[:, j] = np.matmul(B3[:, :, j-n1-n2], C3[:, j-n1-n2])
+
+    # Sum of squared residuals
+    ssr = np.sum((np.sum(Y_em, axis=1)+np.mean(Y) - Y)**2)
+    # Plot figure
+    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(6,6))
+    ax.plot(np.sum(Y_em, axis=1)+np.mean(Y), Y, 'r+', label='Emulator')
+    ax.plot( Y, Y, 'darkgray', label='1:1 Line')
+    ax.axis('square')
+    ax.set_xlabel('Emulator')
+    ax.set_ylabel('New Observation')
+    ax.set_xlim(np.min(Y), np.max(Y))
+    ax.set_ylim(np.min(Y), np.max(Y))
+    ax.legend(loc='lower right')
+    ax.text(x=np.min(Y)*.2, y=np.max(Y) * .8, s=f'SSR = {ssr:.2f}')
+    # fig.suptitle(f'SSR = {ssr:.2f}')
+    fig.tight_layout()
+    plt.show()
+
 
 
 def to_df(self):

@@ -31,7 +31,7 @@ options = {
   'maxorder': 2,
   'maxiter': 100,
   'm': 4,
-  'K': 10,
+  'K': 30,
   'R': 500,
   'alpha': 0.95,
   'lambdax': 0.01,
@@ -39,6 +39,13 @@ options = {
   'seed': 101
 } 
 # Run SALib-HDMR
-Si = hdmr.analyze(problem, X, Y, **options)
+Si, C = hdmr.analyze(problem, X, Y, **options)
 
 Si.plot()
+
+# Generate samples
+X = latin.sample(problem, 5000, seed=int(np.random.random()*100))
+# Run the "model" 
+Y = Ishigami.evaluate(X)
+# Emulator
+Y_em = Si.emulate(C, X, Y)
