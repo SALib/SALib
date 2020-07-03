@@ -157,8 +157,8 @@ def _check_settings(X, Y, maxorder, maxiter, m, K, R, alpha, lambdax):
     if maxiter not in np.arange(1, 1001):
         raise RuntimeError("Field \"maxiter\" of options should be an integer between 1 to 1000.")
     
-    if m not in np.arange(1, 6):
-        raise RuntimeError("Field \"m\" of options should be an integer between 1 to 5.")
+    if m not in np.arange(1, 11):
+        raise RuntimeError("Field \"m\" of options should be an integer between 1 to 10.")
 
     if K not in np.arange(1, 101):
         raise RuntimeError("Field \"K\" of options should be an integer between 1 to 100.")
@@ -290,8 +290,15 @@ def _init(X, Y, settings):
     if (maxorder >= 3):
         Em.update({'c3': c3, 'B3': np.zeros((N, m3, n3))})
 
+    # Cubic basis-spline settings (Li's paper)
+    k = np.arange(-1, m+2)
+    yk = lambda x: np.arange(x-2, x+3)
     # Compute B-Splines
-    Em['B1'] = B_spline(X_n, N, d, m)
+    for j in range(d):
+        for i in range(m1):
+            t = yk(k[i]) / m
+            t = interpolate.BSpline.basis_element(t)(X_n[:,j]) * np.power(m,3) 
+            Em['B1'][:, i, j] = np.where(t < 0, 0, t) 
 
     # Now compute B values for second order
     if (maxorder > 1):
@@ -339,43 +346,6 @@ def _init(X, Y, settings):
     Y_id = np.zeros((R, 1))
 
     return [Em, idx, SA, RT, Y_em, Y_id, m1, m2, m3, j1, j2, j3]
-
-
-def B_spline(X, R, d, m):
-    # Initialize B-Spline Matrix
-    B = np.zeros((R, m + 3, d))
-
-    # Calculate the interval
-    h1 = 1 / m
-
-    # Now loop over each parameter of X through each interval
-    for i, j in itertools.product(range(d), range(m+3)):
-        k = j - 1
-        for r in range(R):
-            X_ri = X[r, i]
-            _k1 = (k - 1)
-            k1 = (k + 1)
-            k2 = (k + 2)
-
-            if (X_ri > k1 * h1 and X_ri <= k2 * h1):
-                B[r, j, i] = (k2 * h1 - X_ri)**3
-            if (X_ri > k * h1 and X_ri <= k1 * h1):
-                B[r, j, i] = (k2 * h1 - X_ri)**3 - \
-                    4 * (k1 * h1 - X_ri)**3
-            if (X_ri > _k1 * h1 and X_ri <= k * h1):
-                B[r, j, i] = (k2 * h1 - X_ri)**3 - \
-                                4 * (k1 * h1 - X_ri)**3 + \
-                                6 * (k * h1 - X_ri)**3
-            if (X_ri > (k - 2) * h1 and X_ri <= _k1 * h1):
-                B[r, j, i] = (k2 * h1 - X_ri)**3 - 4 * \
-                                (k1 * h1 - X_ri)**3 + \
-                                6 * (k * h1 - X_ri)**3 - 4 * \
-                                (_k1 * h1 - X_ri)**3
-
-    # Multiply B with m^3
-    B *= m**3
-
-    return B
 
 
 def _first_order(B1, Y_res, R, n1, m1, maxiter, lambdax):
