@@ -57,7 +57,7 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
     maxiter : int (1-1000, default: 100)
         Max iterations backfitting
 
-    m : int (2-5, default: 2)
+    m : int (2-10, default: 2)
         Number of B-spline intervals
 
     K : int (1-100, default: 20)
@@ -122,12 +122,11 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
     SA, Em, RT, Y_em, idx = _compute(X, Y, settings, init_vars)
 
     # Finalize results
-    Si = _finalize(problem, SA, Em, (settings[i] for i in [
-                       1, 7, 2]), (init_vars[i] for i in [0, 2]), RT, Y_em, idx, X, Y)
+    Si = _finalize(problem, SA, Em, problem['num_vars'], alpha, maxorder, RT, Y_em, idx, X, Y)
 
     # Print results to console
     if print_to_console:
-        _print(Si, settings[1])
+        _print(Si, problem['num_vars'])
 
     return Si
 
@@ -523,10 +522,8 @@ def ancova(Y, Y_em, V_Y, R, n):
     return (S, S_a, S_b)
 
 
-def _finalize(problem, SA, Em, settings, init_vars, RT, Y_em, bootstrap_idx, X, Y):
+def _finalize(problem, SA, Em, d, alpha, maxorder, RT, Y_em, bootstrap_idx, X, Y):
     """Creates ResultDict to be returned."""
-    d, alpha, maxorder = settings
-    Em, SA = init_vars
 
     # Create Sensitivity Indices Result Dictionary
     keys = ('Sa', 'Sa_conf', 'Sb', 'Sb_conf', 'S', 'S_conf', 'select',
