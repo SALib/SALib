@@ -9,7 +9,7 @@ from . import common_args
 from ..util import read_param_file, ResultDict
 
 
-def analyze(problem, X, Y, num_resamples=1000,
+def analyze(problem, X, Y, num_resamples=100,
             conf_level=0.95, print_to_console=False, seed=None):
     """Calculates Derivative-based Global Sensitivity Measure on model outputs.
 
@@ -44,78 +44,95 @@ def analyze(problem, X, Y, num_resamples=1000,
         np.random.seed(seed)
 
     D = problem['num_vars']
+    Y_size = Y.size
 
-    if Y.size % (D + 1) == 0:
-        N = int(Y.size / (D + 1))
+    if Y_size % (D + 1) == 0:
+        N = int(Y_size / (D + 1))
     else:
         raise RuntimeError("Incorrect number of samples in model output file.")
 
     if not 0 < conf_level < 1:
         raise RuntimeError("Confidence level must be between 0-1.")
 
-    base = np.zeros(N)
-    X_base = np.zeros((N, D))
-    perturbed = np.zeros((N, D))
-    X_perturbed = np.zeros((N, D))
+    dims = (N, D)
+    base = np.empty(N)
+    X_base = np.empty(dims)
+    perturbed = np.empty(dims)
+    X_perturbed = np.empty(dims)
     step = D + 1
 
-    base = Y[0:Y.size:step]
-    X_base = X[0:Y.size:step, :]
-    for j in range(D):
-        perturbed[:, j] = Y[(j + 1):Y.size:step]
-        X_perturbed[:, j] = X[(j + 1):Y.size:step, j]
+    base = Y[0:Y_size:step]
+    X_base = X[0:Y_size:step, :]
 
     # First order (+conf.) and Total order (+conf.)
     keys = ('vi', 'vi_std', 'dgsm', 'dgsm_conf')
-    S = ResultDict((k, np.zeros(D)) for k in keys)
+    S = ResultDict((k, np.empty(D)) for k in keys)
     S['names'] = problem['names']
 
     if print_to_console:
         print("Parameter %s %s %s %s" % keys)
 
+    bounds = problem['bounds']
     for j in range(D):
+        perturbed[:, j] = Y[(j + 1):Y_size:step]
+        X_perturbed[:, j] = X[(j + 1):Y_size:step, j]
+
         diff = X_perturbed[:, j] - X_base[:, j]
         perturbed_j = perturbed[:, j]
-        S['vi'][j], S['vi_std'][j] = calc_vi(base,
-                                             perturbed_j,
-                                             diff)
+        S['vi'][j], S['vi_std'][j] = calc_vi_stats(base,
+                                                   perturbed_j,
+                                                   diff)
         S['dgsm'][j], S['dgsm_conf'][j] = calc_dgsm(base,
                                                     perturbed_j,
                                                     diff,
-                                                    problem['bounds'][j],
+                                                    bounds[j],
                                                     num_resamples,
                                                     conf_level)
 
         if print_to_console:
             print("%s %f %f %f %f" % (
-                problem['names'][j], S['vi'][j], S['vi_std'][j], S['dgsm'][j], S['dgsm_conf'][j]))
+                S['names'][j], S['vi'][j], S['vi_std'][j], S['dgsm'][j], S['dgsm_conf'][j]))
 
     return S
 
 
-def calc_vi(base, perturbed, x_delta):
-    # v_i sensitivity measure following Sobol and Kucherenko (2009)
-    # For comparison, Morris mu* < sqrt(v_i)
-    dfdx = (perturbed - base) / x_delta
-    dfdx2 = dfdx ** 2
+def calc_vi_stats(base, perturbed, x_delta):
+    """Calculate v_i mean and std.
+    
+    v_i sensitivity measure following Sobol and Kucherenko (2009)
+    For comparison, Morris mu* < sqrt(v_i)
 
-    return np.mean(dfdx2), np.std(dfdx2)
+    Same as calc_vi_mean but returns standard deviation as well.
+    """
+    dfdx = ((perturbed - base) / x_delta)**2
+    return np.mean(dfdx), np.std(dfdx)
+
+
+def calc_vi_mean(base, perturbed, x_delta):
+    """Calculate v_i mean.
+
+    Same as calc_vi_stats but only returns the mean.
+    """
+    dfdx = ((perturbed - base) / x_delta)**2
+    return dfdx.mean()
 
 
 def calc_dgsm(base, perturbed, x_delta, bounds, num_resamples, conf_level):
-    # v_i sensitivity measure following Sobol and Kucherenko (2009)
-    # For comparison, total order S_tot <= dgsm
+    """v_i sensitivity measure following Sobol and Kucherenko (2009).
+    For comparison, total order S_tot <= dgsm
+    """
     D = np.var(base)
-    vi, _ = calc_vi(base, perturbed, x_delta)
-    dgsm = vi * (bounds[1] - bounds[0]) ** 2 / (D * np.pi ** 2)
+    vi = calc_vi_mean(base, perturbed, x_delta)
+    dgsm = vi * (bounds[1] - bounds[0])**2 / (D * np.pi**2)
 
     len_base = len(base)
-    s = np.zeros(num_resamples)
+    s = np.empty(num_resamples)
+    r = np.random.randint(len_base, size=(num_resamples, len_base))
     for i in range(num_resamples):
-        r = np.random.randint(len_base, size=len_base)
-        s[i], _ = calc_vi(base[r], perturbed[r], x_delta[r])
+        r_i = r[i]
+        s[i] = calc_vi_mean(base[r_i], perturbed[r_i], x_delta[r_i])
 
-    return dgsm, norm.ppf(0.5 + conf_level / 2) * s.std(ddof=1)
+    return dgsm, norm.ppf(0.5 + conf_level / 2.0) * s.std(ddof=1)
 
 
 def cli_parse(parser):

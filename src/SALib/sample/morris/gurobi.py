@@ -15,19 +15,19 @@ from __future__ import division
 import re
 from datetime import datetime as dt
 
-import numpy as np
+import numpy as np  # type: ignore
 
 try:
-    from scipy.misc import comb as nchoosek
+    from scipy.misc import comb as nchoosek  # type: ignore
 except ImportError:
-    from scipy.special import comb as nchoosek
+    from scipy.special import comb as nchoosek  # type: ignore
 
 from . strategy import Strategy
 
 from SALib.util import requires_gurobipy
 
 try:
-    from gurobipy import Model, quicksum, GRB
+    from gurobipy import Model, quicksum, GRB  # type: ignore
 except ImportError:
     _has_gurobi = False
 else:

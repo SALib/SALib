@@ -5,6 +5,7 @@ from numpy.testing import assert_equal, assert_allclose
 from pytest import raises, fixture
 
 import numpy as np
+import warnings
 
 from SALib.sample.morris import (sample,
                                  _compute_optimised_trajectories,
@@ -36,6 +37,34 @@ def expected_sample():
     input_4 = [[1 / 3., 1.], [1., 1.], [1, 1 / 3.]]
     input_6 = [[1 / 3., 2 / 3.], [1 / 3., 0], [1., 0]]
     return np.concatenate([input_1, input_3, input_4, input_6])
+
+
+def test_odd_num_levels_raises_warning(setup_param_file_with_groups):
+
+    parameter_file = setup_param_file_with_groups
+    problem = read_param_file(parameter_file)
+    with warnings.catch_warnings(record=True) as w:
+        # Cause all warnings to always be triggered.
+        warnings.simplefilter("always")
+        # Trigger a warning.
+        sample(problem, 10, num_levels=3)
+        # Verify some things
+        assert len(w) == 1
+        assert issubclass(w[-1].category, UserWarning)
+        assert "num_levels should be an even number, sample may be biased" in str(w[-1].message)
+
+
+def test_even_num_levels_no_warning(setup_param_file_with_groups):
+
+    parameter_file = setup_param_file_with_groups
+    problem = read_param_file(parameter_file)
+    with warnings.catch_warnings(record=True) as w:
+        # Cause all warnings to always be triggered.
+        warnings.simplefilter("always")
+        # Trigger a warning.
+        sample(problem, 10, num_levels=4)
+        # Verify some things
+        assert len(w) == 0
 
 
 def test_group_in_param_file_read(setup_param_file_with_groups):
@@ -122,9 +151,10 @@ def test_group_sample_fails_with_wrong_G_matrix():
                'num_vars': 4,
                'groups': list([1, 2, 3])}
 
-    expected_err = ".*Groups do not match to number of variables.*"
-    with raises(ValueError, match=expected_err):
+    with raises(ValueError) as err:
         sample(problem, N, num_levels)
+
+    assert "Groups do not match to number of variables" in str(err.value)
 
 
 class TestGroupSampleGeneration:

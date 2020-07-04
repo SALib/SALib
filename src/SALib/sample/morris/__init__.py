@@ -27,9 +27,11 @@ it is possible to go higher than the previously suggested 4 from 100.
 """
 from __future__ import division
 
-import numpy as np
+import numpy as np  # type: ignore
+from typing import Dict
 
-import numpy.random as rd
+import numpy.random as rd  # type: ignore
+import warnings
 
 from . gurobi import GlobalOptimisation
 from . local import LocalOptimisation
@@ -41,7 +43,7 @@ from SALib.sample import common_args
 from SALib.util import scale_samples, read_param_file, compute_groups_matrix
 
 try:
-    import gurobipy
+    import gurobipy  # type: ignore
 except ImportError:
     _has_gurobi = False
 else:
@@ -50,8 +52,8 @@ else:
 __all__ = ['sample']
 
 
-def sample(problem, N, num_levels=4, optimal_trajectories=None,
-           local_optimization=True):
+def sample(problem: Dict, N: int, num_levels: int=4, optimal_trajectories: int=None,
+           local_optimization: bool=True, seed=None) -> np.array:
     """Generate model inputs using the Method of Morris
 
     Returns a NumPy matrix containing the model inputs required for Method of
@@ -70,7 +72,7 @@ def sample(problem, N, num_levels=4, optimal_trajectories=None,
     N : int
         The number of trajectories to generate
     num_levels : int, default=4
-        The number of grid levels
+        The number of grid levels (should be even)
     optimal_trajectories : int
         The number of optimal trajectories to sample (between 2 and N)
     local_optimization : bool, default=True
@@ -78,6 +80,7 @@ def sample(problem, N, num_levels=4, optimal_trajectories=None,
         Speeds up the process tremendously for bigger N and num_levels.
         If set to ``False`` brute force method is used, unless ``gurobipy`` is
         available
+    seed : int, default=None
 
     Returns
     -------
@@ -86,6 +89,11 @@ def sample(problem, N, num_levels=4, optimal_trajectories=None,
         of Morris. The resulting matrix has :math:`(G/D+1)*N/T` rows and
         :math:`D` columns, where :math:`D` is the number of parameters.
     """
+    if seed:
+        np.random.seed(seed)
+
+    if not num_levels % 2 == 0:
+        warnings.warn("num_levels should be an even number, sample may be biased")
     if problem.get('groups'):
         sample = _sample_groups(problem, N, num_levels)
     else:
@@ -103,7 +111,7 @@ def sample(problem, N, num_levels=4, optimal_trajectories=None,
     return sample
 
 
-def _sample_oat(problem, N, num_levels=4):
+def _sample_oat(problem: Dict, N: int, num_levels: int=4) -> np.ndarray:
     """Generate trajectories without groups
 
     Arguments
@@ -115,8 +123,7 @@ def _sample_oat(problem, N, num_levels=4):
     num_levels : int, default=4
         The number of grid levels
     """
-    group_membership = np.asmatrix(np.identity(problem['num_vars'],
-                                               dtype=int))
+    group_membership = np.identity(problem['num_vars'], dtype=int)
 
     num_params = group_membership.shape[0]
     sample = np.array([generate_trajectory(group_membership,
@@ -226,7 +233,7 @@ def compute_b_star(J, x_star, delta, B, G, P_star, D_star):
     return b_star
 
 
-def generate_p_star(num_groups):
+def generate_p_star(num_groups: int):
     """Describe the order in which groups move
 
     Arguments
@@ -260,12 +267,11 @@ def generate_x_star(num_params, num_levels):
     -------
     numpy.ndarray
         The initial starting positions of the trajectory
-
     """
     x_star = np.zeros((1, num_params))
     delta = compute_delta(num_levels)
     bound = 1 - delta
-    grid = np.linspace(0, bound, 2)
+    grid = np.linspace(0, bound, int(num_levels / 2))
 
     x_star[0, :] = rd.choice(grid, num_params)
 
