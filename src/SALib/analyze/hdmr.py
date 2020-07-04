@@ -80,7 +80,7 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
 
     Returns
     -------
-    Si : dict,
+    Si : ResultDict,
         Sa: Uncorrelated contribution
         Sa_conf: Confidence interval of Sa
         Sb: Correlated contribution
@@ -91,11 +91,10 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
         ST_conf: Confidence interval of ST
         Sa: Uncorrelated contribution
         select: Number of selection (F-Test)
-
-    C  : tuple of numpy arrays,
-        C1: First order coefficient 
-        C2: Second order coefficient
-        C3: Third Order coefficient
+        C: tuple of numpy arrays,
+            C1: First order coefficient 
+            C2: Second order coefficient
+            C3: Third Order coefficient
 
     References
     ----------
@@ -723,8 +722,10 @@ def to_df(self):
 
 
 def plot(self):
-    """HDMR specific plotting."""
-    hdmr_plot(self)
+    """HDMR specific plotting.
+
+    Gets attached to the SALib problem spec.
+    """
 
 
 def _print(Si, d):
