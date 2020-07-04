@@ -26,16 +26,16 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
     HDMR is used for variance-based global sensitivity analysis (GSA) with 
     correlated and uncorrelated inputs. This function uses as input
 
-    * a N x d matrix of N different d-vectors of model inputs (factors/parameters)
-    * a N x 1 vector of corresponding model outputs
+    - a N x d matrix of N different d-vectors of model inputs (factors/parameters)
+    - a N x 1 vector of corresponding model outputs
 
     Returns to the user:
-    * each factor's first, second, and third order sensitivity coefficient
+    - each factor's first, second, and third order sensitivity coefficient
       (separated in total, structural and correlative contributions), 
-    * an estimate of their 95% confidence intervals (from bootstrap method)
-    * the coefficients of the significant B-spline basis functions that
+    - an estimate of their 95% confidence intervals (from bootstrap method)
+    - the coefficients of the significant B-spline basis functions that
       govern output, 
-    * Y (determined by an F-test of the error residuals of the HDMR model 
+    - Y (determined by an F-test of the error residuals of the HDMR model 
       (emulator) with/without a given first, second and/or
       third order B-spline). These coefficients define an emulator that can
       be used to predict the output, Y, of the original (CPU-intensive)
