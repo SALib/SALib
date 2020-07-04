@@ -686,23 +686,13 @@ def emulate(self, C, X, Y):
         for j in range(n1+n2, n1+n2+n3):
             Y_em[:, j] = np.matmul(B3[:, :, j-n1-n2], C3[:, j-n1-n2])
 
-    # Sum of squared residuals
-    ssr = np.sum((np.sum(Y_em, axis=1)+np.mean(Y) - Y)**2)
-    # Plot figure
-    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(6,6))
-    ax.plot(np.sum(Y_em, axis=1)+np.mean(Y), Y, 'r+', label='Emulator')
-    ax.plot( Y, Y, 'darkgray', label='1:1 Line')
-    ax.axis('square')
-    ax.set_xlabel('Emulator')
-    ax.set_ylabel('New Observation')
-    ax.set_xlim(np.min(Y), np.max(Y))
-    ax.set_ylim(np.min(Y), np.max(Y))
-    ax.legend(loc='lower right')
-    ax.text(x=np.min(Y)*.2, y=np.max(Y) * .8, s=f'SSR = {ssr:.2f}')
-    # fig.suptitle(f'SSR = {ssr:.2f}')
-    fig.tight_layout()
-    plt.show()
+    Y_mean = 0
+    if Y is not None:
+        Y_mean = np.mean(Y)
+        self['Y_test'] = Y
 
+    emulated = np.sum(Y_em, axis=1)+Y_mean
+    self['emulated'] = emulated
 
 
 def to_df(self):

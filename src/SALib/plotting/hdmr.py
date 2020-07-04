@@ -78,9 +78,33 @@ def plot(Si):
                    str(i + 1) + '$'], loc='upper left', bbox_to_anchor=(1.04, 1.0))
         it += 1
 
-    # Adjust spacing between subplots
     fig.tight_layout()
     plt.show()
+
+    if 'emulated' in Si:
+        emulated = Si['emulated']
+        # Sum of squared residuals
+        Y_test = Si['Y_test']
+        ssr = np.sum((emulated - Y_test)**2)
+        
+        # Plot testing results
+        fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(6,6))
+        ax.plot(emulated, Y_test, 'r+', label='Emulator')
+        ax.plot( Y_test, Y_test, 'darkgray', label='1:1 Line')
+        ax.axis('square')
+        ax.set_xlabel('Emulator')
+        ax.set_ylabel('New Observation')
+        ax.set_xlim(np.min(Y_test), np.max(Y_test))
+        ax.set_ylim(np.min(Y_test), np.max(Y_test))
+        ax.legend(loc='lower right')
+        ax.text(x=np.min(Y_test)*.2, y=np.max(Y_test) * .8, s=f'SSR = {ssr:.2f}')
+        fig.suptitle(f'Testing results\nSSR = {ssr:.2f}')
+        fig.tight_layout()
+        plt.show()
+
+    # Adjust spacing between subplots
+    # fig.tight_layout()
+    # plt.show()
 
     return ax
 
