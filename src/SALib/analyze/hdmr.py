@@ -132,7 +132,7 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
     if print_to_console:
         _print(Si, problem['num_vars'])
 
-    return Si, (Em['C1'], Em['C2'], Em['C3'])
+    return Si
 
 def _check_settings(X, Y, maxorder, maxiter, m, K, R, alpha, lambdax):
     """Perform checks to ensure all parameters are within usable/expected ranges."""
@@ -616,16 +616,20 @@ def _finalize(problem, SA, Em, d, alpha, maxorder, RT, Y_em, bootstrap_idx, X, Y
     return Si
 
 
-def emulate(self, C, X, Y):
-    '''Emulates model output with new input data. Generates B-Splines 
-    with new input matrix, X, and multiplies it with coefficient matrix,
-    C. Compares emulated results with observed vector, Y.
+def emulate(self, X, Y=None):
+    '''Emulates model output with new input data. 
+    
+    Generates B-Splines with new input matrix, X, and multiplies it with 
+    coefficient matrix, C. 
+    
+    Compares emulated results with observed vector, Y.
     '''
     # Dimensionality
     N, d = X.shape
 
     # Expand C
-    C1, C2, C3 = C
+    Em = self['Em']
+    C1, C2, C3 = Em['C1'], Em['C2'], Em['C3']
 
     # Take average coefficient
     C1 = np.mean(C1, axis=2)
