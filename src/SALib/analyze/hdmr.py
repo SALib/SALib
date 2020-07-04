@@ -635,9 +635,7 @@ def emulate(self, C, X, Y):
     # Get maxorder and other information from C matrix
     m = C1.shape[0] - 3
     m1 = m+3
-    n1 = d
-    n2 = 0
-    n3 = 0
+    n1, n2, n3 = d, 0, 0
     if C2.shape[0] != 1:
         maxorder = 2
         m2 = C2.shape[0]
