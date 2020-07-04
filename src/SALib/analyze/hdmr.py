@@ -722,6 +722,7 @@ def plot(self):
 
     Gets attached to the SALib problem spec.
     """
+    return hdmr_plot(self)
 
 
 def _print(Si, d):
