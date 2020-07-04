@@ -102,10 +102,6 @@ def plot(Si):
         fig.tight_layout()
         plt.show()
 
-    # Adjust spacing between subplots
-    # fig.tight_layout()
-    # plt.show()
-
     return ax
 
 
