@@ -1,39 +1,32 @@
 @echo off
 
-REM Sensitivity indices will print to command line. Use ">" to write to file.
+REM Example: generating samples from the command line
+salib sample latin ^
+	-n 1000 ^
+	-p ../../src/SALib/test_functions/params/Ishigami.txt ^
+	-o ../data/model_input.txt ^
+	--delimiter=" " ^
+	--precision=8 ^
+	--seed=100
+
+REM Run model and save output
+python -c "from SALib.test_functions import Ishigami; import numpy as np; np.savetxt('../data/model_output.txt', Ishigami.evaluate(np.loadtxt('../data/model_input.txt')))"
+
+REM Perform hdmr analysis
 salib analyze hdmr ^
-  -p ../../../src/SALib/test_functions/params/Ishigami.txt ^
-  -X ../../data/model_input.txt ^
-  -Y ../../data/model_output.txt ^
+  -p ../../src/SALib/test_functions/params/Ishigami.txt ^
+  -X ../data/model_input.txt ^
+  -Y ../data/model_output.txt ^
   -c 0 ^
-  -g 1 ^
   -mor 2 ^
   -mit 100 ^
   -m 4 ^
-  -K 1 ^
-  -R 1000 ^
+  -K 20 ^
+  -R 500 ^
   -a 0.95 ^
-  -lambda 0.05 ^
-  -print 1
-
+  -lambda 0.01
+  
 PAUSE
-REM Then use the output to run the analysis.
-
-REM You can also use the module directly through Python
-REM python -m SALib.analyze.hdmr ^
-REM      -p ../../../src/SALib/test_functions/params/Ishigami.txtt ^
-REM      -X ../../data/case4_input.txt ^
-REM      -Y ../../data/case4_output.txt ^
-REM      -c 0 ^
-REM      -g 0 ^
-REM      -mor 2 ^
-REM      -mit 100 ^
-REM      -m 2 ^
-REM      -K 20 ^
-REM      -R Y // 2 ^
-REM      -a 0.95 ^
-REM      -lambda 0.01 ^
-REM      -print 1
 
 REM Options:
 REM -p, --paramfile: Your parameter range file (3 columns: parameter name, lower bound, upper bound)
@@ -44,8 +37,6 @@ REM -X, --model-input-file: File of model input values (parameter samples).
 REM
 REM -c, --column (optional): Column of model output file to analyze.
 REM                If the file only has one column, this argument will be ignored.
-REM
-REM -g, --graphics (optional): Whether to print out graphics or not (1,0). Default is 1.
 REM
 REM -mor, --maxorder (optional): Maximum order of HDMR expansion (1,2,3). Default is 2.
 REM
@@ -60,5 +51,3 @@ REM
 REM -a, --alfa (optional): Confidence interval. Default is 0.95
 REM
 REM -lambda, --lambdax (optional): Regularization constant. Default is 0.01
-REM
-REM -print, --print-to-console (optional): Whether to print out results to the screen or not (1,0). Default is 1.

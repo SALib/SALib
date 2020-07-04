@@ -52,7 +52,7 @@ __all__ = ['sample']
 
 
 def sample(problem, N, num_levels=4, optimal_trajectories=None,
-           local_optimization=True):
+           local_optimization=True, seed=None):
     """Generate model inputs using the Method of Morris
 
     Returns a NumPy matrix containing the model inputs required for Method of
@@ -87,6 +87,9 @@ def sample(problem, N, num_levels=4, optimal_trajectories=None,
         of Morris. The resulting matrix has :math:`(G/D+1)*N/T` rows and
         :math:`D` columns, where :math:`D` is the number of parameters.
     """
+    if seed:
+        np.random.seed(seed)
+
     if not num_levels % 2 == 0:
         warnings.warn("num_levels should be an even number, sample may be biased")
     if problem.get('groups'):
