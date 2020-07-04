@@ -707,7 +707,11 @@ def to_df(self):
     Pandas DataFrame
     '''
     names = self['names']
-    exclude_list = ['select', 'Em', 'RT', 'Y_em', 'idx', 'X', 'Y', 'Term', 'names']
+
+    # Special dict entries to ignore
+    exclude_list = ['select', 'Em', 'RT', 'Y_em', 
+                    'idx', 'X', 'Y', 'Term', 'names',
+                    'Sa_sum', 'Sb_sum', 'S_sum', 'emulated', 'Y_test']
     new_spec = {k: v for k, v in self.items() if k not in exclude_list}
 
     return pd.DataFrame(new_spec, index=names)
