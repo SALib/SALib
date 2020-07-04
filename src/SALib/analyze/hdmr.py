@@ -24,21 +24,25 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
     """High-Dimensional Model Representation (HDMR) using B-spline functions.
 
     HDMR is used for variance-based global sensitivity analysis (GSA) with 
-    correlated and uncorrelated inputs. This function uses as input a N x d 
-    matrix of N different d-vectors of model inputs (factors/parameters) and 
-    a N x 1 vector of corresponding model outputs and returns to the user
-    each factor's first, second, and third order sensitivity coefficient
-    (separated in total, structural and correlative contributions), an
-    estimate of their 95% confidence intervals (from bootstrap method)
-    and the coefficients of the significant B-spline basis functions that
-    govern output, Y (determined by an F-test of the error residuals of
-    the HDMR model (emulator) with/without a given first, second and/or
-    third order B-spline). These coefficients define an emulator that can
-    be used to predict the output, Y, of the original (CPU-intensive)
-    model for any d-vector of model inputs. For uncorrelated model inputs
-    (columns of X are independent), the HDMR sensitivity indices reduce
-    to a single index (= structural contribution), consistent with their
-    values derived from commonly used variance-based GSA methods.
+    correlated and uncorrelated inputs. This function uses as input
+
+    * a N x d matrix of N different d-vectors of model inputs (factors/parameters)
+    * a N x 1 vector of corresponding model outputs
+
+    Returns to the user:
+    * each factor's first, second, and third order sensitivity coefficient
+      (separated in total, structural and correlative contributions), 
+    * an estimate of their 95% confidence intervals (from bootstrap method)
+    * the coefficients of the significant B-spline basis functions that
+      govern output, 
+    * Y (determined by an F-test of the error residuals of the HDMR model 
+      (emulator) with/without a given first, second and/or
+      third order B-spline). These coefficients define an emulator that can
+      be used to predict the output, Y, of the original (CPU-intensive)
+      model for any d-vector of model inputs. For uncorrelated model inputs
+      (columns of X are independent), the HDMR sensitivity indices reduce
+      to a single index (= structural contribution), consistent with their
+      values derived from commonly used variance-based GSA methods.
 
     Parameters
     ----------
@@ -91,7 +95,7 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
         ST_conf: Confidence interval of ST
         Sa: Uncorrelated contribution
         select: Number of selection (F-Test)
-        C: tuple of numpy arrays,
+        Em: Result set
             C1: First order coefficient 
             C2: Second order coefficient
             C3: Third Order coefficient
@@ -623,6 +627,11 @@ def emulate(self, X, Y=None):
     coefficient matrix, C. 
     
     Compares emulated results with observed vector, Y.
+
+    Returns
+    ========
+    Si : ResultDict, Updated
+
     '''
     # Dimensionality
     N, d = X.shape
