@@ -10,7 +10,7 @@ from SALib.util import read_param_file
 # Genyuan Li et al., Journal of Physical Chemistry A., V. 114 (19), 
 # pp. 6022-6032, 2010.
 
-# Read the parameter range file and generate samples
+# Define SALib problem specification.
 problem = {
   'num_vars': 3,
   'names': ['x1', 'x2', 'x3'],
@@ -39,8 +39,9 @@ options = {
   'seed': 101
 } 
 # Run SALib-HDMR
-Si, C = hdmr.analyze(problem, X, Y, **options)
+Si = hdmr.analyze(problem, X, Y, **options)
 
+# Displays just testing results
 Si.plot()
 
 # Generate samples
@@ -48,4 +49,7 @@ X = latin.sample(problem, 5000, seed=int(np.random.random()*100))
 # Run the "model" 
 Y = Ishigami.evaluate(X)
 # Emulator
-Y_em = Si.emulate(C, X, Y)
+Si.emulate(X, Y)
+
+# After emulator is run, displays results for both testing and training
+Si.plot()
