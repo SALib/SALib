@@ -352,8 +352,14 @@ def _init(X, Y, settings):
 
 
 def B_spline(X, m, d):
-    '''Generate cubic B-splines using scipy built-in basis_element
-    method. Knot points, t, are automatically determined. '''
+    """Generate cubic B-splines using scipy basis_element method. 
+    
+    Knot points (`t`) are automatically determined.
+
+    References
+    ----------
+    .. [1] https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.BSpline.basis_element.html
+    """
     # Initialize B matrix
     B = np.zeros((X.shape[0], m+3, d))
     # Cubic basis-spline settings
