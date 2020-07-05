@@ -362,12 +362,14 @@ def B_spline(X, m, d):
     """
     # Initialize B matrix
     B = np.zeros((X.shape[0], m+3, d))
+
     # Cubic basis-spline settings
     k = np.arange(-1, m+2)
-    def yk(x): return np.arange(x-2, x+3)
+
     # Compute B-Splines
     for j, i in itertools.product(range(d), range(m+3)):
-        t = yk(k[i]) / m
+        k_i = k[i]
+        t = np.arange(k_i-2, k_i+3) / m
         temp = interpolate.BSpline.basis_element(t)(X[:,j]) * np.power(m,3)
         B[:, i, j] = np.where(temp < 0, 0, temp)
     
