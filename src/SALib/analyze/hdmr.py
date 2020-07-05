@@ -725,11 +725,10 @@ def to_df(self):
     '''
     names = self['names']
 
-    # Special dict entries to ignore
-    exclude_list = ['select', 'Em', 'RT', 'Y_em', 
-                    'idx', 'X', 'Y', 'Term', 'names',
-                    'Sa_sum', 'Sb_sum', 'S_sum', 'emulated', 'Y_test']
-    new_spec = {k: v for k, v in self.items() if k not in exclude_list}
+    # Only convert these elements in dict to DF
+    include_list = ['Sa', 'Sb', 'S', 'ST']
+    include_list += [f'{name}_conf' for name in include_list]
+    new_spec = {k: v for k, v in self.items() if k in include_list}
 
     return pd.DataFrame(new_spec, index=names)
 
