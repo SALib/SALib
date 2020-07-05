@@ -2,18 +2,22 @@ from __future__ import division
 
 from numpy.testing import assert_equal, assert_allclose
 
-from pytest import raises, fixture
+from pytest import raises, fixture, warns, mark
 
 import numpy as np
 import warnings
 
-from SALib.sample.morris import (sample,
-                                 _compute_optimised_trajectories,
-                                 generate_p_star,
-                                 compute_b_star,
-                                 compute_delta,
-                                 generate_trajectory,
-                                 generate_x_star)
+from SALib.sample.morris.morris import (sample,
+                                        check_group_membership,
+                                        check_if_num_levels_is_even,
+                                        define_problem_with_groups,
+                                        _compute_optimised_trajectories,
+                                        generate_p_star,
+                                        compute_b_star,
+                                        compute_delta,
+                                        generate_trajectory,
+                                        generate_x_star)
+
 from SALib.util import read_param_file, compute_groups_matrix
 
 
@@ -40,7 +44,6 @@ def expected_sample():
 
 
 def test_odd_num_levels_raises_warning(setup_param_file_with_groups):
-
     parameter_file = setup_param_file_with_groups
     problem = read_param_file(parameter_file)
     with warnings.catch_warnings(record=True) as w:
@@ -51,11 +54,11 @@ def test_odd_num_levels_raises_warning(setup_param_file_with_groups):
         # Verify some things
         assert len(w) == 1
         assert issubclass(w[-1].category, UserWarning)
-        assert "num_levels should be an even number, sample may be biased" in str(w[-1].message)
+        assert "num_levels should be an even number, sample may be biased" in str(
+            w[-1].message)
 
 
 def test_even_num_levels_no_warning(setup_param_file_with_groups):
-
     parameter_file = setup_param_file_with_groups
     problem = read_param_file(parameter_file)
     with warnings.catch_warnings(record=True) as w:
@@ -82,7 +85,6 @@ def test_group_in_param_file_read(setup_param_file_with_groups):
 
 
 def test_optimal_trajectories_lt_samples(setup_param_file):
-
     parameter_file = setup_param_file
     problem = read_param_file(parameter_file)
 
@@ -95,7 +97,6 @@ def test_optimal_trajectories_lt_samples(setup_param_file):
 
 
 def test_optimal_trajectories_lt_10(setup_param_file):
-
     parameter_file = setup_param_file
     problem = read_param_file(parameter_file)
 
@@ -109,7 +110,6 @@ def test_optimal_trajectories_lt_10(setup_param_file):
 
 
 def test_optimal_trajectories_gte_one(setup_param_file):
-
     parameter_file = setup_param_file
     problem = read_param_file(parameter_file)
 
@@ -123,7 +123,6 @@ def test_optimal_trajectories_gte_one(setup_param_file):
 
 
 def test_find_optimum_trajectories(setup_input, expected_sample):
-
     N = 6
     problem = {'num_vars': 2, 'groups': None}
     k_choices = 4
@@ -154,7 +153,8 @@ def test_group_sample_fails_with_wrong_G_matrix():
     with raises(ValueError) as err:
         sample(problem, N, num_levels)
 
-    assert "Groups do not match to number of variables" in str(err.value)
+    assert "Number of entries in \'groups\' should be the same as in " \
+           "\'names\'" in str(err.value)
 
 
 class TestGroupSampleGeneration:
@@ -224,3 +224,99 @@ class TestGroupSampleGeneration:
         print(actual)
         expected = np.array([[0.333333, 0.333333, 0., 0.333333]])
         assert_allclose(actual, expected, rtol=1e-05)
+
+    def test_define_problem_with_groups_all_ok(self):
+        """
+        Checks if the function works when the user defines different groups for
+        each variable.
+        """
+        problem = {
+            'num_vars': 8,
+            'names': ['x1', 'x2', 'x3', 'x4', 'x5', 'x6', 'x7', 'x8'],
+            'groups': ['G1', 'G1', 'G1', 'G2', 'G2', 'G2', 'G3', 'G3']}
+
+        expected = problem
+
+        result = define_problem_with_groups(problem)
+
+        assert expected == result
+
+    def test_define_problem_with_groups_no_group_definition(self):
+        """
+        Checks if the function works when the user doesn't define groups at
+        all.
+        """
+        problem = {
+            'num_vars': 8,
+            'names': ['x1', 'x2', 'x3', 'x4', 'x5', 'x6', 'x7', 'x8']}
+
+        expected = {
+            'num_vars': 8,
+            'names': ['x1', 'x2', 'x3', 'x4', 'x5', 'x6', 'x7', 'x8'],
+            'groups': ['x1', 'x2', 'x3', 'x4', 'x5', 'x6', 'x7', 'x8']}
+
+        result = define_problem_with_groups(problem)
+
+        assert expected == result
+
+    def test_define_problem_with_groups_exception(self):
+        """
+        Checks if the function raises an exception when the user makes an
+        inconsistent definition of groups, i.e, only define groups for some
+        variables.
+        """
+        problem = {
+            'num_vars': 8,
+            'names': ['x1', 'x2', 'x3', 'x4', 'x5', 'x6', 'x7', 'x8'],
+            'groups': ['G1', 'G1', 'G1', 'G2', 'G2', 'G2']}
+
+        with raises(ValueError):
+            define_problem_with_groups(problem)
+
+    def test_check_if_num_levels_is_even_check_odd(self):
+        """
+        Checks if a warn is raised when the number of tests is odd
+        """
+        with warns(None) as record:
+            check_if_num_levels_is_even(5)
+
+        assert record
+
+    def test_check_if_num_levels_is_even_check_even(self):
+        """
+        Checks if a warn is not raised when the number of tests is even.
+        """
+        with warns(None) as record:
+            check_if_num_levels_is_even(4)
+
+        assert not record
+
+    @mark.xfail()
+    def test_check_group_membership_all_ok(self):
+        """
+        Checks if no errors are raised when group_membership is defined
+        correctly. This test is expected to fail.
+        """
+        # Creates a dummy variable
+        group_membership = np.empty((3, 3), dtype=np.int)
+
+        with raises(ValueError):
+            check_group_membership(group_membership)
+
+        with raises(TypeError):
+            check_group_membership(group_membership)
+
+    def test_check_group_membership_error(self):
+        """
+        Checks if an error is raised if group_membership has a wrong type.
+        """
+        # Creates a dummy variable
+        group_membership = 1.0
+
+        with raises(TypeError):
+            check_group_membership(group_membership)
+
+        group_membership = None
+
+        with raises(ValueError):
+            check_group_membership(group_membership)
