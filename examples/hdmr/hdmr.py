@@ -41,15 +41,18 @@ options = {
 # Run SALib-HDMR
 Si = hdmr.analyze(problem, X, Y, **options)
 
-# Displays just testing results
+# Displays sensitivity results and HDMR training results
 Si.plot()
 
 # Generate samples
 X = latin.sample(problem, 5000, seed=int(np.random.random()*100))
 # Run the "model" 
 Y = Ishigami.evaluate(X)
-# Emulator
+
+# Test emulator with new Y values.
+# Can call `emulate()` without Y values, which will run the emulator
+# Emulation results will be in Si["emulated"]
 Si.emulate(X, Y)
 
-# After emulator is run, displays results for both testing and training
+# Displays results for both training and testing after emulator is tested.
 Si.plot()
