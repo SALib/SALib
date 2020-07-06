@@ -1,4 +1,3 @@
-from .gurobi import GlobalOptimisation
 from .local import LocalOptimisation
 from .brute import BruteForce
 from .strategy import SampleMorris

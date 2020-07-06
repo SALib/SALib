@@ -32,7 +32,6 @@ import numpy as np
 import numpy.random as rd
 import warnings
 
-from .gurobi import GlobalOptimisation
 from .local import LocalOptimisation
 from .brute import BruteForce
 
@@ -40,13 +39,6 @@ from .strategy import SampleMorris
 
 from SALib.sample import common_args
 from SALib.util import scale_samples, read_param_file, compute_groups_matrix
-
-try:
-    import gurobipy
-except ImportError:
-    _has_gurobi = False
-else:
-    _has_gurobi = True
 
 __all__ = ['sample']
 
@@ -309,9 +301,7 @@ def _compute_optimised_trajectories(problem: dict, input_sample: int, N: int,
     local_optimization : bool, default=False
         If true, uses local optimisation heuristic
     """
-    if _has_gurobi is False \
-            and local_optimization is False \
-            and k_choices > 10:
+    if local_optimization is False and k_choices > 10:
         msg = "Running optimal trajectories greater than values of 10 \
                 will take a long time."
         raise ValueError(msg)
@@ -400,10 +390,7 @@ def _choose_optimization_strategy(local_optimization: bool):
     -------
 
     """
-    if _has_gurobi and local_optimization is False:
-        # Use global optimization method
-        strategy = GlobalOptimisation()
-    elif local_optimization:
+    if local_optimization:
         # Use local method
         strategy = LocalOptimisation()
     else:
