@@ -316,24 +316,15 @@ def _compute_optimised_trajectories(problem: dict, input_sample: int, N: int,
                 will take a long time."
         raise ValueError(msg)
 
-    num_params = problem['num_vars']
-
     if np.any((input_sample < 0) | (input_sample > 1)):
         raise ValueError("Input sample must be scaled between 0 and 1")
 
-    if _has_gurobi and local_optimization is False:
-        # Use global optimization method
-        strategy = GlobalOptimisation()
-    elif local_optimization:
-        # Use local method
-        strategy = LocalOptimisation()
-    else:
-        # Use brute force approach
-        strategy = BruteForce()
-
     num_groups = len(set(problem['groups']))
+    num_params = problem['num_vars']
 
+    strategy = _choose_optimization_strategy(local_optimization)
     context = SampleMorris(strategy)
+
     output = context.sample(input_sample, N, num_params, k_choices, num_groups)
 
     return output
@@ -394,6 +385,32 @@ def check_group_membership(group_membership):
     if not isinstance(group_membership, np.ndarray):
         raise TypeError("Argument 'group_membership' should be formatted \
                          as a numpy np.ndarray")
+
+
+def _choose_optimization_strategy(local_optimization: bool):
+    """
+    Choose the strategy to optimize the trajectories.
+
+    Parameters
+    ----------
+    local_optimization: boolean to indicate if a local optimization should be
+                        used.
+
+    Returns
+    -------
+
+    """
+    if _has_gurobi and local_optimization is False:
+        # Use global optimization method
+        strategy = GlobalOptimisation()
+    elif local_optimization:
+        # Use local method
+        strategy = LocalOptimisation()
+    else:
+        # Use brute force approach
+        strategy = BruteForce()
+
+    return strategy
 
 
 def cli_parse(parser):
