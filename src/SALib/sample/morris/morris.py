@@ -85,7 +85,7 @@ def sample(problem: dict, N: int, num_levels: int = 4,
 
     Returns
     -------
-    sample : numpy.ndarray
+    sample_morris : numpy.ndarray
         Returns a numpy.ndarray containing the model inputs required for Method
         of Morris. The resulting matrix has :math:`(G/D+1)*N/T` rows and
         :math:`D` columns, where :math:`D` is the number of parameters.
@@ -97,16 +97,16 @@ def sample(problem: dict, N: int, num_levels: int = 4,
 
     problem = define_problem_with_groups(problem)
 
-    sample = _sample_morris(problem, N, num_levels)
+    sample_morris = _sample_morris(problem, N, num_levels)
 
     if optimal_trajectories:
-        sample = _compute_optimised_trajectories(problem, sample,
-                                                 N,
-                                                 optimal_trajectories,
-                                                 local_optimization)
+        sample_morris = _compute_optimised_trajectories(problem, sample_morris,
+                                                        N,
+                                                        optimal_trajectories,
+                                                        local_optimization)
 
-    scale_samples(sample, problem['bounds'])
-    return sample
+    scale_samples(sample_morris, problem['bounds'])
+    return sample_morris
 
 
 def _sample_morris(problem: dict, number_trajectories: int,
