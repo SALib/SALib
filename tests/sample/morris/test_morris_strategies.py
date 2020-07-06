@@ -1,16 +1,17 @@
 """
 """
-from SALib.sample.morris import _sample_groups, SampleMorris
-from SALib.sample.morris.local import LocalOptimisation
-from SALib.sample.morris.brute import BruteForce
+from SALib.sample.morris import SampleMorris, LocalOptimisation, BruteForce
+from SALib.sample.morris.morris import _sample_morris
 
 from SALib.util import read_param_file
 
 import numpy as np
-import pytest
 from numpy.testing import assert_equal, assert_allclose
-from pytest import fixture, raises
 import numpy.random as rd
+
+import pytest
+from pytest import fixture, raises
+
 
 
 @fixture(scope='function')
@@ -206,10 +207,10 @@ class TestLocallyOptimalStrategy:
         num_levels = 4
 
         np.random.seed(12345)
-        expected = _sample_groups(problem, N, num_levels)
+        expected = _sample_morris(problem, N, num_levels)
 
         np.random.seed(12345)
-        actual = _sample_groups(problem, N, num_levels)
+        actual = _sample_morris(problem, N, num_levels)
 
         assert_equal(actual, expected)
 
@@ -238,7 +239,7 @@ class TestLocallyOptimalStrategy:
 
         num_groups = len(set(problem['groups']))
 
-        input_sample = _sample_groups(problem, N, num_levels)
+        input_sample = _sample_morris(problem, N, num_levels)
 
         local = LocalOptimisation()
 
