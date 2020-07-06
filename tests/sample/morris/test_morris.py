@@ -8,15 +8,15 @@ import numpy as np
 import warnings
 
 from SALib.sample.morris.morris import (sample,
-                                        check_group_membership,
-                                        check_if_num_levels_is_even,
-                                        define_problem_with_groups,
+                                        _check_group_membership,
+                                        _check_if_num_levels_is_even,
+                                        _define_problem_with_groups,
                                         _compute_optimised_trajectories,
-                                        generate_p_star,
-                                        compute_b_star,
-                                        compute_delta,
-                                        generate_trajectory,
-                                        generate_x_star)
+                                        _generate_p_star,
+                                        _compute_b_star,
+                                        _compute_delta,
+                                        _generate_trajectory,
+                                        _generate_x_star)
 
 from SALib.util import read_param_file, compute_groups_matrix
 
@@ -127,7 +127,7 @@ def test_find_optimum_trajectories(setup_input, expected_sample):
     problem = {'num_vars': 2, 'names': ['x1', 'x2'], 'groups': None}
     k_choices = 4
 
-    problem = define_problem_with_groups(problem)
+    problem = _define_problem_with_groups(problem)
 
     output = _compute_optimised_trajectories(
         problem, setup_input, N, k_choices)
@@ -168,7 +168,7 @@ class TestGroupSampleGeneration:
         no two columns have 1s in the same position
         '''
         for i in range(1, 100):
-            output = generate_p_star(i)
+            output = _generate_p_star(i)
             if np.any(np.sum(output, 0) != np.ones(i)):
                 raise AssertionError("Not legal P along axis 0")
             elif np.any(np.sum(output, 1) != np.ones(i)):
@@ -176,7 +176,7 @@ class TestGroupSampleGeneration:
 
     def test_compute_delta(self):
         fixture = np.arange(2, 10)
-        output = [compute_delta(f) for f in fixture]
+        output = [_compute_delta(f) for f in fixture]
         desired = np.array([1.0, 0.75, 0.666667, 0.625,
                             0.6, 0.583333, 0.571429, 0.5625])
         assert_allclose(output, desired, rtol=1e-2)
@@ -186,7 +186,7 @@ class TestGroupSampleGeneration:
         G = np.array([[1, 0], [0, 1], [0, 1]])
         # Four levels
         num_levels = 4
-        output = generate_trajectory(G, num_levels)
+        output = _generate_trajectory(G, num_levels)
         if np.any((output > 1) | (output < 0)):
             raise AssertionError("Bound not working: %s", output)
         assert_equal(output.shape[0], 3)
@@ -212,7 +212,7 @@ class TestGroupSampleGeneration:
 
         desired = np.array([[1. / 3, 1, 0], [1, 1, 0], [1, 1. / 3, 2. / 3]])
 
-        output = compute_b_star(J, x_star, delta, B, G, P_star, D_star)
+        output = _compute_b_star(J, x_star, delta, B, G, P_star, D_star)
         assert_allclose(output, desired)
 
     def test_generate_x_star(self):
@@ -222,7 +222,7 @@ class TestGroupSampleGeneration:
         num_levels = 4
 
         np.random.seed(10)
-        actual = generate_x_star(num_params, num_levels)
+        actual = _generate_x_star(num_params, num_levels)
         print(actual)
         expected = np.array([[0.333333, 0.333333, 0., 0.333333]])
         assert_allclose(actual, expected, rtol=1e-05)
@@ -239,7 +239,7 @@ class TestGroupSampleGeneration:
 
         expected = problem
 
-        result = define_problem_with_groups(problem)
+        result = _define_problem_with_groups(problem)
 
         assert expected == result
 
@@ -257,7 +257,7 @@ class TestGroupSampleGeneration:
             'names': ['x1', 'x2', 'x3', 'x4', 'x5', 'x6', 'x7', 'x8'],
             'groups': ['x1', 'x2', 'x3', 'x4', 'x5', 'x6', 'x7', 'x8']}
 
-        result = define_problem_with_groups(problem)
+        result = _define_problem_with_groups(problem)
 
         assert expected == result
 
@@ -273,14 +273,14 @@ class TestGroupSampleGeneration:
             'groups': ['G1', 'G1', 'G1', 'G2', 'G2', 'G2']}
 
         with raises(ValueError):
-            define_problem_with_groups(problem)
+            _define_problem_with_groups(problem)
 
     def test_check_if_num_levels_is_even_check_odd(self):
         """
         Checks if a warn is raised when the number of tests is odd
         """
         with warns(None) as record:
-            check_if_num_levels_is_even(5)
+            _check_if_num_levels_is_even(5)
 
         assert record
 
@@ -289,7 +289,7 @@ class TestGroupSampleGeneration:
         Checks if a warn is not raised when the number of tests is even.
         """
         with warns(None) as record:
-            check_if_num_levels_is_even(4)
+            _check_if_num_levels_is_even(4)
 
         assert not record
 
@@ -303,10 +303,10 @@ class TestGroupSampleGeneration:
         group_membership = np.empty((3, 3), dtype=np.int)
 
         with raises(ValueError):
-            check_group_membership(group_membership)
+            _check_group_membership(group_membership)
 
         with raises(TypeError):
-            check_group_membership(group_membership)
+            _check_group_membership(group_membership)
 
     def test_check_group_membership_error(self):
         """
@@ -316,9 +316,9 @@ class TestGroupSampleGeneration:
         group_membership = 1.0
 
         with raises(TypeError):
-            check_group_membership(group_membership)
+            _check_group_membership(group_membership)
 
         group_membership = None
 
         with raises(ValueError):
-            check_group_membership(group_membership)
+            _check_group_membership(group_membership)

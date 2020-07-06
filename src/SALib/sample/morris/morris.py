@@ -93,9 +93,9 @@ def sample(problem: dict, N: int, num_levels: int = 4,
     if seed:
         np.random.seed(seed)
 
-    check_if_num_levels_is_even(num_levels)
+    _check_if_num_levels_is_even(num_levels)
 
-    problem = define_problem_with_groups(problem)
+    problem = _define_problem_with_groups(problem)
 
     sample_morris = _sample_morris(problem, N, num_levels)
 
@@ -132,7 +132,7 @@ def _sample_morris(problem: dict, number_trajectories: int,
     """
 
     group_membership, _ = compute_groups_matrix(problem['groups'])
-    check_group_membership(group_membership)
+    _check_group_membership(group_membership)
 
     num_params = group_membership.shape[0]
     num_groups = group_membership.shape[1]
@@ -140,7 +140,7 @@ def _sample_morris(problem: dict, number_trajectories: int,
     i = 0
     sample_morris = []
     while i < number_trajectories:
-        sample_morris.append(generate_trajectory(group_membership, num_levels))
+        sample_morris.append(_generate_trajectory(group_membership, num_levels))
         i += 1
     sample_morris = np.array(sample_morris)
 
@@ -148,8 +148,8 @@ def _sample_morris(problem: dict, number_trajectories: int,
                                   num_params))
 
 
-def generate_trajectory(group_membership: np.ndarray,
-                        num_levels: int = 4) -> np.ndarray:
+def _generate_trajectory(group_membership: np.ndarray,
+                         num_levels: int = 4) -> np.ndarray:
     """Return a single trajectory
 
     Return a single trajectory of size :math:`(g+1)`-by-:math:`k`
@@ -169,7 +169,7 @@ def generate_trajectory(group_membership: np.ndarray,
     np.ndarray
     """
 
-    delta = compute_delta(num_levels)
+    delta = _compute_delta(num_levels)
 
     # Infer number of groups `g` and number of params `k` from
     # `group_membership` matrix
@@ -180,7 +180,7 @@ def generate_trajectory(group_membership: np.ndarray,
     B = np.tril(np.ones([num_groups + 1, num_groups],
                         dtype=int), -1)
 
-    P_star = generate_p_star(num_groups)
+    P_star = _generate_p_star(num_groups)
 
     # Matrix J - a (g+1)-by-num_params matrix of ones
     J = np.ones((num_groups + 1, num_params))
@@ -189,18 +189,18 @@ def generate_trajectory(group_membership: np.ndarray,
     # factors move up or down
     D_star = np.diag(rd.choice([-1, 1], num_params))
 
-    x_star = generate_x_star(num_params, num_levels)
+    x_star = _generate_x_star(num_params, num_levels)
 
     # Matrix B* - size (num_groups + 1) * num_params
-    B_star = compute_b_star(J, x_star, delta, B,
-                            group_membership, P_star, D_star)
+    B_star = _compute_b_star(J, x_star, delta, B,
+                             group_membership, P_star, D_star)
 
     return B_star
 
 
-def compute_b_star(J: np.ndarray, x_star: np.ndarray, delta: float,
-                   B: np.ndarray, G: np.ndarray, P_star: np.ndarray,
-                   D_star: np.ndarray) -> np.ndarray:
+def _compute_b_star(J: np.ndarray, x_star: np.ndarray, delta: float,
+                    B: np.ndarray, G: np.ndarray, P_star: np.ndarray,
+                    D_star: np.ndarray) -> np.ndarray:
     """
     Compute the random sampling matrix B*.
 
@@ -228,7 +228,7 @@ def compute_b_star(J: np.ndarray, x_star: np.ndarray, delta: float,
     return b_star
 
 
-def generate_p_star(num_groups: int) -> np.ndarray:
+def _generate_p_star(num_groups: int) -> np.ndarray:
     """Describe the order in which groups move
 
     Parameters
@@ -245,7 +245,7 @@ def generate_p_star(num_groups: int) -> np.ndarray:
     return p_star
 
 
-def generate_x_star(num_params: int, num_levels: int) -> np.ndarray:
+def _generate_x_star(num_params: int, num_levels: int) -> np.ndarray:
     """Generate an 1-by-num_params array to represent initial position for EE
 
     This should be a randomly generated array in the p level grid
@@ -264,7 +264,7 @@ def generate_x_star(num_params: int, num_levels: int) -> np.ndarray:
         The initial starting positions of the trajectory
     """
     x_star = np.zeros((1, num_params))
-    delta = compute_delta(num_levels)
+    delta = _compute_delta(num_levels)
     bound = 1 - delta
     grid = np.linspace(0, bound, int(num_levels / 2))
 
@@ -273,7 +273,7 @@ def generate_x_star(num_params: int, num_levels: int) -> np.ndarray:
     return x_star
 
 
-def compute_delta(num_levels: int) -> float:
+def _compute_delta(num_levels: int) -> float:
     """Computes the delta value from number of levels
 
     Parameters
@@ -330,7 +330,7 @@ def _compute_optimised_trajectories(problem: dict, input_sample: int, N: int,
     return output
 
 
-def define_problem_with_groups(problem: dict) -> dict:
+def _define_problem_with_groups(problem: dict) -> dict:
     """
     Checks if the user defined the 'groups' key in the problem dictionary.
     If not, makes the 'groups' key equal to the variables names. In other
@@ -357,7 +357,7 @@ def define_problem_with_groups(problem: dict) -> dict:
     return problem
 
 
-def check_if_num_levels_is_even(num_levels: int):
+def _check_if_num_levels_is_even(num_levels: int):
     """
     Checks if the number of levels is even. If not, raises a warn.
 
@@ -371,7 +371,7 @@ def check_if_num_levels_is_even(num_levels: int):
                       "sample may be biased")
 
 
-def check_group_membership(group_membership):
+def _check_group_membership(group_membership):
     """
     Checks if the group_membership matrix was correctly defined
 
