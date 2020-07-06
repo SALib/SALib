@@ -28,6 +28,7 @@ it is possible to go higher than the previously suggested 4 from 100.
 from __future__ import division
 
 import numpy as np
+from typing import Dict
 
 import numpy.random as rd
 import warnings
@@ -43,7 +44,7 @@ from SALib.util import scale_samples, read_param_file, compute_groups_matrix
 __all__ = ['sample']
 
 
-def sample(problem: dict, N: int, num_levels: int = 4,
+def sample(problem: Dict, N: int, num_levels: int = 4,
            optimal_trajectories: int = None, local_optimization: bool = True,
            seed: int = None) -> np.ndarray:
     """Generate model inputs using the Method of Morris
@@ -101,7 +102,7 @@ def sample(problem: dict, N: int, num_levels: int = 4,
     return sample_morris
 
 
-def _sample_morris(problem: dict, number_trajectories: int,
+def _sample_morris(problem: Dict, number_trajectories: int,
                    num_levels: int = 4) -> np.ndarray:
     """Generate trajectories for groups
 
@@ -280,7 +281,7 @@ def _compute_delta(num_levels: int) -> float:
     return num_levels / (2.0 * (num_levels - 1))
 
 
-def _compute_optimised_trajectories(problem: dict, input_sample: int, N: int,
+def _compute_optimised_trajectories(problem: Dict, input_sample: int, N: int,
                                     k_choices: int,
                                     local_optimization: bool = False) -> np.ndarray:
     """
@@ -320,7 +321,7 @@ def _compute_optimised_trajectories(problem: dict, input_sample: int, N: int,
     return output
 
 
-def _define_problem_with_groups(problem: dict) -> dict:
+def _define_problem_with_groups(problem: Dict) -> Dict:
     """
     Checks if the user defined the 'groups' key in the problem dictionary.
     If not, makes the 'groups' key equal to the variables names. In other
