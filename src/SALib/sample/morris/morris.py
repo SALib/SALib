@@ -32,11 +32,11 @@ import numpy as np
 import numpy.random as rd
 import warnings
 
-from . gurobi import GlobalOptimisation
-from . local import LocalOptimisation
-from . brute import BruteForce
+from .gurobi import GlobalOptimisation
+from .local import LocalOptimisation
+from .brute import BruteForce
 
-from . strategy import SampleMorris
+from .strategy import SampleMorris
 
 from SALib.sample import common_args
 from SALib.util import scale_samples, read_param_file, compute_groups_matrix
@@ -137,10 +137,15 @@ def _sample_morris(problem: dict, number_trajectories: int,
     num_params = group_membership.shape[0]
     num_groups = group_membership.shape[1]
 
-    sample = np.array([generate_trajectory(group_membership,
-                                           num_levels)
-                       for n in range(number_trajectories)])
-    return sample.reshape((number_trajectories * (num_groups + 1), num_params))
+    i = 0
+    sample_morris = []
+    while i < number_trajectories:
+        sample_morris.append(generate_trajectory(group_membership, num_levels))
+        i += 1
+    sample_morris = np.array(sample_morris)
+
+    return sample_morris.reshape((number_trajectories * (num_groups + 1),
+                                  num_params))
 
 
 def generate_trajectory(group_membership: np.ndarray,
