@@ -362,7 +362,7 @@ def _check_if_num_levels_is_even(num_levels: int):
                       "sample may be biased")
 
 
-def _check_group_membership(group_membership):
+def _check_group_membership(group_membership: np.ndarray):
     """
     Checks if the group_membership matrix was correctly defined
 
