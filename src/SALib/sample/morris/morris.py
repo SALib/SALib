@@ -291,7 +291,7 @@ def compute_delta(num_levels: int) -> float:
 def _compute_optimised_trajectories(problem: dict, input_sample: int, N: int,
                                     k_choices: int,
                                     local_optimization: bool = False) -> np.ndarray:
-    '''
+    """
     Calls the procedure to compute the optimum k_choices of trajectories
     from the input_sample.
     If there are groups, then this procedure allocates the groups to the
@@ -308,7 +308,7 @@ def _compute_optimised_trajectories(problem: dict, input_sample: int, N: int,
         The number of optimal trajectories
     local_optimization : bool, default=False
         If true, uses local optimisation heuristic
-    '''
+    """
     if _has_gurobi is False \
             and local_optimization is False \
             and k_choices > 10:
@@ -331,14 +331,10 @@ def _compute_optimised_trajectories(problem: dict, input_sample: int, N: int,
         # Use brute force approach
         strategy = BruteForce()
 
-    if problem.get('groups'):
-        num_groups = len(set(problem['groups']))
-    else:
-        num_groups = None
+    num_groups = len(set(problem['groups']))
 
     context = SampleMorris(strategy)
-    output = context.sample(input_sample, N, num_params,
-                            k_choices, num_groups)
+    output = context.sample(input_sample, N, num_params, k_choices, num_groups)
 
     return output
 

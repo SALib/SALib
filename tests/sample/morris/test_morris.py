@@ -124,8 +124,10 @@ def test_optimal_trajectories_gte_one(setup_param_file):
 
 def test_find_optimum_trajectories(setup_input, expected_sample):
     N = 6
-    problem = {'num_vars': 2, 'groups': None}
+    problem = {'num_vars': 2, 'names': ['x1', 'x2'], 'groups': None}
     k_choices = 4
+
+    problem = define_problem_with_groups(problem)
 
     output = _compute_optimised_trajectories(
         problem, setup_input, N, k_choices)
