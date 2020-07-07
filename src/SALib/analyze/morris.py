@@ -94,23 +94,22 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
     # being called from Python
     Si = ResultDict((k, [None] * num_vars)
                     for k in ['names', 'mu', 'mu_star', 'sigma', 'mu_star_conf'])
-    Si['mu'] = np.average(ee, 1)
-    Si['mu_star'] = np.average(np.abs(ee), 1)
-    Si['sigma'] = np.std(ee, axis=1, ddof=1)
-    Si['names'] = problem['names']
+    mu = np.average(ee, 1)
+    mu_star = np.average(np.abs(ee), 1)
+    sigma = np.std(ee, axis=1, ddof=1)
 
     for j in range(num_vars):
         Si['mu_star_conf'][j] = compute_mu_star_confidence(
             ee[j, :], num_trajectories, num_resamples, conf_level)
 
     Si_grouped = ResultDict((k, [None] * num_vars)
-                            for k in ['mu_star', 'mu_star_conf'])
-    Si_grouped['mu_star'] = compute_grouped_metric(Si['mu_star'], groups)
+                    for k in ['names', 'mu', 'mu_star', 'sigma', 'mu_star_conf'])
+    Si_grouped['mu_star'] = compute_grouped_metric(mu_star, groups)
     Si_grouped['mu_star_conf'] = compute_grouped_metric(Si['mu_star_conf'],
                                                         groups)
     Si_grouped['names'] = unique_group_names
-    Si_grouped['sigma'] = compute_grouped_sigma(Si['sigma'], groups)
-    Si_grouped['mu'] = compute_grouped_sigma(Si['mu'], groups)
+    Si_grouped['sigma'] = compute_grouped_sigma(sigma, groups)
+    Si_grouped['mu'] = compute_grouped_sigma(mu, groups)
 
     if print_to_console:
         _print_to_console(Si, number_of_groups)
