@@ -77,14 +77,8 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
 
     _define_problem_with_groups(problem)
 
-    msg = "dtype of {} array must be 'float', float32 or float64"
-    if X.dtype not in ['float', 'float32', 'float64']:
-        raise ValueError(msg.format('X'))
-    if Y.dtype not in ['float', 'float32', 'float64']:
-        raise ValueError(msg.format('Y'))
+    _check_if_array_of_floats(X, Y)
 
-    # Assume that there are no groups
-    groups = None
     delta = _compute_delta(num_levels)
 
     num_vars = problem['num_vars']
@@ -109,9 +103,6 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
         Si['mu_star_conf'][j] = compute_mu_star_confidence(
             ee[j, :], num_trajectories, num_resamples, conf_level)
 
-    # if there are groups, then the elementary effects returned need to be
-    # computed over the groups of variables,
-    # rather than the individual variables
     Si_grouped = ResultDict((k, [None] * num_vars)
                             for k in ['mu_star', 'mu_star_conf'])
     Si_grouped['mu_star'] = compute_grouped_metric(Si['mu_star'], groups)
@@ -253,6 +244,25 @@ def compute_mu_star_confidence(ee, num_trajectories, num_resamples,
     mu_star_resampled = np.average(np.abs(ee_resampled), axis=1)
 
     return norm.ppf(0.5 + conf_level / 2) * mu_star_resampled.std(ddof=1)
+
+
+def _check_if_array_of_floats(X: np.ndarray, Y: np.ndarray):
+    """
+    Checks if the input and output arrays are made of floats. If not, raises
+    an error.
+
+    Parameters
+    ----------
+    X : numpy.matrix
+        The NumPy matrix containing the model inputs of dtype=float
+    Y : numpy.array
+        The NumPy array containing the model outputs of dtype=float
+    """
+    msg = "dtype of {} array must be 'float', float32 or float64"
+    if X.dtype not in ['float', 'float32', 'float64']:
+        raise ValueError(msg.format('X'))
+    if Y.dtype not in ['float', 'float32', 'float64']:
+        raise ValueError(msg.format('Y'))
 
 
 def cli_parse(parser):
