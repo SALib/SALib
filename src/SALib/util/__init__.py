@@ -6,6 +6,7 @@ import csv
 from warnings import warn
 from .results import ResultDict
 import pkgutil
+from typing import Dict
 
 import numpy as np  # type: ignore
 import scipy as sp  # type: ignore
@@ -306,3 +307,30 @@ def requires_gurobipy(_has_gurobi):
             return result
         return _wrapper
     return _outer_wrapper
+
+
+def _define_problem_with_groups(problem: Dict) -> Dict:
+    """
+    Checks if the user defined the 'groups' key in the problem dictionary.
+    If not, makes the 'groups' key equal to the variables names. In other
+    words, the number of groups will be equal to the number of variables, which
+    is equivalent to no groups.
+
+    Parameters
+    ----------
+    problem : dict
+        The problem definition
+
+    Returns
+    -------
+    problem : dict
+        The problem definition with the 'groups' key, even if the user doesn't
+        define it
+    """
+    # Checks if there isn't a key 'groups' or if it exists and is set to 'None'
+    if 'groups' not in problem or not problem['groups']:
+        problem['groups'] = problem['names']
+    elif len(problem['groups']) != problem['num_vars']:
+        raise ValueError("Number of entries in \'groups\' should be the same "
+                         "as in \'names\'")
+    return problem

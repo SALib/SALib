@@ -10,7 +10,6 @@ import warnings
 from SALib.sample.morris.morris import (sample,
                                         _check_group_membership,
                                         _check_if_num_levels_is_even,
-                                        _define_problem_with_groups,
                                         _compute_optimised_trajectories,
                                         _generate_p_star,
                                         _compute_b_star,
@@ -18,7 +17,8 @@ from SALib.sample.morris.morris import (sample,
                                         _generate_trajectory,
                                         _generate_x_star)
 
-from SALib.util import read_param_file, compute_groups_matrix
+from SALib.util import (read_param_file, compute_groups_matrix,
+                        _define_problem_with_groups)
 
 
 @fixture(scope='function')
