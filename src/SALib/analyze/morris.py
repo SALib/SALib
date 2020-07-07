@@ -8,8 +8,7 @@ import numpy as np
 
 from . import common_args
 from ..util import (read_param_file, compute_groups_matrix, ResultDict,
-                    _define_problem_with_groups)
-from ..sample.morris import _compute_delta
+                    _define_problem_with_groups, _compute_delta)
 
 
 def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,

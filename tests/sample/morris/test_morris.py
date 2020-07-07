@@ -13,12 +13,11 @@ from SALib.sample.morris.morris import (sample,
                                         _compute_optimised_trajectories,
                                         _generate_p_star,
                                         _compute_b_star,
-                                        _compute_delta,
                                         _generate_trajectory,
                                         _generate_x_star)
 
 from SALib.util import (read_param_file, compute_groups_matrix,
-                        _define_problem_with_groups)
+                        _define_problem_with_groups, _compute_delta)
 
 
 @fixture(scope='function')

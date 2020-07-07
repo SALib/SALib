@@ -334,3 +334,18 @@ def _define_problem_with_groups(problem: Dict) -> Dict:
         raise ValueError("Number of entries in \'groups\' should be the same "
                          "as in \'names\'")
     return problem
+
+
+def _compute_delta(num_levels: int) -> float:
+    """Computes the delta value from number of levels
+
+    Parameters
+    ---------
+    num_levels : int
+        The number of levels
+
+    Returns
+    -------
+    float
+    """
+    return num_levels / (2.0 * (num_levels - 1))
