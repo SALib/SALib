@@ -7,7 +7,8 @@ from typing import Dict
 import numpy as np
 
 from . import common_args
-from ..util import read_param_file, compute_groups_matrix, ResultDict
+from ..util import (read_param_file, compute_groups_matrix, ResultDict,
+                    _define_problem_with_groups)
 from ..sample.morris import _compute_delta
 
 
@@ -74,6 +75,8 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
     if seed:
         np.random.seed(seed)
 
+    _define_problem_with_groups(problem)
+
     msg = "dtype of {} array must be 'float', float32 or float64"
     if X.dtype not in ['float', 'float32', 'float64']:
         raise ValueError(msg.format('X'))
@@ -86,17 +89,10 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
 
     num_vars = problem['num_vars']
 
-    if (problem.get('groups') is None) & (Y.size % (num_vars + 1) == 0):
-        num_trajectories = int(Y.size / (num_vars + 1))
-    elif problem.get('groups') is not None:
-        groups, unique_group_names = compute_groups_matrix(
-            problem['groups'])
-        number_of_groups = len(unique_group_names)
-        num_trajectories = int(Y.size / (number_of_groups + 1))
-    else:
-        raise ValueError("Number of samples in model output file must be"
-                         "a multiple of (D+1), where D is the number of"
-                         "parameters (or groups) in your parameter file.")
+    groups, unique_group_names = compute_groups_matrix(problem['groups'])
+    number_of_groups = len(unique_group_names)
+    num_trajectories = int(Y.size / (number_of_groups + 1))
+
     ee = compute_elementary_effects(
         X, Y, int(Y.size / num_trajectories), delta)
 
@@ -113,25 +109,7 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
         Si['mu_star_conf'][j] = compute_mu_star_confidence(
             ee[j, :], num_trajectories, num_resamples, conf_level)
 
-    if groups is None:
-        if print_to_console:
-            print("{0:<30} {1:>10} {2:>10} {3:>15} {4:>10}".format(
-                "Parameter",
-                "Mu_Star",
-                "Mu",
-                "Mu_Star_Conf",
-                "Sigma")
-            )
-            for j in list(range(num_vars)):
-                print("{0:30} {1:10.3f} {2:10.3f} {3:15.3f} {4:10.3f}".format(
-                    Si['names'][j],
-                    Si['mu_star'][j],
-                    Si['mu'][j],
-                    Si['mu_star_conf'][j],
-                    Si['sigma'][j])
-                )
-        return Si
-    elif groups is not None:
+    if groups is not None:
         # if there are groups, then the elementary effects returned need to be
         # computed over the groups of variables,
         # rather than the individual variables
