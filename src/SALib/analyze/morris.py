@@ -74,7 +74,7 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
     if seed:
         np.random.seed(seed)
 
-    msg = ("dtype of {} array must be 'float', float32 or float64")
+    msg = "dtype of {} array must be 'float', float32 or float64"
     if X.dtype not in ['float', 'float32', 'float64']:
         raise ValueError(msg.format('X'))
     if Y.dtype not in ['float', 'float32', 'float64']:
@@ -97,7 +97,6 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
         raise ValueError("Number of samples in model output file must be"
                          "a multiple of (D+1), where D is the number of"
                          "parameters (or groups) in your parameter file.")
-    ee = np.zeros((num_vars, num_trajectories))
     ee = compute_elementary_effects(
         X, Y, int(Y.size / num_trajectories), delta)
 
@@ -245,8 +244,6 @@ def compute_elementary_effects(model_inputs, model_outputs, trajectory_size,
     num_vars = model_inputs.shape[1]
     num_rows = model_inputs.shape[0]
     num_trajectories = int(num_rows / trajectory_size)
-
-    ee = np.zeros((num_trajectories, num_vars), dtype=np.float)
 
     ip_vec = model_inputs.reshape(num_trajectories, trajectory_size, num_vars)
     ip_cha = np.subtract(ip_vec[:, 1:, :], ip_vec[:, 0:-1, :])
