@@ -130,11 +130,8 @@ def _sample_morris(problem: Dict, number_trajectories: int,
     num_params = group_membership.shape[0]
     num_groups = group_membership.shape[1]
 
-    i = 0
-    sample_morris = []
-    while i < number_trajectories:
-        sample_morris.append(_generate_trajectory(group_membership, num_levels))
-        i += 1
+    sample_morris = [_generate_trajectory(group_membership, num_levels)
+                     for _ in range(number_trajectories)]
     sample_morris = np.array(sample_morris)
 
     return sample_morris.reshape((number_trajectories * (num_groups + 1),
