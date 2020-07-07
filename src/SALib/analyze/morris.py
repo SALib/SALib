@@ -2,6 +2,7 @@ from __future__ import division
 from __future__ import print_function
 
 from scipy.stats import norm
+from typing import Dict
 
 import numpy as np
 
@@ -10,12 +11,10 @@ from ..util import read_param_file, compute_groups_matrix, ResultDict
 from ..sample.morris import _compute_delta
 
 
-def analyze(problem, X, Y,
-            num_resamples=100,
-            conf_level=0.95,
-            print_to_console=False,
-            num_levels=4,
-            seed=None):
+def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
+            num_resamples: int = 100, conf_level: float = 0.95,
+            print_to_console: bool = False, num_levels: int = 4,
+            seed=None) -> np.ndarray:
     """Perform Morris Analysis on model outputs.
 
     Returns a dictionary with keys 'mu', 'mu_star', 'sigma', and
@@ -40,6 +39,8 @@ def analyze(problem, X, Y,
     num_levels : int
         The number of grid levels, must be identical to the value
         passed to SALib.sample.morris (default 4)
+    seed : int
+        Seed to generate a random number
 
     Returns
     -------
