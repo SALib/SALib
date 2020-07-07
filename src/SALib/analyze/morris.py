@@ -7,7 +7,7 @@ import numpy as np
 
 from . import common_args
 from ..util import read_param_file, compute_groups_matrix, ResultDict
-from ..sample.morris import compute_delta
+from ..sample.morris import _compute_delta
 
 
 def analyze(problem, X, Y,
@@ -81,7 +81,7 @@ def analyze(problem, X, Y,
 
     # Assume that there are no groups
     groups = None
-    delta = compute_delta(num_levels)
+    delta = _compute_delta(num_levels)
 
     num_vars = problem['num_vars']
 

@@ -28,30 +28,23 @@ it is possible to go higher than the previously suggested 4 from 100.
 from __future__ import division
 
 import numpy as np
+from typing import Dict
 
 import numpy.random as rd
 import warnings
 
-from . gurobi import GlobalOptimisation
-from . local import LocalOptimisation
-from . brute import BruteForce
+from .local import LocalOptimisation
+from .brute import BruteForce
 
-from . strategy import SampleMorris
+from .strategy import SampleMorris
 
 from SALib.sample import common_args
 from SALib.util import scale_samples, read_param_file, compute_groups_matrix
 
-try:
-    import gurobipy
-except ImportError:
-    _has_gurobi = False
-else:
-    _has_gurobi = True
-
 __all__ = ['sample']
 
 
-def sample(problem: dict, N: int, num_levels: int = 4,
+def sample(problem: Dict, N: int, num_levels: int = 4,
            optimal_trajectories: int = None, local_optimization: bool = True,
            seed: int = None) -> np.ndarray:
     """Generate model inputs using the Method of Morris
@@ -85,7 +78,7 @@ def sample(problem: dict, N: int, num_levels: int = 4,
 
     Returns
     -------
-    sample : numpy.ndarray
+    sample_morris : numpy.ndarray
         Returns a numpy.ndarray containing the model inputs required for Method
         of Morris. The resulting matrix has :math:`(G/D+1)*N/T` rows and
         :math:`D` columns, where :math:`D` is the number of parameters.
@@ -93,23 +86,23 @@ def sample(problem: dict, N: int, num_levels: int = 4,
     if seed:
         np.random.seed(seed)
 
-    check_if_num_levels_is_even(num_levels)
+    _check_if_num_levels_is_even(num_levels)
 
-    problem = define_problem_with_groups(problem)
+    problem = _define_problem_with_groups(problem)
 
-    sample = _sample_morris(problem, N, num_levels)
+    sample_morris = _sample_morris(problem, N, num_levels)
 
     if optimal_trajectories:
-        sample = _compute_optimised_trajectories(problem, sample,
-                                                 N,
-                                                 optimal_trajectories,
-                                                 local_optimization)
+        sample_morris = _compute_optimised_trajectories(problem, sample_morris,
+                                                        N,
+                                                        optimal_trajectories,
+                                                        local_optimization)
 
-    scale_samples(sample, problem['bounds'])
-    return sample
+    scale_samples(sample_morris, problem['bounds'])
+    return sample_morris
 
 
-def _sample_morris(problem: dict, number_trajectories: int,
+def _sample_morris(problem: Dict, number_trajectories: int,
                    num_levels: int = 4) -> np.ndarray:
     """Generate trajectories for groups
 
@@ -132,19 +125,21 @@ def _sample_morris(problem: dict, number_trajectories: int,
     """
 
     group_membership, _ = compute_groups_matrix(problem['groups'])
-    check_group_membership(group_membership)
+    _check_group_membership(group_membership)
 
     num_params = group_membership.shape[0]
     num_groups = group_membership.shape[1]
 
-    sample = np.array([generate_trajectory(group_membership,
-                                           num_levels)
-                       for n in range(number_trajectories)])
-    return sample.reshape((number_trajectories * (num_groups + 1), num_params))
+    sample_morris = [_generate_trajectory(group_membership, num_levels)
+                     for _ in range(number_trajectories)]
+    sample_morris = np.array(sample_morris)
+
+    return sample_morris.reshape((number_trajectories * (num_groups + 1),
+                                  num_params))
 
 
-def generate_trajectory(group_membership: np.ndarray,
-                        num_levels: int = 4) -> np.ndarray:
+def _generate_trajectory(group_membership: np.ndarray,
+                         num_levels: int = 4) -> np.ndarray:
     """Return a single trajectory
 
     Return a single trajectory of size :math:`(g+1)`-by-:math:`k`
@@ -164,7 +159,7 @@ def generate_trajectory(group_membership: np.ndarray,
     np.ndarray
     """
 
-    delta = compute_delta(num_levels)
+    delta = _compute_delta(num_levels)
 
     # Infer number of groups `g` and number of params `k` from
     # `group_membership` matrix
@@ -175,7 +170,7 @@ def generate_trajectory(group_membership: np.ndarray,
     B = np.tril(np.ones([num_groups + 1, num_groups],
                         dtype=int), -1)
 
-    P_star = generate_p_star(num_groups)
+    P_star = _generate_p_star(num_groups)
 
     # Matrix J - a (g+1)-by-num_params matrix of ones
     J = np.ones((num_groups + 1, num_params))
@@ -184,18 +179,18 @@ def generate_trajectory(group_membership: np.ndarray,
     # factors move up or down
     D_star = np.diag(rd.choice([-1, 1], num_params))
 
-    x_star = generate_x_star(num_params, num_levels)
+    x_star = _generate_x_star(num_params, num_levels)
 
     # Matrix B* - size (num_groups + 1) * num_params
-    B_star = compute_b_star(J, x_star, delta, B,
-                            group_membership, P_star, D_star)
+    B_star = _compute_b_star(J, x_star, delta, B,
+                             group_membership, P_star, D_star)
 
     return B_star
 
 
-def compute_b_star(J: np.ndarray, x_star: np.ndarray, delta: float,
-                   B: np.ndarray, G: np.ndarray, P_star: np.ndarray,
-                   D_star: np.ndarray) -> np.ndarray:
+def _compute_b_star(J: np.ndarray, x_star: np.ndarray, delta: float,
+                    B: np.ndarray, G: np.ndarray, P_star: np.ndarray,
+                    D_star: np.ndarray) -> np.ndarray:
     """
     Compute the random sampling matrix B*.
 
@@ -223,7 +218,7 @@ def compute_b_star(J: np.ndarray, x_star: np.ndarray, delta: float,
     return b_star
 
 
-def generate_p_star(num_groups: int) -> np.ndarray:
+def _generate_p_star(num_groups: int) -> np.ndarray:
     """Describe the order in which groups move
 
     Parameters
@@ -240,7 +235,7 @@ def generate_p_star(num_groups: int) -> np.ndarray:
     return p_star
 
 
-def generate_x_star(num_params: int, num_levels: int) -> np.ndarray:
+def _generate_x_star(num_params: int, num_levels: int) -> np.ndarray:
     """Generate an 1-by-num_params array to represent initial position for EE
 
     This should be a randomly generated array in the p level grid
@@ -259,7 +254,7 @@ def generate_x_star(num_params: int, num_levels: int) -> np.ndarray:
         The initial starting positions of the trajectory
     """
     x_star = np.zeros((1, num_params))
-    delta = compute_delta(num_levels)
+    delta = _compute_delta(num_levels)
     bound = 1 - delta
     grid = np.linspace(0, bound, int(num_levels / 2))
 
@@ -268,7 +263,7 @@ def generate_x_star(num_params: int, num_levels: int) -> np.ndarray:
     return x_star
 
 
-def compute_delta(num_levels: int) -> float:
+def _compute_delta(num_levels: int) -> float:
     """Computes the delta value from number of levels
 
     Parameters
@@ -283,10 +278,10 @@ def compute_delta(num_levels: int) -> float:
     return num_levels / (2.0 * (num_levels - 1))
 
 
-def _compute_optimised_trajectories(problem: dict, input_sample: int, N: int,
+def _compute_optimised_trajectories(problem: Dict, input_sample: int, N: int,
                                     k_choices: int,
                                     local_optimization: bool = False) -> np.ndarray:
-    '''
+    """
     Calls the procedure to compute the optimum k_choices of trajectories
     from the input_sample.
     If there are groups, then this procedure allocates the groups to the
@@ -303,42 +298,27 @@ def _compute_optimised_trajectories(problem: dict, input_sample: int, N: int,
         The number of optimal trajectories
     local_optimization : bool, default=False
         If true, uses local optimisation heuristic
-    '''
-    if _has_gurobi is False \
-            and local_optimization is False \
-            and k_choices > 10:
+    """
+    if local_optimization is False and k_choices > 10:
         msg = "Running optimal trajectories greater than values of 10 \
                 will take a long time."
         raise ValueError(msg)
 
-    num_params = problem['num_vars']
-
     if np.any((input_sample < 0) | (input_sample > 1)):
         raise ValueError("Input sample must be scaled between 0 and 1")
 
-    if _has_gurobi and local_optimization is False:
-        # Use global optimization method
-        strategy = GlobalOptimisation()
-    elif local_optimization:
-        # Use local method
-        strategy = LocalOptimisation()
-    else:
-        # Use brute force approach
-        strategy = BruteForce()
+    num_groups = len(set(problem['groups']))
+    num_params = problem['num_vars']
 
-    if problem.get('groups'):
-        num_groups = len(set(problem['groups']))
-    else:
-        num_groups = None
-
+    strategy = _choose_optimization_strategy(local_optimization)
     context = SampleMorris(strategy)
-    output = context.sample(input_sample, N, num_params,
-                            k_choices, num_groups)
+
+    output = context.sample(input_sample, N, num_params, k_choices, num_groups)
 
     return output
 
 
-def define_problem_with_groups(problem: dict) -> dict:
+def _define_problem_with_groups(problem: Dict) -> Dict:
     """
     Checks if the user defined the 'groups' key in the problem dictionary.
     If not, makes the 'groups' key equal to the variables names. In other
@@ -365,7 +345,7 @@ def define_problem_with_groups(problem: dict) -> dict:
     return problem
 
 
-def check_if_num_levels_is_even(num_levels: int):
+def _check_if_num_levels_is_even(num_levels: int):
     """
     Checks if the number of levels is even. If not, raises a warn.
 
@@ -379,7 +359,7 @@ def check_if_num_levels_is_even(num_levels: int):
                       "sample may be biased")
 
 
-def check_group_membership(group_membership):
+def _check_group_membership(group_membership: np.ndarray):
     """
     Checks if the group_membership matrix was correctly defined
 
@@ -393,6 +373,29 @@ def check_group_membership(group_membership):
     if not isinstance(group_membership, np.ndarray):
         raise TypeError("Argument 'group_membership' should be formatted \
                          as a numpy np.ndarray")
+
+
+def _choose_optimization_strategy(local_optimization: bool):
+    """
+    Choose the strategy to optimize the trajectories.
+
+    Parameters
+    ----------
+    local_optimization: boolean to indicate if a local optimization should be
+                        used.
+
+    Returns
+    -------
+
+    """
+    if local_optimization:
+        # Use local method
+        strategy = LocalOptimisation()
+    else:
+        # Use brute force approach
+        strategy = BruteForce()
+
+    return strategy
 
 
 def cli_parse(parser):
