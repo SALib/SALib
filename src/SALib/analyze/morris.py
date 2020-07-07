@@ -100,7 +100,7 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
 
     for j in range(num_vars):
         Si['mu_star_conf'][j] = compute_mu_star_confidence(
-            ee[j, :], num_trajectories, num_resamples, conf_level)
+            ee[j, :], num_resamples, conf_level)
 
     Si_grouped = ResultDict((k, [None] * num_vars)
                     for k in ['names', 'mu', 'mu_star', 'sigma', 'mu_star_conf'])
@@ -211,7 +211,7 @@ def compute_elementary_effects(model_inputs, model_outputs, trajectory_size,
     return ee
 
 
-def compute_mu_star_confidence(ee, num_trajectories, num_resamples,
+def compute_mu_star_confidence(ee, num_resamples,
                                conf_level):
     '''
     Uses bootstrapping where the elementary effects are resampled with
@@ -221,8 +221,7 @@ def compute_mu_star_confidence(ee, num_trajectories, num_resamples,
     if not 0 < conf_level < 1:
         raise ValueError("Confidence level must be between 0-1.")
 
-    resample_index = np.random.randint(
-        len(ee), size=(num_resamples, num_trajectories))
+    resample_index = np.random.randint(len(ee), size=(num_resamples, len(ee)))
     ee_resampled = ee[resample_index]
 
     # Compute average of the absolute values over each of the resamples
