@@ -122,7 +122,8 @@ def _compute_statistical_outputs(elementary_effects: np.ndarray, num_vars: int,
     return Si
 
 
-def _compute_grouped_sigma(ungrouped_sigma, group_matrix):
+def _compute_grouped_sigma(ungrouped_sigma: np.ndarray,
+                           group_matrix: np.ndarray):
     """
     Returns sigma for the groups of parameter values in the
     argument ungrouped_metric where the group consists of no more than
@@ -137,7 +138,8 @@ def _compute_grouped_sigma(ungrouped_sigma, group_matrix):
     return sigma
 
 
-def _compute_grouped_metric(ungrouped_metric, group_matrix):
+def _compute_grouped_metric(ungrouped_metric: np.ndarray,
+                            group_matrix: np.ndarray):
     """
     Computes the mean value for the groups of parameter values in the
     argument ungrouped_metric
@@ -152,7 +154,7 @@ def _compute_grouped_metric(ungrouped_metric, group_matrix):
     return mean_of_mu_star
 
 
-def _get_increased_values(op_vec, up, lo):
+def _get_increased_values(op_vec: np.ndarray, up: np.ndarray, lo: np.ndarray):
 
     up = np.pad(up, ((0, 0), (1, 0), (0, 0)), 'constant')
     lo = np.pad(lo, ((0, 0), (0, 1), (0, 0)), 'constant')
@@ -162,7 +164,7 @@ def _get_increased_values(op_vec, up, lo):
     return res.T
 
 
-def _get_decreased_values(op_vec, up, lo):
+def _get_decreased_values(op_vec: np.ndarray, up: np.ndarray, lo: np.ndarray):
 
     up = np.pad(up, ((0, 0), (0, 1), (0, 0)), 'constant')
     lo = np.pad(lo, ((0, 0), (1, 0), (0, 0)), 'constant')
@@ -172,8 +174,10 @@ def _get_decreased_values(op_vec, up, lo):
     return res.T
 
 
-def _compute_elementary_effects(model_inputs, model_outputs, trajectory_size,
-                                delta):
+def _compute_elementary_effects(model_inputs: np.ndarray,
+                                model_outputs: np.ndarray,
+                                trajectory_size: int,
+                                delta: float) -> np.ndarray:
     """
     Arguments
     ---------
