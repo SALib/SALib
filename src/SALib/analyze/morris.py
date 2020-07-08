@@ -90,26 +90,34 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
 
     ee = _compute_elementary_effects(X, Y, trajectory_size, delta)
 
-    Si = ResultDict((k, [None] * num_vars) for k in ['names', 'mu', 'mu_star',
-                                                     'sigma', 'mu_star_conf'])
-
-    mu = np.average(ee, 1)
-    mu_star = np.average(np.abs(ee), 1)
-    sigma = np.std(ee, axis=1, ddof=1)
-
-    for j in range(num_vars):
-        Si['mu_star_conf'][j] = _compute_mu_star_confidence(
-            ee[j, :], num_resamples, conf_level)
-
-    Si['mu_star'] = _compute_grouped_metric(mu_star, groups)
-    Si['mu_star_conf'] = _compute_grouped_metric(Si['mu_star_conf'],
-                                                         groups)
-    Si['names'] = unique_group_names
-    Si['sigma'] = _compute_grouped_sigma(sigma, groups)
-    Si['mu'] = _compute_grouped_sigma(mu, groups)
+    Si = _compute_statistical_outputs(ee, num_vars, num_resamples, conf_level,
+                                      groups, unique_group_names)
 
     if print_to_console:
         _print_to_console(Si, number_of_groups)
+
+    return Si
+
+
+def _compute_statistical_outputs(elementary_effects, num_vars, num_resamples,
+                                 conf_level, groups, unique_group_names):
+
+    Si = ResultDict((k, [None] * num_vars) for k in ['names', 'mu', 'mu_star',
+                                                     'sigma', 'mu_star_conf'])
+
+    mu = np.average(elementary_effects, 1)
+    mu_star = np.average(np.abs(elementary_effects), 1)
+    sigma = np.std(elementary_effects, axis=1, ddof=1)
+
+    for j in range(num_vars):
+        Si['mu_star_conf'][j] = _compute_mu_star_confidence(
+            elementary_effects[j, :], num_resamples, conf_level)
+
+    Si['mu_star'] = _compute_grouped_metric(mu_star, groups)
+    Si['mu_star_conf'] = _compute_grouped_metric(Si['mu_star_conf'], groups)
+    Si['names'] = unique_group_names
+    Si['sigma'] = _compute_grouped_sigma(sigma, groups)
+    Si['mu'] = _compute_grouped_sigma(mu, groups)
 
     return Si
 
