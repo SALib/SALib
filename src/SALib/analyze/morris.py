@@ -88,7 +88,7 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
     num_trajectories = int(Y.size / (number_of_groups + 1))
     trajectory_size = int(Y.size / num_trajectories)
 
-    ee = compute_elementary_effects(X, Y, trajectory_size, delta)
+    ee = _compute_elementary_effects(X, Y, trajectory_size, delta)
 
     Si = ResultDict((k, [None] * num_vars) for k in ['mu_star_conf'])
     mu = np.average(ee, 1)
@@ -96,18 +96,18 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
     sigma = np.std(ee, axis=1, ddof=1)
 
     for j in range(num_vars):
-        Si['mu_star_conf'][j] = compute_mu_star_confidence(
+        Si['mu_star_conf'][j] = _compute_mu_star_confidence(
             ee[j, :], num_resamples, conf_level)
 
     Si_grouped = ResultDict((k, [None] * num_vars)
                             for k in ['names', 'mu', 'mu_star',
                                       'sigma', 'mu_star_conf'])
-    Si_grouped['mu_star'] = compute_grouped_metric(mu_star, groups)
-    Si_grouped['mu_star_conf'] = compute_grouped_metric(Si['mu_star_conf'],
-                                                        groups)
+    Si_grouped['mu_star'] = _compute_grouped_metric(mu_star, groups)
+    Si_grouped['mu_star_conf'] = _compute_grouped_metric(Si['mu_star_conf'],
+                                                         groups)
     Si_grouped['names'] = unique_group_names
-    Si_grouped['sigma'] = compute_grouped_sigma(sigma, groups)
-    Si_grouped['mu'] = compute_grouped_sigma(mu, groups)
+    Si_grouped['sigma'] = _compute_grouped_sigma(sigma, groups)
+    Si_grouped['mu'] = _compute_grouped_sigma(mu, groups)
 
     if print_to_console:
         _print_to_console(Si, number_of_groups)
@@ -115,13 +115,13 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
     return Si_grouped
 
 
-def compute_grouped_sigma(ungrouped_sigma, group_matrix):
+def _compute_grouped_sigma(ungrouped_sigma, group_matrix):
     """
     Returns sigma for the groups of parameter values in the
     argument ungrouped_metric where the group consists of no more than
     one parameter
     """
-    sigma_agg = compute_grouped_metric(ungrouped_sigma, group_matrix)
+    sigma_agg = _compute_grouped_metric(ungrouped_sigma, group_matrix)
 
     sigma = np.zeros(group_matrix.shape[1], dtype=np.float)
     np.copyto(sigma, sigma_agg, where=group_matrix.sum(axis=0) == 1)
@@ -130,7 +130,7 @@ def compute_grouped_sigma(ungrouped_sigma, group_matrix):
     return sigma
 
 
-def compute_grouped_metric(ungrouped_metric, group_matrix):
+def _compute_grouped_metric(ungrouped_metric, group_matrix):
     """
     Computes the mean value for the groups of parameter values in the
     argument ungrouped_metric
@@ -145,7 +145,7 @@ def compute_grouped_metric(ungrouped_metric, group_matrix):
     return mean_of_mu_star
 
 
-def get_increased_values(op_vec, up, lo):
+def _get_increased_values(op_vec, up, lo):
 
     up = np.pad(up, ((0, 0), (1, 0), (0, 0)), 'constant')
     lo = np.pad(lo, ((0, 0), (0, 1), (0, 0)), 'constant')
@@ -155,7 +155,7 @@ def get_increased_values(op_vec, up, lo):
     return res.T
 
 
-def get_decreased_values(op_vec, up, lo):
+def _get_decreased_values(op_vec, up, lo):
 
     up = np.pad(up, ((0, 0), (0, 1), (0, 0)), 'constant')
     lo = np.pad(lo, ((0, 0), (1, 0), (0, 0)), 'constant')
@@ -165,8 +165,8 @@ def get_decreased_values(op_vec, up, lo):
     return res.T
 
 
-def compute_elementary_effects(model_inputs, model_outputs, trajectory_size,
-                               delta):
+def _compute_elementary_effects(model_inputs, model_outputs, trajectory_size,
+                                delta):
     """
     Arguments
     ---------
@@ -196,8 +196,8 @@ def compute_elementary_effects(model_inputs, model_outputs, trajectory_size,
 
     op_vec = model_outputs.reshape(num_trajectories, trajectory_size)
 
-    result_up = get_increased_values(op_vec, up, lo)
-    result_lo = get_decreased_values(op_vec, up, lo)
+    result_up = _get_increased_values(op_vec, up, lo)
+    result_lo = _get_decreased_values(op_vec, up, lo)
 
     ee = np.subtract(result_up, result_lo)
     np.divide(ee, delta, out=ee)
@@ -205,8 +205,8 @@ def compute_elementary_effects(model_inputs, model_outputs, trajectory_size,
     return ee
 
 
-def compute_mu_star_confidence(ee, num_resamples,
-                               conf_level):
+def _compute_mu_star_confidence(ee, num_resamples,
+                                conf_level):
     """
     Uses bootstrapping where the elementary effects are resampled with
     replacement to produce a histogram of resampled mu_star metrics.

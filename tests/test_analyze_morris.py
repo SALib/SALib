@@ -6,12 +6,12 @@ import numpy as np
 from numpy.testing import assert_allclose, assert_equal
 
 from SALib.analyze.morris import (analyze,
-                                  compute_mu_star_confidence,
-                                  compute_elementary_effects,
-                                  get_increased_values,
-                                  get_decreased_values,
-                                  compute_grouped_metric,
-                                  compute_grouped_sigma)
+                                  _compute_mu_star_confidence,
+                                  _compute_elementary_effects,
+                                  _get_increased_values,
+                                  _get_decreased_values,
+                                  _compute_grouped_metric,
+                                  _compute_grouped_sigma)
 
 
 def test_compute_mu_star_confidence():
@@ -23,7 +23,7 @@ def test_compute_mu_star_confidence():
     num_resamples = 1000
     conf_level = 0.95
 
-    actual = compute_mu_star_confidence(
+    actual = _compute_mu_star_confidence(
         ee, num_resamples, conf_level)
     expected = 0.5
     assert_allclose(actual, expected, atol=1e-01)
@@ -79,10 +79,10 @@ def test_conf_level_within_zero_one_bounds():
     num_resamples = 2
     conf_level_too_low = -1
     with raises(ValueError):
-        compute_mu_star_confidence(ee, num_resamples, conf_level_too_low)
+        _compute_mu_star_confidence(ee, num_resamples, conf_level_too_low)
     conf_level_too_high = 2
     with raises(ValueError):
-        compute_mu_star_confidence(ee, num_resamples, conf_level_too_high)
+        _compute_mu_star_confidence(ee, num_resamples, conf_level_too_high)
 
 
 def test_compute_elementary_effects():
@@ -142,7 +142,7 @@ def test_compute_elementary_effects():
                              dtype=np.float)
     delta = 2. / 3
 
-    actual = compute_elementary_effects(model_inputs, model_outputs, 16, delta)
+    actual = _compute_elementary_effects(model_inputs, model_outputs, 16, delta)
     desired = np.array([[-5.67], [7.18], [1.89], [8.42],
                         [2.93], [3.28], [-3.62], [-7.55],
                         [-2.51], [5.00], [9.34], [0.54],
@@ -173,9 +173,9 @@ def test_compute_grouped_elementary_effects():
                 ['gp1', 'gp2']),
                'num_vars': 15
                }
-    ee = compute_elementary_effects(model_inputs, model_results, 3, 2. / 3)
+    ee = _compute_elementary_effects(model_inputs, model_results, 3, 2. / 3)
     mu_star = np.average(np.abs(ee), axis=1)
-    actual = compute_grouped_metric(mu_star, problem['groups'][0].T)
+    actual = _compute_grouped_metric(mu_star, problem['groups'][0].T)
     desired = np.array([16.86, 35.95])
     assert_allclose(actual, desired, atol=1e-1)
 
@@ -199,7 +199,7 @@ def test_compute_elementary_effects_small():
                              dtype=np.float)
 
     delta = 2. / 3
-    actual = compute_elementary_effects(model_inputs, model_outputs, 3, delta)
+    actual = _compute_elementary_effects(model_inputs, model_outputs, 3, delta)
     desired = np.array(
         [[2.52, 2.01, 2.30, -0.66, -0.93, -1.30],
          [-0.39, 0.13, 0.80, 0.25, -0.02, 0.51]])
@@ -228,7 +228,7 @@ def test_compute_increased_value_for_ee():
                               1.87, 1.0],
                              dtype=np.float)
     op_vec = model_outputs.reshape(6, 3)
-    actual = get_increased_values(op_vec, up, lo)
+    actual = _get_increased_values(op_vec, up, lo)
     desired = np.array([[2.39, 2.3, 2.4, 1.71, 1.54, 1.0],
                         [0.71, 2.39, 2.40, 1.71, 2.15, 2.20]],
                        dtype=np.float)
@@ -257,7 +257,7 @@ def test_compute_decreased_value_for_ee():
                               1.87, 1.0],
                              dtype=np.float)
     op_vec = model_outputs.reshape(6, 3)
-    actual = get_decreased_values(op_vec, up, lo)
+    actual = _get_decreased_values(op_vec, up, lo)
     desired = np.array([[0.71, 0.97, 0.87, 2.15, 2.17, 1.87],
                         [0.97, 2.30, 1.87, 1.54, 2.17, 1.87]],
                        dtype=np.float)
@@ -274,7 +274,7 @@ def test_compute_grouped_mu_star():
                    [-2.00, 0.13, -0.80, 0.25, -0.02, 0.51],
                    [2.00, -0.13, 0.80, -0.25, 0.02, -0.51]])
     mu_star = np.average(np.abs(ee), 1)
-    actual = compute_grouped_metric(mu_star, group_matrix)
+    actual = _compute_grouped_metric(mu_star, group_matrix)
     desired = np.array([1.62, 0.62], dtype=np.float)
     assert_allclose(actual, desired, rtol=1e-1)
 
@@ -298,7 +298,7 @@ def test_sigma_returned_for_groups_with_only_one_param():
                    [-2.00, 0.13, -0.80, 0.25, -0.02, 0.51],
                    [2.00, -0.13, 0.80, -0.25, 0.02, -0.51]])
     sigma = np.std(ee, axis=1, ddof=1)
-    actual = compute_grouped_sigma(sigma, group_matrix)
+    actual = _compute_grouped_sigma(sigma, group_matrix)
     desired = np.array([1.79352911, np.NAN], dtype=np.float)
     assert_allclose(actual, desired, rtol=1e-1)
 
