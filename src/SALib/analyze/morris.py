@@ -2,7 +2,7 @@ from __future__ import division
 from __future__ import print_function
 
 from scipy.stats import norm
-from typing import Dict
+from typing import Dict, List
 
 import numpy as np
 
@@ -99,8 +99,10 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
     return Si
 
 
-def _compute_statistical_outputs(elementary_effects, num_vars, num_resamples,
-                                 conf_level, groups, unique_group_names):
+def _compute_statistical_outputs(elementary_effects: np.ndarray, num_vars: int,
+                                 num_resamples: int, conf_level: float,
+                                 groups: np.ndarray,
+                                 unique_group_names: List) -> ResultDict:
 
     Si = ResultDict((k, [None] * num_vars) for k in ['names', 'mu', 'mu_star',
                                                      'sigma', 'mu_star_conf'])
@@ -108,15 +110,14 @@ def _compute_statistical_outputs(elementary_effects, num_vars, num_resamples,
     mu = np.average(elementary_effects, 1)
     mu_star = np.average(np.abs(elementary_effects), 1)
     sigma = np.std(elementary_effects, axis=1, ddof=1)
+    mu_star_conf = _compute_mu_star_confidence(elementary_effects, num_vars,
+                                               num_resamples, conf_level)
 
-    Si['mu_star_conf'] = _compute_mu_star_confidence(
-            elementary_effects, num_vars, num_resamples, conf_level)
-
-    Si['mu_star'] = _compute_grouped_metric(mu_star, groups)
-    Si['mu_star_conf'] = _compute_grouped_metric(Si['mu_star_conf'], groups)
     Si['names'] = unique_group_names
-    Si['sigma'] = _compute_grouped_sigma(sigma, groups)
     Si['mu'] = _compute_grouped_sigma(mu, groups)
+    Si['mu_star'] = _compute_grouped_metric(mu_star, groups)
+    Si['sigma'] = _compute_grouped_sigma(sigma, groups)
+    Si['mu_star_conf'] = _compute_grouped_metric(mu_star_conf, groups)
 
     return Si
 
