@@ -212,8 +212,8 @@ def _compute_elementary_effects(model_inputs, model_outputs, trajectory_size,
     return ee
 
 
-def _compute_mu_star_confidence(elementary_effects, num_vars, num_resamples,
-                                conf_level):
+def _compute_mu_star_confidence(elementary_effects: np.ndarray, num_vars: int,
+                                num_resamples: int, conf_level: float):
     """
     Uses bootstrapping where the elementary effects are resampled with
     replacement to produce a histogram of resampled mu_star metrics.
@@ -232,7 +232,8 @@ def _compute_mu_star_confidence(elementary_effects, num_vars, num_resamples,
         # Compute average of the absolute values over each of the resamples
         mu_star_resampled = np.average(np.abs(ee_resampled), axis=1)
 
-        mu_star_conf.append(norm.ppf(0.5 + conf_level / 2) * mu_star_resampled.std(ddof=1))
+        mu_star_conf.append(norm.ppf(0.5 + conf_level / 2)
+                            * mu_star_resampled.std(ddof=1))
 
     mu_star_conf = np.asarray(mu_star_conf)
 
