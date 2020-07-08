@@ -86,9 +86,9 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
     groups, unique_group_names = compute_groups_matrix(problem['groups'])
     number_of_groups = len(unique_group_names)
     num_trajectories = int(Y.size / (number_of_groups + 1))
+    trajectory_size = int(Y.size / num_trajectories)
 
-    ee = compute_elementary_effects(
-        X, Y, int(Y.size / num_trajectories), delta)
+    ee = compute_elementary_effects(X, Y, trajectory_size, delta)
 
     # Output the Mu, Mu*, and Sigma Values. Also return them in case this is
     # being called from Python
@@ -118,11 +118,11 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
 
 
 def compute_grouped_sigma(ungrouped_sigma, group_matrix):
-    '''
+    """
     Returns sigma for the groups of parameter values in the
     argument ungrouped_metric where the group consists of no more than
     one parameter
-    '''
+    """
 
     group_matrix = np.array(group_matrix, dtype=np.bool)
 
@@ -137,10 +137,10 @@ def compute_grouped_sigma(ungrouped_sigma, group_matrix):
 
 
 def compute_grouped_metric(ungrouped_metric, group_matrix):
-    '''
+    """
     Computes the mean value for the groups of parameter values in the
     argument ungrouped_metric
-    '''
+    """
 
     group_matrix = np.array(group_matrix, dtype=np.bool)
 
@@ -173,7 +173,7 @@ def get_decreased_values(op_vec, up, lo):
 
 def compute_elementary_effects(model_inputs, model_outputs, trajectory_size,
                                delta):
-    '''
+    """
     Arguments
     ---------
     model_inputs : matrix of inputs to the model under analysis.
@@ -190,7 +190,7 @@ def compute_elementary_effects(model_inputs, model_outputs, trajectory_size,
     ---------
     ee : np.array
         Elementary Effects for each parameter
-    '''
+    """
     num_vars = model_inputs.shape[1]
     num_rows = model_inputs.shape[0]
     num_trajectories = int(num_rows / trajectory_size)
@@ -213,11 +213,11 @@ def compute_elementary_effects(model_inputs, model_outputs, trajectory_size,
 
 def compute_mu_star_confidence(ee, num_resamples,
                                conf_level):
-    '''
+    """
     Uses bootstrapping where the elementary effects are resampled with
     replacement to produce a histogram of resampled mu_star metrics.
     This resample is used to produce a confidence interval.
-    '''
+    """
     if not 0 < conf_level < 1:
         raise ValueError("Confidence level must be between 0-1.")
 
