@@ -121,12 +121,8 @@ def compute_grouped_sigma(ungrouped_sigma, group_matrix):
     argument ungrouped_metric where the group consists of no more than
     one parameter
     """
+    sigma_agg = compute_grouped_metric(ungrouped_sigma, group_matrix)
 
-    group_matrix = np.array(group_matrix, dtype=np.bool)
-
-    sigma_masked = np.ma.masked_array(ungrouped_sigma * group_matrix.T,
-                                      mask=(group_matrix ^ 1).T)
-    sigma_agg = np.ma.mean(sigma_masked, axis=1)
     sigma = np.zeros(group_matrix.shape[1], dtype=np.float)
     np.copyto(sigma, sigma_agg, where=group_matrix.sum(axis=0) == 1)
     np.copyto(sigma, np.NAN, where=group_matrix.sum(axis=0) != 1)
