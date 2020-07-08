@@ -109,9 +109,8 @@ def _compute_statistical_outputs(elementary_effects, num_vars, num_resamples,
     mu_star = np.average(np.abs(elementary_effects), 1)
     sigma = np.std(elementary_effects, axis=1, ddof=1)
 
-    for j in range(num_vars):
-        Si['mu_star_conf'][j] = _compute_mu_star_confidence(
-            elementary_effects[j, :], num_resamples, conf_level)
+    Si['mu_star_conf'] = _compute_mu_star_confidence(
+            elementary_effects, num_vars, num_resamples, conf_level)
 
     Si['mu_star'] = _compute_grouped_metric(mu_star, groups)
     Si['mu_star_conf'] = _compute_grouped_metric(Si['mu_star_conf'], groups)
@@ -212,7 +211,7 @@ def _compute_elementary_effects(model_inputs, model_outputs, trajectory_size,
     return ee
 
 
-def _compute_mu_star_confidence(ee, num_resamples,
+def _compute_mu_star_confidence(elementary_effects, num_vars, num_resamples,
                                 conf_level):
     """
     Uses bootstrapping where the elementary effects are resampled with
@@ -222,13 +221,21 @@ def _compute_mu_star_confidence(ee, num_resamples,
     if not 0 < conf_level < 1:
         raise ValueError("Confidence level must be between 0-1.")
 
-    resample_index = np.random.randint(len(ee), size=(num_resamples, len(ee)))
-    ee_resampled = ee[resample_index]
+    mu_star_conf = []
+    for j in range(num_vars):
+        ee = elementary_effects[j, :]
+        resample_index = np.random.randint(len(ee),
+                                           size=(num_resamples, len(ee)))
+        ee_resampled = ee[resample_index]
 
-    # Compute average of the absolute values over each of the resamples
-    mu_star_resampled = np.average(np.abs(ee_resampled), axis=1)
+        # Compute average of the absolute values over each of the resamples
+        mu_star_resampled = np.average(np.abs(ee_resampled), axis=1)
 
-    return norm.ppf(0.5 + conf_level / 2) * mu_star_resampled.std(ddof=1)
+        mu_star_conf.append(norm.ppf(0.5 + conf_level / 2) * mu_star_resampled.std(ddof=1))
+
+    mu_star_conf = np.asarray(mu_star_conf)
+
+    return mu_star_conf
 
 
 def _check_if_array_of_floats(array_x: np.ndarray):

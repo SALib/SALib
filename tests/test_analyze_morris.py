@@ -19,12 +19,13 @@ def test_compute_mu_star_confidence():
     Tests that compute mu_star_confidence is computed correctly
     """
 
-    ee = np.array([2.52, 2.01, 2.30, 0.66, 0.93, 1.3], dtype=np.float)
+    ee = np.array([[2.52, 2.01, 2.30, 0.66, 0.93, 1.3]], dtype=np.float)
     num_resamples = 1000
     conf_level = 0.95
+    num_vars = 1
 
     actual = _compute_mu_star_confidence(
-        ee, num_resamples, conf_level)
+        ee, num_vars, num_resamples, conf_level)
     expected = 0.5
     assert_allclose(actual, expected, atol=1e-01)
 
@@ -78,11 +79,12 @@ def test_conf_level_within_zero_one_bounds():
     ee = [0, 0, 0]
     num_resamples = 2
     conf_level_too_low = -1
+    num_vars = 1
     with raises(ValueError):
-        _compute_mu_star_confidence(ee, num_resamples, conf_level_too_low)
+        _compute_mu_star_confidence(ee, num_vars, num_resamples, conf_level_too_low)
     conf_level_too_high = 2
     with raises(ValueError):
-        _compute_mu_star_confidence(ee, num_resamples, conf_level_too_high)
+        _compute_mu_star_confidence(ee, num_vars, num_resamples, conf_level_too_high)
 
 
 def test_compute_elementary_effects():
