@@ -90,10 +90,7 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
 
     ee = compute_elementary_effects(X, Y, trajectory_size, delta)
 
-    # Output the Mu, Mu*, and Sigma Values. Also return them in case this is
-    # being called from Python
-    Si = ResultDict((k, [None] * num_vars)
-                    for k in ['names', 'mu', 'mu_star', 'sigma', 'mu_star_conf'])
+    Si = ResultDict((k, [None] * num_vars) for k in ['mu_star_conf'])
     mu = np.average(ee, 1)
     mu_star = np.average(np.abs(ee), 1)
     sigma = np.std(ee, axis=1, ddof=1)
@@ -103,7 +100,8 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
             ee[j, :], num_resamples, conf_level)
 
     Si_grouped = ResultDict((k, [None] * num_vars)
-                    for k in ['names', 'mu', 'mu_star', 'sigma', 'mu_star_conf'])
+                            for k in ['names', 'mu', 'mu_star',
+                                      'sigma', 'mu_star_conf'])
     Si_grouped['mu_star'] = compute_grouped_metric(mu_star, groups)
     Si_grouped['mu_star_conf'] = compute_grouped_metric(Si['mu_star_conf'],
                                                         groups)
