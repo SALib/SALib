@@ -90,7 +90,9 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
 
     ee = _compute_elementary_effects(X, Y, trajectory_size, delta)
 
-    Si = ResultDict((k, [None] * num_vars) for k in ['mu_star_conf'])
+    Si = ResultDict((k, [None] * num_vars) for k in ['names', 'mu', 'mu_star',
+                                                     'sigma', 'mu_star_conf'])
+
     mu = np.average(ee, 1)
     mu_star = np.average(np.abs(ee), 1)
     sigma = np.std(ee, axis=1, ddof=1)
@@ -99,20 +101,17 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
         Si['mu_star_conf'][j] = _compute_mu_star_confidence(
             ee[j, :], num_resamples, conf_level)
 
-    Si_grouped = ResultDict((k, [None] * num_vars)
-                            for k in ['names', 'mu', 'mu_star',
-                                      'sigma', 'mu_star_conf'])
-    Si_grouped['mu_star'] = _compute_grouped_metric(mu_star, groups)
-    Si_grouped['mu_star_conf'] = _compute_grouped_metric(Si['mu_star_conf'],
+    Si['mu_star'] = _compute_grouped_metric(mu_star, groups)
+    Si['mu_star_conf'] = _compute_grouped_metric(Si['mu_star_conf'],
                                                          groups)
-    Si_grouped['names'] = unique_group_names
-    Si_grouped['sigma'] = _compute_grouped_sigma(sigma, groups)
-    Si_grouped['mu'] = _compute_grouped_sigma(mu, groups)
+    Si['names'] = unique_group_names
+    Si['sigma'] = _compute_grouped_sigma(sigma, groups)
+    Si['mu'] = _compute_grouped_sigma(mu, groups)
 
     if print_to_console:
         _print_to_console(Si, number_of_groups)
 
-    return Si_grouped
+    return Si
 
 
 def _compute_grouped_sigma(ungrouped_sigma, group_matrix):
