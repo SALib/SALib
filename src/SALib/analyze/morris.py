@@ -1,10 +1,9 @@
 from __future__ import division
 from __future__ import print_function
 
-from scipy.stats import norm
 from typing import Dict, List
-
 import numpy as np
+from scipy.stats import norm
 
 from . import common_args
 from ..util import (read_param_file, compute_groups_matrix, ResultDict,
@@ -88,10 +87,12 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
     num_trajectories = int(Y.size / (number_of_groups + 1))
     trajectory_size = int(Y.size / num_trajectories)
 
-    ee = _compute_elementary_effects(X, Y, trajectory_size, delta)
+    elementary_effects = _compute_elementary_effects(X, Y,
+                                                     trajectory_size, delta)
 
-    Si = _compute_statistical_outputs(ee, num_vars, num_resamples, conf_level,
-                                      groups, unique_group_names)
+    Si = _compute_statistical_outputs(elementary_effects, num_vars,
+                                      num_resamples, conf_level, groups,
+                                      unique_group_names)
 
     if print_to_console:
         _print_to_console(Si, number_of_groups)
@@ -103,6 +104,28 @@ def _compute_statistical_outputs(elementary_effects: np.ndarray, num_vars: int,
                                  num_resamples: int, conf_level: float,
                                  groups: np.ndarray,
                                  unique_group_names: List) -> ResultDict:
+    """ Computes the statistical parameters related to Morris method.
+
+    Arguments
+    ----------
+    elementary_effects: np.ndarray
+        Morris elementary effects.
+    num_vars: int
+        Number of problem's variables
+    num_resamples: int
+        Number of resamples
+    conf_level: float
+        Confidence level
+    groups: np.ndarray
+        Array defining the distribution of groups
+    unique_group_names: List
+        Names of the groups
+
+    Returns
+    -------
+    Si: ResultDict
+        Morris statistical parameters.
+    """
 
     Si = ResultDict((k, [None] * num_vars) for k in ['names', 'mu', 'mu_star',
                                                      'sigma', 'mu_star_conf'])
@@ -123,38 +146,73 @@ def _compute_statistical_outputs(elementary_effects: np.ndarray, num_vars: int,
 
 
 def _compute_grouped_sigma(ungrouped_sigma: np.ndarray,
-                           group_matrix: np.ndarray):
-    """
-    Returns sigma for the groups of parameter values in the
-    argument ungrouped_metric where the group consists of no more than
-    one parameter
-    """
-    sigma_agg = _compute_grouped_metric(ungrouped_sigma, group_matrix)
+                           groups: np.ndarray) -> np.ndarray:
+    """ Sigma values for the groups.
 
-    sigma = np.zeros(group_matrix.shape[1], dtype=np.float)
-    np.copyto(sigma, sigma_agg, where=group_matrix.sum(axis=0) == 1)
-    np.copyto(sigma, np.NAN, where=group_matrix.sum(axis=0) != 1)
+    Returns sigma for the groups of parameter values in the argument
+    ungrouped_metric where the group consists of no more than
+    one parameter
+
+    Arguments
+    ----------
+    ungrouped_sigma: np.ndarray
+        Sigma values calculated without considering the groups
+    groups: np.ndarray
+        Array defining the distribution of groups
+
+    Returns
+    -------
+    sigma: np.ndarray
+        Sigma values for the groups.
+    """
+    sigma_agg = _compute_grouped_metric(ungrouped_sigma, groups)
+
+    sigma = np.zeros(groups.shape[1], dtype=np.float)
+    np.copyto(sigma, sigma_agg, where=groups.sum(axis=0) == 1)
+    np.copyto(sigma, np.NAN, where=groups.sum(axis=0) != 1)
 
     return sigma
 
 
 def _compute_grouped_metric(ungrouped_metric: np.ndarray,
-                            group_matrix: np.ndarray):
-    """
-    Computes the mean value for the groups of parameter values in the
-    argument ungrouped_metric
+                            groups: np.ndarray) -> np.ndarray:
+    """ Computes the mean value for the groups of parameter values.
+
+    Parameters
+    ----------
+    ungrouped_metric: np.ndarray
+        Metric calculated without considering the groups
+    groups: np.ndarray
+        Array defining the distribution of groups
+
+    Returns
+    -------
+    mean_of_mu_star: np.ndarray
+         Mean value for the groups of parameter values
     """
 
-    group_matrix = np.array(group_matrix, dtype=np.bool)
+    groups = np.array(groups, dtype=np.bool)
 
-    mu_star_masked = np.ma.masked_array(ungrouped_metric * group_matrix.T,
-                                        mask=(group_matrix ^ 1).T)
+    mu_star_masked = np.ma.masked_array(ungrouped_metric * groups.T,
+                                        mask=(groups ^ 1).T)
     mean_of_mu_star = np.ma.mean(mu_star_masked, axis=1)
 
     return mean_of_mu_star
 
 
 def _get_increased_values(op_vec: np.ndarray, up: np.ndarray, lo: np.ndarray):
+    """
+
+    Arguments
+    ----------
+    op_vec
+    up
+    lo
+
+    Returns
+    -------
+
+    """
 
     up = np.pad(up, ((0, 0), (1, 0), (0, 0)), 'constant')
     lo = np.pad(lo, ((0, 0), (0, 1), (0, 0)), 'constant')
@@ -165,6 +223,18 @@ def _get_increased_values(op_vec: np.ndarray, up: np.ndarray, lo: np.ndarray):
 
 
 def _get_decreased_values(op_vec: np.ndarray, up: np.ndarray, lo: np.ndarray):
+    """
+
+    Arguments
+    ----------
+    op_vec
+    up
+    lo
+
+    Returns
+    -------
+
+    """
 
     up = np.pad(up, ((0, 0), (0, 1), (0, 0)), 'constant')
     lo = np.pad(lo, ((0, 0), (1, 0), (0, 0)), 'constant')
@@ -178,7 +248,8 @@ def _compute_elementary_effects(model_inputs: np.ndarray,
                                 model_outputs: np.ndarray,
                                 trajectory_size: int,
                                 delta: float) -> np.ndarray:
-    """
+    """ Computes the Morris elementary effects
+
     Arguments
     ---------
     model_inputs : matrix of inputs to the model under analysis.
@@ -193,8 +264,8 @@ def _compute_elementary_effects(model_inputs: np.ndarray,
 
     Returns
     ---------
-    ee : np.array
-        Elementary Effects for each parameter
+    elementary_effects : np.array
+        Elementary effects for each parameter
     """
     num_vars = model_inputs.shape[1]
     num_rows = model_inputs.shape[0]
@@ -210,28 +281,47 @@ def _compute_elementary_effects(model_inputs: np.ndarray,
     result_up = _get_increased_values(op_vec, up, lo)
     result_lo = _get_decreased_values(op_vec, up, lo)
 
-    ee = np.subtract(result_up, result_lo)
-    np.divide(ee, delta, out=ee)
+    elementary_effects = np.subtract(result_up, result_lo)
+    np.divide(elementary_effects, delta, out=elementary_effects)
 
-    return ee
+    return elementary_effects
 
 
 def _compute_mu_star_confidence(elementary_effects: np.ndarray, num_vars: int,
-                                num_resamples: int, conf_level: float):
-    """
+                                num_resamples: int,
+                                conf_level: float) -> np.ndarray:
+    """Computes the confidence intervals for the mu_star variable.
+
     Uses bootstrapping where the elementary effects are resampled with
     replacement to produce a histogram of resampled mu_star metrics.
     This resample is used to produce a confidence interval.
+
+    Arguments
+    ----------
+    elementary_effects : np.array
+        Elementary effects for each parameter
+    num_vars: int
+        Number of problem's variables
+    num_resamples: int
+        Number of resamples
+    conf_level: float
+        Confidence level
+
+    Returns
+    -------
+    mu_star_conf: np.ndarray
+        Confidence intervals for the mu_star variable
     """
     if not 0 < conf_level < 1:
         raise ValueError("Confidence level must be between 0-1.")
 
     mu_star_conf = []
     for j in range(num_vars):
-        ee = elementary_effects[j, :]
-        resample_index = np.random.randint(len(ee),
-                                           size=(num_resamples, len(ee)))
-        ee_resampled = ee[resample_index]
+        elementary_effects = elementary_effects[j, :]
+        resample_index = np.random.randint(len(elementary_effects),
+                                           size=(num_resamples,
+                                                 len(elementary_effects)))
+        ee_resampled = elementary_effects[resample_index]
 
         # Compute average of the absolute values over each of the resamples
         mu_star_resampled = np.average(np.abs(ee_resampled), axis=1)
@@ -245,10 +335,9 @@ def _compute_mu_star_confidence(elementary_effects: np.ndarray, num_vars: int,
 
 
 def _check_if_array_of_floats(array_x: np.ndarray):
-    """
-    Checks if an arrays is made of floats. If not, raises an error.
+    """ Checks if an arrays is made of floats. If not, raises an error.
 
-    Parameters
+    Arguments
     ----------
     array_x:
         Array to be checked
@@ -259,22 +348,20 @@ def _check_if_array_of_floats(array_x: np.ndarray):
 
 
 def _print_to_console(Si: ResultDict, number_of_groups: int):
-    """
-    Prints the output to the console.
+    """Prints the output to the console.
 
-    Parameters
+    Arguments
     ----------
     Si: Results dictionary
     number_of_groups
     """
     print("{0:<30} {1:>10} {2:>10} {3:>15} {4:>10}".format(
-        "Parameter", "Mu_Star", "Mu", "Mu_Star_Conf", "Sigma")
-    )
+        "Parameter", "Mu_Star", "Mu", "Mu_Star_Conf", "Sigma"))
+
     for j in list(range(number_of_groups)):
         print("{0:30} {1:10.3f} {2:10.3f} {3:15.3f} {4:10.3f}".format(
             Si['names'][j], Si['mu_star'][j], Si['mu'][j],
-            Si['mu_star_conf'][j], Si['sigma'][j])
-        )
+            Si['mu_star_conf'][j], Si['sigma'][j]))
 
 
 def cli_parse(parser):
