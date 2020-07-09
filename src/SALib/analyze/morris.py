@@ -278,12 +278,14 @@ def _compute_elementary_effects(model_inputs: np.ndarray,
     input_matrix = _reshape_model_inputs(model_inputs, num_trajectories,
                                          trajectory_size)
 
-    delta_variables = _calculate_delta_variables(input_matrix)
-    up = (delta_variables > 0)
-    lo = (delta_variables < 0)
+    delta_variables = _calculate_delta_input_variables(input_matrix)
+    value_increased = (delta_variables > 0)
+    value_decreased = (delta_variables < 0)
 
-    result_up = _get_increased_values(output_matrix, up, lo)
-    result_lo = _get_decreased_values(output_matrix, up, lo)
+    result_up = _get_increased_values(output_matrix,
+                                      value_increased, value_decreased)
+    result_lo = _get_decreased_values(output_matrix,
+                                      value_increased, value_decreased)
 
     elementary_effects = np.subtract(result_up, result_lo)
     np.divide(elementary_effects, delta, out=elementary_effects)
@@ -291,7 +293,7 @@ def _compute_elementary_effects(model_inputs: np.ndarray,
     return elementary_effects
 
 
-def _calculate_delta_variables(input_matrix: np.ndarray) -> np.ndarray:
+def _calculate_delta_input_variables(input_matrix: np.ndarray) -> np.ndarray:
     """Computes the delta values of the problem variables.
 
     For each point of the trajectory, computes how much each variable increased
