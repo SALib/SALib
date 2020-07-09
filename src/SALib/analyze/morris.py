@@ -200,12 +200,13 @@ def _compute_grouped_metric(ungrouped_metric: np.ndarray,
     return mean_of_mu_star
 
 
-def _get_increased_values(op_vec: np.ndarray, up: np.ndarray, lo: np.ndarray):
+def _get_increased_values(output_array: np.ndarray, up: np.ndarray,
+                          lo: np.ndarray):
     """
 
     Arguments
     ----------
-    op_vec
+    output_array
     up
     lo
 
@@ -217,17 +218,18 @@ def _get_increased_values(op_vec: np.ndarray, up: np.ndarray, lo: np.ndarray):
     up = np.pad(up, ((0, 0), (1, 0), (0, 0)), 'constant')
     lo = np.pad(lo, ((0, 0), (0, 1), (0, 0)), 'constant')
 
-    res = np.einsum('ik,ikj->ij', op_vec, up + lo)
+    res = np.einsum('ik,ikj->ij', output_array, up + lo)
 
     return res.T
 
 
-def _get_decreased_values(op_vec: np.ndarray, up: np.ndarray, lo: np.ndarray):
+def _get_decreased_values(output_array: np.ndarray, up: np.ndarray,
+                          lo: np.ndarray):
     """
 
     Arguments
     ----------
-    op_vec
+    output_array
     up
     lo
 
@@ -239,7 +241,7 @@ def _get_decreased_values(op_vec: np.ndarray, up: np.ndarray, lo: np.ndarray):
     up = np.pad(up, ((0, 0), (0, 1), (0, 0)), 'constant')
     lo = np.pad(lo, ((0, 0), (1, 0), (0, 0)), 'constant')
 
-    res = np.einsum('ik,ikj->ij', op_vec, up + lo)
+    res = np.einsum('ik,ikj->ij', output_array, up + lo)
 
     return res.T
 
@@ -248,7 +250,7 @@ def _compute_elementary_effects(model_inputs: np.ndarray,
                                 model_outputs: np.ndarray,
                                 trajectory_size: int,
                                 delta: float) -> np.ndarray:
-    """ Computes the Morris elementary effects
+    """Computes the Morris elementary effects
 
     Arguments
     ---------
@@ -272,16 +274,17 @@ def _compute_elementary_effects(model_inputs: np.ndarray,
     num_rows = model_inputs.shape[0]
     num_trajectories = int(num_rows / trajectory_size)
 
-    ip_vec = model_inputs.reshape(num_trajectories, trajectory_size, num_vars)
-    ip_cha = np.subtract(ip_vec[:, 1:, :], ip_vec[:, 0:-1, :])
+    output_matrix = _reshape_model_outputs(model_outputs, num_trajectories,
+                                           trajectory_size)
+    input_matrix = _reshape_model_inputs(model_inputs, num_trajectories,
+                                         trajectory_size, num_vars)
+
+    ip_cha = np.subtract(input_matrix[:, 1:, :], input_matrix[:, 0:-1, :])
     up = (ip_cha > 0)
     lo = (ip_cha < 0)
 
-    output_array = _reshape_model_outputs(model_outputs, num_trajectories,
-                                         trajectory_size)
-
-    result_up = _get_increased_values(output_array, up, lo)
-    result_lo = _get_decreased_values(output_array, up, lo)
+    result_up = _get_increased_values(output_matrix, up, lo)
+    result_lo = _get_decreased_values(output_matrix, up, lo)
 
     elementary_effects = np.subtract(result_up, result_lo)
     np.divide(elementary_effects, delta, out=elementary_effects)
@@ -289,14 +292,39 @@ def _compute_elementary_effects(model_inputs: np.ndarray,
     return elementary_effects
 
 
+def _reshape_model_inputs(model_inputs: np.ndarray, num_trajectories: int,
+                          trajectory_size: int, num_vars: int):
+    """Reshapes the model inputs' matrix.
+
+    Parameters
+    ----------
+    model_inputs: np.ndarray
+        Matrix of model inputs
+    num_trajectories: int
+        Number of trajectories
+    trajectory_size: int
+        Number of points in a trajectory
+    num_vars: int
+        Number of problem's variables
+
+    Returns
+    -------
+    input_matrix: np.ndarray
+        Reshaped input matrix.
+    """
+    input_matrix = model_inputs.reshape(num_trajectories, trajectory_size,
+                                        num_vars)
+    return input_matrix
+
+
 def _reshape_model_outputs(model_outputs: np.ndarray, num_trajectories: int,
                            trajectory_size: int):
-    """ Reshapes the model outputs' matrix.
+    """Reshapes the model outputs' matrix.
 
     Arguments
     ----------
     model_outputs: np.ndarray
-        r-length vector of model outputs
+        Matrix of model outputs
     num_trajectories: int
         Number of trajectories
     trajectory_size: int
@@ -304,11 +332,11 @@ def _reshape_model_outputs(model_outputs: np.ndarray, num_trajectories: int,
 
     Returns
     -------
-    output_array: np.ndarray
+    output_matrix: np.ndarray
         Reshaped output matrix.
     """
-    output_array = model_outputs.reshape(num_trajectories, trajectory_size)
-    return output_array
+    output_matrix = model_outputs.reshape(num_trajectories, trajectory_size)
+    return output_matrix
 
 
 def _compute_mu_star_confidence(elementary_effects: np.ndarray, num_vars: int,
