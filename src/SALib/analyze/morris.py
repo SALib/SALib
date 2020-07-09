@@ -270,18 +270,17 @@ def _compute_elementary_effects(model_inputs: np.ndarray,
     elementary_effects : np.array
         Elementary effects for each parameter
     """
-    num_vars = model_inputs.shape[1]
-    num_rows = model_inputs.shape[0]
-    num_trajectories = int(num_rows / trajectory_size)
+    num_trajectories = _calculate_number_trajectories(model_inputs,
+                                                      trajectory_size)
 
     output_matrix = _reshape_model_outputs(model_outputs, num_trajectories,
                                            trajectory_size)
     input_matrix = _reshape_model_inputs(model_inputs, num_trajectories,
-                                         trajectory_size, num_vars)
+                                         trajectory_size)
 
-    ip_cha = np.subtract(input_matrix[:, 1:, :], input_matrix[:, 0:-1, :])
-    up = (ip_cha > 0)
-    lo = (ip_cha < 0)
+    delta_variables = _calculate_delta_variables(input_matrix)
+    up = (delta_variables > 0)
+    lo = (delta_variables < 0)
 
     result_up = _get_increased_values(output_matrix, up, lo)
     result_lo = _get_decreased_values(output_matrix, up, lo)
@@ -292,11 +291,55 @@ def _compute_elementary_effects(model_inputs: np.ndarray,
     return elementary_effects
 
 
+def _calculate_delta_variables(input_matrix: np.ndarray) -> np.ndarray:
+    """Computes the delta values of the problem variables.
+
+    For each point of the trajectory, computes how much each variable increased
+    or decreased in respect to the previous point.
+
+    Arguments
+    ----------
+    input_matrix: np.ndarray
+        Matrix with the values of the problem's variables for all input points.
+
+    Returns
+    -------
+    delta_variables: np.ndarray
+        Variation of each variable, for each point in the trajectory.
+    """
+    delta_variables = np.subtract(input_matrix[:, 1:, :],
+                                  input_matrix[:, 0:-1, :])
+
+    return delta_variables
+
+
+def _calculate_number_trajectories(model_inputs: np.ndarray,
+                                   trajectory_size: int) -> int:
+    """Calculate the number of trajectories.
+
+    Arguments
+    ----------
+    model_inputs: np.ndarray
+        Matrix of model inputs
+    trajectory_size: int
+        Number of input points in each trajectory
+
+    Returns
+    -------
+    num_trajectories: int
+        Number of trajectories
+    """
+    num_input_points = model_inputs.shape[0]
+    num_trajectories = int(num_input_points / trajectory_size)
+
+    return num_trajectories
+
+
 def _reshape_model_inputs(model_inputs: np.ndarray, num_trajectories: int,
-                          trajectory_size: int, num_vars: int):
+                          trajectory_size: int) -> np.ndarray:
     """Reshapes the model inputs' matrix.
 
-    Parameters
+    Arguments
     ----------
     model_inputs: np.ndarray
         Matrix of model inputs
@@ -304,14 +347,13 @@ def _reshape_model_inputs(model_inputs: np.ndarray, num_trajectories: int,
         Number of trajectories
     trajectory_size: int
         Number of points in a trajectory
-    num_vars: int
-        Number of problem's variables
 
     Returns
     -------
     input_matrix: np.ndarray
         Reshaped input matrix.
     """
+    num_vars = model_inputs.shape[1]
     input_matrix = model_inputs.reshape(num_trajectories, trajectory_size,
                                         num_vars)
     return input_matrix
