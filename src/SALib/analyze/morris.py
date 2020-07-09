@@ -252,15 +252,16 @@ def _compute_elementary_effects(model_inputs: np.ndarray,
 
     Arguments
     ---------
-    model_inputs : matrix of inputs to the model under analysis.
+    model_inputs: np.ndarray
+        matrix of inputs to the model under analysis.
         x-by-r where x is the number of variables and
         r is the number of rows (a function of x and num_trajectories)
-    model_outputs
-        an r-length vector of model outputs
-    trajectory_size
-        a scalar indicating the number of rows in a trajectory
-    delta : float
-        scaling factor computed from `num_levels`
+    model_outputs: np.ndarray
+        r-length vector of model outputs
+    trajectory_size: int
+        Number of points in a trajectory
+    delta: float
+        Scaling factor computed from `num_levels`
 
     Returns
     ---------
@@ -276,15 +277,38 @@ def _compute_elementary_effects(model_inputs: np.ndarray,
     up = (ip_cha > 0)
     lo = (ip_cha < 0)
 
-    op_vec = model_outputs.reshape(num_trajectories, trajectory_size)
+    output_array = _reshape_model_outputs(model_outputs, num_trajectories,
+                                         trajectory_size)
 
-    result_up = _get_increased_values(op_vec, up, lo)
-    result_lo = _get_decreased_values(op_vec, up, lo)
+    result_up = _get_increased_values(output_array, up, lo)
+    result_lo = _get_decreased_values(output_array, up, lo)
 
     elementary_effects = np.subtract(result_up, result_lo)
     np.divide(elementary_effects, delta, out=elementary_effects)
 
     return elementary_effects
+
+
+def _reshape_model_outputs(model_outputs: np.ndarray, num_trajectories: int,
+                           trajectory_size: int):
+    """ Reshapes the model outputs' matrix.
+
+    Arguments
+    ----------
+    model_outputs: np.ndarray
+        r-length vector of model outputs
+    num_trajectories: int
+        Number of trajectories
+    trajectory_size: int
+        Number of points in a trajectory
+
+    Returns
+    -------
+    output_array: np.ndarray
+        Reshaped output matrix.
+    """
+    output_array = model_outputs.reshape(num_trajectories, trajectory_size)
+    return output_array
 
 
 def _compute_mu_star_confidence(elementary_effects: np.ndarray, num_vars: int,
@@ -352,7 +376,7 @@ def _print_to_console(Si: ResultDict, number_of_groups: int):
     Arguments
     ----------
     Si: Results dictionary
-    number_of_groups
+    number_of_groups: int
     """
     print("{0:<30} {1:>10} {2:>10} {3:>15} {4:>10}".format(
         "Parameter", "Mu_Star", "Mu", "Mu_Star_Conf", "Sigma"))
