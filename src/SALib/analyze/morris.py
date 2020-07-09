@@ -317,11 +317,10 @@ def _compute_mu_star_confidence(elementary_effects: np.ndarray, num_vars: int,
 
     mu_star_conf = []
     for j in range(num_vars):
-        elementary_effects = elementary_effects[j, :]
-        resample_index = np.random.randint(len(elementary_effects),
-                                           size=(num_resamples,
-                                                 len(elementary_effects)))
-        ee_resampled = elementary_effects[resample_index]
+        ee = elementary_effects[j, :]
+        resample_index = np.random.randint(len(ee),
+                                           size=(num_resamples, len(ee)))
+        ee_resampled = ee[resample_index]
 
         # Compute average of the absolute values over each of the resamples
         mu_star_resampled = np.average(np.abs(ee_resampled), axis=1)
