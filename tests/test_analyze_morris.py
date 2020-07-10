@@ -10,7 +10,8 @@ from SALib.analyze.morris import (analyze,
                                   _compute_elementary_effects,
                                   _reorganize_output_matrix,
                                   _compute_grouped_metric,
-                                  _compute_grouped_sigma)
+                                  _compute_grouped_sigma,
+                                  _check_if_array_of_floats)
 
 
 def test_compute_mu_star_confidence():
@@ -265,11 +266,11 @@ def test_reorganize_output_matrix_decreased():
     assert_allclose(actual, desired, atol=1e-1)
 
 
-def test_compute_grouped_mu_star():
-    '''
+def test_compute_grouped_metric():
+    """
     Computes mu_star for 3 variables grouped into 2 groups
     There are six trajectories.
-    '''
+    """
     group_matrix = np.array([[1, 0], [0, 1], [0, 1]], dtype=np.int)
     ee = np.array([[2.52, 2.01, 2.30, -0.66, -0.93, -1.30],
                    [-2.00, 0.13, -0.80, 0.25, -0.02, 0.51],
@@ -280,8 +281,8 @@ def test_compute_grouped_mu_star():
     assert_allclose(actual, desired, rtol=1e-1)
 
 
-def test_sigma_returned_for_groups_with_only_one_param():
-    '''
+def test_compute_grouped_sigma():
+    """
     Tests that a value for sigma is returned when the group contains 1 param
 
     Morris groups do not allow a value for sigma to be computed because it
@@ -293,7 +294,7 @@ def test_sigma_returned_for_groups_with_only_one_param():
 
     An NA should be returned for all other groups (as opposed to 0, which could
     confuse plotting.morris)
-    '''
+    """
     group_matrix = np.array([[1, 0], [0, 1], [0, 1]], dtype=np.int)
     ee = np.array([[2.52, 2.01, 2.30, -0.66, -0.93, -1.30],
                    [-2.00, 0.13, -0.80, 0.25, -0.02, 0.51],
@@ -304,30 +305,15 @@ def test_sigma_returned_for_groups_with_only_one_param():
     assert_allclose(actual, desired, rtol=1e-1)
 
 
-def test_raise_error_if_not_floats():
-
-    inputs = np.array([[0, 1. / 3], [0, 1], [2. / 3, 1],
-                       [0, 1. / 3], [2. / 3, 1. / 3], [2. / 3, 1],
-                       [2. / 3, 0], [2. / 3, 2. / 3], [0, 2. / 3],
-                       [1. / 3, 1], [1, 1], [1, 1. / 3],
-                       [1. / 3, 1], [1. / 3, 1. / 3], [1, 1. / 3],
-                       [1. / 3, 2. / 3], [1. / 3, 0], [1, 0]],
-                      dtype=np.int)
+def test_check_if_array_of_floats():
 
     outputs = np.array([0.97, 0.71, 2.39, 0.97, 2.30, 2.39,
                         1.87, 2.40, 0.87, 2.15, 1.71, 1.54,
                         2.15, 2.17, 1.54, 2.20, 1.87, 1.0],
                        dtype=np.int)
 
-    problem = {
-        'num_vars': 2,
-        'names': ['Test 1', 'Test 2'],
-        'groups': None,
-        'bounds': [[0.0, 1.0], [0.0, 1.0]]
-    }
-
     with raises(ValueError):
-        analyze(problem, inputs, outputs)
+        _check_if_array_of_floats(outputs)
 
 
 def test_doesnot_raise_error_if_floats():
