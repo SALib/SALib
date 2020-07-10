@@ -8,8 +8,7 @@ from numpy.testing import assert_allclose, assert_equal
 from SALib.analyze.morris import (analyze,
                                   _compute_mu_star_confidence,
                                   _compute_elementary_effects,
-                                  _get_increased_values,
-                                  _get_decreased_values,
+                                  _reorganize_output_matrix,
                                   _compute_grouped_metric,
                                   _compute_grouped_sigma)
 
@@ -208,7 +207,7 @@ def test_compute_elementary_effects_small():
     assert_allclose(actual, desired, atol=1e-0)
 
 
-def test_compute_increased_value_for_ee():
+def test_reorganize_output_matrix_increased():
     up = np.array([[[False, True], [True, False]],
                    [[True, False], [False, True]],
                    [[False, True], [False, False]],
@@ -230,14 +229,14 @@ def test_compute_increased_value_for_ee():
                               1.87, 1.0],
                              dtype=np.float)
     op_vec = model_outputs.reshape(6, 3)
-    actual = _get_increased_values(op_vec, up, lo)
+    actual = _reorganize_output_matrix(op_vec, up, lo, "increased")
     desired = np.array([[2.39, 2.3, 2.4, 1.71, 1.54, 1.0],
                         [0.71, 2.39, 2.40, 1.71, 2.15, 2.20]],
                        dtype=np.float)
     assert_allclose(actual, desired, atol=1e-1)
 
 
-def test_compute_decreased_value_for_ee():
+def test_reorganize_output_matrix_decreased():
     up = np.array([[[False, True], [True, False]],
                    [[True, False], [False, True]],
                    [[False, True], [False, False]],
@@ -254,12 +253,12 @@ def test_compute_decreased_value_for_ee():
                    [[False, True], [False, False]]],
                   dtype=bool)
 
-    model_outputs = np.array([0.97, 0.71, 2.39, 0.97, 2.3, 2.39, 1.87, 2.40,
-                              0.87, 2.15, 1.71, 1.54, 2.15, 2.17, 1.54, 2.2,
-                              1.87, 1.0],
+    model_outputs = np.array([0.97, 0.71, 2.39, 0.97, 2.3, 2.39,
+                              1.87, 2.40, 0.87, 2.15, 1.71, 1.54,
+                              2.15, 2.17, 1.54, 2.2, 1.87, 1.0],
                              dtype=np.float)
     op_vec = model_outputs.reshape(6, 3)
-    actual = _get_decreased_values(op_vec, up, lo)
+    actual = _reorganize_output_matrix(op_vec, up, lo, "decreased")
     desired = np.array([[0.71, 0.97, 0.87, 2.15, 2.17, 1.87],
                         [0.97, 2.30, 1.87, 1.54, 2.17, 1.87]],
                        dtype=np.float)

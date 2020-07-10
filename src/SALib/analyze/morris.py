@@ -200,48 +200,50 @@ def _compute_grouped_metric(ungrouped_metric: np.ndarray,
     return mean_of_mu_star
 
 
-def _get_increased_values(output_array: np.ndarray, up: np.ndarray,
-                          lo: np.ndarray):
-    """
+def _reorganize_output_matrix(output_array: np.ndarray,
+                              value_increased: np.ndarray,
+                              value_decreased: np.ndarray,
+                              direction: str) -> np.ndarray:
+    """Reorganize the output matrix.
+
+    This method reorganizes the output matrix in a way that allows the
+    elementary effects to be computed as a simple subtraction between two
+    arrays. It repositions the outputs in the output matrix according to the
+    order they changed during the formation of the trajectories.
 
     Arguments
     ----------
-    output_array
-    up
-    lo
-
+    output_array: np.ndarray
+        Matrix of model output values
+    value_increased: np.ndarray
+        Input variables that had their values increased when forming the
+        trajectories matrix
+    value_decreased: np.ndarray
+        Input variables that had their values decreased when forming the
+        trajectories matrix
+    direction: str
+        Direction to consider (values that increased or decreased)
     Returns
     -------
 
     """
+    if direction == "increased":
+        pad_up = (1, 0)
+        pad_lo = (0, 1)
+    elif direction == "decreased":
+        pad_up = (0, 1)
+        pad_lo = (1, 0)
+    else:
+        raise ValueError("The direction should be \'increased\' or "
+                         "\'decreased\'")
 
-    up = np.pad(up, ((0, 0), (1, 0), (0, 0)), 'constant')
-    lo = np.pad(lo, ((0, 0), (0, 1), (0, 0)), 'constant')
+    value_increased = np.pad(value_increased, ((0, 0), pad_up, (0, 0)),
+                             'constant')
+    value_decreased = np.pad(value_decreased, ((0, 0), pad_lo, (0, 0)),
+                             'constant')
 
-    res = np.einsum('ik,ikj->ij', output_array, up + lo)
-
-    return res.T
-
-
-def _get_decreased_values(output_array: np.ndarray, up: np.ndarray,
-                          lo: np.ndarray):
-    """
-
-    Arguments
-    ----------
-    output_array
-    up
-    lo
-
-    Returns
-    -------
-
-    """
-
-    up = np.pad(up, ((0, 0), (0, 1), (0, 0)), 'constant')
-    lo = np.pad(lo, ((0, 0), (1, 0), (0, 0)), 'constant')
-
-    res = np.einsum('ik,ikj->ij', output_array, up + lo)
+    res = np.einsum('ik,ikj->ij', output_array,
+                    value_increased + value_decreased)
 
     return res.T
 
@@ -250,7 +252,7 @@ def _compute_elementary_effects(model_inputs: np.ndarray,
                                 model_outputs: np.ndarray,
                                 trajectory_size: int,
                                 delta: float) -> np.ndarray:
-    """Computes the Morris elementary effects
+    """Computes the Morris elementary effects.
 
     Arguments
     ---------
@@ -282,10 +284,10 @@ def _compute_elementary_effects(model_inputs: np.ndarray,
     value_increased = (delta_variables > 0)
     value_decreased = (delta_variables < 0)
 
-    result_up = _get_increased_values(output_matrix,
-                                      value_increased, value_decreased)
-    result_lo = _get_decreased_values(output_matrix,
-                                      value_increased, value_decreased)
+    result_up = _reorganize_output_matrix(output_matrix, value_increased,
+                                          value_decreased, "increased")
+    result_lo = _reorganize_output_matrix(output_matrix, value_increased,
+                                          value_decreased, "decreased")
 
     elementary_effects = np.subtract(result_up, result_lo)
     np.divide(elementary_effects, delta, out=elementary_effects)
