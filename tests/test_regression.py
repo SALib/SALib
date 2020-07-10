@@ -3,7 +3,7 @@ from pytest import fixture
 import numpy as np
 from numpy.testing import assert_allclose
 
-from SALib.analyze import delta, dgsm, fast, rbd_fast, sobol, morris
+from SALib.analyze import delta, dgsm, fast, rbd_fast, sobol, morris, hdmr
 from SALib.sample import fast_sampler, finite_diff, latin, saltelli
 from SALib.sample.morris import sample as morris_sampler
 
