@@ -281,18 +281,40 @@ def _compute_elementary_effects(model_inputs: np.ndarray,
                                          trajectory_size)
 
     delta_variables = _calculate_delta_input_variables(input_matrix)
-    value_increased = (delta_variables > 0)
-    value_decreased = (delta_variables < 0)
+    value_increased = delta_variables > 0
+    value_decreased = delta_variables < 0
 
-    result_up = _reorganize_output_matrix(output_matrix, value_increased,
-                                          value_decreased, "increased")
-    result_lo = _reorganize_output_matrix(output_matrix, value_increased,
-                                          value_decreased, "decreased")
+    result_increased = _reorganize_output_matrix(output_matrix,
+                                                 value_increased,
+                                                 value_decreased, "increased")
+    result_decreased = _reorganize_output_matrix(output_matrix,
+                                                 value_increased,
+                                                 value_decreased, "decreased")
 
-    elementary_effects = np.subtract(result_up, result_lo)
+    elementary_effects = _calc_results_difference(result_increased,
+                                                  result_decreased)
     np.divide(elementary_effects, delta, out=elementary_effects)
 
     return elementary_effects
+
+
+def _calc_results_difference(result_up: np.ndarray,
+                             result_lo: np.ndarray) -> np.ndarray:
+    """Computes the difference between the output points.
+
+    Arguments
+    ----------
+    result_up: np.ndarray
+    result_lo: np.ndarray
+
+    Returns
+    -------
+    results_difference: np.ndarray
+        Difference between the output points
+    """
+    results_difference = np.subtract(result_up, result_lo)
+
+    return results_difference
 
 
 def _calculate_delta_input_variables(input_matrix: np.ndarray) -> np.ndarray:
