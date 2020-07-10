@@ -352,16 +352,24 @@ def _init(X, Y, settings):
 
 
 def B_spline(X, m, d):
-    '''Generate cubic B-splines using scipy built-in basis_element
-    method. Knot points, t, are automatically determined. '''
+    """Generate cubic B-splines using scipy basis_element method. 
+    
+    Knot points (`t`) are automatically determined.
+
+    References
+    ----------
+    .. [1] https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.BSpline.basis_element.html
+    """
     # Initialize B matrix
     B = np.zeros((X.shape[0], m+3, d))
+
     # Cubic basis-spline settings
     k = np.arange(-1, m+2)
-    def yk(x): return np.arange(x-2, x+3)
+
     # Compute B-Splines
     for j, i in itertools.product(range(d), range(m+3)):
-        t = yk(k[i]) / m
+        k_i = k[i]
+        t = np.arange(k_i-2, k_i+3) / m
         temp = interpolate.BSpline.basis_element(t)(X[:,j]) * np.power(m,3)
         B[:, i, j] = np.where(temp < 0, 0, temp)
     
@@ -717,11 +725,10 @@ def to_df(self):
     '''
     names = self['names']
 
-    # Special dict entries to ignore
-    exclude_list = ['select', 'Em', 'RT', 'Y_em', 
-                    'idx', 'X', 'Y', 'Term', 'names',
-                    'Sa_sum', 'Sb_sum', 'S_sum', 'emulated', 'Y_test']
-    new_spec = {k: v for k, v in self.items() if k not in exclude_list}
+    # Only convert these elements in dict to DF
+    include_list = ['Sa', 'Sb', 'S', 'ST']
+    include_list += [f'{name}_conf' for name in include_list]
+    new_spec = {k: v for k, v in self.items() if k in include_list}
 
     return pd.DataFrame(new_spec, index=names)
 

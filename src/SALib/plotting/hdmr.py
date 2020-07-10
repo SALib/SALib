@@ -97,8 +97,7 @@ def plot(Si):
         ax.set_xlim(np.min(Y_test), np.max(Y_test))
         ax.set_ylim(np.min(Y_test), np.max(Y_test))
         ax.legend(loc='lower right')
-        ax.text(x=np.min(Y_test)*.2, y=np.max(Y_test) * .8, s=f'SSR = {ssr:.2f}')
-        fig.suptitle(f'Testing results\nSSR = {ssr:.2f}')
+        plt.title(f'Testing results\nSSR = {ssr:.2f}')
         fig.tight_layout()
         plt.show()
 
