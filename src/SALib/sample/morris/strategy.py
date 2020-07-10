@@ -12,8 +12,8 @@ Example
 """
 import abc
 
-import numpy as np
-from scipy.spatial.distance import cdist
+import numpy as np  # type: ignore
+from scipy.spatial.distance import cdist  # type: ignore
 
 
 class SampleMorris(object):
