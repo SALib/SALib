@@ -31,11 +31,11 @@ def test_compute_mu_star_confidence():
 
 
 def test_analysis_of_morris_results():
-    '''
+    """
     Tests a one-dimensional vector of results
 
     Taken from the solution to Exercise 4 (p.138) in Saltelli (2008).
-    '''
+    """
     model_input = np.array([[0, 1. / 3], [0, 1], [2. / 3, 1],
                             [0, 1. / 3], [2. / 3, 1. / 3], [2. / 3, 1],
                             [2. / 3, 0], [2. / 3, 2. / 3], [0, 2. / 3],
@@ -81,19 +81,21 @@ def test_conf_level_within_zero_one_bounds():
     conf_level_too_low = -1
     num_vars = 1
     with raises(ValueError):
-        _compute_mu_star_confidence(ee, num_vars, num_resamples, conf_level_too_low)
+        _compute_mu_star_confidence(ee, num_vars, num_resamples,
+                                    conf_level_too_low)
     conf_level_too_high = 2
     with raises(ValueError):
-        _compute_mu_star_confidence(ee, num_vars, num_resamples, conf_level_too_high)
+        _compute_mu_star_confidence(ee, num_vars, num_resamples,
+                                    conf_level_too_high)
 
 
 def test_compute_elementary_effects():
-    '''
+    """
     Inputs for elementary effects taken from Exercise 5 from Saltelli (2008).
     See page 140-145.
     `model_inputs` are from trajectory t_1 from table 3.10 on page 141.
     `desired` is equivalent to column t_1 in table 3.12 on page 145.
-    '''
+    """
     model_inputs = np.array([
                             [1.64, -1.64, -1.64, 0.39, -0.39, 0.39, -1.64,
                              -1.64, -0.39, -0.39, 1.64, 1.64, -0.39, 0.39,
@@ -183,10 +185,10 @@ def test_compute_grouped_elementary_effects():
 
 
 def test_compute_elementary_effects_small():
-    '''
-    Computes elementary effects for two variables,
-    over six trajectories with four levels.
-    '''
+    """
+    Computes elementary effects for two variables, over six trajectories with
+    four levels.
+    """
     model_inputs = np.array([[0, 1. / 3], [0, 1], [2. / 3, 1],
                              [0, 1. / 3], [2. / 3, 1. / 3], [2. / 3, 1],
                              [2. / 3, 0], [2. / 3, 2. / 3], [0, 2. / 3],
@@ -230,7 +232,7 @@ def test_reorganize_output_matrix_increased():
                               1.87, 1.0],
                              dtype=np.float)
     op_vec = model_outputs.reshape(6, 3)
-    actual = _reorganize_output_matrix(op_vec, up, lo, "increased")
+    actual = _reorganize_output_matrix(op_vec, up, lo)
     desired = np.array([[2.39, 2.3, 2.4, 1.71, 1.54, 1.0],
                         [0.71, 2.39, 2.40, 1.71, 2.15, 2.20]],
                        dtype=np.float)
@@ -259,7 +261,7 @@ def test_reorganize_output_matrix_decreased():
                               2.15, 2.17, 1.54, 2.2, 1.87, 1.0],
                              dtype=np.float)
     op_vec = model_outputs.reshape(6, 3)
-    actual = _reorganize_output_matrix(op_vec, up, lo, "decreased")
+    actual = _reorganize_output_matrix(op_vec, up, lo, increase=False)
     desired = np.array([[0.71, 0.97, 0.87, 2.15, 2.17, 1.87],
                         [0.97, 2.30, 1.87, 1.54, 2.17, 1.87]],
                        dtype=np.float)

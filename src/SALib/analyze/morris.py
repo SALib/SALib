@@ -203,7 +203,7 @@ def _compute_grouped_metric(ungrouped_metric: np.ndarray,
 def _reorganize_output_matrix(output_array: np.ndarray,
                               value_increased: np.ndarray,
                               value_decreased: np.ndarray,
-                              direction: str) -> np.ndarray:
+                              increase: bool = True) -> np.ndarray:
     """Reorganize the output matrix.
 
     This method reorganizes the output matrix in a way that allows the
@@ -221,21 +221,19 @@ def _reorganize_output_matrix(output_array: np.ndarray,
     value_decreased: np.ndarray
         Input variables that had their values decreased when forming the
         trajectories matrix
-    direction: str
-        Direction to consider (values that increased or decreased)
+    increase: bool
+        Direction to consider (values that increased or decreased). "Increase"
+        is the default value.
     Returns
     -------
 
     """
-    if direction == "increased":
+    if increase:
         pad_up = (1, 0)
         pad_lo = (0, 1)
-    elif direction == "decreased":
+    else:
         pad_up = (0, 1)
         pad_lo = (1, 0)
-    else:
-        raise ValueError("The direction should be \'increased\' or "
-                         "\'decreased\'")
 
     value_increased = np.pad(value_increased, ((0, 0), pad_up, (0, 0)),
                              'constant')
@@ -286,10 +284,11 @@ def _compute_elementary_effects(model_inputs: np.ndarray,
 
     result_increased = _reorganize_output_matrix(output_matrix,
                                                  value_increased,
-                                                 value_decreased, "increased")
+                                                 value_decreased)
     result_decreased = _reorganize_output_matrix(output_matrix,
                                                  value_increased,
-                                                 value_decreased, "decreased")
+                                                 value_decreased,
+                                                 increase=False)
 
     elementary_effects = _calc_results_difference(result_increased,
                                                   result_decreased)
