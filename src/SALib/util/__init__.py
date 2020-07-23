@@ -10,6 +10,7 @@ import numpy as np  # type: ignore
 import scipy as sp  # type: ignore
 from scipy import stats
 from typing import List
+from scipy.linalg import cholesky
 
 from .util_funcs import (
     avail_approaches, read_param_file, _check_bounds, _check_groups)
@@ -129,7 +130,7 @@ def _nonuniform_scale_samples(params, bounds, dists):
     params : numpy.ndarray
         numpy array of dimensions num_params-by-N,
         where N is the number of samples
-    dists : list
+    dists : list / str
         list of distributions, one for each parameter
             unif: uniform with lower and upper bounds
             triang: triangular with lower and upper bounds, as well as
@@ -143,17 +144,26 @@ def _nonuniform_scale_samples(params, bounds, dists):
             truncnorm: truncated normal distribution with upper and lower
                     bounds, mean and standard deviation
             lognorm: lognormal with ln-space mean and standard deviation
+        if str - distribution is multivariative, now only multivaritative 
+            normal is supported. Than bound row is mean and covariance row.
     """
     b = np.array(bounds)
 
     # initializing matrix for converted values
     conv_params = np.empty_like(params)
+    
+    if isinstance(dists, list):
+        # loop over the parameters
+        for i in range(conv_params.shape[1]):
+            # setting first and second arguments for distributions
+            b1 = b[i][0]
+            b2 = b[i][1]
 
     # loop over the parameters
     for i in range(conv_params.shape[1]):
         # setting first and second arguments for distributions
-        b1 = b[i][0]  # ending
-        b2 = b[i][1]  # 0-1
+        b1 = b[i][0]
+        b2 = b[i][1]
 
         if dists[i] == 'triang':
             if len(b[i]) == 3:
@@ -228,11 +238,29 @@ def _nonuniform_scale_samples(params, bounds, dists):
             else:
                 conv_params[:, i] = np.exp(
                     sp.stats.norm.ppf(params[:, i], loc=b1, scale=b2))
-
         else:
-            valid_dists = ['unif', 'triang', 'norm', 'truncnorm', 'lognorm']
+            valid_dists = ['unif', 'triang', 'norm', 'lognorm']
             raise ValueError('Distributions: choose one of %s' %
                              ", ".join(valid_dists))
+    
+    elif isinstance(dists, str):
+        if dists == 'multi_norm':
+            assert b.shape[0] == conv_params.shape[1] and  \
+                   b.shape[1] == conv_params.shape[1] + 1, \
+                "bounds should have shape of num_vars*(num_vars+1)!"
+
+            # first element is a mean value, 
+            means = b[:, 0]
+            cov   = b[:, 1:] 
+            n_std = sp.stats.norm.ppf(params)
+            conv_params = np.dot(cholesky(cov, lower=True), n_std.T).T + means
+
+        else:
+            valid_multi_dists = ['multi_norm']
+            raise ValueError('Multi distributions: choose one of %s' %
+                                ", ".join(valid_multi_dists))
+    else:
+        raise TypeError("dists should be of list or str type!")
 
     return conv_params
 
