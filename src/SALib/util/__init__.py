@@ -11,6 +11,7 @@ import numpy as np  # type: ignore
 import scipy as sp  # type: ignore
 from scipy import stats
 from typing import List
+from scipy.linalg import cholesky
 
 
 __all__ = ["scale_samples", "read_param_file",
@@ -106,64 +107,86 @@ def nonuniform_scale_samples(params, bounds, dists):
     params : numpy.ndarray
         numpy array of dimensions num_params-by-N,
         where N is the number of samples
-    dists : list
+    dists : list / str
         list of distributions, one for each parameter
             unif: uniform with lower and upper bounds
             triang: triangular with width (scale) and location of peak
                     location of peak is in percentage of width
                     lower bound assumed to be zero
-            norm: normal distribution with mean and standard deviation
+            norm: normal distribution with mean and standard deviation or
             lognorm: lognormal with ln-space mean and standard deviation
+        if str - distribution is multivariative, now only multivaritative 
+            normal is supported. Than bound row is mean and covariance row.
     """
     b = np.array(bounds)
 
     # initializing matrix for converted values
     conv_params = np.empty_like(params)
+    
+    if isinstance(dists, list):
+        # loop over the parameters
+        for i in range(conv_params.shape[1]):
+            # setting first and second arguments for distributions
+            b1 = b[i][0]
+            b2 = b[i][1]
 
-    # loop over the parameters
-    for i in range(conv_params.shape[1]):
-        # setting first and second arguments for distributions
-        b1 = b[i][0]
-        b2 = b[i][1]
+            if dists[i] == 'triang':
+                # checking for correct parameters
+                if b1 <= 0 or b2 <= 0 or b2 >= 1:
+                    raise ValueError('''Triangular distribution: Scale must be
+                        greater than zero; peak on interval [0,1]''')
+                else:
+                    conv_params[:, i] = sp.stats.triang.ppf(
+                        params[:, i], c=b2, scale=b1, loc=0)
 
-        if dists[i] == 'triang':
-            # checking for correct parameters
-            if b1 <= 0 or b2 <= 0 or b2 >= 1:
-                raise ValueError('''Triangular distribution: Scale must be
-                    greater than zero; peak on interval [0,1]''')
+            elif dists[i] == 'unif':
+                if b1 >= b2:
+                    raise ValueError('''Uniform distribution: lower bound
+                        must be less than upper bound''')
+                else:
+                    conv_params[:, i] = params[:, i] * (b2 - b1) + b1
+
+            elif dists[i] == 'norm':
+                if b2 <= 0:
+                    raise ValueError('''Normal distribution: stdev must be > 0''')
+                else:
+                    conv_params[:, i] = sp.stats.norm.ppf(
+                        params[:, i], loc=b1, scale=b2)
+
+            # lognormal distribution (ln-space, not base-10)
+            # paramters are ln-space mean and standard deviation
+            elif dists[i] == 'lognorm':
+                # checking for valid parameters
+                if b2 <= 0:
+                    raise ValueError(
+                        '''Lognormal distribution: stdev must be > 0''')
+                else:
+                    conv_params[:, i] = np.exp(
+                        sp.stats.norm.ppf(params[:, i], loc=b1, scale=b2))
+
             else:
-                conv_params[:, i] = sp.stats.triang.ppf(
-                    params[:, i], c=b2, scale=b1, loc=0)
+                valid_dists = ['unif', 'triang', 'norm', 'lognorm']
+                raise ValueError('Distributions: choose one of %s' %
+                                ", ".join(valid_dists))
+    
+    elif isinstance(dists, str):
+        if dists == 'multi_norm':
+            assert b.shape[0] == conv_params.shape[1] and  \
+                   b.shape[1] == conv_params.shape[1] + 1, \
+                "bounds should have shape of num_vars*(num_vars+1)!"
 
-        elif dists[i] == 'unif':
-            if b1 >= b2:
-                raise ValueError('''Uniform distribution: lower bound
-                    must be less than upper bound''')
-            else:
-                conv_params[:, i] = params[:, i] * (b2 - b1) + b1
-
-        elif dists[i] == 'norm':
-            if b2 <= 0:
-                raise ValueError('''Normal distribution: stdev must be > 0''')
-            else:
-                conv_params[:, i] = sp.stats.norm.ppf(
-                    params[:, i], loc=b1, scale=b2)
-
-        # lognormal distribution (ln-space, not base-10)
-        # paramters are ln-space mean and standard deviation
-        elif dists[i] == 'lognorm':
-            # checking for valid parameters
-            if b2 <= 0:
-                raise ValueError(
-                    '''Lognormal distribution: stdev must be > 0''')
-            else:
-                conv_params[:, i] = np.exp(
-                    sp.stats.norm.ppf(params[:, i], loc=b1, scale=b2))
+            # first element is a mean value, 
+            means = b[:, 0]
+            cov   = b[:, 1:] 
+            n_std = sp.stats.norm.ppf(params)
+            conv_params = np.dot(cholesky(cov, lower=True), n_std.T).T + means
 
         else:
-            valid_dists = ['unif', 'triang', 'norm', 'lognorm']
-            raise ValueError('Distributions: choose one of %s' %
-                             ", ".join(valid_dists))
+            valid_multi_dists = ['multi_norm']
+            raise ValueError('Mylti distributions: choose one of %s' %
+                                ", ".join(valid_multi_dists))
+    else:
+        raise TypeError("dists should be of list or str type!")
 
     return conv_params
 
