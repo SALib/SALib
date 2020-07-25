@@ -39,6 +39,18 @@ class ProblemSpec(dict):
         self._add_samplers()
         self._add_analyzers()
 
+    @property
+    def samples(self):
+        return self._samples
+
+    @property
+    def results(self):
+        return self._results
+    
+    @property
+    def analysis(self):
+        return self._analysis
+
     def sample(self, func, *args, **kwargs):
         """Create sample using given function.
         
@@ -77,22 +89,20 @@ class ProblemSpec(dict):
             nprocs = cpu_count()
 
         # Create wrapped partial function to allow passing of additional args
-        if (len(args) == 0) and (len(kwargs) == 0):
-            tmp_f = func
-        else:
-            partial_f = partial(func, *args, **kwargs)
-            def tmp_f(X_i):
-                """Helper function to run each sample independently"""
-                return partial_f(X_i)
+        tmp_f = func
+        if (len(args) > 0) or (len(kwargs) > 0):
+            tmp_f = partial(func, *args, **kwargs)
 
         # Split into even chunks
         chunks = np.array_split(self._samples, int(nprocs), axis=0)
 
         # Set up result array
-        if len(self['outputs']) - 1 > 1:
-            final_res = np.empty((len(self._samples), len(self['outputs'])))
+        if len(self['outputs']) > 1:
+            res_shape = (len(self._samples), len(self['outputs']))
         else:
-            final_res = np.empty(len(self._samples))
+            res_shape = len(self._samples)
+
+        final_res = np.empty(res_shape)
 
         if ptqdm_available:
             # Display progress bar if available
@@ -101,6 +111,7 @@ class ProblemSpec(dict):
             with Pool(nprocs) as pool:
                 res = list(pool.imap(tmp_f, chunks))
 
+        # Collect results
         i = 0
         for r in res:
             r_len = len(r)
@@ -132,8 +143,7 @@ class ProblemSpec(dict):
     def to_df(self):
         """Convert results to Pandas DataFrame."""
         an_res = self._analysis
-        is_rd_type = isinstance(an_res, ResultDict)
-        if is_rd_type:
+        if isinstance(an_res, ResultDict):
             return an_res.to_df()
         elif isinstance(an_res, dict):
             # case where analysis result is a dict of ResultDicts
