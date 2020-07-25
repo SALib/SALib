@@ -8,9 +8,10 @@ import numpy as np
 import SALib
 import SALib.sample as samplers
 import SALib.analyze as analyzers
-from SALib.util import avail_approaches
 
+from SALib.util import avail_approaches
 from SALib.util.results import ResultDict
+
 
 ptqdm_available = True
 try:

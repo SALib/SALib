@@ -4,8 +4,10 @@
 from collections import OrderedDict
 import pkgutil
 
-import numpy as np
-import scipy as sp
+import numpy as np  # type: ignore
+import scipy as sp  # type: ignore
+from scipy import stats
+from typing import List
 
 from .util_funcs import (avail_approaches, read_param_file, requires_gurobipy)
 from .problem import ProblemSpec
@@ -15,7 +17,8 @@ from .results import ResultDict
 __all__ = ["scale_samples", "read_param_file",
            "ResultDict", "avail_approaches"]
 
-def scale_samples(params, bounds):
+
+def scale_samples(params: np.ndarray, bounds: List):
     '''Rescale samples in 0-to-1 range to arbitrary bounds
 
     Arguments
@@ -144,9 +147,6 @@ def nonuniform_scale_samples(params, bounds, dists):
                              ", ".join(valid_dists))
 
     return conv_params
-
-
-
 
 
 def compute_groups_matrix(groups):
