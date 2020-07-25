@@ -24,9 +24,8 @@ __all__ = ['ProblemSpec']
 
 
 class ProblemSpec(dict):
-    '''Dictionary holding problem specifications.
-
-    '''
+    """Dictionary-like object representing an SALib Problem specification.
+    """
     def __init__(self, *args, **kwargs):
         super(ProblemSpec, self).__init__(*args, **kwargs)
 
@@ -54,7 +53,23 @@ class ProblemSpec(dict):
     def sample(self, func, *args, **kwargs):
         """Create sample using given function.
         
-        Sampling function must accept the problem spec as the first parameter.
+        Sampling function must accept the problem spec as the first parameter,
+        and return a numpy array.
+
+        Parameters
+        ----------
+        func : function,
+            Sampling method to use.
+        
+        *args : list,
+            Additional arguments to be passed to `func`
+        
+        **kwargs : dict,
+            Additional keyword arguments passed to `func`
+
+        Returns
+        ----------
+        self : ProblemSpec object
         """
         self._samples = func(self, *args, **kwargs)
         # Clear model output and analysis results as well?
@@ -62,23 +77,60 @@ class ProblemSpec(dict):
 
         return self
 
-    def run(self, func, *args, **kwargs):
-        """Run a given model.
+    def evaluate(self, func, *args, **kwargs):
+        """Evaluate a given model.
 
-        The target model must accept the samples as the first parameter.
+        Usage Conditions:
+        * The provided function needs to accept a numpy array of inputs as 
+          its first parameter
+        * `func` must return a numpy array of results
+
+        Parameters
+        ----------
+        func : function,
+            Model, or function that wraps a model, to be run in parallel
+        
+        *args : list,
+            Additional arguments to be passed to `func`
+        
+        **kwargs : dict,
+            Additional keyword arguments passed to `func`
+
+        Returns
+        ----------
+        self : ProblemSpec object
         """
         self._results = func(self._samples, *args, **kwargs)
 
         return self
     
-    def run_parallel(self, func, *args, nprocs=None, **kwargs):
-        """Run model in parallel.
+    def evaluate_parallel(self, func, *args, nprocs=None, **kwargs):
+        """Evaluate model in parallel.
 
-        Conditions:
-        * Provided function needs to accept a numpy array of inputs as 
+        Usage Conditions:
+        * The provided function needs to accept a numpy array of inputs as 
           its first parameter
+        * The provided function must return a numpy array of results
 
-        All detected processors will be used if nprocs is not specified.
+        All detected processors will be used if `nprocs` is not specified.
+
+        Parameters
+        ----------
+        func : function,
+            Model, or function that wraps a model, to be run in parallel
+        
+        nprocs : int,
+            Number of processors to use.
+        
+        *args : list,
+            Additional arguments to be passed to `func`
+        
+        **kwargs : dict,
+            Additional keyword arguments passed to `func`
+
+        Returns
+        ----------
+        self : ProblemSpec object
         """
         warnings.warn("This is an experimental feature and may break.")
 
@@ -125,7 +177,23 @@ class ProblemSpec(dict):
     def analyze(self, func, *args, **kwargs):
         """Analyze sampled results using given function.
 
-        Analysis function must accept the problem spec as the first parameter.
+        Analysis function must accept the problem spec as the first parameter
+        and return a numpy array.
+
+        Parameters
+        ----------
+        func : function,
+            Analysis method to use.
+        
+        *args : list,
+            Additional arguments to be passed to `func`
+        
+        **kwargs : dict,
+            Additional keyword arguments passed to `func`
+
+        Returns
+        ----------
+        self : ProblemSpec object
         """
         if 'X' in func.__code__.co_varnames:
             # enforce passing of X if expected
