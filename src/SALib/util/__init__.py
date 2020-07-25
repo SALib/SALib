@@ -100,8 +100,8 @@ def unscale_samples(params, bounds):
 def nonuniform_scale_samples(params, bounds, dists):
     """Rescale samples in 0-to-1 range to other distributions
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     problem : dict
         problem definition including bounds
     params : numpy.ndarray
@@ -125,10 +125,29 @@ def nonuniform_scale_samples(params, bounds, dists):
 
     # initializing matrix for converted values
     conv_params = np.empty_like(params)
+    conv_len = conv_params.shape[1]
+
+    is_str = isinstance(dists, str)
+    if is_str and (dists == 'multi_norm'):
+        assert b.shape[0] == conv_len and  \
+                b.shape[1] == conv_len + 1, \
+            "Bounds should have shape matching (num_vars, (num_vars+1))"
+
+        # first element is a mean value
+        means = b[:, 0]
+        cov   = b[:, 1:] 
+        n_std = sp.stats.norm.ppf(params)
+        conv_params = np.dot(cholesky(cov, lower=True), n_std.T).T + means
+
+        return conv_params
+    elif is_str:
+        valid_multi_dists = ['multi_norm']
+        raise ValueError('Multi distributions: choose one of %s' %
+                            ", ".join(valid_multi_dists))
     
     if isinstance(dists, list):
         # loop over the parameters
-        for i in range(conv_params.shape[1]):
+        for i in range(conv_len):
             # setting first and second arguments for distributions
             b1 = b[i][0]
             b2 = b[i][1]
@@ -171,25 +190,6 @@ def nonuniform_scale_samples(params, bounds, dists):
                 valid_dists = ['unif', 'triang', 'norm', 'lognorm']
                 raise ValueError('Distributions: choose one of %s' %
                                 ", ".join(valid_dists))
-    
-    elif isinstance(dists, str):
-        if dists == 'multi_norm':
-            assert b.shape[0] == conv_params.shape[1] and  \
-                   b.shape[1] == conv_params.shape[1] + 1, \
-                "bounds should have shape of num_vars*(num_vars+1)!"
-
-            # first element is a mean value, 
-            means = b[:, 0]
-            cov   = b[:, 1:] 
-            n_std = sp.stats.norm.ppf(params)
-            conv_params = np.dot(cholesky(cov, lower=True), n_std.T).T + means
-
-        else:
-            valid_multi_dists = ['multi_norm']
-            raise ValueError('Mylti distributions: choose one of %s' %
-                                ", ".join(valid_multi_dists))
-    else:
-        raise TypeError("dists should be of list or str type!")
 
     return conv_params
 
