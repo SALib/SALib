@@ -103,7 +103,7 @@ class ProblemSpec(dict):
         return self
     
     def evaluate_parallel(self, func, *args, nprocs=None, **kwargs):
-        """Evaluate model in parallel.
+        """Evaluate model locally in parallel.
 
         Usage Conditions:
         * The provided function needs to accept a numpy array of inputs as 
@@ -118,7 +118,7 @@ class ProblemSpec(dict):
             Model, or function that wraps a model, to be run in parallel
         
         nprocs : int,
-            Number of processors to use.
+            Number of processors to use. Uses all available if not specified.
         
         *args : list,
             Additional arguments to be passed to `func`
