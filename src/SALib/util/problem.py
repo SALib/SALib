@@ -139,20 +139,10 @@ class ProblemSpec(dict):
             nprocs = cpu_count()
 
         # Create wrapped partial function to allow passing of additional args
-        tmp_f = func
-        if (len(args) > 0) or (len(kwargs) > 0):
-            tmp_f = partial(func, *args, **kwargs)
+        tmp_f = self._wrap_func(func, *args, **kwargs)
 
         # Split into even chunks
         chunks = np.array_split(self._samples, int(nprocs), axis=0)
-
-        # Set up result array
-        if len(self['outputs']) > 1:
-            res_shape = (len(self._samples), len(self['outputs']))
-        else:
-            res_shape = len(self._samples)
-
-        final_res = np.empty(res_shape)
 
         if ptqdm_available:
             # Display progress bar if available
@@ -161,16 +151,67 @@ class ProblemSpec(dict):
             with Pool(nprocs) as pool:
                 res = list(pool.imap(tmp_f, chunks))
 
-        # Collect results
-        i = 0
-        for r in res:
-            r_len = len(r)
-            final_res[i:i+r_len] = r
-            i += r_len
-
-        self._results = final_res
+        self._results = self._collect_results(res)
 
         return self
+
+    def evaluate_distributed(self, func, *args, nprocs=1, servers=None, verbose=False, **kwargs):
+        """Distribute model evaluation across a cluster.
+
+        Usage Conditions:
+        * The provided function needs to accept a numpy array of inputs as 
+          its first parameter
+        * The provided function must return a numpy array of results
+
+        Parameters
+        ----------
+        func : function,
+            Model, or function that wraps a model, to be run in parallel
+        
+        nprocs : int,
+            Number of processors to use for each node. Defaults to 1.
+        
+        servers : list[str] or None,
+            IP addresses or alias for each server/node to use.
+
+        verbose : bool,
+            Display job execution statistics. Defaults to False.
+        
+        *args : list,
+            Additional arguments to be passed to `func`
+        
+        **kwargs : dict,
+            Additional keyword arguments passed to `func`
+
+        Returns
+        ----------
+        self : ProblemSpec object
+        """
+        from pathos.pp import ParallelPythonPool as Pool
+
+        if verbose:
+            from pathos.parallel import stats
+
+        warnings.warn("This is an untested experimental feature and may not work.")
+
+        workers = Pool(nprocs, servers=servers)
+
+        # Split into even chunks
+        chunks = np.array_split(self._samples, int(nprocs)*len(servers), axis=0)
+
+        tmp_f = self._wrap_func(func)
+
+        res = list(workers.map(tmp_f, chunks))
+
+        self._results = self._collect_results(res)
+
+        if verbose:
+            print(stats(), '\n')
+
+        workers.clear()
+
+        return self
+
 
     def analyze(self, func, *args, **kwargs):
         """Analyze sampled results using given function.
@@ -216,6 +257,34 @@ class ProblemSpec(dict):
             return [an.to_df() for an in list(an_res.values())]
         
         raise RuntimeError("Analysis not yet conducted")
+
+    def _wrap_func(self, func, *args, **kwargs):
+        # Create wrapped partial function to allow passing of additional args
+        tmp_f = func
+        if (len(args) > 0) or (len(kwargs) > 0):
+            tmp_f = partial(func, *args, **kwargs)
+        
+        return tmp_f
+    
+    def _setup_result_array(self):
+        if len(self['outputs']) > 1:
+            res_shape = (len(self._samples), len(self['outputs']))
+        else:
+            res_shape = len(self._samples)
+
+        return np.empty(res_shape)
+
+    def _collect_results(self, res):
+        final_res = self._setup_result_array()
+
+        # Collect results
+        i = 0
+        for r in res:
+            r_len = len(r)
+            final_res[i:i+r_len] = r
+            i += r_len
+        
+        return final_res
 
     def _add_samplers(self):
         """Dynamically add available SALib samplers as ProblemSpec methods."""

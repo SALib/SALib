@@ -24,18 +24,34 @@ if __name__ == '__main__':
         'outputs': ['Y']
     })
 
+    # Single core example
     start = time.perf_counter()
     (sp.sample(saltelli.sample, 75000, calc_second_order=True)
         .evaluate(Ishigami.evaluate)
         .analyze(sobol.analyze, calc_second_order=True, conf_level=0.95))
-    print("Time taken with 1 core:", time.perf_counter() - start)
+    print("Time taken with 1 core:", time.perf_counter() - start, '\n')
 
+    # Parallel example
     start = time.perf_counter()
     (sp.sample(saltelli.sample, 75000, calc_second_order=True)
          # can specify number of processors to use with `nprocs`
         .evaluate_parallel(Ishigami.evaluate)
         .analyze(sobol.analyze, calc_second_order=True, conf_level=0.95))
-    print("Time taken with all available cores:", time.perf_counter() - start)
+    print("Time taken with all available cores:", time.perf_counter() - start, '\n')
+
+    print(sp)
+    
+    # Distributed example
+    # Specify itself as servers as an example
+    servers = ('localhost:55774',
+               'localhost:55775',
+               'localhost:55776')
+
+    start = time.perf_counter()
+    (sp.sample(saltelli.sample, 75000, calc_second_order=True)
+        .evaluate_distributed(Ishigami.evaluate, nprocs=2, servers=servers, verbose=True)
+        .analyze(sobol.analyze, calc_second_order=True, conf_level=0.95))
+    print("Time taken with distributed cores:", time.perf_counter() - start, '\n')
 
     print(sp)
 
