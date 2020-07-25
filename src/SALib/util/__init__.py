@@ -107,16 +107,19 @@ def nonuniform_scale_samples(params, bounds, dists):
     params : numpy.ndarray
         numpy array of dimensions num_params-by-N,
         where N is the number of samples
-    dists : list / str
-        list of distributions, one for each parameter
+    dists : list or str
+        list - a list of distributions, one for each parameter
             unif: uniform with lower and upper bounds
             triang: triangular with width (scale) and location of peak
                     location of peak is in percentage of width
                     lower bound assumed to be zero
             norm: normal distribution with mean and standard deviation or
             lognorm: lognormal with ln-space mean and standard deviation
-        if str - distribution is multivariative, now only multivaritative 
-            normal is supported. Than bound row is mean and covariance row.
+        str - distribution applied to all parameters
+            multi_norm: Correlated distribution using the Cholesky 
+            decomposition approach.
+            In this case `bounds` specifies mean (first column) and desired
+            covariance (other columns).
     """
     b = np.array(bounds)
 
