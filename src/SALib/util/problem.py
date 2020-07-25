@@ -5,7 +5,6 @@ import importlib
 
 import numpy as np
 
-import SALib
 import SALib.sample as samplers
 import SALib.analyze as analyzers
 
