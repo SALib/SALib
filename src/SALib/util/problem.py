@@ -2,7 +2,6 @@ import warnings
 from multiprocess import Pool, cpu_count
 from functools import partial, wraps
 import importlib
-import pkgutil
 
 import numpy as np
 
