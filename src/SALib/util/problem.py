@@ -1,3 +1,4 @@
+import warnings
 from multiprocess import Pool, cpu_count
 from functools import partial, wraps
 import importlib
@@ -67,6 +68,8 @@ class ProblemSpec(dict):
 
         All detected processors will be used if nprocs is not specified.
         """
+        warnings.warn("This is an experimental feature and may break.")
+
         if self._samples is None:
             raise RuntimeError("Sampling not yet conducted")
         
