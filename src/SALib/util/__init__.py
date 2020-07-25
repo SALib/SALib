@@ -154,10 +154,29 @@ def _nonuniform_scale_samples(params, bounds, dists):
 
     # initializing matrix for converted values
     conv_params = np.empty_like(params)
+    conv_len = conv_params.shape[1]
+
+    is_str = isinstance(dists, str)
+    if is_str and (dists == 'multi_norm'):
+        assert b.shape[0] == conv_len and  \
+                b.shape[1] == conv_len + 1, \
+            "Bounds should have shape matching (num_vars, (num_vars+1))"
+
+        # first element is a mean value
+        means = b[:, 0]
+        cov   = b[:, 1:] 
+        n_std = sp.stats.norm.ppf(params)
+        conv_params = np.dot(cholesky(cov, lower=True), n_std.T).T + means
+
+        return conv_params
+    elif is_str:
+        valid_multi_dists = ['multi_norm']
+        raise ValueError('Multi distributions: choose one of %s' %
+                            ", ".join(valid_multi_dists))
     
     if isinstance(dists, list):
         # loop over the parameters
-        for i in range(conv_params.shape[1]):
+        for i in range(conv_len):
             # setting first and second arguments for distributions
             b1 = b[i][0]
             b2 = b[i][1]
