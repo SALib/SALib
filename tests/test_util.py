@@ -6,6 +6,7 @@ from numpy.testing import assert_equal, assert_allclose
 import numpy as np
 import pytest
 
+from SALib.sample import saltelli
 from SALib.util import read_param_file, scale_samples, unscale_samples, \
     compute_groups_matrix
 
@@ -177,3 +178,29 @@ def test_compute_groups_from_parameter_file():
     assert_equal(actual_matrix, np.array(
         [[1, 0], [0, 1], [0, 1]], dtype=np.int))
     assert_equal(actual_unique_names, ['Group 1', 'Group 2'])
+
+def test_covarianced_sampling():
+    means = np.array([1, 2, 3, 4])
+    means = np.expand_dims(means, axis = 0).T
+
+    cov = np.array([
+        [16,  2.4,  0,  0], 
+        [2.4,  4,   0,  0], 
+        [0,    0,  16, -5], 
+        [0,    0,  -5,  9]
+    ])
+
+    composition = np.hstack((means, cov))
+
+
+
+    problem = {
+        'num_vars': 4,
+        'names': ['x1', 'x2', 'x3', 'x4'],
+        'bounds': composition,
+        'dists': 'multi_norm',
+    }
+
+    X = saltelli.sample(problem, 100000, calc_second_order=False)
+    np.testing.assert_almost_equal(cov, np.cov(X.T), decimal=3)
+    np.testing.assert_almost_equal(means[:, 0], np.mean(X, axis=0), decimal=3)
