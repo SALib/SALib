@@ -9,6 +9,7 @@ import pkgutil
 
 import numpy as np  # type: ignore
 import scipy as sp  # type: ignore
+from scipy import stats
 from typing import List
 
 
