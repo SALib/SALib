@@ -11,7 +11,6 @@ import numpy as np  # type: ignore
 import scipy as sp  # type: ignore
 from scipy import stats
 from typing import List
-from scipy.linalg import cholesky
 
 
 __all__ = ["scale_samples", "read_param_file",
@@ -100,96 +99,71 @@ def unscale_samples(params, bounds):
 def nonuniform_scale_samples(params, bounds, dists):
     """Rescale samples in 0-to-1 range to other distributions
 
-    Parameters
-    ----------
+    Arguments
+    ---------
     problem : dict
         problem definition including bounds
     params : numpy.ndarray
         numpy array of dimensions num_params-by-N,
         where N is the number of samples
-    dists : list or str
-        list - a list of distributions, one for each parameter
+    dists : list
+        list of distributions, one for each parameter
             unif: uniform with lower and upper bounds
             triang: triangular with width (scale) and location of peak
                     location of peak is in percentage of width
                     lower bound assumed to be zero
-            norm: normal distribution with mean and standard deviation or
+            norm: normal distribution with mean and standard deviation
             lognorm: lognormal with ln-space mean and standard deviation
-        str - distribution applied to all parameters
-            multi_norm: Correlated distribution using the Cholesky 
-            decomposition approach.
-            In this case `bounds` specifies mean (first column) and desired
-            covariance (other columns).
     """
     b = np.array(bounds)
 
     # initializing matrix for converted values
     conv_params = np.empty_like(params)
-    conv_len = conv_params.shape[1]
 
-    is_str = isinstance(dists, str)
-    if is_str and (dists == 'multi_norm'):
-        assert b.shape[0] == conv_len and  \
-                b.shape[1] == conv_len + 1, \
-            "Bounds should have shape matching (num_vars, (num_vars+1))"
+    # loop over the parameters
+    for i in range(conv_params.shape[1]):
+        # setting first and second arguments for distributions
+        b1 = b[i][0]
+        b2 = b[i][1]
 
-        # first element is a mean value
-        means = b[:, 0]
-        cov   = b[:, 1:] 
-        n_std = sp.stats.norm.ppf(params)
-        conv_params = np.dot(cholesky(cov, lower=True), n_std.T).T + means
-
-        return conv_params
-    elif is_str:
-        valid_multi_dists = ['multi_norm']
-        raise ValueError('Multi distributions: choose one of %s' %
-                            ", ".join(valid_multi_dists))
-    
-    if isinstance(dists, list):
-        # loop over the parameters
-        for i in range(conv_len):
-            # setting first and second arguments for distributions
-            b1 = b[i][0]
-            b2 = b[i][1]
-
-            if dists[i] == 'triang':
-                # checking for correct parameters
-                if b1 <= 0 or b2 <= 0 or b2 >= 1:
-                    raise ValueError('''Triangular distribution: Scale must be
-                        greater than zero; peak on interval [0,1]''')
-                else:
-                    conv_params[:, i] = sp.stats.triang.ppf(
-                        params[:, i], c=b2, scale=b1, loc=0)
-
-            elif dists[i] == 'unif':
-                if b1 >= b2:
-                    raise ValueError('''Uniform distribution: lower bound
-                        must be less than upper bound''')
-                else:
-                    conv_params[:, i] = params[:, i] * (b2 - b1) + b1
-
-            elif dists[i] == 'norm':
-                if b2 <= 0:
-                    raise ValueError('''Normal distribution: stdev must be > 0''')
-                else:
-                    conv_params[:, i] = sp.stats.norm.ppf(
-                        params[:, i], loc=b1, scale=b2)
-
-            # lognormal distribution (ln-space, not base-10)
-            # paramters are ln-space mean and standard deviation
-            elif dists[i] == 'lognorm':
-                # checking for valid parameters
-                if b2 <= 0:
-                    raise ValueError(
-                        '''Lognormal distribution: stdev must be > 0''')
-                else:
-                    conv_params[:, i] = np.exp(
-                        sp.stats.norm.ppf(params[:, i], loc=b1, scale=b2))
-
+        if dists[i] == 'triang':
+            # checking for correct parameters
+            if b1 <= 0 or b2 <= 0 or b2 >= 1:
+                raise ValueError('''Triangular distribution: Scale must be
+                    greater than zero; peak on interval [0,1]''')
             else:
-                valid_dists = ['unif', 'triang', 'norm', 'lognorm']
-                raise ValueError('Distributions: choose one of %s' %
-                                ", ".join(valid_dists))
+                conv_params[:, i] = sp.stats.triang.ppf(
+                    params[:, i], c=b2, scale=b1, loc=0)
+
+        elif dists[i] == 'unif':
+            if b1 >= b2:
+                raise ValueError('''Uniform distribution: lower bound
+                    must be less than upper bound''')
+            else:
+                conv_params[:, i] = params[:, i] * (b2 - b1) + b1
+
+        elif dists[i] == 'norm':
+            if b2 <= 0:
+                raise ValueError('''Normal distribution: stdev must be > 0''')
+            else:
+                conv_params[:, i] = sp.stats.norm.ppf(
+                    params[:, i], loc=b1, scale=b2)
+
+        # lognormal distribution (ln-space, not base-10)
+        # paramters are ln-space mean and standard deviation
+        elif dists[i] == 'lognorm':
+            # checking for valid parameters
+            if b2 <= 0:
+                raise ValueError(
+                    '''Lognormal distribution: stdev must be > 0''')
+            else:
+                conv_params[:, i] = np.exp(
+                    sp.stats.norm.ppf(params[:, i], loc=b1, scale=b2))
+
+        else:
+            valid_dists = ['unif', 'triang', 'norm', 'lognorm']
+            raise ValueError('Distributions: choose one of %s' %
+                             ", ".join(valid_dists))
 
     return conv_params
 
