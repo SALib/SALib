@@ -3,7 +3,7 @@ import numpy as np
 
 from SALib.sample.shapley import sample
 from SALib.analyze.shapley import analyze
-from utils import get_sensitivity_stats
+from .utils import get_sensitivity_stats
 
 
 

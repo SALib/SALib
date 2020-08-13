@@ -3,7 +3,7 @@ import numpy as np
 
 from SALib.sample.sobol_corr import sample
 from SALib.analyze.sobol_corr import analyze
-from utils import get_sensitivity_stats
+from .utils import get_sensitivity_stats
 
 
 
