@@ -348,4 +348,4 @@ def _compute_delta(num_levels: int) -> float:
     -------
     float
     """
-    return num_levels / (2.0 * (num_levels - 1))
+    return num_levels / (6.0 * (num_levels - 1))
