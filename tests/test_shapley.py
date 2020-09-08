@@ -116,7 +116,7 @@ def shapley_Si(problem):
     
     x = sample(problem, **sample_args)
     y = problem['func'](x)
-    return analyze(problem, x, y, **analyze_args)
+    return analyze(problem, y, **analyze_args)
 
 
 def atest_analytical1():
@@ -134,6 +134,6 @@ def test_analytical2():
     problem = make_problem2(rho)
     results_c = get_sensitivity_stats(problem, shapley_Si, n=200)
     results_a = problem['analytical'](rho)
-    assert_allclose(results_c['S1'], results_a['S1'], atol=0.05, rtol=0)
-    assert_allclose(results_c['ST'], results_a['ST'], atol=0.05, rtol=0)
-    assert_allclose(results_c['Sh'], results_a['Sh'], atol=0.05, rtol=0)
+    assert_allclose(results_c['S1'], results_a['S1'], atol=0.1, rtol=0)
+    assert_allclose(results_c['ST'], results_a['ST'], atol=0.1, rtol=0)
+    assert_allclose(results_c['Sh'], results_a['Sh'], atol=0.1, rtol=0)

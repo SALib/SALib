@@ -2,10 +2,11 @@ import numpy as np
 import openturns as ot
 
 
+from ..util import read_param_file
 from ..util.distrs import make_input_distribution
 
 
-def sample(problem, n_sample):
+def sample(problem, n_sample, seed=None):
     """
     Creates the Monte-Carlo samples for correlated variables.
     
@@ -33,12 +34,11 @@ def sample(problem, n_sample):
     """
     assert isinstance(problem, dict), "problem should be of dict type"
     dim = problem['num_vars']
-    seed = problem.get('seed', 42)
-    n_realization = 1
 
     input_distribution = make_input_distribution(problem)
-    ot.RandomGenerator.SetSeed(seed)
-    np.random.seed(seed)
+    if seed:
+        ot.RandomGenerator.SetSeed(seed)
+        np.random.seed(seed)
 
     assert isinstance(n_sample, int), \
         "The number of sample should be an integer"
@@ -98,3 +98,31 @@ def sample(problem, n_sample):
         blocks.append(X)
     
     return np.r_[tuple(blocks)]
+
+
+def cli_parse(parser):
+    """Add method specific options to CLI parser.
+
+    Parameters
+    ----------
+    parser : argparse object
+
+    Returns
+    ----------
+    Updated argparse object
+    """
+    
+    return parser
+
+
+def cli_action(args):
+    """Run sampling method
+
+    Parameters
+    ----------
+    args : argparse namespace
+    """
+    problem = read_param_file(args.paramfile)
+    param_values = sample(problem, args.samples, args.seed)
+    np.savetxt(args.output, param_values, delimiter=args.delimiter,
+               fmt='%.' + str(args.precision) + 'e')

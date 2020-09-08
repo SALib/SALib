@@ -3,8 +3,9 @@ import numpy as np
 import openturns as ot
 
 
+from ..util import read_param_file
 
-def analyze(problem, x, y, n_perms, n_var, n_outer, n_inner, n_boot=1):
+def analyze(problem, y, n_perms, n_var, n_outer, n_inner, n_boot=1):
     """Computes the Shapley indices.
     
     The Shapley indices are computed from the computed samples. In addition
@@ -22,7 +23,6 @@ def analyze(problem, x, y, n_perms, n_var, n_outer, n_inner, n_boot=1):
         The sensitivity results of the estimation.
     
     """
-    x = np.array(x)
     y = np.array(y)
 
     assert isinstance(n_boot, int), "n_boot should be an integer."
@@ -167,3 +167,31 @@ def analyze(problem, x, y, n_perms, n_var, n_outer, n_inner, n_boot=1):
         'ST': total_indices.reshape(dim, -1).mean(axis=1),
         'Sh': shapley_indices.reshape(dim, -1).mean(axis=1),
     }
+
+
+def cli_parse(parser):
+    parser.add_argument('--n-perms', type=int, required=False, default=None,
+                        help='Number of permutations. Should be less equal than factorial(dimension).')
+    parser.add_argument('--n-outer', type=int, required=True,
+                        help='Number of outer conditional samples.')
+    parser.add_argument('--n-inner', type=int, required=True,
+                        help='Number of inner conditional samples.')
+    parser.add_argument('-r', '--resamples', type=int, required=False,
+                        default=100,
+                        help='Number of bootstrap resamples for Sobol '
+                        'confidence intervals')
+    return parser
+
+
+def cli_action(args):
+    problem = read_param_file(args.paramfile)
+
+    Y = np.loadtxt(args.model_output_file, delimiter=args.delimiter,
+                   usecols=(args.column,))
+
+    analyze(problem, Y, 
+        args.n_perms, 
+        args.samples, 
+        args.n_outer, 
+        args.n_inner, 
+        args.resamples)

@@ -2,7 +2,10 @@ import numpy as np
 import openturns as ot
 
 
-def analyze(problem, x, y, n_sample, n_boot=100, estimator='soboleff2'):
+from ..util import read_param_file
+
+
+def analyze(problem, y, n_sample, n_boot=100, estimator='soboleff2'):
     """
     Computes the Sobol' indices with the pick and freeze strategy.
     
@@ -252,3 +255,26 @@ _DELTA_INDICES = {
         'full': 0,
         'ind': 1,
         }
+
+
+
+def cli_parse(parser):
+    parser.add_argument('-s', '--samples', type=int, required=True,
+                        help='Number of samples')
+    parser.add_argument('-r', '--resamples', type=int, required=False,
+                        default=100,
+                        help='Number of bootstrap resamples for Sobol '
+                        'confidence intervals')
+    parser.add_argument('--estimator', type=str, required=False,
+                        default='soboleff2',
+                        help='Sobol indices estimator.')
+    return parser
+
+
+def cli_action(args):
+    problem = read_param_file(args.paramfile)
+
+    Y = np.loadtxt(args.model_output_file, delimiter=args.delimiter,
+                   usecols=(args.column,))
+
+    analyze(problem, Y, args.samples, args.resamples, args.estimator)

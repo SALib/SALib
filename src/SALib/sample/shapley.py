@@ -3,6 +3,7 @@ import random
 import numpy as np
 import openturns as ot
 
+from ..util import read_param_file
 from ..util.distrs import make_input_distribution
 
 
@@ -218,3 +219,45 @@ def sample(problem, n_perms, n_var, n_outer, n_inner, randomize=True):
 
     X = np.r_[input_sample_1, input_sample_2]
     return X
+
+
+
+def cli_parse(parser):
+    """Add method specific options to CLI parser.
+
+    Parameters
+    ----------
+    parser : argparse object
+
+    Returns
+    ----------
+    Updated argparse object
+    """
+    parser.add_argument('--n-perms', type=int, required=False, default=None,
+                        help='Number of permutations. Should be less equal than factorial(dimension).')
+    parser.add_argument('--n-outer', type=int, required=True,
+                        help='Number of outer conditional samples.')
+    parser.add_argument('--n-inner', type=int, required=True,
+                        help='Number of inner conditional samples.')
+    parser.add_argument('--randomize', type=bool, required=False, default=True,
+                        help='Let the samples be random after permutation sequence fixing.')
+    return parser
+
+
+def cli_action(args):
+    """Run sampling method
+
+    Parameters
+    ----------
+    args : argparse namespace
+    """
+    problem = read_param_file(args.paramfile)
+    param_values = sample(problem, 
+                          args.n_perms, 
+                          args.samples, 
+                          args.n_outer, 
+                          args.n_inner, 
+                          args.randomize)
+
+    np.savetxt(args.output, param_values, delimiter=args.delimiter,
+               fmt='%.' + str(args.precision) + 'e')

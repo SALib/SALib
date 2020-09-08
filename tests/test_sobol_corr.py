@@ -89,7 +89,7 @@ def sobol_corr_Si(problem):
     
     x = sample(problem, **sample_args)
     y = problem['func'](x)
-    return analyze(problem, x, y, **analyze_args)
+    return analyze(problem, y, **analyze_args)
 
 
 def test_analytical1():
@@ -106,7 +106,7 @@ def test_analytical2():
     problem = make_problem2()
     results_c = get_sensitivity_stats(problem, sobol_corr_Si, n=500)
     results_a = problem['analytical']()
-    assert_allclose(results_c['S1_ind'], results_a['S1_ind'], atol=0, rtol=0.2)
-    assert_allclose(results_c['ST_ind'], results_a['ST_ind'], atol=0, rtol=0.2)
-    assert_allclose(results_c['S1_full'], results_a['S1_full'], atol=0, rtol=0.2)
-    assert_allclose(results_c['ST_full'], results_a['ST_full'], atol=0, rtol=0.2)
+    assert_allclose(results_c['S1_ind'], results_a['S1_ind'], atol=0.2, rtol=0)
+    assert_allclose(results_c['ST_ind'], results_a['ST_ind'], atol=0.2, rtol=0)
+    assert_allclose(results_c['S1_full'], results_a['S1_full'], atol=0.2, rtol=0)
+    assert_allclose(results_c['ST_full'], results_a['ST_full'], atol=0.2, rtol=0)

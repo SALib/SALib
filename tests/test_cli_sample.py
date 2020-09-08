@@ -57,6 +57,28 @@ def test_saltelli():
     assert len(result) == 0, "Error occurred!"
 
 
+def test_sobol_corr():
+    cmd = "python {cli} sample sobol_corr -p {fn} -o {test_data} -n 100".format(
+        cli=salib_cli,
+        fn=ishigami_fp,
+        test_data=test_data).split()
+    result = subprocess.check_output(cmd)
+    assert len(result) == 0, "Error occurred!"
+
+
+def test_shapley():
+    cmd = """python {cli} sample shapley -p {fn} -o {test_data}
+        -n 1000
+        --n-outer 100
+        --n-inner 100
+        """.format(
+        cli=salib_cli,
+        fn=ishigami_fp,
+        test_data=test_data).split()
+    result = subprocess.check_output(cmd)
+    assert len(result) == 0, "Error occurred!"
+
+
 if __name__ == '__main__':
     test_cli_entry()
     test_ff()
@@ -64,3 +86,5 @@ if __name__ == '__main__':
     test_finite_diff()
     test_latin()
     test_saltelli()
+    test_sobol_corr()
+    test_shapley()
