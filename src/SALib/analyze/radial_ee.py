@@ -80,7 +80,10 @@ def analyze(problem: Dict, X: np.array, Y: np.array, sample_sets: int,
         x_tmp = (X_base[:, i] - X[pos::nth, i])
 
         # Convert zero division nan to 0
-        ee[:, i] = np.nan_to_num((Y_base - Y[pos::nth]) / x_tmp)
+        try:
+            ee[:, i] = np.nan_to_num((Y_base - Y[pos::nth]) / x_tmp)
+        except ZeroDivisionError:
+            ee[:, i] = 0.0
     # End for
 
     Si = ResultDict((k, [None] * num_vars)
