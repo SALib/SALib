@@ -168,6 +168,34 @@ def nonuniform_scale_samples(params, bounds, dists):
     return conv_params
 
 
+def apply_scaling(problem, sample):
+    """Scale samples based on specified distribution (defaulting to uniform).
+
+    Adds an entry to the problem specification to indicate samples have been
+    scaled to maintain backwards compatibility (`sample_scaled`).
+
+    Parameters
+    ----------
+    problem : dictionary,
+        SALib problem specification
+    sample : np.ndarray,
+        Sample to scale
+
+    Returns
+    ----------
+    np.ndarray, scaled samples
+    """
+    if not problem.get('dists'):
+        scale_samples(sample, problem['bounds'])
+    else:
+        sample = nonuniform_scale_samples(
+            sample, problem['bounds'], problem['dists'])
+
+    problem['sample_scaled'] = True
+
+    return sample
+
+
 def read_param_file(filename, delimiter=None):
     """Unpacks a parameter file into a dictionary
 

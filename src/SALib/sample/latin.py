@@ -3,7 +3,7 @@ from __future__ import division
 import numpy as np
 
 from . import common_args
-from ..util import scale_samples, read_param_file, nonuniform_scale_samples
+from ..util import read_param_file, apply_scaling
 
 
 def sample(problem, N, seed=None):
@@ -38,13 +38,9 @@ def sample(problem, N, seed=None):
         for j in range(N):
             result[j, i] = temp[j]
 
-    if not problem.get('dists'):
-        scale_samples(result, problem['bounds'])
-        return result
-    else:
-        scaled_latin = nonuniform_scale_samples(
-            result, problem['bounds'], problem['dists'])
-        return scaled_latin
+    result = apply_scaling(problem, result)
+
+    return result
 
 
 # No additional CLI options
