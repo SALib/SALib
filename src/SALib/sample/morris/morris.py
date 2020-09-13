@@ -37,7 +37,8 @@ from .brute import BruteForce
 from .strategy import SampleMorris
 
 from SALib.sample import common_args
-from SALib.util import (read_param_file, compute_groups_matrix, apply_scaling)
+from SALib.util import (apply_scaling, read_param_file, compute_groups_matrix,
+                        _define_problem_with_groups, _compute_delta)
 
 
 __all__ = ['sample']
@@ -263,21 +264,6 @@ def _generate_x_star(num_params: int, num_levels: int) -> np.ndarray:
     return x_star
 
 
-def _compute_delta(num_levels: int) -> float:
-    """Computes the delta value from number of levels
-
-    Parameters
-    ---------
-    num_levels : int
-        The number of levels
-
-    Returns
-    -------
-    float
-    """
-    return num_levels / (2.0 * (num_levels - 1))
-
-
 def _compute_optimised_trajectories(problem: Dict, input_sample: int, N: int,
                                     k_choices: int,
                                     local_optimization: bool = False) -> np.ndarray:
@@ -316,33 +302,6 @@ def _compute_optimised_trajectories(problem: Dict, input_sample: int, N: int,
     output = context.sample(input_sample, N, num_params, k_choices, num_groups)
 
     return output
-
-
-def _define_problem_with_groups(problem: Dict) -> Dict:
-    """
-    Checks if the user defined the 'groups' key in the problem dictionary.
-    If not, makes the 'groups' key equal to the variables names. In other
-    words, the number of groups will be equal to the number of variables, which
-    is equivalent to no groups.
-
-    Parameters
-    ----------
-    problem : dict
-        The problem definition
-
-    Returns
-    -------
-    problem : dict
-        The problem definition with the 'groups' key, even if the user doesn't
-        define it
-    """
-    # Checks if there isn't a key 'groups' or if it exists and is set to 'None'
-    if 'groups' not in problem or not problem['groups']:
-        problem['groups'] = problem['names']
-    elif len(problem['groups']) != problem['num_vars']:
-        raise ValueError("Number of entries in \'groups\' should be the same "
-                         "as in \'names\'")
-    return problem
 
 
 def _check_if_num_levels_is_even(num_levels: int):

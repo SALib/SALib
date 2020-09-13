@@ -3,6 +3,7 @@
 """
 from collections import OrderedDict
 import pkgutil
+from typing import Dict
 
 import numpy as np  # type: ignore
 import scipy as sp  # type: ignore
@@ -21,8 +22,8 @@ __all__ = ["scale_samples", "read_param_file",
 def scale_samples(params: np.ndarray, bounds: List):
     '''Rescale samples in 0-to-1 range to arbitrary bounds
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     params : numpy.ndarray
         numpy array of dimensions `num_params`-by-:math:`N`,
         where :math:`N` is the number of samples
@@ -52,8 +53,8 @@ def scale_samples(params: np.ndarray, bounds: List):
 def unscale_samples(params, bounds):
     """Rescale samples from arbitrary bounds back to [0,1] range
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     bounds : list
         list of lists of dimensions num_params-by-2
     params : numpy.ndarray
@@ -80,8 +81,8 @@ def unscale_samples(params, bounds):
 def nonuniform_scale_samples(params, bounds, dists):
     """Rescale samples in 0-to-1 range to other distributions
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     problem : dict
         problem definition including bounds
     params : numpy.ndarray
@@ -169,6 +170,13 @@ def apply_scaling(problem, sample):
     if not problem.get('dists'):
         scale_samples(sample, problem['bounds'])
     else:
+        if sample.shape[1] != len(problem['dists']):
+            import warnings
+            warnings.warn('Could not sample with alternate distributions. Reverting to uniform sampling.')
+            scale_samples(sample, problem['bounds'])
+
+            return sample
+
         sample = nonuniform_scale_samples(
             sample, problem['bounds'], problem['dists'])
 
@@ -177,84 +185,11 @@ def apply_scaling(problem, sample):
     return sample
 
 
-def read_param_file(filename, delimiter=None):
-    """Unpacks a parameter file into a dictionary
-
-    Reads a parameter file of format::
-
-        Param1,0,1,Group1,dist1
-        Param2,0,1,Group2,dist2
-        Param3,0,1,Group3,dist3
-
-    (Group and Dist columns are optional)
-
-    Returns a dictionary containing:
-        - names - the names of the parameters
-        - bounds - a list of lists of lower and upper bounds
-        - num_vars - a scalar indicating the number of variables
-                     (the length of names)
-        - groups - a list of group names (strings) for each variable
-        - dists - a list of distributions for the problem,
-                    None if not specified or all uniform
-
-    Arguments
-    ---------
-    filename : str
-        The path to the parameter file
-    delimiter : str, default=None
-        The delimiter used in the file to distinguish between columns
-
-    """
-    names = []
-    bounds = []
-    groups = []
-    dists = []
-    num_vars = 0
-    fieldnames = ['name', 'lower_bound', 'upper_bound', 'group', 'dist']
-
-    with open(filename, 'r') as csvfile:
-        dialect = csv.Sniffer().sniff(csvfile.read(1024), delimiters=delimiter)
-        csvfile.seek(0)
-        reader = csv.DictReader(
-            csvfile, fieldnames=fieldnames, dialect=dialect)
-        for row in reader:
-            if row['name'].strip().startswith('#'):
-                pass
-            else:
-                num_vars += 1
-                names.append(row['name'])
-                bounds.append(
-                    [float(row['lower_bound']), float(row['upper_bound'])])
-
-                # If the fourth column does not contain a group name, use
-                # the parameter name
-                if row['group'] is None:
-                    groups.append(row['name'])
-                elif row['group'] == 'NA':
-                    groups.append(row['name'])
-                else:
-                    groups.append(row['group'])
-
-                # If the fifth column does not contain a distribution
-                # use uniform
-                if row['dist'] is None:
-                    dists.append('unif')
-                else:
-                    dists.append(row['dist'])
-
-    if groups == names:
-        groups = None
-    elif len(set(groups)) == 1:
-        raise ValueError('''Only one group defined, results will not be
-            meaningful''')
-
-    # setting dists to none if all are uniform
-    # because non-uniform scaling is not needed
-    if all([d == 'unif' for d in dists]):
-        dists = None
-
-    return {'names': names, 'bounds': bounds, 'num_vars': num_vars,
-            'groups': groups, 'dists': dists}
+def extract_group_names(groups):
+    """Get a unique set of the group names."""
+    unique_group_names = list(OrderedDict.fromkeys(groups))
+    number_of_groups = len(unique_group_names)
+    return unique_group_names, number_of_groups
 
 
 def compute_groups_matrix(groups):
@@ -267,8 +202,8 @@ def compute_groups_matrix(groups):
     Also returns a g-length list of unique group_names whose positions
     correspond to the order of groups in the k-by-g matrix
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     groups : list
         Group names corresponding to each variable
 
@@ -283,9 +218,7 @@ def compute_groups_matrix(groups):
 
     num_vars = len(groups)
 
-    # Get a unique set of the group names
-    unique_group_names = list(OrderedDict.fromkeys(groups))
-    number_of_groups = len(unique_group_names)
+    unique_group_names, number_of_groups = extract_group_names(groups)
 
     indices = dict([(x, i) for (i, x) in enumerate(unique_group_names)])
 
@@ -297,3 +230,64 @@ def compute_groups_matrix(groups):
 
     return output, unique_group_names
 
+
+def requires_gurobipy(_has_gurobi):
+    '''
+    Decorator function which takes a boolean _has_gurobi as an argument.
+    Use decorate any functions which require gurobi.
+    Raises an import error at runtime if gurobi is not present.
+    Note that all runtime errors should be avoided in the working code,
+    using brute force options as preference.
+    '''
+    def _outer_wrapper(wrapped_function):
+        def _wrapper(*args, **kwargs):
+            if _has_gurobi:
+                result = wrapped_function(*args, **kwargs)
+            else:
+                warn("Gurobi not available", ImportWarning)
+                result = None
+            return result
+        return _wrapper
+    return _outer_wrapper
+
+
+def _define_problem_with_groups(problem: Dict) -> Dict:
+    """
+    Checks if the user defined the 'groups' key in the problem dictionary.
+    If not, makes the 'groups' key equal to the variables names. In other
+    words, the number of groups will be equal to the number of variables, which
+    is equivalent to no groups.
+
+    Parameters
+    ----------
+    problem : dict
+        The problem definition
+
+    Returns
+    -------
+    problem : dict
+        The problem definition with the 'groups' key, even if the user doesn't
+        define it
+    """
+    # Checks if there isn't a key 'groups' or if it exists and is set to 'None'
+    if 'groups' not in problem or not problem['groups']:
+        problem['groups'] = problem['names']
+    elif len(problem['groups']) != problem['num_vars']:
+        raise ValueError("Number of entries in \'groups\' should be the same "
+                         "as in \'names\'")
+    return problem
+
+
+def _compute_delta(num_levels: int) -> float:
+    """Computes the delta value from number of levels
+
+    Parameters
+    ---------
+    num_levels : int
+        The number of levels
+
+    Returns
+    -------
+    float
+    """
+    return num_levels / (2.0 * (num_levels - 1))

@@ -23,8 +23,8 @@ def analyze(problem, X, Y, second_order=False, print_to_console=False,
     parameters to the nearest 2**n.  Any results involving dummy parameters
     could indicate a problem with the model runs.
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     problem: dict
         The problem definition
     X: numpy.matrix
@@ -108,14 +108,12 @@ def interactions(problem, Y):
     Computes the second order effects (interactions) between
     all combinations of pairs of input factors
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     problem: dict
         The problem definition
     Y: numpy.array
         The NumPy array containing the model outputs
-    print_to_console: bool, default=False
-        Print results directly to console
 
     Returns
     -------
