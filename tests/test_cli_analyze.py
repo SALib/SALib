@@ -8,6 +8,9 @@ import sys
 import subprocess
 from SALib.test_functions import Ishigami
 import numpy as np
+import pandas as pd
+from io import StringIO
+
 import re
 import os
 from os.path import join as pth_join
@@ -71,7 +74,7 @@ def test_dgsm():
     result = subprocess.check_output(analyze_cmd, universal_newlines=True)
     result = re.sub(r'[\n\t\s]*', '', result)
 
-    expected = "Parametervivi_stddgsmdgsm_confx17.62237816.1981232.2075541.034173x224.48775717.3385567.0920191.090835x311.18125824.0621273.2382591.477114"
+    expected = "vivi_stddgsmdgsm_confx17.62237816.1981232.2075541.034173x224.48775717.3385567.0920191.090835x311.18125824.0621273.2382591.477114"
 
     assert len(result) > 0 and result == expected, \
         f"Unexpected DGSM results.\n\nExpected:\n{expected}\n\nGot:{result}"
@@ -92,12 +95,29 @@ def test_fast():
 
     # run analysis and use regex to strip all whitespace from result
     result = subprocess.check_output(analyze_cmd, universal_newlines=True)
-    result = re.sub(r'[\n\t\s]*', '', result)
 
-    expected = "ParameterFirstTotalx10.3104030.555603x20.4425530.469546x30.0000000.239155"
+    expected = """              S1        ST
+x1  3.104027e-01  0.555603
+x2  4.425532e-01  0.469546
+x3  6.340153e-34  0.239155"""
 
-    assert len(result) > 0 and result == expected, \
-        f"Unexpected FAST results.\n\nExpected:\n{expected}\n\nGot:{result}"
+    data = StringIO(expected)
+    df1 = pd.read_csv(data, sep="\t")
+
+    df1 = df1.iloc[:, 0].str.split(expand=True)
+    df1.columns = ["Name", "S1", "ST"]
+    df1 = df1.iloc[:, 1:].values.astype('float64')
+
+    data = StringIO(result)
+    df2 = pd.read_csv(data, sep="\t")
+
+    df2 = df2.iloc[:, 0].str.split(expand=True)
+    df2.columns = ["Name", "S1", "ST"]
+    df2 = df2.iloc[:, 1:].values.astype('float64')
+
+    assert np.allclose(df1, df2), \
+        "Unexpected FAST results.\n\nExpected:\n{}\n\nGot:{}"\
+        .format(expected, result)
 
 
 def test_ff():
@@ -117,7 +137,7 @@ def test_ff():
     result = subprocess.check_output(analyze_cmd, universal_newlines=True)
     result = re.sub(r'[\n\t\s]*', '', result)
 
-    expected = "ParameterMEx10.000000x20.000000x30.000000dummy_00.000000('x1','x2')0.000000('x1','x3')0.000000('x2','x3')0.000000('x1','dummy_0')0.000000('x2','dummy_0')0.000000('x3','dummy_0')0.000000"
+    expected = "MEx13.855764e-08x20.000000e+00x30.000000e+00dummy_00.000000e+00IE(x1,x2)0.0(x1,x3)0.0(x2,x3)0.0(x1,dummy_0)0.0(x2,dummy_0)0.0(x3,dummy_0)0.0"
 
     assert len(result) > 0 and result == expected, \
         f"Unexpected FF results.\n\nExpected:\n{expected}\n\nGot:{result}"
@@ -141,7 +161,7 @@ def test_morris():
     result = subprocess.check_output(analyze_cmd, universal_newlines=True)
     result = re.sub(r'[\n\t\s]*', '', result)
 
-    expected_output = """ParameterMu_StarMuMu_Star_ConfSigmax17.4997.4991.8019.330x22.215-0.4700.3482.776x35.4240.8641.1487.862"""
+    expected_output = "mumu_starsigmamu_star_confx17.4989307.4989309.3304601.801208x2-0.4703942.2152432.7759250.347972x30.8640155.4238337.8621281.147559"
 
     assert len(result) > 0 and result == expected_output, \
         "Results did not match expected values:\n\n Expected: \n{} \n\n Got: \n{}".format(
@@ -166,7 +186,7 @@ def test_rbd_fast():
     result = subprocess.check_output(analyze_cmd, universal_newlines=True)
     result = re.sub(r'[\n\t\s]*', '', result)
 
-    expected = "ParameterFirstx10.298085x20.46924x3-0.0105166"
+    expected = "S1x10.392230x20.299578x30.034231"
 
     assert len(result) > 0 and result == expected, \
         f"Unexpected RBD-FAST results.\n\nExpected:\n{expected}\n\nGot:{result}"
@@ -189,7 +209,7 @@ def test_sobol():
     result = subprocess.check_output(analyze_cmd, universal_newlines=True)
     result = re.sub(r'[\n\t\s]*', '', result)
 
-    expected_output = 'ParameterS1S1_confSTST_confx10.3079750.0630470.5601370.091908x20.4477670.0533230.4387220.040634x3-0.0042550.0596670.2428450.026578Parameter_1Parameter_2S2S2_confx1x20.0122050.086177x1x30.2515260.108147x2x3-0.0099540.065569'
+    expected_output = 'STST_confx10.5601370.091908x20.4387220.040634x30.2428450.026578S1S1_confx10.3079750.063047x20.4477670.053323x3-0.0042550.059667S2S2_conf(x1,x2)0.0122050.086177(x1,x3)0.2515260.108147(x2,x3)-0.0099540.065569'
     assert len(result) > 0 and result == expected_output, \
         "Results did not match expected values:\n\n Expected: \n{} \n\n Got: \n{}".format(
             expected_output, result)

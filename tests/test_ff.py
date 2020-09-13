@@ -168,6 +168,6 @@ def test_interactions():
                   [0, 1.0, 1.0, 0]], dtype=np.float)
     Y = X[:, 0] + (0.1 * X[:, 1]) + ((1.2 * X[:, 2]) * (1.3 + X[:, 3]))
 #     Y = np.array([1.5, 1, 1.5, 1, 2, 2.5, 2, 2.5], dtype=np.float)
-    ie_names, ie = interactions(problem, Y, print_to_console=True)
+    ie_names, ie = interactions(problem, Y)
     actual = ie
     assert_allclose(actual, [0.3, 0, 0, 0, 0, 0.3], rtol=1e-4, atol=1e-4)
