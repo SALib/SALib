@@ -186,7 +186,7 @@ def test_rbd_fast():
     result = subprocess.check_output(analyze_cmd, universal_newlines=True)
     result = re.sub(r'[\n\t\s]*', '', result)
 
-    expected = "S1x10.392230x20.299578x30.034231"
+    expected = "S1x10.298085x20.469240x3-0.010517"
 
     assert len(result) > 0 and result == expected, \
         f"Unexpected RBD-FAST results.\n\nExpected:\n{expected}\n\nGot:{result}"
