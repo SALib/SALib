@@ -37,7 +37,8 @@ from .brute import BruteForce
 from .strategy import SampleMorris
 
 from SALib.sample import common_args
-from SALib.util import scale_samples, read_param_file, compute_groups_matrix
+from SALib.util import (read_param_file, compute_groups_matrix, apply_scaling)
+
 
 __all__ = ['sample']
 
@@ -96,7 +97,8 @@ def sample(problem: Dict, N: int, num_levels: int = 4,
                                                         optimal_trajectories,
                                                         local_optimization)
 
-    scale_samples(sample_morris, problem['bounds'])
+    sample_morris = apply_scaling(problem, sample_morris)
+
     return sample_morris
 
 
