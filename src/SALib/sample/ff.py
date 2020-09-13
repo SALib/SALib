@@ -8,7 +8,7 @@ This implementation is based on the formulation put forward in
 from scipy.linalg import hadamard
 import numpy as np
 from . import common_args
-from ..util import scale_samples, read_param_file
+from ..util import apply_scaling, read_param_file
 
 
 def find_smallest(num_vars):
@@ -109,7 +109,8 @@ def sample(problem, seed=None):
     contrast = generate_contrast(problem)
     sample = np.array((contrast + 1.) / 2, dtype=np.float)
     problem = extend_bounds(problem)
-    scale_samples(sample, problem['bounds'])
+
+    sample = apply_scaling(problem, sample)
     return sample
 
 

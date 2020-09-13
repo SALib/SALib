@@ -149,6 +149,114 @@ def nonuniform_scale_samples(params, bounds, dists):
     return conv_params
 
 
+def apply_scaling(problem, sample):
+    """Scale samples based on specified distribution (defaulting to uniform).
+
+    Adds an entry to the problem specification to indicate samples have been
+    scaled to maintain backwards compatibility (`sample_scaled`).
+
+    Parameters
+    ----------
+    problem : dictionary,
+        SALib problem specification
+    sample : np.ndarray,
+        Sample to scale
+
+    Returns
+    ----------
+    np.ndarray, scaled samples
+    """
+    if not problem.get('dists'):
+        scale_samples(sample, problem['bounds'])
+    else:
+        sample = nonuniform_scale_samples(
+            sample, problem['bounds'], problem['dists'])
+
+    problem['sample_scaled'] = True
+
+    return sample
+
+
+def read_param_file(filename, delimiter=None):
+    """Unpacks a parameter file into a dictionary
+
+    Reads a parameter file of format::
+
+        Param1,0,1,Group1,dist1
+        Param2,0,1,Group2,dist2
+        Param3,0,1,Group3,dist3
+
+    (Group and Dist columns are optional)
+
+    Returns a dictionary containing:
+        - names - the names of the parameters
+        - bounds - a list of lists of lower and upper bounds
+        - num_vars - a scalar indicating the number of variables
+                     (the length of names)
+        - groups - a list of group names (strings) for each variable
+        - dists - a list of distributions for the problem,
+                    None if not specified or all uniform
+
+    Arguments
+    ---------
+    filename : str
+        The path to the parameter file
+    delimiter : str, default=None
+        The delimiter used in the file to distinguish between columns
+
+    """
+    names = []
+    bounds = []
+    groups = []
+    dists = []
+    num_vars = 0
+    fieldnames = ['name', 'lower_bound', 'upper_bound', 'group', 'dist']
+
+    with open(filename, 'r') as csvfile:
+        dialect = csv.Sniffer().sniff(csvfile.read(1024), delimiters=delimiter)
+        csvfile.seek(0)
+        reader = csv.DictReader(
+            csvfile, fieldnames=fieldnames, dialect=dialect)
+        for row in reader:
+            if row['name'].strip().startswith('#'):
+                pass
+            else:
+                num_vars += 1
+                names.append(row['name'])
+                bounds.append(
+                    [float(row['lower_bound']), float(row['upper_bound'])])
+
+                # If the fourth column does not contain a group name, use
+                # the parameter name
+                if row['group'] is None:
+                    groups.append(row['name'])
+                elif row['group'] == 'NA':
+                    groups.append(row['name'])
+                else:
+                    groups.append(row['group'])
+
+                # If the fifth column does not contain a distribution
+                # use uniform
+                if row['dist'] is None:
+                    dists.append('unif')
+                else:
+                    dists.append(row['dist'])
+
+    if groups == names:
+        groups = None
+    elif len(set(groups)) == 1:
+        raise ValueError('''Only one group defined, results will not be
+            meaningful''')
+
+    # setting dists to none if all are uniform
+    # because non-uniform scaling is not needed
+    if all([d == 'unif' for d in dists]):
+        dists = None
+
+    return {'names': names, 'bounds': bounds, 'num_vars': num_vars,
+            'groups': groups, 'dists': dists}
+
+
 def compute_groups_matrix(groups):
     """Generate matrix which notes factor membership of groups
 
