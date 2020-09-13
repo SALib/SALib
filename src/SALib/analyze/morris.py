@@ -1,18 +1,16 @@
+from typing import Dict, List
+import numpy as np
 from scipy.stats import norm
 
-import numpy as np
-
 from . import common_args
-from ..util import read_param_file, compute_groups_matrix, ResultDict
-from ..sample.morris import _compute_delta
+from ..util import (read_param_file, compute_groups_matrix, ResultDict,
+                    _define_problem_with_groups, _compute_delta)
 
 
-def analyze(problem, X, Y,
-            num_resamples=100,
-            conf_level=0.95,
-            print_to_console=False,
-            num_levels=4,
-            seed=None):
+def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
+            num_resamples: int = 100, conf_level: float = 0.95,
+            print_to_console: bool = False, num_levels: int = 4,
+            seed=None) -> np.ndarray:
     """Perform Morris Analysis on model outputs.
 
     Returns a dictionary with keys 'mu', 'mu_star', 'sigma', and
@@ -23,7 +21,7 @@ def analyze(problem, X, Y,
     ---------
     problem : dict
         The problem definition
-    X : numpy.matrix
+    X : numpy.array
         The NumPy matrix containing the model inputs of dtype=float
     Y : numpy.array
         The NumPy array containing the model outputs of dtype=float
@@ -37,6 +35,8 @@ def analyze(problem, X, Y,
     num_levels : int
         The number of grid levels, must be identical to the value
         passed to SALib.sample.morris (default 4)
+    seed : int
+        Seed to generate a random number
 
     Returns
     -------
@@ -70,187 +70,415 @@ def analyze(problem, X, Y,
     if seed:
         np.random.seed(seed)
 
-    msg = ("dtype of {} array must be 'float', float32 or float64")
-    if X.dtype not in ['float', 'float32', 'float64']:
-        raise ValueError(msg.format('X'))
-    if Y.dtype not in ['float', 'float32', 'float64']:
-        raise ValueError(msg.format('Y'))
+    _define_problem_with_groups(problem)
 
-    # Assume that there are no groups
-    groups = None
+    _check_if_array_of_floats(X)
+    _check_if_array_of_floats(Y)
+
     delta = _compute_delta(num_levels)
 
     num_vars = problem['num_vars']
 
-    if (problem.get('groups') is None) & (Y.size % (num_vars + 1) == 0):
-        num_trajectories = int(Y.size / (num_vars + 1))
-    elif problem.get('groups') is not None:
-        groups, unique_group_names = compute_groups_matrix(
-            problem['groups'])
-        number_of_groups = len(unique_group_names)
-        num_trajectories = int(Y.size / (number_of_groups + 1))
-    else:
-        raise ValueError("Number of samples in model output file must be"
-                         "a multiple of (D+1), where D is the number of"
-                         "parameters (or groups) in your parameter file.")
-    ee = np.zeros((num_vars, num_trajectories))
-    ee = compute_elementary_effects(
-        X, Y, int(Y.size / num_trajectories), delta)
+    groups, unique_group_names = compute_groups_matrix(problem['groups'])
+    number_of_groups = len(unique_group_names)
+    num_trajectories = int(Y.size / (number_of_groups + 1))
+    trajectory_size = int(Y.size / num_trajectories)
 
-    # Output the Mu, Mu*, and Sigma Values. Also return them in case this is
-    # being called from Python
-    Si = ResultDict((k, [None] * num_vars)
-                    for k in ['names', 'mu', 'mu_star', 'sigma', 'mu_star_conf'])
-    Si['mu'] = np.average(ee, 1)
-    Si['mu_star'] = np.average(np.abs(ee), 1)
-    Si['sigma'] = np.std(ee, axis=1, ddof=1)
-    Si['names'] = problem['names']
+    elementary_effects = _compute_elementary_effects(X, Y,
+                                                     trajectory_size, delta)
 
-    for j in range(num_vars):
-        Si['mu_star_conf'][j] = compute_mu_star_confidence(
-            ee[j, :], num_trajectories, num_resamples, conf_level)
+    Si = _compute_statistical_outputs(elementary_effects, num_vars,
+                                      num_resamples, conf_level, groups,
+                                      unique_group_names)
 
-    if groups is not None:
-        # if there are groups, then the elementary effects returned need to be
-        # computed over the groups of variables,
-        # rather than the individual variables
-        Si_grouped = ResultDict((k, [None] * num_vars)
-                                for k in ['mu_star', 'mu_star_conf'])
-        Si_grouped['mu_star'] = compute_grouped_metric(Si['mu_star'], groups)
-        Si_grouped['mu_star_conf'] = compute_grouped_metric(Si['mu_star_conf'],
-                                                            groups)
-        Si_grouped['names'] = unique_group_names
-        Si_grouped['sigma'] = compute_grouped_sigma(Si['sigma'], groups)
-        Si_grouped['mu'] = compute_grouped_sigma(Si['mu'], groups)
+    if print_to_console:
+        _print_to_console(Si, number_of_groups)
 
-        Si = Si_grouped
-    
     if print_to_console:
         print(Si.to_df())
 
     return Si
 
+def _compute_statistical_outputs(elementary_effects: np.ndarray, num_vars: int,
+                                 num_resamples: int, conf_level: float,
+                                 groups: np.ndarray,
+                                 unique_group_names: List) -> ResultDict:
+    """ Computes the statistical parameters related to Morris method.
 
-def compute_grouped_sigma(ungrouped_sigma, group_matrix):
-    '''
-    Returns sigma for the groups of parameter values in the
-    argument ungrouped_metric where the group consists of no more than
+    Arguments
+    ----------
+    elementary_effects: np.ndarray
+        Morris elementary effects.
+    num_vars: int
+        Number of problem's variables
+    num_resamples: int
+        Number of resamples
+    conf_level: float
+        Confidence level
+    groups: np.ndarray
+        Array defining the distribution of groups
+    unique_group_names: List
+        Names of the groups
+
+    Returns
+    -------
+    Si: ResultDict
+        Morris statistical parameters.
+    """
+
+    Si = ResultDict((k, [None] * num_vars) for k in ['names', 'mu', 'mu_star',
+                                                     'sigma', 'mu_star_conf'])
+
+    mu = np.average(elementary_effects, 1)
+    mu_star = np.average(np.abs(elementary_effects), 1)
+    sigma = np.std(elementary_effects, axis=1, ddof=1)
+    mu_star_conf = _compute_mu_star_confidence(elementary_effects, num_vars,
+                                               num_resamples, conf_level)
+
+    Si['names'] = unique_group_names
+    Si['mu'] = _compute_grouped_sigma(mu, groups)
+    Si['mu_star'] = _compute_grouped_metric(mu_star, groups)
+    Si['sigma'] = _compute_grouped_sigma(sigma, groups)
+    Si['mu_star_conf'] = _compute_grouped_metric(mu_star_conf, groups)
+
+    return Si
+
+
+def _compute_grouped_sigma(ungrouped_sigma: np.ndarray,
+                           groups: np.ndarray) -> np.ndarray:
+    """ Sigma values for the groups.
+
+    Returns sigma for the groups of parameter values in the argument
+    ungrouped_metric where the group consists of no more than
     one parameter
-    '''
 
-    group_matrix = np.array(group_matrix, dtype=np.bool)
+    Arguments
+    ----------
+    ungrouped_sigma: np.ndarray
+        Sigma values calculated without considering the groups
+    groups: np.ndarray
+        Array defining the distribution of groups
 
-    sigma_masked = np.ma.masked_array(ungrouped_sigma * group_matrix.T,
-                                      mask=(group_matrix ^ 1).T)
-    sigma_agg = np.ma.mean(sigma_masked, axis=1)
-    sigma = np.zeros(group_matrix.shape[1], dtype=np.float)
+    Returns
+    -------
+    sigma: np.ndarray
+        Sigma values for the groups.
+    """
+    sigma_agg = _compute_grouped_metric(ungrouped_sigma, groups)
 
-    # Sigma for Morris groups require mu rather than mu_star.
-    # Only calculate sigma for groups that have only 1 parameter as
-    # sigma requires mu rather than mu_star.
-    # All others should be NaN.
-    group_sum = group_matrix.sum(axis=0)
-    np.copyto(sigma, sigma_agg, where=group_sum == 1)
-    np.copyto(sigma, np.NAN, where=group_sum != 1)
+    sigma = np.zeros(groups.shape[1], dtype=np.float)
+    np.copyto(sigma, sigma_agg, where=groups.sum(axis=0) == 1)
+    np.copyto(sigma, np.NAN, where=groups.sum(axis=0) != 1)
 
     return sigma
 
 
-def compute_grouped_metric(ungrouped_metric, group_matrix):
-    '''
-    Computes the mean value for the groups of parameter values in the
-    argument ungrouped_metric
-    '''
+def _compute_grouped_metric(ungrouped_metric: np.ndarray,
+                            groups: np.ndarray) -> np.ndarray:
+    """ Computes the mean value for the groups of parameter values.
 
-    group_matrix = np.array(group_matrix, dtype=np.bool)
+    Parameters
+    ----------
+    ungrouped_metric: np.ndarray
+        Metric calculated without considering the groups
+    groups: np.ndarray
+        Array defining the distribution of groups
 
-    mu_star_masked = np.ma.masked_array(ungrouped_metric * group_matrix.T,
-                                        mask=(group_matrix ^ 1).T)
+    Returns
+    -------
+    mean_of_mu_star: np.ndarray
+         Mean value for the groups of parameter values
+    """
+
+    groups = np.array(groups, dtype=np.bool)
+
+    mu_star_masked = np.ma.masked_array(ungrouped_metric * groups.T,
+                                        mask=(groups ^ 1).T)
     mean_of_mu_star = np.ma.mean(mu_star_masked, axis=1)
 
     return mean_of_mu_star
 
 
-def get_increased_values(op_vec, up, lo):
+def _reorganize_output_matrix(output_array: np.ndarray,
+                              value_increased: np.ndarray,
+                              value_decreased: np.ndarray,
+                              increase: bool = True) -> np.ndarray:
+    """Reorganize the output matrix.
 
-    up = np.pad(up, ((0, 0), (1, 0), (0, 0)), 'constant')
-    lo = np.pad(lo, ((0, 0), (0, 1), (0, 0)), 'constant')
+    This method reorganizes the output matrix in a way that allows the
+    elementary effects to be computed as a simple subtraction between two
+    arrays. It repositions the outputs in the output matrix according to the
+    order they changed during the formation of the trajectories.
 
-    res = np.einsum('ik,ikj->ij', op_vec, up + lo)
+    Arguments
+    ----------
+    output_array: np.ndarray
+        Matrix of model output values
+    value_increased: np.ndarray
+        Input variables that had their values increased when forming the
+        trajectories matrix
+    value_decreased: np.ndarray
+        Input variables that had their values decreased when forming the
+        trajectories matrix
+    increase: bool
+        Direction to consider (values that increased or decreased). "Increase"
+        is the default value.
+    Returns
+    -------
+
+    """
+    if increase:
+        pad_up = (1, 0)
+        pad_lo = (0, 1)
+    else:
+        pad_up = (0, 1)
+        pad_lo = (1, 0)
+
+    value_increased = np.pad(value_increased, ((0, 0), pad_up, (0, 0)),
+                             'constant')
+    value_decreased = np.pad(value_decreased, ((0, 0), pad_lo, (0, 0)),
+                             'constant')
+
+    res = np.einsum('ik,ikj->ij', output_array,
+                    value_increased + value_decreased)
 
     return res.T
 
 
-def get_decreased_values(op_vec, up, lo):
+def _compute_elementary_effects(model_inputs: np.ndarray,
+                                model_outputs: np.ndarray,
+                                trajectory_size: int,
+                                delta: float) -> np.ndarray:
+    """Computes the Morris elementary effects.
 
-    up = np.pad(up, ((0, 0), (0, 1), (0, 0)), 'constant')
-    lo = np.pad(lo, ((0, 0), (1, 0), (0, 0)), 'constant')
-
-    res = np.einsum('ik,ikj->ij', op_vec, up + lo)
-
-    return res.T
-
-
-def compute_elementary_effects(model_inputs, model_outputs, trajectory_size,
-                               delta):
-    '''
     Arguments
     ---------
-    model_inputs : matrix of inputs to the model under analysis.
+    model_inputs: np.ndarray
+        matrix of inputs to the model under analysis.
         x-by-r where x is the number of variables and
         r is the number of rows (a function of x and num_trajectories)
-    model_outputs
-        an r-length vector of model outputs
-    trajectory_size
-        a scalar indicating the number of rows in a trajectory
-    delta : float
-        scaling factor computed from `num_levels`
+    model_outputs: np.ndarray
+        r-length vector of model outputs
+    trajectory_size: int
+        Number of points in a trajectory
+    delta: float
+        Scaling factor computed from `num_levels`
 
     Returns
     ---------
-    ee : np.array
-        Elementary Effects for each parameter
-    '''
+    elementary_effects : np.array
+        Elementary effects for each parameter
+    """
+    num_trajectories = _calculate_number_trajectories(model_inputs,
+                                                      trajectory_size)
+
+    output_matrix = _reshape_model_outputs(model_outputs, num_trajectories,
+                                           trajectory_size)
+    input_matrix = _reshape_model_inputs(model_inputs, num_trajectories,
+                                         trajectory_size)
+
+    delta_variables = _calculate_delta_input_variables(input_matrix)
+    value_increased = delta_variables > 0
+    value_decreased = delta_variables < 0
+
+    result_increased = _reorganize_output_matrix(output_matrix,
+                                                 value_increased,
+                                                 value_decreased)
+    result_decreased = _reorganize_output_matrix(output_matrix,
+                                                 value_increased,
+                                                 value_decreased,
+                                                 increase=False)
+
+    elementary_effects = _calc_results_difference(result_increased,
+                                                  result_decreased)
+    np.divide(elementary_effects, delta, out=elementary_effects)
+
+    return elementary_effects
+
+
+def _calc_results_difference(result_up: np.ndarray,
+                             result_lo: np.ndarray) -> np.ndarray:
+    """Computes the difference between the output points.
+
+    Arguments
+    ----------
+    result_up: np.ndarray
+    result_lo: np.ndarray
+
+    Returns
+    -------
+    results_difference: np.ndarray
+        Difference between the output points
+    """
+    results_difference = np.subtract(result_up, result_lo)
+
+    return results_difference
+
+
+def _calculate_delta_input_variables(input_matrix: np.ndarray) -> np.ndarray:
+    """Computes the delta values of the problem variables.
+
+    For each point of the trajectory, computes how much each variable increased
+    or decreased in respect to the previous point.
+
+    Arguments
+    ----------
+    input_matrix: np.ndarray
+        Matrix with the values of the problem's variables for all input points.
+
+    Returns
+    -------
+    delta_variables: np.ndarray
+        Variation of each variable, for each point in the trajectory.
+    """
+    delta_variables = np.subtract(input_matrix[:, 1:, :],
+                                  input_matrix[:, 0:-1, :])
+
+    return delta_variables
+
+
+def _calculate_number_trajectories(model_inputs: np.ndarray,
+                                   trajectory_size: int) -> int:
+    """Calculate the number of trajectories.
+
+    Arguments
+    ----------
+    model_inputs: np.ndarray
+        Matrix of model inputs
+    trajectory_size: int
+        Number of input points in each trajectory
+
+    Returns
+    -------
+    num_trajectories: int
+        Number of trajectories
+    """
+    num_input_points = model_inputs.shape[0]
+    num_trajectories = int(num_input_points / trajectory_size)
+
+    return num_trajectories
+
+
+def _reshape_model_inputs(model_inputs: np.ndarray, num_trajectories: int,
+                          trajectory_size: int) -> np.ndarray:
+    """Reshapes the model inputs' matrix.
+
+    Arguments
+    ----------
+    model_inputs: np.ndarray
+        Matrix of model inputs
+    num_trajectories: int
+        Number of trajectories
+    trajectory_size: int
+        Number of points in a trajectory
+
+    Returns
+    -------
+    input_matrix: np.ndarray
+        Reshaped input matrix.
+    """
     num_vars = model_inputs.shape[1]
-    num_rows = model_inputs.shape[0]
-    num_trajectories = int(num_rows / trajectory_size)
-
-    ee = np.zeros((num_trajectories, num_vars), dtype=np.float)
-
-    ip_vec = model_inputs.reshape(num_trajectories, trajectory_size, num_vars)
-    ip_cha = np.subtract(ip_vec[:, 1:, :], ip_vec[:, 0:-1, :])
-    up = (ip_cha > 0)
-    lo = (ip_cha < 0)
-
-    op_vec = model_outputs.reshape(num_trajectories, trajectory_size)
-
-    result_up = get_increased_values(op_vec, up, lo)
-    result_lo = get_decreased_values(op_vec, up, lo)
-
-    ee = np.subtract(result_up, result_lo)
-    np.divide(ee, delta, out=ee)
-
-    return ee
+    input_matrix = model_inputs.reshape(num_trajectories, trajectory_size,
+                                        num_vars)
+    return input_matrix
 
 
-def compute_mu_star_confidence(ee, num_trajectories, num_resamples,
-                               conf_level):
-    '''
+def _reshape_model_outputs(model_outputs: np.ndarray, num_trajectories: int,
+                           trajectory_size: int):
+    """Reshapes the model outputs' matrix.
+
+    Arguments
+    ----------
+    model_outputs: np.ndarray
+        Matrix of model outputs
+    num_trajectories: int
+        Number of trajectories
+    trajectory_size: int
+        Number of points in a trajectory
+
+    Returns
+    -------
+    output_matrix: np.ndarray
+        Reshaped output matrix.
+    """
+    output_matrix = model_outputs.reshape(num_trajectories, trajectory_size)
+    return output_matrix
+
+
+def _compute_mu_star_confidence(elementary_effects: np.ndarray, num_vars: int,
+                                num_resamples: int,
+                                conf_level: float) -> np.ndarray:
+    """Computes the confidence intervals for the mu_star variable.
+
     Uses bootstrapping where the elementary effects are resampled with
     replacement to produce a histogram of resampled mu_star metrics.
     This resample is used to produce a confidence interval.
-    '''
+
+    Arguments
+    ----------
+    elementary_effects : np.array
+        Elementary effects for each parameter
+    num_vars: int
+        Number of problem's variables
+    num_resamples: int
+        Number of resamples
+    conf_level: float
+        Confidence level
+
+    Returns
+    -------
+    mu_star_conf: np.ndarray
+        Confidence intervals for the mu_star variable
+    """
     if not 0 < conf_level < 1:
         raise ValueError("Confidence level must be between 0-1.")
 
-    resample_index = np.random.randint(
-        len(ee), size=(num_resamples, num_trajectories))
-    ee_resampled = ee[resample_index]
+    mu_star_conf = []
+    for j in range(num_vars):
+        ee = elementary_effects[j, :]
+        resample_index = np.random.randint(len(ee),
+                                           size=(num_resamples, len(ee)))
+        ee_resampled = ee[resample_index]
 
-    # Compute average of the absolute values over each of the resamples
-    mu_star_resampled = np.average(np.abs(ee_resampled), axis=1)
+        # Compute average of the absolute values over each of the resamples
+        mu_star_resampled = np.average(np.abs(ee_resampled), axis=1)
 
-    return norm.ppf(0.5 + conf_level / 2) * mu_star_resampled.std(ddof=1)
+        mu_star_conf.append(norm.ppf(0.5 + conf_level / 2)
+                            * mu_star_resampled.std(ddof=1))
+
+    mu_star_conf = np.asarray(mu_star_conf)
+
+    return mu_star_conf
+
+
+def _check_if_array_of_floats(array_x: np.ndarray):
+    """ Checks if an arrays is made of floats. If not, raises an error.
+
+    Arguments
+    ----------
+    array_x:
+        Array to be checked
+    """
+    msg = "dtype of {} array must be 'float', float32 or float64"
+    if array_x.dtype not in ['float', 'float32', 'float64']:
+        raise ValueError(msg.format(array_x))
+
+
+def _print_to_console(Si: ResultDict, number_of_groups: int):
+    """Prints the output to the console.
+
+    Arguments
+    ----------
+    Si: Results dictionary
+    number_of_groups: int
+    """
+    print("{0:<30} {1:>10} {2:>10} {3:>15} {4:>10}".format(
+        "Parameter", "Mu_Star", "Mu", "Mu_Star_Conf", "Sigma"))
+
+    for j in list(range(number_of_groups)):
+        print("{0:30} {1:10.3f} {2:10.3f} {3:15.3f} {4:10.3f}".format(
+            Si['names'][j], Si['mu_star'][j], Si['mu'][j],
+            Si['mu_star_conf'][j], Si['sigma'][j]))
 
 
 def cli_parse(parser):
