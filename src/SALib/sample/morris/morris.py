@@ -25,8 +25,6 @@ With local_optimization = True (which is default),
 it is possible to go higher than the previously suggested 4 from 100.
 
 """
-from __future__ import division
-
 import numpy as np
 from typing import Dict
 

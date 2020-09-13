@@ -1,5 +1,3 @@
-from __future__ import division
-
 from numpy.testing import assert_equal, assert_allclose
 
 from pytest import raises, fixture, warns, mark

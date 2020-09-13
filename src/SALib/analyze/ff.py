@@ -4,7 +4,6 @@ Created on 30 Jun 2015
 @author: will2
 '''
 
-from __future__ import print_function
 import numpy as np
 from . import common_args
 
