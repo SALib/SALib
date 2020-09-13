@@ -39,6 +39,8 @@ Supported Methods
   ([`Sobol and Kucherenko 2009 <http://www.sciencedirect.com/science/article/pii/S0378475409000354>`_])
 * Fractional Factorial Sensitivity Analysis
   ([`Saltelli et al. 2008 <http://www.wiley.com/WileyCDA/WileyTitle/productCd-0470059974.html>`_])
+* High Dimensional Model Representation
+  ([`Li et al. 2010 <https://pubs.acs.org/doi/pdf/10.1021/jp9096919>`_])
 
 .. toctree::
    :maxdepth: 2

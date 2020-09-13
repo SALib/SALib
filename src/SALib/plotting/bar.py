@@ -17,14 +17,14 @@ def plot(Si_df, ax=None):
 
     Examples
     ----------
-    >>> from SALib.plotting.bar import plot as barplot
-    >>> from SALib.test_functions import Ishigami
-    >>>
-    >>> X = saltelli.sample(problem, 1000)
-    >>> Y = Ishigami.evaluate(X)
-    >>> Si = sobol.analyze(problem, Y, print_to_console=False)
-    >>> Si_df = Si.to_df()
-    >>> barplot(Si_df)
+        >>> from SALib.plotting.bar import plot as barplot
+        >>> from SALib.test_functions import Ishigami
+        >>>
+        >>> X = saltelli.sample(problem, 1000)
+        >>> Y = Ishigami.evaluate(X)
+        >>> Si = sobol.analyze(problem, Y, print_to_console=False)
+        >>> Si_df = Si.to_df()
+        >>> barplot(Si_df)
     '''
     conf_cols = Si_df.columns.str.contains(CONF_COLUMN)
 
