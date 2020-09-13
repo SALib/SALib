@@ -1,7 +1,9 @@
 import warnings
+import importlib
+from types import MethodType
+
 from multiprocess import Pool, cpu_count
 from functools import partial, wraps
-import importlib
 
 import numpy as np
 
@@ -69,9 +71,11 @@ class ProblemSpec(dict):
         ----------
         self : ProblemSpec object
         """
+        # Clear model output and analysis results to avoid confusion
+        # especially if samples are forcibly changed...
+        self._analysis = None
+        self._results = None
         self._samples = func(self, *args, **kwargs)
-        # Clear model output and analysis results as well?
-        # might avoid confusion if the samples are forcibly changed...
 
         return self
 
@@ -234,6 +238,9 @@ class ProblemSpec(dict):
         ----------
         self : ProblemSpec object
         """
+        if self._results is None:
+            raise RuntimeError("Model not yet evaluated")
+
         if 'X' in func.__code__.co_varnames:
             # enforce passing of X if expected
             func = partial(func, *args, X=self._samples, **kwargs)
@@ -286,29 +293,28 @@ class ProblemSpec(dict):
         
         return final_res
 
+    def _method_creator(self, func, method):
+        @wraps(func)
+        def modfunc(self, *args, **kwargs):
+            return getattr(self, method)(func, *args, **kwargs)
+        
+        return modfunc
+
     def _add_samplers(self):
         """Dynamically add available SALib samplers as ProblemSpec methods."""
         for sampler in avail_approaches(samplers):
             func = getattr(importlib.import_module('SALib.sample.{}'.format(sampler)), 'sample')
+            method_name = "sample_{}".format(sampler.replace('_sampler', ''))            
 
-            @wraps(func)
-            def modfunc(*args, **kwargs):
-                self.sample(func, *args, **kwargs)
-                return self
-
-            self.__setattr__("sample_{}".format(sampler.replace('_sampler', '')), modfunc)
+            self.__setattr__(method_name, MethodType(self._method_creator(func, 'sample'), self))
     
     def _add_analyzers(self):
         """Dynamically add available SALib analyzers as ProblemSpec methods."""
         for analyzer in avail_approaches(analyzers):
             func = getattr(importlib.import_module('SALib.analyze.{}'.format(analyzer)), 'analyze')
-            
-            @wraps(func)
-            def modfunc(*args, **kwargs):
-                self.analyze(func, *args, **kwargs)
-                return self
+            method_name = "analyze_{}".format(analyzer.replace('_analyzer', ''))
 
-            self.__setattr__("analyze_{}".format(analyzer.replace('_analyzer', '')), modfunc)
+            self.__setattr__(method_name, MethodType(self._method_creator(func, 'analyze'), self))
 
     def __repr__(self):
         if self._samples is not None:
@@ -316,11 +322,15 @@ class ProblemSpec(dict):
         if self._results is not None:
             print('Outputs:', self._results.shape, "\n")
         if self._analysis is not None:
-            print('Analysis:\n')  # , self._results.shape, "\n")
+            print('Analysis:\n')
             an_res = self._analysis
             if isinstance(an_res, ResultDict):
-                for df in an_res.to_df():
-                    print(df, '\n')
+                dfs = an_res.to_df()
+                if isinstance(dfs, list):
+                    for df in dfs:
+                        print(df, "\n")
+                else:
+                    print(an_res.to_df(), "\n")
             elif isinstance(an_res, dict):
                 for vals in list(an_res.values()):
                     for df in vals.to_df():
