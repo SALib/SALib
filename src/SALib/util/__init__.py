@@ -2,9 +2,6 @@
 
 """
 from collections import OrderedDict
-import csv
-from warnings import warn
-from .results import ResultDict
 import pkgutil
 
 import numpy as np  # type: ignore
@@ -12,29 +9,13 @@ import scipy as sp  # type: ignore
 from scipy import stats
 from typing import List
 
+from .util_funcs import (avail_approaches, read_param_file, requires_gurobipy)
+from .problem import ProblemSpec
+from .results import ResultDict
+
 
 __all__ = ["scale_samples", "read_param_file",
            "ResultDict", "avail_approaches"]
-
-
-def avail_approaches(pkg):
-    '''Create list of available modules.
-
-    Arguments
-    ---------
-    pkg : module
-        module to inspect
-
-    Returns
-    ---------
-    method : list
-        A list of available submodules
-    '''
-    methods = [modname for importer, modname, ispkg in
-               pkgutil.walk_packages(path=pkg.__path__)
-               if modname not in
-               ['common_args', 'directions', 'sobol_sequence']]
-    return methods
 
 
 def scale_samples(params: np.ndarray, bounds: List):
@@ -316,22 +297,3 @@ def compute_groups_matrix(groups):
 
     return output, unique_group_names
 
-
-def requires_gurobipy(_has_gurobi):
-    '''
-    Decorator function which takes a boolean _has_gurobi as an argument.
-    Use decorate any functions which require gurobi.
-    Raises an import error at runtime if gurobi is not present.
-    Note that all runtime errors should be avoided in the working code,
-    using brute force options as preference.
-    '''
-    def _outer_wrapper(wrapped_function):
-        def _wrapper(*args, **kwargs):
-            if _has_gurobi:
-                result = wrapped_function(*args, **kwargs)
-            else:
-                warn("Gurobi not available", ImportWarning)
-                result = None
-            return result
-        return _wrapper
-    return _outer_wrapper
