@@ -1,24 +1,14 @@
-from __future__ import division
+from pytest import fixture
 
+import numpy as np
 from numpy.testing import assert_allclose
 
-from SALib.analyze import delta
-from SALib.analyze import dgsm
-from SALib.analyze import fast
-from SALib.analyze import rbd_fast
-from SALib.analyze import sobol
-from SALib.sample import fast_sampler
-from SALib.sample import finite_diff
-from SALib.sample import latin
-from SALib.sample import saltelli
-import numpy as np
+from SALib.analyze import delta, dgsm, fast, rbd_fast, sobol, morris
+from SALib.sample import fast_sampler, finite_diff, latin, saltelli
+from SALib.sample.morris import sample as morris_sampler
 
-from SALib.analyze import morris
-from SALib.sample.morris import sample
 from SALib.test_functions import Ishigami
 from SALib.util import read_param_file
-
-from pytest import fixture
 
 
 @fixture(scope='function')
@@ -41,8 +31,8 @@ class TestMorris:
         set_seed
         param_file = 'src/SALib/test_functions/params/Ishigami.txt'
         problem = read_param_file(param_file)
-        param_values = sample(problem, 10000, 4,
-                              optimal_trajectories=None)
+        param_values = morris_sampler(problem, 10000, 4,
+                                      optimal_trajectories=None)
 
         Y = Ishigami.evaluate(param_values)
 
@@ -58,9 +48,9 @@ class TestMorris:
         param_file = 'src/SALib/test_functions/params/Ishigami_groups.txt'
         problem = read_param_file(param_file)
 
-        param_values = sample(problem=problem, N=10000,
-                              num_levels=4,
-                              optimal_trajectories=None)
+        param_values = morris_sampler(problem=problem, N=10000,
+                                      num_levels=4,
+                                      optimal_trajectories=None)
 
         Y = Ishigami.evaluate(param_values)
 
@@ -77,10 +67,10 @@ class TestMorris:
         param_file = 'src/SALib/test_functions/params/Ishigami_groups.txt'
         problem = read_param_file(param_file)
 
-        param_values = sample(problem=problem, N=50,
-                              num_levels=4,
-                              optimal_trajectories=6,
-                              local_optimization=False)
+        param_values = morris_sampler(problem=problem, N=50,
+                                      num_levels=4,
+                                      optimal_trajectories=6,
+                                      local_optimization=False)
 
         Y = Ishigami.evaluate(param_values)
 
@@ -102,10 +92,10 @@ class TestMorris:
         param_file = 'src/SALib/test_functions/params/Ishigami_groups.txt'
         problem = read_param_file(param_file)
 
-        param_values = sample(problem=problem, N=500,
-                              num_levels=4,
-                              optimal_trajectories=20,
-                              local_optimization=True)
+        param_values = morris_sampler(problem=problem, N=500,
+                                      num_levels=4,
+                                      optimal_trajectories=20,
+                                      local_optimization=True)
 
         Y = Ishigami.evaluate(param_values)
 
@@ -129,10 +119,10 @@ class TestMorris:
         set_seed
         param_file = 'src/SALib/test_functions/params/Ishigami.txt'
         problem = read_param_file(param_file)
-        param_values = sample(problem=problem, N=20,
-                              num_levels=4,
-                              optimal_trajectories=9,
-                              local_optimization=True)
+        param_values = morris_sampler(problem=problem, N=20,
+                                      num_levels=4,
+                                      optimal_trajectories=9,
+                                      local_optimization=True)
 
         Y = Ishigami.evaluate(param_values)
 
@@ -267,6 +257,7 @@ def test_regression_delta():
 
     assert_allclose(Si['delta'], [0.210, 0.358, 0.155], atol=5e-2, rtol=1e-1)
     assert_allclose(Si['S1'], [0.31, 0.44, 0.00], atol=5e-2, rtol=1e-1)
+
 
 def test_regression_delta_svm():
     xy_input_fn = 'tests/data/delta_svm_regression_data.csv'

@@ -1,6 +1,4 @@
-from __future__ import division
-from __future__ import print_function
-
+from typing import Dict
 from scipy.stats import norm, gaussian_kde, rankdata
 
 import numpy as np
@@ -9,8 +7,9 @@ from . import common_args
 from ..util import read_param_file, ResultDict
 
 
-def analyze(problem, X, Y, num_resamples=100,
-            conf_level=0.95, print_to_console=False, seed=None):
+def analyze(problem: Dict, X: np.array, Y: np.array, 
+            num_resamples: int = 100, conf_level: float = 0.95,
+            print_to_console: bool = False, seed: int = None) -> Dict:
     """Perform Delta Moment-Independent Analysis on model outputs.
 
     Returns a dictionary with keys 'delta', 'delta_conf', 'S1', and 'S1_conf',
@@ -44,9 +43,9 @@ def analyze(problem, X, Y, num_resamples=100,
 
     Examples
     --------
-    >>> X = latin.sample(problem, 1000)
-    >>> Y = Ishigami.evaluate(X)
-    >>> Si = delta.analyze(problem, X, Y, print_to_console=True)
+        >>> X = latin.sample(problem, 1000)
+        >>> Y = Ishigami.evaluate(X)
+        >>> Si = delta.analyze(problem, X, Y, print_to_console=True)
     """
     if seed:
         np.random.seed(seed)
@@ -59,7 +58,7 @@ def analyze(problem, X, Y, num_resamples=100,
 
     # equal frequency partition
     exp = (2 / (7 + np.tanh((1500 - N) / 500)))
-    M = min(int(np.ceil(N**exp)), 48)
+    M = int(np.round( min(int(np.ceil(N**exp)), 48) ))
     m = np.linspace(0, N, M + 1)
     Ygrid = np.linspace(np.min(Y), np.max(Y), 100)
 
@@ -88,10 +87,9 @@ def analyze(problem, X, Y, num_resamples=100,
 
     return S
 
-# Plischke et al. 2013 estimator (eqn 26) for d_hat
-
 
 def calc_delta(Y, Ygrid, X, m):
+    """Plischke et al. (2013) delta index estimator (eqn 26) for d_hat."""
     N = len(Y)
     fy = gaussian_kde(Y, bw_method='silverman')(Ygrid)
     abs_fy = np.abs(fy)
