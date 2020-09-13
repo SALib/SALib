@@ -169,12 +169,26 @@ def apply_scaling(problem, sample):
     if not problem.get('dists'):
         scale_samples(sample, problem['bounds'])
     else:
+        if sample.shape[1] != len(problem['dists']):
+            import warnings
+            warnings.warn('Could not sample with alternate distributions. Reverting to uniform sampling.')
+            scale_samples(sample, problem['bounds'])
+
+            return sample
+
         sample = nonuniform_scale_samples(
             sample, problem['bounds'], problem['dists'])
 
     problem['sample_scaled'] = True
 
     return sample
+
+
+def extract_group_names(groups):
+    """Get a unique set of the group names."""
+    unique_group_names = list(OrderedDict.fromkeys(groups))
+    number_of_groups = len(unique_group_names)
+    return unique_group_names, number_of_groups
 
 
 def compute_groups_matrix(groups):
@@ -203,9 +217,7 @@ def compute_groups_matrix(groups):
 
     num_vars = len(groups)
 
-    # Get a unique set of the group names
-    unique_group_names = list(OrderedDict.fromkeys(groups))
-    number_of_groups = len(unique_group_names)
+    unique_group_names, number_of_groups = extract_group_names(groups)
 
     indices = dict([(x, i) for (i, x) in enumerate(unique_group_names)])
 
