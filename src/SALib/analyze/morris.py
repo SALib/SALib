@@ -92,9 +92,6 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
                                       unique_group_names)
 
     if print_to_console:
-        _print_to_console(Si, number_of_groups)
-
-    if print_to_console:
         print(Si.to_df())
 
     return Si
@@ -462,23 +459,6 @@ def _check_if_array_of_floats(array_x: np.ndarray):
     msg = "dtype of {} array must be 'float', float32 or float64"
     if array_x.dtype not in ['float', 'float32', 'float64']:
         raise ValueError(msg.format(array_x))
-
-
-def _print_to_console(Si: ResultDict, number_of_groups: int):
-    """Prints the output to the console.
-
-    Arguments
-    ----------
-    Si: Results dictionary
-    number_of_groups: int
-    """
-    print("{0:<30} {1:>10} {2:>10} {3:>15} {4:>10}".format(
-        "Parameter", "Mu_Star", "Mu", "Mu_Star_Conf", "Sigma"))
-
-    for j in list(range(number_of_groups)):
-        print("{0:30} {1:10.3f} {2:10.3f} {3:15.3f} {4:10.3f}".format(
-            Si['names'][j], Si['mu_star'][j], Si['mu'][j],
-            Si['mu_star_conf'][j], Si['sigma'][j]))
 
 
 def cli_parse(parser):

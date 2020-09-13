@@ -37,8 +37,7 @@ from .brute import BruteForce
 from .strategy import SampleMorris
 
 from SALib.sample import common_args
-from SALib.util import (read_param_file, compute_groups_matrix, apply_scaling)
-from SALib.util import (scale_samples, read_param_file, compute_groups_matrix,
+from SALib.util import (apply_scaling, read_param_file, compute_groups_matrix,
                         _define_problem_with_groups, _compute_delta)
 
 
