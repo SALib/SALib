@@ -22,8 +22,8 @@ __all__ = ["scale_samples", "read_param_file",
 def scale_samples(params: np.ndarray, bounds: List):
     '''Rescale samples in 0-to-1 range to arbitrary bounds
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     params : numpy.ndarray
         numpy array of dimensions `num_params`-by-:math:`N`,
         where :math:`N` is the number of samples
@@ -53,8 +53,8 @@ def scale_samples(params: np.ndarray, bounds: List):
 def unscale_samples(params, bounds):
     """Rescale samples from arbitrary bounds back to [0,1] range
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     bounds : list
         list of lists of dimensions num_params-by-2
     params : numpy.ndarray
@@ -81,8 +81,8 @@ def unscale_samples(params, bounds):
 def nonuniform_scale_samples(params, bounds, dists):
     """Rescale samples in 0-to-1 range to other distributions
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     problem : dict
         problem definition including bounds
     params : numpy.ndarray
@@ -202,8 +202,8 @@ def compute_groups_matrix(groups):
     Also returns a g-length list of unique group_names whose positions
     correspond to the order of groups in the k-by-g matrix
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     groups : list
         Group names corresponding to each variable
 
