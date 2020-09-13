@@ -1,6 +1,3 @@
-from __future__ import division
-from __future__ import print_function
-
 from scipy.stats import norm
 
 import numpy as np
@@ -113,25 +110,7 @@ def analyze(problem, X, Y,
         Si['mu_star_conf'][j] = compute_mu_star_confidence(
             ee[j, :], num_trajectories, num_resamples, conf_level)
 
-    if groups is None:
-        if print_to_console:
-            print("{0:<30} {1:>10} {2:>10} {3:>15} {4:>10}".format(
-                "Parameter",
-                "Mu_Star",
-                "Mu",
-                "Mu_Star_Conf",
-                "Sigma")
-            )
-            for j in list(range(num_vars)):
-                print("{0:30} {1:10.3f} {2:10.3f} {3:15.3f} {4:10.3f}".format(
-                    Si['names'][j],
-                    Si['mu_star'][j],
-                    Si['mu'][j],
-                    Si['mu_star_conf'][j],
-                    Si['sigma'][j])
-                )
-        return Si
-    elif groups is not None:
+    if groups is not None:
         # if there are groups, then the elementary effects returned need to be
         # computed over the groups of variables,
         # rather than the individual variables
@@ -144,27 +123,12 @@ def analyze(problem, X, Y,
         Si_grouped['sigma'] = compute_grouped_sigma(Si['sigma'], groups)
         Si_grouped['mu'] = compute_grouped_sigma(Si['mu'], groups)
 
-        if print_to_console:
-            print("{0:<30} {1:>10} {2:>10} {3:>15} {4:>10}".format(
-                "Parameter",
-                "Mu_Star",
-                "Mu",
-                "Mu_Star_Conf",
-                "Sigma")
-            )
-            for j in list(range(number_of_groups)):
-                print("{0:30} {1:10.3f} {2:10.3f} {3:15.3f} {4:10.3f}".format(
-                    Si_grouped['names'][j],
-                    Si_grouped['mu_star'][j],
-                    Si_grouped['mu'][j],
-                    Si_grouped['mu_star_conf'][j],
-                    Si_grouped['sigma'][j])
-                )
+        Si = Si_grouped
+    
+    if print_to_console:
+        print(Si.to_df())
 
-        return Si_grouped
-    else:
-        raise RuntimeError(
-            "Could not determine which parameters should be returned")
+    return Si
 
 
 def compute_grouped_sigma(ungrouped_sigma, group_matrix):
@@ -180,8 +144,14 @@ def compute_grouped_sigma(ungrouped_sigma, group_matrix):
                                       mask=(group_matrix ^ 1).T)
     sigma_agg = np.ma.mean(sigma_masked, axis=1)
     sigma = np.zeros(group_matrix.shape[1], dtype=np.float)
-    np.copyto(sigma, sigma_agg, where=group_matrix.sum(axis=0) == 1)
-    np.copyto(sigma, np.NAN, where=group_matrix.sum(axis=0) != 1)
+
+    # Sigma for Morris groups require mu rather than mu_star.
+    # Only calculate sigma for groups that have only 1 parameter as
+    # sigma requires mu rather than mu_star.
+    # All others should be NaN.
+    group_sum = group_matrix.sum(axis=0)
+    np.copyto(sigma, sigma_agg, where=group_sum == 1)
+    np.copyto(sigma, np.NAN, where=group_sum != 1)
 
     return sigma
 
