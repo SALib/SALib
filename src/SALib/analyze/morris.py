@@ -17,8 +17,8 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
     'mu_star_conf', where each entry is a list of parameters containing
     the indices in the same order as the parameter file.
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     problem : dict
         The problem definition
     X : numpy.array
@@ -102,7 +102,7 @@ def _compute_statistical_outputs(elementary_effects: np.ndarray, num_vars: int,
                                  unique_group_names: List) -> ResultDict:
     """ Computes the statistical parameters related to Morris method.
 
-    Arguments
+    Parameters
     ----------
     elementary_effects: np.ndarray
         Morris elementary effects.
@@ -149,7 +149,7 @@ def _compute_grouped_sigma(ungrouped_sigma: np.ndarray,
     ungrouped_metric where the group consists of no more than
     one parameter
 
-    Arguments
+    Parameters
     ----------
     ungrouped_sigma: np.ndarray
         Sigma values calculated without considering the groups
@@ -207,7 +207,7 @@ def _reorganize_output_matrix(output_array: np.ndarray,
     arrays. It repositions the outputs in the output matrix according to the
     order they changed during the formation of the trajectories.
 
-    Arguments
+    Parameters
     ----------
     output_array: np.ndarray
         Matrix of model output values
@@ -248,8 +248,8 @@ def _compute_elementary_effects(model_inputs: np.ndarray,
                                 delta: float) -> np.ndarray:
     """Computes the Morris elementary effects.
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     model_inputs: np.ndarray
         matrix of inputs to the model under analysis.
         x-by-r where x is the number of variables and
@@ -297,7 +297,7 @@ def _calc_results_difference(result_up: np.ndarray,
                              result_lo: np.ndarray) -> np.ndarray:
     """Computes the difference between the output points.
 
-    Arguments
+    Parameters
     ----------
     result_up: np.ndarray
     result_lo: np.ndarray
@@ -318,7 +318,7 @@ def _calculate_delta_input_variables(input_matrix: np.ndarray) -> np.ndarray:
     For each point of the trajectory, computes how much each variable increased
     or decreased in respect to the previous point.
 
-    Arguments
+    Parameters
     ----------
     input_matrix: np.ndarray
         Matrix with the values of the problem's variables for all input points.
@@ -338,7 +338,7 @@ def _calculate_number_trajectories(model_inputs: np.ndarray,
                                    trajectory_size: int) -> int:
     """Calculate the number of trajectories.
 
-    Arguments
+    Parameters
     ----------
     model_inputs: np.ndarray
         Matrix of model inputs
@@ -360,7 +360,7 @@ def _reshape_model_inputs(model_inputs: np.ndarray, num_trajectories: int,
                           trajectory_size: int) -> np.ndarray:
     """Reshapes the model inputs' matrix.
 
-    Arguments
+    Parameters
     ----------
     model_inputs: np.ndarray
         Matrix of model inputs
@@ -384,7 +384,7 @@ def _reshape_model_outputs(model_outputs: np.ndarray, num_trajectories: int,
                            trajectory_size: int):
     """Reshapes the model outputs' matrix.
 
-    Arguments
+    Parameters
     ----------
     model_outputs: np.ndarray
         Matrix of model outputs
@@ -411,7 +411,7 @@ def _compute_mu_star_confidence(elementary_effects: np.ndarray, num_vars: int,
     replacement to produce a histogram of resampled mu_star metrics.
     This resample is used to produce a confidence interval.
 
-    Arguments
+    Parameters
     ----------
     elementary_effects : np.array
         Elementary effects for each parameter
@@ -451,7 +451,7 @@ def _compute_mu_star_confidence(elementary_effects: np.ndarray, num_vars: int,
 def _check_if_array_of_floats(array_x: np.ndarray):
     """ Checks if an arrays is made of floats. If not, raises an error.
 
-    Arguments
+    Parameters
     ----------
     array_x:
         Array to be checked
