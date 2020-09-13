@@ -6,8 +6,8 @@ from warnings import warn
 def avail_approaches(pkg):
     '''Create list of available modules.
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     pkg : module
         module to inspect
 
@@ -43,8 +43,8 @@ def read_param_file(filename, delimiter=None):
         - dists - a list of distributions for the problem,
                     None if not specified or all uniform
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     filename : str
         The path to the parameter file
     delimiter : str, default=None
