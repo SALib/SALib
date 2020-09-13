@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from . import common_args
-from ..util import read_param_file, compute_groups_matrix, ResultDict
+from ..util import read_param_file, compute_groups_matrix, ResultDict, extract_group_names
 from types import MethodType
 
 from multiprocessing import Pool, cpu_count
@@ -291,8 +291,16 @@ def Si_to_pandas_dict(S_dict):
     idx = None
     second_order = None
     if 'S2' in S_dict:
-        names = problem['names']
-        idx = list(combinations(names, 2))
+        if not problem.get('groups'):
+            names = problem['names']
+        else:
+            names, _ = extract_group_names(problem.get('groups'))
+
+        if len(names) > 2:
+            idx = list(combinations(names, 2))
+        else:
+            idx = [tuple(set(names)), ]
+        
         second_order = {
             'S2': [S_dict['S2'][names.index(i[0]), names.index(i[1])]
                    for i in idx],
@@ -315,7 +323,13 @@ def to_df(self):
     >>> total_Si, first_Si, second_Si = Si.to_df()
     '''
     total, first, (idx, second) = Si_to_pandas_dict(self)
-    names = self.problem['names']
+
+    problem = self.problem
+    if not problem.get('groups'):
+        names = problem['names']
+    else:
+        names, _ = extract_group_names(problem.get('groups'))
+
     ret = [pd.DataFrame(total, index=names),
            pd.DataFrame(first, index=names)]
 
