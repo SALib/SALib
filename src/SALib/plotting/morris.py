@@ -8,15 +8,13 @@ Method of Morris results
 
 The procedures should build upon and return an axes instance::
 
-    import matplotlib.plot as plt
+    import matplotlib.pyplot as plt
     Si = morris.analyze(problem, param_values, Y, conf_level=0.95,
                         print_to_console=False, num_levels=10)
-    p = morris.horizontal_bar_plot(Si)
+    
     # set plot style etc.
-
-    fig, ax = plt.subplots(1, 1)
-    my_plotter(ax, data1, data2, {'marker':'x'})
-
+    fig, ax = plt.subplots(1)
+    p = SALib.plotting.morris.horizontal_bar_plot(ax, Si, {'marker':'x'})
     p.show()
 '''
 import numpy as np
@@ -30,13 +28,14 @@ def _sort_Si_by_index(Si, key, index):
     return np.array([Si[key][x] for x in index])
 
 
-def horizontal_bar_plot(ax, Si, param_dict, sortby='mu_star', unit=''):
+def horizontal_bar_plot(ax, Si, opts=None, sortby='mu_star', unit=''):
     '''Updates a matplotlib axes instance with a horizontal bar plot
-
-    of mu_star, with error bars representing mu_star_conf
+    of mu_star, with error bars representing mu_star_conf.
     '''
-
     assert sortby in ['mu_star', 'mu_star_conf', 'sigma', 'mu']
+
+    if opts is None:
+        opts = {}
 
     # Sort all the plotted elements by mu_star (or optionally another
     # metric)
@@ -53,7 +52,7 @@ def horizontal_bar_plot(ax, Si, param_dict, sortby='mu_star', unit=''):
                   xerr=mu_star_conf_sorted,
                   align='center',
                   ecolor='black',
-                  **param_dict)
+                  **opts)
 
     ax.set_yticks(y_pos)
     ax.set_yticklabels(plot_names)
@@ -64,16 +63,18 @@ def horizontal_bar_plot(ax, Si, param_dict, sortby='mu_star', unit=''):
     return out
 
 
-def covariance_plot(ax, Si, param_dict, unit=""):
+def covariance_plot(ax, Si, opts=None, unit=""):
     '''Plots mu* against sigma or the 95% confidence interval
 
     '''
+    if opts is None:
+        opts = {}
 
     if Si['sigma'] is not None:
         # sigma is not present if using morris groups
         y = Si['sigma']
         out = ax.scatter(Si['mu_star'], y, c=u'k', marker=u'o',
-                         **param_dict)
+                         **opts)
         ax.set_ylabel(r'$\sigma$')
 
         ax.set_xlim(0,)
@@ -93,7 +94,7 @@ def covariance_plot(ax, Si, param_dict, unit=""):
     else:
         y = Si['mu_star_conf']
         out = ax.scatter(Si['mu_star'], y, c=u'k', marker=u'o',
-                         **param_dict)
+                         **opts)
         ax.set_ylabel(r'$95\% CI$')
 
     ax.set_xlabel(r'$\mu^\star$ ' + unit)
@@ -102,10 +103,13 @@ def covariance_plot(ax, Si, param_dict, unit=""):
     return out
 
 
-def sample_histograms(fig, input_sample, problem, param_dict):
+def sample_histograms(fig, input_sample, problem, opts=None):
     '''Plots a set of subplots of histograms of the input sample
 
     '''
+    if opts is None:
+        opts = {}
+
     num_vars = problem['num_vars']
     names = problem['names']
 
@@ -122,7 +126,7 @@ def sample_histograms(fig, input_sample, problem, param_dict):
                            bins=num_levels,
                            density=False,
                            label=None,
-                           **param_dict))
+                           **opts))
 
         ax.set_title('%s' % (names[variable]))
         ax.tick_params(axis='x',  # changes apply to the x-axis

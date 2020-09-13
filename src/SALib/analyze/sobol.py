@@ -1,6 +1,3 @@
-from __future__ import division
-from __future__ import print_function
-
 from scipy.stats import norm
 
 import numpy as np
@@ -121,13 +118,17 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
 
         S = Si_list_to_dict(S_list.get(), D, calc_second_order)
 
-    # Print results to console
-    if print_to_console:
-        print_indices(S, problem, calc_second_order)
-
+    
     # Add problem context and override conversion method for special case
     S.problem = problem
     S.to_df = MethodType(to_df, S)
+
+    # Print results to console
+    if print_to_console:
+        res = S.to_df()
+        for df in res:
+            print(df)
+    
     return S
 
 
@@ -305,8 +306,13 @@ def to_df(self):
     '''Conversion method to Pandas DataFrame. To be attached to ResultDict.
 
     Returns
-    ========
+    --------
     List : of Pandas DataFrames in order of Total, First, Second
+
+    Example
+    -------
+    >>> Si = sobol.analyze(problem, Y, print_to_console=True)
+    >>> total_Si, first_Si, second_Si = Si.to_df()
     '''
     total, first, (idx, second) = Si_to_pandas_dict(self)
     names = self.problem['names']
@@ -317,32 +323,6 @@ def to_df(self):
         ret += [pd.DataFrame(second, index=idx)]
 
     return ret
-
-
-def print_indices(S, problem, calc_second_order):
-    # Output to console
-    if not problem.get('groups'):
-        title = 'Parameter'
-        names = problem['names']
-        D = problem['num_vars']
-    else:
-        title = 'Group'
-        _, names = compute_groups_matrix(problem['groups'])
-        D = len(names)
-
-    print('%s S1 S1_conf ST ST_conf' % title)
-
-    for j in range(D):
-        print('%s %f %f %f %f' % (names[j], S['S1'][
-            j], S['S1_conf'][j], S['ST'][j], S['ST_conf'][j]))
-
-    if calc_second_order:
-        print('\n%s_1 %s_2 S2 S2_conf' % (title, title))
-
-        for j in range(D):
-            for k in range(j + 1, D):
-                print("%s %s %f %f" % (names[j], names[k],
-                                       S['S2'][j, k], S['S2_conf'][j, k]))
 
 
 def cli_parse(parser):

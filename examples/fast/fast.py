@@ -18,7 +18,7 @@ Y = Ishigami.evaluate(param_values)
 
 # Perform the sensitivity analysis using the model output
 # Specify which column of the output file to analyze (zero-indexed)
-Si = fast.analyze(problem, Y, print_to_console=False)
+Si = fast.analyze(problem, Y, print_to_console=True)
 # Returns a dictionary with keys 'S1' and 'ST'
 # e.g. Si['S1'] contains the first-order index for each parameter, in the
 # same order as the parameter file

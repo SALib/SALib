@@ -1,5 +1,4 @@
-from __future__ import division
-
+import warnings
 import numpy as np
 
 from . import common_args
@@ -28,7 +27,11 @@ def sample(problem, N, calc_second_order=True, seed=None, skip_values=1000):
         Calculate second-order sensitivities (default True)
     """
     if seed:
-        np.random.seed(seed)
+        msg = "The seed value is ignored for the Saltelli sampler\n"
+        msg += "as it uses the (deterministic) Sobol sequence.\n"
+        msg += "Different samples can be obtained by setting the\n"
+        msg += "`skip_values` parameter (defaults to 1000)."
+        warnings.warn(msg)
 
     D = problem['num_vars']
     groups = problem.get('groups')
