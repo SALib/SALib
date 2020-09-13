@@ -1,40 +1,50 @@
-# Travis config for jdherman/SALib
+os: linux
 language: python
+dist: xenial
 
-python:
-- "2.7"
-- "3.3"
+addons:
+  apt:
+    packages:
+    - git
+    - python-pip
 
-env: 
- - DEPS="numpy=1.7.0 scipy scikit-learn"
- - DEPS="numpy=1.8.0 scipy scikit-learn"
- - DEPS="numpy=1.9.0 scipy scikit-learn"
- - DEPS="numpy scipy scikit-learn"
-
-install:
- - sudo apt-get update
- - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-     wget http://repo.continuum.io/miniconda/Miniconda-3.7.3-Linux-x86_64.sh -O miniconda.sh;
-   else
-     wget http://repo.continuum.io/miniconda/Miniconda3-3.7.3-Linux-x86_64.sh -O miniconda.sh;
-   fi
- - bash miniconda.sh -b -p $HOME/miniconda
- - export PATH="$HOME/miniconda/bin:$PATH"
- - hash -r
- - conda config --set always_yes yes --set changeps1 no
- - conda install -c conda conda-env
- - conda update -q conda --no-deps
-  # Useful for debugging any issues with conda
- - conda info -a
-
-  # Replace dep1 dep2 ... with your dependencies
- - conda create -q -n testenv python=$TRAVIS_PYTHON_VERSION $DEPS pip
- - source activate testenv
- - python setup.py install
- - pip install coveralls
-script:
- - coverage run --source=SALib --omit=SALib/_version.py setup.py test
-after_success:
- - coveralls
 notifications:
- email: false
+  email: false
+
+jobs:
+  allow_failures:
+    - env: DISTRIB="conda" PYTHON_VERSION="3.5" COVERAGE="false"
+  include:
+    - stage: "test"
+      name: "Test the SALib package"
+      env:
+      - DISTRIB="conda" PYTHON_VERSION="3.5" COVERAGE="false"
+      - DISTRIB="conda" PYTHON_VERSION="3.6" COVERAGE="true"
+      - DISTRIB="conda" PYTHON_VERSION="3.7" COVERAGE="false"
+      - DISTRIB="conda" PYTHON_VERSION="3.8" COVERAGE="false"
+      install:
+      - source tests/travis_install.sh
+      - pip install -r test-requirements.txt
+      script:
+      - python setup.py develop
+      - pytest
+      after_success:
+      - if [[ "$COVERAGE" == "true" ]]; then coveralls || echo "failed"; fi
+
+    - stage: "deploy"
+      name: "Deploy to PyPI"
+      if: tag =~ ^v
+      env: DISTRIB="conda" PYTHON_VERSION="3.6" COVERAGE="false"
+      install:
+      - source tests/travis_install.sh
+      - pip install -r requirements.txt
+      script: echo "Deploying to PyPI"
+      deploy:
+        provider: pypi
+        username: jdherman
+        password:
+          secure: KiUygZVHWMR2a+fk092xeHh8J2c61VGrgq4v1l3bq41MxcZO745H7CLJJ3rfqo+G5/pqy4/tm+q3p8fHhbUmwMcuSC3vjRN6WAYjuNPs0FMVXiIkMQtevv2LdVF1zVKFBdYTuNrfugtZ/GXh/ReCydjEBWTrTaNYeNM4ZRIaj0Q=
+        on:
+          tags: true
+          all_branches: true
+        cleanup: false

@@ -1,71 +1,28 @@
-from setuptools import setup, find_packages
-from setuptools.command.test import test as TestCommand
-import versioneer
-versioneer.VCS = 'git'
-versioneer.versionfile_source = 'SALib/_version.py'
-versioneer.versionfile_build = None
-versioneer.tag_prefix = 'v' # tags are like 1.2.0
-versioneer.parentdir_prefix = 'SALib-' # dirname like 'myproject-1.2.0'
+# -*- coding: utf-8 -*-
+"""
+    Setup file for salib.
+    Use setup.cfg to configure your project.
 
-class NoseTestCommand(TestCommand):
+    This file was generated with PyScaffold 3.2.2.
+    PyScaffold helps you to put up the scaffold of your new Python project.
+    Learn more under: https://pyscaffold.org/
+"""
+import os
+import sys
 
-    def finalize_options(self):
-        TestCommand.finalize_options(self)
-        self.test_args = []
-        self.test_suite = True
+from pkg_resources import VersionConflict, require
+from setuptools import setup
 
-    def run_tests(self):
-        # Run nose ensuring that argv simulates running nosetests directly
-        import nose
-        nose.run_exit(argv=['nosetests'])
+scripts = ['src/SALib/scripts/salib.py']
+if os.name == 'nt':
+    scripts.append('src/SALib/scripts/salib.bat')
 
-
-
-
-def setup_package():
-    # Assemble additional setup commands
-    cmdclass = versioneer.get_cmdclass()
-    cmdclass['test'] = NoseTestCommand
-
-    setup(
-        name='SALib',
-        packages=find_packages(exclude=["*tests*"]),
-        author="Jon Herman",
-        author_email="jdherman8@gmail.com",
-        license=open('LICENSE.md').read(),
-        tests_require=['nose'],
-        install_requires=[
-            "numpy",
-            "scipy",
-            "scikit-learn",
-        ],
-        # Two arguments required by Versioneer
-        version = versioneer.get_version(),
-        cmdclass=cmdclass,
-        url="https://github.com/jdherman/SALib",
-        long_description=open('README.md').read(),
-        description=(
-            'Tools for sensitivity analysis. Contains Sobol, Morris, and FAST methods.'),
-        # entry_points = {
-        #     'console_scripts': [
-        #         'salib = SALib.bin.salib:main',
-        #     ]
-        # },
-        classifiers=[
-            # 'Development Status :: 5 - Production/Stable',
-            'Intended Audience :: End Users/Desktop',
-            'Intended Audience :: Developers',
-            'Intended Audience :: Science/Research',
-            # 'License :: OSI Approved :: BSD License',
-            'Operating System :: MacOS :: MacOS X',
-            'Operating System :: Microsoft :: Windows',
-            'Operating System :: POSIX',
-            'Programming Language :: Python',
-            # 'Programming Language :: Python :: 2.7',
-            # 'Programming Language :: Python :: 2 :: Only',
-            'Topic :: Scientific/Engineering :: Mathematics',
-        ],)
+try:
+    require('setuptools>=38.3')
+except VersionConflict:
+    print("Error: version of setuptools is too old (<38.3)!")
+    sys.exit(1)
 
 
 if __name__ == "__main__":
-    setup_package()
+    setup(use_pyscaffold=True, scripts=scripts)
