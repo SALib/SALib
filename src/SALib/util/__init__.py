@@ -3,6 +3,7 @@
 """
 from collections import OrderedDict
 import pkgutil
+from typing import Dict
 
 import numpy as np  # type: ignore
 import scipy as sp  # type: ignore
@@ -21,8 +22,8 @@ __all__ = ["scale_samples", "read_param_file",
 def scale_samples(params: np.ndarray, bounds: List):
     '''Rescale samples in 0-to-1 range to arbitrary bounds
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     params : numpy.ndarray
         numpy array of dimensions `num_params`-by-:math:`N`,
         where :math:`N` is the number of samples
@@ -52,8 +53,8 @@ def scale_samples(params: np.ndarray, bounds: List):
 def unscale_samples(params, bounds):
     """Rescale samples from arbitrary bounds back to [0,1] range
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     bounds : list
         list of lists of dimensions num_params-by-2
     params : numpy.ndarray
@@ -80,8 +81,8 @@ def unscale_samples(params, bounds):
 def nonuniform_scale_samples(params, bounds, dists):
     """Rescale samples in 0-to-1 range to other distributions
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     problem : dict
         problem definition including bounds
     params : numpy.ndarray
@@ -201,8 +202,8 @@ def compute_groups_matrix(groups):
     Also returns a g-length list of unique group_names whose positions
     correspond to the order of groups in the k-by-g matrix
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     groups : list
         Group names corresponding to each variable
 
@@ -229,3 +230,64 @@ def compute_groups_matrix(groups):
 
     return output, unique_group_names
 
+
+def requires_gurobipy(_has_gurobi):
+    '''
+    Decorator function which takes a boolean _has_gurobi as an argument.
+    Use decorate any functions which require gurobi.
+    Raises an import error at runtime if gurobi is not present.
+    Note that all runtime errors should be avoided in the working code,
+    using brute force options as preference.
+    '''
+    def _outer_wrapper(wrapped_function):
+        def _wrapper(*args, **kwargs):
+            if _has_gurobi:
+                result = wrapped_function(*args, **kwargs)
+            else:
+                warn("Gurobi not available", ImportWarning)
+                result = None
+            return result
+        return _wrapper
+    return _outer_wrapper
+
+
+def _define_problem_with_groups(problem: Dict) -> Dict:
+    """
+    Checks if the user defined the 'groups' key in the problem dictionary.
+    If not, makes the 'groups' key equal to the variables names. In other
+    words, the number of groups will be equal to the number of variables, which
+    is equivalent to no groups.
+
+    Parameters
+    ----------
+    problem : dict
+        The problem definition
+
+    Returns
+    -------
+    problem : dict
+        The problem definition with the 'groups' key, even if the user doesn't
+        define it
+    """
+    # Checks if there isn't a key 'groups' or if it exists and is set to 'None'
+    if 'groups' not in problem or not problem['groups']:
+        problem['groups'] = problem['names']
+    elif len(problem['groups']) != problem['num_vars']:
+        raise ValueError("Number of entries in \'groups\' should be the same "
+                         "as in \'names\'")
+    return problem
+
+
+def _compute_delta(num_levels: int) -> float:
+    """Computes the delta value from number of levels
+
+    Parameters
+    ---------
+    num_levels : int
+        The number of levels
+
+    Returns
+    -------
+    float
+    """
+    return num_levels / (2.0 * (num_levels - 1))
