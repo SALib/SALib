@@ -112,7 +112,7 @@ def _sample_morris(problem: Dict, number_trajectories: int,
     of factors
 
     Parameters
-    ---------
+    ----------
     problem : dict
         The problem definition
     number_trajectories : int
@@ -149,7 +149,7 @@ def _generate_trajectory(group_membership: np.ndarray,
     both implied by the dimensions of `group_membership`
 
     Parameters
-    ---------
+    ----------
     group_membership : np.ndarray
         a k-by-g matrix which notes factor membership of groups
     num_levels : int, default=4
@@ -223,7 +223,7 @@ def _generate_p_star(num_groups: int) -> np.ndarray:
     """Describe the order in which groups move
 
     Parameters
-    ---------
+    ----------
     num_groups : int
 
     Returns
@@ -243,7 +243,7 @@ def _generate_x_star(num_params: int, num_levels: int) -> np.ndarray:
     :math:`\omega`
 
     Parameters
-    ---------
+    ----------
     num_params : int
         The number of parameters (factors)
     num_levels : int
@@ -274,7 +274,7 @@ def _compute_optimised_trajectories(problem: Dict, input_sample: int, N: int,
     correct call here.
 
     Parameters
-    ---------
+    ----------
     problem : dict
         The problem definition
     input_sample :
