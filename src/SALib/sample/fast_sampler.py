@@ -32,6 +32,11 @@ def sample(problem, N, M=4, seed=None):
            in rate coefficients. I theory. 
            Journal of Chemical Physics 59, 3873–3878. 
            https://doi.org/10.1063/1.1680571
+
+    .. [2] Saltelli, A., S. Tarantola, and K. P.-S. Chan (1999).  "A
+           Quantitative Model-Independent Method for Global Sensitivity
+           Analysis of Model Output."  Technometrics, 41(1):39-56,
+           doi:10.1080/00401706.1999.10485594.
     """
     if seed:
         np.random.seed(seed)

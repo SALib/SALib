@@ -42,6 +42,14 @@ def analyze(problem, X, Y, second_order=False, print_to_console=False,
         A dictionary of sensitivity indices, including main effects ``ME``,
         and interaction effects ``IE`` (if ``second_order`` is True)
 
+    References
+    ----------
+    .. [1] Saltelli, A., Ratto, M., Andres, T., Campolongo, F., Cariboni, J., Gatelli, D., 
+           Saisana, M., Tarantola, S., 2008. 
+           Global Sensitivity Analysis: The Primer. 
+           Wiley, West Sussex, U.K.
+           https://dx.doi.org/10.1002/9780470725184
+
     Examples
     --------
     >>> X = sample(problem)
