@@ -4,7 +4,7 @@ import numpy as np
 
 from . import common_args
 from . import sobol_sequence
-from ..util import apply_scaling, read_param_file
+from ..util import scale_samples, read_param_file
 
 
 def sample(problem: Dict, N: int, delta: float = 0.01, 
@@ -57,7 +57,7 @@ def sample(problem: Dict, N: int, delta: float = 0.01,
     base_sequence = sobol_sequence.sample(N + skip_values, D)
 
     # scale before finite differencing
-    base_sequence = apply_scaling(problem, base_sequence)
+    base_sequence = scale_samples(base_sequence, problem)
 
     dgsm_sequence = np.empty([N * (D + 1), D])
 

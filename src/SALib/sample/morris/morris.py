@@ -37,8 +37,8 @@ from .brute import BruteForce
 from .strategy import SampleMorris
 
 from SALib.sample import common_args
-from SALib.util import (apply_scaling, read_param_file, compute_groups_matrix,
-                        _define_problem_with_groups, _compute_delta)
+from SALib.util import (scale_samples, read_param_file, compute_groups_matrix,
+                        _define_problem_with_groups, _compute_delta, _check_groups)
 
 
 __all__ = ['sample']
@@ -118,7 +118,7 @@ def sample(problem: Dict, N: int, num_levels: int = 4,
                                                         optimal_trajectories,
                                                         local_optimization)
 
-    sample_morris = apply_scaling(problem, sample_morris)
+    sample_morris = scale_samples(sample_morris, problem)
 
     return sample_morris
 
@@ -144,8 +144,8 @@ def _sample_morris(problem: Dict, number_trajectories: int,
     -------
     numpy.ndarray
     """
-
-    group_membership, _ = compute_groups_matrix(problem['groups'])
+    groups = _check_groups(problem)
+    group_membership, _ = compute_groups_matrix(groups)
     _check_group_membership(group_membership)
 
     num_params = group_membership.shape[0]
