@@ -91,7 +91,7 @@ def sample(problem, seed=None):
     ``dummy_0`` required for this procedure. These dummy variables can be used
     as a check for errors in the analyze procedure.
 
-    This algorithm is an implementation of that contained in
+    This algorithm is an implementation of that contained in Saltelli et al
     [`Saltelli et al. 2008 <http://www.wiley.com/WileyCDA/WileyTitle/productCd-0470059974.html>`_]
 
     Parameters
@@ -102,6 +102,15 @@ def sample(problem, seed=None):
     Returns
     -------
     sample : :class:`numpy.array`
+
+
+    References
+    ----------
+    .. [1] Saltelli, A., Ratto, M., Andres, T., Campolongo, F., Cariboni, J., Gatelli, D., 
+           Saisana, M., Tarantola, S., 2008. 
+           Global Sensitivity Analysis: The Primer. 
+           Wiley, West Sussex, U.K.
+           https://dx.doi.org/10.1002/9780470725184
 
     """
     if seed:

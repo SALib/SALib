@@ -23,6 +23,15 @@ def sample(problem, N, M=4, seed=None):
     M : int
         The interference parameter, i.e., the number of harmonics to sum in the
         Fourier series decomposition (default 4)
+
+    References
+    ----------
+    .. [1] Cukier, R.I., Fortuin, C.M., Shuler, K.E., Petschek, A.G., 
+           Schaibly, J.H., 1973. 
+           Study of the sensitivity of coupled reaction systems to uncertainties 
+           in rate coefficients. I theory. 
+           Journal of Chemical Physics 59, 3873–3878. 
+           https://doi.org/10.1063/1.1680571
     """
     if seed:
         np.random.seed(seed)
