@@ -3,7 +3,8 @@ import numpy as np
 
 from . import common_args
 from . import sobol_sequence
-from ..util import apply_scaling, read_param_file, compute_groups_matrix
+from ..util import (scale_samples, read_param_file, 
+                    compute_groups_matrix, _check_groups)
 
 
 def sample(problem, N, calc_second_order=True, seed=None, skip_values=1000):
@@ -34,13 +35,13 @@ def sample(problem, N, calc_second_order=True, seed=None, skip_values=1000):
         warnings.warn(msg)
 
     D = problem['num_vars']
-    groups = problem.get('groups')
+    groups = _check_groups(problem)
 
     if not groups:
         Dg = problem['num_vars']
     else:
-        Dg = len(set(groups))
         G, group_names = compute_groups_matrix(groups)
+        Dg = len(set(group_names))
 
     # Create base sequence - could be any type of sampling
     base_sequence = sobol_sequence.sample(N + skip_values, 2 * D)
@@ -87,7 +88,7 @@ def sample(problem, N, calc_second_order=True, seed=None, skip_values=1000):
 
         index += 1
 
-    saltelli_sequence = apply_scaling(problem, saltelli_sequence)
+    saltelli_sequence = scale_samples(saltelli_sequence, problem)
     return saltelli_sequence
 
 

@@ -3,7 +3,7 @@ import math
 import numpy as np
 
 from . import common_args
-from .. util import apply_scaling, read_param_file
+from .. util import scale_samples, read_param_file
 
 
 def sample(problem, N, M=4, seed=None):
@@ -63,7 +63,7 @@ def sample(problem, N, M=4, seed=None):
             g = 0.5 + (1 / math.pi) * np.arcsin(np.sin(omega2[j] * s + phi))
             X[l, j] = g
 
-    X = apply_scaling(problem, X)
+    X = scale_samples(X, problem)
     return X
 
 

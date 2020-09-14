@@ -1,7 +1,7 @@
 import numpy as np
 
 from . import common_args
-from ..util import read_param_file, apply_scaling
+from ..util import read_param_file, scale_samples
 
 
 def sample(problem, N, seed=None):
@@ -36,7 +36,7 @@ def sample(problem, N, seed=None):
         for j in range(N):
             result[j, i] = temp[j]
 
-    result = apply_scaling(problem, result)
+    result = scale_samples(result, problem)
 
     return result
 
