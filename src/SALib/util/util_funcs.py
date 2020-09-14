@@ -2,9 +2,11 @@ import pkgutil
 import csv
 from warnings import warn
 
+import numpy as np
+
 
 def avail_approaches(pkg):
-    '''Create list of available modules.
+    """Create list of available modules.
 
     Parameters
     ----------
@@ -15,7 +17,7 @@ def avail_approaches(pkg):
     ---------
     method : list
         A list of available submodules
-    '''
+    """
     methods = [modname for importer, modname, ispkg in
                pkgutil.walk_packages(path=pkg.__path__)
                if modname not in
@@ -91,8 +93,8 @@ def read_param_file(filename, delimiter=None):
     if groups == names:
         groups = None
     elif len(set(groups)) == 1:
-        raise ValueError('''Only one group defined, results will not be
-            meaningful''')
+        raise ValueError("""Only one group defined, results will not be
+            meaningful""")
 
     # setting dists to none if all are uniform
     # because non-uniform scaling is not needed
@@ -103,21 +105,35 @@ def read_param_file(filename, delimiter=None):
             'groups': groups, 'dists': dists}
 
 
-def requires_gurobipy(_has_gurobi):
-    '''
-    Decorator function which takes a boolean _has_gurobi as an argument.
-    Use decorate any functions which require gurobi.
-    Raises an import error at runtime if gurobi is not present.
-    Note that all runtime errors should be avoided in the working code,
-    using brute force options as preference.
-    '''
-    def _outer_wrapper(wrapped_function):
-        def _wrapper(*args, **kwargs):
-            if _has_gurobi:
-                result = wrapped_function(*args, **kwargs)
-            else:
-                warn("Gurobi not available", ImportWarning)
-                result = None
-            return result
-        return _wrapper
-    return _outer_wrapper
+def _check_groups(problem):
+    """Check if there is more than 1 group."""
+    groups = problem.get('groups')
+    if not groups:
+        return False
+
+    if len(set(groups)) == 1:
+        return False
+    return groups
+
+
+def _check_bounds(bounds):
+    """Check user supplied distribution bounds for validity.
+
+    Parameters
+    ----------
+    problem : dict
+        The problem definition
+
+    Returns
+    -------
+    tuple : containing upper and lower bounds
+    """
+    b = np.array(bounds)
+
+    lower_bounds = b[:, 0]
+    upper_bounds = b[:, 1]
+
+    if np.any(lower_bounds >= upper_bounds):
+        raise ValueError("Bounds are not legal")
+
+    return lower_bounds, upper_bounds

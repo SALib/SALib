@@ -3,14 +3,14 @@
 """
 from collections import OrderedDict
 import pkgutil
-from typing import Dict
+from typing import Dict, Tuple
 
 import numpy as np  # type: ignore
 import scipy as sp  # type: ignore
 from scipy import stats
 from typing import List
 
-from .util_funcs import (avail_approaches, read_param_file, requires_gurobipy)
+from .util_funcs import (avail_approaches, read_param_file, _check_bounds, _check_groups)
 from .problem import ProblemSpec
 from .results import ResultDict
 
@@ -19,8 +19,8 @@ __all__ = ["scale_samples", "read_param_file",
            "ResultDict", "avail_approaches"]
 
 
-def scale_samples(params: np.ndarray, bounds: List):
-    '''Rescale samples in 0-to-1 range to arbitrary bounds
+def _scale_samples(params: np.ndarray, bounds: List):
+    """Rescale samples in 0-to-1 range to arbitrary bounds
 
     Parameters
     ----------
@@ -30,14 +30,9 @@ def scale_samples(params: np.ndarray, bounds: List):
 
     bounds : list
         list of lists of dimensions `num_params`-by-2
-    '''
+    """
     # Check bounds are legal (upper bound is greater than lower bound)
-    b = np.array(bounds)
-    lower_bounds = b[:, 0]
-    upper_bounds = b[:, 1]
-
-    if np.any(lower_bounds >= upper_bounds):
-        raise ValueError("Bounds are not legal")
+    lower_bounds, upper_bounds = _check_bounds(bounds)
 
     # This scales the samples in-place, by using the optional output
     # argument for the numpy ufunctions
@@ -50,7 +45,46 @@ def scale_samples(params: np.ndarray, bounds: List):
            out=params)
 
 
-def unscale_samples(params, bounds):
+def scale_samples(params: np.ndarray, problem: Dict):
+    """Scale samples based on specified distribution (defaulting to uniform).
+
+    Adds an entry to the problem specification to indicate samples have been
+    scaled to maintain backwards compatibility (`sample_scaled`).
+
+    Parameters
+    ----------
+    params : np.ndarray,
+        numpy array of dimensions `num_params`-by-:math:`N`,
+        where :math:`N` is the number of samples
+    problem : dictionary,
+        SALib problem specification
+
+    Returns
+    ----------
+    np.ndarray, scaled samples
+    """
+    bounds = problem['bounds']
+    dists = problem.get('dists')
+
+    if dists is None:
+        _scale_samples(params, bounds)
+    else:
+        if params.shape[1] != len(dists):
+            msg = "Mismatch in number of parameters and distributions.\n"
+            msg += "Num parameters: {}".format(params.shape[1])
+            msg += "Num distributions: {}".format(len(dists))
+            raise ValueError(msg)
+
+        params = _nonuniform_scale_samples(
+            params, bounds, dists)
+
+    problem['sample_scaled'] = True
+
+    return params
+    # limited_params = limit_samples(params, upper_bound, lower_bound, dists)
+
+
+def _unscale_samples(params, bounds):
     """Rescale samples from arbitrary bounds back to [0,1] range
 
     Parameters
@@ -78,7 +112,7 @@ def unscale_samples(params, bounds):
               out=params)
 
 
-def nonuniform_scale_samples(params, bounds, dists):
+def _nonuniform_scale_samples(params, bounds, dists):
     """Rescale samples in 0-to-1 range to other distributions
 
     Parameters
@@ -111,22 +145,22 @@ def nonuniform_scale_samples(params, bounds, dists):
         if dists[i] == 'triang':
             # checking for correct parameters
             if b1 <= 0 or b2 <= 0 or b2 >= 1:
-                raise ValueError('''Triangular distribution: Scale must be
-                    greater than zero; peak on interval [0,1]''')
+                raise ValueError("""Triangular distribution: Scale must be
+                    greater than zero; peak on interval [0,1]""")
             else:
                 conv_params[:, i] = sp.stats.triang.ppf(
                     params[:, i], c=b2, scale=b1, loc=0)
 
         elif dists[i] == 'unif':
             if b1 >= b2:
-                raise ValueError('''Uniform distribution: lower bound
-                    must be less than upper bound''')
+                raise ValueError("""Uniform distribution: lower bound
+                    must be less than upper bound""")
             else:
                 conv_params[:, i] = params[:, i] * (b2 - b1) + b1
 
         elif dists[i] == 'norm':
             if b2 <= 0:
-                raise ValueError('''Normal distribution: stdev must be > 0''')
+                raise ValueError("""Normal distribution: stdev must be > 0""")
             else:
                 conv_params[:, i] = sp.stats.norm.ppf(
                     params[:, i], loc=b1, scale=b2)
@@ -137,7 +171,7 @@ def nonuniform_scale_samples(params, bounds, dists):
             # checking for valid parameters
             if b2 <= 0:
                 raise ValueError(
-                    '''Lognormal distribution: stdev must be > 0''')
+                    """Lognormal distribution: stdev must be > 0""")
             else:
                 conv_params[:, i] = np.exp(
                     sp.stats.norm.ppf(params[:, i], loc=b1, scale=b2))
@@ -150,49 +184,28 @@ def nonuniform_scale_samples(params, bounds, dists):
     return conv_params
 
 
-def apply_scaling(problem, sample):
-    """Scale samples based on specified distribution (defaulting to uniform).
+def extract_group_names(groups: List) -> Tuple:
+    """Get a unique set of the group names.
 
-    Adds an entry to the problem specification to indicate samples have been
-    scaled to maintain backwards compatibility (`sample_scaled`).
+    Reverts to parameter names (and number of parameters) if groups not
+    defined.
 
     Parameters
     ----------
-    problem : dictionary,
-        SALib problem specification
-    sample : np.ndarray,
-        Sample to scale
+    groups : List
+        
 
     Returns
-    ----------
-    np.ndarray, scaled samples
+    -------
+    tuple : names, number of groups    
     """
-    if not problem.get('dists'):
-        scale_samples(sample, problem['bounds'])
-    else:
-        if sample.shape[1] != len(problem['dists']):
-            import warnings
-            warnings.warn('Could not sample with alternate distributions. Reverting to uniform sampling.')
-            scale_samples(sample, problem['bounds'])
+    names = list(OrderedDict.fromkeys(groups))
+    number = len(names)
 
-            return sample
-
-        sample = nonuniform_scale_samples(
-            sample, problem['bounds'], problem['dists'])
-
-    problem['sample_scaled'] = True
-
-    return sample
+    return names, number
 
 
-def extract_group_names(groups):
-    """Get a unique set of the group names."""
-    unique_group_names = list(OrderedDict.fromkeys(groups))
-    number_of_groups = len(unique_group_names)
-    return unique_group_names, number_of_groups
-
-
-def compute_groups_matrix(groups):
+def compute_groups_matrix(groups: List):
     """Generate matrix which notes factor membership of groups
 
     Computes a k-by-g matrix which notes factor membership of groups
@@ -204,7 +217,7 @@ def compute_groups_matrix(groups):
 
     Parameters
     ----------
-    groups : list
+    groups : List
         Group names corresponding to each variable
 
     Returns
@@ -213,11 +226,7 @@ def compute_groups_matrix(groups):
         containing group matrix assigning parameters to
         groups and a list of unique group names
     """
-    if not groups:
-        return None
-
     num_vars = len(groups)
-
     unique_group_names, number_of_groups = extract_group_names(groups)
 
     indices = dict([(x, i) for (i, x) in enumerate(unique_group_names)])
@@ -229,26 +238,6 @@ def compute_groups_matrix(groups):
         output[parameter_row, group_index] = 1
 
     return output, unique_group_names
-
-
-def requires_gurobipy(_has_gurobi):
-    '''
-    Decorator function which takes a boolean _has_gurobi as an argument.
-    Use decorate any functions which require gurobi.
-    Raises an import error at runtime if gurobi is not present.
-    Note that all runtime errors should be avoided in the working code,
-    using brute force options as preference.
-    '''
-    def _outer_wrapper(wrapped_function):
-        def _wrapper(*args, **kwargs):
-            if _has_gurobi:
-                result = wrapped_function(*args, **kwargs)
-            else:
-                warn("Gurobi not available", ImportWarning)
-                result = None
-            return result
-        return _wrapper
-    return _outer_wrapper
 
 
 def _define_problem_with_groups(problem: Dict) -> Dict:
