@@ -17,6 +17,10 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
     'mu_star_conf', where each entry is a list of parameters containing
     the indices in the same order as the parameter file.
 
+    Compatible with
+    ---------------
+    * `morris`
+
     Parameters
     ----------
     problem : dict
