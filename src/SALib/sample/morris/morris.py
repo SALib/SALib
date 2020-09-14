@@ -82,6 +82,26 @@ def sample(problem: Dict, N: int, num_levels: int = 4,
         Returns a numpy.ndarray containing the model inputs required for Method
         of Morris. The resulting matrix has :math:`(G/D+1)*N/T` rows and
         :math:`D` columns, where :math:`D` is the number of parameters.
+
+    References
+    ----------
+    .. [1] Ruano, M.V., Ribes, J., Seco, A., Ferrer, J., 2012. 
+           An improved sampling strategy based on trajectory design for 
+           application of the Morris method to systems with many input factors. 
+           Environmental Modelling & Software 37, 103–109. 
+           https://doi.org/10.1016/j.envsoft.2012.03.008
+
+    .. [2] Morris, M.D., 1991. 
+           Factorial Sampling Plans for Preliminary Computational Experiments. 
+           Technometrics 33, 161–174. 
+           https://doi.org/10.1080/00401706.1991.10484804
+
+    .. [3] Campolongo, F., Cariboni, J., Saltelli, A., 2007. 
+           An effective screening design for sensitivity analysis of large models. 
+           Environmental Modelling & Software, Modelling, computer-assisted 
+           simulations, and mapping of dangerous phenomena for 
+           hazard assessment 22, 1509–1518. 
+           https://doi.org/10.1016/j.envsoft.2006.10.004
     """
     if seed:
         np.random.seed(seed)
