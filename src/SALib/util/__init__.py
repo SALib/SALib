@@ -33,11 +33,6 @@ def _scale_samples(params: np.ndarray, bounds: List):
     """
     # Check bounds are legal (upper bound is greater than lower bound)
     lower_bounds, upper_bounds = _check_bounds(bounds)
-    lower_bounds = b[:, 0]
-    upper_bounds = b[:, 1]
-
-    if np.any(lower_bounds >= upper_bounds):
-        raise ValueError("Bounds are not legal")
 
     # This scales the samples in-place, by using the optional output
     # argument for the numpy ufunctions
@@ -211,18 +206,6 @@ def extract_group_names(groups: List) -> Tuple:
 
 
 def compute_groups_matrix(groups: List):
-
-    return sample
-
-
-def extract_group_names(groups):
-    """Get a unique set of the group names."""
-    unique_group_names = list(OrderedDict.fromkeys(groups))
-    number_of_groups = len(unique_group_names)
-    return unique_group_names, number_of_groups
-
-
-def compute_groups_matrix(groups):
     """Generate matrix which notes factor membership of groups
 
     Computes a k-by-g matrix which notes factor membership of groups
@@ -243,11 +226,7 @@ def compute_groups_matrix(groups):
         containing group matrix assigning parameters to
         groups and a list of unique group names
     """
-    if not groups:
-        return None
-
     num_vars = len(groups)
-
     unique_group_names, number_of_groups = extract_group_names(groups)
 
     indices = dict([(x, i) for (i, x) in enumerate(unique_group_names)])
@@ -259,26 +238,6 @@ def compute_groups_matrix(groups):
         output[parameter_row, group_index] = 1
 
     return output, unique_group_names
-
-
-def requires_gurobipy(_has_gurobi):
-    '''
-    Decorator function which takes a boolean _has_gurobi as an argument.
-    Use decorate any functions which require gurobi.
-    Raises an import error at runtime if gurobi is not present.
-    Note that all runtime errors should be avoided in the working code,
-    using brute force options as preference.
-    '''
-    def _outer_wrapper(wrapped_function):
-        def _wrapper(*args, **kwargs):
-            if _has_gurobi:
-                result = wrapped_function(*args, **kwargs)
-            else:
-                warn("Gurobi not available", ImportWarning)
-                result = None
-            return result
-        return _wrapper
-    return _outer_wrapper
 
 
 def _define_problem_with_groups(problem: Dict) -> Dict:

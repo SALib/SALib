@@ -2,9 +2,11 @@ import pkgutil
 import csv
 from warnings import warn
 
+import numpy as np
+
 
 def avail_approaches(pkg):
-    '''Create list of available modules.
+    """Create list of available modules.
 
     Parameters
     ----------
@@ -15,7 +17,7 @@ def avail_approaches(pkg):
     ---------
     method : list
         A list of available submodules
-    '''
+    """
     methods = [modname for importer, modname, ispkg in
                pkgutil.walk_packages(path=pkg.__path__)
                if modname not in
@@ -91,8 +93,8 @@ def read_param_file(filename, delimiter=None):
     if groups == names:
         groups = None
     elif len(set(groups)) == 1:
-        raise ValueError('''Only one group defined, results will not be
-            meaningful''')
+        raise ValueError("""Only one group defined, results will not be
+            meaningful""")
 
     # setting dists to none if all are uniform
     # because non-uniform scaling is not needed
