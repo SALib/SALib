@@ -68,7 +68,7 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
     if not groups:
         D = problem['num_vars']
     else:
-        D = len(set(problem['groups']))
+        _, D = extract_group_names(groups)
 
     if calc_second_order and Y.size % (2 * D + 2) == 0:
         N = int(Y.size / (2 * D + 2))
@@ -107,7 +107,6 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
                     S['S2_conf'][j, k] = Z * second_order(A[r], AB[r, j],
                                                           AB[r, k], BA[r, j],
                                                           B[r]).std(ddof=1)
-
     else:
         tasks, n_processors = create_task_list(
             D, calc_second_order, n_processors)
@@ -161,9 +160,9 @@ def create_Si_dict(D, calc_second_order):
                    for k in ('S1', 'S1_conf', 'ST', 'ST_conf'))
 
     if calc_second_order:
-        S['S2'] = np.zeros((D, D))
+        S['S2'] = np.empty((D, D))
         S['S2'][:] = np.nan
-        S['S2_conf'] = np.zeros((D, D))
+        S['S2_conf'] = np.empty((D, D))
         S['S2_conf'][:] = np.nan
 
     return S
@@ -302,7 +301,7 @@ def Si_to_pandas_dict(S_dict):
         if len(names) > 2:
             idx = list(combinations(names, 2))
         else:
-            idx = (tuple(set(names)), )
+            idx = (names, )
         
         second_order = {
             'S2': [S_dict['S2'][names.index(i[0]), names.index(i[1])]
