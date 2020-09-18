@@ -4,7 +4,8 @@ from sys import exit
 import numpy as np
 
 from . import common_args
-from ..util import read_param_file, ResultDict, extract_groups
+from ..util import (read_param_file, ResultDict, extract_groups, 
+                    compute_groups_matrix, _group_metric)
 
 
 def analyze(problem, Y, M=4, print_to_console=False, seed=None):
@@ -47,10 +48,11 @@ def analyze(problem, Y, M=4, print_to_console=False, seed=None):
     if seed:
         np.random.seed(seed)
 
+    num_vars = problem['num_vars']
     group_names, D = extract_groups(problem)
 
-    if Y.size % (D) == 0:
-        N = int(Y.size / D)
+    if Y.size % (num_vars) == 0:
+        N = int(Y.size / num_vars)
     else:
         print("""
             Error: Number of samples in model output file must be a multiple of D,
@@ -59,23 +61,29 @@ def analyze(problem, Y, M=4, print_to_console=False, seed=None):
         exit()
 
     # Recreate the vector omega used in the sampling
-    omega = np.zeros([D])
+    omega = np.zeros([num_vars])
     omega[0] = math.floor((N - 1) / (2 * M))
     m = math.floor(omega[0] / (2 * M))
 
-    if m >= (D - 1):
-        omega[1:] = np.floor(np.linspace(1, m, D - 1))
+    if m >= (num_vars - 1):
+        omega[1:] = np.floor(np.linspace(1, m, num_vars - 1))
     else:
-        omega[1:] = np.arange(D - 1) % m + 1
+        omega[1:] = np.arange(num_vars - 1) % m + 1
 
     # Calculate and Output the First and Total Order Values
-    Si = ResultDict((k, [None] * D) for k in ['S1', 'ST'])
+    keys = ('S1', 'ST')
+    Si = ResultDict((k, np.zeros(num_vars)) for k in keys)
     Si['names'] = group_names
 
-    for i in range(D):
+    for i in range(num_vars):
         l = np.arange(i * N, (i + 1) * N)
         Si['S1'][i] = compute_first_order(Y[l], N, M, omega[0])
         Si['ST'][i] = compute_total_order(Y[l], N, omega[0])
+
+    if D < num_vars:
+        groupings, _ = compute_groups_matrix(problem['groups'])
+        for key in keys:
+            Si[key] = _group_metric(groupings, Si[key])
     
     if print_to_console:
         print(Si.to_df())

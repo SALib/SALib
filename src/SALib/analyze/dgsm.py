@@ -3,7 +3,8 @@ from scipy.stats import norm
 import numpy as np
 
 from . import common_args
-from ..util import read_param_file, ResultDict
+from ..util import (read_param_file, ResultDict, extract_groups, 
+                    compute_groups_matrix, _group_metric)
 
 import warnings
 
@@ -42,38 +43,36 @@ def analyze(problem, X, Y, num_resamples=100,
     if seed:
         np.random.seed(seed)
 
-    if problem.get('groups'):
-        warnings.warn("SALib DGSM method does not currently support groups")
-
-    D = problem['num_vars']
+    num_vars = problem['num_vars']
+    group_names, D = extract_groups(problem)
     
     Y_size = Y.size
 
-    if Y_size % (D + 1) == 0:
-        N = int(Y_size / (D + 1))
+    if Y_size % (num_vars + 1) == 0:
+        N = int(Y_size / (num_vars + 1))
     else:
         raise RuntimeError("Incorrect number of samples in model output file.")
 
     if not 0 < conf_level < 1:
         raise RuntimeError("Confidence level must be between 0-1.")
 
-    dims = (N, D)
+    dims = (N, num_vars)
     base = np.empty(N)
     X_base = np.empty(dims)
     perturbed = np.empty(dims)
     X_perturbed = np.empty(dims)
-    step = D + 1
+    step = num_vars + 1
 
     base = Y[0:Y_size:step]
     X_base = X[0:Y_size:step, :]
 
     # First order (+conf.) and Total order (+conf.)
     keys = ('vi', 'vi_std', 'dgsm', 'dgsm_conf')
-    S = ResultDict((k, np.empty(D)) for k in keys)
-    S['names'] = problem['names']
+    S = ResultDict((k, np.empty(num_vars)) for k in keys)
+    S['names'] = group_names
 
     bounds = problem['bounds']
-    for j in range(D):
+    for j in range(num_vars):
         perturbed[:, j] = Y[(j + 1):Y_size:step]
         X_perturbed[:, j] = X[(j + 1):Y_size:step, j]
 
@@ -88,6 +87,11 @@ def analyze(problem, X, Y, num_resamples=100,
                                                     bounds[j],
                                                     num_resamples,
                                                     conf_level)
+
+    if D < num_vars:
+        groupings, _ = compute_groups_matrix(problem['groups'])
+        for key in keys:
+            S[key] = _group_metric(groupings, S[key])
     
     if print_to_console:
         print(S.to_df())

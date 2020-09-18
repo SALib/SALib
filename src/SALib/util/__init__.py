@@ -267,6 +267,30 @@ def compute_groups_matrix(groups: List):
     return output, unique_group_names
 
 
+def _group_metric(groups, ungrouped_metric):
+    """ Computes the mean value for the groups of parameter values.
+
+    Parameters
+    ----------
+    groups: np.ndarray
+        Array defining the distribution of groups
+    ungrouped_metric: np.ndarray
+        Metric calculated without considering the groups
+
+    Returns
+    -------
+    metric: np.ndarray
+         Mean value for the groups of parameter values
+    """
+    groups = np.array(groups, dtype=np.bool)
+
+    masked = np.ma.masked_array(ungrouped_metric * groups.T,
+                                mask=(groups ^ 1).T)
+    metric = np.ma.mean(masked, axis=1)
+
+    return metric
+
+
 def _define_problem_with_groups(problem: Dict) -> Dict:
     """
     Checks if the user defined the 'groups' key in the problem dictionary.

@@ -4,10 +4,10 @@ from scipy.stats import norm, gaussian_kde, rankdata
 import numpy as np
 
 from . import common_args
-from ..util import read_param_file, ResultDict, extract_groups
+from ..util import (read_param_file, ResultDict, extract_groups,
+                    compute_groups_matrix, _group_metric)
 
 import warnings
-
 
 
 def analyze(problem: Dict, X: np.array, Y: np.array, 
@@ -53,6 +53,7 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
     if seed:
         np.random.seed(seed)
 
+    num_vars = problem['num_vars']
     group_names, D = extract_groups(problem)
     N = Y.size
 
@@ -66,11 +67,11 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
     Ygrid = np.linspace(np.min(Y), np.max(Y), 100)
 
     keys = ('delta', 'delta_conf', 'S1', 'S1_conf')
-    S = ResultDict((k, np.zeros(D)) for k in keys)
+    S = ResultDict((k, np.zeros(num_vars)) for k in keys)
     S['names'] = group_names
 
     try:
-        for i in range(D):
+        for i in range(num_vars):
             X_i = X[:, i]
             S['delta'][i], S['delta_conf'][i] = bias_reduced_delta(
                 Y, Ygrid, X_i, m, num_resamples, conf_level)
@@ -84,6 +85,11 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
         msg += "SALib team"
 
         raise np.linalg.LinAlgError(msg)
+
+    if D < num_vars:
+        groupings, _ = compute_groups_matrix(problem['groups'])
+        for key in keys:
+            S[key] = _group_metric(groupings, S[key])
 
     if print_to_console:
         print(S.to_df())

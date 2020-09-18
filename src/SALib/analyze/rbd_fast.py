@@ -5,7 +5,8 @@ import numpy as np
 from scipy.signal import periodogram
 
 from . import common_args
-from ..util import read_param_file, ResultDict, extract_groups
+from ..util import (read_param_file, ResultDict, extract_groups, 
+                    compute_groups_matrix, _group_metric)
 
 
 def analyze(problem, X, Y, M=10, print_to_console=False, seed=None):
@@ -60,17 +61,22 @@ def analyze(problem, X, Y, M=10, print_to_console=False, seed=None):
     if seed:
         np.random.seed(seed)
 
+    num_vars = problem['num_vars']
     group_names, D = extract_groups(problem)
     N = Y.size
 
     # Calculate and Output the First Order Value
-    Si = ResultDict((k, [None] * D) for k in ['S1'])
+    Si = ResultDict((k, [None] * num_vars) for k in ['S1'])
     Si['names'] = group_names
 
-    for i in range(D):
+    for i in range(num_vars):
         S1 = compute_first_order(permute_outputs(X[:, i], Y), M)
         S1 = unskew_S1(S1, M, N)
         Si['S1'][i] = S1
+
+    if D < num_vars:
+        groupings, _ = compute_groups_matrix(problem['groups'])
+        Si['S1'] = _group_metric(groupings, Si['S1'])
     
     if print_to_console:
         print(Si.to_df())
