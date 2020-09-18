@@ -4,7 +4,7 @@ from scipy.stats import norm
 
 from . import common_args
 from ..util import (read_param_file, compute_groups_matrix, ResultDict,
-                    _define_problem_with_groups, _compute_delta, _check_groups)
+                    _define_problem_with_groups, _compute_delta)
 
 
 def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
@@ -78,13 +78,9 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
     delta = _compute_delta(num_levels)
 
     num_vars = problem['num_vars']
-    groups = _check_groups(problem)
-    if not groups:
-        number_of_groups = num_vars
-    else:
-        groups, unique_group_names = compute_groups_matrix(groups)
-        number_of_groups = len(set(unique_group_names))
-    # End if
+
+    groups, unique_group_names = compute_groups_matrix(problem.get('groups'))
+    number_of_groups = len(unique_group_names)
 
     num_trajectories = int(Y.size / (number_of_groups + 1))
     trajectory_size = int(Y.size / num_trajectories)
@@ -127,7 +123,6 @@ def _compute_statistical_outputs(elementary_effects: np.ndarray, num_vars: int,
     Si: ResultDict
         Morris statistical parameters.
     """
-
     Si = ResultDict((k, [None] * num_vars) for k in ['names', 'mu', 'mu_star',
                                                      'sigma', 'mu_star_conf'])
 

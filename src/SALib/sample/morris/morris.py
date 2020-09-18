@@ -38,7 +38,7 @@ from .strategy import SampleMorris
 
 from SALib.sample import common_args
 from SALib.util import (scale_samples, read_param_file, compute_groups_matrix,
-                        _define_problem_with_groups, _compute_delta, _check_groups)
+                        _define_problem_with_groups, _compute_delta)
 
 
 __all__ = ['sample']
@@ -112,7 +112,7 @@ def _sample_morris(problem: Dict, number_trajectories: int,
     of factors
 
     Parameters
-    ----------
+    ---------
     problem : dict
         The problem definition
     number_trajectories : int
@@ -124,8 +124,7 @@ def _sample_morris(problem: Dict, number_trajectories: int,
     -------
     numpy.ndarray
     """
-    groups = _check_groups(problem)
-    group_membership, _ = compute_groups_matrix(groups)
+    group_membership, _ = compute_groups_matrix(problem.get('groups'))
     _check_group_membership(group_membership)
 
     num_params = group_membership.shape[0]
@@ -149,7 +148,7 @@ def _generate_trajectory(group_membership: np.ndarray,
     both implied by the dimensions of `group_membership`
 
     Parameters
-    ----------
+    ---------
     group_membership : np.ndarray
         a k-by-g matrix which notes factor membership of groups
     num_levels : int, default=4
@@ -223,7 +222,7 @@ def _generate_p_star(num_groups: int) -> np.ndarray:
     """Describe the order in which groups move
 
     Parameters
-    ----------
+    ---------
     num_groups : int
 
     Returns
@@ -243,7 +242,7 @@ def _generate_x_star(num_params: int, num_levels: int) -> np.ndarray:
     :math:`\omega`
 
     Parameters
-    ----------
+    ---------
     num_params : int
         The number of parameters (factors)
     num_levels : int
@@ -274,7 +273,7 @@ def _compute_optimised_trajectories(problem: Dict, input_sample: int, N: int,
     correct call here.
 
     Parameters
-    ----------
+    ---------
     problem : dict
         The problem definition
     input_sample :
