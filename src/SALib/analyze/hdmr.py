@@ -12,6 +12,8 @@ from . import common_args
 from ..util import read_param_file, ResultDict
 from matplotlib import pyplot as plt
 
+import warnings
+
 
 __all__ = ['analyze', 'cli_parse', 'cli_action']
 
@@ -121,6 +123,9 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
     # Random Seed
     if seed:
         np.random.seed(seed)
+
+    if problem.get('groups'):
+        warnings.warn("SALib HDMR method does not currently support groups")
 
     # Initial part: Check input arguments and define HDMR variables
     settings = _check_settings(X, Y, maxorder, maxiter, m, K, R, alpha, lambdax)

@@ -5,6 +5,8 @@ import numpy as np
 from . import common_args
 from ..util import read_param_file, ResultDict
 
+import warnings
+
 
 def analyze(problem, X, Y, num_resamples=100,
             conf_level=0.95, print_to_console=False, seed=None):
@@ -40,7 +42,11 @@ def analyze(problem, X, Y, num_resamples=100,
     if seed:
         np.random.seed(seed)
 
+    if problem.get('groups'):
+        warnings.warn("SALib DGSM method does not currently support groups")
+
     D = problem['num_vars']
+    
     Y_size = Y.size
 
     if Y_size % (D + 1) == 0:

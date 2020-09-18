@@ -4,7 +4,10 @@ from scipy.stats import norm, gaussian_kde, rankdata
 import numpy as np
 
 from . import common_args
-from ..util import read_param_file, ResultDict
+from ..util import read_param_file, ResultDict, extract_groups
+
+import warnings
+
 
 
 def analyze(problem: Dict, X: np.array, Y: np.array, 
@@ -50,7 +53,7 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
     if seed:
         np.random.seed(seed)
 
-    D = problem['num_vars']
+    group_names, D = extract_groups(problem)
     N = Y.size
 
     if not 0 < conf_level < 1:
@@ -64,7 +67,7 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
 
     keys = ('delta', 'delta_conf', 'S1', 'S1_conf')
     S = ResultDict((k, np.zeros(D)) for k in keys)
-    S['names'] = problem['names']
+    S['names'] = group_names
 
     try:
         for i in range(D):

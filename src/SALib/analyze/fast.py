@@ -4,7 +4,7 @@ from sys import exit
 import numpy as np
 
 from . import common_args
-from ..util import read_param_file, ResultDict
+from ..util import read_param_file, ResultDict, extract_groups
 
 
 def analyze(problem, Y, M=4, print_to_console=False, seed=None):
@@ -47,7 +47,7 @@ def analyze(problem, Y, M=4, print_to_console=False, seed=None):
     if seed:
         np.random.seed(seed)
 
-    D = problem['num_vars']
+    group_names, D = extract_groups(problem)
 
     if Y.size % (D) == 0:
         N = int(Y.size / D)
@@ -70,7 +70,7 @@ def analyze(problem, Y, M=4, print_to_console=False, seed=None):
 
     # Calculate and Output the First and Total Order Values
     Si = ResultDict((k, [None] * D) for k in ['S1', 'ST'])
-    Si['names'] = problem['names']
+    Si['names'] = group_names
 
     for i in range(D):
         l = np.arange(i * N, (i + 1) * N)
