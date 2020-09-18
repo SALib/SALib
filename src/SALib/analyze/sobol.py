@@ -4,8 +4,7 @@ import numpy as np
 import pandas as pd
 
 from . import common_args
-from ..util import (read_param_file, compute_groups_matrix, ResultDict, 
-                    extract_group_names, _check_groups)
+from ..util import (read_param_file, ResultDict, extract_groups)
 from types import MethodType
 
 from multiprocessing import Pool, cpu_count
@@ -62,13 +61,11 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
     """
     if seed:
         np.random.seed(seed)
+
     # determining if groups are defined and adjusting the number
     # of rows in the cross-sampled matrix accordingly
-    groups = _check_groups(problem)
-    if not groups:
-        D = problem['num_vars']
-    else:
-        _, D = extract_group_names(groups)
+    _, D = extract_groups(problem)
+        
 
     if calc_second_order and Y.size % (2 * D + 2) == 0:
         N = int(Y.size / (2 * D + 2))
@@ -290,13 +287,8 @@ def Si_to_pandas_dict(S_dict):
     idx = None
     second_order = None
     if 'S2' in S_dict:
-        groups = _check_groups(problem)
-        if groups:
-            names, _ = extract_group_names(groups)
-        else:
-            names = problem.get('names')
-
-        if len(names) > 2:
+        names, num_names = extract_groups(problem)
+        if num_names > 2:
             idx = list(combinations(names, 2))
         else:
             idx = (names, )
@@ -325,11 +317,7 @@ def to_df(self):
     total, first, (idx, second) = Si_to_pandas_dict(self)
 
     problem = self.problem
-    groups = _check_groups(problem)
-    if not groups:
-        names = problem.get('names')
-    else:
-        names, _ = extract_group_names(groups)
+    names, _ = extract_groups(problem)
 
     ret = [pd.DataFrame(total, index=names),
            pd.DataFrame(first, index=names)]

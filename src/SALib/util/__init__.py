@@ -10,7 +10,7 @@ import scipy as sp  # type: ignore
 from scipy import stats
 from typing import List
 
-from .util_funcs import (avail_approaches, read_param_file, _check_bounds, _check_groups)
+from .util_funcs import (avail_approaches, read_param_file, _check_bounds)
 from .problem import ProblemSpec
 from .results import ResultDict
 
@@ -81,7 +81,6 @@ def scale_samples(params: np.ndarray, problem: Dict):
     problem['sample_scaled'] = True
 
     return params
-    # limited_params = limit_samples(params, upper_bound, lower_bound, dists)
 
 
 def _unscale_samples(params, bounds):
@@ -200,6 +199,34 @@ def extract_group_names(groups: List) -> Tuple:
     tuple : names, number of groups    
     """
     names = list(OrderedDict.fromkeys(groups))
+    number = len(names)
+
+    return names, number
+
+
+def extract_groups(problem: Dict) -> Tuple:
+    """Get a unique set of the group names.
+
+    Reverts to parameter names (and number of parameters) if groups not
+    defined.
+
+    Parameters
+    ----------
+    groups : List
+        
+
+    Returns
+    -------
+    tuple : names, number of groups    
+    """
+    groups = problem.get('groups')
+
+    if not groups or (len(set(groups)) == 1):
+        names = problem['names']
+    else:
+        groups = problem.get('groups')
+        names = list(OrderedDict.fromkeys(groups))
+
     number = len(names)
 
     return names, number
