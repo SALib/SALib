@@ -267,8 +267,9 @@ def compute_groups_matrix(groups: List):
     return output, unique_group_names
 
 
-def _group_metric(groups, ungrouped_metric):
-    """ Computes the mean value for the groups of parameter values.
+def _group_metric(groups: np.ndarray, 
+                  ungrouped_metric: np.ndarray) -> np.ndarray:
+    """Computes the mean value for the groups of parameter values.
 
     Parameters
     ----------
