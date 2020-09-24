@@ -23,6 +23,10 @@ def analyze(problem, X, Y, second_order=False, print_to_console=False,
     parameters to the nearest 2**n.  Any results involving dummy parameters
     could indicate a problem with the model runs.
 
+    Compatible with
+    ---------------
+    * `ff`
+
     Parameters
     ----------
     problem: dict
