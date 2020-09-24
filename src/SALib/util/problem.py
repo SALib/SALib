@@ -3,6 +3,7 @@ import importlib
 from types import MethodType
 
 from multiprocess import Pool, cpu_count
+from pathos.pp import ParallelPythonPool as pp_Pool
 from functools import partial, wraps
 
 import numpy as np
@@ -52,14 +53,13 @@ class ProblemSpec(dict):
 
     def sample(self, func, *args, **kwargs):
         """Create sample using given function.
-        
-        Sampling function must accept the problem spec as the first parameter,
-        and return a numpy array.
 
         Parameters
         ----------
         func : function,
-            Sampling method to use.
+            Sampling method to use. The given function must accept the SALib
+            problem specification as the first parameter and return a numpy
+            array.
         
         *args : list,
             Additional arguments to be passed to `func`
@@ -82,15 +82,13 @@ class ProblemSpec(dict):
     def evaluate(self, func, *args, **kwargs):
         """Evaluate a given model.
 
-        Usage Conditions:
-        * The provided function needs to accept a numpy array of inputs as 
-          its first parameter
-        * `func` must return a numpy array of results
-
         Parameters
         ----------
         func : function,
-            Model, or function that wraps a model, to be run in parallel
+            Model, or function that wraps a model, to be run/evaluated.
+            The provided function is required to accept a numpy array of
+            inputs as its first parameter and must return a numpy array of
+            results.
         
         *args : list,
             Additional arguments to be passed to `func`
@@ -109,17 +107,14 @@ class ProblemSpec(dict):
     def evaluate_parallel(self, func, *args, nprocs=None, **kwargs):
         """Evaluate model locally in parallel.
 
-        Usage Conditions:
-        * The provided function needs to accept a numpy array of inputs as 
-          its first parameter
-        * The provided function must return a numpy array of results
-
         All detected processors will be used if `nprocs` is not specified.
 
         Parameters
         ----------
         func : function,
-            Model, or function that wraps a model, to be run in parallel
+            Model, or function that wraps a model, to be run in parallel.
+            The provided function needs to accept a numpy array of inputs as 
+            its first parameter and must return a numpy array of results.
         
         nprocs : int,
             Number of processors to use. Uses all available if not specified.
@@ -134,7 +129,7 @@ class ProblemSpec(dict):
         ----------
         self : ProblemSpec object
         """
-        warnings.warn("This is an experimental feature and may break.")
+        warnings.warn("This is an experimental feature and may not work.")
 
         if self._samples is None:
             raise RuntimeError("Sampling not yet conducted")
@@ -191,14 +186,12 @@ class ProblemSpec(dict):
         ----------
         self : ProblemSpec object
         """
-        from pathos.pp import ParallelPythonPool as Pool
-
         if verbose:
             from pathos.parallel import stats
 
         warnings.warn("This is an untested experimental feature and may not work.")
 
-        workers = Pool(nprocs, servers=servers)
+        workers = pp_Pool(nprocs, servers=servers)
 
         # Split into even chunks
         chunks = np.array_split(self._samples, int(nprocs)*len(servers), axis=0)
@@ -220,13 +213,13 @@ class ProblemSpec(dict):
     def analyze(self, func, *args, **kwargs):
         """Analyze sampled results using given function.
 
-        Analysis function must accept the problem spec as the first parameter
-        and return a numpy array.
 
         Parameters
         ----------
         func : function,
-            Analysis method to use.
+            Analysis method to use. The provided function must accept the 
+            problem specification as the first parameter and return a numpy
+            array.
         
         *args : list,
             Additional arguments to be passed to `func`
