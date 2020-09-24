@@ -29,7 +29,8 @@ Python 3 (from SALib v1.2 onwards SALib does not officially support Python 2)
 
 * Method of Morris, including groups and optimal trajectories (`Morris
   1991 <http://www.tandfonline.com/doi/abs/10.1080/00401706.1991.10484804>`__,
-  `Campolongo et al. 2007 <http://www.sciencedirect.com/science/article/pii/S1364815206002805>`__)
+  `Campolongo et al. 2007 <http://www.sciencedirect.com/science/article/pii/S1364815206002805>`__,
+  `Ruano et al. 2012 <https://doi.org/10.1016/j.envsoft.2012.03.008>`__)
 
 * Fourier Amplitude Sensitivity Test (FAST) (`Cukier et al. 1973 <http://scitation.aip.org/content/aip/journal/jcp/59/8/10.1063/1.1680571>`__,
   `Saltelli et al. 1999 <http://amstat.tandfonline.com/doi/abs/10.1080/00401706.1999.10485594>`__)
@@ -47,6 +48,11 @@ Python 3 (from SALib v1.2 onwards SALib does not officially support Python 2)
 
 * Fractional Factorial Sensitivity Analysis 
   (`Saltelli et al. 2008 <http://www.wiley.com/WileyCDA/WileyTitle/productCd-0470059974.html>`__)
+
+* High-Dimensional Model Representation (HDMR) 
+  (`Li et al. 2010 <https://doi.org/10.1021/jp9096919>`__)
+
+
 
 **Contributing:** see `here <CONTRIBUTING.md>`__
 
