@@ -59,6 +59,46 @@ Python 3 (from SALib v1.2 onwards SALib does not officially support Python 2)
 Quick Start
 ~~~~~~~~~~~
 
+Method chaining approach
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Chaining calls is supported from SALib v1.4 
+
+.. code:: python
+
+    from SALib import ProblemSpec
+    from SALib.test_functions import Ishigami
+
+    import numpy as np
+
+
+    # By convention, we assign to "sp" (for "SALib Problem")
+    sp = ProblemSpec({
+      'names': ['x1', 'x2', 'x3'],   # Name of each parameter
+      'bounds': [[np.pi, np.pi]]*3,  # bounds of each parameter
+      'outputs': ['Y']               # name of outputs in expected order
+    })
+
+    (sp.sample_saltelli(1000, calc_second_order=True)
+       .evaluate(Ishigami.evaluate)
+       .analyze_sobol(print_to_console=True))
+
+    print(sp)
+
+    # Samples, model results and analyses can be extracted:
+    print(sp.samples)
+    print(sp.results)
+    print(sp.analysis)
+
+    # Basic plotting functionality is also provided
+    sp.plot()
+
+
+The above is equivalent to the procedural approach below:
+
+Procedural approach
+~~~~~~~~~~~~~~~~~~~
+
 .. code:: python
 
     from SALib.sample import saltelli
