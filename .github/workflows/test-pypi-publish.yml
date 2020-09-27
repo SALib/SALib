@@ -6,15 +6,19 @@ name: Upload SALib Python Package pre-release to PyPI and TestPyPI
 on: 
   push:
     branches:
-        - "develop"
+      - "develop"
+    tags:
+      - "*dev*"
+
 jobs:
   pre-release:
     name: "Pre Release"
     runs-on: ubuntu-latest
 
     steps:
+    - uses: actions/checkout@v2
+
     - name: Publish distribution 📦 to Test PyPI
-      uses: actions/checkout@v2
       uses: pypa/gh-action-pypi-publish@master
       with:
         password: ${{ secrets.test_pypi_password }}
