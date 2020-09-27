@@ -23,6 +23,10 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
     indices in the same order as the parameter file.  If calc_second_order is
     True, the dictionary also contains keys 'S2' and 'S2_conf'.
 
+    Compatible with
+    ---------------
+    * `saltelli`
+
     Parameters
     ----------
     problem : dict
@@ -160,10 +164,8 @@ def create_Si_dict(D, calc_second_order):
                    for k in ('S1', 'S1_conf', 'ST', 'ST_conf'))
 
     if calc_second_order:
-        S['S2'] = np.empty((D, D))
-        S['S2'][:] = np.nan
-        S['S2_conf'] = np.empty((D, D))
-        S['S2_conf'][:] = np.nan
+        S['S2'] = np.full((D, D), np.nan)
+        S['S2_conf'] = np.full((D, D), np.nan)
 
     return S
 

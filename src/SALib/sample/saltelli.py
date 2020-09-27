@@ -26,6 +26,22 @@ def sample(problem, N, calc_second_order=True, seed=None, skip_values=1000):
         The number of samples to generate
     calc_second_order : bool
         Calculate second-order sensitivities (default True)
+
+    References
+    ----------
+    .. [1] Saltelli, A., 2002. 
+           Making best use of model evaluations to compute sensitivity indices. 
+           Computer Physics Communications 145, 280–297. 
+           https://doi.org/10.1016/S0010-4655(02)00280-1
+
+    .. [2] Sobol', I.M., 2001. 
+           Global sensitivity indices for nonlinear mathematical models and 
+           their Monte Carlo estimates. 
+           Mathematics and Computers in Simulation, 
+           The Second IMACS Seminar on Monte Carlo Methods 55, 271–280. 
+           https://doi.org/10.1016/S0378-4754(00)00270-6
+
+
     """
     if seed:
         msg = "The seed value is ignored for the Saltelli sampler\n"

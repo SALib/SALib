@@ -63,3 +63,12 @@ Fractional Factorial
 
 .. autofunction:: SALib.analyze.ff.analyze
    :noindex:
+
+High-Dimensional Model Representation
+-------------------------------------
+
+.. autofunction:: SALib.sample.latin.sample
+   :noindex:
+
+.. autofunction:: SALib.analyze.ff.hdmr
+   :noindex:

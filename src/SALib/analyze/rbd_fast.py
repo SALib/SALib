@@ -16,6 +16,10 @@ def analyze(problem, X, Y, M=10, print_to_console=False, seed=None):
     size D (the number of parameters) containing the indices in the same order
     as the parameter file.
 
+    Compatible with
+    ---------------
+    * all samplers
+
     Parameters
     ----------
     problem : dict

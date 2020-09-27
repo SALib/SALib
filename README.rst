@@ -29,7 +29,8 @@ Python 3 (from SALib v1.2 onwards SALib does not officially support Python 2)
 
 * Method of Morris, including groups and optimal trajectories (`Morris
   1991 <http://www.tandfonline.com/doi/abs/10.1080/00401706.1991.10484804>`__,
-  `Campolongo et al. 2007 <http://www.sciencedirect.com/science/article/pii/S1364815206002805>`__)
+  `Campolongo et al. 2007 <http://www.sciencedirect.com/science/article/pii/S1364815206002805>`__,
+  `Ruano et al. 2012 <https://doi.org/10.1016/j.envsoft.2012.03.008>`__)
 
 * Fourier Amplitude Sensitivity Test (FAST) (`Cukier et al. 1973 <http://scitation.aip.org/content/aip/journal/jcp/59/8/10.1063/1.1680571>`__,
   `Saltelli et al. 1999 <http://amstat.tandfonline.com/doi/abs/10.1080/00401706.1999.10485594>`__)
@@ -48,10 +49,55 @@ Python 3 (from SALib v1.2 onwards SALib does not officially support Python 2)
 * Fractional Factorial Sensitivity Analysis 
   (`Saltelli et al. 2008 <http://www.wiley.com/WileyCDA/WileyTitle/productCd-0470059974.html>`__)
 
+* High-Dimensional Model Representation (HDMR) 
+  (`Li et al. 2010 <https://doi.org/10.1021/jp9096919>`__)
+
+
+
 **Contributing:** see `here <CONTRIBUTING.md>`__
 
 Quick Start
 ~~~~~~~~~~~
+
+Method chaining approach
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Chaining calls is supported from SALib v1.4 
+
+.. code:: python
+
+    from SALib import ProblemSpec
+    from SALib.test_functions import Ishigami
+
+    import numpy as np
+
+
+    # By convention, we assign to "sp" (for "SALib Problem")
+    sp = ProblemSpec({
+      'names': ['x1', 'x2', 'x3'],   # Name of each parameter
+      'bounds': [[-np.pi, np.pi]]*3,  # bounds of each parameter
+      'outputs': ['Y']               # name of outputs in expected order
+    })
+
+    (sp.sample_saltelli(1000, calc_second_order=True)
+       .evaluate(Ishigami.evaluate)
+       .analyze_sobol(print_to_console=True))
+
+    print(sp)
+
+    # Samples, model results and analyses can be extracted:
+    print(sp.samples)
+    print(sp.results)
+    print(sp.analysis)
+
+    # Basic plotting functionality is also provided
+    sp.plot()
+
+
+The above is equivalent to the procedural approach below:
+
+Procedural approach
+~~~~~~~~~~~~~~~~~~~
 
 .. code:: python
 
