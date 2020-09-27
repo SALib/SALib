@@ -105,17 +105,6 @@ def read_param_file(filename, delimiter=None):
             'groups': groups, 'dists': dists}
 
 
-def _check_groups(problem):
-    """Check if there is more than 1 group."""
-    groups = problem.get('groups')
-    if not groups:
-        return False
-
-    if len(set(groups)) == 1:
-        return False
-    return groups
-
-
 def _check_bounds(bounds):
     """Check user supplied distribution bounds for validity.
 

@@ -4,7 +4,7 @@ from scipy.stats import norm
 
 from . import common_args
 from ..util import (read_param_file, compute_groups_matrix, ResultDict,
-                    _define_problem_with_groups, _compute_delta, _check_groups)
+                    _define_problem_with_groups, _compute_delta, _group_metric)
 
 
 def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
@@ -78,13 +78,9 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
     delta = _compute_delta(num_levels)
 
     num_vars = problem['num_vars']
-    groups = _check_groups(problem)
-    if not groups:
-        number_of_groups = num_vars
-    else:
-        groups, unique_group_names = compute_groups_matrix(groups)
-        number_of_groups = len(set(unique_group_names))
-    # End if
+
+    groups, unique_group_names = compute_groups_matrix(problem.get('groups'))
+    number_of_groups = len(unique_group_names)
 
     num_trajectories = int(Y.size / (number_of_groups + 1))
     trajectory_size = int(Y.size / num_trajectories)
@@ -127,7 +123,6 @@ def _compute_statistical_outputs(elementary_effects: np.ndarray, num_vars: int,
     Si: ResultDict
         Morris statistical parameters.
     """
-
     Si = ResultDict((k, [None] * num_vars) for k in ['names', 'mu', 'mu_star',
                                                      'sigma', 'mu_star_conf'])
 
@@ -139,9 +134,9 @@ def _compute_statistical_outputs(elementary_effects: np.ndarray, num_vars: int,
 
     Si['names'] = unique_group_names
     Si['mu'] = _compute_grouped_sigma(mu, groups)
-    Si['mu_star'] = _compute_grouped_metric(mu_star, groups)
+    Si['mu_star'] = _group_metric(groups, mu_star)
     Si['sigma'] = _compute_grouped_sigma(sigma, groups)
-    Si['mu_star_conf'] = _compute_grouped_metric(mu_star_conf, groups)
+    Si['mu_star_conf'] = _group_metric(groups, mu_star_conf)
 
     return Si
 
@@ -166,39 +161,13 @@ def _compute_grouped_sigma(ungrouped_sigma: np.ndarray,
     sigma: np.ndarray
         Sigma values for the groups.
     """
-    sigma_agg = _compute_grouped_metric(ungrouped_sigma, groups)
+    sigma_agg = _group_metric(groups, ungrouped_sigma)
 
     sigma = np.zeros(groups.shape[1], dtype=np.float)
     np.copyto(sigma, sigma_agg, where=groups.sum(axis=0) == 1)
     np.copyto(sigma, np.NAN, where=groups.sum(axis=0) != 1)
 
     return sigma
-
-
-def _compute_grouped_metric(ungrouped_metric: np.ndarray,
-                            groups: np.ndarray) -> np.ndarray:
-    """ Computes the mean value for the groups of parameter values.
-
-    Parameters
-    ----------
-    ungrouped_metric: np.ndarray
-        Metric calculated without considering the groups
-    groups: np.ndarray
-        Array defining the distribution of groups
-
-    Returns
-    -------
-    mean_of_mu_star: np.ndarray
-         Mean value for the groups of parameter values
-    """
-
-    groups = np.array(groups, dtype=np.bool)
-
-    mu_star_masked = np.ma.masked_array(ungrouped_metric * groups.T,
-                                        mask=(groups ^ 1).T)
-    mean_of_mu_star = np.ma.mean(mu_star_masked, axis=1)
-
-    return mean_of_mu_star
 
 
 def _reorganize_output_matrix(output_array: np.ndarray,

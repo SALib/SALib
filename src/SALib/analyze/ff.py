@@ -13,6 +13,8 @@ from types import MethodType
 from SALib.util import read_param_file, ResultDict
 from SALib.sample.ff import generate_contrast, extend_bounds
 
+import warnings
+
 
 def analyze(problem, X, Y, second_order=False, print_to_console=False,
             seed=None):
@@ -53,6 +55,9 @@ def analyze(problem, X, Y, second_order=False, print_to_console=False,
 
     problem = extend_bounds(problem)
     num_vars = problem['num_vars']
+
+    if problem.get('groups'):
+        warnings.warn("SALib Fractional Factorial analysis does not currently support groups.")
 
     X = generate_contrast(problem)
 

@@ -9,9 +9,10 @@ from SALib.analyze.morris import (analyze,
                                   _compute_mu_star_confidence,
                                   _compute_elementary_effects,
                                   _reorganize_output_matrix,
-                                  _compute_grouped_metric,
                                   _compute_grouped_sigma,
                                   _check_if_array_of_floats)
+
+from SALib.util import _group_metric
 
 
 def test_compute_mu_star_confidence():
@@ -179,7 +180,7 @@ def test_compute_grouped_elementary_effects():
                }
     ee = _compute_elementary_effects(model_inputs, model_results, 3, 2. / 3)
     mu_star = np.average(np.abs(ee), axis=1)
-    actual = _compute_grouped_metric(mu_star, problem['groups'][0].T)
+    actual = _group_metric(problem['groups'][0].T, mu_star)
     desired = np.array([16.86, 35.95])
     assert_allclose(actual, desired, atol=1e-1)
 
@@ -268,7 +269,7 @@ def test_reorganize_output_matrix_decreased():
     assert_allclose(actual, desired, atol=1e-1)
 
 
-def test_compute_grouped_metric():
+def test_group_metric():
     """
     Computes mu_star for 3 variables grouped into 2 groups
     There are six trajectories.
@@ -278,7 +279,7 @@ def test_compute_grouped_metric():
                    [-2.00, 0.13, -0.80, 0.25, -0.02, 0.51],
                    [2.00, -0.13, 0.80, -0.25, 0.02, -0.51]])
     mu_star = np.average(np.abs(ee), 1)
-    actual = _compute_grouped_metric(mu_star, group_matrix)
+    actual = _group_metric(group_matrix, mu_star)
     desired = np.array([1.62, 0.62], dtype=np.float)
     assert_allclose(actual, desired, rtol=1e-1)
 

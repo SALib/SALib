@@ -6,6 +6,7 @@ from . import common_args
 from . import sobol_sequence
 from ..util import scale_samples, read_param_file
 
+import warnings
 
 def sample(problem: Dict, N: int, delta: float = 0.01, 
            seed: int = None, skip_values: int = 1000) -> np.ndarray:
@@ -35,6 +36,9 @@ def sample(problem: Dict, N: int, delta: float = 0.01,
     """
     if seed:
         np.random.seed(seed)
+
+    if problem.get('groups'):
+        warnings.warn("SALib finite_diff sampler does not currently support groups.")
 
     D = problem['num_vars']
     bounds = problem['bounds']

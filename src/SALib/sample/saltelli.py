@@ -4,7 +4,7 @@ import numpy as np
 from . import common_args
 from . import sobol_sequence
 from ..util import (scale_samples, read_param_file, 
-                    compute_groups_matrix, _check_groups)
+                    extract_groups)
 
 
 def sample(problem, N, calc_second_order=True, seed=None, skip_values=1000):
@@ -35,13 +35,8 @@ def sample(problem, N, calc_second_order=True, seed=None, skip_values=1000):
         warnings.warn(msg)
 
     D = problem['num_vars']
-    groups = _check_groups(problem)
-
-    if not groups:
-        Dg = problem['num_vars']
-    else:
-        G, group_names = compute_groups_matrix(groups)
-        Dg = len(set(group_names))
+    groups = problem.get('groups')
+    group_names, Dg = extract_groups(problem)
 
     # Create base sequence - could be any type of sampling
     base_sequence = sobol_sequence.sample(N + skip_values, 2 * D)

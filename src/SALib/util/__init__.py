@@ -10,7 +10,7 @@ import scipy as sp  # type: ignore
 from scipy import stats
 from typing import List
 
-from .util_funcs import (avail_approaches, read_param_file, _check_bounds, _check_groups)
+from .util_funcs import (avail_approaches, read_param_file, _check_bounds)
 from .problem import ProblemSpec
 from .results import ResultDict
 
@@ -81,7 +81,6 @@ def scale_samples(params: np.ndarray, problem: Dict):
     problem['sample_scaled'] = True
 
     return params
-    # limited_params = limit_samples(params, upper_bound, lower_bound, dists)
 
 
 def _unscale_samples(params, bounds):
@@ -205,6 +204,34 @@ def extract_group_names(groups: List) -> Tuple:
     return names, number
 
 
+def extract_groups(problem: Dict) -> Tuple:
+    """Get a unique set of the group names.
+
+    Reverts to parameter names (and number of parameters) if groups not
+    defined.
+
+    Parameters
+    ----------
+    groups : List
+        
+
+    Returns
+    -------
+    tuple : names, number of groups    
+    """
+    groups = problem.get('groups')
+
+    if not groups or (len(set(groups)) == 1):
+        names = problem['names']
+    else:
+        groups = problem.get('groups')
+        names = list(OrderedDict.fromkeys(groups))
+
+    number = len(names)
+
+    return names, number
+
+
 def compute_groups_matrix(groups: List):
     """Generate matrix which notes factor membership of groups
 
@@ -238,6 +265,31 @@ def compute_groups_matrix(groups: List):
         output[parameter_row, group_index] = 1
 
     return output, unique_group_names
+
+
+def _group_metric(groups: np.ndarray, 
+                  ungrouped_metric: np.ndarray) -> np.ndarray:
+    """Computes the mean value for the groups of parameter values.
+
+    Parameters
+    ----------
+    groups: np.ndarray
+        Array defining the distribution of groups
+    ungrouped_metric: np.ndarray
+        Metric calculated without considering the groups
+
+    Returns
+    -------
+    metric: np.ndarray
+         Mean value for the groups of parameter values
+    """
+    groups = np.array(groups, dtype=np.bool)
+
+    masked = np.ma.masked_array(ungrouped_metric * groups.T,
+                                mask=(groups ^ 1).T)
+    metric = np.ma.mean(masked, axis=1)
+
+    return metric
 
 
 def _define_problem_with_groups(problem: Dict) -> Dict:
