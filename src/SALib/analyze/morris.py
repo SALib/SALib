@@ -17,6 +17,10 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
     'mu_star_conf', where each entry is a list of parameters containing
     the indices in the same order as the parameter file.
 
+    Compatible with
+    ---------------
+    * `morris`
+
     Parameters
     ----------
     problem : dict
@@ -54,6 +58,7 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
     .. [1] Morris, M. (1991).  "Factorial Sampling Plans for Preliminary
            Computational Experiments."  Technometrics, 33(2):161-174,
            doi:10.1080/00401706.1991.10484804.
+
     .. [2] Campolongo, F., J. Cariboni, and A. Saltelli (2007).  "An effective
            screening design for sensitivity analysis of large models."
            Environmental Modelling & Software, 22(10):1509-1518,

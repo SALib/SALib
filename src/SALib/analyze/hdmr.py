@@ -44,6 +44,10 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
       to a single index (= structural contribution), consistent with their
       values derived from commonly used variance-based GSA methods.
 
+    Compatible with
+    ---------------
+    * all samplers
+
     Parameters
     ----------
     problem : dict

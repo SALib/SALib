@@ -23,6 +23,10 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
     indices in the same order as the parameter file.  If calc_second_order is
     True, the dictionary also contains keys 'S2' and 'S2_conf'.
 
+    Compatible with
+    ---------------
+    * `saltelli`
+
     Parameters
     ----------
     problem : dict

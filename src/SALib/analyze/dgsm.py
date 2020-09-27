@@ -14,6 +14,10 @@ def analyze(problem, X, Y, num_resamples=100,
     where each entry is a list of size D (the number of parameters) containing
     the indices in the same order as the parameter file.
 
+    Compatible with
+    ---------------
+    * `finite_diff`
+
     Parameters
     ----------
     problem : dict
