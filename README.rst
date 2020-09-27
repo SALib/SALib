@@ -75,7 +75,7 @@ Chaining calls is supported from SALib v1.4
     # By convention, we assign to "sp" (for "SALib Problem")
     sp = ProblemSpec({
       'names': ['x1', 'x2', 'x3'],   # Name of each parameter
-      'bounds': [[np.pi, np.pi]]*3,  # bounds of each parameter
+      'bounds': [[-np.pi, np.pi]]*3,  # bounds of each parameter
       'outputs': ['Y']               # name of outputs in expected order
     })
 
