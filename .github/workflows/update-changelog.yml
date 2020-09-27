@@ -1,4 +1,5 @@
 # This workflow creates a PR with an automatically updated changelog
+# Based on: https://github.com/marketplace/actions/update-changelog
 
 name: Update changelog for release candidates
 

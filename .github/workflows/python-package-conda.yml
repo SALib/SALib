@@ -1,3 +1,5 @@
+# Based on: https://github.com/fcakyon/conda-publish-action
+
 name: SALib Python Package using Conda
 
 on: 
