@@ -30,6 +30,8 @@ print(sp)
 # Basic plotting of results
 sp.plot()
 
+plt.title("Basic example plot")
+
 
 # More advanced plotting
 
@@ -43,7 +45,7 @@ axes = sp.plot()
 for ax in axes:
     ax.set_yscale('log')
 
-plt.show()
+axes[0].set_title("Example custom plot with log scale")
 
 # Other custom layouts can be created in the usual matplotlib style
 # with the basic bar plotter.
@@ -51,8 +53,9 @@ plt.show()
 from SALib.plotting.bar import plot as barplot
 
 # Example: Direct control of plot elements
-fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
+fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(6, 16))
 
+# Get result DataFrames
 total, first, second = sp.to_df()
 
 ax1 = barplot(total, ax=ax1)
@@ -62,5 +65,5 @@ ax3 = barplot(second, ax=ax3)
 ax1.set_yscale('log')
 ax2.set_yscale('log')
 
-# Make the plot appear if not in Jupyter notebooks
+ax1.set_title("Customized matplotlib plot")
 plt.show()
