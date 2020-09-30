@@ -1,10 +1,10 @@
-from __future__ import division
-
+import warnings
 import numpy as np
 
 from . import common_args
 from . import sobol_sequence
-from ..util import scale_samples, nonuniform_scale_samples, read_param_file, compute_groups_matrix
+from ..util import (scale_samples, read_param_file, 
+                    compute_groups_matrix, _check_groups)
 
 
 def sample(problem, N, calc_second_order=True, seed=None, skip_values=1000):
@@ -26,18 +26,38 @@ def sample(problem, N, calc_second_order=True, seed=None, skip_values=1000):
         The number of samples to generate
     calc_second_order : bool
         Calculate second-order sensitivities (default True)
+
+    References
+    ----------
+    .. [1] Saltelli, A., 2002. 
+           Making best use of model evaluations to compute sensitivity indices. 
+           Computer Physics Communications 145, 280–297. 
+           https://doi.org/10.1016/S0010-4655(02)00280-1
+
+    .. [2] Sobol', I.M., 2001. 
+           Global sensitivity indices for nonlinear mathematical models and 
+           their Monte Carlo estimates. 
+           Mathematics and Computers in Simulation, 
+           The Second IMACS Seminar on Monte Carlo Methods 55, 271–280. 
+           https://doi.org/10.1016/S0378-4754(00)00270-6
+
+
     """
     if seed:
-        np.random.seed(seed)
+        msg = "The seed value is ignored for the Saltelli sampler\n"
+        msg += "as it uses the (deterministic) Sobol sequence.\n"
+        msg += "Different samples can be obtained by setting the\n"
+        msg += "`skip_values` parameter (defaults to 1000)."
+        warnings.warn(msg)
 
     D = problem['num_vars']
-    groups = problem.get('groups')
+    groups = _check_groups(problem)
 
     if not groups:
         Dg = problem['num_vars']
     else:
-        Dg = len(set(groups))
         G, group_names = compute_groups_matrix(groups)
+        Dg = len(set(group_names))
 
     # Create base sequence - could be any type of sampling
     base_sequence = sobol_sequence.sample(N + skip_values, 2 * D)
@@ -83,15 +103,9 @@ def sample(problem, N, calc_second_order=True, seed=None, skip_values=1000):
             saltelli_sequence[index, j] = base_sequence[i, j + D]
 
         index += 1
-    if not problem.get('dists'):
-        # scaling values out of 0-1 range with uniform distributions
-        scale_samples(saltelli_sequence, problem['bounds'])
-        return saltelli_sequence
-    else:
-        # scaling values to other distributions based on inverse CDFs
-        scaled_saltelli = nonuniform_scale_samples(
-            saltelli_sequence, problem['bounds'], problem['dists'])
-        return scaled_saltelli
+
+    saltelli_sequence = scale_samples(saltelli_sequence, problem)
+    return saltelli_sequence
 
 
 def cli_parse(parser):

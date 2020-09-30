@@ -88,3 +88,59 @@ The output can then be converted to a Pandas DataFrame for further analysis.
 ```python
 total_Si, first_Si, second_Si = Si.to_df()
 ```
+
+
+### Generating alternate distributions
+
+In the [Quick Start](https://github.com/SALib/SALib/tree/master/README.rst) we
+generate a uniform sample of parameter space.
+
+```python
+from SALib.sample import saltelli
+from SALib.analyze import sobol
+from SALib.test_functions import Ishigami
+import numpy as np
+
+problem = {
+     'num_vars': 3, 
+     'names': ['x1', 'x2', 'x3'], 
+     'bounds': [[-3.14159265359, 3.14159265359], 
+               [-3.14159265359, 3.14159265359], 
+               [-3.14159265359, 3.14159265359]]
+}
+
+param_values = saltelli.sample(problem, 1000)
+```
+
+SALib is also capable of generating alternate sampling distributions by 
+specifying a `dist` entry in the `problem` specification.
+
+As implied in the basic example, a uniform distribution is the default.
+
+When an entry for `dist` is not 'unif', the `bounds` entry does not indicate
+parameter bounds but sample-specific metadata.
+
+`bounds` definitions for available distributions:
+
+* unif: uniform distribution
+    e.g. :code:`[-np.pi, np.pi]` defines the lower and upper bounds
+* triang: triangular with width (scale) and location of peak. 
+    Location of peak is in percentage of width.
+    Lower bound assumed to be zero.
+
+    e.g. :code:`[3, 0.5]` assumes 0 to 3, with a peak at 1.5
+* norm: normal distribution with mean and standard deviation
+* lognorm: lognormal with ln-space mean and standard deviation
+
+An example specification is shown below:
+
+```python
+problem = {
+     'names': ['x1', 'x2', 'x3'],
+     'num_vars': 3,
+     'bounds': [[-np.pi, np.pi], [1.0, 0.2], [3, 0.5]],
+     'groups': ['G1', 'G2', 'G1'],
+     'dists': ['unif', 'lognorm', 'triang']
+}
+```
+

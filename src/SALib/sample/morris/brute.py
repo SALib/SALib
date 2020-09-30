@@ -22,8 +22,8 @@ class BruteForce(Strategy):
                                  num_groups: int=None) -> List:
         """Use brute force method to find most distant trajectories
 
-        Arguments
-        ---------
+        Parameters
+        ----------
         input_sample : numpy.ndarray
         num_samples : int
             The number of samples to generate
@@ -54,8 +54,8 @@ class BruteForce(Strategy):
         Finds the 'k_choices' most distant choices from the
         'num_samples' trajectories contained in 'input_sample'
 
-        Arguments
-        ---------
+        Parameters
+        ----------
         input_sample : numpy.ndarray
         num_samples : int
             The number of samples to generate
@@ -117,7 +117,7 @@ class BruteForce(Strategy):
         Obtains scores from the distance_matrix for each pairwise combination
         held in the combos array
 
-        Arguments
+        Parameters
         ----------
         combos : numpy.ndarray
         pairwise : numpy.ndarray
@@ -137,8 +137,8 @@ class BruteForce(Strategy):
     def find_maximum(self, scores, N, k_choices):
         """Finds the `k_choices` maximum scores from `scores`
 
-        Arguments
-        ---------
+        Parameters
+        ----------
         scores : numpy.ndarray
         N : int
         k_choices : int
@@ -159,8 +159,8 @@ class BruteForce(Strategy):
     def nth(iterable, n, default=None):
         """Returns the nth item or a default value
 
-        Arguments
-        ---------
+        Parameters
+        ----------
         iterable : iterable
         n : int
         default : default=None

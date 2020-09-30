@@ -1,6 +1,3 @@
-from __future__ import division
-from __future__ import print_function
-
 import math
 from sys import exit
 
@@ -16,6 +13,10 @@ def analyze(problem, Y, M=4, print_to_console=False, seed=None):
     Returns a dictionary with keys 'S1' and 'ST', where each entry is a list of
     size D (the number of parameters) containing the indices in the same order
     as the parameter file.
+
+    Compatible with
+    ---------------
+    * `fast_sampler`
 
     Parameters
     ----------
@@ -72,8 +73,6 @@ def analyze(problem, Y, M=4, print_to_console=False, seed=None):
         omega[1:] = np.arange(D - 1) % m + 1
 
     # Calculate and Output the First and Total Order Values
-    if print_to_console:
-        print("Parameter First Total")
     Si = ResultDict((k, [None] * D) for k in ['S1', 'ST'])
     Si['names'] = problem['names']
 
@@ -81,9 +80,9 @@ def analyze(problem, Y, M=4, print_to_console=False, seed=None):
         l = np.arange(i * N, (i + 1) * N)
         Si['S1'][i] = compute_first_order(Y[l], N, M, omega[0])
         Si['ST'][i] = compute_total_order(Y[l], N, omega[0])
-        if print_to_console:
-            print("%s %f %f" %
-                  (problem['names'][i], Si['S1'][i], Si['ST'][i]))
+    
+    if print_to_console:
+        print(Si.to_df())
 
     return Si
 

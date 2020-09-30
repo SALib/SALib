@@ -1,9 +1,19 @@
+import os
 from os.path import join as pth_join
 import subprocess
 
+
 salib_cli = "./src/SALib/scripts/salib.py"
 ishigami_fp = "./src/SALib/test_functions/params/Ishigami.txt"
-test_data = pth_join('tests', 'data', 'test.txt')
+test_file = 'test.txt'
+test_data = pth_join('./tests', 'data', test_file)
+
+
+def teardown_function(func):
+    # Removes the test file if it was created.
+    files = os.listdir('./tests/data')
+    if test_file in files:
+        os.remove(test_data)
 
 
 def test_cli_entry():

@@ -1,9 +1,7 @@
-from __future__ import division
-
 import numpy as np
 
 from . import common_args
-from ..util import scale_samples, read_param_file, nonuniform_scale_samples
+from ..util import read_param_file, scale_samples
 
 
 def sample(problem, N, seed=None):
@@ -19,6 +17,23 @@ def sample(problem, N, seed=None):
         The problem definition
     N : int
         The number of samples to generate
+
+
+    References
+    ----------
+    .. [1] McKay, M.D., Beckman, R.J., Conover, W.J., 1979. 
+           A comparison of three methods for selecting values of input 
+           variables in the analysis of output from a computer code. 
+           Technometrics 21, 239–245. 
+           https://doi.org/10.2307/1268522
+
+    .. [2] Iman, R.L., Helton, J.C., Campbell, J.E., 1981. 
+           An Approach to Sensitivity Analysis of Computer Models: 
+           Part I—Introduction, Input Variable Selection and 
+           Preliminary Variable Assessment. 
+           Journal of Quality Technology 13, 174–183. 
+           https://doi.org/10.1080/00224065.1981.11978748
+
     """
     if seed:
         np.random.seed(seed)
@@ -38,13 +53,9 @@ def sample(problem, N, seed=None):
         for j in range(N):
             result[j, i] = temp[j]
 
-    if not problem.get('dists'):
-        scale_samples(result, problem['bounds'])
-        return result
-    else:
-        scaled_latin = nonuniform_scale_samples(
-            result, problem['bounds'], problem['dists'])
-        return scaled_latin
+    result = scale_samples(result, problem)
+
+    return result
 
 
 # No additional CLI options
@@ -65,5 +76,4 @@ def cli_action(args):
 
 
 if __name__ == "__main__":
-    cli_parse = None  # No additional options
     common_args.run_cli(cli_parse, cli_action)
