@@ -16,6 +16,10 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
     where each entry is a list of size D (the number of parameters) containing
     the indices in the same order as the parameter file.
 
+    Compatible with
+    ---------------
+    * all samplers
+
     Parameters
     ----------
     problem : dict
