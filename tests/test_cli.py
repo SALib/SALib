@@ -31,8 +31,3 @@ def test_cli_avail_methods():
             # Just try to access the functions - raises error on failure
             approach.cli_parse
             approach.cli_action
-
-
-if __name__ == '__main__':
-    test_cli_usage()
-    test_cli_avail_methods()

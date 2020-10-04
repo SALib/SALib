@@ -215,11 +215,22 @@ def test_sobol():
             expected_output, result)
 
 
-if __name__ == '__main__':
-    test_delta()
-    test_dgsm()
-    test_fast()
-    test_ff()
-    test_morris()
-    test_rbd_fast()
-    test_sobol()
+def test_pawn():
+    # Generate inputs
+    cmd = f"python {salib_cli} sample latin -p {ishigami_fp} -o {input_path} \
+    --precision=8 -n 1000 --seed=100".split()
+
+    result = subprocess.check_output(cmd, universal_newlines=True)
+    np.savetxt(output_path, Ishigami.evaluate(
+        np.loadtxt(input_path)))
+
+    analyze_cmd = f"python {salib_cli} analyze pawn -p {ishigami_fp}\
+        -X {input_path} -Y {output_path} -r 100 --seed=100".split()
+
+    result = subprocess.check_output(analyze_cmd, universal_newlines=True)
+    result = re.sub(r'[\n\t\s]*', '', result)
+
+    expected_output = 'PAWNiPAWNi_confx10.25200.073777x20.39150.075457x30.11500.058947'
+    assert len(result) > 0 and result == expected_output, \
+        "Results did not match expected values:\n\n Expected: \n{} \n\n Got: \n{}".format(
+            expected_output, result)
