@@ -259,21 +259,11 @@ class ProblemSpec(dict):
         raise RuntimeError("Analysis not yet conducted")
     
     def plot(self):
-        """Create bar chart of results"""
-        Si_df = self.to_df()
-
-        if isinstance(Si_df, (list, tuple)):
-            import matplotlib.pyplot as plt  # type: ignore
-            from SALib.plotting.bar import plot as barplot  # type: ignore
-
-            fig, axes = plt.subplots(1, len(Si_df))
-            for idx, f in enumerate(Si_df):
-                axes[idx] = barplot(f, ax=axes[idx])
-
-        else:
-            axes = barplot(Si_df)
-
-        return axes
+        """Plot results"""
+        if self._analysis is not None:
+            return self._analysis.plot()
+        
+        raise RuntimeError("Analysis not yet conducted")
 
     def _wrap_func(self, func, *args, **kwargs):
         # Create wrapped partial function to allow passing of additional args
@@ -295,6 +285,8 @@ class ProblemSpec(dict):
         final_res = self._setup_result_array()
 
         # Collect results
+        # Cannot enumerate over this as the length
+        # of individual results may vary
         i = 0
         for r in res:
             r_len = len(r)
