@@ -38,6 +38,12 @@ if __name__ == '__main__':
         .analyze_sobol(calc_second_order=True, conf_level=0.95))
     print("Time taken with 1 core:", time.perf_counter() - start, '\n')
 
+    # Samples, model results and analyses can be extracted:
+    # print(sp.samples)
+    # print(sp.results)
+    # print(sp.analysis)
+    # print(sp.to_df())
+
     # Same above, but passing in specific functions
     # (sp.sample(saltelli.sample, 25000, calc_second_order=True)
     #     .evaluate(Ishigami.evaluate)
