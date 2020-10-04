@@ -1,17 +1,35 @@
 import numpy as np
-from scipy.stats import ks_2samp
+from scipy.stats import norm, kstest
 
 from . import common_args
-
-from ..util import (read_param_file, ResultDict, 
+from ..util import (read_param_file, ResultDict,
                     extract_group_names, _check_groups)
 
 
-def analyze(problem, X, Y, S=10, print_to_console=False, seed=None):
-    """Performs PAWN sensitivity analysis.
+__all__ = ['analyze', 'cli_parse', 'cli_action']
 
-    Ported from an implementation in `R` by Baroni & Francke (2020)
-    https://github.com/baronig/GSA-cvd
+
+def analyze(problem, X, Y, S=10, stat='median', 
+            num_resamples: int = 100, conf_level: float = 0.95,
+            print_to_console=False, seed=None):
+    """Performs PAWN (2018) sensitivity analysis.
+
+    PAWN is a density-based method which uses the cumulative distribution
+    function (CDF), rather than the variance, of model outputs. Density-based
+    methods may be more appropriate in cases where the variance of outputs
+    does not well-represent uncertainty in the model's inputs. This may be 
+    the case if the output distribution is highly-skewed or multi-modal [1].
+
+    The PAWN method uses the two-sample Kolmogorov-Smirnov statistic to 
+    measure the distance between unconditional and conditional CDFs (see [2]).
+
+    This implementation was ported from [3], originally implemented in `R` 
+    (https://github.com/baronig/GSA-cvd).
+
+
+    Compatible with
+    ---------------
+    * all samplers
 
 
     Parameters
@@ -23,61 +41,80 @@ def analyze(problem, X, Y, S=10, print_to_console=False, seed=None):
     Y : numpy.array
         A NumPy array containing the model outputs
     S : int
-        Number of slides (default 10)
+        The number of equal-size intervals ('slides') to partition the 
+        input-output space (default 10).
+        The conditional mean (i.e. `E(Y|X_{i})`) is calculated for each 
+        interval.
+    stat : str or function
+        If string, any numpy compatible statistic (defaults to `median`)
+        A custom function can be provided instead.
     print_to_console : bool
         Print results directly to console (default False)
     seed : int
         Seed value to ensure deterministic results
 
+
     References
     ----------
-    .. [1] Pianosi, F., Wagener, T., 2015. 
+    .. [1] Pianosi, F., Wagener, T., 2018. 
+           Distribution-based sensitivity analysis from a generic input-output 
+           sample. 
+           Environmental Modelling & Software 108, 197–207. 
+           https://doi.org/10.1016/j.envsoft.2018.07.019
+
+    .. [2] Pianosi, F., Wagener, T., 2015. 
            A simple and efficient method for global sensitivity analysis 
            based on cumulative distribution functions. 
            Environmental Modelling & Software 67, 1–11. 
            https://doi.org/10.1016/j.envsoft.2015.01.004
+    
+    .. [3] Baroni, G., Francke, T., 2020. 
+           An effective strategy for combining variance- and distribution-based 
+           global sensitivity analysis. 
+           Environmental Modelling & Software 134, 104851. 
+           https://doi.org/10.1016/j.envsoft.2020.104851
 
 
     Examples
     --------
-    >>> X = latin.sample(problem, 1000)
-    >>> Y = Ishigami.evaluate(X)
-    >>> Si = pawn.analyze(problem, X, Y, S=10, print_to_console=False)
+        >>> X = latin.sample(problem, 1000)
+        >>> Y = Ishigami.evaluate(X)
+        >>> Si = pawn.analyze(problem, X, Y)
     """
     if seed:
         np.random.seed(seed)
 
     groups = _check_groups(problem)
-    print("Groups: ", groups)
     if not groups:
         D = problem['num_vars']
     else:
-        _, D = extract_group_names(problem.get('groups'))
+        _, D = extract_group_names(groups)
 
     result = np.full((D, ), np.nan)
-    temp_pawn = np.full((S, D), np.nan)
+    conf = result.copy()
+
+    if isinstance(stat, str):
+        try:
+            stat_func = getattr(np, stat)
+        except AttributeError:
+            raise AttributeError(
+                "Could not find specified statistic: '{}'".format(stat))
+    elif callable(stat):
+        stat_func = stat
+    else:
+        raise ValueError("Unknown statistic: '{}'".format(stat))
 
     step = (1/S)
+    seq = np.arange(0.0, 1+step, step)
     for d_i in range(D):
-        seq = np.arange(0, 1+step, step)
-        X_q = np.nanquantile(X[:, d_i], seq)
+        X_di = X[:, d_i]
+        X_q = np.nanquantile(X_di, seq)
 
-        for s in range(S):
-            Y_sel = Y[(X[:, d_i] >= X_q[s]) & (X[:, d_i] < X_q[s+1])]
+        result[d_i], Nc = _calc_ks(X_di, X_q, Y, S, stat_func)
+        conf[d_i] = _bootstrap(X_di, seq, Y, Nc, S, num_resamples, conf_level, 
+                               stat_func)
 
-            # KD value
-            # Function returns a KS object which holds the KS statistic
-            # and p-value
-            # Note from documentation:
-            # if the K-S statistic is small or the p-value is high, then 
-            # we cannot reject the hypothesis that the distributions of 
-            # the two samples are the same.
-            ks = ks_2samp(Y_sel, Y)
-            temp_pawn[s, d_i] = ks.statistic 
-
-        result[d_i] = np.median(temp_pawn[:, d_i])
-
-    Si = ResultDict([('PAWN', result)])
+    Si = ResultDict([('PAWNi', result), ('PAWNi_conf', conf)])
     Si['names'] = problem['names']
 
     if print_to_console:
@@ -86,12 +123,82 @@ def analyze(problem, X, Y, S=10, print_to_console=False, seed=None):
     return Si
 
 
+def _bootstrap(X_di, seq, Y, Nc, S, num_resamples, conf_level, stat_func):
+    """Bootstrap without replacement.
+
+    `Nc` does not need to be selected by the user, as it is simply the number
+    of points in each interval (see [1] in `analyze`).
+
+    Reason for preferring bootstrap without replacement is given in the
+    supplementary materials of [1] (see reference list below).
+
+
+    Parameters
+    ----------
+    Y : Output
+    Nc : int,
+        Size of conditional sample
+    num_resamples : int
+        Number of bootstrap samples to take (< N, where N is number of available samples)
+    conf_level : float
+        The confidence interval level (default 0.95)
+
+    we will derive the unconditional sample YU by randomly extracting from `Y` a subsample of size
+    `N_{c}`, where `N_{c} < N`
+
+
+    References
+    ----------
+    .. [1] Khorashadi Zadeh, F., Nossent, J., Sarrazin, F., Pianosi, F.,
+           van Griensven, A., Wagener, T., Bauwens, W., 2017.
+           Comparison of variance-based and moment-independent global
+           sensitivity analysis approaches by application to the SWAT
+           model.
+           Environmental Modelling & Software 91, 210–222.
+           https://doi.org/10.1016/j.envsoft.2017.02.001
+
+    """
+
+    s = np.full(num_resamples, np.nan)
+    Y_len = Y.shape[0]
+    for i in range(num_resamples):
+        # Random extraction from Y
+        r = np.random.choice(Y_len, Nc, replace=False)
+        Y_sel = Y[r]
+        X_r = X_di[r]
+        X_q = np.nanquantile(X_r, seq)
+
+        b_s, _ = _calc_ks(X_r, X_q, Y_sel, S, stat_func)
+        s[i] = stat_func(b_s)
+    
+    return norm.ppf(0.5 + conf_level / 2.0) * s.std(ddof=1)
+
+
+def _calc_ks(X_r, X_q, Y_sel, S, stat_func):
+    s = np.full(S, np.nan)
+    for s_i in range(S):
+        Ys = Y_sel[(X_r >= X_q[s_i]) & (X_r < X_q[s_i+1])]
+
+        # kstest function returns a KS object which holds the KS statistic
+        # and p-value
+        # Note from documentation:
+        # if the K-S statistic is small or the p-value is high, then 
+        # we cannot reject the hypothesis that the distributions of 
+        # the two samples are the same.
+        s[s_i] = kstest(Ys, Y_sel).statistic
+
+    return stat_func(s), Ys.shape[0]
+
+
 def cli_parse(parser):
     parser.add_argument('-X', '--model-input-file',
                         type=str, required=True, help='Model input file')
 
     parser.add_argument('-S', '--slices',
-                        type=int, required=False, help='Number of slices to take')
+                        type=int, required=False, default=10, help='Number of intervals to partition input-output space')
+    
+    parser.add_argument('-s', '--statistic',
+                        type=str, required=False, default='median', help='Numpy compatible statistic to use (defaults to median)')
     return parser
 
 
