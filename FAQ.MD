@@ -11,8 +11,10 @@ SALib 1.3 onwards does not support Python 2.7
 ### I've already got results from my Monte Carlo simulation - which technique can I use?
 DMIM, RBD-FAST, PAWN and HDMR methods are sampling scheme independent.
 
+
 ### Can you help me with implementing my sensitivity analysis?
 Check out [the examples here](https://github.com/SALib/SALib/tree/develop/examples)
+
 
 ### The example(s) use the Ishigami function. How do I use SALib with my own model?
 Two options:
@@ -29,7 +31,6 @@ Call the `.to_df()` method if you would like Pandas DataFrames.
 
 If using the method chaining approach, see [the example here](https://github.com/SALib/SALib/tree/develop/examples/problem)
 
-If using the method chaining approach, the numpy array can be obtained via `.analysis`
 
 ### How can I plot my results?
 SALib provides some basic plotting functionality. See [the example here](https://github.com/SALib/SALib/tree/develop/examples/plotting).
