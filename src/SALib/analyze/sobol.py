@@ -350,7 +350,7 @@ def cli_parse(parser):
                         help='Maximum order of sensitivity indices to '
                         'calculate')
     parser.add_argument('-r', '--resamples', type=int, required=False,
-                        default=1000,
+                        default=100,
                         help='Number of bootstrap resamples for Sobol '
                         'confidence intervals')
     parser.add_argument('--parallel', action='store_true', help='Makes '
