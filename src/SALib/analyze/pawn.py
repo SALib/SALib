@@ -193,12 +193,14 @@ def _calc_ks(X_r, X_q, Y_sel, S, stat_func):
 def cli_parse(parser):
     parser.add_argument('-X', '--model-input-file',
                         type=str, required=True, help='Model input file')
-
     parser.add_argument('-S', '--slices',
                         type=int, required=False, default=10, help='Number of intervals to partition input-output space')
-    
-    parser.add_argument('-s', '--statistic',
+    parser.add_argument('-st', '--statistic',
                         type=str, required=False, default='median', help='Numpy compatible statistic to use (defaults to median)')
+    parser.add_argument('-r', '--resamples', type=int, required=False,
+                        default=100,
+                        help='Number of bootstrap resamples for Sobol '
+                        'confidence intervals')
     return parser
 
 
