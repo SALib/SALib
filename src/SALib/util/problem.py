@@ -250,10 +250,13 @@ class ProblemSpec(dict):
     def to_df(self):
         """Convert results to Pandas DataFrame."""
         an_res = self._analysis
-        if an_res is None:
-            raise RuntimeError("Analysis not yet conducted")
-
-        return an_res.to_df()
+        if isinstance(an_res, ResultDict):
+            return an_res.to_df()
+        elif isinstance(an_res, dict):
+            # case where analysis result is a dict of ResultDicts
+            return [an.to_df() for an in list(an_res.values())]
+        
+        raise RuntimeError("Analysis not yet conducted")
     
     def plot(self):
         """Plot results"""
