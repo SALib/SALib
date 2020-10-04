@@ -1,13 +1,22 @@
 """Example showing how to use the ProblemSpec approach.
 
 Showcases method chaining, and parallel model runs using
-all available cores.
+all available processors.
+
+The following caveats apply:
+
+1. Functions passed into `sample`, `analyze`, `evaluate` and `evaluate_*` must 
+   accept a numpy array of `X` values as the first parameter, and return a 
+   numpy array of results.
+2. Parallel evaluation is only beneficial for long-running models
+3. Currently, model results must fit in memory - no on-disk caching is provided.
 """
 
 from SALib.analyze import sobol
 from SALib.sample import saltelli
 from SALib.test_functions import Ishigami
 from SALib import ProblemSpec
+import numpy as np
 
 import time
 
@@ -18,22 +27,25 @@ if __name__ == '__main__':
     sp = ProblemSpec({
         'names': ['x1', 'x2', 'x3'],
         'groups': None,
-        'bounds': [[-3.14159265359, 3.14159265359],
-                [-3.14159265359, 3.14159265359],
-                [-3.14159265359, 3.14159265359]],
+        'bounds': [[-np.pi, np.pi]*3],
         'outputs': ['Y']
     })
 
     # Single core example
     start = time.perf_counter()
-    (sp.sample(saltelli.sample, 75000, calc_second_order=True)
+    (sp.sample_saltelli(25000, calc_second_order=True)
         .evaluate(Ishigami.evaluate)
-        .analyze(sobol.analyze, calc_second_order=True, conf_level=0.95))
+        .analyze_sobol(calc_second_order=True, conf_level=0.95))
     print("Time taken with 1 core:", time.perf_counter() - start, '\n')
+
+    # Same above, but passing in specific functions
+    # (sp.sample(saltelli.sample, 25000, calc_second_order=True)
+    #     .evaluate(Ishigami.evaluate)
+    #     .analyze(sobol.analyze, calc_second_order=True, conf_level=0.95))
 
     # Parallel example
     start = time.perf_counter()
-    (sp.sample(saltelli.sample, 75000, calc_second_order=True)
+    (sp.sample(saltelli.sample, 25000, calc_second_order=True)
          # can specify number of processors to use with `nprocs`
         .evaluate_parallel(Ishigami.evaluate)
         .analyze(sobol.analyze, calc_second_order=True, conf_level=0.95))
@@ -48,12 +60,17 @@ if __name__ == '__main__':
                'localhost:55776')
 
     start = time.perf_counter()
-    (sp.sample(saltelli.sample, 75000, calc_second_order=True)
+    (sp.sample(saltelli.sample, 25000, calc_second_order=True)
         .evaluate_distributed(Ishigami.evaluate, nprocs=2, servers=servers, verbose=True)
         .analyze(sobol.analyze, calc_second_order=True, conf_level=0.95))
     print("Time taken with distributed cores:", time.perf_counter() - start, '\n')
 
     print(sp)
+
+    # To display plots:
+    # import matplotlib.pyplot as plt
+    # sp.plot()
+    # plt.show()
 
 # First-order indices expected with Saltelli sampling:
 # x1: 0.3139
