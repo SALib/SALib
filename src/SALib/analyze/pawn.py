@@ -135,16 +135,14 @@ def _bootstrap(X_di, seq, Y, Nc, S, num_resamples, conf_level, stat_func):
 
     Parameters
     ----------
-    Y : Output
-    Nc : int,
+    Y : np.array
+        Model outputs
+    Nc : int
         Size of conditional sample
     num_resamples : int
         Number of bootstrap samples to take (< N, where N is number of available samples)
     conf_level : float
         The confidence interval level (default 0.95)
-
-    we will derive the unconditional sample YU by randomly extracting from `Y` a subsample of size
-    `N_{c}`, where `N_{c} < N`
 
 
     References
