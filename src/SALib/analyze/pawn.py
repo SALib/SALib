@@ -158,7 +158,6 @@ def _bootstrap(X_di, seq, Y, Nc, S, num_resamples, conf_level, stat_func):
            https://doi.org/10.1016/j.envsoft.2017.02.001
 
     """
-
     s = np.full(num_resamples, np.nan)
     Y_len = Y.shape[0]
     for i in range(num_resamples):
@@ -168,8 +167,7 @@ def _bootstrap(X_di, seq, Y, Nc, S, num_resamples, conf_level, stat_func):
         X_r = X_di[r]
         X_q = np.nanquantile(X_r, seq)
 
-        b_s, _ = _calc_ks(X_r, X_q, Y_sel, S, stat_func)
-        s[i] = stat_func(b_s)
+        s[i], _ = _calc_ks(X_r, X_q, Y_sel, S, stat_func)
     
     return norm.ppf(0.5 + conf_level / 2.0) * s.std(ddof=1)
 
