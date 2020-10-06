@@ -60,9 +60,9 @@ class ProblemSpec(dict):
     @results.setter
     def results(self, vals):
         cols = vals.shape[1]
-        if cols != self['num_vars']:
+        if cols != len(self['outputs']):
             msg = "Mismatched sample size: Expected "
-            msg += "{} cols, got {}".format(self['num_vars'], cols)
+            msg += "{} cols, got {}".format(self['outputs'], cols)
             raise ValueError(msg)
 
         self._results = vals
