@@ -90,7 +90,7 @@ def analyze(problem, X, Y, S=10, stat='median',
     else:
         _, D = extract_group_names(groups)
 
-    result = np.full((D, ), np.nan)
+    result = np.zeros((D, ))
     conf = result.copy()
 
     if isinstance(stat, str):
@@ -108,6 +108,12 @@ def analyze(problem, X, Y, S=10, stat='median',
     seq = np.arange(0.0, 1+step, step)
     for d_i in range(D):
         X_di = X[:, d_i]
+        if X_di.ptp() == 0.0:
+            # Input is constant
+            result[d_i] = 0.0
+            conf[d_i] = 0.0
+            continue
+
         X_q = np.nanquantile(X_di, seq)
 
         result[d_i], Nc = _calc_ks(X_di, X_q, Y, S, stat_func)
@@ -163,8 +169,13 @@ def _bootstrap(X_di, seq, Y, Nc, S, num_resamples, conf_level, stat_func):
         r = np.random.choice(Y_len, Nc, replace=False)
         Y_sel = Y[r]
         X_r = X_di[r]
-        X_q = np.nanquantile(X_r, seq)
 
+        if (X_r.shape[0] == 0) or (X_r.ptp() == 0.0):
+            # Input is constant
+            s[i] = 0.0
+            continue
+
+        X_q = np.nanquantile(X_r, seq)
         s[i], _ = _calc_ks(X_r, X_q, Y_sel, S, stat_func)
     
     return norm.ppf(0.5 + conf_level / 2.0) * s.std(ddof=1)
@@ -181,7 +192,11 @@ def _calc_ks(X_r, X_q, Y_sel, S, stat_func):
         # if the K-S statistic is small or the p-value is high, then 
         # we cannot reject the hypothesis that the distributions of 
         # the two samples are the same.
-        s[s_i] = kstest(Ys, Y_sel).statistic
+        try:
+            s[s_i] = kstest(Ys, Y_sel).statistic
+        except ValueError:
+            # Ys is empty
+            s[s_i] = 0.0
 
     return stat_func(s), Ys.shape[0]
 
@@ -195,7 +210,7 @@ def cli_parse(parser):
                         type=str, required=False, default='median', help='Numpy compatible statistic to use (defaults to median)')
     parser.add_argument('-r', '--resamples', type=int, required=False,
                         default=100,
-                        help='Number of bootstrap resamples for Sobol '
+                        help='Number of bootstrap resamples to estimate'
                         'confidence intervals')
     return parser
 
