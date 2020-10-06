@@ -43,9 +43,29 @@ class ProblemSpec(dict):
     def samples(self):
         return self._samples
 
+    @samples.setter
+    def samples(self, vals):
+        cols = vals.shape[1]
+        if cols != self['num_vars']:
+            msg = "Mismatched sample size: Expected "
+            msg += "{} cols, got {}".format(self['num_vars'], cols)
+            raise ValueError(msg)
+
+        self._samples = vals
+
     @property
     def results(self):
         return self._results
+    
+    @results.setter
+    def results(self, vals):
+        cols = vals.shape[1]
+        if cols != self['num_vars']:
+            msg = "Mismatched sample size: Expected "
+            msg += "{} cols, got {}".format(self['num_vars'], cols)
+            raise ValueError(msg)
+
+        self._results = vals
     
     @property
     def analysis(self):
@@ -218,8 +238,8 @@ class ProblemSpec(dict):
         ----------
         func : function,
             Analysis method to use. The provided function must accept the 
-            problem specification as the first parameter and return a numpy
-            array.
+            problem specification as the first parameter, X values if needed, 
+            Y values, and return a numpy array.
         
         *args : list,
             Additional arguments to be passed to `func`
