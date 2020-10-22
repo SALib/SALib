@@ -15,13 +15,13 @@ def find_smallest(num_vars):
     """Find the smallest exponent of two that is greater than the number
     of variables
 
-    Arguments
-    =========
+    Parameters
+    ----------
     num_vars : int
         Number of variables
 
     Returns
-    =======
+    -------
     x : int
         Smallest exponent of two greater than `num_vars`
     """
@@ -33,8 +33,8 @@ def find_smallest(num_vars):
 def extend_bounds(problem):
     """Extends the problem bounds to the nearest power of two
 
-    Arguments
-    =========
+    Parameters
+    ----------
     problem : dict
         The problem definition
     """
@@ -59,8 +59,8 @@ def extend_bounds(problem):
 def generate_contrast(problem):
     """Generates the raw sample from the problem file
 
-    Arguments
-    =========
+    Parameters
+    ----------
     problem : dict
         The problem definition
     """
@@ -94,13 +94,13 @@ def sample(problem, seed=None):
     This algorithm is an implementation of that contained in
     [`Saltelli et al. 2008 <http://www.wiley.com/WileyCDA/WileyTitle/productCd-0470059974.html>`_]
 
-    Arguments
-    =========
+    Parameters
+    ----------
     problem : dict
         The problem definition
 
     Returns
-    =======
+    -------
     sample : :class:`numpy.array`
 
     """
@@ -109,7 +109,8 @@ def sample(problem, seed=None):
     contrast = generate_contrast(problem)
     sample = np.array((contrast + 1.) / 2, dtype=np.float)
     problem = extend_bounds(problem)
-    scale_samples(sample, problem['bounds'])
+
+    sample = scale_samples(sample, problem)
     return sample
 
 

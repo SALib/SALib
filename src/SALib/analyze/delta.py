@@ -1,6 +1,4 @@
-from __future__ import division
-from __future__ import print_function
-
+from typing import Dict
 from scipy.stats import norm, gaussian_kde, rankdata
 
 import numpy as np
@@ -9,8 +7,9 @@ from . import common_args
 from ..util import read_param_file, ResultDict
 
 
-def analyze(problem, X, Y, num_resamples=10,
-            conf_level=0.95, print_to_console=False, seed=None):
+def analyze(problem: Dict, X: np.array, Y: np.array, 
+            num_resamples: int = 100, conf_level: float = 0.95,
+            print_to_console: bool = False, seed: int = None) -> Dict:
     """Perform Delta Moment-Independent Analysis on model outputs.
 
     Returns a dictionary with keys 'delta', 'delta_conf', 'S1', and 'S1_conf',
@@ -44,9 +43,9 @@ def analyze(problem, X, Y, num_resamples=10,
 
     Examples
     --------
-    >>> X = latin.sample(problem, 1000)
-    >>> Y = Ishigami.evaluate(X)
-    >>> Si = delta.analyze(problem, X, Y, print_to_console=True)
+        >>> X = latin.sample(problem, 1000)
+        >>> Y = Ishigami.evaluate(X)
+        >>> Si = delta.analyze(problem, X, Y, print_to_console=True)
     """
     if seed:
         np.random.seed(seed)
@@ -67,9 +66,6 @@ def analyze(problem, X, Y, num_resamples=10,
     S = ResultDict((k, np.zeros(D)) for k in keys)
     S['names'] = problem['names']
 
-    if print_to_console:
-        print("Parameter %s %s %s %s" % keys)
-
     try:
         for i in range(D):
             X_i = X[:, i]
@@ -78,9 +74,6 @@ def analyze(problem, X, Y, num_resamples=10,
             S['S1'][i] = sobol_first(Y, X_i, m)
             S['S1_conf'][i] = sobol_first_conf(
                 Y, X_i, m, num_resamples, conf_level)
-            if print_to_console:
-                print("%s %f %f %f %f" % (S['names'][i], S['delta'][
-                    i], S['delta_conf'][i], S['S1'][i], S['S1_conf'][i]))
     except np.linalg.LinAlgError as e:
         msg = "Singular matrix detected\n"
         msg += "This may be due to the sample size ({}) being too small\n".format(Y.size)
@@ -89,12 +82,14 @@ def analyze(problem, X, Y, num_resamples=10,
 
         raise np.linalg.LinAlgError(msg)
 
-    return S
+    if print_to_console:
+        print(S.to_df())
 
-# Plischke et al. 2013 estimator (eqn 26) for d_hat
+    return S
 
 
 def calc_delta(Y, Ygrid, X, m):
+    """Plischke et al. (2013) delta index estimator (eqn 26) for d_hat."""
     N = len(Y)
     fy = gaussian_kde(Y, bw_method='silverman')(Ygrid)
     abs_fy = np.abs(fy)

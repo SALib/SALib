@@ -1,5 +1,3 @@
-from __future__ import division
-
 import math
 
 import numpy as np
@@ -12,12 +10,15 @@ import numpy as np
 # x2: 0.4424
 # x3: 0.0
 def evaluate(values):
-    Y = np.zeros([values.shape[0]])
+    Y = np.zeros(values.shape[0])
     A = 7
     B = 0.1
 
+    # X = values
+    # Y = np.sin(X[:, 0]) + A * np.power(np.sin(X[:, 1]), 2) + \
+    #         B * np.power(X[:, 2], 4) * np.sin(X[:, 0])
     for i, X in enumerate(values):
-        Y[i] = math.sin(X[0]) + A * math.pow(math.sin(X[1]), 2) + \
-            B * math.pow(X[2], 4) * math.sin(X[0])
+        Y[i] = np.sin(X[0]) + A * np.power(np.sin(X[1]), 2) + \
+            B * np.power(X[2], 4) * np.sin(X[0])
 
     return Y

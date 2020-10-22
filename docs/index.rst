@@ -32,19 +32,22 @@ Supported Methods
 * Fourier Amplitude Sensitivity Test (FAST)
   ([`Cukier et al. 1973 <http://scitation.aip.org/content/aip/journal/jcp/59/8/10.1063/1.1680571>`_], [`Saltelli et al. 1999 <http://amstat.tandfonline.com/doi/abs/10.1080/00401706.1999.10485594>`_])
 * Random Balance Designs - Fourier Amplitude Sensitivity Test (RBD-FAST)
-  ([`Tarantola et al. 2006 <https://hal.archives-ouvertes.fr/hal-01065897/file/Tarantola06RESS_HAL.pdf`_], [`Elmar Plischke 2010 <https://doi.org/10.1016/j.ress.2009.11.005>`_], [`Tissot et al. 2012 <https://doi.org/10.1016/j.ress.2012.06.010>`_])
+  ([`Tarantola et al. 2006 <https://hal.archives-ouvertes.fr/hal-01065897/file/Tarantola06RESS_HAL.pdf>`_], [`Elmar Plischke 2010 <https://doi.org/10.1016/j.ress.2009.11.005>`_], [`Tissot et al. 2012 <https://doi.org/10.1016/j.ress.2012.06.010>`_])
 * Delta Moment-Independent Measure
   ([`Borgonovo 2007 <http://www.sciencedirect.com/science/article/pii/S0951832006000883>`_], [`Plischke et al. 2013 <http://www.sciencedirect.com/science/article/pii/S0377221712008995>`_])
 * Derivative-based Global Sensitivity Measure (DGSM)
   ([`Sobol and Kucherenko 2009 <http://www.sciencedirect.com/science/article/pii/S0378475409000354>`_])
 * Fractional Factorial Sensitivity Analysis
   ([`Saltelli et al. 2008 <http://www.wiley.com/WileyCDA/WileyTitle/productCd-0470059974.html>`_])
+* High Dimensional Model Representation
+  ([`Li et al. 2010 <https://pubs.acs.org/doi/pdf/10.1021/jp9096919>`_])
 
 .. toctree::
    :maxdepth: 2
 
    getting-started
    basics
+   advanced
    api
 
    License <license>

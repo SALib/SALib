@@ -2,59 +2,37 @@
 
 """
 from collections import OrderedDict
-import csv
-from warnings import warn
-from .results import ResultDict
 import pkgutil
+from typing import Dict, Tuple
 
 import numpy as np  # type: ignore
 import scipy as sp  # type: ignore
+from scipy import stats
 from typing import List
+
+from .util_funcs import (avail_approaches, read_param_file, _check_bounds, _check_groups)
+from .problem import ProblemSpec
+from .results import ResultDict
 
 
 __all__ = ["scale_samples", "read_param_file",
            "ResultDict", "avail_approaches"]
 
 
-def avail_approaches(pkg):
-    '''Create list of available modules.
+def _scale_samples(params: np.ndarray, bounds: List):
+    """Rescale samples in 0-to-1 range to arbitrary bounds
 
-    Arguments
-    ---------
-    pkg : module
-        module to inspect
-
-    Returns
-    ---------
-    method : list
-        A list of available submodules
-    '''
-    methods = [modname for importer, modname, ispkg in
-               pkgutil.walk_packages(path=pkg.__path__)
-               if modname not in
-               ['common_args', 'directions', 'sobol_sequence']]
-    return methods
-
-
-def scale_samples(params: np.ndarray, bounds: List):
-    '''Rescale samples in 0-to-1 range to arbitrary bounds
-
-    Arguments
-    ---------
+    Parameters
+    ----------
     params : numpy.ndarray
         numpy array of dimensions `num_params`-by-:math:`N`,
         where :math:`N` is the number of samples
 
     bounds : list
         list of lists of dimensions `num_params`-by-2
-    '''
+    """
     # Check bounds are legal (upper bound is greater than lower bound)
-    b = np.array(bounds)
-    lower_bounds = b[:, 0]
-    upper_bounds = b[:, 1]
-
-    if np.any(lower_bounds >= upper_bounds):
-        raise ValueError("Bounds are not legal")
+    lower_bounds, upper_bounds = _check_bounds(bounds)
 
     # This scales the samples in-place, by using the optional output
     # argument for the numpy ufunctions
@@ -67,11 +45,50 @@ def scale_samples(params: np.ndarray, bounds: List):
            out=params)
 
 
-def unscale_samples(params, bounds):
+def scale_samples(params: np.ndarray, problem: Dict):
+    """Scale samples based on specified distribution (defaulting to uniform).
+
+    Adds an entry to the problem specification to indicate samples have been
+    scaled to maintain backwards compatibility (`sample_scaled`).
+
+    Parameters
+    ----------
+    params : np.ndarray,
+        numpy array of dimensions `num_params`-by-:math:`N`,
+        where :math:`N` is the number of samples
+    problem : dictionary,
+        SALib problem specification
+
+    Returns
+    ----------
+    np.ndarray, scaled samples
+    """
+    bounds = problem['bounds']
+    dists = problem.get('dists')
+
+    if dists is None:
+        _scale_samples(params, bounds)
+    else:
+        if params.shape[1] != len(dists):
+            msg = "Mismatch in number of parameters and distributions.\n"
+            msg += "Num parameters: {}".format(params.shape[1])
+            msg += "Num distributions: {}".format(len(dists))
+            raise ValueError(msg)
+
+        params = _nonuniform_scale_samples(
+            params, bounds, dists)
+
+    problem['sample_scaled'] = True
+
+    return params
+    # limited_params = limit_samples(params, upper_bound, lower_bound, dists)
+
+
+def _unscale_samples(params, bounds):
     """Rescale samples from arbitrary bounds back to [0,1] range
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     bounds : list
         list of lists of dimensions num_params-by-2
     params : numpy.ndarray
@@ -95,11 +112,11 @@ def unscale_samples(params, bounds):
               out=params)
 
 
-def nonuniform_scale_samples(params, bounds, dists):
+def _nonuniform_scale_samples(params, bounds, dists):
     """Rescale samples in 0-to-1 range to other distributions
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     problem : dict
         problem definition including bounds
     params : numpy.ndarray
@@ -128,22 +145,22 @@ def nonuniform_scale_samples(params, bounds, dists):
         if dists[i] == 'triang':
             # checking for correct parameters
             if b1 <= 0 or b2 <= 0 or b2 >= 1:
-                raise ValueError('''Triangular distribution: Scale must be
-                    greater than zero; peak on interval [0,1]''')
+                raise ValueError("""Triangular distribution: Scale must be
+                    greater than zero; peak on interval [0,1]""")
             else:
                 conv_params[:, i] = sp.stats.triang.ppf(
                     params[:, i], c=b2, scale=b1, loc=0)
 
         elif dists[i] == 'unif':
             if b1 >= b2:
-                raise ValueError('''Uniform distribution: lower bound
-                    must be less than upper bound''')
+                raise ValueError("""Uniform distribution: lower bound
+                    must be less than upper bound""")
             else:
                 conv_params[:, i] = params[:, i] * (b2 - b1) + b1
 
         elif dists[i] == 'norm':
             if b2 <= 0:
-                raise ValueError('''Normal distribution: stdev must be > 0''')
+                raise ValueError("""Normal distribution: stdev must be > 0""")
             else:
                 conv_params[:, i] = sp.stats.norm.ppf(
                     params[:, i], loc=b1, scale=b2)
@@ -154,7 +171,7 @@ def nonuniform_scale_samples(params, bounds, dists):
             # checking for valid parameters
             if b2 <= 0:
                 raise ValueError(
-                    '''Lognormal distribution: stdev must be > 0''')
+                    """Lognormal distribution: stdev must be > 0""")
             else:
                 conv_params[:, i] = np.exp(
                     sp.stats.norm.ppf(params[:, i], loc=b1, scale=b2))
@@ -167,87 +184,28 @@ def nonuniform_scale_samples(params, bounds, dists):
     return conv_params
 
 
-def read_param_file(filename, delimiter=None):
-    """Unpacks a parameter file into a dictionary
+def extract_group_names(groups: List) -> Tuple:
+    """Get a unique set of the group names.
 
-    Reads a parameter file of format::
+    Reverts to parameter names (and number of parameters) if groups not
+    defined.
 
-        Param1,0,1,Group1,dist1
-        Param2,0,1,Group2,dist2
-        Param3,0,1,Group3,dist3
+    Parameters
+    ----------
+    groups : List
+        
 
-    (Group and Dist columns are optional)
-
-    Returns a dictionary containing:
-        - names - the names of the parameters
-        - bounds - a list of lists of lower and upper bounds
-        - num_vars - a scalar indicating the number of variables
-                     (the length of names)
-        - groups - a list of group names (strings) for each variable
-        - dists - a list of distributions for the problem,
-                    None if not specified or all uniform
-
-    Arguments
-    ---------
-    filename : str
-        The path to the parameter file
-    delimiter : str, default=None
-        The delimiter used in the file to distinguish between columns
-
+    Returns
+    -------
+    tuple : names, number of groups    
     """
-    names = []
-    bounds = []
-    groups = []
-    dists = []
-    num_vars = 0
-    fieldnames = ['name', 'lower_bound', 'upper_bound', 'group', 'dist']
+    names = list(OrderedDict.fromkeys(groups))
+    number = len(names)
 
-    with open(filename, 'r') as csvfile:
-        dialect = csv.Sniffer().sniff(csvfile.read(1024), delimiters=delimiter)
-        csvfile.seek(0)
-        reader = csv.DictReader(
-            csvfile, fieldnames=fieldnames, dialect=dialect)
-        for row in reader:
-            if row['name'].strip().startswith('#'):
-                pass
-            else:
-                num_vars += 1
-                names.append(row['name'])
-                bounds.append(
-                    [float(row['lower_bound']), float(row['upper_bound'])])
-
-                # If the fourth column does not contain a group name, use
-                # the parameter name
-                if row['group'] is None:
-                    groups.append(row['name'])
-                elif row['group'] == 'NA':
-                    groups.append(row['name'])
-                else:
-                    groups.append(row['group'])
-
-                # If the fifth column does not contain a distribution
-                # use uniform
-                if row['dist'] is None:
-                    dists.append('unif')
-                else:
-                    dists.append(row['dist'])
-
-    if groups == names:
-        groups = None
-    elif len(set(groups)) == 1:
-        raise ValueError('''Only one group defined, results will not be
-            meaningful''')
-
-    # setting dists to none if all are uniform
-    # because non-uniform scaling is not needed
-    if all([d == 'unif' for d in dists]):
-        dists = None
-
-    return {'names': names, 'bounds': bounds, 'num_vars': num_vars,
-            'groups': groups, 'dists': dists}
+    return names, number
 
 
-def compute_groups_matrix(groups):
+def compute_groups_matrix(groups: List):
     """Generate matrix which notes factor membership of groups
 
     Computes a k-by-g matrix which notes factor membership of groups
@@ -257,9 +215,9 @@ def compute_groups_matrix(groups):
     Also returns a g-length list of unique group_names whose positions
     correspond to the order of groups in the k-by-g matrix
 
-    Arguments
-    ---------
-    groups : list
+    Parameters
+    ----------
+    groups : List
         Group names corresponding to each variable
 
     Returns
@@ -268,14 +226,8 @@ def compute_groups_matrix(groups):
         containing group matrix assigning parameters to
         groups and a list of unique group names
     """
-    if not groups:
-        return None
-
     num_vars = len(groups)
-
-    # Get a unique set of the group names
-    unique_group_names = list(OrderedDict.fromkeys(groups))
-    number_of_groups = len(unique_group_names)
+    unique_group_names, number_of_groups = extract_group_names(groups)
 
     indices = dict([(x, i) for (i, x) in enumerate(unique_group_names)])
 
@@ -288,21 +240,43 @@ def compute_groups_matrix(groups):
     return output, unique_group_names
 
 
-def requires_gurobipy(_has_gurobi):
-    '''
-    Decorator function which takes a boolean _has_gurobi as an argument.
-    Use decorate any functions which require gurobi.
-    Raises an import error at runtime if gurobi is not present.
-    Note that all runtime errors should be avoided in the working code,
-    using brute force options as preference.
-    '''
-    def _outer_wrapper(wrapped_function):
-        def _wrapper(*args, **kwargs):
-            if _has_gurobi:
-                result = wrapped_function(*args, **kwargs)
-            else:
-                warn("Gurobi not available", ImportWarning)
-                result = None
-            return result
-        return _wrapper
-    return _outer_wrapper
+def _define_problem_with_groups(problem: Dict) -> Dict:
+    """
+    Checks if the user defined the 'groups' key in the problem dictionary.
+    If not, makes the 'groups' key equal to the variables names. In other
+    words, the number of groups will be equal to the number of variables, which
+    is equivalent to no groups.
+
+    Parameters
+    ----------
+    problem : dict
+        The problem definition
+
+    Returns
+    -------
+    problem : dict
+        The problem definition with the 'groups' key, even if the user doesn't
+        define it
+    """
+    # Checks if there isn't a key 'groups' or if it exists and is set to 'None'
+    if 'groups' not in problem or not problem['groups']:
+        problem['groups'] = problem['names']
+    elif len(problem['groups']) != problem['num_vars']:
+        raise ValueError("Number of entries in \'groups\' should be the same "
+                         "as in \'names\'")
+    return problem
+
+
+def _compute_delta(num_levels: int) -> float:
+    """Computes the delta value from number of levels
+
+    Parameters
+    ---------
+    num_levels : int
+        The number of levels
+
+    Returns
+    -------
+    float
+    """
+    return num_levels / (2.0 * (num_levels - 1))

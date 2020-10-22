@@ -166,7 +166,7 @@ intervals, typically with a confidence level of 95%. Use the keyword argument :c
 
 .. code:: python
 
-    print Si['S1']
+    print(Si['S1'])
     
     [ 0.30644324  0.44776661 -0.00104936 ]
     
@@ -175,7 +175,7 @@ have no first-order effects.
 
 .. code:: python
 
-    print Si['ST']
+    print(Si['ST'])
     
     [ 0.56013728  0.4387225   0.24284474]
 
@@ -197,4 +197,25 @@ We can see there are strong interactions between x1 and x3.  Some computing
 error will appear in the sensitivity indices.  For example, we observe a
 negative value for the x2-x3 index.  Typically, these computing errors shrink as
 the number of samples increases.
+
+The output can then be converted to a Pandas DataFrame for further analysis.
+
+..code:: python
+    total_Si, first_Si, second_Si = Si.to_df()
+
+    # Note that if the sample was created with `calc_second_order=False`
+    # Then the second order sensitivities will not be returned
+    # total_Si, first_Si = Si.to_df()
+
+
      
+Basic Plotting
+~~~~~~~~~~~~~~~~
+
+Basic plotting facilities are provided for convenience.
+
+.. code:: python
+    
+    Si.plot()
+
+The :code:`plot()` method returns matplotlib axes objects to allow later adjustment.
