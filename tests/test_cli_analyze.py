@@ -96,23 +96,25 @@ def test_fast():
     # run analysis and use regex to strip all whitespace from result
     result = subprocess.check_output(analyze_cmd, universal_newlines=True)
 
-    expected = """              S1        ST
-x1  3.104027e-01  0.555603
-x2  4.425532e-01  0.469546
-x3  6.340153e-34  0.239155"""
+    expected = """              S1        ST   S1_conf   ST_conf
+x1  3.104027e-01  0.555603  0.007016  0.027110
+x2  4.425532e-01  0.469546  0.006901  0.026395
+x3  1.921394e-28  0.239155  0.007892  0.026510"""
+
+    col_names = ["Name", "S1", "ST", "S1_conf", "ST_conf"]
 
     data = StringIO(expected)
     df1 = pd.read_csv(data, sep="\t")
 
     df1 = df1.iloc[:, 0].str.split(expand=True)
-    df1.columns = ["Name", "S1", "ST"]
+    df1.columns = col_names
     df1 = df1.iloc[:, 1:].values.astype('float64')
 
     data = StringIO(result)
     df2 = pd.read_csv(data, sep="\t")
 
     df2 = df2.iloc[:, 0].str.split(expand=True)
-    df2.columns = ["Name", "S1", "ST"]
+    df2.columns = col_names
     df2 = df2.iloc[:, 1:].values.astype('float64')
 
     assert np.allclose(df1, df2), \
@@ -186,7 +188,7 @@ def test_rbd_fast():
     result = subprocess.check_output(analyze_cmd, universal_newlines=True)
     result = re.sub(r'[\n\t\s]*', '', result)
 
-    expected = "S1x10.298085x20.469240x3-0.010517"
+    expected = "S1S1_confx10.2980850.061361x20.4692400.067994x3-0.0105170.039771"
 
     assert len(result) > 0 and result == expected, \
         f"Unexpected RBD-FAST results.\n\nExpected:\n{expected}\n\nGot:{result}"
