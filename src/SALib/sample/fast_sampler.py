@@ -94,6 +94,7 @@ def cli_parse(parser):
     """
     parser.add_argument('-M', '--m-coef', type=int, required=False, default=4,
                         help='M coefficient, default 4', dest='M')
+
     return parser
 
 

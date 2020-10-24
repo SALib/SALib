@@ -2,12 +2,13 @@ import math
 from sys import exit
 
 import numpy as np
+from scipy.stats import norm
 
 from . import common_args
 from ..util import read_param_file, ResultDict
 
 
-def analyze(problem, Y, M=4, print_to_console=False, seed=None):
+def analyze(problem, Y, M=4, num_resamples=100, conf_level=0.95, print_to_console=False, seed=None):
     """Performs the Fourier Amplitude Sensitivity Test (FAST) on model outputs.
 
     Returns a dictionary with keys 'S1' and 'ST', where each entry is a list of
@@ -73,13 +74,19 @@ def analyze(problem, Y, M=4, print_to_console=False, seed=None):
         omega[1:] = np.arange(D - 1) % m + 1
 
     # Calculate and Output the First and Total Order Values
-    Si = ResultDict((k, [None] * D) for k in ['S1', 'ST'])
+    Si = ResultDict((k, [None] * D) for k in ['S1', 'ST', 'S1_conf', 'ST_conf'])
     Si['names'] = problem['names']
 
+    omega_0 = omega[0]
     for i in range(D):
         l = np.arange(i * N, (i + 1) * N)
-        Si['S1'][i] = compute_first_order(Y[l], N, M, omega[0])
-        Si['ST'][i] = compute_total_order(Y[l], N, omega[0])
+        Y_l = Y[l]
+        Si['S1'][i] = compute_first_order(Y_l, N, M, omega_0)
+        Si['ST'][i] = compute_total_order(Y_l, N, omega_0)
+
+        S1_d_conf, ST_d_conf = bootstrap(Y_l, N, M, omega_0, num_resamples, conf_level)
+        Si['S1_conf'][i] = S1_d_conf
+        Si['ST_conf'][i] = ST_d_conf
     
     if print_to_console:
         print(Si.to_df())
@@ -103,8 +110,50 @@ def compute_total_order(outputs, N, omega):
     return (1 - Dt / V)
 
 
+def bootstrap(Y, N, M, omega_0, resamples, conf_level):
+    # Use half of available data each time
+    T_data = Y.shape[0]
+    n_size = int(T_data * 0.5)
+
+    res_S1 = np.zeros(resamples)
+    res_ST = np.zeros(resamples)
+    for i in range(resamples):
+        sample_idx = np.random.choice(T_data, replace=True, size=n_size)
+        Y_rs = Y[sample_idx]
+
+        S1 = compute_first_order(Y_rs, N, M, omega_0)
+        ST = compute_total_order(Y_rs, N, omega_0)
+        res_S1[i] = S1
+        res_ST[i] = ST
+
+    bnd = norm.ppf(0.5 + conf_level / 2.0)
+    S1_conf = bnd * res_S1.std(ddof=1)
+    ST_conf = bnd * res_ST.std(ddof=1)
+    return S1_conf, ST_conf
+
+
 # No additional arguments required for FAST
-cli_parse = None
+def cli_parse(parser):
+    """Add method specific options to CLI parser.
+
+    Parameters
+    ----------
+    parser : argparse object
+
+    Returns
+    ----------
+    Updated argparse object
+    """
+    parser.add_argument('-M', '--M', type=int, required=False,
+                        default=4,
+                        help='Inference parameter')
+    parser.add_argument('-r', '--resamples', type=int, required=False,
+                        default=100,
+                        help='Number of bootstrap resamples for Sobol '
+                        'confidence intervals')
+
+    return parser
+
 
 
 def cli_action(args):
@@ -112,7 +161,8 @@ def cli_action(args):
     Y = np.loadtxt(args.model_output_file,
                    delimiter=args.delimiter, usecols=(args.column,))
 
-    analyze(problem, Y, print_to_console=True, seed=args.seed)
+    analyze(problem, Y, M=args.M, num_resamples=args.resamples, 
+            print_to_console=True, seed=args.seed)
 
 
 if __name__ == "__main__":
