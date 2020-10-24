@@ -268,10 +268,10 @@ class ProblemSpec(dict):
 
         out_cols = self.get('outputs', None)
         if out_cols is None:
-            num_cols = self._results.shape[1]
-            if num_cols == 1:
+            if len(self._results.shape) == 1:
                 self['outputs'] = ['Y']
             else:
+                num_cols = self._results.shape[1]
                 self['outputs'] = [f'Y{i}' for i in range(1, num_cols+1)]
 
         if len(self['outputs']) > 1:

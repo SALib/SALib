@@ -34,6 +34,3 @@ If using the method chaining approach, see [the example here](https://github.com
 
 ### How can I plot my results?
 SALib provides some basic plotting functionality. See [the example here](https://github.com/SALib/SALib/tree/develop/examples/plotting).
-
-
-
