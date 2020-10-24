@@ -280,10 +280,11 @@ class ProblemSpec(dict):
     
     def plot(self):
         """Plot results"""
-        if self._analysis is not None:
-            return self._analysis.plot()
-        
-        raise RuntimeError("Analysis not yet conducted")
+        if self._analysis is None:
+            raise RuntimeError("Analysis not yet conducted")
+
+        return self._analysis.plot()
+
 
     def _wrap_func(self, func, *args, **kwargs):
         # Create wrapped partial function to allow passing of additional args
