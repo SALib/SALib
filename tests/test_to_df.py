@@ -123,7 +123,7 @@ def test_fast_to_df():
         "FAST Si: Expected DataFrame, got {}".format(type(Si_df))
     assert set(Si_df.index) == expected_index, "Incorrect index in DataFrame"
 
-    col_names = set(['S1', 'ST'])
+    col_names = set(['S1', 'ST', 'S1_conf', 'ST_conf'])
     assert set(Si_df.columns) == col_names, \
         "Unexpected column names in DataFrame. Expected {}, got {}".format(
             col_names, Si_df.columns)
@@ -163,7 +163,7 @@ def test_ff_to_df():
                        ('x3', 'dummy_0')])
     assert set(inter_effect.index) == inter_index, \
         "Incorrect index in Interaction Effect DataFrame"
-# End test_fast_to_df()
+# End test_ff_to_df()
 
 
 def test_rbd_to_df():
@@ -186,8 +186,8 @@ def test_rbd_to_df():
         "RBD Si: Expected DataFrame, got {}".format(type(Si_df))
     assert set(Si_df.index) == set(params), "Incorrect index in DataFrame"
 
-    col_names = set(['S1'])
+    col_names = set(['S1', 'S1_conf'])
     assert set(Si_df.columns) == col_names, \
         "Unexpected column names in DataFrame. Expected {}, got {}".format(
             col_names, Si_df.columns)
-# End test_fast_to_df()
+# End test_rbd_to_df()

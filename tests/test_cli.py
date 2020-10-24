@@ -11,7 +11,7 @@ def test_cli_usage():
                                       shell=True,
                                       universal_newlines=True)
     except subprocess.CalledProcessError as e:
-        pass
+        raise RuntimeError(f"Call failed:\n{e}")
     else:
         # if no error raised, check the returned string
         assert len(out) > 0 and "usage" in out.lower(), \

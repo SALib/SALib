@@ -60,10 +60,18 @@ class ProblemSpec(dict):
     @results.setter
     def results(self, vals):
         cols = vals.shape[1]
-        if cols != len(self['outputs']):
-            msg = "Mismatched sample size: Expected "
-            msg += "{} cols, got {}".format(self['outputs'], cols)
-            raise ValueError(msg)
+        out_cols = self.get('outputs', None)
+
+        if out_cols is None:
+            if cols == 1:
+                self['outputs'] = ['Y']
+            else:
+                self['outputs'] = [f'Y{i}' for i in range(1, cols+1)]
+        else:
+            if cols != len(self['outputs']):
+                msg = "Mismatched sample size: Expected "
+                msg += "{} cols, got {}".format(self['outputs'], cols)
+                raise ValueError(msg)
 
         self._results = vals
     
@@ -258,6 +266,14 @@ class ProblemSpec(dict):
             # enforce passing of X if expected
             func = partial(func, *args, X=self._samples, **kwargs)
 
+        out_cols = self.get('outputs', None)
+        if out_cols is None:
+            num_cols = self._results.shape[1]
+            if num_cols == 1:
+                self['outputs'] = ['Y']
+            else:
+                self['outputs'] = [f'Y{i}' for i in range(1, num_cols+1)]
+
         if len(self['outputs']) > 1:
             self._analysis = {}
             for i, out in enumerate(self['outputs']):
@@ -280,10 +296,11 @@ class ProblemSpec(dict):
     
     def plot(self):
         """Plot results"""
-        if self._analysis is not None:
-            return self._analysis.plot()
-        
-        raise RuntimeError("Analysis not yet conducted")
+        if self._analysis is None:
+            raise RuntimeError("Analysis not yet conducted")
+
+        return self._analysis.plot()
+
 
     def _wrap_func(self, func, *args, **kwargs):
         # Create wrapped partial function to allow passing of additional args

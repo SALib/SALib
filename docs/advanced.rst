@@ -72,11 +72,11 @@ In :ref:`basics`, we generate a uniform sample of parameter space.
     param_values = saltelli.sample(problem, 1000)
 
 SALib is also capable of generating alternate sampling distributions by 
-specifying a :code:`dist` entry in the :code:`problem` specification.
+specifying a :code:`dists` entry in the :code:`problem` specification.
 
 As implied in the basic example, a uniform distribution is the default.
 
-When an entry for :code:`dist` is not 'unif', the :code:`bounds` entry does not indicate
+When an entry for :code:`dists` is not 'unif', the :code:`bounds` entry does not indicate
 parameter bounds but sample-specific metadata.
 
 :code:`bounds` definitions for available distributions:
