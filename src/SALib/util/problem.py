@@ -319,9 +319,19 @@ class ProblemSpec(dict):
             # have to divide by 2 to account for CI columns
             num_cols = len(self._analysis[fk]) // 2
 
-        _, axes = plt.subplots(num_rows, num_cols, sharey=True)
+        p_width = max(num_cols*3, 5)
+        p_height = max(num_rows*3, 6)
+        _, axes = plt.subplots(num_rows, num_cols, sharey=True, 
+                               figsize=(p_width, p_height))
         for res, ax in zip(self._analysis, axes):
             self._analysis[res].plot(ax=ax)
+
+            try:
+                ax[0].set_title(res)
+            except TypeError:
+                ax.set_title(res)
+
+        plt.tight_layout()
 
         return axes
 
