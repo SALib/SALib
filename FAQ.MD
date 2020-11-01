@@ -29,7 +29,7 @@ Two options:
 ### How do I get the sensitivity results?
 Call the `.to_df()` method if you would like Pandas DataFrames.
 
-If using the method chaining approach, see [the example here](https://github.com/SALib/SALib/tree/develop/examples/problem)
+If using the method chaining approach, see [the example here](https://github.com/SALib/SALib/tree/develop/examples/Problem)
 
 
 ### How can I plot my results?

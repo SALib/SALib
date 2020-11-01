@@ -398,13 +398,22 @@ class ProblemSpec(dict):
             print('Analysis:\n')
             an_res = self._analysis
 
-            for res_name in an_res:
-                print("{}:".format(res_name))
-                dfs = an_res[res_name].to_df()
-                if isinstance(dfs, (list, tuple)):
-                    for df in dfs:
-                        print(df, "\n")
+            allowed_types = (list, tuple)
+            if isinstance(an_res, ResultDict):
+                an_res = an_res.to_df()
+                if not isinstance(an_res, allowed_types):
+                    print(an_res, "\n")
                 else:
-                    print(dfs, "\n")
+                    for df in an_res:
+                        print(df, "\n")
+            elif isinstance(an_res, dict):
+                for res_name in an_res:
+                    print("{}:".format(res_name))
+                    dfs = an_res[res_name].to_df()
+                    if isinstance(dfs, allowed_types):
+                        for df in dfs:
+                            print(df, "\n")
+                    else:
+                        print(dfs, "\n")
         return ''
     
