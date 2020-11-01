@@ -61,7 +61,7 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
         raise RuntimeError("Confidence level must be between 0-1.")
 
     # equal frequency partition
-    exp = (2 / (7 + np.tanh((1500 - N) / 500)))
+    exp = (2.0 / (7.0 + np.tanh((1500.0 - N) / 500.0)))
     M = int(np.round( min(int(np.ceil(N**exp)), 48) ))
     m = np.linspace(0, N, M + 1)
     Ygrid = np.linspace(np.min(Y), np.max(Y), 100)

@@ -53,7 +53,7 @@ if __name__ == '__main__':
     start = time.perf_counter()
     (sp.sample(saltelli.sample, 25000, calc_second_order=True)
          # can specify number of processors to use with `nprocs`
-        .evaluate_parallel(Ishigami.evaluate)
+        .evaluate_parallel(Ishigami.evaluate, nprocs=2)
         .analyze(sobol.analyze, calc_second_order=True, conf_level=0.95))
     print("Time taken with all available cores:", time.perf_counter() - start, '\n')
 

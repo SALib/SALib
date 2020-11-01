@@ -295,11 +295,45 @@ class ProblemSpec(dict):
         raise RuntimeError("Analysis not yet conducted")
     
     def plot(self):
-        """Plot results"""
+        """Plot results.
+
+        Returns
+        -------
+        axes : matplotlib axes object
+        """
         if self._analysis is None:
             raise RuntimeError("Analysis not yet conducted")
 
-        return self._analysis.plot()
+        num_rows = len(self['outputs'])
+        if num_rows == 1:
+            return self._analysis.plot()
+
+        try:
+            plt
+        except:
+            import matplotlib.pyplot as plt
+
+        num_cols = 1
+        fk = list(self._analysis.keys())[0]
+        if isinstance(self._analysis[fk].to_df(), (list, tuple)):
+            # have to divide by 2 to account for CI columns
+            num_cols = len(self._analysis[fk]) // 2
+
+        p_width = max(num_cols*3, 5)
+        p_height = max(num_rows*3, 6)
+        _, axes = plt.subplots(num_rows, num_cols, sharey=True, 
+                               figsize=(p_width, p_height))
+        for res, ax in zip(self._analysis, axes):
+            self._analysis[res].plot(ax=ax)
+
+            try:
+                ax[0].set_title(res)
+            except TypeError:
+                ax.set_title(res)
+
+        plt.tight_layout()
+
+        return axes
 
 
     def _wrap_func(self, func, *args, **kwargs):
@@ -363,16 +397,23 @@ class ProblemSpec(dict):
         if self._analysis is not None:
             print('Analysis:\n')
             an_res = self._analysis
+
+            allowed_types = (list, tuple)
             if isinstance(an_res, ResultDict):
-                dfs = an_res.to_df()
-                if isinstance(dfs, list):
-                    for df in dfs:
-                        print(df, "\n")
+                an_res = an_res.to_df()
+                if not isinstance(an_res, allowed_types):
+                    print(an_res, "\n")
                 else:
-                    print(an_res.to_df(), "\n")
-            elif isinstance(an_res, dict):
-                for vals in list(an_res.values()):
-                    for df in vals.to_df():
+                    for df in an_res:
                         print(df, "\n")
+            elif isinstance(an_res, dict):
+                for res_name in an_res:
+                    print("{}:".format(res_name))
+                    dfs = an_res[res_name].to_df()
+                    if isinstance(dfs, allowed_types):
+                        for df in dfs:
+                            print(df, "\n")
+                    else:
+                        print(dfs, "\n")
         return ''
     
