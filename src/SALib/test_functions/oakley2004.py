@@ -4,9 +4,17 @@ from SALib import ProblemSpec
 
 
 def evaluate(x, A, M):
-    a1, a2, a3 = A
+    """Test function taken from Oakley and O'Hagan (2004) (see [1])
 
-    # print( (a1@x + a2@np.sin(x[0]) + a3@np.cos(x[0]) + x[0].T@(M@x[0])))
+
+    References
+    ----------
+    .. [1] Oakley, J.E., O’Hagan, A., 2004. 
+           Probabilistic sensitivity analysis of complex models: a Bayesian approach. 
+           Journal of the Royal Statistical Society: Series B (Statistical Methodology) 66, 751–769. 
+           https://doi.org/10.1111/j.1467-9868.2004.05304.x
+    """
+    a1, a2, a3 = A
 
     num_ins = x.shape[0]
     Y = np.zeros(num_ins)
@@ -18,6 +26,8 @@ def evaluate(x, A, M):
 
 
 if __name__ == '__main__':
+
+    # Raw values taken from: http://www.jeremy-oakley.staff.shef.ac.uk/psa_example.txt
     M = np.array([
         -2.25E-02, -1.85E-01, 1.34E-01, 3.69E-01, 1.72E-01, 1.37E-01, -4.40E-01, -8.14E-02, 7.13E-01, -4.44E-01, 5.04E-01, -2.41E-02, -4.59E-02, 2.17E-01, 5.59E-02,
         2.57E-01, 5.38E-02, 2.58E-01, 2.38E-01, -5.91E-01, -8.16E-02, -2.87E-01, 4.16E-01, 4.98E-01, 8.39E-02, -1.11E-01, 3.32E-02, -1.40E-01, -3.10E-02, -2.23E-01,
@@ -36,22 +46,18 @@ if __name__ == '__main__':
         4.15E-02, -2.60E-01, 4.64E-01, -3.61E-01, -9.50E-01, -1.65E-01, 3.09E-03, 5.28E-02, 2.25E-01, 3.84E-01, 4.56E-01, -1.86E-01, 8.23E-03, 1.67E-01, 1.60E-01
     ]).reshape(15,15)
 
-    a1 = np.array([0.0118, 0.0456, 0.2297, 0.0393, 0.1177, 0.3865, 0.3897, 0.6061, 0.6159, 0.4005, 1.0741, 1.1474, 0.7880, 1.1242, 1.1982])
-    a2 = np.array([0.4341, 0.0887, 0.0512, 0.3233, 0.1489, 1.0360, 0.9892, 0.9672, 0.8977, 0.8083, 1.8426, 2.4712, 2.3946, 2.0045, 2.2621])
-    a3 = np.array([0.1044, 0.2057, 0.0774, 0.2730, 0.1253, 0.7526, 0.8570, 1.0331, 0.8388, 0.7970, 2.2145, 2.0382, 2.4004, 2.0541, 1.9845])
-
-    A = np.array([a1, a2, a3])
+    A = np.array([[0.0118, 0.0456, 0.2297, 0.0393, 0.1177, 0.3865, 0.3897, 0.6061, 0.6159, 0.4005, 1.0741, 1.1474, 0.7880, 1.1242, 1.1982],
+                  [0.4341, 0.0887, 0.0512, 0.3233, 0.1489, 1.0360, 0.9892, 0.9672, 0.8977, 0.8083, 1.8426, 2.4712, 2.3946, 2.0045, 2.2621],
+                  [0.1044, 0.2057, 0.0774, 0.2730, 0.1253, 0.7526, 0.8570, 1.0331, 0.8388, 0.7970, 2.2145, 2.0382, 2.4004, 2.0541, 1.9845]])
 
     sp = ProblemSpec({
         'names': ['x{}'.format(i) for i in range(1,16)],
         'bounds': [[0, 1]*15],
     })
 
-    (sp.sample_latin(250)
+    (sp.sample_saltelli(1000, calc_second_order=False)
         .evaluate(evaluate, A, M)
-        .analyze_rbd_fast()
+        .analyze_sobol(calc_second_order=False)
     )
 
     print(sp)
-
-    # evaluate(A, x, M)
