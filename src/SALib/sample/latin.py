@@ -21,17 +21,17 @@ def sample(problem, N, seed=None):
 
     References
     ----------
-    .. [1] McKay, M.D., Beckman, R.J., Conover, W.J., 1979. 
-           A comparison of three methods for selecting values of input 
-           variables in the analysis of output from a computer code. 
-           Technometrics 21, 239–245. 
+    .. [1] McKay, M.D., Beckman, R.J., Conover, W.J., 1979.
+           A comparison of three methods for selecting values of input
+           variables in the analysis of output from a computer code.
+           Technometrics 21, 239–245.
            https://doi.org/10.2307/1268522
 
-    .. [2] Iman, R.L., Helton, J.C., Campbell, J.E., 1981. 
-           An Approach to Sensitivity Analysis of Computer Models: 
-           Part I—Introduction, Input Variable Selection and 
-           Preliminary Variable Assessment. 
-           Journal of Quality Technology 13, 174–183. 
+    .. [2] Iman, R.L., Helton, J.C., Campbell, J.E., 1981.
+           An Approach to Sensitivity Analysis of Computer Models:
+           Part I—Introduction, Input Variable Selection and
+           Preliminary Variable Assessment.
+           Journal of Quality Technology 13, 174–183.
            https://doi.org/10.1080/00224065.1981.11978748
 
     """
@@ -63,9 +63,6 @@ def sample(problem, N, seed=None):
         for sample in range(num_samples):
             if groups:
                 grouped_variables = np.where(G[:, group] == 1)
-                print(result)
-                print(grouped_variables)
-                print(temp)
                 result[sample, grouped_variables[0]] = temp[sample, group]
             else:
                 result[sample, group] = temp[sample, group]

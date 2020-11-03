@@ -88,3 +88,28 @@ class TestLatinSample:
         )
         print(actual, expected)
         approx(actual, expected)
+
+    def test_latin_sample_two_groups(self):
+
+        problem = {
+            'num_vars': 2,
+            'bounds': [[0, 1], [0, 1]],
+            'names': ['var1', 'var2'],
+            'groups': ['group1', 'group2']
+        }
+
+        actual = sample(problem, 10, seed=42)
+        print(actual)
+        expected = np.array(
+            [[0.17319939, 0.85247564],
+             [0.50205845, 0.21559945],
+             [0.4601115, 0.59699099],
+             [0.83042422, 0.71834045],
+             [0.03745401, 0.38661761],
+             [0.7181825, 0.15986585],
+             [0.68324426, 0.92912291],
+             [0.30580836, 0.09507143],
+             [0.21560186, 0.47080726],
+             [0.9431945, 0.62123391]]
+        )
+        np.testing.assert_allclose(actual, expected)
