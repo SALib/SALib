@@ -86,7 +86,6 @@ class TestLatinSample:
              [0.41560186, 0.62921446],
              [0.51559945, 0.24319450]]
         )
-        print(actual, expected)
         approx(actual, expected)
 
     def test_latin_sample_two_groups(self):
@@ -99,7 +98,6 @@ class TestLatinSample:
         }
 
         actual = sample(problem, 10, seed=42)
-        print(actual)
         expected = np.array(
             [[0.17319939, 0.85247564],
              [0.50205845, 0.21559945],
