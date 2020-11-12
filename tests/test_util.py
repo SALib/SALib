@@ -6,6 +6,7 @@ import pytest
 
 from SALib.util import (read_param_file, _scale_samples, _unscale_samples,
                         compute_groups_matrix)
+from SALib.sample import latin
 
 from . conftest import make_temporary_file
 
@@ -175,3 +176,21 @@ def test_compute_groups_from_parameter_file():
     assert_equal(actual_matrix, np.array(
         [[1, 0], [0, 1], [0, 1]], dtype=np.int))
     assert_equal(actual_unique_names, ['Group 1', 'Group 2'])
+
+def test_nonuniform_scale_samples_truncnorm():
+    """
+    Test the rescaling of samples for truncated normal distribution
+    """
+    problem = {
+        'num_vars': 1,
+        'bounds': [[0, 3.14, 2, 1]],
+        'names': ['x1']
+    }
+    actual = latin.sample(problem, 10, seed=42)
+    expected = np.array(
+        [[2.70075011], [0.8578461], [0.1176056],
+         [1.90223825], [2.46997931], [3.04833479],
+         [1.12997876], [0.61252429], [1.30498985],
+         [1.61898228]]
+    )
+    np.testing.assert_allclose(actual, expected)
