@@ -199,7 +199,7 @@ def _nonuniform_scale_samples(params, bounds, dists):
                     sp.stats.norm.ppf(params[:, i], loc=b1, scale=b2))
 
         else:
-            valid_dists = ['unif', 'triang', 'norm', 'lognorm']
+            valid_dists = ['unif', 'triang', 'norm', 'truncnorm', 'lognorm']
             raise ValueError('Distributions: choose one of %s' %
                              ", ".join(valid_dists))
 
