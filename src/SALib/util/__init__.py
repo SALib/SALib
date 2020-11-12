@@ -129,6 +129,8 @@ def _nonuniform_scale_samples(params, bounds, dists):
                     location of peak is in percentage of width
                     lower bound assumed to be zero
             norm: normal distribution with mean and standard deviation
+            truncnorm: truncated normal distribution with upper and lower
+                    bounds, meand and standard deviation
             lognorm: lognormal with ln-space mean and standard deviation
     """
     b = np.array(bounds)
@@ -164,6 +166,26 @@ def _nonuniform_scale_samples(params, bounds, dists):
             else:
                 conv_params[:, i] = sp.stats.norm.ppf(
                     params[:, i], loc=b1, scale=b2)
+
+        # Truncated normal distribution
+        # parameters are lower bound and upper bound, mean and stdev
+        elif dists[i] == 'truncnorm':
+            b3 = b[i][2]
+            b4 = b[i][3]
+            if b4 <= 0:
+                raise ValueError(
+                    """Truncated normal distribution: stdev must
+                    be > 0"""
+                )
+            if b1 >= b2:
+                raise ValueError(
+                    """Truncated normal distribution: lower bound
+                    must be less than upper bound"""
+                )
+            else:
+                conv_params[:, i] = sp.stats.truncnorm.ppf(
+                    params[:, i], b1, b2, loc=b3, scale=b4
+                )
 
         # lognormal distribution (ln-space, not base-10)
         # paramters are ln-space mean and standard deviation
