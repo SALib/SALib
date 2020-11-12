@@ -184,7 +184,7 @@ def _nonuniform_scale_samples(params, bounds, dists):
                 )
             else:
                 conv_params[:, i] = sp.stats.truncnorm.ppf(
-                    params[:, i], b1, b2, loc=b3, scale=b4
+                    params[:, i], (b1 - b3) / b4, (b2 - b3) / b4, loc=b3, scale=b4
                 )
 
         # lognormal distribution (ln-space, not base-10)
