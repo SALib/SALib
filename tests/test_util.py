@@ -183,6 +183,7 @@ def test_nonuniform_scale_samples_truncnorm():
     """
     problem = {
         'num_vars': 1,
+        'dists': ['truncnorm'],
         'bounds': [[0, 3.14, 2, 1]],
         'names': ['x1']
     }
