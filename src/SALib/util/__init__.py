@@ -130,7 +130,7 @@ def _nonuniform_scale_samples(params, bounds, dists):
                     lower bound assumed to be zero
             norm: normal distribution with mean and standard deviation
             truncnorm: truncated normal distribution with upper and lower
-                    bounds, meand and standard deviation
+                    bounds, mean and standard deviation
             lognorm: lognormal with ln-space mean and standard deviation
     """
     b = np.array(bounds)
