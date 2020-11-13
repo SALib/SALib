@@ -50,11 +50,25 @@ def test_delta():
     -Y {output_path} -c 0 -r 10 --seed=100".split()
 
     result = subprocess.check_output(analyze_cmd, universal_newlines=True)
-    result = re.sub(r'[\n\t\s]*', '', result)
 
-    expected_output = 'Parameterdeltadelta_confS1S1_confx10.2104780.0060910.3113620.012291x20.3540230.0062380.4283650.017972x30.1609860.0047180.0011110.002995'
-    assert len(result) > 0 and result in expected_output, \
-        f"Results did not match expected values:\n\n Expected: \n{expected_output} \n\n Got: \n{result}"
+    delta_expected = [0.210478, 0.354023, 0.160986]
+    sobol_expected = [0.311362, 0.428365, 0.001111]
+
+    test = pd.read_csv(StringIO(result), index_col=0, sep=r'\s+')
+    test['expected'] = delta_expected
+
+    lower = (test['delta'] - test['delta_conf'])
+    upper = (test['delta'] + test['delta_conf'])
+    comparison = test['expected'].between(lower, upper)
+    assert comparison.all(), \
+        "Expected Delta results not within confidence bounds"
+
+    test['expected'] = sobol_expected
+    lower = (test['S1'] - test['S1_conf'])
+    upper = (test['S1'] + test['S1_conf'])
+    comparison = test['expected'].between(lower, upper)
+    assert comparison.all(), \
+        "Expected Sobol results not within confidence bounds"
 
 
 def test_dgsm():
@@ -72,12 +86,17 @@ def test_dgsm():
 
     # run analysis and use regex to strip all whitespace from result
     result = subprocess.check_output(analyze_cmd, universal_newlines=True)
-    result = re.sub(r'[\n\t\s]*', '', result)
 
-    expected = "vivi_stddgsmdgsm_confx17.62237816.1981232.2075541.034173x224.48775717.3385567.0920191.090835x311.18125824.0621273.2382591.477114"
+    dgsm_expected = [2.207554, 7.092019, 3.238259]
 
-    assert len(result) > 0 and result == expected, \
-        f"Unexpected DGSM results.\n\nExpected:\n{expected}\n\nGot:{result}"
+    test = pd.read_csv(StringIO(result), index_col=0, sep=r'\s+')
+    test['expected'] = dgsm_expected
+
+    lower = (test['dgsm'] - test['dgsm_conf'])
+    upper = (test['dgsm'] + test['dgsm_conf'])
+    comparison = test['expected'].between(lower, upper)
+    assert comparison.all(), \
+        "Expected DGSM results not within confidence bounds"
 
 
 def test_fast():
@@ -140,7 +159,6 @@ def test_ff():
     result = re.sub(r'[\n\t\s]*', '', result)
 
     expected = "MEx13.855764e-08x20.000000e+00x30.000000e+00dummy_00.000000e+00IE(x1,x2)0.0(x1,x3)0.0(x2,x3)0.0(x1,dummy_0)0.0(x2,dummy_0)0.0(x3,dummy_0)0.0"
-
     assert len(result) > 0 and result == expected, \
         f"Unexpected FF results.\n\nExpected:\n{expected}\n\nGot:{result}"
 
@@ -186,12 +204,18 @@ def test_rbd_fast():
 
     # run analysis and use regex to strip all whitespace from result
     result = subprocess.check_output(analyze_cmd, universal_newlines=True)
-    result = re.sub(r'[\n\t\s]*', '', result)
 
-    expected = "S1S1_confx10.2980850.061361x20.4692400.067994x3-0.0105170.039771"
+    expected = [0.351277, 0.468170, -0.005864]
 
-    assert len(result) > 0 and result == expected, \
-        f"Unexpected RBD-FAST results.\n\nExpected:\n{expected}\n\nGot:{result}"
+    test = pd.read_csv(StringIO(result), index_col=0, sep=r'\s+')
+    test['expected'] = expected
+
+    lower = (test['S1'] - test['S1_conf'])
+    upper = (test['S1'] + test['S1_conf'])
+    comparison = test['expected'].between(lower, upper)
+
+    assert comparison.all(), \
+        "RBD-FAST results +/- CI not in line with expected results."
 
 
 def test_sobol():
