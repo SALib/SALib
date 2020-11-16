@@ -11,26 +11,26 @@ addons:
 notifications:
   email: false
 
+env:
+  - DISTRIB="conda" PYTHON_VERSION="3.6" COVERAGE="true"
+  - DISTRIB="conda" PYTHON_VERSION="3.7" COVERAGE="false"
+  - DISTRIB="conda" PYTHON_VERSION="3.8" COVERAGE="false"
+
+install:
+  - source tests/travis_install.sh
+  - pip install -r test-requirements.txt
+script:
+  - python setup.py develop
+  - pytest
+after_success:
+  - if [[ "$COVERAGE" == "true" ]]; then coveralls || echo "failed"; fi
+
 jobs:
   include:
-  - stage: "test"
-    name: "Test the SALib package"
-    env:
-    - DISTRIB="conda" PYTHON_VERSION="3.6" COVERAGE="true"
-    - DISTRIB="conda" PYTHON_VERSION="3.7" COVERAGE="false"
-    - DISTRIB="conda" PYTHON_VERSION="3.8" COVERAGE="false"
-    install:
-    - source tests/travis_install.sh
-    - pip install -r test-requirements.txt
-    script:
-    - python setup.py develop
-    - pytest
-    after_success:
-    - if [[ "$COVERAGE" == "true" ]]; then coveralls || echo "failed"; fi
   - stage: "deploy"
     name: "Deploy to PyPI"
     if: tag =~ ^v
-    env: DISTRIB="conda" PYTHON_VERSION="3.6" COVERAGE="false"
+    env: DISTRIB="conda" PYTHON_VERSION="3.8" COVERAGE="false"
     install:
     - source tests/travis_install.sh
     - pip install -r requirements.txt
