@@ -3,6 +3,8 @@
 import pytest
 import tempfile
 
+
+@pytest.fixture
 def make_temporary_file():
     """ Returns a temporary file name
 
