@@ -11,38 +11,35 @@ addons:
 notifications:
   email: false
 
-env:
-- DISTRIB="conda" PYTHON_VERSION="3.6" COVERAGE="true"
-- DISTRIB="conda" PYTHON_VERSION="3.7" COVERAGE="false"
-- DISTRIB="conda" PYTHON_VERSION="3.8" COVERAGE="false"
-
 jobs:
   include:
-    - stage: "test"
-      name: "Test the SALib package"
-      install:
-      - source tests/travis_install.sh
-      - pip install -r test-requirements.txt
-      script:
-      - python setup.py develop
-      - pytest
-      after_success:
-      - if [[ "$COVERAGE" == "true" ]]; then coveralls || echo "failed"; fi
-
-    - stage: "deploy"
-      name: "Deploy to PyPI"
-      if: tag =~ ^v
-      env: DISTRIB="conda" PYTHON_VERSION="3.6" COVERAGE="false"
-      install:
-      - source tests/travis_install.sh
-      - pip install -r requirements.txt
-      script: echo "Deploying to PyPI"
-      deploy:
-        provider: pypi
-        username: jdherman
-        password:
-          secure: KiUygZVHWMR2a+fk092xeHh8J2c61VGrgq4v1l3bq41MxcZO745H7CLJJ3rfqo+G5/pqy4/tm+q3p8fHhbUmwMcuSC3vjRN6WAYjuNPs0FMVXiIkMQtevv2LdVF1zVKFBdYTuNrfugtZ/GXh/ReCydjEBWTrTaNYeNM4ZRIaj0Q=
-        on:
-          tags: true
-          all_branches: true
-        cleanup: false
+  - env: DISTRIB="conda" PYTHON_VERSION="3.6" COVERAGE="true"
+  - env: DISTRIB="conda" PYTHON_VERSION="3.7" COVERAGE="false"
+  - env: DISTRIB="conda" PYTHON_VERSION="3.8" COVERAGE="false"
+  - stage: "test"
+    name: "Test the SALib package"
+    install:
+    - source tests/travis_install.sh
+    - pip install -r test-requirements.txt
+    script:
+    - python setup.py develop
+    - pytest
+    after_success:
+    - if [[ "$COVERAGE" == "true" ]]; then coveralls || echo "failed"; fi
+  - stage: "deploy"
+    name: "Deploy to PyPI"
+    if: tag =~ ^v
+    env: DISTRIB="conda" PYTHON_VERSION="3.6" COVERAGE="false"
+    install:
+    - source tests/travis_install.sh
+    - pip install -r requirements.txt
+    script: echo "Deploying to PyPI"
+    deploy:
+      provider: pypi
+      username: jdherman
+      password:
+        secure: KiUygZVHWMR2a+fk092xeHh8J2c61VGrgq4v1l3bq41MxcZO745H7CLJJ3rfqo+G5/pqy4/tm+q3p8fHhbUmwMcuSC3vjRN6WAYjuNPs0FMVXiIkMQtevv2LdVF1zVKFBdYTuNrfugtZ/GXh/ReCydjEBWTrTaNYeNM4ZRIaj0Q=
+      on:
+        tags: true
+        all_branches: true
+      cleanup: false
