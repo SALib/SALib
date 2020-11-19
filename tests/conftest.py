@@ -3,6 +3,8 @@
 import pytest
 import tempfile
 
+
+@pytest.fixture
 def make_temporary_file():
     """ Returns a temporary file name
 
@@ -16,8 +18,8 @@ def make_temporary_file():
 
 
 @pytest.fixture(scope='function')
-def setup_function():
-    filename = make_temporary_file()
+def setup_function(make_temporary_file):
+    filename = make_temporary_file
     with open(filename, "w+") as ofile:
         ofile.write("Test1 0.0 100.0\n")
         ofile.write("Test2 5.0 51.0\n")
@@ -25,8 +27,8 @@ def setup_function():
 
 
 @pytest.fixture(scope='function')
-def setup_param_file():
-    filename = make_temporary_file()
+def setup_param_file(make_temporary_file):
+    filename = make_temporary_file
     with open(filename, "w") as ofile:
         ofile.write("Test 1,0,1.0\n")
         ofile.write("Test 2,0,1.0\n")
@@ -35,8 +37,8 @@ def setup_param_file():
 
 
 @pytest.fixture(scope='function')
-def setup_param_file_with_groups():
-    filename = make_temporary_file()
+def setup_param_file_with_groups(make_temporary_file):
+    filename = make_temporary_file
     with open(filename, "w") as ofile:
         ofile.write("Test 1,0,1.0,Group 1\n")
         ofile.write("Test 2,0,1.0,Group 1\n")
@@ -45,8 +47,8 @@ def setup_param_file_with_groups():
 
 
 @pytest.fixture(scope='function')
-def setup_param_groups_prime():
-    filename = make_temporary_file()
+def setup_param_groups_prime(make_temporary_file):
+    filename = make_temporary_file
     with open(filename, "w") as ofile:
         ofile.write("Test 1,0,1.0,Group 1\n")
         ofile.write("Test 2,0,1.0,Group 2\n")

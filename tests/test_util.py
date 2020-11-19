@@ -8,12 +8,10 @@ from SALib.util import (read_param_file, _scale_samples, _unscale_samples,
                         compute_groups_matrix)
 from SALib.sample import latin
 
-from . conftest import make_temporary_file
-
 
 @pytest.fixture(scope='function')
-def setup_param_file_group_dist():
-    filename = make_temporary_file()
+def setup_param_file_group_dist(make_temporary_file):
+    filename = make_temporary_file
     with open(filename, "w") as ofile:
         ofile.write("Test1 0.0 100.0 Group1 unif\n")
         ofile.write("Test2 5.0 51.0 Group1 triang\n")
@@ -22,8 +20,8 @@ def setup_param_file_group_dist():
 
 
 @pytest.fixture(scope='function')
-def setup_csv_param_file_space():
-    filename = make_temporary_file()
+def setup_csv_param_file_space(make_temporary_file):
+    filename = make_temporary_file
     with open(filename, "w") as ofile:
         ofile.write("Test 1,0.0,100.0\n")
         ofile.write("Test 2,5.0,51.0\n")
@@ -31,8 +29,8 @@ def setup_csv_param_file_space():
 
 
 @pytest.fixture(scope='function')
-def setup_tab_param_file_espace_names():
-    filename = make_temporary_file()
+def setup_tab_param_file_espace_names(make_temporary_file):
+    filename = make_temporary_file
     with open(filename, "w") as ofile:
         ofile.write("Test 1\t0.0\t100.0\n")
         ofile.write("Test 2\t5.0\t51.0\n")
@@ -40,8 +38,8 @@ def setup_tab_param_file_espace_names():
 
 
 @pytest.fixture(scope='function')
-def setup_csv_param_file_space_comments():
-    filename = make_temporary_file()
+def setup_csv_param_file_space_comments(make_temporary_file):
+    filename = make_temporary_file
     with open(filename, "w") as ofile:
         ofile.write("# Here is a comment\n")
         ofile.write("'Test 1',0.0,100.0\n")
