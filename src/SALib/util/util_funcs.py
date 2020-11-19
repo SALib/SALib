@@ -21,7 +21,9 @@ def avail_approaches(pkg):
     methods = [modname for importer, modname, ispkg in
                pkgutil.walk_packages(path=pkg.__path__)
                if modname not in
-               ['common_args', 'directions', 'sobol_sequence']]
+               ['common_args', 'directions', 'sobol_sequence']
+               and 'test' not in modname]
+
     return methods
 
 
