@@ -8,7 +8,7 @@ from numpy.testing import assert_equal, assert_allclose
 from SALib import ProblemSpec
 
 
-def test_func(x):
+def example_func(x):
     """Example linear test function."""
     return np.sum(x, axis=1)
 
@@ -85,7 +85,35 @@ def test_morris_group_analysis():
     assert len(res[res.index == "C"]) == 1, "Could not find Group C"
 
 
+def test_latin_group_sample():
+    """Ensure valid groupings are returned from the Morris analysis method.
+
+    Note: $\mu$ and $\sigma$ values will be NaN. See [1].
+
+
+    References
+    ----------
+
+    .. [1] Campolongo, F., Cariboni, J., Saltelli, A., 2007. 
+           An effective screening design for sensitivity analysis of large models. 
+           Environmental Modelling & Software, 22, 1509–1518.
+           https://dx.doi.org/10.1016/j.envsoft.2006.10.004
+    """
+    group_spec = ProblemSpec(
+        {
+            "names": ["P1", "P2", "P3", "P4", "P5", "P6"],
+            "bounds": [[-100.0, 100.0] * 6],
+            "groups": ["A", "B"] * 3,
+        }
+    )
+
+    group_spec.sample_latin(1000)
+
+    print(group_spec.samples)
+
+
 if __name__ == "__main__":
     test_sobol_group_analysis()
     test_morris_group_analysis()
+    test_latin_group_sample()
 
