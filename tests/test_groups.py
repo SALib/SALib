@@ -1,4 +1,4 @@
-"""High-level tests to ensure grouped analyses return expected groupings."""
+"""High-level tests to ensure grouped analyses convert to Pandas DataFrame."""
 
 from typing import Dict, List
 
