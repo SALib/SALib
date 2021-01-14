@@ -107,6 +107,14 @@ class ProblemSpec(dict):
 
         return self
 
+    def set_samples(self, samples):
+        """Provide samples."""
+        self.samples = samples
+
+    def set_results(self, results):
+        """Set model results."""
+        self.results = results
+
     def evaluate(self, func, *args, **kwargs):
         """Evaluate a given model.
 
