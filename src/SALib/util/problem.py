@@ -108,13 +108,13 @@ class ProblemSpec(dict):
         return self
 
     def set_samples(self, samples):
-        """Provide samples."""
+        """Set previous samples used."""
         self.samples = samples
 
         return self
 
     def set_results(self, results):
-        """Set model results."""
+        """Set previously available model results."""
         self.results = results
 
         return self
