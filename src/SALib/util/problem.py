@@ -53,6 +53,9 @@ class ProblemSpec(dict):
 
         self._samples = vals
 
+        # Clear results to avoid confusion
+        self._results = None
+
     @property
     def results(self):
         return self._results
@@ -122,6 +125,8 @@ class ProblemSpec(dict):
     def set_results(self, results):
         """Set previously available model results."""
         self.results = results
+        # if self.samples is not None:
+        #     warnings.warn('Existing samples found - make sure these results are for those samples!')
 
         return self
 
@@ -434,4 +439,3 @@ class ProblemSpec(dict):
                     else:
                         print(dfs, "\n")
         return ''
-    
