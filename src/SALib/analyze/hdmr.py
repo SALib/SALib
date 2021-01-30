@@ -391,9 +391,8 @@ def _first_order(B1, Y_res, C1, R, n1, m1, maxiter, lambdax):
         # Regularized least squares inversion ( minimize || C1 ||_2 )
         B11 = np.matmul(np.transpose(B1[:, :, j]), B1[:, :, j])
 
-        if (np.linalg.det(B11) == 0):
-            C1[:, j] = 0  # Ill-defined
-        else:
+        # if it is ill-conditioned matrix, the default value is zero
+        if np.all(np.linalg.svd(B11)[1]): # sigma, diagonal matrix, from svd
             T1[:, :, j] = np.linalg.solve(np.add(B11, np.multiply(
                 lambdax, np.identity(m1))), np.transpose(B1[:, :, j]))
 
@@ -438,9 +437,8 @@ def _second_order(B2, Y_res, C2, R, n2, m2, lambdax):
         # Regularized least squares inversion ( minimize || C1 ||_2 )
         B22 = np.matmul(np.transpose(B2[:, :, j]), B2[:, :, j])
 
-        if (np.linalg.det(B22) == 0):
-            C2[:, j] = 0  # Ill-defined
-        else:
+        # if it is ill-conditioned matrix, the default value is zero
+        if np.all(np.linalg.svd(B22)[1]): # sigma, diagonal matrix, from svd
             T2[:, :, j] = np.linalg.solve(np.add(B22, np.multiply(
                 lambdax, np.identity(m2))), np.transpose(B2[:, :, j]))
 
@@ -466,9 +464,9 @@ def _third_order(B3, Y_res, C3, R, n3, m3, lambdax):
     for j in range(n3):
         # Regularized least squares inversion ( minimize || C1 ||_2 )
         B33 = np.matmul(np.transpose(B3[:, :, j]), B3[:, :, j])
-        if (np.linalg.det(B33) == 0):
-            C3[:, j] = 0  # Ill-defined
-        else:
+
+        # if it is ill-conditioned matrix, the default value is zero
+        if np.all(np.linalg.svd(B33)[1]): # sigma, diagonal matrix, from svd
             T3[:, :, j] = np.linalg.solve(np.add(B33, np.multiply(
                 lambdax, np.identity(m3))), np.transpose(B3[:, :, j]))
 
