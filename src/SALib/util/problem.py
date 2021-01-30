@@ -59,7 +59,13 @@ class ProblemSpec(dict):
     
     @results.setter
     def results(self, vals):
-        cols = vals.shape[1]
+        val_shape = vals.shape
+
+        if len(val_shape) == 1:
+            cols = 1
+        else:
+            cols = vals.shape[1]
+
         out_cols = self.get('outputs', None)
 
         if out_cols is None:
