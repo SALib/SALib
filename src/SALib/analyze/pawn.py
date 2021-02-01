@@ -13,6 +13,10 @@ def analyze(problem, X, Y, S=10, print_to_console=False, seed=None):
     Ported from an implementation in `R` by Baroni & Francke (2020)
     https://github.com/baronig/GSA-cvd
 
+    Calculates the min, mean, median, max, and coefficient of variation (CV).
+
+    CV is (standard deviation / mean), and so lower values indicate little change
+    over the slides, and larger values indicate large variations across the slides.
 
     Parameters
     ----------
@@ -54,7 +58,7 @@ def analyze(problem, X, Y, S=10, print_to_console=False, seed=None):
     else:
         var_names, D = extract_group_names(problem.get('groups'))
 
-    result = np.full((D, ), np.nan)
+    results = np.full((D, 5), np.nan)
     temp_pawn = np.full((S, D), np.nan)
 
     step = (1/S)
@@ -75,9 +79,21 @@ def analyze(problem, X, Y, S=10, print_to_console=False, seed=None):
             ks = ks_2samp(Y_sel, Y)
             temp_pawn[s, d_i] = ks.statistic 
 
-        result[d_i] = np.median(temp_pawn[:, d_i])
+        p_ind = temp_pawn[:, d_i]
+        mins = np.min(p_ind)
+        mean = np.mean(p_ind)
+        med = np.median(p_ind)
+        maxs = np.max(p_ind)
+        cv = np.std(p_ind) / mean
+        results[d_i] = [mins, mean, med, maxs, cv]
 
-    Si = ResultDict([('PAWN', result)])
+    Si = ResultDict([
+        ('minimum', results[:, 0]),
+        ('mean', results[:, 1]),
+        ('median', results[:, 2]),
+        ('maximum', results[:, 3]),
+        ('CV', results[:, 4]),
+    ])
     Si['names'] = var_names
 
     if print_to_console:
