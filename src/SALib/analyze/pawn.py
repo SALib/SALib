@@ -48,11 +48,11 @@ def analyze(problem, X, Y, S=10, print_to_console=False, seed=None):
         np.random.seed(seed)
 
     groups = _check_groups(problem)
-    print("Groups: ", groups)
     if not groups:
         D = problem['num_vars']
+        var_names = problem['names']
     else:
-        _, D = extract_group_names(problem.get('groups'))
+        var_names, D = extract_group_names(problem.get('groups'))
 
     result = np.full((D, ), np.nan)
     temp_pawn = np.full((S, D), np.nan)
@@ -78,7 +78,7 @@ def analyze(problem, X, Y, S=10, print_to_console=False, seed=None):
         result[d_i] = np.median(temp_pawn[:, d_i])
 
     Si = ResultDict([('PAWN', result)])
-    Si['names'] = problem['names']
+    Si['names'] = var_names
 
     if print_to_console:
         print(Si.to_df())
