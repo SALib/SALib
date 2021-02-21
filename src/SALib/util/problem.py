@@ -53,13 +53,22 @@ class ProblemSpec(dict):
 
         self._samples = vals
 
+        # Clear results to avoid confusion
+        self._results = None
+
     @property
     def results(self):
         return self._results
     
     @results.setter
     def results(self, vals):
-        cols = vals.shape[1]
+        val_shape = vals.shape
+
+        if len(val_shape) == 1:
+            cols = 1
+        else:
+            cols = vals.shape[1]
+
         out_cols = self.get('outputs', None)
 
         if out_cols is None:
@@ -104,6 +113,20 @@ class ProblemSpec(dict):
         self._analysis = None
         self._results = None
         self._samples = func(self, *args, **kwargs)
+
+        return self
+
+    def set_samples(self, samples):
+        """Set previous samples used."""
+        self.samples = samples
+
+        return self
+
+    def set_results(self, results):
+        """Set previously available model results."""
+        self.results = results
+        # if self.samples is not None:
+        #     warnings.warn('Existing samples found - make sure these results are for those samples!')
 
         return self
 
@@ -416,4 +439,3 @@ class ProblemSpec(dict):
                     else:
                         print(dfs, "\n")
         return ''
-    
