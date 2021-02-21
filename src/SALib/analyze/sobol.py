@@ -138,19 +138,23 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
 
 
 def first_order(A, AB, B):
-    # First order estimator following Saltelli et al. 2010 CPC, normalized by
-    # sample variance
+    """
+    First order estimator following Saltelli et al. 2010 CPC, normalized by
+    sample variance
+    """
     return np.mean(B * (AB - A), axis=0) / np.var(np.r_[A, B], axis=0)
 
 
 def total_order(A, AB, B):
-    # Total order estimator following Saltelli et al. 2010 CPC, normalized by
-    # sample variance
+    """
+    Total order estimator following Saltelli et al. 2010 CPC, normalized by
+    sample variance
+    """
     return 0.5 * np.mean((A - AB) ** 2, axis=0) / np.var(np.r_[A, B], axis=0)
 
 
 def second_order(A, ABj, ABk, BAj, B):
-    # Second order estimator following Saltelli 2002
+    """Second order estimator following Saltelli 2002"""
     Vjk = np.mean(BAj * ABk - A * B, axis=0) / np.var(np.r_[A, B], axis=0)
     Sj = first_order(A, ABj, B)
     Sk = first_order(A, ABk, B)
@@ -159,7 +163,7 @@ def second_order(A, ABj, ABk, BAj, B):
 
 
 def create_Si_dict(D, calc_second_order):
-    # initialize empty dict to store sensitivity indices
+    """initialize empty dict to store sensitivity indices"""
     S = ResultDict((k, np.zeros(D))
                    for k in ('S1', 'S1_conf', 'ST', 'ST_conf'))
 
@@ -207,9 +211,11 @@ def sobol_parallel(Z, A, AB, BA, B, r, tasks):
 
 
 def create_task_list(D, calc_second_order, n_processors):
-    # Create list with one entry (key, parameter 1, parameter 2) per sobol
-    # index (+conf.). This is used to supply parallel tasks to
-    # multiprocessing.Pool
+    """
+    Create list with one entry (key, parameter 1, parameter 2) per sobol
+    index (+conf.). This is used to supply parallel tasks to
+    multiprocessing.Pool
+    """
     tasks_first_order = [[d, j, None] for j in range(
         D) for d in ('S1', 'S1_conf', 'ST', 'ST_conf')]
 
@@ -236,8 +242,8 @@ def create_task_list(D, calc_second_order, n_processors):
 
 
 def Si_list_to_dict(S_list, D, calc_second_order):
-    # Convert the parallel output into the regular dict format for
-    # printing/returning
+    """Convert the parallel output into the regular dict format for
+    printing/returning"""
     S = create_Si_dict(D, calc_second_order)
     L = []
     for l in S_list:  # first reformat to flatten
