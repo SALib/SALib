@@ -39,6 +39,7 @@ Software
 * `EMA workbench <https://github.com/quaquel/EMAworkbench>`_
 * `Brain/Circulation Model Developer <https://github.com/bcmd/BCMD>`_
 * `DAE Tools <http://daetools.com/>`_
+* `agentpy <https://github.com/JoelForamitti/agentpy>`_
 
 Blogs
 -----
