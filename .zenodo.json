@@ -1,0 +1,79 @@
+{
+    "license": "MIT",
+    "upload_type": "software",
+    "creators": [
+        {
+            "affiliation": "KTH Royal Institute of Technology",
+            "name": "Will Usher",
+            "orcid": "0000-0001-9367-1791",
+        },
+        {
+            "affiliation": "UC Davis",
+            "name": "Jon Herman",
+            "orcid": "0000-0002-4081-3175"
+        },
+        {
+            "name": "Takuya Iwanaga"
+        },
+        {
+            "affiliation": "Universit\u00e9 d'Orl\u00e9ans",
+            "name": "Lucas Teixeira"
+        },
+        {
+            "affiliation": "Universit\u00e9 Savoie Mont-Blanc",
+            "name": "Nicolas CELLIER"
+        },
+        {
+            "name": "Calvin Whealton"
+        },
+        {
+            "affiliation": "",
+            "name": "David Hadka"
+        },
+        {
+            "name": "xantares"
+        },
+        {
+            "name": "bernardoct"
+        },
+        {
+            "name": "Fernando Rios"
+        },
+        {
+            "affiliation": "Paul Scherrer Institute",
+            "name": "Chris Mutel"
+        },
+        {
+            "affiliation": "Cederstrand IT ApS",
+            "name": "Erik Cederstrand"
+        },
+        {
+            "name": "TobiasKAndersen"
+        },
+        {
+            "affiliation": "Deltares",
+            "name": "Joeri van Engelen"
+        },
+        {
+            "name": "ANtlord"
+        },
+        {
+            "name": "Hania Kranas"
+        },
+        {
+            "affiliation": "@PumasAI",
+            "name": "Vaibhav Kumar Dixit"
+        },
+        {
+            "name": "bsteubing"
+        }
+    ],
+    "access_right": "open",
+    "related_identifiers": [
+        {
+            "scheme": "doi",
+            "identifier": "10.5281/zenodo.598306",
+            "relation": "isVersionOf"
+        }
+    ]
+}
