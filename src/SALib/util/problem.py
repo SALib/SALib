@@ -30,6 +30,8 @@ class ProblemSpec(dict):
     def __init__(self, *args, **kwargs):
         super(ProblemSpec, self).__init__(*args, **kwargs)
 
+        _check_spec_attributes(self)
+
         self._samples = None
         self._results = None
         self._analysis = None
@@ -439,3 +441,15 @@ class ProblemSpec(dict):
                     else:
                         print(dfs, "\n")
         return ''
+
+
+def _check_spec_attributes(spec: ProblemSpec):
+    assert 'names' in spec, "Names not defined"
+    assert 'bounds' in spec, "Bounds not defined"
+    assert len(spec['bounds']) == len(spec['names']), \
+        f"""Number of bounds do not match number of names
+        Number of names: 
+        {len(spec['names'])} | {spec['names']}
+        ----------------
+        Number of bounds: {len(spec['bounds'])}
+        """
