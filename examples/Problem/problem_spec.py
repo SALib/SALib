@@ -27,7 +27,7 @@ if __name__ == '__main__':
     sp = ProblemSpec({
         'names': ['x1', 'x2', 'x3'],
         'groups': None,
-        'bounds': [[-np.pi, np.pi]*3],
+        'bounds': [[-np.pi, np.pi]]*3,
         'outputs': ['Y']
     })
 
