@@ -64,7 +64,7 @@ def test_morris_group_analysis():
     group_spec = ProblemSpec(
         {
             "names": ["P1", "P2", "P3", "P4", "P5", "P6"],
-            "bounds": [[-100.0, 100.0] * 6],
+            "bounds": [[-100.0, 100.0]] * 6,
             "groups": ["A", "B", "C"] * 2,
         }
     )

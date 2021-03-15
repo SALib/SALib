@@ -1,32 +1,55 @@
+import pytest
+
 import numpy as np
 
 from SALib import ProblemSpec
 from SALib.test_functions import Ishigami
 
 
-def test_sp():
-    """Ensure basic usage works without raising any errors."""
+def test_sp_bounds():
+    """Ensure incorrect user-defined bounds raises AssertionErrors."""
+    with pytest.raises(AssertionError) as e_info:
+        ProblemSpec()
 
-    sp = ProblemSpec({
+    with pytest.raises(AssertionError) as e_info:
+        ProblemSpec({
+            'names': ['x1', 'x2', 'x3'],
+            'groups': None,
+            'outputs': ['Y']
+        })
+
+    with pytest.raises(AssertionError) as e_info:
+        ProblemSpec({
             'names': ['x1', 'x2', 'x3'],
             'groups': None,
             'bounds': [[-np.pi, np.pi]*3],
             'outputs': ['Y']
+        })
+
+
+def test_sp():
+    """Ensure basic usage works without raising any errors."""
+
+    sp = ProblemSpec({
+        'names': ['x1', 'x2', 'x3'],
+        'groups': None,
+        'bounds': [[-np.pi, np.pi]]*3,
+        'outputs': ['Y']
     })
 
     (sp.sample_saltelli(100, calc_second_order=True)
-        .evaluate(Ishigami.evaluate)
-        .analyze_sobol(calc_second_order=True, conf_level=0.95))
+       .evaluate(Ishigami.evaluate)
+       .analyze_sobol(calc_second_order=True, conf_level=0.95))
 
 
 def test_sp_setters():
     """Test sample and result setters."""
 
     sp = ProblemSpec({
-            'names': ['x1', 'x2', 'x3'],
-            'groups': None,
-            'bounds': [[-np.pi, np.pi]*3],
-            'outputs': ['Y']
+        'names': ['x1', 'x2', 'x3'],
+        'groups': None,
+        'bounds': [[-np.pi, np.pi]]*3,
+        'outputs': ['Y']
     })
 
     nvars = sp['num_vars']
@@ -55,9 +78,9 @@ def test_sp_setters():
 
     # Entire process should not raise errors
     (sp.sample_saltelli(100, calc_second_order=True)
-        .set_samples(X2)
-        .set_results(Y2)
-        .analyze_sobol(calc_second_order=True, conf_level=0.95))
+       .set_samples(X2)
+       .set_results(Y2)
+       .analyze_sobol(calc_second_order=True, conf_level=0.95))
 
 
 if __name__ == '__main__':
