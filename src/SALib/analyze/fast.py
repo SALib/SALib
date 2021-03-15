@@ -81,8 +81,10 @@ def analyze(problem, Y, M=4, num_resamples=100, conf_level=0.95, print_to_consol
     for i in range(D):
         l = np.arange(i * N, (i + 1) * N)
         Y_l = Y[l]
-        Si['S1'][i] = compute_first_order(Y_l, N, M, omega_0)
-        Si['ST'][i] = compute_total_order(Y_l, N, omega_0)
+
+        S1, ST = compute_orders(Y_l, N, M, omega_0)
+        Si['S1'][i] = S1
+        Si['ST'][i] = ST
 
         S1_d_conf, ST_d_conf = bootstrap(Y_l, N, M, omega_0, num_resamples, conf_level)
         Si['S1_conf'][i] = S1_d_conf
@@ -94,20 +96,16 @@ def analyze(problem, Y, M=4, num_resamples=100, conf_level=0.95, print_to_consol
     return Si
 
 
-def compute_first_order(outputs, N, M, omega):
+def compute_orders(outputs, N, M, omega):
     f = np.fft.fft(outputs)
     Sp = np.power(np.absolute(f[np.arange(1, int((N + 1) / 2))]) / N, 2)
-    V = 2 * np.sum(Sp)
-    D1 = 2 * np.sum(Sp[np.arange(1, M + 1) * int(omega) - 1])
-    return D1 / V
+    V = 2.0 * np.sum(Sp)
 
+    # Calculate first and total order
+    D1 = 2.0 * np.sum(Sp[np.arange(1, M + 1) * int(omega) - 1])
+    Dt = 2.0 * np.sum(Sp[np.arange(int(omega / 2.0))])
 
-def compute_total_order(outputs, N, omega):
-    f = np.fft.fft(outputs)
-    Sp = np.power(np.absolute(f[np.arange(1, int((N + 1) / 2))]) / N, 2)
-    V = 2 * np.sum(Sp)
-    Dt = 2 * sum(Sp[np.arange(int(omega / 2))])
-    return (1 - Dt / V)
+    return (D1 / V), (1.0 - Dt / V)
 
 
 def bootstrap(Y, N, M, omega_0, resamples, conf_level):
@@ -121,8 +119,7 @@ def bootstrap(Y, N, M, omega_0, resamples, conf_level):
         sample_idx = np.random.choice(T_data, replace=True, size=n_size)
         Y_rs = Y[sample_idx]
 
-        S1 = compute_first_order(Y_rs, N, M, omega_0)
-        ST = compute_total_order(Y_rs, N, omega_0)
+        S1, ST = compute_orders(Y_rs, N, M, omega_0)
         res_S1[i] = S1
         res_ST[i] = ST
 
