@@ -5,7 +5,7 @@
         {
             "affiliation": "KTH Royal Institute of Technology",
             "name": "Will Usher",
-            "orcid": "0000-0001-9367-1791",
+            "orcid": "0000-0001-9367-1791"
         },
         {
             "affiliation": "UC Davis",
@@ -13,7 +13,8 @@
             "orcid": "0000-0002-4081-3175"
         },
         {
-            "name": "Takuya Iwanaga"
+            "name": "Takuya Iwanaga",
+            "orcid": "0000-0001-8173-0870"
         },
         {
             "affiliation": "Universit\u00e9 d'Orl\u00e9ans",
@@ -24,7 +25,8 @@
             "name": "Nicolas CELLIER"
         },
         {
-            "name": "Calvin Whealton"
+            "name": "Calvin Whealton",
+            "orcid": "0000-0001-9900-0542"
         },
         {
             "affiliation": "",
@@ -45,7 +47,8 @@
         },
         {
             "affiliation": "Cederstrand IT ApS",
-            "name": "Erik Cederstrand"
+            "name": "Erik Cederstrand",
+            "orcid": "0000-0002-4512-0933"
         },
         {
             "name": "TobiasKAndersen"
