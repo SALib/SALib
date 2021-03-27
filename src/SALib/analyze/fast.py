@@ -11,7 +11,7 @@ from ..util import read_param_file, ResultDict
 
 
 def analyze(problem, Y, M=4, print_to_console=False, seed=None):
-    """Performs the Fourier Amplitude Sensitivity Test (FAST) on model outputs.
+    """Performs the extended Fourier Amplitude Sensitivity Test (eFAST) on model outputs.
 
     Returns a dictionary with keys 'S1' and 'ST', where each entry is a list of
     size D (the number of parameters) containing the indices in the same order
