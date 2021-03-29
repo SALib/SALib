@@ -1,5 +1,4 @@
 """
-
 Original implementation in R by Gilles Pujol (2006) for the R `sensitivity` package.
 Ported to Python by Jon Herman
 
