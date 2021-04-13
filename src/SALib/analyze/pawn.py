@@ -37,6 +37,11 @@ def analyze(problem, X, Y, S=10, print_to_console=False, seed=None):
            Environmental Modelling & Software 67, 1–11. 
            https://doi.org/10.1016/j.envsoft.2015.01.004
 
+    .. [2] Gabriele Baroni and Till Francke, 2020.
+           An effective strategy for combining variance- and 
+           distribution-based global sensitivity analysis.
+           Environmental Modelling & Software, 134, 104851.
+           https://doi.org/10.1016/j.envsoft.2020.104851
 
     Examples
     --------
@@ -68,7 +73,7 @@ def analyze(problem, X, Y, S=10, print_to_console=False, seed=None):
             # KD value
             # Function returns a KS object which holds the KS statistic
             # and p-value
-            # Note from documentation:
+            # Note from scipy documentation:
             # if the K-S statistic is small or the p-value is high, then 
             # we cannot reject the hypothesis that the distributions of 
             # the two samples are the same.
