@@ -10,9 +10,6 @@ from ..util import (read_param_file, ResultDict,
 def analyze(problem, X, Y, S=10, print_to_console=False, seed=None):
     """Performs PAWN sensitivity analysis.
 
-    Ported from an implementation in `R` by Baroni & Francke (2020)
-    https://github.com/baronig/GSA-cvd
-
     Calculates the min, mean, median, max, and coefficient of variation (CV).
 
     CV is (standard deviation / mean), and so lower values indicate little change
@@ -40,6 +37,17 @@ def analyze(problem, X, Y, S=10, print_to_console=False, seed=None):
            based on cumulative distribution functions. 
            Environmental Modelling & Software 67, 1–11. 
            https://doi.org/10.1016/j.envsoft.2015.01.004
+
+    .. [2] Baroni, G., Francke, T., 2020.
+           An effective strategy for combining variance- and 
+           distribution-based global sensitivity analysis.
+           Environmental Modelling & Software, 134, 104851.
+           https://doi.org/10.1016/j.envsoft.2020.104851
+
+    .. [3] Baroni, G., Francke, T., 2020.
+           GSA-cvd
+           Combining variance- and distribution-based global sensitivity analysis
+           https://github.com/baronig/GSA-cvd
 
 
     Examples
