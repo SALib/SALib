@@ -49,7 +49,6 @@ def analyze(problem, X, Y, S=10, print_to_console=False, seed=None):
            Combining variance- and distribution-based global sensitivity analysis
            https://github.com/baronig/GSA-cvd
 
-
     Examples
     --------
     >>> X = latin.sample(problem, 1000)
@@ -80,7 +79,7 @@ def analyze(problem, X, Y, S=10, print_to_console=False, seed=None):
             # KD value
             # Function returns a KS object which holds the KS statistic
             # and p-value
-            # Note from documentation:
+            # Note from scipy documentation:
             # if the K-S statistic is small or the p-value is high, then 
             # we cannot reject the hypothesis that the distributions of 
             # the two samples are the same.

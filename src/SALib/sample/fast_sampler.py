@@ -7,9 +7,9 @@ from .. util import scale_samples, read_param_file
 
 
 def sample(problem, N, M=4, seed=None):
-    """Generate model inputs for the Fourier Amplitude Sensitivity Test (FAST).
+    """Generate model inputs for the extended Fourier Amplitude Sensitivity Test (eFAST).
 
-    Returns a NumPy matrix containing the model inputs required by the Fourier
+    Returns a NumPy matrix containing the model inputs required by the extended Fourier
     Amplitude sensitivity test.  The resulting matrix contains N * D rows and D
     columns, where D is the number of parameters.  The samples generated are
     intended to be used by :func:`SALib.analyze.fast.analyze`.
@@ -78,6 +78,7 @@ def sample(problem, N, M=4, seed=None):
             X[l, j] = g
 
     X = scale_samples(X, problem)
+
     return X
 
 

@@ -111,3 +111,22 @@ class TestLatinSample:
              [0.9431945, 0.62123391]]
         )
         np.testing.assert_allclose(actual, expected)
+
+    def test_latin_group_constant(self):
+        """Ensure grouped parameters have identical values."""
+        problem = {
+            "num_vars": 6,
+            "names": ["P1", "P2", "P3", "P4", "P5", "P6"],
+            "bounds": [[-100.0, 100.0] * 6],
+            "groups": ["A", "B"] * 3,
+        }
+        samples = sample(problem, 10, seed=42)
+
+        # Group samples should have the same values
+        # Get (max - min) with the `ptp()` method, the result of which should be 
+        # an array of zeros
+        diff = samples[:, ::2].ptp(axis=1)
+        assert np.all(diff == 0), "Grouped samples do not have the same values"
+
+        diff = samples[:, 1::2].ptp(axis=1)
+        assert np.all(diff == 0), "Grouped samples do not have the same values"
