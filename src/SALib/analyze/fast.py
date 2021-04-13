@@ -1,10 +1,9 @@
 """
 Original implementation in R by Gilles Pujol (2006) for the R `sensitivity` package.
-Ported to Python by Jon Herman
+Ported to Python by Jon Herman.
 
 The R `sensitivity` package is released under GPL v2.
-
-Following the requirement of GPL v2, the full text of the license is below.
+To address possible legal requirements, the full text of the GPL v2 license is included below.
 
 
 GNU General Public License, version 2 (GPL-2.0)
