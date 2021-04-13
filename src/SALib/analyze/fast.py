@@ -83,7 +83,6 @@ END OF TERMS AND CONDITIONS
 """
 
 import math
-from sys import exit
 
 import numpy as np
 from scipy.stats import norm
@@ -141,11 +140,11 @@ def analyze(problem, Y, M=4, num_resamples=100, conf_level=0.95, print_to_consol
     if Y.size % (D) == 0:
         N = int(Y.size / D)
     else:
-        print("""
-            Error: Number of samples in model output file must be a multiple of D,
-            where D is the number of parameters in your parameter file.
-          """)
-        exit()
+        msg ="""
+        Error: Number of samples in model output file must be a multiple of D,
+        where D is the number of parameters.
+        """
+        raise ValueError(msg)
 
     # Recreate the vector omega used in the sampling
     omega_0 = math.floor((N - 1) / (2 * M))
