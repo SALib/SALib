@@ -8,9 +8,9 @@ from ..util import scale_samples, read_param_file
 
 
 def sample(problem: Dict, N: int, delta: float = 0.01, 
-           seed: int = None, skip_values: int = 1000) -> np.ndarray:
+           seed: int = None, skip_values: int = 1024) -> np.ndarray:
     """Generate matrix of samples for derivative-based global sensitivity measure (dgsm).
-    Start from a QMC (sobol) sequence and finite difference with delta % steps
+    Start from a QMC (Sobol') sequence and finite difference with delta % steps
 
     Parameters
     ----------
