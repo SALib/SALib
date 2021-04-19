@@ -1,5 +1,7 @@
 from __future__ import division
+import warnings
 
+import math
 import numpy as np
 
 from . import common_args
@@ -29,6 +31,34 @@ def sample(problem, N, calc_second_order=True, seed=None, skip_values=1000):
     """
     if seed:
         np.random.seed(seed)
+
+    # bit-shift test to check if `N` is a power of 2
+    if not ((N & (N-1) == 0) and (N != 0 and N-1 != 0)):
+        msg = """
+        Convergence properties of the Sobol' sequence is only valid if `N` is a power of 2.
+        SALib will continue on, but results may have issues.
+        In future, this will raise an error.
+        """
+        warnings.warn(msg, FutureWarning)
+
+    M = skip_values
+    if not ((M & (M-1) == 0) and (M != 0 and M-1 != 0)):
+        msg = """
+        Convergence properties of the Sobol' sequence is only valid if `skip_values` is a power of 2.
+        SALib will continue on, but results may have issues.
+        In future, this will raise an error.
+        """
+        warnings.warn(msg, FutureWarning)
+
+    n_exp = int(math.log(N, 2))
+    s_exp = int(math.log(M, 2))
+    if n_exp >= s_exp:
+        msg = f"""
+        Convergence may not be valid as 2^{n_exp} ({N}) is >= 2^{s_exp} ({M}).
+        SALib will continue on, but results may have issues.
+        In future, this will raise an error.
+        """
+        warnings.warn(msg, FutureWarning)
 
     D = problem['num_vars']
     groups = problem.get('groups')
