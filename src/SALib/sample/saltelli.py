@@ -33,6 +33,7 @@ def sample(problem, N, calc_second_order=True, seed=None, skip_values=1024):
         np.random.seed(seed)
 
     # bit-shift test to check if `N` is a power of 2
+    n_is_base_2 = True
     if not ((N & (N-1) == 0) and (N != 0 and N-1 != 0)):
         msg = """
         Convergence properties of the Sobol' sequence is only valid if `N` is a power of 2.
@@ -40,8 +41,11 @@ def sample(problem, N, calc_second_order=True, seed=None, skip_values=1024):
         In future, this will raise an error.
         """
         warnings.warn(msg, FutureWarning)
+        n_is_base_2 = False
+
 
     M = skip_values
+    m_is_base_2 = True
     if not ((M & (M-1) == 0) and (M != 0 and M-1 != 0)):
         msg = """
         Convergence properties of the Sobol' sequence is only valid if `skip_values` is a power of 2.
@@ -49,16 +53,18 @@ def sample(problem, N, calc_second_order=True, seed=None, skip_values=1024):
         In future, this will raise an error.
         """
         warnings.warn(msg, FutureWarning)
+        m_is_base_2 = False
 
-    n_exp = int(math.log(N, 2))
-    s_exp = int(math.log(M, 2))
-    if n_exp >= s_exp:
-        msg = f"""
-        Convergence may not be valid as 2^{n_exp} ({N}) is >= 2^{s_exp} ({M}).
-        SALib will continue on, but results may have issues.
-        In future, this will raise an error.
-        """
-        warnings.warn(msg, FutureWarning)
+    if n_is_base_2 and m_is_base_2:
+        n_exp = int(math.log(N, 2))
+        m_exp = int(math.log(M, 2))
+        if n_exp >= m_exp:
+            msg = f"""
+            Convergence may not be valid as 2^{n_exp} ({N}) is >= 2^{m_exp} ({M}).
+            SALib will continue on, but results may have issues.
+            In future, this will raise an error.
+            """
+            warnings.warn(msg, FutureWarning)
 
     D = problem['num_vars']
     groups = problem.get('groups')
