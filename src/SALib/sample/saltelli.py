@@ -1,5 +1,6 @@
 import warnings
 import numpy as np
+import math
 
 from . import common_args
 from . import sobol_sequence
@@ -7,15 +8,15 @@ from ..util import (scale_samples, read_param_file,
                     compute_groups_matrix, _check_groups)
 
 
-def sample(problem, N, calc_second_order=True, seed=None, skip_values=1000):
-    """Generates model inputs using Saltelli's extension of the Sobol sequence.
+def sample(problem, N, calc_second_order=True, seed=None, skip_values=1024):
+    """Generates model inputs using Saltelli's extension of the Sobol' sequence.
 
     Returns a NumPy matrix containing the model inputs using Saltelli's sampling
-    scheme.  Saltelli's scheme extends the Sobol sequence in a way to reduce
+    scheme.  Saltelli's scheme extends the Sobol' sequence in a way to reduce
     the error rates in the resulting sensitivity index calculations.  If
     calc_second_order is False, the resulting matrix has N * (D + 2)
     rows, where D is the number of parameters.  If calc_second_order is True,
-    the resulting matrix has N * (2D + 2) rows.  These model inputs are
+    the resulting matrix has N * (2D + 2) rows. These model inputs are
     intended to be used with :func:`SALib.analyze.sobol.analyze`.
 
     Parameters
@@ -23,9 +24,12 @@ def sample(problem, N, calc_second_order=True, seed=None, skip_values=1000):
     problem : dict
         The problem definition
     N : int
-        The number of samples to generate
+        The number of samples to generate.
+        Must be a power of 2 and <= `skip_values`.
     calc_second_order : bool
         Calculate second-order sensitivities (default True)
+    skip_values : int
+        Number of points in Sobol' sequence to skip (must be a power of 2).
 
     References
     ----------
@@ -45,10 +49,34 @@ def sample(problem, N, calc_second_order=True, seed=None, skip_values=1000):
     """
     if seed:
         msg = "The seed value is ignored for the Saltelli sampler\n"
-        msg += "as it uses the (deterministic) Sobol sequence.\n"
+        msg += "as it uses the (deterministic) Sobol' sequence.\n"
         msg += "Different samples can be obtained by setting the\n"
-        msg += "`skip_values` parameter (defaults to 1000)."
+        msg += "`skip_values` parameter (defaults to 1024)."
         warnings.warn(msg)
+
+    
+    # bit-shift test to check if `N` is a power of 2
+    if not ((N & (N-1) == 0) and (N != 0 and N-1 != 0)):
+        msg = f"""
+        Convergence properties of the Sobol' sequence is only valid if 
+        `N` ({N}) is a power of 2.
+        """
+        raise ValueError(msg)
+
+    M = skip_values
+    if not ((M & (M-1) == 0) and (M != 0 and M-1 != 0)):
+        msg = """
+        Convergence properties of the Sobol' sequence is only valid if 
+        `skip_values` ({M}) is a power of 2.
+        """
+        raise ValueError(msg)
+
+    n_exp = int(math.log(N, 2))
+    m_exp = int(math.log(M, 2))
+    if n_exp >= m_exp:
+        msg = f"Convergence may not be valid as 2^{n_exp} ({N}) is >= 2^{m_exp} ({M})."
+        raise ValueError(msg)
+
 
     D = problem['num_vars']
     groups = _check_groups(problem)
