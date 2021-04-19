@@ -8,8 +8,6 @@ package by Gilles Pujol (2006).
 """
 
 import math
-from sys import exit
-
 import numpy as np
 
 from . import common_args
@@ -61,11 +59,10 @@ def analyze(problem, Y, M=4, print_to_console=False, seed=None):
     if Y.size % (D) == 0:
         N = int(Y.size / D)
     else:
-        print("""
+        raise ValueError("""
             Error: Number of samples in model output file must be a multiple of D,
             where D is the number of parameters in your parameter file.
           """)
-        exit()
 
     # Recreate the vector omega used in the sampling
     omega_0 = math.floor((N - 1) / (2 * M))
