@@ -1,14 +1,16 @@
+from typing import Dict, Optional
 import warnings
 import numpy as np
 import math
 
 from . import common_args
 from . import sobol_sequence
-from ..util import (scale_samples, read_param_file, 
+from ..util import (scale_samples, read_param_file,
                     compute_groups_matrix, _check_groups)
 
 
-def sample(problem, N, calc_second_order=True, seed=None, skip_values=1024):
+def sample(problem: Dict, N: int, calc_second_order: bool = True,
+           seed: Optional[int] = None, skip_values: Optional[int] = 1024):
     """Generates model inputs using Saltelli's extension of the Sobol' sequence.
 
     Returns a NumPy matrix containing the model inputs using Saltelli's sampling
@@ -33,16 +35,16 @@ def sample(problem, N, calc_second_order=True, seed=None, skip_values=1024):
 
     References
     ----------
-    .. [1] Saltelli, A., 2002. 
-           Making best use of model evaluations to compute sensitivity indices. 
-           Computer Physics Communications 145, 280–297. 
+    .. [1] Saltelli, A., 2002.
+           Making best use of model evaluations to compute sensitivity indices.
+           Computer Physics Communications 145, 280–297.
            https://doi.org/10.1016/S0010-4655(02)00280-1
 
-    .. [2] Sobol', I.M., 2001. 
-           Global sensitivity indices for nonlinear mathematical models and 
-           their Monte Carlo estimates. 
-           Mathematics and Computers in Simulation, 
-           The Second IMACS Seminar on Monte Carlo Methods 55, 271–280. 
+    .. [2] Sobol', I.M., 2001.
+           Global sensitivity indices for nonlinear mathematical models and
+           their Monte Carlo estimates.
+           Mathematics and Computers in Simulation,
+           The Second IMACS Seminar on Monte Carlo Methods 55, 271–280.
            https://doi.org/10.1016/S0378-4754(00)00270-6
 
 
@@ -54,11 +56,11 @@ def sample(problem, N, calc_second_order=True, seed=None, skip_values=1024):
         msg += "`skip_values` parameter (defaults to 1024)."
         warnings.warn(msg)
 
-    
+
     # bit-shift test to check if `N` is a power of 2
     if not ((N & (N-1) == 0) and (N != 0 and N-1 != 0)):
         msg = f"""
-        Convergence properties of the Sobol' sequence is only valid if 
+        Convergence properties of the Sobol' sequence is only valid if
         `N` ({N}) is a power of 2.
         """
         raise ValueError(msg)
@@ -66,7 +68,7 @@ def sample(problem, N, calc_second_order=True, seed=None, skip_values=1024):
     M = skip_values
     if not ((M & (M-1) == 0) and (M != 0 and M-1 != 0)):
         msg = """
-        Convergence properties of the Sobol' sequence is only valid if 
+        Convergence properties of the Sobol' sequence is only valid if
         `skip_values` ({M}) is a power of 2.
         """
         raise ValueError(msg)
