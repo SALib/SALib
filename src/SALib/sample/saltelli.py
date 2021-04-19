@@ -30,7 +30,12 @@ def sample(problem, N, calc_second_order=True, seed=None, skip_values=1024):
         Calculate second-order sensitivities (default True)
     """
     if seed:
-        np.random.seed(seed)
+        msg = "The seed value is ignored for the Saltelli sampler\n"
+        msg += "as it uses the (deterministic) Sobol sequence.\n"
+        msg += "Different samples can be obtained by setting the\n"
+        msg += "`skip_values` parameter (defaults to 1024)."
+        warnings.warn(msg)
+
 
     # bit-shift test to check if `N` is a power of 2
     n_is_base_2 = True
