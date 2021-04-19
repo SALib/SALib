@@ -73,7 +73,7 @@ def sample(problem, N, calc_second_order=True, seed=None, skip_values=1024):
         Dg = problem['num_vars']
     else:
         Dg = len(set(groups))
-        G, group_names = compute_groups_matrix(groups)
+        _, group_names = compute_groups_matrix(groups)
 
     # Create base sequence - could be any type of sampling
     base_sequence = sobol_sequence.sample(N + skip_values, 2 * D)
