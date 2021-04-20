@@ -47,13 +47,18 @@ def sample(problem: Dict, N: int, calc_second_order: bool = True,
            The Second IMACS Seminar on Monte Carlo Methods 55, 271–280.
            https://doi.org/10.1016/S0378-4754(00)00270-6
 
+    .. [3] Owen, A. B., 2020. 
+           On dropping the first Sobol' point. 
+           arXiv:2008.08051 [cs, math, stat]. 
+           Available at: http://arxiv.org/abs/2008.08051 (Accessed: 20 April 2021).
 
+    .. [4] Discussion: https://github.com/scipy/scipy/pull/10844
     """
     if seed:
-        msg = "The seed value is ignored for the Saltelli sampler\n"
-        msg += "as it uses the (deterministic) Sobol' sequence.\n"
-        msg += "Different samples can be obtained by setting the\n"
-        msg += "`skip_values` parameter (defaults to 1024)."
+        msg = ("The seed value is ignored for the Saltelli sampler\n"
+               "as it uses the (deterministic) Sobol' sequence.\n"
+               "Different samples can be obtained by setting the\n"
+               "`skip_values` parameter (defaults to 1024).")
         warnings.warn(msg)
 
 
