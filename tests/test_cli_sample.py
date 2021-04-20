@@ -1,3 +1,4 @@
+import pytest
 import os
 from os.path import join as pth_join
 import subprocess
@@ -59,12 +60,34 @@ def test_latin():
 
 
 def test_saltelli():
-    cmd = "python {cli} sample latin -p {fn} -o {test_data} -n 100".format(
+    cmd = "python {cli} sample saltelli -p {fn} -o {test_data} -n 512".format(
         cli=salib_cli,
         fn=ishigami_fp,
         test_data=test_data).split()
     result = subprocess.check_output(cmd)
     assert len(result) == 0, "Error occurred!"
+
+
+def test_saltelli_error():
+    proc_err = subprocess.CalledProcessError
+
+    # Ensure error is raised when n_samples not a power of 2
+    with pytest.raises(proc_err) as e:
+        cmd = f"salib sample saltelli -p {ishigami_fp} -o {test_data} -n 511".split()
+        result = subprocess.check_output(cmd)
+        assert "ValueError" in str(result)
+
+    # Ensure error is raised when skip_values < n_samples
+    with pytest.raises(proc_err) as e:
+        cmd = f"salib sample saltelli -p {ishigami_fp} -o {test_data} -n 2048 --skip-values 1024".split()
+        result = subprocess.check_output(cmd)
+        assert "ValueError" in str(result)
+
+    # Ensure error is raised when skip_values not a power of 2
+    with pytest.raises(proc_err) as e:
+        cmd = f"salib sample saltelli -p {ishigami_fp} -o {test_data} -n 512 --skip-values 1025".split()
+        result = subprocess.check_output(cmd)
+        assert "ValueError" in str(result)
 
 
 if __name__ == '__main__':
