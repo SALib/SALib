@@ -30,10 +30,11 @@ def sample(problem, N, calc_second_order=True, seed=None, skip_values=1024):
         Calculate second-order sensitivities (default True)
     """
     if seed:
-        msg = "The seed value is ignored for the Saltelli sampler\n"
-        msg += "as it uses the (deterministic) Sobol' sequence.\n"
-        msg += "Different samples can be obtained by setting the\n"
-        msg += "`skip_values` parameter (defaults to 1024)."
+        msg = ("The seed value is ignored for the Saltelli sampler\n"
+               "as it uses the (deterministic) Sobol' sequence.\n"
+               "Different samples can be obtained by setting the\n"
+               "`skip_values` parameter (defaults to 1024).")
+
         warnings.warn(msg)
 
 
