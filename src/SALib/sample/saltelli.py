@@ -17,8 +17,9 @@ def sample(problem, N, calc_second_order=True, seed=None, skip_values=1024):
     the error rates in the resulting sensitivity index calculations. If
     `calc_second_order` is False, the resulting matrix has ``N * (D + 2)``
 
-    rows, where D is the number of parameters. If calc_second_order is `True`,
-    the resulting matrix has N * (2D + 2) rows. These model inputs are
+    rows, where ``D`` is the number of parameters. If `calc_second_order` is True,
+    the resulting matrix has ``N * (2D + 2)`` rows. These model inputs are
+
     intended to be used with :func:`SALib.analyze.sobol.analyze`.
 
     Parameters
