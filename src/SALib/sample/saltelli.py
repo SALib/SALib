@@ -158,6 +158,9 @@ def cli_parse(parser):
                         choices=[1, 2],
                         help='Maximum order of sensitivity indices \
                            to calculate')
+    parser.add_argument('--skip-values', type=int, required=False, default=1024,
+                        help='Number of sample points to skip (default: 1024)')
+
     return parser
 
 
@@ -171,6 +174,7 @@ def cli_action(args):
     problem = read_param_file(args.paramfile)
     param_values = sample(problem, args.samples,
                           calc_second_order=(args.max_order == 2),
+                          skip_values=args.skip_values,
                           seed=args.seed)
     np.savetxt(args.output, param_values, delimiter=args.delimiter,
                fmt='%.' + str(args.precision) + 'e')
