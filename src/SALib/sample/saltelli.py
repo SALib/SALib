@@ -14,11 +14,11 @@ def sample(problem: Dict, N: int, calc_second_order: bool = True,
     """Generates model inputs using Saltelli's extension of the Sobol' sequence.
 
     Returns a NumPy matrix containing the model inputs using Saltelli's sampling
-    scheme.  Saltelli's scheme extends the Sobol' sequence in a way to reduce
-    the error rates in the resulting sensitivity index calculations.  If
-    calc_second_order is False, the resulting matrix has N * (D + 2)
-    rows, where D is the number of parameters.  If calc_second_order is True,
-    the resulting matrix has N * (2D + 2) rows. These model inputs are
+    scheme. Saltelli's scheme extends the Sobol' sequence in a way to reduce
+    the error rates in the resulting sensitivity index calculations. If
+    `calc_second_order` is False, the resulting matrix has ``N * (D + 2)``
+    rows, where ``D`` is the number of parameters. If `calc_second_order` is True,
+    the resulting matrix has ``N * (2D + 2)`` rows. These model inputs are
     intended to be used with :func:`SALib.analyze.sobol.analyze`.
 
     Parameters
