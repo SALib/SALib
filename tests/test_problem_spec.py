@@ -37,7 +37,7 @@ def test_sp():
         'outputs': ['Y']
     })
 
-    (sp.sample_saltelli(100, calc_second_order=True)
+    (sp.sample_saltelli(128, calc_second_order=True)
        .evaluate(Ishigami.evaluate)
        .analyze_sobol(calc_second_order=True, conf_level=0.95))
 
@@ -53,16 +53,16 @@ def test_sp_setters():
     })
 
     nvars = sp['num_vars']
-    N = 100
+    N = 128
     X1 = sp.sample_saltelli(N, calc_second_order=True).samples
 
     # Saltelli produces `N*(2p+2)` samples when producing samples for 2nd order analysis
-    expected_samples = 100*(2*nvars+2)
+    expected_samples = 128*(2*nvars+2)
 
     assert X1.shape[0] == expected_samples, "Number of samples is not as expected"
 
     # Get another 100 samples
-    X2 = sp.sample_saltelli(100, calc_second_order=True).samples
+    X2 = sp.sample_saltelli(128, calc_second_order=True).samples
     assert np.all(sp.samples == X2), "Stored sample and extracted samples are not identical!"
 
     # Test property setter
@@ -77,7 +77,7 @@ def test_sp_setters():
     assert sp.results is None, "Results were not cleared after new sample values were set!"
 
     # Entire process should not raise errors
-    (sp.sample_saltelli(100, calc_second_order=True)
+    (sp.sample_saltelli(128, calc_second_order=True)
        .set_samples(X2)
        .set_results(Y2)
        .analyze_sobol(calc_second_order=True, conf_level=0.95))

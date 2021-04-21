@@ -34,7 +34,7 @@ def test_sobol_group_analysis():
 
     # fmt: off
     (group_spec  
-        .sample_saltelli(100)
+        .sample_saltelli(128)
         .evaluate(example_func)
         .analyze_sobol()
     )

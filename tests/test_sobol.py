@@ -9,11 +9,12 @@ from SALib.test_functions import Ishigami, Sobol_G
 from SALib.util import read_param_file
 
 
-def setup_samples(N=500, calc_second_order=True):
+def setup_samples(N=512, calc_second_order=True):
     param_file = 'src/SALib/test_functions/params/Ishigami.txt'
     problem = read_param_file(param_file)
-    param_values = saltelli.sample(
-        problem, N=N, calc_second_order=calc_second_order)
+    param_values = saltelli.sample(problem, N=N, 
+                                   calc_second_order=calc_second_order, 
+                                   check_conv=False)
     return problem, param_values
 
 
@@ -139,7 +140,7 @@ def test_Sobol_G_using_sobol():
                'bounds': [[0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1]]}
     N = 5000
     a = np.array([78, 12, 0.5, 2, 97, 33])
-    param_values = saltelli.sample(problem, N, calc_second_order=False)
+    param_values = saltelli.sample(problem, N, calc_second_order=False, check_conv=False)
     model_results = Sobol_G.evaluate(param_values, a)
     Si = sobol.analyze(problem, model_results, calc_second_order=False)
 #     expected = Sobol_G.total_sensitivity_index(a)

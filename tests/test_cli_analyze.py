@@ -57,14 +57,22 @@ def test_delta():
     upper = (test['delta'] + test['delta_conf'])
     comparison = test['expected'].between(lower, upper)
     assert comparison.all(), \
-        "Expected Delta results not within confidence bounds"
+        ("Expected Delta results not within confidence bounds\n"
+         f"+\-: \n{test['delta_conf']}\n"
+         f"Expected: {delta_expected}\n"
+         f"Got: {test['delta']}\n"
+        )
 
     test['expected'] = sobol_expected
     lower = (test['S1'] - test['S1_conf'])
     upper = (test['S1'] + test['S1_conf'])
     comparison = test['expected'].between(lower, upper)
     assert comparison.all(), \
-        "Expected Sobol results not within confidence bounds"
+        ("Expected Sobol results not within confidence bounds\n"
+         f"+\-: \n{test['S1_conf']}\n"
+         f"Expected: {sobol_expected}\n"
+         f"Got: {test['S1']}\n"
+        )
 
 
 def test_dgsm():
@@ -86,13 +94,16 @@ def test_dgsm():
     dgsm_expected = [2.207554, 7.092019, 3.238259]
 
     test = pd.read_csv(StringIO(result), index_col=0, sep=r'\s+')
-    test['expected'] = dgsm_expected
+    test['calc'] = dgsm_expected
 
     lower = (test['dgsm'] - test['dgsm_conf'])
     upper = (test['dgsm'] + test['dgsm_conf'])
-    comparison = test['expected'].between(lower, upper)
+    comparison = test['calc'].between(lower, upper)
     assert comparison.all(), \
-        "Expected DGSM results not within confidence bounds"
+        ("Expected DGSM results not within confidence bounds\n"
+         f"Expected +/-: {dgsm_expected}\n"
+         f"Got +/-: {test['dgsm_conf']}\n"
+        )
 
 
 def test_fast():

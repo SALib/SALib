@@ -50,7 +50,7 @@ def test_sobol_to_df():
         'bounds': [[-np.pi, np.pi]]*3
     }
 
-    X = saltelli.sample(problem, 1000)
+    X = saltelli.sample(problem, 512)
     Y = Ishigami.evaluate(X)
     Si = sobol.analyze(problem, Y, print_to_console=False)
     total, first, second = Si.to_df()

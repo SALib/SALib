@@ -33,8 +33,8 @@ def test_saltelli_sample_seed():
 
     N, problem = problem_setup()
 
-    sample1 = saltelli.sample(problem, N, calc_second_order=False, skip_values=1000)
-    sample2 = saltelli.sample(problem, N, calc_second_order=False, skip_values=1001)
+    sample1 = saltelli.sample(problem, N, calc_second_order=False, skip_values=1000, check_conv=False)
+    sample2 = saltelli.sample(problem, N, calc_second_order=False, skip_values=1001, check_conv=False)
 
     np.testing.assert_equal(np.any(np.not_equal(sample1,sample2)), True)
 

@@ -141,7 +141,7 @@ class TestMorris:
 def test_regression_sobol():
     param_file = 'src/SALib/test_functions/params/Ishigami.txt'
     problem = read_param_file(param_file)
-    param_values = saltelli.sample(problem, 10000, calc_second_order=True)
+    param_values = saltelli.sample(problem, 10000, calc_second_order=True, check_conv=False)
 
     Y = Ishigami.evaluate(param_values)
 
@@ -158,7 +158,7 @@ def test_regression_sobol():
 def test_regression_sobol_parallel():
     param_file = 'src/SALib/test_functions/params/Ishigami.txt'
     problem = read_param_file(param_file)
-    param_values = saltelli.sample(problem, 10000, calc_second_order=True)
+    param_values = saltelli.sample(problem, 10000, calc_second_order=True, check_conv=False)
 
     Y = Ishigami.evaluate(param_values)
 
@@ -179,7 +179,7 @@ def test_regression_sobol_groups():
         'bounds': [[-np.pi, np.pi]] * 3,
         'groups': ['G1', 'G2', 'G1']
     }
-    param_values = saltelli.sample(problem, 10000, calc_second_order=True)
+    param_values = saltelli.sample(problem, 10000, calc_second_order=True, check_conv=False)
 
     Y = Ishigami.evaluate(param_values)
     Si = sobol.analyze(problem, Y,
@@ -199,7 +199,7 @@ def test_regression_sobol_groups_dists():
         'groups': ['G1', 'G2', 'G1'],
         'dists': ['unif', 'lognorm', 'triang']
     }
-    param_values = saltelli.sample(problem, 10000, calc_second_order=True)
+    param_values = saltelli.sample(problem, 10000, calc_second_order=True, check_conv=False)
 
     Y = Ishigami.evaluate(param_values)
     Si = sobol.analyze(problem, Y,

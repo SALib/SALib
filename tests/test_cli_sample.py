@@ -4,7 +4,7 @@ from os.path import join as pth_join
 import subprocess
 
 
-salib_cli = "./src/SALib/scripts/salib.py"
+salib_cli = "salib"
 ishigami_fp = "./src/SALib/test_functions/params/Ishigami.txt"
 test_file = 'test.txt'
 test_data = pth_join('./tests', 'data', test_file)
@@ -18,13 +18,13 @@ def teardown_function(func):
 
 
 def test_cli_entry():
-    cmd = 'python {cli} -h'.format(cli=salib_cli).split()
+    cmd = '{cli} -h'.format(cli=salib_cli).split()
     result = subprocess.check_output(cmd)
     assert 'Errno' not in str(result), "Error occurred when trying to use CLI!"
 
 
 def test_ff():
-    cmd = "python {cli} sample ff -p {fn} -o {test_data} -n 100".format(
+    cmd = "{cli} sample ff -p {fn} -o {test_data} -n 100".format(
         cli=salib_cli,
         fn=ishigami_fp,
         test_data=test_data).split()
@@ -33,7 +33,7 @@ def test_ff():
 
 
 def test_fast():
-    cmd = "python {cli} sample fast_sampler -p {fn} -o {test_data} -n 100".format(
+    cmd = "{cli} sample fast_sampler -p {fn} -o {test_data} -n 100".format(
         cli=salib_cli,
         fn=ishigami_fp,
         test_data=test_data).split()
@@ -42,7 +42,7 @@ def test_fast():
 
 
 def test_finite_diff():
-    cmd = "python {cli} sample finite_diff -p {fn} -o {test_data} -n 100".format(
+    cmd = "{cli} sample finite_diff -p {fn} -o {test_data} -n 100".format(
         cli=salib_cli,
         fn=ishigami_fp,
         test_data=test_data).split()
@@ -51,7 +51,7 @@ def test_finite_diff():
 
 
 def test_latin():
-    cmd = "python {cli} sample latin -p {fn} -o {test_data} -n 100".format(
+    cmd = "{cli} sample latin -p {fn} -o {test_data} -n 100".format(
         cli=salib_cli,
         fn=ishigami_fp,
         test_data=test_data).split()
@@ -60,7 +60,7 @@ def test_latin():
 
 
 def test_saltelli():
-    cmd = "python {cli} sample saltelli -p {fn} -o {test_data} -n 512".format(
+    cmd = "{cli} sample saltelli -p {fn} -o {test_data} -n 512".format(
         cli=salib_cli,
         fn=ishigami_fp,
         test_data=test_data).split()
