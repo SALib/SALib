@@ -290,7 +290,10 @@ def Si_to_pandas_dict(S_dict):
     idx = None
     second_order = None
     if 'S2' in S_dict:
-        names = problem['names']
+        if not problem.get('groups'):
+            names = problem['names']
+        else:
+            _, names = compute_groups_matrix(problem['groups'])
         idx = list(combinations(names, 2))
         second_order = {
             'S2': [S_dict['S2'][names.index(i[0]), names.index(i[1])]
@@ -309,7 +312,10 @@ def to_df(self):
     List : of Pandas DataFrames in order of Total, First, Second
     '''
     total, first, (idx, second) = Si_to_pandas_dict(self)
-    names = self.problem['names']
+    if not self.problem.get('groups'):
+        names = self.problem['names']
+    else:
+        _, names = compute_groups_matrix(self.problem['groups'])
     ret = [pd.DataFrame(total, index=names),
            pd.DataFrame(first, index=names)]
 
