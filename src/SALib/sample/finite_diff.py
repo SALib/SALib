@@ -36,7 +36,7 @@ def sample(problem, N, delta=0.01, seed=None):
     bounds = problem['bounds']
 
     # How many values of the Sobol sequence to skip
-    skip_values = 1000
+    skip_values = 1024
 
     # Create base sequence - could be any type of sampling
     base_sequence = sobol_sequence.sample(N + skip_values, D)
