@@ -1,5 +1,7 @@
 from __future__ import division
+import warnings
 
+import math
 import numpy as np
 
 from . import common_args
@@ -7,15 +9,15 @@ from . import sobol_sequence
 from ..util import scale_samples, nonuniform_scale_samples, read_param_file, compute_groups_matrix
 
 
-def sample(problem, N, calc_second_order=True, seed=None, skip_values=1000):
-    """Generates model inputs using Saltelli's extension of the Sobol sequence.
+def sample(problem, N, calc_second_order=True, seed=None, skip_values=1024):
+    """Generates model inputs using Saltelli's extension of the Sobol' sequence.
 
     Returns a NumPy matrix containing the model inputs using Saltelli's sampling
-    scheme.  Saltelli's scheme extends the Sobol sequence in a way to reduce
-    the error rates in the resulting sensitivity index calculations.  If
-    calc_second_order is False, the resulting matrix has N * (D + 2)
-    rows, where D is the number of parameters.  If calc_second_order is True,
-    the resulting matrix has N * (2D + 2) rows.  These model inputs are
+    scheme. Saltelli's scheme extends the Sobol' sequence in a way to reduce
+    the error rates in the resulting sensitivity index calculations. If
+    `calc_second_order` is False, the resulting matrix has ``N * (D + 2)``
+    rows, where ``D`` is the number of parameters. If `calc_second_order` is True,
+    the resulting matrix has ``N * (2D + 2)`` rows. These model inputs are
     intended to be used with :func:`SALib.analyze.sobol.analyze`.
 
     Parameters
@@ -23,12 +25,55 @@ def sample(problem, N, calc_second_order=True, seed=None, skip_values=1000):
     problem : dict
         The problem definition
     N : int
-        The number of samples to generate
+        The number of samples to generate.
+        Must be an exponent of 2 and < `skip_values`.
     calc_second_order : bool
         Calculate second-order sensitivities (default True)
+    skip_values : int
+        Number of points in Sobol' sequence to skip (must be an exponent of 2).
     """
     if seed:
-        np.random.seed(seed)
+        msg = ("The seed value is ignored for the Saltelli sampler\n"
+               "as it uses the (deterministic) Sobol' sequence.\n"
+               "Different samples can be obtained by setting the\n"
+               "`skip_values` parameter (defaults to 1024).")
+
+        warnings.warn(msg)
+
+
+    # bit-shift test to check if `N` is a power of 2
+    n_is_base_2 = True
+    if not ((N & (N-1) == 0) and (N != 0 and N-1 != 0)):
+        msg = """
+        Convergence properties of the Sobol' sequence is only valid if `N` = 2^n.
+        SALib will continue on, but results may have issues.
+        In future, this will raise an error.
+        """
+        warnings.warn(msg, FutureWarning)
+        n_is_base_2 = False
+
+
+    M = skip_values
+    m_is_base_2 = True
+    if not ((M & (M-1) == 0) and (M != 0 and M-1 != 0)):
+        msg = """
+        Convergence properties of the Sobol' sequence is only valid if `skip_values` == 2^m.
+        SALib will continue on, but results may have issues.
+        In future, this will raise an error.
+        """
+        warnings.warn(msg, FutureWarning)
+        m_is_base_2 = False
+
+    if n_is_base_2 and m_is_base_2:
+        n_exp = int(math.log(N, 2))
+        m_exp = int(math.log(M, 2))
+        if n_exp >= m_exp:
+            msg = f"""
+            Convergence may not be valid as 2^{n_exp} ({N}) is >= 2^{m_exp} ({M}).
+            SALib will continue on, but results may have issues.
+            In future, this will raise an error.
+            """
+            warnings.warn(msg, FutureWarning)
 
     D = problem['num_vars']
     groups = problem.get('groups')
@@ -37,7 +82,7 @@ def sample(problem, N, calc_second_order=True, seed=None, skip_values=1000):
         Dg = problem['num_vars']
     else:
         Dg = len(set(groups))
-        G, group_names = compute_groups_matrix(groups)
+        _, group_names = compute_groups_matrix(groups)
 
     # Create base sequence - could be any type of sampling
     base_sequence = sobol_sequence.sample(N + skip_values, 2 * D)
