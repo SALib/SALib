@@ -164,6 +164,12 @@ def cli_parse(parser):
                            to calculate')
     parser.add_argument('--skip-values', type=int, required=False, default=1024,
                         help='Number of sample points to skip (default: 1024)')
+    parser.add_argument('--check-conv', type=bool, required=False, default=True,
+                        help='Check samples meet convergence property requirements (default: True)')
+
+    # hacky way to remove an argument (seed option is not relevant for Saltelli)
+    remove_opts = [x for x in parser._actions if x.dest == 'seed']
+    [parser._handle_conflict_resolve(None, [('--seed', x), ('-s', x)]) for x in remove_opts]
 
     return parser
 
@@ -179,7 +185,7 @@ def cli_action(args):
     param_values = sample(problem, args.samples,
                           calc_second_order=(args.max_order == 2),
                           skip_values=args.skip_values,
-                          seed=args.seed)
+                          check_conv=args.check_conv)
     np.savetxt(args.output, param_values, delimiter=args.delimiter,
                fmt='%.' + str(args.precision) + 'e')
 
