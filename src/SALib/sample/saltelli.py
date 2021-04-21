@@ -26,11 +26,11 @@ def sample(problem, N, calc_second_order=True, seed=None, skip_values=1024):
         The problem definition
     N : int
         The number of samples to generate.
-        Must be a power of 2 and <= `skip_values`.
+        Must be an exponent of 2 and < `skip_values`.
     calc_second_order : bool
         Calculate second-order sensitivities (default True)
     skip_values : int
-        Number of points in Sobol' sequence to skip (must be a power of 2).
+        Number of points in Sobol' sequence to skip (must be an exponent of 2).
     """
     if seed:
         msg = ("The seed value is ignored for the Saltelli sampler\n"
