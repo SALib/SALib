@@ -39,9 +39,13 @@ def analyze(problem, Y, M=4, num_resamples=100, conf_level=0.95, print_to_consol
            59(8):3873-3878, doi:10.1063/1.1680571.
 
     .. [2] Saltelli, A., S. Tarantola, and K. P.-S. Chan (1999).  "A
-          Quantitative Model-Independent Method for Global Sensitivity
-          Analysis of Model Output."  Technometrics, 41(1):39-56,
-          doi:10.1080/00401706.1999.10485594.
+           Quantitative Model-Independent Method for Global Sensitivity
+           Analysis of Model Output."  Technometrics, 41(1):39-56,
+           doi:10.1080/00401706.1999.10485594.
+
+    .. [3] fast99 - R `sensitivity` package
+           Gilles Pujol (2006)
+           https://github.com/cran/sensitivity/blob/master/R/fast99.R
 
     Examples
     --------
