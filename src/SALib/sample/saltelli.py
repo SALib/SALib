@@ -45,7 +45,7 @@ def sample(problem, N, calc_second_order=True, seed=None, skip_values=1024):
     n_is_base_2 = True
     if not ((N & (N-1) == 0) and (N != 0 and N-1 != 0)):
         msg = """
-        Convergence properties of the Sobol' sequence is only valid if `N` is a power of 2.
+        Convergence properties of the Sobol' sequence is only valid if `N` = 2^n.
         SALib will continue on, but results may have issues.
         In future, this will raise an error.
         """
@@ -57,7 +57,7 @@ def sample(problem, N, calc_second_order=True, seed=None, skip_values=1024):
     m_is_base_2 = True
     if not ((M & (M-1) == 0) and (M != 0 and M-1 != 0)):
         msg = """
-        Convergence properties of the Sobol' sequence is only valid if `skip_values` is a power of 2.
+        Convergence properties of the Sobol' sequence is only valid if `skip_values` == 2^m.
         SALib will continue on, but results may have issues.
         In future, this will raise an error.
         """
