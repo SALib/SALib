@@ -9,8 +9,15 @@ from ..util import (scale_samples, read_param_file,
                     compute_groups_matrix, _check_groups)
 
 
+def convergence_issue_msg(msg, check_conv):
+    if check_conv:
+        raise ValueError(msg)
+    else:
+        warnings.warn(msg)
+
+
 def sample(problem: Dict, N: int, calc_second_order: bool = True,
-           seed: Optional[int] = None, skip_values: Optional[int] = 1024):
+           skip_values: int = 1024, check_conv: bool = True):
     """Generates model inputs using Saltelli's extension of the Sobol' sequence.
 
     Returns a NumPy matrix containing the model inputs using Saltelli's sampling
@@ -27,11 +34,16 @@ def sample(problem: Dict, N: int, calc_second_order: bool = True,
         The problem definition
     N : int
         The number of samples to generate.
-        Must be an exponent of and < `skip_values`.
+        Must be an exponent of 2 and < `skip_values`.
     calc_second_order : bool
         Calculate second-order sensitivities (default True)
     skip_values : int
         Number of points in Sobol' sequence to skip (must be an exponent of 2).
+    check_conv : bool (default: True)
+        Check that `N` and `skip_values` meet sample size requirements.
+        Convergence properties of the Sobol' sequence is only valid when
+        ``N < skip_values`` and that both are exponents of 2 (e.g., `N = 2^n`).
+        If True, raises error if this condition is not met.
 
     References
     ----------
@@ -54,36 +66,28 @@ def sample(problem: Dict, N: int, calc_second_order: bool = True,
 
     .. [4] Discussion: https://github.com/scipy/scipy/pull/10844
     """
-    if seed:
-        msg = ("The seed value is ignored for the Saltelli sampler\n"
-               "as it uses the (deterministic) Sobol' sequence.\n"
-               "Different samples can be obtained by setting the\n"
-               "`skip_values` parameter (defaults to 1024).")
-        warnings.warn(msg)
-
-
-    # bit-shift test to check if `N` is a power of 2
+    # bit-shift test to check if `N` == 2**n
     if not ((N & (N-1) == 0) and (N != 0 and N-1 != 0)):
         msg = f"""
         Convergence properties of the Sobol' sequence is only valid if
-        `N` ({N}) is a power of 2.
+        `N` ({N}) is equal to `2^n`.
         """
-        raise ValueError(msg)
+        convergence_issue_msg(msg, check_conv)
 
     M = skip_values
     if not ((M & (M-1) == 0) and (M != 0 and M-1 != 0)):
-        msg = """
+        msg = f"""
         Convergence properties of the Sobol' sequence is only valid if
-        `skip_values` ({M}) is a power of 2.
+        `skip_values` ({M}) is equal to `2^m`.
         """
-        raise ValueError(msg)
+        convergence_issue_msg(msg, check_conv)
 
-    n_exp = int(math.log(N, 2))
-    m_exp = int(math.log(M, 2))
-    if n_exp >= m_exp:
-        msg = f"Convergence may not be valid as 2^{n_exp} ({N}) is >= 2^{m_exp} ({M})."
-        raise ValueError(msg)
-
+    if check_conv:
+        n_exp = int(math.log(N, 2))
+        m_exp = int(math.log(M, 2))
+        if n_exp >= m_exp:
+            msg = f"Convergence may not be valid as 2^{n_exp} ({N}) is >= 2^{m_exp} ({M})."
+            convergence_issue_msg(msg, check_conv)
 
     D = problem['num_vars']
     groups = _check_groups(problem)
