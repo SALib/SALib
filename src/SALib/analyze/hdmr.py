@@ -114,7 +114,7 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
        
     Examples
     --------
-        >>> X = saltelli.sample(problem, 1000)
+        >>> X = saltelli.sample(problem, 512)
         >>> Y = Ishigami.evaluate(X)
         >>> Si = hdmr.analyze(problem, X, Y, **options)
 

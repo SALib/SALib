@@ -22,7 +22,7 @@ def plot(Si_df, ax=None):
         >>>
         >>> # See README for example problem specification
         >>>
-        >>> X = saltelli.sample(problem, 1000)
+        >>> X = saltelli.sample(problem, 512)
         >>> Y = Ishigami.evaluate(X)
         >>> Si = sobol.analyze(problem, Y, print_to_console=False)
         >>> total, first, second = Si.to_df()

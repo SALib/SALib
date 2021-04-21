@@ -59,7 +59,7 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
 
     Examples
     --------
-    >>> X = saltelli.sample(problem, 1000)
+    >>> X = saltelli.sample(problem, 512)
     >>> Y = Ishigami.evaluate(X)
     >>> Si = sobol.analyze(problem, Y, print_to_console=True)
 
@@ -282,7 +282,7 @@ def Si_to_pandas_dict(S_dict):
 
     Examples
     --------
-    >>> X = saltelli.sample(problem, 1000)
+    >>> X = saltelli.sample(problem, 512)
     >>> Y = Ishigami.evaluate(X)
     >>> Si = sobol.analyze(problem, Y, print_to_console=True)
     >>> T_Si, first_Si, (idx, second_Si) = sobol.Si_to_pandas_dict(Si, problem)
