@@ -12,7 +12,7 @@ if sys.version_info[0] == 2:
 
 
 def test_delta():
-    cmd = "python {cli} sample saltelli -p {fn} -o model_input.txt -n 1000"\
+    cmd = "python {cli} sample saltelli -p {fn} -o model_input.txt -n 1024"\
           .format(cli=salib_cli, fn=ishigami_fp) +\
           " --precision 8 --max-order 2 --seed=100"
     subprocess.run(cmd.split())
@@ -28,7 +28,7 @@ def test_delta():
     result = subprocess.check_output(analyze_cmd, universal_newlines=True)
     result = re.sub(r'[\n\t\s]*', '', result)
 
-    expected_output = 'Parameterdeltadelta_confS1S1_confx10.2104780.0060910.3113620.012291x20.3540230.0062380.4283650.017972x30.1609860.0047180.0011110.002995'
+    expected_output = 'Parameterdeltadelta_confS1S1_confx10.2122850.0074810.3123190.011463x20.3530150.0061840.4306860.013135x30.1613440.0057540.0013880.001545'
     assert len(result) > 0 and result in expected_output, \
         "Results did not match expected values:\n\n Expected: \n{} \n\n Got: \n{}".format(
             expected_output, result)
@@ -53,7 +53,7 @@ def test_dgsm():
     result = subprocess.check_output(analyze_cmd, universal_newlines=True)
     result = re.sub(r'[\n\t\s]*', '', result)
 
-    expected = "Parametervivi_stddgsmdgsm_confx17.62237816.1981232.2075541.034173x224.48775717.3385567.0920191.090835x311.18125824.0621273.2382591.477114"
+    expected = "Parametervivi_stddgsmdgsm_confx17.69803416.3731482.2331100.986061x224.48770117.3199737.1035971.092944x311.05754523.7851003.2076651.488346"
 
     assert len(result) > 0 and result == expected, \
         "Unexpected DGSM results.\n\nExpected:\n{}\n\nGot:{}"\
@@ -168,7 +168,7 @@ def test_rbd_fast():
 
 def test_sobol():
     # Generate inputs
-    cmd = "python {cli} sample saltelli -p {fn} -o model_input.txt -n 1000\
+    cmd = "python {cli} sample saltelli -p {fn} -o model_input.txt -n 1024\
     --precision 8 --max-order 2 --seed=100".format(cli=salib_cli,
                                                    fn=ishigami_fp)
     cmd = cmd.split()
@@ -184,7 +184,7 @@ def test_sobol():
     result = subprocess.check_output(analyze_cmd, universal_newlines=True)
     result = re.sub(r'[\n\t\s]*', '', result)
 
-    expected_output = 'ParameterS1S1_confSTST_confx10.3079750.0630470.5601370.091908x20.4477670.0533230.4387220.040634x3-0.0042550.0596670.2428450.026578Parameter_1Parameter_2S2S2_confx1x20.0122050.086177x1x30.2515260.108147x2x3-0.0099540.065569'
+    expected_output = 'ParameterS1S1_confSTST_confx10.3168320.0622410.5558600.085972x20.4437630.0560470.4418980.041596x30.0122030.0559540.2446750.025332Parameter_1Parameter_2S2S2_confx1x20.0092540.083829x1x30.2381720.101764x2x3-0.0048880.067819'
     assert len(result) > 0 and result == expected_output, \
         "Results did not match expected values:\n\n Expected: \n{} \n\n Got: \n{}".format(
             expected_output, result)
