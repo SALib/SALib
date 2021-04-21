@@ -33,7 +33,7 @@ if __name__ == '__main__':
 
     # Single core example
     start = time.perf_counter()
-    (sp.sample_saltelli(25000, calc_second_order=True)
+    (sp.sample_saltelli(25000, check_conv=False)
         .evaluate(Ishigami.evaluate)
         .analyze_sobol(calc_second_order=True, conf_level=0.95))
     print("Time taken with 1 core:", time.perf_counter() - start, '\n')
@@ -51,7 +51,7 @@ if __name__ == '__main__':
 
     # Parallel example
     start = time.perf_counter()
-    (sp.sample(saltelli.sample, 25000, calc_second_order=True)
+    (sp.sample(saltelli.sample, 25000, check_conv=False)
          # can specify number of processors to use with `nprocs`
         .evaluate_parallel(Ishigami.evaluate, nprocs=2)
         .analyze(sobol.analyze, calc_second_order=True, conf_level=0.95))
@@ -66,7 +66,7 @@ if __name__ == '__main__':
                'localhost:55776')
 
     start = time.perf_counter()
-    (sp.sample(saltelli.sample, 25000, calc_second_order=True)
+    (sp.sample(saltelli.sample, 25000, check_conv=False)
         .evaluate_distributed(Ishigami.evaluate, nprocs=2, servers=servers, verbose=True)
         .analyze(sobol.analyze, calc_second_order=True, conf_level=0.95))
     print("Time taken with distributed cores:", time.perf_counter() - start, '\n')

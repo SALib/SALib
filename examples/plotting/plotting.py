@@ -15,7 +15,7 @@ sp = ProblemSpec({
     'outputs': ['Y']               # name of outputs in expected order
 })
 
-(sp.sample_saltelli(1000, calc_second_order=True)
+(sp.sample_saltelli(512, calc_second_order=True)
     .evaluate(Ishigami.evaluate)
     .analyze_sobol())
 

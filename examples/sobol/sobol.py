@@ -11,7 +11,7 @@ from SALib.util import read_param_file
 problem = read_param_file('../../src/SALib/test_functions/params/Ishigami.txt')
 
 # Generate samples
-param_values = saltelli.sample(problem, 1000, calc_second_order=True)
+param_values = saltelli.sample(problem, 512, calc_second_order=True)
 
 # Run the "model" and save the output in a text file
 # This will happen offline for external models
