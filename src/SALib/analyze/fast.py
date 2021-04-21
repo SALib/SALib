@@ -1,12 +1,3 @@
-"""
-Implementation of the extended Fourier Amplitude Sensitivity Test 
-(eFAST; Saltelli et al., 1999) by Jon Herman and other contributors
-to the SALib package.
-
-The code here is inspired by an implementation in the R `sensitivity`
-package by Gilles Pujol (2006).
-"""
-
 import math
 import numpy as np
 
@@ -41,9 +32,13 @@ def analyze(problem, Y, M=4, print_to_console=False, seed=None):
            59(8):3873-3878, doi:10.1063/1.1680571.
 
     .. [2] Saltelli, A., S. Tarantola, and K. P.-S. Chan (1999).  "A
-          Quantitative Model-Independent Method for Global Sensitivity
-          Analysis of Model Output."  Technometrics, 41(1):39-56,
-          doi:10.1080/00401706.1999.10485594.
+           Quantitative Model-Independent Method for Global Sensitivity
+           Analysis of Model Output."  Technometrics, 41(1):39-56,
+           doi:10.1080/00401706.1999.10485594.
+
+    .. [3] fast99 - R `sensitivity` package
+           Gilles Pujol (2006)
+           https://github.com/cran/sensitivity/blob/master/R/fast99.R
 
     Examples
     --------
