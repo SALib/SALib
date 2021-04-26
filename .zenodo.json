@@ -22,7 +22,8 @@
         },
         {
             "affiliation": "Universit\u00e9 Savoie Mont-Blanc",
-            "name": "Nicolas CELLIER"
+            "name": "Nicolas CELLIER",
+            "orcid": "0000-0002-3759-3546"
         },
         {
             "name": "Calvin Whealton",
@@ -43,7 +44,8 @@
         },
         {
             "affiliation": "Paul Scherrer Institute",
-            "name": "Chris Mutel"
+            "name": "Chris Mutel",
+            "orcid": "0000-0002-7898-9862"
         },
         {
             "affiliation": "Cederstrand IT ApS",
@@ -51,11 +53,14 @@
             "orcid": "0000-0002-4512-0933"
         },
         {
-            "name": "TobiasKAndersen"
+            "name": "Tobias Andersen",
+            "affiliation": "Aarhus University",
+            "orcid": "0000-0003-1257-2201"
         },
         {
             "affiliation": "Deltares",
-            "name": "Joeri van Engelen"
+            "name": "Joeri van Engelen",
+            "orcid": "0000-0002-7628-2548"
         },
         {
             "name": "ANtlord"
@@ -68,7 +73,8 @@
             "name": "Vaibhav Kumar Dixit"
         },
         {
-            "name": "bsteubing"
+            "name": "Bernhard Steubing",
+            "orcid": "0000-0002-1307-6376"
         }
     ],
     "access_right": "open",
