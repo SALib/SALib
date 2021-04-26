@@ -2,6 +2,18 @@
 Changelog
 =========
 
+Version 1.3.13
+==============
+
+- Many documentation improvements
+- Explicitly mention extended FAST in documentation
+- Saltelli sampling: Warnings displayed when selected samples do not meet 
+  requirements (PR #416).
+- Conversion to DataFrame when groups are defined with Sobol' results
+  (PR #413 and Issue #387)
+- Group sampling and analysis enabled for Sobol' and morris
+- Enhanced DataFrame support for groups
+
 Version 1.3
 ===========
 
