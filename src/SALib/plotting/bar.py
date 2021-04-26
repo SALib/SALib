@@ -20,7 +20,7 @@ def plot(Si_df, ax=None):
     >>> from SALib.plotting.bar import plot as barplot
     >>> from SALib.test_functions import Ishigami
     >>>
-    >>> X = saltelli.sample(problem, 1000)
+    >>> X = saltelli.sample(problem, 512)
     >>> Y = Ishigami.evaluate(X)
     >>> Si = sobol.analyze(problem, Y, print_to_console=False)
     >>> Si_df = Si.to_df()
