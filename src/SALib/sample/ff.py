@@ -107,7 +107,7 @@ def sample(problem, seed=None):
     if seed:
         np.random.seed(seed)
     contrast = generate_contrast(problem)
-    sample = np.array((contrast + 1.) / 2, dtype=np.float)
+    sample = np.array((contrast + 1.) / 2, dtype=float)
     problem = extend_bounds(problem)
     scale_samples(sample, problem['bounds'])
     return sample
