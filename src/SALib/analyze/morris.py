@@ -174,12 +174,12 @@ def compute_grouped_sigma(ungrouped_sigma, group_matrix):
     one parameter
     '''
 
-    group_matrix = np.array(group_matrix, dtype=np.bool)
+    group_matrix = np.array(group_matrix, dtype=bool)
 
     sigma_masked = np.ma.masked_array(ungrouped_sigma * group_matrix.T,
                                       mask=(group_matrix ^ 1).T)
     sigma_agg = np.ma.mean(sigma_masked, axis=1)
-    sigma = np.zeros(group_matrix.shape[1], dtype=np.float)
+    sigma = np.zeros(group_matrix.shape[1], dtype=float)
     np.copyto(sigma, sigma_agg, where=group_matrix.sum(axis=0) == 1)
     np.copyto(sigma, np.NAN, where=group_matrix.sum(axis=0) != 1)
 
@@ -192,7 +192,7 @@ def compute_grouped_metric(ungrouped_metric, group_matrix):
     argument ungrouped_metric
     '''
 
-    group_matrix = np.array(group_matrix, dtype=np.bool)
+    group_matrix = np.array(group_matrix, dtype=bool)
 
     mu_star_masked = np.ma.masked_array(ungrouped_metric * group_matrix.T,
                                         mask=(group_matrix ^ 1).T)
@@ -245,7 +245,7 @@ def compute_elementary_effects(model_inputs, model_outputs, trajectory_size,
     num_rows = model_inputs.shape[0]
     num_trajectories = int(num_rows / trajectory_size)
 
-    ee = np.zeros((num_trajectories, num_vars), dtype=np.float)
+    ee = np.zeros((num_trajectories, num_vars), dtype=float)
 
     ip_vec = model_inputs.reshape(num_trajectories, trajectory_size, num_vars)
     ip_cha = np.subtract(ip_vec[:, 1:, :], ip_vec[:, 0:-1, :])
