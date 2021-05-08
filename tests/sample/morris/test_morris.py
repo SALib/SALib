@@ -80,7 +80,7 @@ def test_group_in_param_file_read(setup_param_file_with_groups):
         problem['groups'])
 
     assert_equal(problem['names'], ["Test 1", "Test 2", "Test 3"])
-    assert_equal(groups, np.array([[1, 0], [1, 0], [0, 1]], dtype=np.int))
+    assert_equal(groups, np.array([[1, 0], [1, 0], [0, 1]], dtype=int))
     assert_equal(group_names, ['Group 1', 'Group 2'])
 
 
@@ -300,7 +300,7 @@ class TestGroupSampleGeneration:
         correctly. This test is expected to fail.
         """
         # Creates a dummy variable
-        group_membership = np.empty((3, 3), dtype=np.int)
+        group_membership = np.empty((3, 3), dtype=int)
 
         with raises(ValueError):
             _check_group_membership(group_membership)
