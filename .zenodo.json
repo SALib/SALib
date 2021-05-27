@@ -1,0 +1,88 @@
+{
+    "license": "MIT",
+    "upload_type": "software",
+    "creators": [
+        {
+            "affiliation": "UC Davis",
+            "name": "Jon Herman",
+            "orcid": "0000-0002-4081-3175"
+        },
+        {
+            "affiliation": "KTH Royal Institute of Technology",
+            "name": "Will Usher",
+            "orcid": "0000-0001-9367-1791"
+        },
+        {
+            "name": "Takuya Iwanaga",
+            "orcid": "0000-0001-8173-0870"
+        },
+        {
+            "affiliation": "Universit\u00e9 d'Orl\u00e9ans",
+            "name": "Lucas Teixeira"
+        },
+        {
+            "affiliation": "Universit\u00e9 Savoie Mont-Blanc",
+            "name": "Nicolas CELLIER",
+            "orcid": "0000-0002-3759-3546"
+        },
+        {
+            "name": "Calvin Whealton",
+            "orcid": "0000-0001-9900-0542"
+        },
+        {
+            "affiliation": "",
+            "name": "David Hadka"
+        },
+        {
+            "name": "xantares"
+        },
+        {
+            "name": "bernardoct"
+        },
+        {
+            "name": "Fernando Rios"
+        },
+        {
+            "affiliation": "Paul Scherrer Institute",
+            "name": "Chris Mutel",
+            "orcid": "0000-0002-7898-9862"
+        },
+        {
+            "affiliation": "Cederstrand IT ApS",
+            "name": "Erik Cederstrand",
+            "orcid": "0000-0002-4512-0933"
+        },
+        {
+            "name": "Tobias Andersen",
+            "affiliation": "Aarhus University",
+            "orcid": "0000-0003-1257-2201"
+        },
+        {
+            "affiliation": "Deltares",
+            "name": "Joeri van Engelen",
+            "orcid": "0000-0002-7628-2548"
+        },
+        {
+            "name": "ANtlord"
+        },
+        {
+            "name": "Hania Kranas"
+        },
+        {
+            "affiliation": "@PumasAI",
+            "name": "Vaibhav Kumar Dixit"
+        },
+        {
+            "name": "Bernhard Steubing",
+            "orcid": "0000-0002-1307-6376"
+        }
+    ],
+    "access_right": "open",
+    "related_identifiers": [
+        {
+            "scheme": "doi",
+            "identifier": "10.5281/zenodo.598306",
+            "relation": "isVersionOf"
+        }
+    ]
+}
