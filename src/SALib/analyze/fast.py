@@ -41,8 +41,8 @@ def analyze(problem, Y, M=4, num_resamples=100, conf_level=0.95, print_to_consol
            Analysis of Model Output."  Technometrics, 41(1):39-56,
            doi:10.1080/00401706.1999.10485594.
 
-    .. [3] fast99 - R `sensitivity` package
-           Gilles Pujol (2006)
+    .. [3] Pujol, G. (2006)
+           fast99 - R `sensitivity` package
            https://github.com/cran/sensitivity/blob/master/R/fast99.R
 
     Examples
