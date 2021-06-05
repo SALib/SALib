@@ -70,7 +70,7 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray, S: int = 10,
         D = problem['num_vars']
         var_names = problem['names']
     else:
-        var_names, D = extract_group_names(problem.get('groups'))
+        var_names, D = extract_group_names(problem.get('groups', []))
 
     results = np.full((D, 5), np.nan)
     temp_pawn = np.full((S, D), np.nan)
