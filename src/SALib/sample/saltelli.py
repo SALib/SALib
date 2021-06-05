@@ -1,7 +1,8 @@
 from typing import Dict, Optional
-import warnings
-import numpy as np
 import math
+import warnings
+
+import numpy as np
 
 from . import common_args
 from . import sobol_sequence
@@ -14,7 +15,6 @@ def convergence_issue_msg(msg, check_conv):
         raise ValueError(msg)
     else:
         warnings.warn(msg)
-
 
 def sample(problem: Dict, N: int, calc_second_order: bool = True,
            skip_values: int = 1024, check_conv: bool = True):

@@ -1,12 +1,3 @@
-"""
-Implementation of the extended Fourier Amplitude Sensitivity Test 
-(eFAST; Saltelli et al., 1999) by Jon Herman and other contributors
-to the SALib package.
-
-The code here is inspired by an implementation in the R `sensitivity`
-package by Gilles Pujol (2006).
-"""
-
 import math
 import numpy as np
 from scipy.stats import norm
@@ -68,7 +59,7 @@ def analyze(problem, Y, M=4, num_resamples=100, conf_level=0.95, print_to_consol
     if Y.size % (D) == 0:
         N = int(Y.size / D)
     else:
-        msg ="""
+        msg = """
         Error: Number of samples in model output file must be a multiple of D,
         where D is the number of parameters.
         """
@@ -82,6 +73,7 @@ def analyze(problem, Y, M=4, num_resamples=100, conf_level=0.95, print_to_consol
     Si['names'] = problem['names']
     for i in range(D):
         l = np.arange(i * N, (i + 1) * N)
+
         Y_l = Y[l]
 
         S1, ST = compute_orders(Y_l, N, M, omega_0)

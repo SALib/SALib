@@ -42,12 +42,12 @@ def test_analysis_of_morris_results():
                             [1. / 3, 1], [1, 1], [1, 1. / 3],
                             [1. / 3, 1], [1. / 3, 1. / 3], [1, 1. / 3],
                             [1. / 3, 2. / 3], [1. / 3, 0], [1, 0]],
-                           dtype=np.float)
+                           dtype=float)
 
     model_output = np.array([0.97, 0.71, 2.39, 0.97, 2.30, 2.39,
                              1.87, 2.40, 0.87, 2.15, 1.71, 1.54,
                              2.15, 2.17, 1.54, 2.20, 1.87, 1.0],
-                            dtype=np.float)
+                            dtype=float)
 
     problem = {
         'num_vars': 2,
@@ -139,11 +139,11 @@ def test_compute_elementary_effects():
                                 1.64, 1.64, -0.39, -0.39, -0.39, -1.64, -0.39],
                             [-0.39, 0.39, 0.39, -1.64, 1.64, -1.64, 0.39, 0.39,
                              1.64, 1.64, -0.39, -0.39, 1.64, -1.64, -0.39]],
-                            dtype=np.float)
+                            dtype=float)
     model_outputs = np.array([24.9, 22.72, 21.04, 16.01, 10.4, 10.04, 8.6,
                               13.39, 4.69, 8.02, 9.98, 3.75, 1.33, 2.59,
                               6.37, 9.99],
-                             dtype=np.float)
+                             dtype=float)
     delta = 2. / 3
 
     actual = _compute_elementary_effects(model_inputs, model_outputs, 16, delta)
@@ -151,7 +151,7 @@ def test_compute_elementary_effects():
                         [2.93], [3.28], [-3.62], [-7.55],
                         [-2.51], [5.00], [9.34], [0.54],
                         [5.43], [2.15], [13.05]],
-                       dtype=np.float)
+                       dtype=float)
     assert_allclose(actual, desired, atol=1e-1)
 
 
@@ -195,12 +195,12 @@ def test_compute_elementary_effects_small():
                              [1. / 3, 1], [1, 1], [1, 1. / 3],
                              [1. / 3, 1], [1. / 3, 1. / 3], [1, 1. / 3],
                              [1. / 3, 2. / 3], [1. / 3, 0], [1, 0]],
-                            dtype=np.float)
+                            dtype=float)
 
     model_outputs = np.array([0.97, 0.71, 2.39, 0.97, 2.3, 2.39, 1.87, 2.40,
                               0.87, 2.15, 1.71, 1.54, 2.15, 2.17, 1.54, 2.2,
                               1.87, 1.0],
-                             dtype=np.float)
+                             dtype=float)
 
     delta = 2. / 3
     actual = _compute_elementary_effects(model_inputs, model_outputs, 3, delta)
@@ -230,12 +230,12 @@ def test_reorganize_output_matrix_increased():
     model_outputs = np.array([0.97, 0.71, 2.39, 0.97, 2.3, 2.39, 1.87, 2.40,
                               0.87, 2.15, 1.71, 1.54, 2.15, 2.17, 1.54, 2.2,
                               1.87, 1.0],
-                             dtype=np.float)
+                             dtype=float)
     op_vec = model_outputs.reshape(6, 3)
     actual = _reorganize_output_matrix(op_vec, up, lo)
     desired = np.array([[2.39, 2.3, 2.4, 1.71, 1.54, 1.0],
                         [0.71, 2.39, 2.40, 1.71, 2.15, 2.20]],
-                       dtype=np.float)
+                       dtype=float)
     assert_allclose(actual, desired, atol=1e-1)
 
 
@@ -264,7 +264,7 @@ def test_reorganize_output_matrix_decreased():
     actual = _reorganize_output_matrix(op_vec, up, lo, increase=False)
     desired = np.array([[0.71, 0.97, 0.87, 2.15, 2.17, 1.87],
                         [0.97, 2.30, 1.87, 1.54, 2.17, 1.87]],
-                       dtype=np.float)
+                       dtype=float)
     assert_allclose(actual, desired, atol=1e-1)
 
 
@@ -274,12 +274,14 @@ def test_compute_grouped_metric():
     There are six trajectories.
     """
     group_matrix = np.array([[1, 0], [0, 1], [0, 1]], dtype=np.int)
+
     ee = np.array([[2.52, 2.01, 2.30, -0.66, -0.93, -1.30],
                    [-2.00, 0.13, -0.80, 0.25, -0.02, 0.51],
                    [2.00, -0.13, 0.80, -0.25, 0.02, -0.51]])
     mu_star = np.average(np.abs(ee), 1)
     actual = _compute_grouped_metric(mu_star, group_matrix)
     desired = np.array([1.62, 0.62], dtype=np.float)
+
     assert_allclose(actual, desired, rtol=1e-1)
 
 
@@ -298,21 +300,22 @@ def test_compute_grouped_sigma():
     confuse plotting.morris)
     """
     group_matrix = np.array([[1, 0], [0, 1], [0, 1]], dtype=np.int)
+
     ee = np.array([[2.52, 2.01, 2.30, -0.66, -0.93, -1.30],
                    [-2.00, 0.13, -0.80, 0.25, -0.02, 0.51],
                    [2.00, -0.13, 0.80, -0.25, 0.02, -0.51]])
     sigma = np.std(ee, axis=1, ddof=1)
+
     actual = _compute_grouped_sigma(sigma, group_matrix)
     desired = np.array([1.79352911, np.NAN], dtype=np.float)
     assert_allclose(actual, desired, rtol=1e-1)
 
 
 def test_check_if_array_of_floats():
-
     outputs = np.array([0.97, 0.71, 2.39, 0.97, 2.30, 2.39,
                         1.87, 2.40, 0.87, 2.15, 1.71, 1.54,
                         2.15, 2.17, 1.54, 2.20, 1.87, 1.0],
-                       dtype=np.int)
+                       dtype=int)
 
     with raises(ValueError):
         _check_if_array_of_floats(outputs)

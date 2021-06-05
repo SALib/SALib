@@ -11,7 +11,7 @@ def sample(problem, N, M=4, seed=None):
 
     Returns a NumPy matrix containing the model inputs required by the extended Fourier
     Amplitude sensitivity test.  The resulting matrix contains N * D rows and D
-    columns, where D is the number of parameters.  The samples generated are
+    columns, where D is the number of parameters. The samples generated are
     intended to be used by :func:`SALib.analyze.fast.analyze`.
 
     Parameters

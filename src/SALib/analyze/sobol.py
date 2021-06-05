@@ -83,7 +83,7 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
         Incorrect number of samples in model output file.
         Confirm that calc_second_order matches option used during sampling.""")
 
-    if conf_level < 0 or conf_level > 1:
+    if not 0 < conf_level < 1:
         raise RuntimeError("Confidence level must be between 0-1.")
 
     # normalize the model output

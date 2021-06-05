@@ -4,8 +4,9 @@ __all__ = ['plot']
 # magic string indicating DF columns holding conf bound values
 CONF_COLUMN = '_conf'
 
+
 def plot(Si_df, ax=None):
-    """Create bar chart of results
+    """Create bar chart of results.
 
     Parameters
     ----------
@@ -17,16 +18,16 @@ def plot(Si_df, ax=None):
 
     Examples
     ----------
-        >>> from SALib.plotting.bar import plot as barplot
-        >>> from SALib.test_functions import Ishigami
-        >>>
-        >>> # See README for example problem specification
-        >>>
-        >>> X = saltelli.sample(problem, 512)
-        >>> Y = Ishigami.evaluate(X)
-        >>> Si = sobol.analyze(problem, Y, print_to_console=False)
-        >>> total, first, second = Si.to_df()
-        >>> barplot(total)
+    >>> from SALib.plotting.bar import plot as barplot
+    >>> from SALib.test_functions import Ishigami
+    >>>
+    >>> # See README for example problem specification
+    >>>
+    >>> X = saltelli.sample(problem, 512)
+    >>> Y = Ishigami.evaluate(X)
+    >>> Si = sobol.analyze(problem, Y, print_to_console=False)
+    >>> total, first, second = Si.to_df()
+    >>> barplot(total)
     """
     conf_cols = Si_df.columns.str.contains(CONF_COLUMN)
 

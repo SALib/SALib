@@ -229,6 +229,7 @@ def test_sobol():
     # Generate inputs
     cmd = f"salib sample saltelli -p {ishigami_fp} -o {input_file} -n 1024\
     --precision 8 --max-order 2 --skip-values 2048"
+
     cmd = cmd.split()
 
     result = subprocess.check_output(cmd, universal_newlines=True)

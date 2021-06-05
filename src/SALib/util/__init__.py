@@ -253,7 +253,7 @@ def compute_groups_matrix(groups: List):
 
     indices = dict([(x, i) for (i, x) in enumerate(unique_group_names)])
 
-    output = np.zeros((num_vars, number_of_groups), dtype=np.int)
+    output = np.zeros((num_vars, number_of_groups), dtype=int)
 
     for parameter_row, group_membership in enumerate(groups):
         group_index = indices[group_membership]

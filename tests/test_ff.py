@@ -53,7 +53,7 @@ def test_ff_sample():
                          [0, 0, 0, 0],
                          [0, 1, 0, 1],
                          [0, 0, 1, 1],
-                         [0, 1, 1, 0]], dtype=np.float)
+                         [0, 1, 1, 0]], dtype=float)
     assert_equal(actual, expected)
 
 
@@ -71,7 +71,7 @@ def test_ff_sample_scaled():
                          [0, 0, 0, 0],
                          [0, 1, 0, 1],
                          [0, 0, 1, 1],
-                         [0, 1, 1, 0]], dtype=np.float)
+                         [0, 1, 1, 0]], dtype=float)
     assert_equal(actual, expected)
 
 
@@ -89,8 +89,8 @@ def test_ff_analyze():
                   [0, 0, 0, 0],
                   [0, 1, 0, 1],
                   [0, 0, 1, 1],
-                  [0, 1, 1, 0]], dtype=np.float)
-    Y = np.array([1.5, 1, 1.5, 1, 2, 2.5, 2, 2.5], dtype=np.float)
+                  [0, 1, 1, 0]], dtype=float)
+    Y = np.array([1.5, 1, 1.5, 1, 2, 2.5, 2, 2.5], dtype=float)
     actual = analyze(problem, X, Y)
     expected = {'ME': np.array([ -0.5 ,  0.25,  0.  ,  0.  ]), 'names': ['x1', 'x2', 'x3', 'x4']}
     assert_equal(actual, expected)
@@ -117,7 +117,7 @@ def test_ff_example():
 
     Si = analyze(problem, X, Y)
 
-    expected = np.array([1, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], dtype=np.float)
+    expected = np.array([1, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], dtype=float)
     assert_equal(expected, Si['ME'])
 
 
@@ -165,9 +165,9 @@ def test_interactions():
                   [0, 0, 0, 0],
                   [0, 1.0, 0, 1.0],
                   [0, 0, 1.0, 1.0],
-                  [0, 1.0, 1.0, 0]], dtype=np.float)
+                  [0, 1.0, 1.0, 0]], dtype=float)
     Y = X[:, 0] + (0.1 * X[:, 1]) + ((1.2 * X[:, 2]) * (1.3 + X[:, 3]))
-#     Y = np.array([1.5, 1, 1.5, 1, 2, 2.5, 2, 2.5], dtype=np.float)
     ie_names, ie = interactions(problem, Y)
+
     actual = ie
     assert_allclose(actual, [0.3, 0, 0, 0, 0, 0.3], rtol=1e-4, atol=1e-4)

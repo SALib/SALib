@@ -136,7 +136,7 @@ def test_unscale_samples():
     Simple test to unscale samples back to [0,1] range
     """
     params = np.array(
-        [np.arange(10, 21, 1), np.arange(-10, 12, 2)], dtype=np.float).T
+        [np.arange(10, 21, 1), np.arange(-10, 12, 2)], dtype=float).T
     bounds = [[10, 20], [-10, 10]]
 
     desired = np.arange(0, 1.1, 0.1).repeat(2).reshape((11, 2))
@@ -172,7 +172,7 @@ def test_compute_groups_from_parameter_file():
         compute_groups_matrix(['Group 1', 'Group 2', 'Group 2'])
 
     assert_equal(actual_matrix, np.array(
-        [[1, 0], [0, 1], [0, 1]], dtype=np.int))
+        [[1, 0], [0, 1], [0, 1]], dtype=int))
     assert_equal(actual_unique_names, ['Group 1', 'Group 2'])
 
 def test_nonuniform_scale_samples_truncnorm():

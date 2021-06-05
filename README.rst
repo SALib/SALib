@@ -32,7 +32,7 @@ Python 3 (from SALib v1.2 onwards SALib does not officially support Python 2)
   `Campolongo et al. 2007 <http://www.sciencedirect.com/science/article/pii/S1364815206002805>`__,
   `Ruano et al. 2012 <https://doi.org/10.1016/j.envsoft.2012.03.008>`__)
 
-* extended Fourier Amplitude Sensitivity Test (FAST) (`Cukier et al. 1973 <http://scitation.aip.org/content/aip/journal/jcp/59/8/10.1063/1.1680571>`__,
+* extended Fourier Amplitude Sensitivity Test (eFAST) (`Cukier et al. 1973 <http://scitation.aip.org/content/aip/journal/jcp/59/8/10.1063/1.1680571>`__,
   `Saltelli et al. 1999 <http://amstat.tandfonline.com/doi/abs/10.1080/00401706.1999.10485594>`__)
 
 * Random Balance Designs - Fourier Amplitude Sensitivity Test (RBD-FAST) (`Tarantola et al. 2006 <https://hal.archives-ouvertes.fr/hal-01065897/file/Tarantola06RESS_HAL.pdf>`__,
