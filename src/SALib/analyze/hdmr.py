@@ -16,7 +16,7 @@ from matplotlib import pyplot as plt
 __all__ = ['analyze', 'cli_parse', 'cli_action']
 
 
-def analyze(problem: Dict, X: np.array, Y: np.array, 
+def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray, 
             maxorder: int = 2, maxiter: int = 100, 
             m: int = 2, K: int = 20, R: int = None, alpha: float = 0.95,
             lambdax: float = 0.01,

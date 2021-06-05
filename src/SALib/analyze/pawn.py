@@ -8,7 +8,7 @@ from ..util import (read_param_file, ResultDict,
                     extract_group_names, _check_groups)
 
 
-def analyze(problem: Dict, X: np.array, Y: np.array, S: int = 10, 
+def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray, S: int = 10, 
             print_to_console: bool = False, 
             seed: int = None):
     """Performs PAWN sensitivity analysis.
