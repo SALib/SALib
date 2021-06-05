@@ -64,6 +64,19 @@ def test_bad_conf_level():
                       calc_second_order=True,
                       conf_level=1.01,
                       print_to_console=False)
+        
+    with raises(RuntimeError):
+        sobol.analyze(problem, Y,
+                      calc_second_order=True,
+                      conf_level=1.0,
+                      print_to_console=False)
+
+    with raises(RuntimeError):
+        sobol.analyze(problem, Y,
+                      calc_second_order=True,
+                      conf_level=0.0,
+                      print_to_console=False)
+        
 
 
 def test_incorrect_second_order_setting():
