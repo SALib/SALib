@@ -1,19 +1,26 @@
+from typing import Dict
+
 import numpy as np
 from scipy.stats import ks_2samp
 
 from . import common_args
-
 from ..util import (read_param_file, ResultDict, 
                     extract_group_names, _check_groups)
 
 
-def analyze(problem, X, Y, S=10, print_to_console=False, seed=None):
+def analyze(problem: Dict, X: np.array, Y: np.array, S: int = 10, 
+            print_to_console: bool = False, 
+            seed: int = None):
     """Performs PAWN sensitivity analysis.
 
     Calculates the min, mean, median, max, and coefficient of variation (CV).
 
     CV is (standard deviation / mean), and so lower values indicate little change
     over the slides, and larger values indicate large variations across the slides.
+
+    Compatible with
+    ---------------
+    * all samplers
 
     Parameters
     ----------
