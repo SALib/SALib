@@ -10,14 +10,8 @@ from ..util import (scale_samples, read_param_file,
                     compute_groups_matrix, _check_groups)
 
 
-def convergence_issue_msg(msg, check_conv):
-    if check_conv:
-        raise ValueError(msg)
-    else:
-        warnings.warn(msg)
-
 def sample(problem: Dict, N: int, calc_second_order: bool = True,
-           skip_values: int = 1024, check_conv: bool = True):
+           skip_values: int = 1024):
     """Generates model inputs using Saltelli's extension of the Sobol' sequence.
 
     Returns a NumPy matrix containing the model inputs using Saltelli's sampling
@@ -27,6 +21,11 @@ def sample(problem: Dict, N: int, calc_second_order: bool = True,
     rows, where ``D`` is the number of parameters. If `calc_second_order` is True,
     the resulting matrix has ``N * (2D + 2)`` rows. These model inputs are
     intended to be used with :func:`SALib.analyze.sobol.analyze`.
+
+    Raises a UserWarning in cases where sample sizes may be sub-optimal.
+    The convergence properties of the Sobol' sequence requires
+    ``N < skip_values`` and that both `N` and `skip_values` are base 2 
+    (e.g., `N = 2^n`).
 
     Parameters
     ----------
@@ -39,11 +38,6 @@ def sample(problem: Dict, N: int, calc_second_order: bool = True,
         Calculate second-order sensitivities (default True)
     skip_values : int
         Number of points in Sobol' sequence to skip (must be an exponent of 2).
-    check_conv : bool (default: True)
-        Check that `N` and `skip_values` meet sample size requirements.
-        Convergence properties of the Sobol' sequence is only valid when
-        ``N < skip_values`` and that both are exponents of 2 (e.g., `N = 2^n`).
-        If True, raises error if this condition is not met.
 
     References
     ----------
@@ -59,9 +53,9 @@ def sample(problem: Dict, N: int, calc_second_order: bool = True,
            The Second IMACS Seminar on Monte Carlo Methods 55, 271–280.
            https://doi.org/10.1016/S0378-4754(00)00270-6
 
-    .. [3] Owen, A. B., 2020. 
-           On dropping the first Sobol' point. 
-           arXiv:2008.08051 [cs, math, stat]. 
+    .. [3] Owen, A. B., 2020.
+           On dropping the first Sobol' point.
+           arXiv:2008.08051 [cs, math, stat].
            Available at: http://arxiv.org/abs/2008.08051 (Accessed: 20 April 2021).
 
     .. [4] Discussion: https://github.com/scipy/scipy/pull/10844
@@ -72,7 +66,7 @@ def sample(problem: Dict, N: int, calc_second_order: bool = True,
         Convergence properties of the Sobol' sequence is only valid if
         `N` ({N}) is equal to `2^n`.
         """
-        convergence_issue_msg(msg, check_conv)
+        warnings.warn(msg)
 
     M = skip_values
     if not ((M & (M-1) == 0) and (M != 0 and M-1 != 0)):
@@ -80,14 +74,13 @@ def sample(problem: Dict, N: int, calc_second_order: bool = True,
         Convergence properties of the Sobol' sequence is only valid if
         `skip_values` ({M}) is equal to `2^m`.
         """
-        convergence_issue_msg(msg, check_conv)
+        warnings.warn(msg)
 
-    if check_conv:
-        n_exp = int(math.log(N, 2))
-        m_exp = int(math.log(M, 2))
-        if n_exp >= m_exp:
-            msg = f"Convergence may not be valid as 2^{n_exp} ({N}) is >= 2^{m_exp} ({M})."
-            convergence_issue_msg(msg, check_conv)
+    n_exp = int(math.log(N, 2))
+    m_exp = int(math.log(M, 2))
+    if n_exp >= m_exp:
+        msg = f"Convergence may not be valid as 2^{n_exp} ({N}) is >= 2^{m_exp} ({M})."
+        warnings.warn(msg)
 
     D = problem['num_vars']
     groups = _check_groups(problem)
@@ -164,8 +157,6 @@ def cli_parse(parser):
                            to calculate')
     parser.add_argument('--skip-values', type=int, required=False, default=1024,
                         help='Number of sample points to skip (default: 1024)')
-    parser.add_argument('--check-conv', type=bool, required=False, default=True,
-                        help='Check samples meet convergence property requirements (default: True)')
 
     # hacky way to remove an argument (seed option is not relevant for Saltelli)
     remove_opts = [x for x in parser._actions if x.dest == 'seed']
@@ -184,8 +175,7 @@ def cli_action(args):
     problem = read_param_file(args.paramfile)
     param_values = sample(problem, args.samples,
                           calc_second_order=(args.max_order == 2),
-                          skip_values=args.skip_values,
-                          check_conv=args.check_conv)
+                          skip_values=args.skip_values)
     np.savetxt(args.output, param_values, delimiter=args.delimiter,
                fmt='%.' + str(args.precision) + 'e')
 

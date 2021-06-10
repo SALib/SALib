@@ -18,7 +18,7 @@ sp = ProblemSpec({
     'outputs': ['max_P', 'Utility', 'Inertia', 'Reliability']
 })
 
-(sp.sample_saltelli(1000, check_conv=False)
+(sp.sample_saltelli(1000)
     .evaluate(lake_problem.evaluate)
     .analyze_sobol())
 
@@ -38,7 +38,7 @@ sp = ProblemSpec({
     'outputs': ['Y']
 })
 
-(sp.sample_saltelli(500, check_conv=False)
+(sp.sample_saltelli(500)
     .evaluate(Ishigami.evaluate)
     .analyze_sobol())
 

@@ -68,26 +68,21 @@ def test_saltelli():
     assert len(result) == 0, "Error occurred!"
 
 
-def test_saltelli_error():
-    proc_err = subprocess.CalledProcessError
-
+def test_saltelli_warning():
     # Ensure error is raised when n_samples not a power of 2
-    with pytest.raises(proc_err) as e:
-        cmd = f"salib sample saltelli -p {ishigami_fp} -o {test_data} -n 511".split()
-        result = subprocess.check_output(cmd)
-        assert "ValueError" in str(result)
+    cmd = f"salib sample saltelli -p {ishigami_fp} -o {test_data} -n 511".split()
+    result = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+    assert "Warning" in str(result)
 
-    # Ensure error is raised when skip_values < n_samples
-    with pytest.raises(proc_err) as e:
-        cmd = f"salib sample saltelli -p {ishigami_fp} -o {test_data} -n 2048 --skip-values 1024".split()
-        result = subprocess.check_output(cmd)
-        assert "ValueError" in str(result)
+    # Ensure warning is raised when skip_values < n_samples
+    cmd = f"salib sample saltelli -p {ishigami_fp} -o {test_data} -n 2048 --skip-values 1024".split()
+    result = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+    assert "Warning" in str(result)
 
     # Ensure error is raised when skip_values not a power of 2
-    with pytest.raises(proc_err) as e:
-        cmd = f"salib sample saltelli -p {ishigami_fp} -o {test_data} -n 512 --skip-values 1025".split()
-        result = subprocess.check_output(cmd)
-        assert "ValueError" in str(result)
+    cmd = f"salib sample saltelli -p {ishigami_fp} -o {test_data} -n 512 --skip-values 1025".split()
+    result = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+    assert "Warning" in str(result)
 
 
 if __name__ == '__main__':
