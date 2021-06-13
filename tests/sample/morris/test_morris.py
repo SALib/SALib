@@ -46,13 +46,16 @@ def test_odd_num_levels_raises_warning(setup_param_file_with_groups):
     with warnings.catch_warnings(record=True) as w:
         # Cause all warnings to always be triggered.
         warnings.simplefilter("always")
-        # Trigger a warning.
+        # Trigger a UserWarning as num_levels should be an even number
         sample(problem, 10, num_levels=3)
-        # Verify some things
-        assert len(w) == 1
-        assert issubclass(w[-1].category, UserWarning)
-        assert "num_levels should be an even number, sample may be biased" in str(
-            w[-1].message)
+
+        categories = [issubclass(m.category, UserWarning) for m in w]
+        assert any(categories), "Expected warning not raised"
+
+        needle = "num_levels should be an even number, sample may be biased"
+        messages = [str(m.message) for m in w]
+        msg_check = [needle in hay for hay in messages]
+        assert any(msg_check), "Inappropriate num_levels warning not found"
 
 
 def test_even_num_levels_no_warning(setup_param_file_with_groups):
@@ -61,10 +64,15 @@ def test_even_num_levels_no_warning(setup_param_file_with_groups):
     with warnings.catch_warnings(record=True) as w:
         # Cause all warnings to always be triggered.
         warnings.simplefilter("always")
-        # Trigger a warning.
+        # Check that num_levels warning is not raised
         sample(problem, 10, num_levels=4)
-        # Verify some things
-        assert len(w) == 0
+        
+        if len(w) > 0:
+            needle = "num_levels should be an even number, sample may be biased"
+            messages = [str(m.message) for m in w]
+            msg_check = [needle in hay for hay in messages]
+            assert not any(msg_check), \
+                "Inappropriate num_levels warning raised when all okay"
 
 
 def test_group_in_param_file_read(setup_param_file_with_groups):
