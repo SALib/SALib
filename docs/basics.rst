@@ -198,3 +198,119 @@ error will appear in the sensitivity indices.  For example, we observe a
 negative value for the x2-x3 index.  Typically, these computing errors shrink as
 the number of samples increases.
      
+
+Another Example
+---------------
+
+When the model you want to analyse depends on parameters that are not part of
+the sensitivity analysis, like position or time, the analysis can be performed
+for each time/position "bin" separately.
+
+Consider the example of a parabola:
+
+.. math::
+
+    f(x) = a + b x^2
+
+The parameters :math:`a` and :math:`b` will be subject to the sensitivity analysis,
+but :math:`x` will be not.
+
+We start with a set of imports:
+
+.. code:: python
+
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    from SALib.sample import saltelli
+    from SALib.analyze import sobol
+
+and define the parabola:
+
+.. code:: python
+
+    def parabola(x, a, b):
+        """Return y = a + b*x**2."""
+        return a + b*x**2
+
+The :code:`dict` describing the problem contains therefore only :math:`a` and :math:`b`:
+
+.. code:: python
+
+    problem = {
+        'num_vars': 2,
+        'names': ['a', 'b'],
+        'bounds': [[0, 1]]*2
+    }
+
+The triad of sampling, evaluating and analysing becomes:
+
+.. code:: python
+
+    # sample
+    param_values = saltelli.sample(problem, 2**6)
+
+    # evaluate
+    x = np.linspace(-1, 1, 100)
+    y = np.array([parabola(x, *params) for params in param_values])
+
+    # analyse
+    sobol_indices = [sobol.analyze(problem, Y) for Y in y.T]
+
+Note how we analysed for each :math:`x` separately.
+
+Now we can extract the first-order Sobol indices for each bin of :math:`x` and plot:
+
+.. code:: python
+
+    S1s = np.array([s['S1'] for s in sobol_indices])
+
+    fig = plt.figure(figsize=(10, 6), constrained_layout=True)
+    gs = fig.add_gridspec(2, 2)
+
+    ax0 = fig.add_subplot(gs[:, 0])
+    ax1 = fig.add_subplot(gs[0, 1])
+    ax2 = fig.add_subplot(gs[1, 1])
+
+    for i, ax in enumerate([ax1, ax2]):
+        ax.plot(x, S1s[:, i],
+                label=r'S1$_\mathregular{{{}}}$'.format(problem["names"][i]),
+                color='black')
+        ax.set_xlabel("x")
+        ax.set_ylabel("First-order Sobol index")
+
+        ax.set_ylim(0, 1.04)
+
+        ax.yaxis.set_label_position("right")
+        ax.yaxis.tick_right()
+
+        ax.legend(loc='upper right')
+
+    ax0.plot(x, np.mean(y, axis=0), label="Mean", color='black')
+
+    # in percent
+    prediction_interval = 95
+
+    ax0.fill_between(x,
+                     np.percentile(y, 50 - prediction_interval/2., axis=0),
+                     np.percentile(y, 50 + prediction_interval/2., axis=0),
+                     alpha=0.5, color='black',
+                     label=f"{prediction_interval} % prediction interval")
+
+    ax0.set_xlabel("x")
+    ax0.set_ylabel("y")
+    ax0.legend(title=r"$y=a+b\cdot x^2$",
+               loc='upper center')._legend_box.align = "left"
+
+    plt.show()
+
+.. figure:: assets/example_parabola.svg
+    :width: 800
+    :align: center
+
+With the help of the plots, we interprete the Sobol indices. At
+:math:`x=0`, the variation in :math:`y` can be explained to 100 % by
+parameter :math:`a` as the contribution to :math:`y` from :math:`b
+x^2` vanishes. With larger :math:`|x|`, the contribution to the
+variation from parameter :math:`b` increases and the contribution from
+parameter :math:`a` decreases.
