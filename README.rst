@@ -194,6 +194,7 @@ Software
 * `Brain/Circulation Model Developer <https://github.com/bcmd/BCMD>`_
 * `DAE Tools <http://daetools.com/>`_
 * `agentpy <https://github.com/JoelForamitti/agentpy>`_
+* `uncertainpy <https://github.com/simetenn/uncertainpy>`_
 
 Blogs
 ~~~~~
