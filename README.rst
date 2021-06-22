@@ -93,7 +93,7 @@ Then the ``problem`` dictionary above can be created from the
 
 Lots of other options are included for parameter files, as well as a
 command-line interface. See the `advanced
-readme <README-advanced.md>`__.
+section in the documentation <https://salib.readthedocs.io/en/latest/advanced.html>`__.
 
 Also check out the
 `examples <https://github.com/SALib/SALib/tree/master/examples>`__ for a

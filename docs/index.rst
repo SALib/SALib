@@ -45,6 +45,7 @@ Supported Methods
 
    getting-started
    basics
+   advanced
    api
 
    License <license>
