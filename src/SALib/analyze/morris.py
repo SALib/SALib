@@ -40,6 +40,8 @@ def analyze(problem, X, Y,
     num_levels : int
         The number of grid levels, must be identical to the value
         passed to SALib.sample.morris (default 4)
+    seed : int
+        Seed to generate a random number
 
     Returns
     -------

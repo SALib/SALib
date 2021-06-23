@@ -23,6 +23,8 @@ def analyze(problem, Y, M=4, print_to_console=False, seed=None):
         the Fourier series decomposition (default 4)
     print_to_console : bool
         Print results directly to console (default False)
+    seed : int
+        Seed to generate a random number
 
     References
     ----------

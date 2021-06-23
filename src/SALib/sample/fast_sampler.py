@@ -25,6 +25,8 @@ def sample(problem, N, M=4, seed=None):
     M : int
         The interference parameter, i.e., the number of harmonics to sum in the
         Fourier series decomposition (default 4)
+    seed : int
+        Seed to generate a random number
     """
     if seed:
         np.random.seed(seed)

@@ -19,6 +19,8 @@ def sample(problem, N, seed=None):
         The problem definition
     N : int
         The number of samples to generate
+    seed : int
+        Seed to generate a random number
     """
     if seed:
         np.random.seed(seed)

@@ -32,6 +32,8 @@ def analyze(problem, X, Y, num_resamples=100,
         The confidence interval level (default 0.95)
     print_to_console : bool
         Print results directly to console (default False)
+    seed : int
+        Seed to generate a random number
 
     References
     ----------

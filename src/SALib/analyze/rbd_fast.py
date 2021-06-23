@@ -32,6 +32,8 @@ def analyze(problem, X, Y, M=10, print_to_console=False, seed=None):
         the Fourier series decomposition (default 10)
     print_to_console : bool
         Print results directly to console (default False)
+    seed : int
+        Seed to generate a random number
 
     References
     ----------

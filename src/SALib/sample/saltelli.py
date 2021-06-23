@@ -29,6 +29,8 @@ def sample(problem, N, calc_second_order=True, seed=None, skip_values=1024):
         Must be an exponent of 2 and < `skip_values`.
     calc_second_order : bool
         Calculate second-order sensitivities (default True)
+    seed : int
+        Seed to generate a random number
     skip_values : int
         Number of points in Sobol' sequence to skip (must be an exponent of 2).
     """

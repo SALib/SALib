@@ -39,6 +39,12 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
         The confidence interval level (default 0.95)
     print_to_console : bool
         Print results directly to console (default False)
+    parralel : bool
+        Perform analysis in parallel if True
+    n_processors : int
+        Number of parallel processes (only used if parallel is True)
+    seed : int
+        Seed to generate a random number
 
     References
     ----------

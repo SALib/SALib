@@ -98,6 +98,8 @@ def sample(problem, seed=None):
     =========
     problem : dict
         The problem definition
+    seed : int
+        Seed to generate a random number
 
     Returns
     =======

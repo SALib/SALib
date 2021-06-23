@@ -36,6 +36,8 @@ def analyze(problem, X, Y, second_order=False, print_to_console=False,
         Include interaction effects
     print_to_console: bool, default=False
         Print results directly to console
+    seed : int
+        Seed to generate a random number
 
     Returns
     -------
