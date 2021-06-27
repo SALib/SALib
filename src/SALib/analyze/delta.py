@@ -16,6 +16,10 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
     where each entry is a list of size D (the number of parameters) containing
     the indices in the same order as the parameter file.
 
+    Compatible with
+    ---------------
+    * all samplers
+
     Parameters
     ----------
     problem : dict
@@ -57,7 +61,7 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
         raise RuntimeError("Confidence level must be between 0-1.")
 
     # equal frequency partition
-    exp = (2 / (7 + np.tanh((1500 - N) / 500)))
+    exp = (2.0 / (7.0 + np.tanh((1500.0 - N) / 500.0)))
     M = int(np.round( min(int(np.ceil(N**exp)), 48) ))
     m = np.linspace(0, N, M + 1)
     Ygrid = np.linspace(np.min(Y), np.max(Y), 100)
@@ -65,9 +69,6 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
     keys = ('delta', 'delta_conf', 'S1', 'S1_conf')
     S = ResultDict((k, np.zeros(D)) for k in keys)
     S['names'] = problem['names']
-
-    if print_to_console:
-        print("Parameter %s %s %s %s" % keys)
 
     try:
         for i in range(D):
@@ -77,9 +78,6 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
             S['S1'][i] = sobol_first(Y, X_i, m)
             S['S1_conf'][i] = sobol_first_conf(
                 Y, X_i, m, num_resamples, conf_level)
-            if print_to_console:
-                print("%s %f %f %f %f" % (S['names'][i], S['delta'][
-                    i], S['delta_conf'][i], S['S1'][i], S['S1_conf'][i]))
     except np.linalg.LinAlgError as e:
         msg = "Singular matrix detected\n"
         msg += "This may be due to the sample size ({}) being too small\n".format(Y.size)
@@ -87,6 +85,9 @@ def analyze(problem: Dict, X: np.array, Y: np.array,
         msg += "SALib team"
 
         raise np.linalg.LinAlgError(msg)
+
+    if print_to_console:
+        print(S.to_df())
 
     return S
 

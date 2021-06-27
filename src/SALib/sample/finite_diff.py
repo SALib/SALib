@@ -1,4 +1,4 @@
-from __future__ import division
+from typing import Dict
 
 import numpy as np
 
@@ -7,9 +7,10 @@ from . import sobol_sequence
 from ..util import scale_samples, read_param_file
 
 
-def sample(problem, N, delta=0.01, seed=None):
+def sample(problem: Dict, N: int, delta: float = 0.01, 
+           seed: int = None, skip_values: int = 1024) -> np.ndarray:
     """Generate matrix of samples for derivative-based global sensitivity measure (dgsm).
-    Start from a QMC (sobol) sequence and finite difference with delta % steps
+    Start from a QMC (Sobol') sequence and finite difference with delta % steps
 
     Parameters
     ----------
@@ -17,17 +18,34 @@ def sample(problem, N, delta=0.01, seed=None):
         SALib problem specification
 
     N : int
-        number of samples
+        Number of samples
 
     delta : float
         Finite difference step size (percent)
     
     seed : int or None
-        random seed value
+        Random seed value
+
+    skip_values : int
+        How many values of the Sobol sequence to skip
 
     Returns
     ----------
     np.array : DGSM sequence
+
+    References
+    ----------
+    .. [1] Sobol', I.M., Kucherenko, S., 2009. 
+           Derivative based global sensitivity measures and their link with 
+           global sensitivity indices. 
+           Mathematics and Computers in Simulation 79, 3009–3017. 
+           https://doi.org/10.1016/j.matcom.2009.01.023
+
+    .. [2] Sobol', I.M., Kucherenko, S., 2010. 
+           Derivative based global sensitivity measures. 
+           Procedia - Social and Behavioral Sciences 2, 7745–7746. 
+           https://doi.org/10.1016/j.sbspro.2010.05.208
+
     """
     if seed:
         np.random.seed(seed)
@@ -35,13 +53,12 @@ def sample(problem, N, delta=0.01, seed=None):
     D = problem['num_vars']
     bounds = problem['bounds']
 
-    # How many values of the Sobol sequence to skip
-    skip_values = 1024
-
     # Create base sequence - could be any type of sampling
     base_sequence = sobol_sequence.sample(N + skip_values, D)
+
     # scale before finite differencing
-    scale_samples(base_sequence, bounds)
+    base_sequence = scale_samples(base_sequence, problem)
+
     dgsm_sequence = np.empty([N * (D + 1), D])
 
     index = 0

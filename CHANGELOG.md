@@ -1,23 +1,49 @@
-=========
-Changelog
-=========
+# Changelog
 
-Version 1.3.13
-==============
+This changelog follows the format defined at:
+https://keepachangelog.com/en/1.0.0/
+
+## [1.4.0]
+
+### Added
+
+- High Dimensional Model Representation (HDMR) method (PR #275)
+- PAWN method (PR #415)
+- Support for sampling/analysis method chaining (PR #339)
+- Support for truncated normal distribution (PR #383)
+- Confidence Interval estimation for FAST-based methods (PR #375)
+- Initial support for parallel model evaluation
+
+### Documentation
+
+- Defining non-uniform sampling now explicitly documented
+- Many general documentation improvements
+- Added FAQ
+
+### Development
+
+- Generalized support for non-uniform sampling methods (PR #346)
+
+
+## [1.3.13]
+
+### Added
 
 - Many documentation improvements
 - Explicitly mention extended FAST in documentation
 - Saltelli sampling: Warnings displayed when selected samples do not meet 
   requirements (PR #416).
-- Conversion to DataFrame when groups are defined with Sobol' results
-  (PR #413 and Issue #387)
 - Group sampling and analysis enabled for Sobol' and morris
 - Enhanced DataFrame support for groups
 
-Version 1.3
-===========
+### Bug Fixes:
 
-New Features:
+- Conversion to DataFrame when groups are defined with Sobol' results
+  (PR #413 and Issue #387)
+
+## [1.3.0]
+
+### Added
 
 - Various minor performance enhancements (PR #253 #264)
 - Added some visualisation methods (PR #259)
@@ -26,7 +52,7 @@ New Features:
 - Revamped fast method for consistency (PR #239)
 - Updated Sobol-G function to modified G-function (#269)
 
-Bug Fixes:
+### Bug Fixes:
 
 - Method of morris didn't adjust with levels above 4 (PR #252)
 - Add missing seed option for morris sampling
@@ -34,29 +60,28 @@ Bug Fixes:
 - Fixed typo (#205)
 - Updated import of scipy comb function (PR #243)
 
-Documentation:
+### Documentation:
 
 - Update documentation for Morris and DSGM methods (#261 #266)
 
-Development Features:
+### Development Features:
 
 - Updated PyScaffold to version 3.2.2 (#267)
 - Updated Travis and package config (#285)
 
-Version 1.1.0
-=============
+## [1.1.0]
 
-New Features:
+### New Features:
 
 - Refactored Method of Morris so the Ruano et al. local approach is default
 
-Bug Fixes:
+### Bug Fixes:
 
 - Inputs to morris.analyze are provided as floats
 - Removed calls to standard random library as inconsistent between Python 2 & 3
 - First row in Sobol sequences should be zero, not empty
 
-Documentation:
+### Documentation:
 
 - Added a Code of Conduct
 - Added DAETools, BCMD and others to citations - thanks for using SALib!
@@ -65,14 +90,13 @@ Documentation:
 - Improved existing documentation where lacking e.g. for fractional factorial
   method
 
-Development Features:
+### Development Features:
 
 - Implemented automatic deployment to PyPi
 - Fixed a bug preventing automatic deployment to PyPi upon tagging a branch
 - Removed postgres from travis config
 
-Version 1.0.0
-=============
+## [1.0.0]
 
 Release of our stable version of SALIB to coincide with an submission to JOSS:
 
@@ -83,8 +107,7 @@ Release of our stable version of SALIB to coincide with an submission to JOSS:
 - Updated the Travis-CI scripts
 - Moved the tests out of the SALib package and migrated to using pytest
 
-Version 0.7.1
-=============
+## [0.7.1]
 
 Improvements to Morris sampling and Sobol groups/distributions
 
@@ -96,8 +119,7 @@ Improvements to Morris sampling and Sobol groups/distributions
   the future.
 - Also includes several minor bug fixes.
 
-Version 0.7.0
-=============
+## [0.7.0]
 
 New documentation, doc strings and installation requirements
 
@@ -106,15 +128,13 @@ New documentation, doc strings and installation requirements
 - no longer test for numpy <1.8.0 and matplotlib < 1.4.3, and these
   requirements are implemented in a new setup script.
 
-Version 0.6.3
-=============
+## [0.6.3]
 
 Parallel option for Sobol method
 
 - New option to run analyze.sobol function in parallel using multiprocessing
 
-Version 0.6.2
-=============
+## [0.6.2]
 
 This release does not contain any new functionality, but SALib now is citable
 using a Digital Object Identifier (DOI), which can be found in the readme.
@@ -127,8 +147,7 @@ Some minor updates are included:
   morris, but its all we have when using groups.
 - some minor updates to the tests in the plotting module
 
-Version 0.6.0
-=============
+## [0.6.0]
 
 - Set up to include and test plotting functions
 - Specific plotting functions for Morris
@@ -136,16 +155,14 @@ Version 0.6.0
 - Repo transferred to SALib organization, update setup and URLs
 - Small bugfixes
 
-Version 0.5.0
-=============
+## [0.5.0]
 
 - Vectorized bootstrap calculations for Morris and Sobol
 - Optional trajectory optimization with Gurobi, and tests for it
 - Several minor bugfixes
 - Starting with v0.5, SALib is released under the MIT license.
 
-Version 0.4.0
-=============
+## [0.4.0]
 
 - Better Python API without requiring file read/write to the OS.
   Consistent functional API to sampling methods so that they return numpy
@@ -154,21 +171,18 @@ Version 0.4.0
   from native Python.
 - Also expanded tests for regression and the Sobol method.
 
-Version 0.3.0
-=============
+## [0.3.0]
 
 Improvements to Morris sampling and analysis methods,
 some bugfixes to make consistent with previous versions of the methods.
 
-Version 0.2.0
-=============
+## [0.2.0]
 
 Improvements to Morris sampling methods (support for group sampling,
 and optimized trajectories). Much better test coverage, and fixed Python 3
 compatibility.
 
-Version 0.1.0
-=============
+## [0.1.0]
 
 First numbered release. Contains reasonably well-tested versions of the Sobol,
 Morris, and FAST methods. Also contains newer additions of DGSM and delta

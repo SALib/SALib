@@ -8,6 +8,7 @@
 *.log
 *.pot
 __pycache__/*
+__pycache__
 .cache/*
 .*.swp
 */.ipynb_checkpoints/*
@@ -33,6 +34,8 @@ htmlcov/*
 .tox
 junit.xml
 coverage.xml
+.mypy_cache
+.pytest_cache
 
 # Build and docs folder/files
 build/*

@@ -1,5 +1,3 @@
-from __future__ import division
-
 from numpy.testing import assert_equal, assert_allclose
 
 from pytest import raises, fixture, warns, mark
@@ -10,15 +8,14 @@ import warnings
 from SALib.sample.morris.morris import (sample,
                                         _check_group_membership,
                                         _check_if_num_levels_is_even,
-                                        _define_problem_with_groups,
                                         _compute_optimised_trajectories,
                                         _generate_p_star,
                                         _compute_b_star,
-                                        _compute_delta,
                                         _generate_trajectory,
                                         _generate_x_star)
 
-from SALib.util import read_param_file, compute_groups_matrix
+from SALib.util import (read_param_file, compute_groups_matrix,
+                        _define_problem_with_groups, _compute_delta)
 
 
 @fixture(scope='function')
@@ -49,13 +46,16 @@ def test_odd_num_levels_raises_warning(setup_param_file_with_groups):
     with warnings.catch_warnings(record=True) as w:
         # Cause all warnings to always be triggered.
         warnings.simplefilter("always")
-        # Trigger a warning.
+        # Trigger a UserWarning as num_levels should be an even number
         sample(problem, 10, num_levels=3)
-        # Verify some things
-        assert len(w) == 1
-        assert issubclass(w[-1].category, UserWarning)
-        assert "num_levels should be an even number, sample may be biased" in str(
-            w[-1].message)
+
+        categories = [issubclass(m.category, UserWarning) for m in w]
+        assert any(categories), "Expected warning not raised"
+
+        needle = "num_levels should be an even number, sample may be biased"
+        messages = [str(m.message) for m in w]
+        msg_check = [needle in hay for hay in messages]
+        assert any(msg_check), "Inappropriate num_levels warning not found"
 
 
 def test_even_num_levels_no_warning(setup_param_file_with_groups):
@@ -64,10 +64,15 @@ def test_even_num_levels_no_warning(setup_param_file_with_groups):
     with warnings.catch_warnings(record=True) as w:
         # Cause all warnings to always be triggered.
         warnings.simplefilter("always")
-        # Trigger a warning.
+        # Check that num_levels warning is not raised
         sample(problem, 10, num_levels=4)
-        # Verify some things
-        assert len(w) == 0
+        
+        if len(w) > 0:
+            needle = "num_levels should be an even number, sample may be biased"
+            messages = [str(m.message) for m in w]
+            msg_check = [needle in hay for hay in messages]
+            assert not any(msg_check), \
+                "Inappropriate num_levels warning raised when all okay"
 
 
 def test_group_in_param_file_read(setup_param_file_with_groups):
@@ -76,8 +81,7 @@ def test_group_in_param_file_read(setup_param_file_with_groups):
     '''
     parameter_file = setup_param_file_with_groups
     problem = read_param_file(parameter_file)
-    groups, group_names = compute_groups_matrix(
-        problem['groups'])
+    groups, group_names = compute_groups_matrix(problem.get('groups'))
 
     assert_equal(problem['names'], ["Test 1", "Test 2", "Test 3"])
     assert_equal(groups, np.array([[1, 0], [1, 0], [0, 1]], dtype=int))
