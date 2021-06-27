@@ -3,6 +3,44 @@
 This changelog follows the format defined at:
 https://keepachangelog.com/en/1.0.0/
 
+## [1.4.0]
+
+### Added
+
+- High Dimensional Model Representation (HDMR) method (PR #275)
+- PAWN method (PR #415)
+- Support for sampling/analysis method chaining (PR #339)
+- Support for truncated normal distribution (PR #383)
+- Confidence Interval estimation for FAST-based methods (PR #375)
+- Initial support for parallel model evaluation
+
+### Documentation
+
+- Defining non-uniform sampling now explicitly documented
+- Many general documentation improvements
+- Added FAQ
+
+### Development
+
+- Generalized support for non-uniform sampling methods (PR #346)
+
+
+## [1.3.13]
+
+### Added
+
+- Many documentation improvements
+- Explicitly mention extended FAST in documentation
+- Saltelli sampling: Warnings displayed when selected samples do not meet 
+  requirements (PR #416).
+- Group sampling and analysis enabled for Sobol' and morris
+- Enhanced DataFrame support for groups
+
+### Bug Fixes:
+
+- Conversion to DataFrame when groups are defined with Sobol' results
+  (PR #413 and Issue #387)
+
 ## [1.3.0]
 
 ### Added
