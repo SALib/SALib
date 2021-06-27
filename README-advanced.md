@@ -40,7 +40,7 @@ Si = sobol.analyze(problem, Y, calc_second_order=True, conf_level=0.95,
                    print_to_console=False, parallel=True, n_processors=4)
 ```
 
-Other methods include Morris, FAST, Delta-MIM, and DGSM. For an explanation of all command line options for each method, [see the examples here](https://github.com/SALib/SALib/tree/master/examples).
+Other methods include Morris, FAST, Delta-MIM, and DGSM. For an explanation of all command line options for each method, [see the examples here](https://github.com/SALib/SALib/tree/main/examples).
 
 
 ### Groups of variables (Sobol and Morris methods only)
@@ -92,7 +92,7 @@ total_Si, first_Si, second_Si = Si.to_df()
 
 ### Generating alternate distributions
 
-In the [Quick Start](https://github.com/SALib/SALib/tree/master/README.rst) we
+In the [Quick Start](https://github.com/SALib/SALib/tree/main/README.rst) we
 generate a uniform sample of parameter space.
 
 ```python
