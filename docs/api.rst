@@ -67,8 +67,5 @@ Fractional Factorial
 High-Dimensional Model Representation
 -------------------------------------
 
-.. autofunction:: SALib.sample.latin.sample
-   :noindex:
-
 .. autofunction:: SALib.analyze.ff.hdmr
    :noindex:

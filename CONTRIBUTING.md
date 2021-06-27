@@ -47,9 +47,9 @@ We use Github issues to track ideas for  and [enhancements](https://github.com/S
 
 Then, create a new branch with a useful name, such as `new_method_method_name`. Methods should consist of:
 
-* A sampling module (a `method_name.py` file in `SALib.sample`). This will contain, among other things, a function `sample(problem, ...)` that accepts a problem dictionary and returns a numpy array of samples, one column for each parameter. See [SALib.sample.saltelli](https://github.com/SALib/SALib/blob/master/SALib/sample/saltelli.py) for an example.
+* A sampling module (a `method_name.py` file in `SALib.sample`). This will contain, among other things, a function `sample(problem, ...)` that accepts a problem dictionary and returns a numpy array of samples, one column for each parameter. See [SALib.sample.saltelli](https://github.com/SALib/SALib/blob/main/SALib/sample/saltelli.py) for an example.
 
-* An analysis module (a `method_name.py` file in `SALib.analyze`). This will contain a function analyze(problem, ...) that returns a dictionary of sensitivity indices. See [SALib.analyze.sobol](https://github.com/SALib/SALib/blob/master/SALib/analyze/sobol.py) for an example.
+* An analysis module (a `method_name.py` file in `SALib.analyze`). This will contain a function analyze(problem, ...) that returns a dictionary of sensitivity indices. See [SALib.analyze.sobol](https://github.com/SALib/SALib/blob/main/SALib/analyze/sobol.py) for an example.
 
 * An example shell script and python file in the `examples` folder, ideally using a test function included in SALib such as the Ishigami or Sobol-G functions.
 
@@ -57,13 +57,13 @@ Then, create a new branch with a useful name, such as `new_method_method_name`. 
 
 * All contributed methods should also provide functions to support their use through the command line interface (CLI). These are `cli_parse()` and `cli_action()` to parse command line options and to run the sampling and analysis respectively. See the implementations in [SALib.analyze.delta](https://github.com/SALib/SALib/blob/consolidate-cli/SALib/analyze/delta.py) for an example.
 
-* Tests in the `tests` folder.  We're using Travis CI and Coveralls. Ideally, every new function will have one or more corresponding tests to check that errors are raised for invalid inputs, and that functions return matrices of the proper sizes. (For example [see here](https://github.com/SALib/SALib/blob/master/tests/test_sobol.py). But at a minimum, please include a regression test for the Ishigami function, in the same format as all of the other methods [see here](https://github.com/SALib/SALib/blob/master/tests/test_regression.py). This will at least ensure that future updates don't break your code!
+* Tests in the `tests` folder.  We're using Travis CI and Coveralls. Ideally, every new function will have one or more corresponding tests to check that errors are raised for invalid inputs, and that functions return matrices of the proper sizes. (For example [see here](https://github.com/SALib/SALib/blob/main/tests/test_sobol.py). But at a minimum, please include a regression test for the Ishigami function, in the same format as all of the other methods [see here](https://github.com/SALib/SALib/blob/main/tests/test_regression.py). This will at least ensure that future updates don't break your code!
 
 Finally, submit a pull request. Either @willu47 or @jdherman will review the pull request and merge in your changes.
 
 ### Other Enhancements
 
-Contributions not related to new methods are also welcome. These might include new test functions (see [SALib.test_functions](https://github.com/SALib/SALib/tree/master/SALib/test_functions) for how these are set up), or other code that is general across some or all of the methods. This general code is currently included in [SALib.util.\_\_init\_\_.py](https://github.com/SALib/SALib/blob/master/SALib/util/__init__.py).
+Contributions not related to new methods are also welcome. These might include new test functions (see [SALib.test_functions](https://github.com/SALib/SALib/tree/main/SALib/test_functions) for how these are set up), or other code that is general across some or all of the methods. This general code is currently included in [SALib.util.\_\_init\_\_.py](https://github.com/SALib/SALib/blob/main/SALib/util/__init__.py).
 
 
 ### Other Development Comments
@@ -78,10 +78,7 @@ This will ensure that your tests are repeatable.
 
 ### Notes about scope
 
-* We've had some discussions about moving to an OOP setup. At this point, it would require a pretty big refactor for all of the methods. It's tough to group the methods into classes when they're decoupled, and preserving state would force people to learn a whole API. The current functional(ish) approach is easier to test, and users can do whatever they want with the numpy matrices. That's our preference for now, unless someone sees a clear way to restructure everything into classes. Further discussion on this can be found [here](https://github.com/SALib/SALib/issues/216#issuecomment-435647632).
-
-
-
-* SALib contains a few basic types of plots, especially for the Morris method. However, we generally assume that plot types and styles are left to the user, as these are often application-specific. Users interested in more complex plot types should check out the [savvy](https://github.com/houghb/savvy) library, which is built on top of SALib.
+* SALib contains a few basic types of plots, especially for the Morris method. Indicative results can be made by calling the [`.plot()` method](https://salib.readthedocs.io/en/main/basics.html#basic-plotting)
+* However, we generally assume that plot types and styles are left to the user, as these are often application-specific. Users interested in more complex plot types should check out the [savvy](https://github.com/houghb/savvy) library, which is built on top of SALib.
 
 Thanks again!
