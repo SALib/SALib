@@ -1,5 +1,5 @@
 Sensitivity Analysis Library (SALib)
-------------------------------------
+====================================
 
 Python implementations of commonly used sensitivity analysis methods.
 Useful in systems modeling to calculate the effects of model inputs or
@@ -17,11 +17,8 @@ Python 3 (from SALib v1.2 onwards SALib does not officially support Python 2)
 
 **Build Status:** |Build Status| **Test Coverage:** |Coverage Status|
 
-**SALib Paper:** |status|
-
-``Herman, J., Usher, W., (2017), SALib: An open-source Python library for Sensitivity Analysis, Journal of Open Source Software, 2(9), 97, doi:10.21105/joss.00097``
-
-**Methods included:** 
+Included methods
+----------------
 
 * Sobol Sensitivity Analysis (`Sobol 2001 <http://www.sciencedirect.com/science/article/pii/S0378475400002706>`__,
   `Saltelli 2002 <http://www.sciencedirect.com/science/article/pii/S0010465502002801>`__,
@@ -57,7 +54,7 @@ Python 3 (from SALib v1.2 onwards SALib does not officially support Python 2)
 **Contributing:** see `here <CONTRIBUTING.md>`__
 
 Quick Start
-~~~~~~~~~~~
+-----------
 
 Method chaining approach
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -144,14 +141,83 @@ Then the ``problem`` dictionary above can be created from the
 
 Lots of other options are included for parameter files, as well as a
 command-line interface. See the `advanced
-readme <README-advanced.md>`__.
+section in the documentation <https://salib.readthedocs.io/en/latest/advanced.html>`__.
 
 Also check out the
 `examples <https://github.com/SALib/SALib/tree/master/examples>`__ for a
 full description of options for each method.
 
+How to cite SAlib
+-----------------
+
+If you would like to use our software, please cite it using the following:
+
+    Herman, J. and Usher, W. (2017) SALib: An open-source Python library for
+    sensitivity analysis. Journal of Open Source Software, 2(9).
+    doi:10.21105/joss.00097
+
+|paper status|
+
+If you use BibTeX, cite using the following entry::
+
+    @article{Herman2017,
+    doi = {10.21105/joss.00097},
+    url = {https://doi.org/10.21105/joss.00097},
+    year  = {2017},
+    month = {jan},
+    publisher = {The Open Journal},
+    volume = {2},
+    number = {9},
+    author = {Jon Herman and Will Usher},
+    title = {{SALib}: An open-source Python library for Sensitivity Analysis},
+    journal = {The Journal of Open Source Software}
+    }
+
+Projects that use SALib
+-----------------------
+
+Many projects now use the Global Sensitivity Analysis features provided by
+SALib. Here is a selection:
+
+Software
+~~~~~~~~
+
+* `The City Energy Analyst <https://github.com/architecture-building-systems/CEAforArcGIS>`_
+* `pynoddy <https://github.com/flohorovicic/pynoddy>`_
+* `savvy <https://github.com/houghb/savvy>`_
+* `rhodium <https://github.com/Project-Platypus/Rhodium>`_
+* `pySur <https://github.com/MastenSpace/pysur>`_
+* `EMA workbench <https://github.com/quaquel/EMAworkbench>`_
+* `Brain/Circulation Model Developer <https://github.com/bcmd/BCMD>`_
+* `DAE Tools <http://daetools.com/>`_
+* `agentpy <https://github.com/JoelForamitti/agentpy>`_
+* `uncertainpy <https://github.com/simetenn/uncertainpy>`_
+
+Blogs
+~~~~~
+
+* `Sensitivity Analyis in Python <http://www.perrygeo.com/sensitivity-analysis-in-python.html>`_
+* `Sensitivity Analysis with SALib <http://keyboardscientist.weebly.com/blog/sensitivity-analysis-with-salib>`_
+* `Running Sobol using SALib <https://waterprogramming.wordpress.com/2013/08/05/running-sobol-sensitivity-analysis-using-salib/>`_
+* `Extensions of SALib for more complex sensitivity analyses <https://waterprogramming.wordpress.com/2014/02/11/extensions-of-salib-for-more-complex-sensitivity-analyses/>`_
+
+Videos
+~~~~~~
+
+* `PyData Presentation on SALib <https://youtu.be/gkR_lz5OptU>`_
+
+If you would like to be added to this list, please submit a pull request,
+or create an issue.
+
+Many thanks for using SALib.
+
+How to contribute
+-----------------
+
+See `here <CONTRIBUTING.md>`__ for how to contribute to SAlib.
+
 License
-~~~~~~~
+-------
 
 Copyright (C) 2012-2019 Jon Herman, Will Usher, and others. Versions v0.5 and
 later are released under the `MIT license <LICENSE.md>`__.
@@ -162,5 +228,5 @@ later are released under the `MIT license <LICENSE.md>`__.
    :target: https://coveralls.io/r/SALib/SALib
 .. |Code Issues| image:: https://www.quantifiedcode.com/api/v1/project/ed62e70f899e4ec8af4ea6b2212d4b30/badge.svg
    :target: https://www.quantifiedcode.com/app/project/ed62e70f899e4ec8af4ea6b2212d4b30
-.. |status| image:: http://joss.theoj.org/papers/431262803744581c1d4b6a95892d3343/status.svg
+.. |paper status| image:: http://joss.theoj.org/papers/431262803744581c1d4b6a95892d3343/status.svg
    :target: http://joss.theoj.org/papers/431262803744581c1d4b6a95892d3343

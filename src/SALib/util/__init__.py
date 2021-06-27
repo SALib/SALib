@@ -34,6 +34,9 @@ def _scale_samples(params: np.ndarray, bounds: List):
     # Check bounds are legal (upper bound is greater than lower bound)
     lower_bounds, upper_bounds = _check_bounds(bounds)
 
+    if np.any(lower_bounds >= upper_bounds):
+        raise ValueError("Bounds are not legal (upper bound must be greater than lower bound)")
+
     # This scales the samples in-place, by using the optional output
     # argument for the numpy ufunctions
     # The calculation is equivalent to:
@@ -101,7 +104,7 @@ def _unscale_samples(params, bounds):
     upper_bounds = b[:, 1]
 
     if np.any(lower_bounds >= upper_bounds):
-        raise ValueError("Bounds are not legal")
+        raise ValueError("Bounds are not legal (upper bound must be greater than lower bound)")
 
     # This scales the samples in-place, by using the optional output
     # argument for the numpy ufunctions
