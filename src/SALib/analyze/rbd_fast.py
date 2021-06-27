@@ -1,23 +1,25 @@
 #!/usr/bin/env python
 # coding=utf8
 
-from __future__ import division
-from __future__ import print_function
-
 import numpy as np
 from scipy.signal import periodogram
+from scipy.stats import norm
 
 from . import common_args
 from ..util import read_param_file, ResultDict
 
 
-def analyze(problem, X, Y, M=10, print_to_console=False, seed=None):
+def analyze(problem, X, Y, M=10, num_resamples=100, conf_level=0.95, print_to_console=False, seed=None):
     """Performs the Random Balanced Design - Fourier Amplitude Sensitivity Test
     (RBD-FAST) on model outputs.
 
     Returns a dictionary with keys 'S1', where each entry is a list of
     size D (the number of parameters) containing the indices in the same order
     as the parameter file.
+
+    Compatible with
+    ---------------
+    * all samplers
 
     Parameters
     ----------
@@ -67,18 +69,18 @@ def analyze(problem, X, Y, M=10, print_to_console=False, seed=None):
     N = Y.size
 
     # Calculate and Output the First Order Value
-    if print_to_console:
-        print("Parameter First")
-    Si = ResultDict((k, [None] * D) for k in ['S1'])
+    Si = ResultDict((k, [None] * D) for k in ['S1', 'S1_conf'])
     Si['names'] = problem['names']
 
     for i in range(D):
         S1 = compute_first_order(permute_outputs(X[:, i], Y), M)
         S1 = unskew_S1(S1, M, N)
         Si['S1'][i] = S1
-        if print_to_console:
-            print("%s %g" %
-                  (problem['names'][i].ljust(9), Si['S1'][i]))
+        Si['S1_conf'][i] = bootstrap(X[:, i], Y, M, num_resamples, conf_level)
+    
+    if print_to_console:
+        print(Si.to_df())
+
     return Si
 
 
@@ -118,9 +120,32 @@ def unskew_S1(S1, M, N):
     return S1 - lamb / (1 - lamb) * (1 - S1)
 
 
+def bootstrap(X_d, Y, M, resamples, conf_level):
+    # Use half of available data each time
+    T_data = X_d.shape[0]
+    n_size = int(T_data * 0.5)
+
+    res = np.zeros(resamples)
+    for i in range(resamples):
+        sample_idx = np.random.choice(T_data, replace=True, size=n_size)
+        X_rs, Y_rs = X_d[sample_idx], Y[sample_idx]
+        S1 = compute_first_order(permute_outputs(X_rs, Y_rs), M)
+        S1 = unskew_S1(S1, M, Y_rs.size)
+        res[i] = S1
+
+    return norm.ppf(0.5 + conf_level / 2.0) * res.std(ddof=1)
+
+
 def cli_parse(parser):
     parser.add_argument('-X', '--model-input-file',
                         type=str, required=True, help='Model input file')
+    parser.add_argument('-M', '--M', type=int, required=False,
+                        default=10,
+                        help='Inference parameter')
+    parser.add_argument('-r', '--resamples', type=int, required=False,
+                        default=100,
+                        help='Number of bootstrap resamples for Sobol '
+                        'confidence intervals')
     return parser
 
 
@@ -131,7 +156,7 @@ def cli_action(args):
     Y = np.loadtxt(args.model_output_file,
                    delimiter=args.delimiter,
                    usecols=(args.column,))
-    analyze(problem, X, Y, print_to_console=True, seed=args.seed)
+    analyze(problem, X, Y, M=args.M, num_resamples=args.resamples, print_to_console=True, seed=args.seed)
 
 
 if __name__ == "__main__":

@@ -11,3 +11,5 @@ Developers
 * Fernando Rios
 * Dan Hyams
 * xantares
+* Abdullah Sahin <sahina@uci.edu>
+* Takuya Iwanaga

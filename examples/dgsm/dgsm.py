@@ -20,7 +20,7 @@ Y = Ishigami.evaluate(param_values)
 
 # Perform the sensitivity analysis using the model output
 # Specify which column of the output file to analyze (zero-indexed)
-Si = dgsm.analyze(problem, param_values, Y, conf_level=0.95, print_to_console=False)
+Si = dgsm.analyze(problem, param_values, Y, conf_level=0.95, print_to_console=True)
 # Returns a dictionary with keys 'vi', 'vi_std', 'dgsm', and 'dgsm_conf'
 # e.g. Si['vi'] contains the sensitivity measure for each parameter, in
 # the same order as the parameter file

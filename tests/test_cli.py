@@ -11,7 +11,7 @@ def test_cli_usage():
                                       shell=True,
                                       universal_newlines=True)
     except subprocess.CalledProcessError as e:
-        pass
+        raise RuntimeError(f"Call failed:\n{e}")
     else:
         # if no error raised, check the returned string
         assert len(out) > 0 and "usage" in out.lower(), \
@@ -22,11 +22,10 @@ def test_cli_avail_methods():
     method_types = ['sample', 'analyze']
 
     for method in method_types:
-        module = importlib.import_module('.'.join(['SALib', method]))
+        module = importlib.import_module(f'SALib.{method}')
         actions = avail_approaches(module)
         for act in actions:
-            approach = importlib.import_module('.'.join(
-                ['SALib', method, act]))
+            approach = importlib.import_module(f'SALib.{method}.{act}')
 
             # Just try to access the functions - raises error on failure
             approach.cli_parse

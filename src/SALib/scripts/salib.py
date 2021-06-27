@@ -8,8 +8,8 @@ from SALib.util import avail_approaches
 def parse_subargs(module, parser, method, opts):
     '''Attach argument parser for action specific options.
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     module : module
         name of module to extract action from
     parser : argparser

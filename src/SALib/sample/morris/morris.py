@@ -25,8 +25,6 @@ With local_optimization = True (which is default),
 it is possible to go higher than the previously suggested 4 from 100.
 
 """
-from __future__ import division
-
 import numpy as np
 from typing import Dict
 
@@ -39,7 +37,9 @@ from .brute import BruteForce
 from .strategy import SampleMorris
 
 from SALib.sample import common_args
-from SALib.util import scale_samples, read_param_file, compute_groups_matrix
+from SALib.util import (scale_samples, read_param_file, compute_groups_matrix,
+                        _define_problem_with_groups, _compute_delta, _check_groups)
+
 
 __all__ = ['sample']
 
@@ -82,6 +82,26 @@ def sample(problem: Dict, N: int, num_levels: int = 4,
         Returns a numpy.ndarray containing the model inputs required for Method
         of Morris. The resulting matrix has :math:`(G/D+1)*N/T` rows and
         :math:`D` columns, where :math:`D` is the number of parameters.
+
+    References
+    ----------
+    .. [1] Ruano, M.V., Ribes, J., Seco, A., Ferrer, J., 2012. 
+           An improved sampling strategy based on trajectory design for 
+           application of the Morris method to systems with many input factors. 
+           Environmental Modelling & Software 37, 103–109. 
+           https://doi.org/10.1016/j.envsoft.2012.03.008
+
+    .. [2] Morris, M.D., 1991. 
+           Factorial Sampling Plans for Preliminary Computational Experiments. 
+           Technometrics 33, 161–174. 
+           https://doi.org/10.1080/00401706.1991.10484804
+
+    .. [3] Campolongo, F., Cariboni, J., Saltelli, A., 2007. 
+           An effective screening design for sensitivity analysis of large models. 
+           Environmental Modelling & Software, Modelling, computer-assisted 
+           simulations, and mapping of dangerous phenomena for 
+           hazard assessment 22, 1509–1518. 
+           https://doi.org/10.1016/j.envsoft.2006.10.004
     """
     if seed:
         np.random.seed(seed)
@@ -98,7 +118,8 @@ def sample(problem: Dict, N: int, num_levels: int = 4,
                                                         optimal_trajectories,
                                                         local_optimization)
 
-    scale_samples(sample_morris, problem['bounds'])
+    sample_morris = scale_samples(sample_morris, problem)
+
     return sample_morris
 
 
@@ -123,8 +144,8 @@ def _sample_morris(problem: Dict, number_trajectories: int,
     -------
     numpy.ndarray
     """
-
-    group_membership, _ = compute_groups_matrix(problem['groups'])
+    groups = _check_groups(problem)
+    group_membership, _ = compute_groups_matrix(groups)
     _check_group_membership(group_membership)
 
     num_params = group_membership.shape[0]
@@ -263,21 +284,6 @@ def _generate_x_star(num_params: int, num_levels: int) -> np.ndarray:
     return x_star
 
 
-def _compute_delta(num_levels: int) -> float:
-    """Computes the delta value from number of levels
-
-    Parameters
-    ---------
-    num_levels : int
-        The number of levels
-
-    Returns
-    -------
-    float
-    """
-    return num_levels / (2.0 * (num_levels - 1))
-
-
 def _compute_optimised_trajectories(problem: Dict, input_sample: int, N: int,
                                     k_choices: int,
                                     local_optimization: bool = False) -> np.ndarray:
@@ -316,33 +322,6 @@ def _compute_optimised_trajectories(problem: Dict, input_sample: int, N: int,
     output = context.sample(input_sample, N, num_params, k_choices, num_groups)
 
     return output
-
-
-def _define_problem_with_groups(problem: Dict) -> Dict:
-    """
-    Checks if the user defined the 'groups' key in the problem dictionary.
-    If not, makes the 'groups' key equal to the variables names. In other
-    words, the number of groups will be equal to the number of variables, which
-    is equivalent to no groups.
-
-    Parameters
-    ----------
-    problem : dict
-        The problem definition
-
-    Returns
-    -------
-    problem : dict
-        The problem definition with the 'groups' key, even if the user doesn't
-        define it
-    """
-    # Checks if there isn't a key 'groups' or if it exists and is set to 'None'
-    if 'groups' not in problem or not problem['groups']:
-        problem['groups'] = problem['names']
-    elif len(problem['groups']) != problem['num_vars']:
-        raise ValueError("Number of entries in \'groups\' should be the same "
-                         "as in \'names\'")
-    return problem
 
 
 def _check_if_num_levels_is_even(num_levels: int):

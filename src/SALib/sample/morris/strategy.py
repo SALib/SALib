@@ -19,8 +19,8 @@ from scipy.spatial.distance import cdist  # type: ignore
 class SampleMorris(object):
     """Computes the optimum `k_choices` of trajectories from the input_sample.
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     strategy : :class:`Strategy`
     """
 
@@ -32,8 +32,8 @@ class SampleMorris(object):
         """Computes the optimum k_choices of trajectories
         from the input_sample.
 
-        Arguments
-        ---------
+        Parameters
+        ----------
         input_sample : numpy.ndarray
         num_samples : int
             The number of samples to generate
@@ -66,8 +66,8 @@ class Strategy:
                 num_params, k_choices, num_groups):
         """Implement this in your class
 
-        Arguments
-        ---------
+        Parameters
+        ----------
         input_sample : numpy.ndarray
         num_samples : int
             The number of samples to generate
@@ -90,8 +90,8 @@ class Strategy:
         """Computes the optimum k_choices of trajectories
         from the input_sample.
 
-        Arguments
-        ---------
+        Parameters
+        ----------
         input_sample : numpy.ndarray
         num_samples : int
             The number of samples to generate
@@ -141,8 +141,8 @@ class Strategy:
         For each trajectory, identifies the indexes of the input sample which
         is a function of the number of factors/groups and the number of samples
 
-        Arguments
-        ---------
+        Parameters
+        ----------
         num_samples : int
             The number of trajectories
         num_params : int
@@ -173,8 +173,8 @@ class Strategy:
                        maximum_combo, num_groups=None):
         """Picks the trajectories from the input
 
-        Arguments
-        ---------
+        Parameters
+        ----------
         input_sample : numpy.ndarray
         num_samples : int
         num_params : int
@@ -205,8 +205,8 @@ class Strategy:
             - the correct size
             - values between 0 and 1
 
-        Arguments
-        ---------
+        Parameters
+        ----------
         input_sample : numpy.ndarray
         num_params : int
         num_samples : int
@@ -221,6 +221,12 @@ class Strategy:
     @staticmethod
     def compute_distance(m, l):
         '''Compute distance between two trajectories
+
+        Parameters
+        ----------
+        m : np.ndarray
+
+        l : np.ndarray
 
         Returns
         -------
@@ -248,8 +254,8 @@ class Strategy:
         If the `groups` argument is filled, then the distances are still
         calculated for each trajectory,
 
-        Arguments
-        ---------
+        Parameters
+        ----------
         input_sample : numpy.ndarray
             The input sample of trajectories for which to compute
             the distance matrix

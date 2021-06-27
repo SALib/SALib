@@ -1,0 +1,9 @@
+name: SALib
+channels:
+  - conda-forge
+dependencies:
+  # required
+  - numpy>=1.16.5
+  - python=3
+  - pandas>=1.1.2
+  - matplotlib>=3.2.2

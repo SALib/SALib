@@ -1,13 +1,11 @@
-from __future__ import division
-from __future__ import print_function
-
 from scipy.stats import norm
 
 import numpy as np
 import pandas as pd
 
 from . import common_args
-from ..util import read_param_file, compute_groups_matrix, ResultDict
+from ..util import (read_param_file, compute_groups_matrix, ResultDict, 
+                    extract_group_names, _check_groups)
 from types import MethodType
 
 from multiprocessing import Pool, cpu_count
@@ -24,6 +22,10 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
     each entry is a list of size D (the number of parameters) containing the
     indices in the same order as the parameter file.  If calc_second_order is
     True, the dictionary also contains keys 'S2' and 'S2_conf'.
+
+    Compatible with
+    ---------------
+    * `saltelli`
 
     Parameters
     ----------
@@ -66,10 +68,11 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
         np.random.seed(seed)
     # determining if groups are defined and adjusting the number
     # of rows in the cross-sampled matrix accordingly
-    if not problem.get('groups'):
+    groups = _check_groups(problem)
+    if not groups:
         D = problem['num_vars']
     else:
-        D = len(set(problem['groups']))
+        _, D = extract_group_names(groups)
 
     if calc_second_order and Y.size % (2 * D + 2) == 0:
         N = int(Y.size / (2 * D + 2))
@@ -108,7 +111,6 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
                     S['S2_conf'][j, k] = Z * second_order(A[r], AB[r, j],
                                                           AB[r, k], BA[r, j],
                                                           B[r]).std(ddof=1)
-
     else:
         tasks, n_processors = create_task_list(
             D, calc_second_order, n_processors)
@@ -121,30 +123,38 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
 
         S = Si_list_to_dict(S_list.get(), D, calc_second_order)
 
-    # Print results to console
-    if print_to_console:
-        print_indices(S, problem, calc_second_order)
-
+    
     # Add problem context and override conversion method for special case
     S.problem = problem
     S.to_df = MethodType(to_df, S)
+
+    # Print results to console
+    if print_to_console:
+        res = S.to_df()
+        for df in res:
+            print(df)
+    
     return S
 
 
 def first_order(A, AB, B):
-    # First order estimator following Saltelli et al. 2010 CPC, normalized by
-    # sample variance
+    """
+    First order estimator following Saltelli et al. 2010 CPC, normalized by
+    sample variance
+    """
     return np.mean(B * (AB - A), axis=0) / np.var(np.r_[A, B], axis=0)
 
 
 def total_order(A, AB, B):
-    # Total order estimator following Saltelli et al. 2010 CPC, normalized by
-    # sample variance
+    """
+    Total order estimator following Saltelli et al. 2010 CPC, normalized by
+    sample variance
+    """
     return 0.5 * np.mean((A - AB) ** 2, axis=0) / np.var(np.r_[A, B], axis=0)
 
 
 def second_order(A, ABj, ABk, BAj, B):
-    # Second order estimator following Saltelli 2002
+    """Second order estimator following Saltelli 2002"""
     Vjk = np.mean(BAj * ABk - A * B, axis=0) / np.var(np.r_[A, B], axis=0)
     Sj = first_order(A, ABj, B)
     Sk = first_order(A, ABk, B)
@@ -153,15 +163,13 @@ def second_order(A, ABj, ABk, BAj, B):
 
 
 def create_Si_dict(D, calc_second_order):
-    # initialize empty dict to store sensitivity indices
+    """initialize empty dict to store sensitivity indices"""
     S = ResultDict((k, np.zeros(D))
                    for k in ('S1', 'S1_conf', 'ST', 'ST_conf'))
 
     if calc_second_order:
-        S['S2'] = np.zeros((D, D))
-        S['S2'][:] = np.nan
-        S['S2_conf'] = np.zeros((D, D))
-        S['S2_conf'][:] = np.nan
+        S['S2'] = np.full((D, D), np.nan)
+        S['S2_conf'] = np.full((D, D), np.nan)
 
     return S
 
@@ -203,9 +211,11 @@ def sobol_parallel(Z, A, AB, BA, B, r, tasks):
 
 
 def create_task_list(D, calc_second_order, n_processors):
-    # Create list with one entry (key, parameter 1, parameter 2) per sobol
-    # index (+conf.). This is used to supply parallel tasks to
-    # multiprocessing.Pool
+    """
+    Create list with one entry (key, parameter 1, parameter 2) per sobol
+    index (+conf.). This is used to supply parallel tasks to
+    multiprocessing.Pool
+    """
     tasks_first_order = [[d, j, None] for j in range(
         D) for d in ('S1', 'S1_conf', 'ST', 'ST_conf')]
 
@@ -232,8 +242,8 @@ def create_task_list(D, calc_second_order, n_processors):
 
 
 def Si_list_to_dict(S_list, D, calc_second_order):
-    # Convert the parallel output into the regular dict format for
-    # printing/returning
+    """Convert the parallel output into the regular dict format for
+    printing/returning"""
     S = create_Si_dict(D, calc_second_order)
     L = []
     for l in S_list:  # first reformat to flatten
@@ -290,11 +300,17 @@ def Si_to_pandas_dict(S_dict):
     idx = None
     second_order = None
     if 'S2' in S_dict:
-        if not problem.get('groups'):
-            names = problem['names']
+        groups = _check_groups(problem)
+        if groups:
+            names, _ = extract_group_names(groups)
         else:
-            _, names = compute_groups_matrix(problem['groups'])
-        idx = list(combinations(names, 2))
+            names = problem.get('names')
+
+        if len(names) > 2:
+            idx = list(combinations(names, 2))
+        else:
+            idx = (names, )
+        
         second_order = {
             'S2': [S_dict['S2'][names.index(i[0]), names.index(i[1])]
                    for i in idx],
@@ -308,14 +324,23 @@ def to_df(self):
     '''Conversion method to Pandas DataFrame. To be attached to ResultDict.
 
     Returns
-    ========
+    --------
     List : of Pandas DataFrames in order of Total, First, Second
+
+    Example
+    -------
+    >>> Si = sobol.analyze(problem, Y, print_to_console=True)
+    >>> total_Si, first_Si, second_Si = Si.to_df()
     '''
     total, first, (idx, second) = Si_to_pandas_dict(self)
-    if not self.problem.get('groups'):
-        names = self.problem['names']
+
+    problem = self.problem
+    groups = _check_groups(problem)
+    if not groups:
+        names = problem.get('names')
     else:
-        _, names = compute_groups_matrix(self.problem['groups'])
+        names, _ = extract_group_names(groups)
+
     ret = [pd.DataFrame(total, index=names),
            pd.DataFrame(first, index=names)]
 
@@ -325,39 +350,13 @@ def to_df(self):
     return ret
 
 
-def print_indices(S, problem, calc_second_order):
-    # Output to console
-    if not problem.get('groups'):
-        title = 'Parameter'
-        names = problem['names']
-        D = problem['num_vars']
-    else:
-        title = 'Group'
-        _, names = compute_groups_matrix(problem['groups'])
-        D = len(names)
-
-    print('%s S1 S1_conf ST ST_conf' % title)
-
-    for j in range(D):
-        print('%s %f %f %f %f' % (names[j], S['S1'][
-            j], S['S1_conf'][j], S['ST'][j], S['ST_conf'][j]))
-
-    if calc_second_order:
-        print('\n%s_1 %s_2 S2 S2_conf' % (title, title))
-
-        for j in range(D):
-            for k in range(j + 1, D):
-                print("%s %s %f %f" % (names[j], names[k],
-                                       S['S2'][j, k], S['S2_conf'][j, k]))
-
-
 def cli_parse(parser):
     parser.add_argument('--max-order', type=int, required=False, default=2,
                         choices=[1, 2],
                         help='Maximum order of sensitivity indices to '
                         'calculate')
     parser.add_argument('-r', '--resamples', type=int, required=False,
-                        default=1000,
+                        default=100,
                         help='Number of bootstrap resamples for Sobol '
                         'confidence intervals')
     parser.add_argument('--parallel', action='store_true', help='Makes '
