@@ -6,8 +6,8 @@ SALib - Sensitivity Analysis Library in Python
   :target: http://salib.readthedocs.io/en/latest/?badge=latest
   :alt: Documentation Status
 
-.. image:: https://travis-ci.org/SALib/SALib.svg?branch=master
-    :target: https://travis-ci.org/SALib/SALib
+.. image:: https://travis-ci.com/SALib/SALib.svg?branch=master
+    :target: https://travis-ci.com/SALib/SALib
     :alt: Continuous Integration Status
 
 .. image:: https://coveralls.io/repos/github/SALib/SALib/badge.svg?branch=master

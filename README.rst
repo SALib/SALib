@@ -227,8 +227,8 @@ License
 Copyright (C) 2012-2019 Jon Herman, Will Usher, and others. Versions v0.5 and
 later are released under the `MIT license <LICENSE.md>`__.
 
-.. |Build Status| image:: https://travis-ci.org/SALib/SALib.svg?branch=master
-   :target: https://travis-ci.org/SALib/SALib
+.. |Build Status| image:: https://travis-ci.com/SALib/SALib.svg?branch=master
+   :target: https://travis-ci.com/SALib/SALib
 .. |Coverage Status| image:: https://img.shields.io/coveralls/SALib/SALib.svg
    :target: https://coveralls.io/r/SALib/SALib
 .. |Code Issues| image:: https://www.quantifiedcode.com/api/v1/project/ed62e70f899e4ec8af4ea6b2212d4b30/badge.svg
