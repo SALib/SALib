@@ -49,6 +49,7 @@ Included methods
 * High-Dimensional Model Representation (HDMR) 
   (`Rabitz et al. 1999 <https://doi.org/10.1016/S0010-4655(98)00152-0>`__, `Li et al. 2010 <https://doi.org/10.1021/jp9096919>`__)
 
+* PAWN (`Pianosi and Wagener 2018 <10.1016/j.envsoft.2018.07.019>`__, `Pianosi and Wagener 2015 <https://doi.org/10.1016/j.envsoft.2015.01.004>`__)
 
 
 **Contributing:** see `here <CONTRIBUTING.md>`__
@@ -162,16 +163,16 @@ If you would like to use our software, please cite it using the following:
 If you use BibTeX, cite using the following entry::
 
     @article{Herman2017,
-    doi = {10.21105/joss.00097},
-    url = {https://doi.org/10.21105/joss.00097},
-    year  = {2017},
-    month = {jan},
-    publisher = {The Open Journal},
-    volume = {2},
-    number = {9},
-    author = {Jon Herman and Will Usher},
-    title = {{SALib}: An open-source Python library for Sensitivity Analysis},
-    journal = {The Journal of Open Source Software}
+      doi = {10.21105/joss.00097},
+      url = {https://doi.org/10.21105/joss.00097},
+      year  = {2017},
+      month = {jan},
+      publisher = {The Open Journal},
+      volume = {2},
+      number = {9},
+      author = {Jon Herman and Will Usher},
+      title = {{SALib}: An open-source Python library for Sensitivity Analysis},
+      journal = {The Journal of Open Source Software}
     }
 
 Projects that use SALib
