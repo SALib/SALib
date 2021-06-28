@@ -5,6 +5,8 @@ https://keepachangelog.com/en/1.0.0/
 
 ## [1.4.0]
 
+Shortlist of changes since v1.3.x
+
 ### Added
 
 - High Dimensional Model Representation (HDMR) method (PR #275)
