@@ -11,7 +11,7 @@ from ..util import (scale_samples, read_param_file,
 
 
 def sample(problem: Dict, N: int, calc_second_order: bool = True,
-           skip_values: int = 1024):
+           skip_values: int = 0):
     """Generates model inputs using Saltelli's extension of the Sobol' sequence.
 
     Returns a NumPy matrix containing the model inputs using Saltelli's sampling
@@ -22,10 +22,13 @@ def sample(problem: Dict, N: int, calc_second_order: bool = True,
     the resulting matrix has ``N * (2D + 2)`` rows. These model inputs are
     intended to be used with :func:`SALib.analyze.sobol.analyze`.
 
-    Raises a UserWarning in cases where sample sizes may be sub-optimal.
-    The convergence properties of the Sobol' sequence requires
+    If `skip_values` is > 0, raises a UserWarning in cases where sample sizes may 
+    be sub-optimal. The convergence properties of the Sobol' sequence requires
     ``N < skip_values`` and that both `N` and `skip_values` are base 2 
-    (e.g., `N = 2^n`).
+    (e.g., ``N = 2^n``). See discussion in [4] for context and information.
+
+    If skipping values, one recommendation is that the largest possible `n` such that
+    ``(2^n)-1 <= N`` is skipped (see [5]).
 
     Parameters
     ----------
@@ -37,7 +40,9 @@ def sample(problem: Dict, N: int, calc_second_order: bool = True,
     calc_second_order : bool
         Calculate second-order sensitivities (default True)
     skip_values : int
-        Number of points in Sobol' sequence to skip (must be an exponent of 2).
+        Number of points in Sobol' sequence to skip, ideally a value of base 2
+        (default 0, see Owen [3] and Discussion [4])
+
 
     References
     ----------
@@ -59,6 +64,12 @@ def sample(problem: Dict, N: int, calc_second_order: bool = True,
            Available at: http://arxiv.org/abs/2008.08051 (Accessed: 20 April 2021).
 
     .. [4] Discussion: https://github.com/scipy/scipy/pull/10844
+           https://github.com/scipy/scipy/pull/10844#issuecomment-673029539
+    
+    .. [5] Johnson, S. G. 
+           Sobol.jl: The Sobol module for Julia
+           https://github.com/stevengj/Sobol.jl
+           
     """
     # bit-shift test to check if `N` == 2**n
     if not ((N & (N-1) == 0) and (N != 0 and N-1 != 0)):
@@ -68,19 +79,20 @@ def sample(problem: Dict, N: int, calc_second_order: bool = True,
         """
         warnings.warn(msg)
 
-    M = skip_values
-    if not ((M & (M-1) == 0) and (M != 0 and M-1 != 0)):
-        msg = f"""
-        Convergence properties of the Sobol' sequence is only valid if
-        `skip_values` ({M}) is equal to `2^m`.
-        """
-        warnings.warn(msg)
+    if skip_values > 0:
+        M = skip_values
+        if not ((M & (M-1) == 0) and (M != 0 and M-1 != 0)):
+            msg = f"""
+            Convergence properties of the Sobol' sequence is only valid if
+            `skip_values` ({M}) is equal to `2^m`.
+            """
+            warnings.warn(msg)
 
-    n_exp = int(math.log(N, 2))
-    m_exp = int(math.log(M, 2))
-    if n_exp >= m_exp:
-        msg = f"Convergence may not be valid as 2^{n_exp} ({N}) is >= 2^{m_exp} ({M})."
-        warnings.warn(msg)
+        n_exp = int(math.log(N, 2))
+        m_exp = int(math.log(M, 2))
+        if n_exp >= m_exp:
+            msg = f"Convergence may not be valid as 2^{n_exp} ({N}) is >= 2^{m_exp} ({M})."
+            warnings.warn(msg)
 
     D = problem['num_vars']
     groups = _check_groups(problem)
