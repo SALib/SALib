@@ -104,12 +104,12 @@ below.
 
 .. code:: python
 
-    param_values = saltelli.sample(problem, 1000)
+    param_values = saltelli.sample(problem, 1024)
 
 Here, :code:`param_values` is a NumPy matrix.  If we run
 :code:`param_values.shape`, we see that the matrix is 8000 by 3.  The Saltelli
 sampler generated 8000 samples.  The Saltelli sampler generates
-:math:`N*(2D+2)` samples, where in this example N is 1000 (the argument we
+:math:`N*(2D+2)` samples, where in this example N is 1024 (the argument we
 supplied) and D is 3 (the number of model inputs). The keyword argument :code:`calc_second_order=False` will exclude second-order indices, resulting in a smaller sample matrix with :math:`N*(D+2)` rows instead.
 
 Run Model

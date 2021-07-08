@@ -33,7 +33,7 @@ Or in the `problem` dictionary:
 
 .. code:: python
 
-    param_values = saltelli.sample(problem, 1000)
+    param_values = saltelli.sample(problem, 1024)
     Y = Ishigami.evaluate(param_values)
     Si = sobol.analyze(problem, Y, print_to_console=True)
 
@@ -69,7 +69,7 @@ In :ref:`basics`, we generate a uniform sample of parameter space.
                    [-3.14159265359, 3.14159265359]]
     }
 
-    param_values = saltelli.sample(problem, 1000)
+    param_values = saltelli.sample(problem, 1024)
 
 SALib is also capable of generating alternate sampling distributions by 
 specifying a :code:`dists` entry in the :code:`problem` specification.
