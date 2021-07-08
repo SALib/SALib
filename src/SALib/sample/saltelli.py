@@ -14,21 +14,40 @@ def sample(problem: Dict, N: int, calc_second_order: bool = True,
            skip_values: int = 0):
     """Generates model inputs using Saltelli's extension of the Sobol' sequence.
 
+    The Sobol' sequence is a popular quasi-random low-discrepancy sequence used
+    to generate uniform samples of parameter space.
+
     Returns a NumPy matrix containing the model inputs using Saltelli's sampling
     scheme. Saltelli's scheme extends the Sobol' sequence in a way to reduce
     the error rates in the resulting sensitivity index calculations. If
-    `calc_second_order` is False, the resulting matrix has ``N * (D + 2)``
-    rows, where ``D`` is the number of parameters. If `calc_second_order` is True,
+    `calc_second_order` is False, the resulting matrix has ``N * (D + 2)`` rows,
+    where ``D`` is the number of parameters. If `calc_second_order` is `True`,
     the resulting matrix has ``N * (2D + 2)`` rows. These model inputs are
     intended to be used with :func:`SALib.analyze.sobol.analyze`.
 
-    If `skip_values` is > 0, raises a UserWarning in cases where sample sizes may 
-    be sub-optimal. The convergence properties of the Sobol' sequence requires
-    ``N < skip_values`` and that both `N` and `skip_values` are base 2 
-    (e.g., ``N = 2^n``). See discussion in [4] for context and information.
+    Notes
+    -----
+    The initial points of the Sobol' sequence has some repetition (see Table 2 
+    in Campolongo [1]), which can be avoided by setting the `skip_values` 
+    parameter. Skipping values reportedly improves the uniformity of samples. It 
+    has been shown, however, that naively skipping values may reduce accuracy, 
+    increasing the number of samples needed to achieve convergence (see Owen [2]). 
+    The previous default `skip_values` value (1024) has been set to 0 for this
+    reason.
 
-    If skipping values, one recommendation is that the largest possible `n` such that
-    ``(2^n)-1 <= N`` is skipped (see [5]).
+    One recommendation is that both `skip_values` and `N` be a power of 2, where 
+    `N` is the desired number of samples (see Owen [2], and discussion in [5] for 
+    further context).
+
+    Failing that, `skip_values` can be set to a value equal to the largest 
+    possible ``(2^n)-1 <= N`` (see [6]).
+
+    In other words:
+
+    ``skip_values := (2^n)-1 <= N``
+
+    The method now raises a UserWarning in cases where ``skip_values > 0`` and 
+    where sample sizes may be sub-optimal.
 
     Parameters
     ----------
@@ -46,30 +65,35 @@ def sample(problem: Dict, N: int, calc_second_order: bool = True,
 
     References
     ----------
-    .. [1] Saltelli, A., 2002.
+    .. [1] Campolongo, F., Saltelli, A., Cariboni, J., 2011.
+           From screening to quantitative sensitivity analysis. A unified approach.
+           Computer Physics Communications 182, 978–988.
+           https://doi.org/10.1016/j.cpc.2010.12.039
+
+    .. [2] Owen, A. B., 2020.
+           On dropping the first Sobol' point.
+           arXiv:2008.08051 [cs, math, stat].
+           Available at: http://arxiv.org/abs/2008.08051 (Accessed: 20 April 2021).
+
+    .. [3] Saltelli, A., 2002.
            Making best use of model evaluations to compute sensitivity indices.
            Computer Physics Communications 145, 280–297.
            https://doi.org/10.1016/S0010-4655(02)00280-1
 
-    .. [2] Sobol', I.M., 2001.
+    .. [4] Sobol', I.M., 2001.
            Global sensitivity indices for nonlinear mathematical models and
            their Monte Carlo estimates.
            Mathematics and Computers in Simulation,
            The Second IMACS Seminar on Monte Carlo Methods 55, 271–280.
            https://doi.org/10.1016/S0378-4754(00)00270-6
 
-    .. [3] Owen, A. B., 2020.
-           On dropping the first Sobol' point.
-           arXiv:2008.08051 [cs, math, stat].
-           Available at: http://arxiv.org/abs/2008.08051 (Accessed: 20 April 2021).
-
-    .. [4] Discussion: https://github.com/scipy/scipy/pull/10844
+    .. [5] Discussion: https://github.com/scipy/scipy/pull/10844
+           https://github.com/scipy/scipy/pull/10844#issuecomment-672186615
            https://github.com/scipy/scipy/pull/10844#issuecomment-673029539
-    
-    .. [5] Johnson, S. G. 
+
+    .. [6] Johnson, S. G.
            Sobol.jl: The Sobol module for Julia
            https://github.com/stevengj/Sobol.jl
-           
     """
     # bit-shift test to check if `N` == 2**n
     if not ((N & (N-1) == 0) and (N != 0 and N-1 != 0)):
