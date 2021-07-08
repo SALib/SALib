@@ -17,7 +17,7 @@ Parameter files can also be comma-delimited if your parameter names or group nam
 **Generate samples** (the `-p` flag is the parameter file)
 ```
 salib sample saltelli \
-     -n 1000 \
+     -n 1024 \
      -p ./src/SALib/test_functions/params/Ishigami.txt \
      -o model_input.txt
 ```
@@ -68,7 +68,7 @@ problem = {
 `groups` is a list of strings specifying the group name to which each variable belongs. The rest of the code stays the same:
 
 ```python
-param_values = saltelli.sample(problem, 1000)
+param_values = saltelli.sample(problem, 1024)
 Y = Ishigami.evaluate(param_values)
 Si = sobol.analyze(problem, Y, print_to_console=True)
 ```
@@ -109,7 +109,7 @@ problem = {
                [-3.14159265359, 3.14159265359]]
 }
 
-param_values = saltelli.sample(problem, 1000)
+param_values = saltelli.sample(problem, 1024)
 ```
 
 SALib is also capable of generating alternate sampling distributions by 

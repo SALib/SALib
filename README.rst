@@ -74,7 +74,7 @@ Procedural approach
     }
 
     # Generate samples
-    param_values = saltelli.sample(problem, 1000)
+    param_values = saltelli.sample(problem, 1024)
 
     # Run model (example)
     Y = Ishigami.evaluate(param_values)
@@ -128,7 +128,7 @@ Chaining calls is supported from SALib v1.4
       'outputs': ['Y']               # name of outputs in expected order
     })
 
-    (sp.sample_saltelli(1000, calc_second_order=True)
+    (sp.sample_saltelli(1024, calc_second_order=True)
        .evaluate(Ishigami.evaluate)
        .analyze_sobol(print_to_console=True))
 
