@@ -11,7 +11,7 @@ from ..util import (scale_samples, read_param_file,
 
 
 def sample(problem: Dict, N: int, calc_second_order: bool = True,
-           skip_values: int = 0):
+           skip_values: int = 1024):
     """Generates model inputs using Saltelli's extension of the Sobol' sequence.
 
     The Sobol' sequence is a popular quasi-random low-discrepancy sequence used
@@ -27,26 +27,21 @@ def sample(problem: Dict, N: int, calc_second_order: bool = True,
 
     Notes
     -----
-    The initial points of the Sobol' sequence has some repetition (see Table 2 
-    in Campolongo [1]), which can be avoided by setting the `skip_values` 
-    parameter. Skipping values reportedly improves the uniformity of samples. It 
-    has been shown, however, that naively skipping values may reduce accuracy, 
-    increasing the number of samples needed to achieve convergence (see Owen [2]). 
-    The previous default `skip_values` value (1024) has been set to 0 for this
-    reason.
+    The initial points of the Sobol' sequence has some repetition (see Table 2
+    in Campolongo [1]), which can be avoided by setting the `skip_values`
+    parameter. Skipping values reportedly improves the uniformity of samples. It
+    has been shown, however, that naively skipping values may reduce accuracy,
+    increasing the number of samples needed to achieve convergence (see Owen [2]).
 
-    One recommendation is that both `skip_values` and `N` be a power of 2, where 
-    `N` is the desired number of samples (see Owen [2], and discussion in [5] for 
+    One recommendation is that both `skip_values` and `N` be a power of 2, where
+    `N` is the desired number of samples (see Owen [2], and discussion in [5] for
     further context).
 
-    Failing that, `skip_values` can be set to a value equal to the largest 
-    possible ``(2^n)-1 <= N`` (see [6]).
+    A separate recommendation is that `skip_values` be set to a value equal to the 
+    largest possible ``(2^m)-1 <= N`` (see [6]). In other words, the user selects
+    an `m` such that `skip_values` is equal to ``(2^m)-1``.
 
-    In other words:
-
-    ``skip_values := (2^n)-1 <= N``
-
-    The method now raises a UserWarning in cases where ``skip_values > 0`` and 
+    The method now raises a UserWarning in cases where ``skip_values > 0`` and
     where sample sizes may be sub-optimal.
 
     Parameters
@@ -60,7 +55,7 @@ def sample(problem: Dict, N: int, calc_second_order: bool = True,
         Calculate second-order sensitivities (default True)
     skip_values : int
         Number of points in Sobol' sequence to skip, ideally a value of base 2
-        (default 0, see Owen [3] and Discussion [4])
+        (default 1024)
 
 
     References
