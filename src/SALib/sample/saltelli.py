@@ -11,7 +11,7 @@ from ..util import (scale_samples, read_param_file,
 
 
 def sample(problem: Dict, N: int, calc_second_order: bool = True,
-           skip_values: int = 1024):
+           skip_values: int = None):
     """Generates model inputs using Saltelli's extension of the Sobol' sequence.
 
     The Sobol' sequence is a popular quasi-random low-discrepancy sequence used
@@ -33,16 +33,15 @@ def sample(problem: Dict, N: int, calc_second_order: bool = True,
     has been shown, however, that naively skipping values may reduce accuracy,
     increasing the number of samples needed to achieve convergence (see Owen [2]).
 
-    One recommendation is that both `skip_values` and `N` be a power of 2, where
-    `N` is the desired number of samples (see Owen [2], and discussion in [5] for
-    further context).
+    A recommendation adopted here is that both `skip_values` and `N` be a power
+    of 2, where `N` is the desired number of samples (see [2] and discussion in
+    [5] for further context). It is also suggested therein that
+    ``skip_values >= N``.
 
-    A separate recommendation is that `skip_values` be set to a value equal to the 
-    largest possible ``(2^m)-1 <= N`` (see [6]). In other words, the user selects
-    an `m` such that `skip_values` is equal to ``(2^m)-1``.
-
-    The method now raises a UserWarning in cases where ``skip_values > 0`` and
-    where sample sizes may be sub-optimal.
+    The method now defaults to setting `skip_values` to a power of two that is
+    ``>= N``. If `skip_values` is provided, the method now raises a UserWarning
+    in cases where sample sizes may be sub-optimal according to the recommendation
+    above.
 
     Parameters
     ----------
@@ -50,12 +49,12 @@ def sample(problem: Dict, N: int, calc_second_order: bool = True,
         The problem definition
     N : int
         The number of samples to generate.
-        Must be an exponent of 2 and < `skip_values`.
+        Ideally a power of 2 and <= `skip_values`.
     calc_second_order : bool
         Calculate second-order sensitivities (default True)
-    skip_values : int
+    skip_values : int or None
         Number of points in Sobol' sequence to skip, ideally a value of base 2
-        (default 1024)
+        (default: a power of 2 >= N, or 16; whichever is greater)
 
 
     References
@@ -85,10 +84,6 @@ def sample(problem: Dict, N: int, calc_second_order: bool = True,
     .. [5] Discussion: https://github.com/scipy/scipy/pull/10844
            https://github.com/scipy/scipy/pull/10844#issuecomment-672186615
            https://github.com/scipy/scipy/pull/10844#issuecomment-673029539
-
-    .. [6] Johnson, S. G.
-           Sobol.jl: The Sobol module for Julia
-           https://github.com/stevengj/Sobol.jl
     """
     # bit-shift test to check if `N` == 2**n
     if not ((N & (N-1) == 0) and (N != 0 and N-1 != 0)):
@@ -98,20 +93,38 @@ def sample(problem: Dict, N: int, calc_second_order: bool = True,
         """
         warnings.warn(msg)
 
-    if skip_values > 0:
+    if skip_values is None:
+        # If not specified, set skip_values to next largest power of 2
+        skip_values = int(2**math.ceil(math.log(1011)/math.log(2)))
+
+        # 16 is arbitrarily selected here to avoid initial points
+        # for very low sample sizes
+        skip_values = max(skip_values, 16)
+
+    elif skip_values > 0:
         M = skip_values
         if not ((M & (M-1) == 0) and (M != 0 and M-1 != 0)):
             msg = f"""
             Convergence properties of the Sobol' sequence is only valid if
-            `skip_values` ({M}) is equal to `2^m`.
+            `skip_values` ({M}) is a power of 2.
             """
             warnings.warn(msg)
 
+        # warning when N > skip_values
+        # (see: https://github.com/scipy/scipy/pull/10844#issuecomment-673029539)
         n_exp = int(math.log(N, 2))
         m_exp = int(math.log(M, 2))
-        if n_exp >= m_exp:
-            msg = f"Convergence may not be valid as 2^{n_exp} ({N}) is >= 2^{m_exp} ({M})."
+        if n_exp > m_exp:
+            msg = (
+                "Convergence may not be valid as the number of requested samples is"
+                f" > `skip_values` ({N} > {M})."
+            )
             warnings.warn(msg)
+    elif skip_values == 0:
+        warnings.warn("Duplicate samples will be taken as no points are skipped.")
+    else:
+        assert isinstance(skip_values, int) and skip_values >= 0, \
+            "`skip_values` must be a positive integer."
 
     D = problem['num_vars']
     groups = _check_groups(problem)
@@ -186,8 +199,8 @@ def cli_parse(parser):
                         choices=[1, 2],
                         help='Maximum order of sensitivity indices \
                            to calculate')
-    parser.add_argument('--skip-values', type=int, required=False, default=1024,
-                        help='Number of sample points to skip (default: 1024)')
+    parser.add_argument('--skip-values', type=int, required=False, default=None,
+                        help='Number of sample points to skip (default: next largest power of 2 from `samples`)')
 
     # hacky way to remove an argument (seed option is not relevant for Saltelli)
     remove_opts = [x for x in parser._actions if x.dest == 'seed']
