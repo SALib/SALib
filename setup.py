@@ -25,4 +25,4 @@ except VersionConflict:
 
 
 if __name__ == "__main__":
-    setup(use_pyscaffold=True, scripts=scripts)
+    setup(scripts=scripts)
