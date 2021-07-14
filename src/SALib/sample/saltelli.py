@@ -95,7 +95,7 @@ def sample(problem: Dict, N: int, calc_second_order: bool = True,
 
     if skip_values is None:
         # If not specified, set skip_values to next largest power of 2
-        skip_values = int(2**math.ceil(math.log(1011)/math.log(2)))
+        skip_values = int(2**math.ceil(math.log(N)/math.log(2)))
 
         # 16 is arbitrarily selected here to avoid initial points
         # for very low sample sizes
