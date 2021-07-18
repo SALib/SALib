@@ -78,10 +78,14 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray, S: int = 10,
     step = (1/S)
     for d_i in range(D):
         seq = np.arange(0, 1+step, step)
-        X_q = np.nanquantile(X[:, d_i], seq)
+        X_di = X[:, d_i]
+        X_q = np.nanquantile(X_di, seq)
 
         for s in range(S):
-            Y_sel = Y[(X[:, d_i] >= X_q[s]) & (X[:, d_i] < X_q[s+1])]
+            Y_sel = Y[(X_di >= X_q[s]) & (X_di < X_q[s+1])]
+            if len(Y_sel) == 0:
+                # no available samples
+                continue
 
             # KD value
             # Function returns a KS object which holds the KS statistic
