@@ -98,11 +98,11 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray, S: int = 10,
             temp_pawn[s, d_i] = ks.statistic 
 
         p_ind = temp_pawn[:, d_i]
-        mins = np.min(p_ind)
-        mean = np.mean(p_ind)
-        med = np.median(p_ind)
-        maxs = np.max(p_ind)
-        cv = np.std(p_ind) / mean
+        mins = np.nanmin(p_ind)
+        mean = np.nanmean(p_ind)
+        med = np.nanmedian(p_ind)
+        maxs = np.nanmax(p_ind)
+        cv = np.nanstd(p_ind) / mean
         results[d_i] = [mins, mean, med, maxs, cv]
 
     Si = ResultDict([
