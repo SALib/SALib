@@ -308,6 +308,63 @@ class ProblemSpec(dict):
 
         return self
 
+    def analyze_parallel(self, func, *args, nprocs=None, **kwargs):
+        """Analyze sampled results using the given function in parallel.
+
+        Parameters
+        ----------
+        func : function,
+            Analysis method to use. The provided function must accept the
+            problem specification as the first parameter, X values if needed,
+            Y values, and return a numpy array.
+
+        *args : list,
+            Additional arguments to be passed to `func`
+
+        nprocs : int,
+            Number of processors to use. Uses all available if not specified.
+
+        **kwargs : dict,
+            Additional keyword arguments passed to `func`
+
+        Returns
+        ----------
+        self : ProblemSpec object
+        """
+        warnings.warn("This is an experimental feature and may not work.")
+
+        if self._results is None:
+            raise RuntimeError("Model not yet evaluated")
+
+        if nprocs is None:
+            nprocs = cpu_count()
+
+        if 'X' in func.__code__.co_varnames:
+            # enforce passing of X if expected
+            func = partial(func, *args, X=self._samples, **kwargs)
+
+        out_cols = self.get('outputs', None)
+        if out_cols is None:
+            if len(self._results.shape) == 1:
+                self['outputs'] = ['Y']
+            else:
+                num_cols = self._results.shape[1]
+                self['outputs'] = [f'Y{i}' for i in range(1, num_cols+1)]
+
+        Yn = len(self['outputs'])
+        if ptqdm_available:
+            # Display progress bar if available
+            res = p_imap(lambda y: func(self, Y=y), [self._results[:, i] for i in range(Yn)], num_cpus=nprocs)
+        else:
+            with Pool(nprocs) as pool:
+                res = list(pool.imap(lambda y: func(self, Y=y), [self._results[:, i] for i in range(Yn)]))
+
+        self._analysis = {}
+        for out, Si in zip(self['outputs'], list(res)):
+            self._analysis[out] = Si
+
+        return self
+
     def to_df(self):
         """Convert results to Pandas DataFrame."""
         an_res = self._analysis
