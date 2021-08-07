@@ -472,11 +472,17 @@ class ProblemSpec(dict):
 
             self.__setattr__(method_name, MethodType(self._method_creator(func, 'analyze'), self))
 
-    def __repr__(self):
+    def __str__(self):
         if self._samples is not None:
-            print('Samples:', self._samples.shape, "\n")
+            nr, nx = self._samples.shape
+            print('Samples:')
+            print(f'\t{nx} parameters:', self['names'])
+            print(f'\t{nr} evaluations', '\n')
         if self._results is not None:
-            print('Outputs:', self._results.shape, "\n")
+            nr, ny = self._results.shape
+            print('Outputs:')
+            print(f"\t{ny} outputs:", self['outputs'])
+            print(f'\t{nr} evaluations', '\n')
         if self._analysis is not None:
             print('Analysis:\n')
             an_res = self._analysis
