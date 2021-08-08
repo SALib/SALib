@@ -368,22 +368,34 @@ class ProblemSpec(dict):
 
         # Cap number of processors used
         Yn = len(self['outputs'])
-        max_procs = cpu_count()
-        if nprocs is None:
-            nprocs = max_procs
+        if Yn == 1:
+            # Only single output, cannot parallelize
+            res = func(self, Y=self._results)
         else:
-            nprocs = min(Yn, nprocs, max_procs)
+            max_procs = cpu_count()
+            if nprocs is None:
+                nprocs = max_procs
+            else:
+                nprocs = min(Yn, nprocs, max_procs)
 
-        if ptqdm_available:
-            # Display progress bar if available
-            res = p_imap(lambda y: func(self, Y=y), [self._results[:, i] for i in range(Yn)], num_cpus=nprocs)
+            if ptqdm_available:
+                # Display progress bar if available
+                res = p_imap(lambda y: func(self, Y=y), 
+                             [self._results[:, i] for i in range(Yn)], 
+                             num_cpus=nprocs)
+            else:
+                with Pool(nprocs) as pool:
+                    res = list(pool.imap(lambda y: func(self, Y=y), 
+                               [self._results[:, i] for i in range(Yn)]))
+
+        # Assign by output name if more than 1 output, otherwise
+        # attach directly
+        if Yn > 1:
+            self._analysis = {}
+            for out, Si in zip(self['outputs'], list(res)):
+                self._analysis[out] = Si
         else:
-            with Pool(nprocs) as pool:
-                res = list(pool.imap(lambda y: func(self, Y=y), [self._results[:, i] for i in range(Yn)]))
-
-        self._analysis = {}
-        for out, Si in zip(self['outputs'], list(res)):
-            self._analysis[out] = Si
+            self._analysis = res
 
         return self
 
@@ -496,12 +508,18 @@ class ProblemSpec(dict):
 
     def __str__(self):
         if self._samples is not None:
-            nr, nx = self._samples.shape
+            arr_shape = self._samples.shape
+            if len(arr_shape) == 1:
+                arr_shape = (arr_shape, 1)
+            nr, nx = arr_shape
             print('Samples:')
             print(f'\t{nx} parameters:', self['names'])
             print(f'\t{nr} evaluations', '\n')
         if self._results is not None:
-            nr, ny = self._results.shape
+            arr_shape = self._results.shape
+            if len(arr_shape) == 1:
+                arr_shape = (arr_shape, 1)
+            nr, ny = arr_shape
             print('Outputs:')
             print(f"\t{ny} outputs:", self['outputs'])
             print(f'\t{nr} evaluations', '\n')
