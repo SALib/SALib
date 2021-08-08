@@ -18,7 +18,7 @@ sp = ProblemSpec({
     'outputs': ['max_P', 'Utility', 'Inertia', 'Reliability']
 })
 
-(sp.sample_saltelli(1000)
+(sp.sample_saltelli(1024)
     .evaluate(lake_problem.evaluate)
     .analyze_sobol())
 

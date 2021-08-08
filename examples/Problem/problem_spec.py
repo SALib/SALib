@@ -33,7 +33,7 @@ if __name__ == '__main__':
 
     # Single core example
     start = time.perf_counter()
-    (sp.sample_saltelli(25000)
+    (sp.sample_saltelli(2**15)
         .evaluate(Ishigami.evaluate)
         .analyze_sobol(calc_second_order=True, conf_level=0.95))
     print("Time taken with 1 core:", time.perf_counter() - start, '\n')
@@ -51,11 +51,11 @@ if __name__ == '__main__':
 
     # Parallel example
     start = time.perf_counter()
-    (sp.sample(saltelli.sample, 25000)
+    (sp.sample(saltelli.sample, 2**15)
          # can specify number of processors to use with `nprocs`
         .evaluate_parallel(Ishigami.evaluate, nprocs=2)
         .analyze(sobol.analyze, calc_second_order=True, conf_level=0.95))
-    print("Time taken with all available cores:", time.perf_counter() - start, '\n')
+    print("Time taken with 2 cores:", time.perf_counter() - start, '\n')
 
     print(sp)
     
