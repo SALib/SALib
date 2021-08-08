@@ -38,16 +38,25 @@ if __name__ == '__main__':
         .analyze_sobol(calc_second_order=True, conf_level=0.95))
     print("Time taken with 1 core:", time.perf_counter() - start, '\n')
 
+    # Same above example, but passing in specific functions
+    # (sp.sample(saltelli.sample, 25000, calc_second_order=True)
+    #     .evaluate(Ishigami.evaluate)
+    #     .analyze(sobol.analyze, calc_second_order=True, conf_level=0.95))
+
     # Samples, model results and analyses can be extracted:
     # print(sp.samples)
     # print(sp.results)
     # print(sp.analysis)
     # print(sp.to_df())
 
-    # Same above, but passing in specific functions
-    # (sp.sample(saltelli.sample, 25000, calc_second_order=True)
-    #     .evaluate(Ishigami.evaluate)
-    #     .analyze(sobol.analyze, calc_second_order=True, conf_level=0.95))
+    # Can set pre-existing samples/results as needed
+    # sp.samples = some_numpy_array
+    # sp.set_samples(some_numpy_array)
+    #
+    # Using method chaining...
+    # (sp.set_samples(some_numpy_array)
+    #    .set_results(some_result_array)
+    #    .analyze_sobol(calc_second_order=True, conf_level=0.95))
 
     # Parallel example
     start = time.perf_counter()
