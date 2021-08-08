@@ -65,7 +65,9 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
 
     """
     if seed:
-        np.random.seed(seed)
+        # Set seed to ensure CIs are the same
+        rng = np.random.default_rng(seed).integers
+
     # determining if groups are defined and adjusting the number
     # of rows in the cross-sampled matrix accordingly
     groups = _check_groups(problem)
@@ -90,7 +92,7 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
     Y = (Y - Y.mean()) / Y.std()
 
     A, B, AB, BA = separate_output_values(Y, D, N, calc_second_order)
-    r = np.random.randint(N, size=(N, num_resamples))
+    r = rng(N, size=(N, num_resamples))
     Z = norm.ppf(0.5 + conf_level / 2)
 
     if not parallel:
