@@ -119,17 +119,19 @@ class ProblemSpec(dict):
 
         return self
 
-    def set_samples(self, samples):
+    def set_samples(self, samples: np.ndarray):
         """Set previous samples used."""
         self.samples = samples
 
         return self
 
-    def set_results(self, results):
+    def set_results(self, results: np.ndarray):
         """Set previously available model results."""
+        if self.samples is not None:
+            assert self.samples.shape[0] == results.shape[0], \
+                "Provided result array does not match existing number of existing samples!"
+
         self.results = results
-        # if self.samples is not None:
-        #     warnings.warn('Existing samples found - make sure these results are for those samples!')
 
         return self
 
