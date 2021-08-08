@@ -67,6 +67,8 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
     if seed:
         # Set seed to ensure CIs are the same
         rng = np.random.default_rng(seed).integers
+    else:
+        rng = np.random.randint
 
     # determining if groups are defined and adjusting the number
     # of rows in the cross-sampled matrix accordingly
