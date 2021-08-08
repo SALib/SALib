@@ -154,6 +154,10 @@ class ProblemSpec(dict):
         ----------
         self : ProblemSpec object
         """
+        if 'nprocs' in kwargs:
+            nprocs = kwargs.pop('nprocs')
+            return self.evaluate_parallel(func, *args, nprocs=nprocs, **kwargs)
+
         self._results = func(self._samples, *args, **kwargs)
 
         return self
@@ -171,7 +175,8 @@ class ProblemSpec(dict):
             its first parameter and must return a numpy array of results.
 
         nprocs : int,
-            Number of processors to use. Uses all available if not specified.
+            Number of processors to use.
+            Capped to the number of available processors.
 
         *args : list,
             Additional arguments to be passed to `func`
@@ -188,8 +193,11 @@ class ProblemSpec(dict):
         if self._samples is None:
             raise RuntimeError("Sampling not yet conducted")
 
+        max_procs = cpu_count()
         if nprocs is None:
-            nprocs = cpu_count()
+            nprocs = max_procs
+        else:
+            nprocs = min(max_procs, nprocs)
 
         # Create wrapped partial function to allow passing of additional args
         tmp_f = self._wrap_func(func, *args, **kwargs)
@@ -285,6 +293,10 @@ class ProblemSpec(dict):
         ----------
         self : ProblemSpec object
         """
+        if 'nprocs' in kwargs:
+            # Call parallel method instead
+            return self.analyze_parallel(func, *args, **kwargs)
+
         if self._results is None:
             raise RuntimeError("Model not yet evaluated")
 
@@ -325,7 +337,8 @@ class ProblemSpec(dict):
             Additional arguments to be passed to `func`
 
         nprocs : int,
-            Number of processors to use. Uses all available if not specified.
+            Number of processors to use.
+            Capped to the number of outputs or available processors.
 
         **kwargs : dict,
             Additional keyword arguments passed to `func`
@@ -338,9 +351,6 @@ class ProblemSpec(dict):
 
         if self._results is None:
             raise RuntimeError("Model not yet evaluated")
-
-        if nprocs is None:
-            nprocs = cpu_count()
 
         if 'X' in func.__code__.co_varnames:
             # enforce passing of X if expected
@@ -356,7 +366,14 @@ class ProblemSpec(dict):
                 num_cols = self._results.shape[1]
                 self['outputs'] = [f'Y{i}' for i in range(1, num_cols+1)]
 
+        # Cap number of processors used
         Yn = len(self['outputs'])
+        max_procs = cpu_count()
+        if nprocs is None:
+            nprocs = max_procs
+        else:
+            nprocs = min(Yn, nprocs, max_procs)
+
         if ptqdm_available:
             # Display progress bar if available
             res = p_imap(lambda y: func(self, Y=y), [self._results[:, i] for i in range(Yn)], num_cpus=nprocs)
@@ -454,6 +471,7 @@ class ProblemSpec(dict):
         return final_res
 
     def _method_creator(self, func, method):
+        """Generate convenience methods for specified `method`."""
         @wraps(func)
         def modfunc(self, *args, **kwargs):
             return getattr(self, method)(func, *args, **kwargs)
