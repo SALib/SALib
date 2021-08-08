@@ -512,7 +512,7 @@ class ProblemSpec(dict):
         if self._samples is not None:
             arr_shape = self._samples.shape
             if len(arr_shape) == 1:
-                arr_shape = (arr_shape, 1)
+                arr_shape = (arr_shape[0], 1)
             nr, nx = arr_shape
             print('Samples:')
             print(f'\t{nx} parameters:', self['names'])
@@ -520,7 +520,7 @@ class ProblemSpec(dict):
         if self._results is not None:
             arr_shape = self._results.shape
             if len(arr_shape) == 1:
-                arr_shape = (arr_shape, 1)
+                arr_shape = (arr_shape[0], 1)
             nr, ny = arr_shape
             print('Outputs:')
             print(f"\t{ny} outputs:", self['outputs'])
