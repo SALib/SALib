@@ -149,6 +149,9 @@ class ProblemSpec(dict):
         *args : list,
             Additional arguments to be passed to `func`
 
+        nprocs : int,
+            If specified, attempts to parallelize model evaluations
+
         **kwargs : dict,
             Additional keyword arguments passed to `func`
 
@@ -277,7 +280,6 @@ class ProblemSpec(dict):
     def analyze(self, func, *args, **kwargs):
         """Analyze sampled results using given function.
 
-
         Parameters
         ----------
         func : function,
@@ -287,6 +289,9 @@ class ProblemSpec(dict):
 
         *args : list,
             Additional arguments to be passed to `func`
+
+        nprocs : int,
+            If specified, attempts to parallelize model evaluations
 
         **kwargs : dict,
             Additional keyword arguments passed to `func`
@@ -382,12 +387,12 @@ class ProblemSpec(dict):
 
             if ptqdm_available:
                 # Display progress bar if available
-                res = p_imap(lambda y: func(self, Y=y), 
-                             [self._results[:, i] for i in range(Yn)], 
+                res = p_imap(lambda y: func(self, Y=y),
+                             [self._results[:, i] for i in range(Yn)],
                              num_cpus=nprocs)
             else:
                 with Pool(nprocs) as pool:
-                    res = list(pool.imap(lambda y: func(self, Y=y), 
+                    res = list(pool.imap(lambda y: func(self, Y=y),
                                [self._results[:, i] for i in range(Yn)]))
 
         # Assign by output name if more than 1 output, otherwise
