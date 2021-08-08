@@ -53,8 +53,10 @@ if __name__ == '__main__':
     start = time.perf_counter()
     (sp.sample(saltelli.sample, 2**15)
          # can specify number of processors to use with `nprocs`
+         # this will be capped to the number of detected processors
+         # or, in the case of analysis, the number of outputs.
         .evaluate_parallel(Ishigami.evaluate, nprocs=2)
-        .analyze(sobol.analyze, calc_second_order=True, conf_level=0.95))
+        .analyze_sobol(calc_second_order=True, conf_level=0.95, nprocs=2))
     print("Time taken with 2 cores:", time.perf_counter() - start, '\n')
 
     print(sp)
@@ -66,7 +68,7 @@ if __name__ == '__main__':
                'localhost:55776')
 
     start = time.perf_counter()
-    (sp.sample(saltelli.sample, 25000)
+    (sp.sample(saltelli.sample, 2**15)
         .evaluate_distributed(Ishigami.evaluate, nprocs=2, servers=servers, verbose=True)
         .analyze(sobol.analyze, calc_second_order=True, conf_level=0.95))
     print("Time taken with distributed cores:", time.perf_counter() - start, '\n')
