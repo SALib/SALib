@@ -291,6 +291,8 @@ class ProblemSpec(dict):
         if 'X' in func.__code__.co_varnames:
             # enforce passing of X if expected
             func = partial(func, *args, X=self._samples, **kwargs)
+        else:
+            func = partial(func, *args, **kwargs)
 
         out_cols = self.get('outputs', None)
         if out_cols is None:
@@ -303,9 +305,9 @@ class ProblemSpec(dict):
         if len(self['outputs']) > 1:
             self._analysis = {}
             for i, out in enumerate(self['outputs']):
-                self._analysis[out] = func(self, *args, Y=self._results[:, i], **kwargs)
+                self._analysis[out] = func(self, Y=self._results[:, i])
         else:
-            self._analysis = func(self, *args, Y=self._results, **kwargs)
+            self._analysis = func(self, Y=self._results)
 
         return self
 
@@ -343,6 +345,8 @@ class ProblemSpec(dict):
         if 'X' in func.__code__.co_varnames:
             # enforce passing of X if expected
             func = partial(func, *args, X=self._samples, **kwargs)
+        else:
+            func = partial(func, *args, **kwargs)
 
         out_cols = self.get('outputs', None)
         if out_cols is None:
@@ -484,7 +488,7 @@ class ProblemSpec(dict):
             print(f"\t{ny} outputs:", self['outputs'])
             print(f'\t{nr} evaluations', '\n')
         if self._analysis is not None:
-            print('Analysis:\n')
+            print('Analysis:')
             an_res = self._analysis
 
             allowed_types = (list, tuple)
