@@ -8,7 +8,6 @@
     Learn more under: https://pyscaffold.org/
 """
 import os
-import sys
 
 from setuptools import setup
 
@@ -19,7 +18,7 @@ if os.name == 'nt':
 if __name__ == "__main__":
     try:
         setup(use_scm_version={"version_scheme": "no-guess-dev"},
-              scripts=scripts)
+              scripts=scripts, setup_requires=["setuptools_scm"])
     except:  # noqa
         print(
             "\n\nAn error occurred while building the project, "
