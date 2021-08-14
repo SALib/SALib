@@ -202,6 +202,8 @@ class ProblemSpec(dict):
         if nprocs is None:
             nprocs = max_procs
         else:
+            if nprocs > max_procs:
+                warnings.warn(f"{nprocs} processors requested but only {max_procs} found.")
             nprocs = min(max_procs, nprocs)
 
         # Create wrapped partial function to allow passing of additional args
@@ -377,6 +379,8 @@ class ProblemSpec(dict):
         Yn = len(self['outputs'])
         if Yn == 1:
             # Only single output, cannot parallelize
+            warnings.warn(f"Analysis was not parallelized: {nprocs} processors requested for 1 output.")
+
             res = func(self, Y=self._results)
         else:
             max_procs = cpu_count()
