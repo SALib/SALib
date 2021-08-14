@@ -55,7 +55,7 @@ def lake_problem(X: FLOAT_OR_ARRAY, a: FLOAT_OR_ARRAY = 0.1, q: FLOAT_OR_ARRAY =
     return X_t1
 
 
-def evaluate_lake(values: np.ndarray) -> np.ndarray:
+def evaluate_lake(values: np.ndarray, seed=101) -> np.ndarray:
     """Evaluate the Lake Problem with an array of parameter values.
 
     .. [1] Hadka, D., Herman, J., Reed, P., Keller, K., (2015).
@@ -86,15 +86,17 @@ def evaluate_lake(values: np.ndarray) -> np.ndarray:
     -------
     np.ndarray, of Phosphorus pollution over time `t`
     """
+    rng = np.random.default_rng(seed)
+
     nvars = values.shape[0]
 
     a, q, b, mean, stdev = values.T
 
     sq_mean = mean**2
     sq_std = stdev**2
-    eps = np.random.lognormal(log(sq_mean / sqrt(sq_std + sq_mean)),
-                              sqrt(log(1.0 + sq_std / sq_mean)),
-                              size=nvars)
+    eps = rng.lognormal(log(sq_mean / sqrt(sq_std + sq_mean)),
+                        sqrt(log(1.0 + sq_std / sq_mean)),
+                        size=nvars)
 
     Y = np.zeros((nvars, nvars))
     for t in range(nvars):
@@ -104,7 +106,7 @@ def evaluate_lake(values: np.ndarray) -> np.ndarray:
     return Y
 
 
-def evaluate(values: np.ndarray, nvars: int = 100):
+def evaluate(values: np.ndarray, nvars: int = 100, seed=101):
     """Evaluate the Lake Problem with an array of parameter values.
 
     Parameters
@@ -126,7 +128,7 @@ def evaluate(values: np.ndarray, nvars: int = 100):
     nsamples = len(a)
     Y = np.empty((nsamples, 4))
     for i in range(nsamples):
-        tmp = evaluate_lake(values[i, :5])
+        tmp = evaluate_lake(values[i, :5], seed=seed)
 
         a_i = a[i]
         q_i = q[i]

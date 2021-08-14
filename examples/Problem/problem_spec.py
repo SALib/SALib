@@ -1,15 +1,15 @@
 """Example showing how to use the ProblemSpec approach.
 
-Showcases method chaining, and parallel model runs using
-all available processors.
+Showcases method chaining, and parallel model runs using 2 processors.
 
 The following caveats apply:
 
-1. Functions passed into `sample`, `analyze`, `evaluate` and `evaluate_*` must 
+1. Functions passed into `sample`, `analyze` and `evaluate` must 
    accept a numpy array of `X` values as the first parameter, and return a 
    numpy array of results.
-2. Parallel evaluation is only beneficial for long-running models
-3. Currently, model results must fit in memory - no on-disk caching is provided.
+2. Parallel evaluation/analysis is only beneficial for long-running models 
+   or large datasets
+3. Currently, results must fit in memory - no on-disk caching is provided.
 """
 
 from SALib.analyze import sobol
@@ -33,10 +33,15 @@ if __name__ == '__main__':
 
     # Single core example
     start = time.perf_counter()
-    (sp.sample_saltelli(25000)
+    (sp.sample_saltelli(2**15)
         .evaluate(Ishigami.evaluate)
         .analyze_sobol(calc_second_order=True, conf_level=0.95))
     print("Time taken with 1 core:", time.perf_counter() - start, '\n')
+
+    # Same above example, but passing in specific functions
+    # (sp.sample(saltelli.sample, 25000, calc_second_order=True)
+    #     .evaluate(Ishigami.evaluate)
+    #     .analyze(sobol.analyze, calc_second_order=True, conf_level=0.95))
 
     # Samples, model results and analyses can be extracted:
     # print(sp.samples)
@@ -44,18 +49,24 @@ if __name__ == '__main__':
     # print(sp.analysis)
     # print(sp.to_df())
 
-    # Same above, but passing in specific functions
-    # (sp.sample(saltelli.sample, 25000, calc_second_order=True)
-    #     .evaluate(Ishigami.evaluate)
-    #     .analyze(sobol.analyze, calc_second_order=True, conf_level=0.95))
+    # Can set pre-existing samples/results as needed
+    # sp.samples = some_numpy_array
+    # sp.set_samples(some_numpy_array)
+    #
+    # Using method chaining...
+    # (sp.set_samples(some_numpy_array)
+    #    .set_results(some_result_array)
+    #    .analyze_sobol(calc_second_order=True, conf_level=0.95))
 
     # Parallel example
     start = time.perf_counter()
-    (sp.sample(saltelli.sample, 25000)
+    (sp.sample(saltelli.sample, 2**15)
          # can specify number of processors to use with `nprocs`
-        .evaluate_parallel(Ishigami.evaluate, nprocs=2)
-        .analyze(sobol.analyze, calc_second_order=True, conf_level=0.95))
-    print("Time taken with all available cores:", time.perf_counter() - start, '\n')
+         # this will be capped to the number of detected processors
+         # or, in the case of analysis, the number of outputs.
+        .evaluate(Ishigami.evaluate, nprocs=2)
+        .analyze_sobol(calc_second_order=True, conf_level=0.95, nprocs=2))
+    print("Time taken with 2 cores:", time.perf_counter() - start, '\n')
 
     print(sp)
     
@@ -66,7 +77,7 @@ if __name__ == '__main__':
                'localhost:55776')
 
     start = time.perf_counter()
-    (sp.sample(saltelli.sample, 25000)
+    (sp.sample(saltelli.sample, 2**15)
         .evaluate_distributed(Ishigami.evaluate, nprocs=2, servers=servers, verbose=True)
         .analyze(sobol.analyze, calc_second_order=True, conf_level=0.95))
     print("Time taken with distributed cores:", time.perf_counter() - start, '\n')
