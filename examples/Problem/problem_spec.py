@@ -1,15 +1,15 @@
 """Example showing how to use the ProblemSpec approach.
 
-Showcases method chaining, and parallel model runs using
-all available processors.
+Showcases method chaining, and parallel model runs using 2 processors.
 
 The following caveats apply:
 
-1. Functions passed into `sample`, `analyze`, `evaluate` and `evaluate_*` must 
+1. Functions passed into `sample`, `analyze` and `evaluate` must 
    accept a numpy array of `X` values as the first parameter, and return a 
    numpy array of results.
-2. Parallel evaluation is only beneficial for long-running models
-3. Currently, model results must fit in memory - no on-disk caching is provided.
+2. Parallel evaluation/analysis is only beneficial for long-running models 
+   or large datasets
+3. Currently, results must fit in memory - no on-disk caching is provided.
 """
 
 from SALib.analyze import sobol
@@ -64,7 +64,7 @@ if __name__ == '__main__':
          # can specify number of processors to use with `nprocs`
          # this will be capped to the number of detected processors
          # or, in the case of analysis, the number of outputs.
-        .evaluate_parallel(Ishigami.evaluate, nprocs=2)
+        .evaluate(Ishigami.evaluate, nprocs=2)
         .analyze_sobol(calc_second_order=True, conf_level=0.95, nprocs=2))
     print("Time taken with 2 cores:", time.perf_counter() - start, '\n')
 
