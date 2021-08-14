@@ -19,7 +19,7 @@ def test_compute_mu_star_confidence():
     Tests that compute mu_star_confidence is computed correctly
     """
 
-    ee = np.array([[2.52, 2.01, 2.30, 0.66, 0.93, 1.3]], dtype=np.float)
+    ee = np.array([[2.52, 2.01, 2.30, 0.66, 0.93, 1.3]], dtype=float)
     num_resamples = 1000
     conf_level = 0.95
     num_vars = 1
@@ -259,7 +259,7 @@ def test_reorganize_output_matrix_decreased():
     model_outputs = np.array([0.97, 0.71, 2.39, 0.97, 2.3, 2.39,
                               1.87, 2.40, 0.87, 2.15, 1.71, 1.54,
                               2.15, 2.17, 1.54, 2.2, 1.87, 1.0],
-                             dtype=np.float)
+                             dtype=float)
     op_vec = model_outputs.reshape(6, 3)
     actual = _reorganize_output_matrix(op_vec, up, lo, increase=False)
     desired = np.array([[0.71, 0.97, 0.87, 2.15, 2.17, 1.87],
@@ -273,14 +273,14 @@ def test_compute_grouped_metric():
     Computes mu_star for 3 variables grouped into 2 groups
     There are six trajectories.
     """
-    group_matrix = np.array([[1, 0], [0, 1], [0, 1]], dtype=np.int)
+    group_matrix = np.array([[1, 0], [0, 1], [0, 1]], dtype=int)
 
     ee = np.array([[2.52, 2.01, 2.30, -0.66, -0.93, -1.30],
                    [-2.00, 0.13, -0.80, 0.25, -0.02, 0.51],
                    [2.00, -0.13, 0.80, -0.25, 0.02, -0.51]])
     mu_star = np.average(np.abs(ee), 1)
     actual = _compute_grouped_metric(mu_star, group_matrix)
-    desired = np.array([1.62, 0.62], dtype=np.float)
+    desired = np.array([1.62, 0.62], dtype=float)
 
     assert_allclose(actual, desired, rtol=1e-1)
 
@@ -299,7 +299,7 @@ def test_compute_grouped_sigma():
     An NA should be returned for all other groups (as opposed to 0, which could
     confuse plotting.morris)
     """
-    group_matrix = np.array([[1, 0], [0, 1], [0, 1]], dtype=np.int)
+    group_matrix = np.array([[1, 0], [0, 1], [0, 1]], dtype=int)
 
     ee = np.array([[2.52, 2.01, 2.30, -0.66, -0.93, -1.30],
                    [-2.00, 0.13, -0.80, 0.25, -0.02, 0.51],
@@ -307,7 +307,7 @@ def test_compute_grouped_sigma():
     sigma = np.std(ee, axis=1, ddof=1)
 
     actual = _compute_grouped_sigma(sigma, group_matrix)
-    desired = np.array([1.79352911, np.NAN], dtype=np.float)
+    desired = np.array([1.79352911, np.NAN], dtype=float)
     assert_allclose(actual, desired, rtol=1e-1)
 
 

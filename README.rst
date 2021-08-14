@@ -145,7 +145,7 @@ Chaining calls is supported from SALib v1.4
 
 The above is equivalent to the procedural approach shown previously.
 
-Also check out the
+Also check out the `FAQ <https://github.com/SALib/SALib/tree/main/FAQ.MD>`__ and
 `examples <https://github.com/SALib/SALib/tree/main/examples>`__ for a
 full description of options for each method.
 
@@ -195,6 +195,7 @@ Software
 * `DAE Tools <http://daetools.com/>`_
 * `agentpy <https://github.com/JoelForamitti/agentpy>`_
 * `uncertainpy <https://github.com/simetenn/uncertainpy>`_
+* `CLIMADA <https://github.com/CLIMADA-project/climada_python>`_
 
 Blogs
 ~~~~~
