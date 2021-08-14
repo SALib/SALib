@@ -5,6 +5,7 @@ from types import MethodType
 from multiprocess import Pool, cpu_count
 from pathos.pp import ParallelPythonPool as pp_Pool
 from functools import partial, wraps
+import itertools as it
 
 import numpy as np
 
@@ -61,7 +62,7 @@ class ProblemSpec(dict):
     @property
     def results(self):
         return self._results
-    
+
     @results.setter
     def results(self, vals):
         val_shape = vals.shape
@@ -85,7 +86,7 @@ class ProblemSpec(dict):
                 raise ValueError(msg)
 
         self._results = vals
-    
+
     @property
     def analysis(self):
         return self._analysis
@@ -99,10 +100,10 @@ class ProblemSpec(dict):
             Sampling method to use. The given function must accept the SALib
             problem specification as the first parameter and return a numpy
             array.
-        
+
         *args : list,
             Additional arguments to be passed to `func`
-        
+
         **kwargs : dict,
             Additional keyword arguments passed to `func`
 
@@ -118,17 +119,19 @@ class ProblemSpec(dict):
 
         return self
 
-    def set_samples(self, samples):
+    def set_samples(self, samples: np.ndarray):
         """Set previous samples used."""
         self.samples = samples
 
         return self
 
-    def set_results(self, results):
+    def set_results(self, results: np.ndarray):
         """Set previously available model results."""
+        if self.samples is not None:
+            assert self.samples.shape[0] == results.shape[0], \
+                "Provided result array does not match existing number of existing samples!"
+
         self.results = results
-        # if self.samples is not None:
-        #     warnings.warn('Existing samples found - make sure these results are for those samples!')
 
         return self
 
@@ -142,10 +145,13 @@ class ProblemSpec(dict):
             The provided function is required to accept a numpy array of
             inputs as its first parameter and must return a numpy array of
             results.
-        
+
         *args : list,
             Additional arguments to be passed to `func`
-        
+
+        nprocs : int,
+            If specified, attempts to parallelize model evaluations
+
         **kwargs : dict,
             Additional keyword arguments passed to `func`
 
@@ -153,10 +159,14 @@ class ProblemSpec(dict):
         ----------
         self : ProblemSpec object
         """
+        if 'nprocs' in kwargs:
+            nprocs = kwargs.pop('nprocs')
+            return self.evaluate_parallel(func, *args, nprocs=nprocs, **kwargs)
+
         self._results = func(self._samples, *args, **kwargs)
 
         return self
-    
+
     def evaluate_parallel(self, func, *args, nprocs=None, **kwargs):
         """Evaluate model locally in parallel.
 
@@ -166,15 +176,16 @@ class ProblemSpec(dict):
         ----------
         func : function,
             Model, or function that wraps a model, to be run in parallel.
-            The provided function needs to accept a numpy array of inputs as 
+            The provided function needs to accept a numpy array of inputs as
             its first parameter and must return a numpy array of results.
-        
+
         nprocs : int,
-            Number of processors to use. Uses all available if not specified.
-        
+            Number of processors to use.
+            Capped to the number of available processors.
+
         *args : list,
             Additional arguments to be passed to `func`
-        
+
         **kwargs : dict,
             Additional keyword arguments passed to `func`
 
@@ -186,9 +197,14 @@ class ProblemSpec(dict):
 
         if self._samples is None:
             raise RuntimeError("Sampling not yet conducted")
-        
+
+        max_procs = cpu_count()
         if nprocs is None:
-            nprocs = cpu_count()
+            nprocs = max_procs
+        else:
+            if nprocs > max_procs:
+                warnings.warn(f"{nprocs} processors requested but only {max_procs} found.")
+            nprocs = min(max_procs, nprocs)
 
         # Create wrapped partial function to allow passing of additional args
         tmp_f = self._wrap_func(func, *args, **kwargs)
@@ -211,7 +227,7 @@ class ProblemSpec(dict):
         """Distribute model evaluation across a cluster.
 
         Usage Conditions:
-        * The provided function needs to accept a numpy array of inputs as 
+        * The provided function needs to accept a numpy array of inputs as
           its first parameter
         * The provided function must return a numpy array of results
 
@@ -219,19 +235,19 @@ class ProblemSpec(dict):
         ----------
         func : function,
             Model, or function that wraps a model, to be run in parallel
-        
+
         nprocs : int,
             Number of processors to use for each node. Defaults to 1.
-        
+
         servers : list[str] or None,
             IP addresses or alias for each server/node to use.
 
         verbose : bool,
             Display job execution statistics. Defaults to False.
-        
+
         *args : list,
             Additional arguments to be passed to `func`
-        
+
         **kwargs : dict,
             Additional keyword arguments passed to `func`
 
@@ -266,17 +282,19 @@ class ProblemSpec(dict):
     def analyze(self, func, *args, **kwargs):
         """Analyze sampled results using given function.
 
-
         Parameters
         ----------
         func : function,
-            Analysis method to use. The provided function must accept the 
-            problem specification as the first parameter, X values if needed, 
+            Analysis method to use. The provided function must accept the
+            problem specification as the first parameter, X values if needed,
             Y values, and return a numpy array.
-        
+
         *args : list,
             Additional arguments to be passed to `func`
-        
+
+        nprocs : int,
+            If specified, attempts to parallelize model evaluations
+
         **kwargs : dict,
             Additional keyword arguments passed to `func`
 
@@ -284,12 +302,18 @@ class ProblemSpec(dict):
         ----------
         self : ProblemSpec object
         """
+        if 'nprocs' in kwargs:
+            # Call parallel method instead
+            return self.analyze_parallel(func, *args, **kwargs)
+
         if self._results is None:
             raise RuntimeError("Model not yet evaluated")
 
         if 'X' in func.__code__.co_varnames:
             # enforce passing of X if expected
             func = partial(func, *args, X=self._samples, **kwargs)
+        else:
+            func = partial(func, *args, **kwargs)
 
         out_cols = self.get('outputs', None)
         if out_cols is None:
@@ -302,9 +326,87 @@ class ProblemSpec(dict):
         if len(self['outputs']) > 1:
             self._analysis = {}
             for i, out in enumerate(self['outputs']):
-                self._analysis[out] = func(self, *args, Y=self._results[:, i], **kwargs)
+                self._analysis[out] = func(self, Y=self._results[:, i])
         else:
-            self._analysis = func(self, *args, Y=self._results, **kwargs)
+            self._analysis = func(self, Y=self._results)
+
+        return self
+
+    def analyze_parallel(self, func, *args, nprocs=None, **kwargs):
+        """Analyze sampled results using the given function in parallel.
+
+        Parameters
+        ----------
+        func : function,
+            Analysis method to use. The provided function must accept the
+            problem specification as the first parameter, X values if needed,
+            Y values, and return a numpy array.
+
+        *args : list,
+            Additional arguments to be passed to `func`
+
+        nprocs : int,
+            Number of processors to use.
+            Capped to the number of outputs or available processors.
+
+        **kwargs : dict,
+            Additional keyword arguments passed to `func`
+
+        Returns
+        ----------
+        self : ProblemSpec object
+        """
+        warnings.warn("This is an experimental feature and may not work.")
+
+        if self._results is None:
+            raise RuntimeError("Model not yet evaluated")
+
+        if 'X' in func.__code__.co_varnames:
+            # enforce passing of X if expected
+            func = partial(func, *args, X=self._samples, **kwargs)
+        else:
+            func = partial(func, *args, **kwargs)
+
+        out_cols = self.get('outputs', None)
+        if out_cols is None:
+            if len(self._results.shape) == 1:
+                self['outputs'] = ['Y']
+            else:
+                num_cols = self._results.shape[1]
+                self['outputs'] = [f'Y{i}' for i in range(1, num_cols+1)]
+
+        # Cap number of processors used
+        Yn = len(self['outputs'])
+        if Yn == 1:
+            # Only single output, cannot parallelize
+            warnings.warn(f"Analysis was not parallelized: {nprocs} processors requested for 1 output.")
+
+            res = func(self, Y=self._results)
+        else:
+            max_procs = cpu_count()
+            if nprocs is None:
+                nprocs = max_procs
+            else:
+                nprocs = min(Yn, nprocs, max_procs)
+
+            if ptqdm_available:
+                # Display progress bar if available
+                res = p_imap(lambda y: func(self, Y=y),
+                             [self._results[:, i] for i in range(Yn)],
+                             num_cpus=nprocs)
+            else:
+                with Pool(nprocs) as pool:
+                    res = list(pool.imap(lambda y: func(self, Y=y),
+                               [self._results[:, i] for i in range(Yn)]))
+
+        # Assign by output name if more than 1 output, otherwise
+        # attach directly
+        if Yn > 1:
+            self._analysis = {}
+            for out, Si in zip(self['outputs'], list(res)):
+                self._analysis[out] = Si
+        else:
+            self._analysis = res
 
         return self
 
@@ -316,9 +418,9 @@ class ProblemSpec(dict):
         elif isinstance(an_res, dict):
             # case where analysis result is a dict of ResultDicts
             return [an.to_df() for an in list(an_res.values())]
-        
+
         raise RuntimeError("Analysis not yet conducted")
-    
+
     def plot(self):
         """Plot results.
 
@@ -346,7 +448,7 @@ class ProblemSpec(dict):
 
         p_width = max(num_cols*3, 5)
         p_height = max(num_rows*3, 6)
-        _, axes = plt.subplots(num_rows, num_cols, sharey=True, 
+        _, axes = plt.subplots(num_rows, num_cols, sharey=True,
                                figsize=(p_width, p_height))
         for res, ax in zip(self._analysis, axes):
             self._analysis[res].plot(ax=ax)
@@ -366,9 +468,9 @@ class ProblemSpec(dict):
         tmp_f = func
         if (len(args) > 0) or (len(kwargs) > 0):
             tmp_f = partial(func, *args, **kwargs)
-        
+
         return tmp_f
-    
+
     def _setup_result_array(self):
         if len(self['outputs']) > 1:
             res_shape = (len(self._samples), len(self['outputs']))
@@ -388,24 +490,25 @@ class ProblemSpec(dict):
             r_len = len(r)
             final_res[i:i+r_len] = r
             i += r_len
-        
+
         return final_res
 
     def _method_creator(self, func, method):
+        """Generate convenience methods for specified `method`."""
         @wraps(func)
         def modfunc(self, *args, **kwargs):
             return getattr(self, method)(func, *args, **kwargs)
-        
+
         return modfunc
 
     def _add_samplers(self):
         """Dynamically add available SALib samplers as ProblemSpec methods."""
         for sampler in avail_approaches(samplers):
             func = getattr(importlib.import_module('SALib.sample.{}'.format(sampler)), 'sample')
-            method_name = "sample_{}".format(sampler.replace('_sampler', ''))            
+            method_name = "sample_{}".format(sampler.replace('_sampler', ''))
 
             self.__setattr__(method_name, MethodType(self._method_creator(func, 'sample'), self))
-    
+
     def _add_analyzers(self):
         """Dynamically add available SALib analyzers as ProblemSpec methods."""
         for analyzer in avail_approaches(analyzers):
@@ -414,13 +517,25 @@ class ProblemSpec(dict):
 
             self.__setattr__(method_name, MethodType(self._method_creator(func, 'analyze'), self))
 
-    def __repr__(self):
+    def __str__(self):
         if self._samples is not None:
-            print('Samples:', self._samples.shape, "\n")
+            arr_shape = self._samples.shape
+            if len(arr_shape) == 1:
+                arr_shape = (arr_shape[0], 1)
+            nr, nx = arr_shape
+            print('Samples:')
+            print(f'\t{nx} parameters:', self['names'])
+            print(f'\t{nr} evaluations', '\n')
         if self._results is not None:
-            print('Outputs:', self._results.shape, "\n")
+            arr_shape = self._results.shape
+            if len(arr_shape) == 1:
+                arr_shape = (arr_shape[0], 1)
+            nr, ny = arr_shape
+            print('Outputs:')
+            print(f"\t{ny} outputs:", self['outputs'])
+            print(f'\t{nr} evaluations', '\n')
         if self._analysis is not None:
-            print('Analysis:\n')
+            print('Analysis:')
             an_res = self._analysis
 
             allowed_types = (list, tuple)
@@ -448,7 +563,7 @@ def _check_spec_attributes(spec: ProblemSpec):
     assert 'bounds' in spec, "Bounds not defined"
     assert len(spec['bounds']) == len(spec['names']), \
         f"""Number of bounds do not match number of names
-        Number of names: 
+        Number of names:
         {len(spec['names'])} | {spec['names']}
         ----------------
         Number of bounds: {len(spec['bounds'])}
