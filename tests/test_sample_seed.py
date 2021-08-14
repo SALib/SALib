@@ -1,3 +1,4 @@
+import pytest
 import numpy as np
 
 from SALib.sample import fast_sampler, finite_diff, latin, saltelli
@@ -29,12 +30,13 @@ def test_morris_sample_seed():
     np.testing.assert_equal(np.any(np.not_equal(sample1,sample2)), True)
 
 
+@pytest.mark.filterwarnings("ignore::UserWarning")
 def test_saltelli_sample_seed():
 
     N, problem = problem_setup()
 
-    sample1 = saltelli.sample(problem, N, calc_second_order=False, skip_values=1000)
-    sample2 = saltelli.sample(problem, N, calc_second_order=False, skip_values=1001)
+    sample1 = saltelli.sample(problem, N, calc_second_order=False, skip_values=1024)
+    sample2 = saltelli.sample(problem, N, calc_second_order=False, skip_values=1025)
 
     np.testing.assert_equal(np.any(np.not_equal(sample1,sample2)), True)
 

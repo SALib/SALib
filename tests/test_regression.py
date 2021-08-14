@@ -1,4 +1,4 @@
-from pytest import fixture
+from pytest import fixture, mark
 
 import numpy as np
 from numpy.testing import assert_allclose
@@ -138,6 +138,7 @@ class TestMorris:
                         rtol=1e-5)
 
 
+@mark.filterwarnings("ignore::UserWarning")
 def test_regression_sobol():
     param_file = 'src/SALib/test_functions/params/Ishigami.txt'
     problem = read_param_file(param_file)
@@ -155,6 +156,7 @@ def test_regression_sobol():
                     0.00, 0.25, 0.00], atol=5e-2, rtol=1e-1)
 
 
+@mark.filterwarnings("ignore::UserWarning")
 def test_regression_sobol_parallel():
     param_file = 'src/SALib/test_functions/params/Ishigami.txt'
     problem = read_param_file(param_file)
@@ -172,6 +174,7 @@ def test_regression_sobol_parallel():
                     0.00, 0.25, 0.00], atol=5e-2, rtol=1e-1)
 
 
+@mark.filterwarnings("ignore::UserWarning")
 def test_regression_sobol_groups():
     problem = {
         'num_vars': 3,
@@ -191,6 +194,7 @@ def test_regression_sobol_groups():
     assert_allclose(Si['S2'][0][1], [0.00], atol=5e-2, rtol=1e-1)
 
 
+@mark.filterwarnings("ignore::UserWarning")
 def test_regression_sobol_groups_dists():
     problem = {
         'num_vars': 3,
@@ -221,6 +225,7 @@ def test_regression_fast():
     Si = fast.analyze(problem, Y, print_to_console=False)
     assert_allclose(Si['S1'], [0.31, 0.44, 0.00], atol=5e-2, rtol=1e-1)
     assert_allclose(Si['ST'], [0.55, 0.44, 0.24], atol=5e-2, rtol=1e-1)
+
 
 def test_regression_hdmr_ishigami():
     param_file = 'src/SALib/test_functions/params/Ishigami.txt'

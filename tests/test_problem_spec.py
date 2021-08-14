@@ -84,6 +84,7 @@ def test_sp_setters():
        .analyze_sobol(calc_second_order=True, conf_level=0.95))
 
 
+@pytest.mark.filterwarnings("ignore::UserWarning")
 def test_parallel_single_output():
     # Create the SALib Problem specification
     sp = ProblemSpec({
@@ -108,6 +109,7 @@ def test_parallel_single_output():
     assert np.testing.assert_equal(sp.analysis, psp.analysis) is None, "Analysis results not equal!"
 
 
+@pytest.mark.filterwarnings("ignore::UserWarning")
 def test_parallel_multi_output():
     from SALib.test_functions import lake_problem
 
