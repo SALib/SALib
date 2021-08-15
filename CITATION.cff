@@ -1,0 +1,14 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Herman"
+  given-names: "Jon"
+  orcid: "0000-0002-4081-3175"
+- family-names: "Usher"
+  given-names: "Will"
+  orcid: "0000-0001-9367-1791"
+title: "SALib: An open-source Python library for sensitivity analysis"
+version: 1.0
+doi: 10.21105/joss.00097
+date-released: 2017-01-08
+url: "https://github.com/SALib/SALib"
