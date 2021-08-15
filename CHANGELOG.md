@@ -3,6 +3,18 @@
 This changelog follows the format defined at:
 https://keepachangelog.com/en/1.0.0/
 
+## [1.4.1]
+
+- Adjusted Saltelli sampling to follow recommendation of Owen (2020) 
+  (http://arxiv.org/abs/2008.08051; https://github.com/scipy/scipy/pull/10844#issuecomment-672186615)
+- Initial support for parallel analysis
+
+### Documentation
+
+- Updated Salteli sampling examples to use powers of 2 following recommendations
+- Added `citations.cff` file
+
+
 ## [1.4.0]
 
 Shortlist of changes since v1.3.x
