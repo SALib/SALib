@@ -150,7 +150,7 @@ Also check out the `FAQ <https://github.com/SALib/SALib/tree/main/FAQ.MD>`__ and
 full description of options for each method.
 
 
-How to cite SAlib
+How to cite SALib
 -----------------
 
 If you would like to use our software, please cite it using the following:
@@ -219,7 +219,7 @@ Many thanks for using SALib.
 How to contribute
 -----------------
 
-See `here <CONTRIBUTING.md>`__ for how to contribute to SAlib.
+See `here <CONTRIBUTING.md>`__ for how to contribute to SALib.
 
 
 License
