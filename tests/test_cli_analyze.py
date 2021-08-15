@@ -58,7 +58,7 @@ def test_delta():
     comparison = test['expected'].between(lower, upper)
     assert comparison.all(), \
         ("Expected Delta results not within confidence bounds\n"
-         f"+\-: \n{test['delta_conf']}\n"
+         f"+\\-: \n{test['delta_conf']}\n"
          f"Expected: {delta_expected}\n"
          f"Got: {test['delta']}\n"
         )
@@ -69,7 +69,7 @@ def test_delta():
     comparison = test['expected'].between(lower, upper)
     assert comparison.all(), \
         ("Expected Sobol results not within confidence bounds\n"
-         f"+\-: \n{test['S1_conf']}\n"
+         f"+\\-: \n{test['S1_conf']}\n"
          f"Expected: {sobol_expected}\n"
          f"Got: {test['S1']}\n"
         )

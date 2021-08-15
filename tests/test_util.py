@@ -126,7 +126,7 @@ def test_scale_samples():
     bounds = [[10, 20], [-10, 10]]
 
     desired = np.array(
-        [np.arange(10, 21, 1), np.arange(-10, 12, 2)], dtype=np.float).T
+        [np.arange(10, 21, 1), np.arange(-10, 12, 2)], dtype=float).T
     _scale_samples(params, bounds)
     assert_allclose(params, desired, atol=1e-03, rtol=1e-03)
 
