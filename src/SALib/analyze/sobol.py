@@ -94,13 +94,17 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
     Z = norm.ppf(0.5 + conf_level / 2)
 
     if not parallel:
-        S = create_Si_dict(D, calc_second_order)
+        S = create_Si_dict(D, num_resamples, calc_second_order)
 
         for j in range(D):
             S['S1'][j] = first_order(A, AB[:, j], B)
-            S['S1_conf'][j] = Z * first_order(A[r], AB[r, j], B[r]).std(ddof=1)
-            S['ST'][j] = total_order(A, AB[:, j], B)
-            S['ST_conf'][j] = Z * total_order(A[r], AB[r, j], B[r]).std(ddof=1)
+            S1_conf_j = first_order(A[r], AB[r, j], B[r])    #made the result from resamples into a separate variable
+            S['S1_conf_all'][:, j] = S1_conf_j       #this new separate variable can be stored
+            S['S1_conf'][j] = Z * S1_conf_j.std(ddof=1)   #this new separate variable should impact the computational effort
+            S['ST'][j] = total_order(A, AB[:, j], B)    #similar for the total-effect
+            ST_conf_j = total_order(A[r], AB[r, j], B[r])
+            S['ST_conf_all'][:, j] = ST_conf_j
+            S['ST_conf'][j] = Z * ST_conf_j.std(ddof=1)
 
         # Second order (+conf.)
         if calc_second_order:
@@ -162,10 +166,13 @@ def second_order(A, ABj, ABk, BAj, B):
     return Vjk - Sj - Sk
 
 
-def create_Si_dict(D, calc_second_order):
+def create_Si_dict(D, num_resamples, calc_second_order):
     """initialize empty dict to store sensitivity indices"""
     S = ResultDict((k, np.zeros(D))
                    for k in ('S1', 'S1_conf', 'ST', 'ST_conf'))
+    S['S1_conf_all'] = np.zeros((num_resamples, D))
+    S['ST_conf_all'] = np.zeros((num_resamples, D))
+    #Added necessary keys to be able to store the results from each resample
 
     if calc_second_order:
         S['S2'] = np.full((D, D), np.nan)
