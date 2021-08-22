@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from . import common_args
-from ..util import (read_param_file, compute_groups_matrix, ResultDict, 
+from ..util import (read_param_file, compute_groups_matrix, ResultDict,
                     extract_group_names, _check_groups)
 from types import MethodType
 
@@ -15,7 +15,7 @@ from itertools import combinations, zip_longest
 
 def analyze(problem, Y, calc_second_order=True, num_resamples=100,
             conf_level=0.95, print_to_console=False, parallel=False,
-            n_processors=None, seed=None):
+            n_processors=None, keep_resamples=False, seed=None):
     """Perform Sobol Analysis on model outputs.
 
     Returns a dictionary with keys 'S1', 'S1_conf', 'ST', and 'ST_conf', where
@@ -41,6 +41,8 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
         The confidence interval level (default 0.95)
     print_to_console : bool
         Print results directly to console (default False)
+    keep_resamples : bool
+        Whether or not to store intermediate resampling results (default False)
 
     References
     ----------
@@ -98,13 +100,23 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
     Z = norm.ppf(0.5 + conf_level / 2)
 
     if not parallel:
-        S = create_Si_dict(D, calc_second_order)
+        S = create_Si_dict(D, num_resamples, keep_resamples, calc_second_order)
 
         for j in range(D):
             S['S1'][j] = first_order(A, AB[:, j], B)
-            S['S1_conf'][j] = Z * first_order(A[r], AB[r, j], B[r]).std(ddof=1)
+            S1_conf_j = first_order(A[r], AB[r, j], B[r])
+
+            if keep_resamples:
+                S['S1_conf_all'][:, j] = S1_conf_j
+
+            S['S1_conf'][j] = Z * S1_conf_j.std(ddof=1)
             S['ST'][j] = total_order(A, AB[:, j], B)
-            S['ST_conf'][j] = Z * total_order(A[r], AB[r, j], B[r]).std(ddof=1)
+            ST_conf_j = total_order(A[r], AB[r, j], B[r])
+
+            if keep_resamples:
+                S['ST_conf_all'][:, j] = ST_conf_j
+
+            S['ST_conf'][j] = Z * ST_conf_j.std(ddof=1)
 
         # Second order (+conf.)
         if calc_second_order:
@@ -125,9 +137,9 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
         pool.close()
         pool.join()
 
-        S = Si_list_to_dict(S_list.get(), D, calc_second_order)
+        S = Si_list_to_dict(S_list.get(), D, num_resamples,
+                            keep_resamples, calc_second_order)
 
-    
     # Add problem context and override conversion method for special case
     S.problem = problem
     S.to_df = MethodType(to_df, S)
@@ -137,7 +149,7 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
         res = S.to_df()
         for df in res:
             print(df)
-    
+
     return S
 
 
@@ -166,10 +178,15 @@ def second_order(A, ABj, ABk, BAj, B):
     return Vjk - Sj - Sk
 
 
-def create_Si_dict(D, calc_second_order):
+def create_Si_dict(D: int, num_resamples: int, keep_resamples: bool, calc_second_order: bool):
     """initialize empty dict to store sensitivity indices"""
     S = ResultDict((k, np.zeros(D))
                    for k in ('S1', 'S1_conf', 'ST', 'ST_conf'))
+
+    if keep_resamples:
+        # Create entries to store intermediate resampling results
+        S['S1_conf_all'] = np.zeros((num_resamples, D))
+        S['ST_conf_all'] = np.zeros((num_resamples, D))
 
     if calc_second_order:
         S['S2'] = np.full((D, D), np.nan)
@@ -245,10 +262,10 @@ def create_task_list(D, calc_second_order, n_processors):
     return tasks, n_processors
 
 
-def Si_list_to_dict(S_list, D, calc_second_order):
+def Si_list_to_dict(S_list, D: int, num_resamples: int, keep_resamples:bool, calc_second_order: bool):
     """Convert the parallel output into the regular dict format for
     printing/returning"""
-    S = create_Si_dict(D, calc_second_order)
+    S = create_Si_dict(D, num_resamples, keep_resamples, calc_second_order)
     L = []
     for l in S_list:  # first reformat to flatten
         L += l
@@ -314,7 +331,7 @@ def Si_to_pandas_dict(S_dict):
             idx = list(combinations(names, 2))
         else:
             idx = (names, )
-        
+
         second_order = {
             'S2': [S_dict['S2'][names.index(i[0]), names.index(i[1])]
                    for i in idx],
