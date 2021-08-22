@@ -111,7 +111,6 @@ def total_sensitivity_index(a, alpha=None):
 
     pv = _partial_first_order_variance(a, alpha)
     tv = _total_variance(a, alpha)
-    
-    sum_pv = pv.sum(axis=0)
-    
-    return np.subtract(1, np.divide(np.subtract(sum_pv, pv.T), tv))
+    product_pv = np.product(1 + pv, axis=0)
+
+    return np.divide(pv * np.divide(product_pv, 1 + pv.T), tv)
