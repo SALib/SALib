@@ -92,9 +92,9 @@ def test_total_sensitivity_index():
     a = np.array([78, 12, 0.5, 2, 97, 33])
 
     actual = total_sensitivity_index(a)
+    expected = np.array([3.294577e-04, 1.214324e-02, 7.959698e-01, 2.203131e-01,
+                         2.140966e-04, 1.778255e-03])
 
-    expected = np.array([0.030956547, 0.040875287, 0.796423551,
-                         0.222116249, 0.030859879, 0.032170899])
 
     assert_allclose(actual, expected, atol=1e-2, rtol=1e-6)
 
@@ -128,7 +128,7 @@ def test_modified_Sobol_G_error_if_value_beyond_range():
 
     expected_err = "Sobol G function called with delta values less than zero or greater than one"
     with raises(ValueError, match=expected_err):
-        evaluate(parameter_values, delta=delta_values) 
+        evaluate(parameter_values, delta=delta_values)
 
     alpha_values = np.array([0, -0.2, -0.3, 0.4, 0.5, 0.6, 0.7, 0.8])
     expected_err = "Sobol G function called with alpha values less than or equal to zero"
