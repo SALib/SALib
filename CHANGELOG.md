@@ -9,6 +9,7 @@ https://keepachangelog.com/en/1.0.0/
   (http://arxiv.org/abs/2008.08051; https://github.com/scipy/scipy/pull/10844#issuecomment-672186615)
 - Initial support for parallel analysis
 - Updated Sobol' G-function analytic results (PR #464, Issues #335 #461)
+- Sobol' analysis: Optional storage of intermediate resample results to allow analysis of variation (PR #462)
 
 ### Documentation
 
