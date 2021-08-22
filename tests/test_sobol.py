@@ -110,7 +110,7 @@ def test_parallel_first_order():
     Si_list = []
     for t in tasks:
         Si_list.append(sobol.sobol_parallel(Z, A, AB, BA, B, r, t))
-    Si = sobol.Si_list_to_dict(Si_list, D=3, calc_second_order=c2o)
+    Si = sobol.Si_list_to_dict(Si_list, D=3, num_resamples=100, keep_resamples=False, calc_second_order=c2o)
 
     assert_allclose(Si['S1'], [0.31, 0.44, 0.00], atol=5e-2, rtol=1e-1)
     assert_allclose(Si['ST'], [0.55, 0.44, 0.24], atol=5e-2, rtol=1e-1)
@@ -132,7 +132,7 @@ def test_parallel_second_order():
     Si_list = []
     for t in tasks:
         Si_list.append(sobol.sobol_parallel(Z, A, AB, BA, B, r, t))
-    Si = sobol.Si_list_to_dict(Si_list, D=3, calc_second_order=c2o)
+    Si = sobol.Si_list_to_dict(Si_list, D=3, num_resamples=100, keep_resamples=False, calc_second_order=c2o)
 
     assert_allclose(Si['S1'], [0.31, 0.44, 0.00], atol=5e-2, rtol=1e-1)
     assert_allclose(Si['ST'], [0.55, 0.44, 0.24], atol=5e-2, rtol=1e-1)
