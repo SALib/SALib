@@ -1,3 +1,3 @@
 (changelog)=
-```{include} ../ChangeLog.md
+```{include} ../CHANGELOG.md
 ```
