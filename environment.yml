@@ -3,7 +3,14 @@ channels:
   - conda-forge
 dependencies:
   # required
+  - pip
   - numpy>=1.16.5
   - python=3
   - pandas>=1.1.2
   - matplotlib>=3.2.2
+  - scipy>=1.5.2
+  - pathos>=0.2.5
+  - pip:
+    - myst_parser
+    - numpydoc
+    - .
