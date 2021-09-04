@@ -213,8 +213,8 @@ def test_oakley_results():
         'dists': ['norm']*15
     })
 
-    (sp.sample_latin(2048)
-        .evaluate(evaluate, A, M)
+    (sp.sample_latin(2048, seed=101)
+        .evaluate(oakley2004.evaluate, A, M)
         .analyze_rbd_fast(seed=101, num_resamples=100)
     )
 

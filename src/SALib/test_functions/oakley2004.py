@@ -58,7 +58,7 @@ if __name__ == '__main__':
         'dists': ['norm']*15
     })
 
-    (sp.sample_latin(2048)
+    (sp.sample_latin(2048, seed=101)
         .evaluate(evaluate, A, M)
         .analyze_rbd_fast(seed=101, num_resamples=100)
     )
