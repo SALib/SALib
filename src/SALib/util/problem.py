@@ -468,16 +468,14 @@ class ProblemSpec(dict):
 
         return tmp_f
 
-    def _setup_result_array(self):
-        if len(self['outputs']) > 1:
-            res_shape = (len(self._samples), len(self['outputs']))
+    def _collect_results(self, res):
+        res_shape = res[0].shape
+        if len(res_shape) > 1:
+            res_shape = (len(self._samples), len(res_shape))
         else:
             res_shape = len(self._samples)
 
-        return np.empty(res_shape)
-
-    def _collect_results(self, res):
-        final_res = self._setup_result_array()
+        final_res = np.empty(res_shape)
 
         # Collect results
         # Cannot enumerate over this as the length
