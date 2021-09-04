@@ -66,14 +66,12 @@ class ProblemSpec(dict):
     @results.setter
     def results(self, vals):
         val_shape = vals.shape
-
         if len(val_shape) == 1:
             cols = 1
         else:
             cols = vals.shape[1]
 
         out_cols = self.get('outputs', None)
-
         if out_cols is None:
             if cols == 1:
                 self['outputs'] = ['Y']
