@@ -13,10 +13,10 @@ def evaluate(values, a=None, delta=None, alpha=None):
 
     Reverts to original Sobol G-function if delta and alpha are not given.
 
-    .. [1] Saltelli, A., Annoni, P., Azzini, I., Campolongo, F., Ratto, M., 
-           Tarantola, S., 2010. Variance based sensitivity analysis of model 
-           output. Design and estimator for the total sensitivity index. 
-           Computer Physics Communications 181, 259–270. 
+    .. [1] Saltelli, A., Annoni, P., Azzini, I., Campolongo, F., Ratto, M.,
+           Tarantola, S., 2010. Variance based sensitivity analysis of model
+           output. Design and estimator for the total sensitivity index.
+           Computer Physics Communications 181, 259–270.
            https://doi.org/10.1016/j.cpc.2009.09.018
 
     Parameters
@@ -36,7 +36,7 @@ def evaluate(values, a=None, delta=None, alpha=None):
     """
     if type(values) != np.ndarray:
         raise TypeError("The argument `values` must be a numpy ndarray")
-  
+
     if a is None:
         a = np.array([0, 1, 4.5, 9, 99, 99, 99, 99])
 
@@ -81,14 +81,13 @@ def evaluate(values, a=None, delta=None, alpha=None):
     return Y
 
 
-
 def _partial_first_order_variance(a=None, alpha=None):
     if a is None:
         a = [0, 1, 4.5, 9, 99, 99, 99, 99]
     if alpha is None:
         alpha = np.ones_like(a)
     a = np.array(a)
-    
+
     return np.divide((alpha**2), np.multiply((1 + 2 * alpha), np.square(1 + a)))
 
 
@@ -109,10 +108,9 @@ def sensitivity_index(a, alpha=None):
 
 def total_sensitivity_index(a, alpha=None):
     a = np.array(a)
-    
+
     pv = _partial_first_order_variance(a, alpha)
     tv = _total_variance(a, alpha)
-    
-    sum_pv = pv.sum(axis=0)
-    
-    return np.subtract(1, np.divide(np.subtract(sum_pv, pv.T), tv))
+    product_pv = np.product(1 + pv, axis=0)
+
+    return np.divide(pv * np.divide(product_pv, 1 + pv.T), tv)

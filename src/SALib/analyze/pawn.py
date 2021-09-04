@@ -4,12 +4,12 @@ import numpy as np
 from scipy.stats import ks_2samp
 
 from . import common_args
-from ..util import (read_param_file, ResultDict, 
+from ..util import (read_param_file, ResultDict,
                     extract_group_names, _check_groups)
 
 
-def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray, S: int = 10, 
-            print_to_console: bool = False, 
+def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray, S: int = 10,
+            print_to_console: bool = False,
             seed: int = None):
     """Performs PAWN sensitivity analysis.
 
@@ -21,6 +21,10 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray, S: int = 10,
     Compatible with
     ---------------
     * all samplers
+
+    Notes
+    -----
+    This implementation ignores all NaNs.
 
     Parameters
     ----------
@@ -39,19 +43,24 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray, S: int = 10,
 
     References
     ----------
-    .. [1] Pianosi, F., Wagener, T., 2015. 
-           A simple and efficient method for global sensitivity analysis 
-           based on cumulative distribution functions. 
-           Environmental Modelling & Software 67, 1–11. 
+    .. [1] Pianosi, F., Wagener, T., 2015.
+           A simple and efficient method for global sensitivity analysis
+           based on cumulative distribution functions.
+           Environmental Modelling & Software 67, 1–11.
            https://doi.org/10.1016/j.envsoft.2015.01.004
 
-    .. [2] Baroni, G., Francke, T., 2020.
-           An effective strategy for combining variance- and 
+    .. [2] Pianosi, F., Wagener, T., 2018.
+           Distribution-based sensitivity analysis from a generic input-output sample.
+           Environmental Modelling & Software 108, 197–207.
+           https://doi.org/10.1016/j.envsoft.2018.07.019
+
+    .. [3] Baroni, G., Francke, T., 2020.
+           An effective strategy for combining variance- and
            distribution-based global sensitivity analysis.
            Environmental Modelling & Software, 134, 104851.
            https://doi.org/10.1016/j.envsoft.2020.104851
 
-    .. [3] Baroni, G., Francke, T., 2020.
+    .. [4] Baroni, G., Francke, T., 2020.
            GSA-cvd
            Combining variance- and distribution-based global sensitivity analysis
            https://github.com/baronig/GSA-cvd
@@ -78,27 +87,31 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray, S: int = 10,
     step = (1/S)
     for d_i in range(D):
         seq = np.arange(0, 1+step, step)
-        X_q = np.nanquantile(X[:, d_i], seq)
+        X_di = X[:, d_i]
+        X_q = np.nanquantile(X_di, seq)
 
         for s in range(S):
-            Y_sel = Y[(X[:, d_i] >= X_q[s]) & (X[:, d_i] < X_q[s+1])]
+            Y_sel = Y[(X_di >= X_q[s]) & (X_di < X_q[s+1])]
+            if len(Y_sel) == 0:
+                # no available samples
+                continue
 
             # KD value
             # Function returns a KS object which holds the KS statistic
             # and p-value
             # Note from scipy documentation:
-            # if the K-S statistic is small or the p-value is high, then 
-            # we cannot reject the hypothesis that the distributions of 
+            # if the K-S statistic is small or the p-value is high, then
+            # we cannot reject the hypothesis that the distributions of
             # the two samples are the same.
             ks = ks_2samp(Y_sel, Y)
-            temp_pawn[s, d_i] = ks.statistic 
+            temp_pawn[s, d_i] = ks.statistic
 
         p_ind = temp_pawn[:, d_i]
-        mins = np.min(p_ind)
-        mean = np.mean(p_ind)
-        med = np.median(p_ind)
-        maxs = np.max(p_ind)
-        cv = np.std(p_ind) / mean
+        mins = np.nanmin(p_ind)
+        mean = np.nanmean(p_ind)
+        med = np.nanmedian(p_ind)
+        maxs = np.nanmax(p_ind)
+        cv = np.nanstd(p_ind) / mean
         results[d_i] = [mins, mean, med, maxs, cv]
 
     Si = ResultDict([

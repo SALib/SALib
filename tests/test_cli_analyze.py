@@ -58,7 +58,7 @@ def test_delta():
     comparison = test['expected'].between(lower, upper)
     assert comparison.all(), \
         ("Expected Delta results not within confidence bounds\n"
-         f"+\-: \n{test['delta_conf']}\n"
+         f"+\\-: \n{test['delta_conf']}\n"
          f"Expected: {delta_expected}\n"
          f"Got: {test['delta']}\n"
         )
@@ -69,7 +69,7 @@ def test_delta():
     comparison = test['expected'].between(lower, upper)
     assert comparison.all(), \
         ("Expected Sobol results not within confidence bounds\n"
-         f"+\-: \n{test['S1_conf']}\n"
+         f"+\\-: \n{test['S1_conf']}\n"
          f"Expected: {sobol_expected}\n"
          f"Got: {test['S1']}\n"
         )
@@ -243,7 +243,7 @@ def test_sobol():
     result = subprocess.check_output(analyze_cmd, universal_newlines=True)
     result = re.sub(r'[\n\t\s]*', '', result)
 
-    expected_output = 'STST_confx10.5579470.084460x20.4421890.044082x30.2414020.028068S1S1_confx10.3105760.060494x20.4436530.054648x3-0.0129620.054765S2S2_conf(x1,x2)-0.0143970.084384(x1,x3)0.2462310.103131(x2,x3)0.0005390.064658'
+    expected_output = "STST_confx10.5579470.085851x20.4421890.041396x30.2414020.028607S1S1_confx10.3105760.059615x20.4436530.053436x3-0.0129620.053891S2S2_conf(x1,x2)-0.0143970.083679(x1,x3)0.2462310.103117(x2,x3)0.0005390.064169"
     assert len(result) > 0 and result == expected_output, \
         "Results did not match expected values:\n\n Expected: \n{} \n\n Got: \n{}".format(
             expected_output, result)

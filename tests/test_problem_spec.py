@@ -1,4 +1,5 @@
 import pytest
+import copy
 
 import numpy as np
 
@@ -83,6 +84,58 @@ def test_sp_setters():
        .analyze_sobol(calc_second_order=True, conf_level=0.95))
 
 
-if __name__ == '__main__':
-    test_sp_setters()
+@pytest.mark.filterwarnings("ignore::UserWarning")
+def test_parallel_single_output():
+    # Create the SALib Problem specification
+    sp = ProblemSpec({
+        'names': ['x1', 'x2', 'x3'],
+        'groups': None,
+        'bounds': [[-np.pi, np.pi]]*3,
+        'outputs': ['Y']
+    })
 
+    # Single core example
+    (sp.sample_saltelli(2**8)
+        .evaluate(Ishigami.evaluate)
+        .analyze_sobol(calc_second_order=True, conf_level=0.95, seed=101))
+
+    # Parallel example
+    psp = copy.deepcopy(sp)
+    (psp.sample_saltelli(2**8)
+        .evaluate_parallel(Ishigami.evaluate, nprocs=2)
+        .analyze_sobol(calc_second_order=True, conf_level=0.95, nprocs=2, seed=101))
+
+    assert np.testing.assert_equal(sp.results, psp.results) is None, "Model results not equal!"
+    assert np.testing.assert_equal(sp.analysis, psp.analysis) is None, "Analysis results not equal!"
+
+
+@pytest.mark.filterwarnings("ignore::UserWarning")
+def test_parallel_multi_output():
+    from SALib.test_functions import lake_problem
+
+    # Create the SALib Problem specification
+    sp = ProblemSpec({
+        'names': ['a', 'q', 'b', 'mean', 'stdev', 'delta', 'alpha'],
+        'bounds': [[0.0, 0.1],
+                   [2.0, 4.5],
+                   [0.1, 0.45],
+                   [0.01, 0.05],
+                   [0.001, 0.005],
+                   [0.93, 0.99],
+                   [0.2, 0.5]],
+        'outputs': ['max_P', 'Utility', 'Inertia', 'Reliability']
+    })
+
+    # Single core example
+    (sp.sample_saltelli(2**8)
+        .evaluate(lake_problem.evaluate)
+        .analyze_sobol(calc_second_order=True, conf_level=0.95, seed=101))
+
+    # Parallel example
+    psp = copy.deepcopy(sp)
+    (psp.sample_saltelli(2**8)
+        .evaluate_parallel(lake_problem.evaluate, nprocs=2)
+        .analyze_sobol(calc_second_order=True, conf_level=0.95, nprocs=2, seed=101))
+
+    assert np.testing.assert_equal(sp.results, psp.results) is None, "Model results not equal!"
+    assert np.testing.assert_equal(sp.analysis, psp.analysis) is None, "Analysis results not equal!"

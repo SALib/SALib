@@ -173,7 +173,7 @@ def _compute_grouped_sigma(ungrouped_sigma: np.ndarray,
     """
     sigma_agg = _compute_grouped_metric(ungrouped_sigma, groups)
 
-    sigma = np.zeros(groups.shape[1], dtype=np.float)
+    sigma = np.zeros(groups.shape[1], dtype=float)
     np.copyto(sigma, sigma_agg, where=groups.sum(axis=0) == 1)
     np.copyto(sigma, np.NAN, where=groups.sum(axis=0) != 1)
 
@@ -197,7 +197,7 @@ def _compute_grouped_metric(ungrouped_metric: np.ndarray,
          Mean value for the groups of parameter values
     """
 
-    groups = np.array(groups, dtype=np.bool)
+    groups = np.array(groups, dtype=bool)
 
     mu_star_masked = np.ma.masked_array(ungrouped_metric * groups.T,
                                         mask=(groups ^ 1).T)
