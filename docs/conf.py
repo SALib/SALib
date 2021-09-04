@@ -13,12 +13,6 @@ import sys
 import inspect
 import shutil
 
-# Support markdown
-from recommonmark.parser import CommonMarkParser
-source_parsers = {
-    '.md': CommonMarkParser,
-}
-
 # -- Path setup --------------------------------------------------------------
 
 __location__ = os.path.join(
@@ -56,7 +50,8 @@ try:
     cmd_line_template = (
         "sphinx-apidoc --implicit-namespaces -f -o {outputdir} {moduledir}"
     )
-    cmd_line = cmd_line_template.format(outputdir=output_dir, moduledir=module_dir)
+    cmd_line = cmd_line_template.format(
+        outputdir=output_dir, moduledir=module_dir)
 
     args = cmd_line.split(" ")
     if tuple(sphinx.__version__.split(".")) >= ("1", "7"):
@@ -85,13 +80,17 @@ extensions = [
     "sphinx.ext.ifconfig",
     "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
+    "myst_parser"
 ]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 
 # The suffix of source filenames.
-source_suffix = [".rst", ".md"]
+source_suffix = {
+    '.rst': 'restructuredtext',
+    '.md': 'markdown',
+}
 
 # The encoding of source files.
 # source_encoding = 'utf-8-sig'
@@ -252,7 +251,8 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-    ("index", "user_guide.tex", "SALib Documentation", "Jon Herman, Will Usher and others", "manual")
+    ("index", "user_guide.tex", "SALib Documentation",
+     "Jon Herman, Will Usher and others", "manual")
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
