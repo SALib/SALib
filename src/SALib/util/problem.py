@@ -193,7 +193,7 @@ class ProblemSpec(dict):
         ----------
         self : ProblemSpec object
         """
-        warnings.warn("This is an experimental feature and may not work.")
+        warnings.warn("Parallel evaluation is an experimental feature and may not work.")
 
         if self._samples is None:
             raise RuntimeError("Sampling not yet conducted")
@@ -258,7 +258,7 @@ class ProblemSpec(dict):
         if verbose:
             from pathos.parallel import stats
 
-        warnings.warn("This is an untested experimental feature and may not work.")
+        warnings.warn("Distributed evaluation is an untested experimental feature and may not work.")
 
         workers = pp_Pool(nprocs, servers=servers)
 
@@ -356,7 +356,7 @@ class ProblemSpec(dict):
         ----------
         self : ProblemSpec object
         """
-        warnings.warn("This is an experimental feature and may not work.")
+        warnings.warn("Parallel analysis is an experimental feature and may not work.")
 
         if self._results is None:
             raise RuntimeError("Model not yet evaluated")
