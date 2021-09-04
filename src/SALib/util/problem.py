@@ -66,14 +66,12 @@ class ProblemSpec(dict):
     @results.setter
     def results(self, vals):
         val_shape = vals.shape
-
         if len(val_shape) == 1:
             cols = 1
         else:
             cols = vals.shape[1]
 
         out_cols = self.get('outputs', None)
-
         if out_cols is None:
             if cols == 1:
                 self['outputs'] = ['Y']
@@ -163,7 +161,7 @@ class ProblemSpec(dict):
             nprocs = kwargs.pop('nprocs')
             return self.evaluate_parallel(func, *args, nprocs=nprocs, **kwargs)
 
-        self._results = func(self._samples, *args, **kwargs)
+        self.results = func(self._samples, *args, **kwargs)
 
         return self
 
@@ -193,7 +191,7 @@ class ProblemSpec(dict):
         ----------
         self : ProblemSpec object
         """
-        warnings.warn("This is an experimental feature and may not work.")
+        warnings.warn("Parallel evaluation is an experimental feature and may not work.")
 
         if self._samples is None:
             raise RuntimeError("Sampling not yet conducted")
@@ -219,7 +217,7 @@ class ProblemSpec(dict):
             with Pool(nprocs) as pool:
                 res = list(pool.imap(tmp_f, chunks))
 
-        self._results = self._collect_results(res)
+        self.results = self._collect_results(res)
 
         return self
 
@@ -258,7 +256,7 @@ class ProblemSpec(dict):
         if verbose:
             from pathos.parallel import stats
 
-        warnings.warn("This is an untested experimental feature and may not work.")
+        warnings.warn("Distributed evaluation is an untested experimental feature and may not work.")
 
         workers = pp_Pool(nprocs, servers=servers)
 
@@ -269,7 +267,7 @@ class ProblemSpec(dict):
 
         res = list(workers.map(tmp_f, chunks))
 
-        self._results = self._collect_results(res)
+        self.results = self._collect_results(res)
 
         if verbose:
             print(stats(), '\n')
@@ -356,7 +354,7 @@ class ProblemSpec(dict):
         ----------
         self : ProblemSpec object
         """
-        warnings.warn("This is an experimental feature and may not work.")
+        warnings.warn("Parallel analysis is an experimental feature and may not work.")
 
         if self._results is None:
             raise RuntimeError("Model not yet evaluated")
@@ -462,25 +460,22 @@ class ProblemSpec(dict):
 
         return axes
 
-
     def _wrap_func(self, func, *args, **kwargs):
         # Create wrapped partial function to allow passing of additional args
         tmp_f = func
         if (len(args) > 0) or (len(kwargs) > 0):
-            tmp_f = partial(func, *args, **kwargs)
+            tmp_f = lambda x: func(x, *args, **kwargs)
 
         return tmp_f
 
-    def _setup_result_array(self):
-        if len(self['outputs']) > 1:
-            res_shape = (len(self._samples), len(self['outputs']))
+    def _collect_results(self, res):
+        res_shape = res[0].shape
+        if len(res_shape) > 1:
+            res_shape = (len(self._samples), *res_shape[1:])
         else:
             res_shape = len(self._samples)
 
-        return np.empty(res_shape)
-
-    def _collect_results(self, res):
-        final_res = self._setup_result_array()
+        final_res = np.empty(res_shape)
 
         # Collect results
         # Cannot enumerate over this as the length
