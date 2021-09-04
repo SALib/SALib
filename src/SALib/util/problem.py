@@ -163,7 +163,7 @@ class ProblemSpec(dict):
             nprocs = kwargs.pop('nprocs')
             return self.evaluate_parallel(func, *args, nprocs=nprocs, **kwargs)
 
-        self._results = func(self._samples, *args, **kwargs)
+        self.results = func(self._samples, *args, **kwargs)
 
         return self
 
@@ -219,7 +219,7 @@ class ProblemSpec(dict):
             with Pool(nprocs) as pool:
                 res = list(pool.imap(tmp_f, chunks))
 
-        self._results = self._collect_results(res)
+        self.results = self._collect_results(res)
 
         return self
 
@@ -269,7 +269,7 @@ class ProblemSpec(dict):
 
         res = list(workers.map(tmp_f, chunks))
 
-        self._results = self._collect_results(res)
+        self.results = self._collect_results(res)
 
         if verbose:
             print(stats(), '\n')
