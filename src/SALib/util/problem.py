@@ -460,12 +460,11 @@ class ProblemSpec(dict):
 
         return axes
 
-
     def _wrap_func(self, func, *args, **kwargs):
         # Create wrapped partial function to allow passing of additional args
         tmp_f = func
         if (len(args) > 0) or (len(kwargs) > 0):
-            tmp_f = partial(func, *args, **kwargs)
+            tmp_f = lambda x: func(x, *args, **kwargs)
 
         return tmp_f
 
