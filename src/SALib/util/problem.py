@@ -471,7 +471,7 @@ class ProblemSpec(dict):
     def _collect_results(self, res):
         res_shape = res[0].shape
         if len(res_shape) > 1:
-            res_shape = (len(self._samples), len(res_shape))
+            res_shape = (len(self._samples), *res_shape[1:])
         else:
             res_shape = len(self._samples)
 
