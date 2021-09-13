@@ -26,7 +26,7 @@ What is SALib?
 --------------
 
 SALib is an open source library written in Python for performing
-sensitivity analysis.  SALib provides a decoupled workflow, meaning it does not
+sensitivity analyses.  SALib provides a decoupled workflow, meaning it does not
 directly interface with the mathematical or computational model.  Instead,
 SALib is responsible for generating the model inputs, using one of the
 :code:`sample` functions, and computing the sensitivity indices from the model
