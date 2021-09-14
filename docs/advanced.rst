@@ -41,12 +41,14 @@ Or in the `problem` dictionary:
 But the output is printed by group:
 ::
 
-    Group S1 S1_conf ST ST_conf
-    Group_1 0.307834 0.066424 0.559577 0.082978
-    Group_2 0.444052 0.080255 0.667258 0.060871
-
-    Group_1 Group_2 S2 S2_conf
-    Group_1 Group_2 0.242964 0.124229
+               ST   ST_conf
+Group_1  0.555309  0.084058
+Group_2  0.684332  0.057449
+               S1   S1_conf
+Group_1  0.316696  0.056797
+Group_2  0.456497  0.079049
+                          S2   S2_conf
+(Group_1, Group_2)  0.238909  0.127195
 
 
 Generating alternate distributions
