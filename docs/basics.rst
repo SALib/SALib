@@ -168,7 +168,7 @@ intervals, typically with a confidence level of 95%. Use the keyword argument :c
 
     print(Si['S1'])
 
-    [ 0.30644324  0.44776661 -0.00104936 ]
+    [ 0.316832  0.443763 0.012203 ]
 
 Here, we see that x1 and x2 exhibit first-order sensitivities but x3 appears to
 have no first-order effects.
@@ -177,7 +177,7 @@ have no first-order effects.
 
     print(Si['ST'])
 
-    [ 0.56013728  0.4387225   0.24284474]
+    [ 0.555860  0.441898   0.244675]
 
 If the total-order indices are substantially larger than the first-order
 indices, then there is likely higher-order interactions occurring.  We can look
@@ -185,13 +185,13 @@ at the second-order indices to see these higher-order interactions:
 
 .. code:: python
 
-    print "x1-x2:", Si['S2'][0,1]
-    print "x1-x3:", Si['S2'][0,2]
-    print "x2-x3:", Si['S2'][1,2]
+    print("x1-x2:", Si['S2'][0,1])
+    print("x1-x3:", Si['S2'][0,2])
+    print("x2-x3:", Si['S2'][1,2])
 
-    x1-x2: 0.0155279
-    x1-x3: 0.25484902
-    x2-x3: -0.00995392
+    x1-x2: 0.0092542
+    x1-x3: 0.2381721
+    x2-x3: -0.0048877
 
 We can see there are strong interactions between x1 and x3.  Some computing
 error will appear in the sensitivity indices.  For example, we observe a
