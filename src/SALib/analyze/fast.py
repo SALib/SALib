@@ -92,7 +92,8 @@ def analyze(problem, Y, M=4, num_resamples=100, conf_level=0.95, print_to_consol
 
 def compute_orders(outputs, N, M, omega):
     f = np.fft.fft(outputs)
-    Sp = np.power(np.absolute(f[np.arange(1, int((N + 1) / 2))]) / N, 2)
+    Sp = np.power(np.absolute(f[np.arange(1, math.floor(N / 2))]) / N, 2)
+
     V = 2.0 * np.sum(Sp)
 
     # Calculate first and total order
