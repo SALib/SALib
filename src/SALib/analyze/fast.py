@@ -83,7 +83,7 @@ def analyze(problem, Y, M=4, num_resamples=100, conf_level=0.95, print_to_consol
         S1_d_conf, ST_d_conf = bootstrap(Y_l, N, M, omega_0, num_resamples, conf_level)
         Si['S1_conf'][i] = S1_d_conf
         Si['ST_conf'][i] = ST_d_conf
-    
+
     if print_to_console:
         print(Si.to_df())
 
@@ -153,7 +153,7 @@ def cli_action(args):
     Y = np.loadtxt(args.model_output_file,
                    delimiter=args.delimiter, usecols=(args.column,))
 
-    analyze(problem, Y, M=args.M, num_resamples=args.resamples, 
+    analyze(problem, Y, M=args.M, num_resamples=args.resamples,
             print_to_console=True, seed=args.seed)
 
 
