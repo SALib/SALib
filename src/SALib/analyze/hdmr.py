@@ -46,7 +46,7 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
 
     Compatible with
     ---------------
-    * all samplers
+    all samplers
 
     Parameters
     ----------

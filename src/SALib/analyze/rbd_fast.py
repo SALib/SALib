@@ -19,7 +19,7 @@ def analyze(problem, X, Y, M=10, num_resamples=100, conf_level=0.95, print_to_co
 
     Compatible with
     ---------------
-    * all samplers
+    all samplers
 
     Parameters
     ----------

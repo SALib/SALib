@@ -25,7 +25,7 @@ def analyze(problem, X, Y, second_order=False, print_to_console=False,
 
     Compatible with
     ---------------
-    * `ff`
+    `ff` : :func:`SALib.sample.ff.sample`
 
     Parameters
     ----------

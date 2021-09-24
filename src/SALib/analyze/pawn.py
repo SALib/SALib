@@ -20,7 +20,7 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray, S: int = 10,
 
     Compatible with
     ---------------
-    * all samplers
+    all samplers
 
     Notes
     -----

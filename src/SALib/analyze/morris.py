@@ -19,7 +19,7 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
 
     Compatible with
     ---------------
-    * `morris`
+    `morris` : :func:`SALib.sample.morris.sample`
 
     Parameters
     ----------

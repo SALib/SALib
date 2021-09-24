@@ -25,7 +25,7 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
 
     Compatible with
     ---------------
-    * `saltelli`
+    `saltelli` : :func:`SALib.sample.saltelli.sample`
 
     Parameters
     ----------

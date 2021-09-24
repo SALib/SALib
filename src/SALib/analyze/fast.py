@@ -15,7 +15,7 @@ def analyze(problem, Y, M=4, num_resamples=100, conf_level=0.95, print_to_consol
 
     Compatible with
     ---------------
-    * `fast_sampler`
+    `fast_sampler` : :func:`SALib.sample.fast_sampler.sample`
 
     Parameters
     ----------
