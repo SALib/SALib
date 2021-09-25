@@ -10,6 +10,7 @@ FAST - Fourier Amplitude Sensitivity Test
 .. autofunction:: SALib.sample.fast_sampler.sample
    :noindex:
 
+
 .. autofunction:: SALib.analyze.fast.analyze
    :noindex:
 
@@ -18,6 +19,7 @@ RBD-FAST - Random Balance Designs Fourier Amplitude Sensitivity Test
 
 .. autofunction:: SALib.sample.latin.sample
    :noindex:
+
 
 .. autofunction:: SALib.analyze.rbd_fast.analyze
    :noindex:
@@ -28,14 +30,16 @@ Method of Morris
 .. autofunction:: SALib.sample.morris.sample
    :noindex:
 
+
 .. autofunction:: SALib.analyze.morris.analyze
    :noindex:
 
-Sobol Sensitivity Analysis
+Sobol' Sensitivity Analysis
 --------------------------
 
 .. autofunction:: SALib.sample.saltelli.sample
    :noindex:
+
 
 .. autofunction:: SALib.analyze.sobol.analyze
    :noindex:
@@ -45,6 +49,7 @@ Delta Moment-Independent Measure
 
 .. autofunction:: SALib.sample.latin.sample
    :noindex:
+
 
 .. autofunction:: SALib.analyze.delta.analyze
    :noindex:
@@ -61,11 +66,18 @@ Fractional Factorial
 .. autofunction:: SALib.sample.ff.sample
    :noindex:
 
+
 .. autofunction:: SALib.analyze.ff.analyze
+   :noindex:
+
+PAWN Sensitivity Analysis
+-------------------------
+
+.. autofunction:: SALib.analyze.pawn.analyze
    :noindex:
 
 High-Dimensional Model Representation
 -------------------------------------
 
-.. autofunction:: SALib.analyze.ff.hdmr
+.. autofunction:: SALib.analyze.hdmr.analyze
    :noindex:
