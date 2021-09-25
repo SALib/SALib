@@ -13,9 +13,12 @@ def analyze(problem, Y, M=4, num_resamples=100, conf_level=0.95, print_to_consol
     size D (the number of parameters) containing the indices in the same order
     as the parameter file.
 
-    Compatible with
-    ---------------
-    `fast_sampler` : :func:`SALib.sample.fast_sampler.sample`
+
+    Notes
+    -----
+    Compatible with:
+        `fast_sampler` : :func:`SALib.sample.fast_sampler.sample`
+
 
     Parameters
     ----------
@@ -28,6 +31,7 @@ def analyze(problem, Y, M=4, num_resamples=100, conf_level=0.95, print_to_consol
         the Fourier series decomposition (default 4)
     print_to_console : bool
         Print results directly to console (default False)
+
 
     References
     ----------
@@ -45,11 +49,12 @@ def analyze(problem, Y, M=4, num_resamples=100, conf_level=0.95, print_to_consol
            fast99 - R `sensitivity` package
            https://github.com/cran/sensitivity/blob/master/R/fast99.R
 
+
     Examples
     --------
-    >>> X = fast_sampler.sample(problem, 1000)
-    >>> Y = Ishigami.evaluate(X)
-    >>> Si = fast.analyze(problem, Y, print_to_console=False)
+        >>> X = fast_sampler.sample(problem, 1000)
+        >>> Y = Ishigami.evaluate(X)
+        >>> Si = fast.analyze(problem, Y, print_to_console=False)
     """
     if seed:
         np.random.seed(seed)

@@ -17,9 +17,11 @@ def analyze(problem, X, Y, M=10, num_resamples=100, conf_level=0.95, print_to_co
     size D (the number of parameters) containing the indices in the same order
     as the parameter file.
 
-    Compatible with
-    ---------------
-    all samplers
+    Notes
+    -----
+    Compatible with:
+        all samplers
+
 
     Parameters
     ----------
@@ -34,6 +36,7 @@ def analyze(problem, X, Y, M=10, num_resamples=100, conf_level=0.95, print_to_co
         the Fourier series decomposition (default 10)
     print_to_console : bool
         Print results directly to console (default False)
+
 
     References
     ----------
@@ -56,11 +59,12 @@ def analyze(problem, X, Y, M=10, num_resamples=100, conf_level=0.95, print_to_co
           Journal of Building Performance Simulation.
           doi:10.1080/19401493.2015.1112430
 
+
     Examples
     --------
-    >>> X = latin.sample(problem, 1000)
-    >>> Y = Ishigami.evaluate(X)
-    >>> Si = rbd_fast.analyze(problem, X, Y, print_to_console=False)
+        >>> X = latin.sample(problem, 1000)
+        >>> Y = Ishigami.evaluate(X)
+        >>> Si = rbd_fast.analyze(problem, X, Y, print_to_console=False)
     """
     if seed:
         np.random.seed(seed)

@@ -16,9 +16,12 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
     where each entry is a list of size D (the number of parameters) containing
     the indices in the same order as the parameter file.
 
-    Compatible with
-    ---------------
-    all samplers
+
+    Notes
+    -----
+    Compatible with:
+        all samplers
+
 
     Parameters
     ----------
@@ -35,6 +38,7 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
     print_to_console : bool
         Print results directly to console (default False)
 
+
     References
     ----------
     .. [1] Borgonovo, E. (2007). "A new uncertainty importance measure."
@@ -44,6 +48,7 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
     .. [2] Plischke, E., E. Borgonovo, and C. L. Smith (2013). "Global
            sensitivity measures from given data." European Journal of
            Operational Research, 226(3):536-550, doi:10.1016/j.ejor.2012.11.047.
+
 
     Examples
     --------

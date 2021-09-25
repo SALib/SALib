@@ -23,9 +23,13 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
     indices in the same order as the parameter file.  If calc_second_order is
     True, the dictionary also contains keys 'S2' and 'S2_conf'.
 
-    Compatible with
-    ---------------
-    `saltelli` : :func:`SALib.sample.saltelli.sample`
+
+    Notes
+    -----
+    Compatible with:
+        `saltelli` : :func:`SALib.sample.saltelli.sample`
+
+
 
     Parameters
     ----------
@@ -44,6 +48,7 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
     keep_resamples : bool
         Whether or not to store intermediate resampling results (default False)
 
+
     References
     ----------
     .. [1] Sobol, I. M. (2001).  "Global sensitivity indices for nonlinear
@@ -59,12 +64,12 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
            Computer Physics Communications, 181(2):259-270,
            doi:10.1016/j.cpc.2009.09.018.
 
+
     Examples
     --------
-    >>> X = saltelli.sample(problem, 512)
-    >>> Y = Ishigami.evaluate(X)
-    >>> Si = sobol.analyze(problem, Y, print_to_console=True)
-
+        >>> X = saltelli.sample(problem, 512)
+        >>> Y = Ishigami.evaluate(X)
+        >>> Si = sobol.analyze(problem, Y, print_to_console=True)
     """
     if seed:
         # Set seed to ensure CIs are the same
