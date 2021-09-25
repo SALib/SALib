@@ -80,7 +80,7 @@ def analyze(problem, Y, M=4, num_resamples=100, conf_level=0.95, print_to_consol
         Si['S1'][i] = S1
         Si['ST'][i] = ST
 
-        S1_d_conf, ST_d_conf = bootstrap(Y_l, N, M, omega_0, num_resamples, conf_level)
+        S1_d_conf, ST_d_conf = bootstrap(Y_l, M, num_resamples, conf_level)
         Si['S1_conf'][i] = S1_d_conf
         Si['ST_conf'][i] = ST_d_conf
 
@@ -90,20 +90,25 @@ def analyze(problem, Y, M=4, num_resamples=100, conf_level=0.95, print_to_consol
     return Si
 
 
-def compute_orders(outputs, N, M, omega):
+def compute_orders(outputs: np.ndarray, N: int, M: int, omega: int):
     f = np.fft.fft(outputs)
-    Sp = np.power(np.absolute(f[np.arange(1, math.floor(N / 2))]) / N, 2)
+    Sp = np.power(np.absolute(f[np.arange(1, math.ceil(N / 2))]) / N, 2)
 
     V = 2.0 * np.sum(Sp)
 
     # Calculate first and total order
-    D1 = 2.0 * np.sum(Sp[np.arange(1, M + 1) * int(omega) - 1])
-    Dt = 2.0 * np.sum(Sp[np.arange(int(omega / 2.0))])
+    D1 = 2.0 * np.sum(Sp[np.arange(1, M + 1) * omega - 1])
+    Dt = 2.0 * np.sum(Sp[np.arange(math.floor(omega / 2.0))])
 
     return (D1 / V), (1.0 - Dt / V)
 
 
-def bootstrap(Y, N, M, omega_0, resamples, conf_level):
+def bootstrap(Y: np.ndarray, M: int, resamples: int, conf_level: float):
+    """Compute CIs.
+
+    Infers ``N`` from results of sub-sample ``Y`` and re-estimates omega (ω)
+    Re-estimates omega (ω) for the above ``N``.
+    """
     # Use half of available data each time
     T_data = Y.shape[0]
     n_size = int(T_data * 0.5)
@@ -114,7 +119,10 @@ def bootstrap(Y, N, M, omega_0, resamples, conf_level):
         sample_idx = np.random.choice(T_data, replace=True, size=n_size)
         Y_rs = Y[sample_idx]
 
-        S1, ST = compute_orders(Y_rs, N, M, omega_0)
+        N = len(Y_rs)
+        omega = math.floor((N - 1) / (2 * M))
+
+        S1, ST = compute_orders(Y_rs, N, M, omega)
         res_S1[i] = S1
         res_ST[i] = ST
 
