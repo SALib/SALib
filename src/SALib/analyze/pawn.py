@@ -15,16 +15,18 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray, S: int = 10,
 
     Calculates the min, mean, median, max, and coefficient of variation (CV).
 
-    CV is (standard deviation / mean), and so lower values indicate little change
-    over the slides, and larger values indicate large variations across the slides.
+    CV is (standard deviation / mean), and so lower values indicate little
+    change over the slides, and larger values indicate large variations across
+    the slides.
 
-    Compatible with
-    ---------------
-    * all samplers
 
     Notes
     -----
+    Compatible with:
+        all samplers
+
     This implementation ignores all NaNs.
+
 
     Parameters
     ----------
@@ -40,6 +42,7 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray, S: int = 10,
         Print results directly to console (default False)
     seed : int
         Seed value to ensure deterministic results
+
 
     References
     ----------
@@ -65,11 +68,12 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray, S: int = 10,
            Combining variance- and distribution-based global sensitivity analysis
            https://github.com/baronig/GSA-cvd
 
+
     Examples
     --------
-    >>> X = latin.sample(problem, 1000)
-    >>> Y = Ishigami.evaluate(X)
-    >>> Si = pawn.analyze(problem, X, Y, S=10, print_to_console=False)
+        >>> X = latin.sample(problem, 1000)
+        >>> Y = Ishigami.evaluate(X)
+        >>> Si = pawn.analyze(problem, X, Y, S=10, print_to_console=False)
     """
     if seed:
         np.random.seed(seed)

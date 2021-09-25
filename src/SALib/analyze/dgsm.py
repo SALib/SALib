@@ -14,9 +14,12 @@ def analyze(problem, X, Y, num_resamples=100,
     where each entry is a list of size D (the number of parameters) containing
     the indices in the same order as the parameter file.
 
-    Compatible with
-    ---------------
-    * `finite_diff`
+
+    Notes
+    -----
+    Compatible with:
+        `finite_diff` : :func:`SALib.sample.finite_diff.sample`
+
 
     Parameters
     ----------
@@ -34,12 +37,19 @@ def analyze(problem, X, Y, num_resamples=100,
     print_to_console : bool
         Print results directly to console (default False)
 
+
     References
     ----------
     .. [1] Sobol, I. M. and S. Kucherenko (2009). "Derivative based global
            sensitivity measures and their link with global sensitivity
            indices." Mathematics and Computers in Simulation, 79(10):3009-3017,
            doi:10.1016/j.matcom.2009.01.023.
+
+    Examples
+    --------
+        >>> X = finite_diff.sample(problem, 1000)
+        >>> Y = Ishigami.evaluate(X)
+        >>> Si = dgsm.analyze(problem, Y, print_to_console=False)
     """
     if seed:
         np.random.seed(seed)
@@ -86,7 +96,7 @@ def analyze(problem, X, Y, num_resamples=100,
                                                     bounds[j],
                                                     num_resamples,
                                                     conf_level)
-    
+
     if print_to_console:
         print(S.to_df())
 
@@ -95,7 +105,7 @@ def analyze(problem, X, Y, num_resamples=100,
 
 def calc_vi_stats(base, perturbed, x_delta):
     """Calculate v_i mean and std.
-    
+
     v_i sensitivity measure following Sobol and Kucherenko (2009)
     For comparison, Morris mu* < sqrt(v_i)
 

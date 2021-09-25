@@ -29,7 +29,7 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
     - a N x d matrix of N different d-vectors of model inputs (factors/parameters)
     - a N x 1 vector of corresponding model outputs
 
-    Returns to the user:
+    Returns:
     - each factor's first, second, and third order sensitivity coefficient
       (separated in total, structural and correlative contributions), 
     - an estimate of their 95% confidence intervals (from bootstrap method)
@@ -44,9 +44,14 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
       to a single index (= structural contribution), consistent with their
       values derived from commonly used variance-based GSA methods.
 
-    Compatible with
-    ---------------
-    * all samplers
+
+    Notes
+    -----
+    Compatible with:
+        all samplers
+
+    Contributed by @sahin-abdullah (sahina@uci.edu)
+
 
     Parameters
     ----------
@@ -59,7 +64,7 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
     Y : numpy.array
         The NumPy array containing the model outputs for each row of X
 
-    maxorder : int (1-3, default: 2) 
+    maxorder : int (1-3, default: 2)
         Maximum HDMR expansion order
 
     maxiter : int (1-1000, default: 100)
@@ -82,9 +87,10 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
 
     print_to_console : bool
         Print results directly to console (default False)
-    
+
     seed : bool
         Set a seed value
+
 
     Returns
     -------
@@ -100,9 +106,10 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
         Sa: Uncorrelated contribution
         select: Number of selection (F-Test)
         Em: Result set
-            C1: First order coefficient 
+            C1: First order coefficient
             C2: Second order coefficient
             C3: Third Order coefficient
+
 
     References
     ----------
@@ -111,16 +118,13 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
             Systems with Independent and/or Correlated Inputs", Journal of
             Physical Chemistry A, Vol. 114 (19), pp. 6022 - 6032, 2010,
             https://doi.org/10.1021/jp9096919
-       
+
+
     Examples
     --------
         >>> X = saltelli.sample(problem, 512)
         >>> Y = Ishigami.evaluate(X)
         >>> Si = hdmr.analyze(problem, X, Y, **options)
-
-    Contributed by
-    --------------
-        @sahin-abdullah (sahina@uci.edu)
     """
     # Random Seed
     if seed:

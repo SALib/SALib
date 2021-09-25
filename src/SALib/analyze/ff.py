@@ -23,9 +23,12 @@ def analyze(problem, X, Y, second_order=False, print_to_console=False,
     parameters to the nearest 2**n.  Any results involving dummy parameters
     could indicate a problem with the model runs.
 
-    Compatible with
-    ---------------
-    * `ff`
+
+    Notes
+    -----
+    Compatible with:
+        `ff` : :func:`SALib.sample.ff.sample`
+
 
     Parameters
     ----------
@@ -40,11 +43,13 @@ def analyze(problem, X, Y, second_order=False, print_to_console=False,
     print_to_console: bool, default=False
         Print results directly to console
 
+
     Returns
     -------
     Si: dict
         A dictionary of sensitivity indices, including main effects ``ME``,
         and interaction effects ``IE`` (if ``second_order`` is True)
+
 
     References
     ----------
@@ -54,11 +59,12 @@ def analyze(problem, X, Y, second_order=False, print_to_console=False,
            Wiley, West Sussex, U.K.
            https://dx.doi.org/10.1002/9780470725184
 
+
     Examples
     --------
-    >>> X = sample(problem)
-    >>> Y = X[:, 0] + (0.1 * X[:, 1]) + ((1.2 * X[:, 2]) * (0.2 + X[:, 0]))
-    >>> analyze(problem, X, Y, second_order=True, print_to_console=True)
+        >>> X = sample(problem)
+        >>> Y = X[:, 0] + (0.1 * X[:, 1]) + ((1.2 * X[:, 2]) * (0.2 + X[:, 0]))
+        >>> analyze(problem, X, Y, second_order=True, print_to_console=True)
     """
     if seed:
         np.random.seed(seed)

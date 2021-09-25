@@ -17,9 +17,12 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
     'mu_star_conf', where each entry is a list of parameters containing
     the indices in the same order as the parameter file.
 
-    Compatible with
-    ---------------
-    * `morris`
+
+    Notes
+    -----
+    Compatible with:
+        `morris` : :func:`SALib.sample.morris.sample`
+
 
     Parameters
     ----------
@@ -42,6 +45,7 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
     seed : int
         Seed to generate a random number
 
+
     Returns
     -------
     Si : dict
@@ -52,6 +56,7 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
         - `sigma` - the standard deviation of the elementary effect
         - `mu_star_conf` - the bootstrapped confidence interval
         - `names` - the names of the parameters
+
 
     References
     ----------
@@ -64,13 +69,13 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
            Environmental Modelling & Software, 22(10):1509-1518,
            doi:10.1016/j.envsoft.2006.10.004.
 
+
     Examples
     --------
-    >>> X = morris.sample(problem, 1000, num_levels=4)
-    >>> Y = Ishigami.evaluate(X)
-    >>> Si = morris.analyze(problem, X, Y, conf_level=0.95,
-    >>>                     print_to_console=True, num_levels=4)
-
+        >>> X = morris.sample(problem, 1000, num_levels=4)
+        >>> Y = Ishigami.evaluate(X)
+        >>> Si = morris.analyze(problem, X, Y, conf_level=0.95,
+        >>>                     print_to_console=True, num_levels=4)
     """
     if seed:
         np.random.seed(seed)

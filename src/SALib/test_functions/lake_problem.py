@@ -6,31 +6,37 @@ from scipy.optimize import brentq
 
 FLOAT_OR_ARRAY = Union[float, np.array]
 
-def lake_problem(X: FLOAT_OR_ARRAY, a: FLOAT_OR_ARRAY = 0.1, q: FLOAT_OR_ARRAY = 2.0, 
+
+def lake_problem(X: FLOAT_OR_ARRAY, a: FLOAT_OR_ARRAY = 0.1,
+                 q: FLOAT_OR_ARRAY = 2.0,
                  b: FLOAT_OR_ARRAY = 0.42,
                  eps: FLOAT_OR_ARRAY = 0.02) -> float:
-    """Lake Problem as given in [1] and [2] modified for use as a test function.
+    """Lake Problem as given in Hadka et al., (2015) and Kwakkel (2017)
+    modified for use as a test function.
 
     The `mean` and `stdev` parameters control the log normal distribution of
     natural inflows (`epsilon` in [1] and [2]).
 
+    References
+    ----------
     .. [1] Hadka, D., Herman, J., Reed, P., Keller, K., (2015).
-           "An open source framework for many-objective robust decision making."
-           Environmental Modelling & Software 74, 114–129. 
+           "An open source framework for many-objective robust decision
+                making."
+           Environmental Modelling & Software 74, 114–129.
            doi:10.1016/j.envsoft.2015.07.014
-    
-    .. [2] Kwakkel, J.H, (2017). "The Exploratory Modeling Workbench: An open 
-           source toolkit for exploratory modeling, scenario discovery, and 
+
+    .. [2] Kwakkel, J.H, (2017). "The Exploratory Modeling Workbench: An open
+           source toolkit for exploratory modeling, scenario discovery, and
            (multi-objective) robust decision making."
-           Environmental Modelling & Software 96, 239–250. 
+           Environmental Modelling & Software 96, 239–250.
            doi:10.1016/j.envsoft.2017.06.054
 
-    .. [3] Singh, R., Reed, P., Keller, K., (2015). "Many-objective robust 
-           decision making for managing an ecosystem with a deeply uncertain 
+    .. [3] Singh, R., Reed, P., Keller, K., (2015). "Many-objective robust
+           decision making for managing an ecosystem with a deeply uncertain
            threshold response."
-           Ecology and Society 20. 
+           Ecology and Society 20.
            doi:10.5751/ES-07687-200312
-    
+
     Parameters
     ----------
     X : float or np.ndarray
@@ -58,24 +64,27 @@ def lake_problem(X: FLOAT_OR_ARRAY, a: FLOAT_OR_ARRAY = 0.1, q: FLOAT_OR_ARRAY =
 def evaluate_lake(values: np.ndarray, seed=101) -> np.ndarray:
     """Evaluate the Lake Problem with an array of parameter values.
 
+    References
+    ----------
     .. [1] Hadka, D., Herman, J., Reed, P., Keller, K., (2015).
-           "An open source framework for many-objective robust decision making."
-           Environmental Modelling & Software 74, 114–129. 
+           "An open source framework for many-objective robust decision
+                making."
+           Environmental Modelling & Software 74, 114–129.
            doi:10.1016/j.envsoft.2015.07.014
 
-    .. [2] Singh, R., Reed, P., Keller, K., (2015). "Many-objective robust 
-           decision making for managing an ecosystem with a deeply uncertain 
+    .. [2] Singh, R., Reed, P., Keller, K., (2015). "Many-objective robust
+           decision making for managing an ecosystem with a deeply uncertain
            threshold response."
-           Ecology and Society 20. 
+           Ecology and Society 20.
            doi:10.5751/ES-07687-200312
 
     Parameters
     ----------
-    values : np.ndarray, 
+    values : np.ndarray,
              model inputs in the (column) order of
              a, q, b, mean, stdev
 
-             where 
+             where
              * `a` is rate of anthropogenic pollution
              * `q` is exponent controlling recycling rate
              * `b` is decay rate for phosphorus
@@ -100,7 +109,8 @@ def evaluate_lake(values: np.ndarray, seed=101) -> np.ndarray:
 
     Y = np.zeros((nvars, nvars))
     for t in range(nvars):
-        # First X value will be last Y value (should be 0 as we are filling an array of zeros)
+        # First X value will be last Y value (should be 0 as we are filling
+        # an array of zeros)
         Y[t] = lake_problem(Y[t-1], a, q, b, eps)
 
     return Y
@@ -111,13 +121,13 @@ def evaluate(values: np.ndarray, nvars: int = 100, seed=101):
 
     Parameters
     ----------
-    values : np.ndarray, 
+    values : np.ndarray,
              model inputs in the (column) order of
              a, q, b, mean, stdev, delta, alpha
 
-    nvars : int, 
+    nvars : int,
             number of decision variables to simulate (default: 100)
-    
+
 
     Returns
     -------
@@ -161,7 +171,8 @@ if __name__ == '__main__':
     LAKE_SPEC = {
         'num_vars': 7,
         'names': ['a', 'q', 'b', 'mean', 'stdev', 'delta', 'alpha'],
-        'bounds': [[0.0, 0.1], [2.0, 4.5], [0.1, 0.45], [0.01, 0.05], [0.001, 0.005], [0.93, 0.99], [0.2, 0.5]],
+        'bounds': [[0.0, 0.1], [2.0, 4.5], [0.1, 0.45], [0.01, 0.05],
+                   [0.001, 0.005], [0.93, 0.99], [0.2, 0.5]],
         'outputs': ['max_P', 'Utility', 'Inertia', 'Reliability']
     }
 
