@@ -111,7 +111,7 @@ def bootstrap(Y: np.ndarray, M: int, resamples: int, conf_level: float):
     """
     # Use half of available data each time
     T_data = Y.shape[0]
-    n_size = int(T_data * 0.5)
+    n_size = math.ceil(T_data * 0.5)
 
     res_S1 = np.zeros(resamples)
     res_ST = np.zeros(resamples)
