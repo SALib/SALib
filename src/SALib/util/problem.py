@@ -276,7 +276,6 @@ class ProblemSpec(dict):
 
         return self
 
-
     def analyze(self, func, *args, **kwargs):
         """Analyze sampled results using given function.
 
@@ -300,6 +299,14 @@ class ProblemSpec(dict):
         ----------
         self : ProblemSpec object
         """
+        if self['num_vars'] == 1 or (self['groups'] and len('groups') == 1):
+            msg = (
+                "There is only a single parameter or group defined. There is "
+                "no point in conducting sensitivity analysis as any and all"
+                "effect(s) will be mapped to the single parameter/group."
+            )
+            raise ValueError(msg)
+
         if 'nprocs' in kwargs:
             # Call parallel method instead
             return self.analyze_parallel(func, *args, **kwargs)

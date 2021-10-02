@@ -139,3 +139,41 @@ def test_parallel_multi_output():
 
     assert np.testing.assert_equal(sp.results, psp.results) is None, "Model results not equal!"
     assert np.testing.assert_equal(sp.analysis, psp.analysis) is None, "Analysis results not equal!"
+
+
+
+def test_single_parameter():
+    """Ensures error is raised when attempting to conduct SA on a single parameter."""
+
+    sp = ProblemSpec({
+        'names': ['x1'],
+        'bounds': [[-1, 1]],
+        'outputs': ['Y']
+    })
+
+    def func(X):
+        return X[1] * X[0]
+
+    sp.sample_latin(50)
+    sp.evaluate(func)
+
+    with pytest.raises(ValueError):
+        sp.analyze_hdmr()
+
+def test_single_group():
+    """Ensures error is raised when attempting to conduct SA on a single group."""
+    sp = ProblemSpec({
+        'names': ['x1'],
+        'bounds': [[-1, 1]],
+        'groups': ['G1'],
+        'outputs': ['Y']
+    })
+
+    def func(X):
+        return X[1] * X[0]
+
+    sp.sample_latin(50)
+    sp.evaluate(func)
+
+    with pytest.raises(ValueError):
+        sp.analyze_hdmr()
