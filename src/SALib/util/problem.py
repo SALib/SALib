@@ -38,6 +38,8 @@ class ProblemSpec(dict):
         self._analysis = None
 
         self['num_vars'] = len(self['names'])
+        if 'groups' not in self:
+            self['groups'] = None
 
         self._add_samplers()
         self._add_analyzers()
