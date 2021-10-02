@@ -107,7 +107,7 @@ def bootstrap(Y: np.ndarray, M: int, resamples: int, conf_level: float):
     """Compute CIs.
 
     Infers ``N`` from results of sub-sample ``Y`` and re-estimates omega (ω)
-    Re-estimates omega (ω) for the above ``N``.
+    for the above ``N``.
     """
     # Use half of available data each time
     T_data = Y.shape[0]
@@ -153,7 +153,6 @@ def cli_parse(parser):
                         'confidence intervals')
 
     return parser
-
 
 
 def cli_action(args):

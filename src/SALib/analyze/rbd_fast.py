@@ -40,6 +40,7 @@ def analyze(problem, X, Y, M=10, num_resamples=100, conf_level=0.95, print_to_co
     .. [1] S. Tarantola, D. Gatelli and T. Mara (2006) "Random Balance Designs
           for the Estimation of First Order Global Sensitivity Indices",
           Reliability Engineering and System Safety, 91:6, 717-727
+          https://doi.org/10.1016/j.ress.2005.06.003
 
     .. [2] Elmar Plischke (2010) "An effective algorithm for computing global
           sensitivity indices (EASI) Reliability Engineering & System Safety",
