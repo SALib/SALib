@@ -126,11 +126,11 @@ def sample(problem: Dict, N: int, num_levels: int = 4,
     sample_morris = _sample_morris(problem, N, num_levels)
 
     if optimal_trajectories:
-        if not isinstance(optimal_trajectories, int) or \
-           optimal_trajectories > N:
+        if local_optimization and (not isinstance(optimal_trajectories, int) or
+           optimal_trajectories > N):
             msg = ("optimal_trajectories should be an "
                    f"integer between 2 and {N}")
-            raise TypeError(msg)
+            raise ValueError(msg)
 
         sample_morris = _compute_optimised_trajectories(problem, sample_morris,
                                                         N,
