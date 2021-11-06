@@ -56,17 +56,14 @@ def sample(problem: Dict, N: int, num_levels: int = 4,
     suggest going no higher than 4 from a pool of 100 samples with this "brute
     force" approach.
 
-    Ruano et al., [3] proposed an alternative to this "brute force" approach
-    with an iterative process that maximizes the distance between subgroups of
-    generated trajectories, from which the final set of trajectories are
-    selected, again maximizing the distance between each. The approach is not
-    guarenteed to produce the most optimal spread of trajectories, but are at
-    least locally maximized and significantly reduce the time taken to select
-    trajectories.
-
-     With
-    ``local_optimization = True`` (which is default), it is possible to go
-    higher than the previously suggested 4 from 100.
+    Ruano et al., [3] proposed an alternative approach with an iterative
+    process that maximizes the distance between subgroups of generated
+    trajectories, from which the final set of trajectories are selected, again
+    maximizing the distance between each. The approach is not guaranteed to
+    produce the most optimal spread of trajectories, but are at least locally
+    maximized and significantly reduce the time taken to select trajectories.
+    With ``local_optimization = True`` (which is default), it is possible to
+    go higher than the previously suggested 4 from 100.
 
     Parameters
     ----------
