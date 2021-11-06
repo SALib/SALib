@@ -10,12 +10,30 @@ from ..util import (read_param_file, compute_groups_matrix, ResultDict,
 def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
             num_resamples: int = 100, conf_level: float = 0.95,
             print_to_console: bool = False, num_levels: int = 4,
-            seed=None) -> np.ndarray:
+            seed=None) -> Dict:
     """Perform Morris Analysis on model outputs.
 
-    Returns a dictionary with keys 'mu', 'mu_star', 'sigma', and
-    'mu_star_conf', where each entry is a list of parameters containing
-    the indices in the same order as the parameter file.
+    Returns a result set with keys ``mu``, ``mu_star``, ``sigma``, and
+    ``mu_star_conf``, where each entry corresponds to the parameters
+    defined in the problem spec or parameter file.
+
+    - ``mu`` metric indicates the mean of the distribution
+    - ``mu_star`` metric indicates the mean of the distribution of absolute
+        values
+    - ``sigma`` is the standard deviation of the distribution
+
+    Notes
+    -----
+    When applied with groups, the ``mu`` metric is less reliable as the effect
+    from parameters within a group become averaged out.
+
+    The ``mu_star`` metric avoids this issue as it indicates the mean of the
+    absolute values. If the direction of effects is important, Campolongo et
+    al., [2] suggest comparing ``mu_star`` with ``mu``. If ``mu`` is low
+    and ``mu_star`` is high, then the effects are of different signs.
+
+    ``sigma`` is used as an indicator of interactions between parameters, or
+    groups of parameters.
 
 
     Notes
@@ -60,12 +78,15 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
 
     References
     ----------
-    .. [1] Morris, M. (1991).  "Factorial Sampling Plans for Preliminary
-           Computational Experiments."  Technometrics, 33(2):161-174,
+    .. [1] Morris, M. (1991).
+            "Factorial Sampling Plans for Preliminary
+             Computational Experiments."
+           Technometrics, 33(2):161-174,
            doi:10.1080/00401706.1991.10484804.
 
-    .. [2] Campolongo, F., J. Cariboni, and A. Saltelli (2007).  "An effective
-           screening design for sensitivity analysis of large models."
+    .. [2] Campolongo, F., J. Cariboni, and A. Saltelli (2007).
+            "An effective screening design for sensitivity analysis
+             of large models."
            Environmental Modelling & Software, 22(10):1509-1518,
            doi:10.1016/j.envsoft.2006.10.004.
 
@@ -110,6 +131,7 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
         print(Si.to_df())
 
     return Si
+
 
 def _compute_statistical_outputs(elementary_effects: np.ndarray, num_vars: int,
                                  num_resamples: int, conf_level: float,
