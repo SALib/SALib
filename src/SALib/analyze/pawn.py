@@ -13,8 +13,11 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray, S: int = 10,
             seed: int = None):
     """Performs PAWN sensitivity analysis.
 
-    The PAWN method is a moment-independent approach to Global Sensitivity
-    Analysis (GSA). The distribution of model outputs is examined rather than
+    The PAWN method [1] is a moment-independent approach to Global Sensitivity
+    Analysis (GSA). It is described as producing robust results at relatively
+    low sample sizes (see [2]) for the purpose of factor ranking and screening.
+
+    The distribution of model outputs is examined rather than
     their variation as is typical in other common GSA approaches. The PAWN
     method further distinguishes itself from other moment-independent
     approaches by characterizing outputs by their cumulative distribution
