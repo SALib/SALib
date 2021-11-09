@@ -32,9 +32,10 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray, S: int = 10,
 
     This implementation reports the PAWN index at the min, mean, median, and
     max across the slides/conditioning intervals as well as the coefficient of
-    variation (``CV``). As the ``CV`` is (standard deviation / mean), and
-    indicates the level of variability across the slides, with values closer to
-    zero indicating lower variation.
+    variation (``CV``). The median value is the typically reported value. As
+    the ``CV`` is (standard deviation / mean), it indicates the level of
+    variability across the slides, with values closer to zero indicating lower
+    variation.
 
 
     Notes
