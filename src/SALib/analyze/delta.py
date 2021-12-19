@@ -7,7 +7,7 @@ from . import common_args
 from ..util import read_param_file, ResultDict
 
 
-def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray, 
+def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
             num_resamples: int = 100, conf_level: float = 0.95,
             print_to_console: bool = False, seed: int = None) -> Dict:
     """Perform Delta Moment-Independent Analysis on model outputs.
@@ -32,7 +32,7 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
     Y : numpy.array
         A NumPy array containing the model outputs
     num_resamples : int
-        The number of resamples when computing confidence intervals (default 10)
+        The number of resamples when computing confidence intervals (default 100)
     conf_level : float
         The confidence interval level (default 0.95)
     print_to_console : bool
@@ -115,7 +115,7 @@ def calc_delta(Y, Ygrid, X, m):
             fy_ = np.abs(fy - fyc)
         else:
             fy_ = abs_fy
-        
+
         d_hat += (nm / (2 * N)) * np.trapz(fy_, Ygrid)
 
     return d_hat
