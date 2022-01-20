@@ -496,7 +496,7 @@ def f_test(Y, f0, Y_em, R, alpha, m1, m2, m3, n1, n2, n3, n):
         # Number of parameters of proposed model (order dependent)
         if i <= n1:
             p1 = m1        # 1st order
-        elif i > n1 and i <= (n1 + n2):
+        elif n1 < i <= n1 + n2:
             p1 = m2        # 2nd order
         else:
             p1 = m3        # 3rd order
