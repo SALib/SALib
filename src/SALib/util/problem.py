@@ -429,7 +429,7 @@ class ProblemSpec(dict):
         raise RuntimeError("Analysis not yet conducted")
 
     def plot(self):
-        """Plot results.
+        """Plot results as a bar chart.
 
         Returns
         -------
@@ -468,6 +468,17 @@ class ProblemSpec(dict):
         plt.tight_layout()
 
         return axes
+
+    def heatmap(self, metric: str, title: str = None, ax=None):
+        """Plot results as a heatmap.
+
+        Returns
+        -------
+        ax : matplotlib axes object
+        """
+        from SALib.plotting.heatmap import heatmap  # type: ignore
+
+        return heatmap(self, metric, title, ax)
 
     def _wrap_func(self, func, *args, **kwargs):
         # Create wrapped partial function to allow passing of additional args
