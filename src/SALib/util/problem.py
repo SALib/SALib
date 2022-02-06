@@ -472,6 +472,14 @@ class ProblemSpec(dict):
     def heatmap(self, metric: str, title: str = None, ax=None):
         """Plot results as a heatmap.
 
+        Parameters
+        ----------
+        metric : str, name of metric to plot, dependent on what 
+                    analysis was conducted (ST, S1, etc)
+        title : str, title of plot to use (defaults to the same as `metric`)
+        ax : axes object, matplotlib axes object to use for plot.
+                Creates a new figure if not provided.
+
         Returns
         -------
         ax : matplotlib axes object
