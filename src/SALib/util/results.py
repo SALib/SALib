@@ -1,6 +1,7 @@
 import pandas as pd  # type: ignore
 from SALib.plotting.bar import plot as barplot
 
+
 class ResultDict(dict):
     '''Dictionary holding analysis results.
 

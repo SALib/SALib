@@ -435,7 +435,7 @@ class ProblemSpec(dict):
 
         try:
             plt
-        except:
+        except NameError:
             import matplotlib.pyplot as plt
 
         num_cols = 1
