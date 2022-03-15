@@ -85,4 +85,5 @@ and copy/paste the code below.
     print(Si['S1'])
 
 If installed correctly, the last line above will print three values, similar
-to :code:`[ 0.30644324  0.44776661 -0.00104936]`.
+to :code:`[ 0.31683154 0.44376306 0.01220312]`.
+
