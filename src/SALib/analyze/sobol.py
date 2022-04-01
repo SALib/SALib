@@ -163,7 +163,11 @@ def first_order(A, AB, B):
     First order estimator following Saltelli et al. 2010 CPC, normalized by
     sample variance
     """
-    return np.mean(B * (AB - A), axis=0) / np.var(np.r_[A, B], axis=0)
+    y = np.r_[A, B]
+    if y.ptp() == 0:
+        return np.array([0.0])
+
+    return np.mean(B * (AB - A), axis=0) / np.var(y, axis=0)
 
 
 def total_order(A, AB, B):
@@ -171,12 +175,20 @@ def total_order(A, AB, B):
     Total order estimator following Saltelli et al. 2010 CPC, normalized by
     sample variance
     """
-    return 0.5 * np.mean((A - AB) ** 2, axis=0) / np.var(np.r_[A, B], axis=0)
+    y = np.r_[A, B]
+    if y.ptp() == 0:
+        return np.array([0.0])
+
+    return 0.5 * np.mean((A - AB) ** 2, axis=0) / np.var(y, axis=0)
 
 
 def second_order(A, ABj, ABk, BAj, B):
     """Second order estimator following Saltelli 2002"""
-    Vjk = np.mean(BAj * ABk - A * B, axis=0) / np.var(np.r_[A, B], axis=0)
+    y = np.r_[A, B]
+    if y.ptp() == 0:
+        return np.array([0.0])
+
+    Vjk = np.mean(BAj * ABk - A * B, axis=0) / np.var(y, axis=0)
     Sj = first_order(A, ABj, B)
     Sk = first_order(A, ABk, B)
 
