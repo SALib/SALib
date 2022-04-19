@@ -16,8 +16,9 @@ class LocalOptimisation(Strategy):
         return self.find_local_maximum(input_sample, num_samples, num_params,
                                        k_choices, num_groups)
 
-    def find_local_maximum(self, input_sample: np.ndarray, N: int, num_params: int,
-                           k_choices: int, num_groups: int=None) -> List:
+    def find_local_maximum(self, input_sample: np.ndarray, N: int,
+                           num_params: int, k_choices: int,
+                           num_groups: int = None) -> List:
         """Find the most different trajectories in the input sample using a
         local approach
 
@@ -91,7 +92,8 @@ class LocalOptimisation(Strategy):
             tot_indices_list, tot_max_array, "tot", "tot")
         return sorted(tot_max)
 
-    def sum_distances(self, indices: Tuple, distance_matrix: np.ndarray) -> np.ndarray:
+    def sum_distances(self, indices: Tuple,
+                      distance_matrix: np.ndarray) -> np.ndarray:
         """Calculate combinatorial distance between a select group of
         trajectories, indicated by indices
 
