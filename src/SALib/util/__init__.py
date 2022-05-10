@@ -144,17 +144,22 @@ def _nonuniform_scale_samples(params, bounds, dists):
     # loop over the parameters
     for i in range(conv_params.shape[1]):
         # setting first and second arguments for distributions
-        b1 = b[i][0]
-        b2 = b[i][1]
+        b1 = b[i][0] # ending
+        b2 = b[i][1] #0-1
+        
 
         if dists[i] == 'triang':
+            loc_start = b[i][0] #loc start
+            b1 = b[i][1] #triangular distribution end
+            b2 = b[i][2] # 0-1 aka c
+           
             # checking for correct parameters
-            if b1 <= 0 or b2 <= 0 or b2 >= 1:
+            if b1 <= 0 or b2 <= 0 or b2 >= 1 or loc_start>b1:
                 raise ValueError("""Triangular distribution: Scale must be
-                    greater than zero; peak on interval [0,1]""")
+                    greater than zero; peak on interval [0,1], triangular start value must be smaller than end value""")
             else:
                 conv_params[:, i] = sp.stats.triang.ppf(
-                    params[:, i], c=b2, scale=b1, loc=0)
+                    params[:, i], c=b2, scale=b1-loc_start, loc=loc_start)
 
         elif dists[i] == 'unif':
             if b1 >= b2:
