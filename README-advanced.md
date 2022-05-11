@@ -124,11 +124,13 @@ parameter bounds but sample-specific metadata.
 
 * unif: uniform distribution
     e.g. :code:`[-np.pi, np.pi]` defines the lower and upper bounds
-* triang: triangular with width (scale) and location of peak. 
-    Location of peak is in percentage of width.
-    Lower bound assumed to be zero.
+* triang: triangular with lower and upper bounds, as well as
+     location of peak
+     The location of peak is in percentage of width
+     e.g. :code:`[1.0, 3.0, 0.5]` indicates 1.0 to 3.0 with a peak at 2.0
 
-    e.g. :code:`[3, 0.5]` assumes 0 to 3, with a peak at 1.5
+     A deprecated two-value format assumes the lower bound to be 0
+     e.g. :code:`[3, 0.5]` assumes 0 to 3, with a peak at 1.5
 * norm: normal distribution with mean and standard deviation
 * lognorm: lognormal with ln-space mean and standard deviation
 
