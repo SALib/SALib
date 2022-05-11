@@ -4,6 +4,7 @@
 from collections import OrderedDict
 import pkgutil
 from typing import Dict, Tuple
+import warnings
 
 import numpy as np  # type: ignore
 import scipy as sp  # type: ignore
@@ -151,9 +152,25 @@ def _nonuniform_scale_samples(params, bounds, dists):
         b2 = b[i][1]  # 0-1
 
         if dists[i] == 'triang':
-            loc_start = b[i][0]  # loc start
-            b1 = b[i][1]  # triangular distribution end
-            b2 = b[i][2]  # 0-1 aka c
+            if len(b[i]) == 3:
+                loc_start = b[i][0]  # loc start
+                b1 = b[i][1]  # triangular distribution end
+                b2 = b[i][2]  # 0-1 aka c
+            elif len(b[i]) == 2:
+                msg = ("Two-value format for triangular distributions detected.\n"
+                    "To remove this message, specify the distribution start, "
+                    "end, and peak (three values) "
+                    "instead of the current two-value format "
+                    "(distribution end and peak, with start assumed to be 0)\n"
+                    "The two-value format will be deprecated in SALib v1.5"
+                )
+                warnings.warn(msg, DeprecationWarning, stacklevel=2)
+
+                loc_start = 0
+                b1 = b[i][0]
+                b2 = b[i][1]
+            else:
+                raise ValueError("Unknown triangular distribution specification. Check problem specification.")
 
             # checking for correct parameters
             if b1 <= 0 or b2 <= 0 or b2 >= 1 or loc_start > b1:
