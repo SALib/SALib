@@ -10,7 +10,8 @@ import scipy as sp  # type: ignore
 from scipy import stats
 from typing import List
 
-from .util_funcs import (avail_approaches, read_param_file, _check_bounds, _check_groups)
+from .util_funcs import (
+    avail_approaches, read_param_file, _check_bounds, _check_groups)
 from .problem import ProblemSpec
 from .results import ResultDict
 
@@ -35,7 +36,8 @@ def _scale_samples(params: np.ndarray, bounds: List):
     lower_bounds, upper_bounds = _check_bounds(bounds)
 
     if np.any(lower_bounds >= upper_bounds):
-        raise ValueError("Bounds are not legal (upper bound must be greater than lower bound)")
+        raise ValueError(
+            "Bounds are not legal (upper bound must be greater than lower bound)")
 
     # This scales the samples in-place, by using the optional output
     # argument for the numpy ufunctions
@@ -104,7 +106,8 @@ def _unscale_samples(params, bounds):
     upper_bounds = b[:, 1]
 
     if np.any(lower_bounds >= upper_bounds):
-        raise ValueError("Bounds are not legal (upper bound must be greater than lower bound)")
+        raise ValueError(
+            "Bounds are not legal (upper bound must be greater than lower bound)")
 
     # This scales the samples in-place, by using the optional output
     # argument for the numpy ufunctions
@@ -144,17 +147,16 @@ def _nonuniform_scale_samples(params, bounds, dists):
     # loop over the parameters
     for i in range(conv_params.shape[1]):
         # setting first and second arguments for distributions
-        b1 = b[i][0] # ending
-        b2 = b[i][1] #0-1
-        
+        b1 = b[i][0]  # ending
+        b2 = b[i][1]  # 0-1
 
         if dists[i] == 'triang':
-            loc_start = b[i][0] #loc start
-            b1 = b[i][1] #triangular distribution end
-            b2 = b[i][2] # 0-1 aka c
-           
+            loc_start = b[i][0]  # loc start
+            b1 = b[i][1]  # triangular distribution end
+            b2 = b[i][2]  # 0-1 aka c
+
             # checking for correct parameters
-            if b1 <= 0 or b2 <= 0 or b2 >= 1 or loc_start>b1:
+            if b1 <= 0 or b2 <= 0 or b2 >= 1 or loc_start > b1:
                 raise ValueError("""Triangular distribution: Scale must be
                     greater than zero; peak on interval [0,1], triangular start value must be smaller than end value""")
             else:
@@ -223,7 +225,7 @@ def extract_group_names(groups: List) -> Tuple:
     Parameters
     ----------
     groups : List
-        
+
 
     Returns
     -------
