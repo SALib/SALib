@@ -132,9 +132,9 @@ def _nonuniform_scale_samples(params, bounds, dists):
     dists : list
         list of distributions, one for each parameter
             unif: uniform with lower and upper bounds
-            triang: triangular with width (scale) and location of peak
-                    location of peak is in percentage of width
-                    lower bound assumed to be zero
+            triang: triangular with lower and upper bounds, as well as
+                    location of peak
+                    The location of peak is in percentage of width
             norm: normal distribution with mean and standard deviation
             truncnorm: truncated normal distribution with upper and lower
                     bounds, mean and standard deviation
