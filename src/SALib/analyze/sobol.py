@@ -86,9 +86,9 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
         _, D = extract_group_names(groups)
 
     if calc_second_order and Y.size % (2 * D + 2) == 0:
-        N = int(Y.size / (2 * D + 2))
+        N = int(Y.size / (4 * D + 2))
     elif not calc_second_order and Y.size % (D + 2) == 0:
-        N = int(Y.size / (D + 2))
+        N = int(Y.size / (2 * D + 2))
     else:
         raise RuntimeError("""
         Incorrect number of samples in model output file.
@@ -100,7 +100,7 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
     # normalize the model output
     Y = (Y - Y.mean()) / Y.std()
 
-    A, B, AB, BA = separate_output_values(Y, D, N, calc_second_order)
+    A, B, AB, BA, BC, CB = separate_output_values(Y, D, N, calc_second_order)
     r = rng(N, size=(N, num_resamples))
     Z = norm.ppf(0.5 + conf_level / 2)
 
@@ -110,11 +110,14 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
         for j in range(D):
             S['S1'][j] = first_order(A, AB[:, j], B)
             S1_conf_j = first_order(A[r], AB[r, j], B[r])
+            S['S1_3inputs'][j] = first_order_3inputs(A, AB[:, j], B, BC[:, j])
+            S1_3inputs_conf_j = first_order_3inputs(A[r], AB[r, j], B[r], BC[r, j])
 
             if keep_resamples:
                 S['S1_conf_all'][:, j] = S1_conf_j
 
             S['S1_conf'][j] = Z * S1_conf_j.std(ddof=1)
+            S['S1_3inputs_conf'][j] = Z * S1_3inputs_conf_j.std(ddof=1)
             S['ST'][j] = total_order(A, AB[:, j], B)
             ST_conf_j = total_order(A[r], AB[r, j], B[r])
 
@@ -166,6 +169,13 @@ def first_order(A, AB, B):
     return np.mean(B * (AB - A), axis=0) / np.var(np.r_[A, B], axis=0)
 
 
+def first_order_3inputs(A, AB, B, BC):
+    """
+    First order estimator following Owen 2013, normalized by
+    sample variance
+    """
+    return np.mean((B - BC) * (AB - A), axis=0) / np.var(np.r_[A, B], axis=0)
+
 def total_order(A, AB, B):
     """
     Total order estimator following Saltelli et al. 2010 CPC, normalized by
@@ -186,7 +196,7 @@ def second_order(A, ABj, ABk, BAj, B):
 def create_Si_dict(D: int, num_resamples: int, keep_resamples: bool, calc_second_order: bool):
     """initialize empty dict to store sensitivity indices"""
     S = ResultDict((k, np.zeros(D))
-                   for k in ('S1', 'S1_conf', 'ST', 'ST_conf'))
+                   for k in ('S1', 'S1_conf', 'S1_3inputs', 'S1_3inputs_conf', 'ST', 'ST_conf'))
 
     if keep_resamples:
         # Create entries to store intermediate resampling results
@@ -203,7 +213,9 @@ def create_Si_dict(D: int, num_resamples: int, keep_resamples: bool, calc_second
 def separate_output_values(Y, D, N, calc_second_order):
     AB = np.zeros((N, D))
     BA = np.zeros((N, D)) if calc_second_order else None
-    step = 2 * D + 2 if calc_second_order else D + 2
+    BC = np.zeros((N, D))
+    CB = np.zeros((N, D)) if calc_second_order else None
+    step = 4 * D + 2 if calc_second_order else 2 * D + 2
 
     A = Y[0:Y.size:step]
     B = Y[(step - 1):Y.size:step]
@@ -211,8 +223,13 @@ def separate_output_values(Y, D, N, calc_second_order):
         AB[:, j] = Y[(j + 1):Y.size:step]
         if calc_second_order:
             BA[:, j] = Y[(j + 1 + D):Y.size:step]
+            BC[:, j] = Y[(j + 1 + 2 * D):Y.size:step]
+            CB[:, j] = Y[(j + 1 + 3 * D):Y.size:step]
+        else:
+            BC[:, j] = Y[(j + 1 + D):Y.size:step]
 
-    return A, B, AB, BA
+
+    return A, B, AB, BA, BC, CB
 
 
 def sobol_parallel(Z, A, AB, BA, B, r, tasks):
@@ -320,7 +337,9 @@ def Si_to_pandas_dict(S_dict):
     }
     first_order = {
         'S1': S_dict['S1'],
-        'S1_conf': S_dict['S1_conf']
+        'S1_conf': S_dict['S1_conf'],
+        'S1_3inputs': S_dict['S1_3inputs'],
+        'S1_3inputs_conf': S_dict['S1_3inputs_conf']
     }
 
     idx = None

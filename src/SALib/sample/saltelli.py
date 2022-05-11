@@ -136,12 +136,12 @@ def sample(problem: Dict, N: int, calc_second_order: bool = True,
         Dg = len(set(group_names))
 
     # Create base sequence - could be any type of sampling
-    base_sequence = sobol_sequence.sample(N + skip_values, 2 * D)
+    base_sequence = sobol_sequence.sample(N + skip_values, 3 * D)
 
     if calc_second_order:
-        saltelli_sequence = np.zeros([(2 * Dg + 2) * N, D])
+        saltelli_sequence = np.zeros([(4 * Dg + 2) * N, D])
     else:
-        saltelli_sequence = np.zeros([(Dg + 2) * N, D])
+        saltelli_sequence = np.zeros([(2 * Dg + 2) * N, D])
     index = 0
 
     for i in range(skip_values, N + skip_values):
@@ -171,6 +171,28 @@ def sample(problem: Dict, N: int, calc_second_order: bool = True,
                         saltelli_sequence[index, j] = base_sequence[i, j]
                     else:
                         saltelli_sequence[index, j] = base_sequence[i, j + D]
+
+                index += 1
+
+        # Cross-sample elements of "C" into "B"
+        for k in range(Dg):
+            for j in range(D):
+                if (not groups and j == k) or (groups and group_names[k] == groups[j]):
+                    saltelli_sequence[index, j] = base_sequence[i, j + 2 * D]
+                else:
+                    saltelli_sequence[index, j] = base_sequence[i, j + D]
+
+            index += 1
+
+        # Cross-sample elements of "B" into "C"
+        # Only needed if you're doing second-order indices (true by default)
+        if calc_second_order:
+            for k in range(Dg):
+                for j in range(D):
+                    if (not groups and j == k) or (groups and group_names[k] == groups[j]):
+                        saltelli_sequence[index, j] = base_sequence[i, j + D]
+                    else:
+                        saltelli_sequence[index, j] = base_sequence[i, j + 2 * D]
 
                 index += 1
 
