@@ -114,14 +114,22 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
             if keep_resamples:
                 S['S1_conf_all'][:, j] = S1_conf_j
 
-            S['S1_conf'][j] = Z * S1_conf_j.std(ddof=1)
+            var_diff = np.r_[A[r], B[r]].ptp()
+            if var_diff != 0.0:
+                S['S1_conf'][j] = Z * S1_conf_j.std(ddof=1)
+            else:
+                S['S1_conf'][j] = 0.0
+
             S['ST'][j] = total_order(A, AB[:, j], B)
             ST_conf_j = total_order(A[r], AB[r, j], B[r])
 
             if keep_resamples:
                 S['ST_conf_all'][:, j] = ST_conf_j
 
-            S['ST_conf'][j] = Z * ST_conf_j.std(ddof=1)
+            if var_diff != 0.0:
+                S['ST_conf'][j] = Z * ST_conf_j.std(ddof=1)
+            else:
+                S['ST_conf'][j] = 0.0
 
         # Second order (+conf.)
         if calc_second_order:
