@@ -16,8 +16,8 @@ from matplotlib import pyplot as plt
 __all__ = ['analyze', 'cli_parse', 'cli_action']
 
 
-def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray, 
-            maxorder: int = 2, maxiter: int = 100, 
+def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
+            maxorder: int = 2, maxiter: int = 100,
             m: int = 2, K: int = 20, R: int = None, alpha: float = 0.95,
             lambdax: float = 0.01,
             print_to_console: bool = True, seed: int = None) -> Dict:
@@ -131,20 +131,23 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
         np.random.seed(seed)
 
     # Initial part: Check input arguments and define HDMR variables
-    settings = _check_settings(X, Y, maxorder, maxiter, m, K, R, alpha, lambdax)
+    settings = _check_settings(
+        X, Y, maxorder, maxiter, m, K, R, alpha, lambdax)
     init_vars = _init(X, Y, settings)
 
     # Sensitivity Analysis Computation with/without bootstraping
     SA, Em, RT, Y_em, idx = _compute(X, Y, settings, init_vars)
 
     # Finalize results
-    Si = _finalize(problem, SA, Em, problem['num_vars'], alpha, maxorder, RT, Y_em, idx, X, Y)
+    Si = _finalize(problem, SA, Em,
+                   problem['num_vars'], alpha, maxorder, RT, Y_em, idx, X, Y)
 
     # Print results to console
     if print_to_console:
         _print(Si, problem['num_vars'])
 
     return Si
+
 
 def _check_settings(X, Y, maxorder, maxiter, m, K, R, alpha, lambdax):
     """Perform checks to ensure all parameters are within usable/expected ranges."""
@@ -154,45 +157,58 @@ def _check_settings(X, Y, maxorder, maxiter, m, K, R, alpha, lambdax):
 
     # Now check input-output mismatch
     if d == 1:
-        raise RuntimeError("Matrix X contains only a single column: No point to do sensitivity analysis when d = 1.")
+        raise RuntimeError(
+            "Matrix X contains only a single column: No point to do sensitivity analysis when d = 1.")
     if N < 300:
-        raise RuntimeError(f"Number of samples in matrix X, {N}, is insufficient. Need at least 300.")
+        raise RuntimeError(
+            f"Number of samples in matrix X, {N}, is insufficient. Need at least 300.")
     if N != y_row:
-        raise RuntimeError(f"Dimension mismatch. The number of outputs ({y_row}) should match number of samples ({N})")
+        raise RuntimeError(
+            f"Dimension mismatch. The number of outputs ({y_row}) should match number of samples ({N})")
     if Y.size != N:
-        raise RuntimeError("Y should be a N x 1 vector with one simulated output for each N parameter vectors.")
+        raise RuntimeError(
+            "Y should be a N x 1 vector with one simulated output for each N parameter vectors.")
 
-    if maxorder not in (1,2,3):
-        raise RuntimeError(f"Field \"maxorder\" of options should be an integer with values of 1, 2 or 3, got {maxorder}")
+    if maxorder not in (1, 2, 3):
+        raise RuntimeError(
+            f"Field \"maxorder\" of options should be an integer with values of 1, 2 or 3, got {maxorder}")
 
     # Important next check for maxorder - as maxorder relates to d
     if (d == 2) and (maxorder > 2):
-        raise RuntimeError("SALib-HDMR ERRROR: Field \"maxorder\" of options has to be 2 as d = 2 (X has two columns)")
+        raise RuntimeError(
+            "SALib-HDMR ERRROR: Field \"maxorder\" of options has to be 2 as d = 2 (X has two columns)")
 
     if maxiter not in np.arange(1, 1001):
-        raise RuntimeError("Field \"maxiter\" of options should be an integer between 1 to 1000.")
-    
+        raise RuntimeError(
+            "Field \"maxiter\" of options should be an integer between 1 to 1000.")
+
     if m not in np.arange(1, 11):
-        raise RuntimeError("Field \"m\" of options should be an integer between 1 to 10.")
+        raise RuntimeError(
+            "Field \"m\" of options should be an integer between 1 to 10.")
 
     if K not in np.arange(1, 101):
-        raise RuntimeError("Field \"K\" of options should be an integer between 1 to 100.")
+        raise RuntimeError(
+            "Field \"K\" of options should be an integer between 1 to 100.")
 
     if R is None:
         R = y_row // 2
     elif R not in np.arange(300, N+1):
-        raise RuntimeError(f"Field \"R\" of options should be an integer between 300 and {N}, the number of rows matrix X.")
+        raise RuntimeError(
+            f"Field \"R\" of options should be an integer between 300 and {N}, the number of rows matrix X.")
 
     if (K == 1) and (R != y_row):
         R = y_row
-    
+
     if alpha < 0.5 or alpha > 1.0:
-        raise RuntimeError("Field \"alpha\" of options should be an integer between 0.5 to 1.0")
+        raise RuntimeError(
+            "Field \"alpha\" of options should be an integer between 0.5 to 1.0")
 
     if lambdax > 10.0:
-        raise RuntimeError("SALib-HDMR WARNING: Field \"lambdax\" of options set rather large. Default: lambdax = 0.01")
+        raise RuntimeError(
+            "SALib-HDMR WARNING: Field \"lambdax\" of options set rather large. Default: lambdax = 0.01")
     elif lambdax < 0.0:
-        raise RuntimeError("Field \"lambdax\" (regularization term) of options cannot be smaller than zero. Default: 0.01")
+        raise RuntimeError(
+            "Field \"lambdax\" (regularization term) of options cannot be smaller than zero. Default: 0.01")
 
     return [N, d, maxorder, maxiter,
             m, K, R, alpha, lambdax]
@@ -220,19 +236,21 @@ def _compute(X, Y, settings, init_vars):
         Y_res = Y_id - Em['f0'][k]
 
         # 1st order component functions: ind/backfitting
-        Y_em[:, j1], Y_res, Em['C1'][:, :, k] = _first_order(Em['B1'][idx[:, k], :, :], Y_res, 
-                                                             Em['C1'][:, :, k], R, Em['n1'], m1,
+        Y_em[:, j1], Y_res, Em['C1'][:, :, k] = _first_order(Em['B1'][idx[:, k], :, :], Y_res,
+                                                             Em['C1'][:, :,
+                                                                      k], R, Em['n1'], m1,
                                                              maxiter, lambdax)
 
         # 2nd order component functions: individual
         if (maxorder > 1):
-            Y_em[:, j2], Y_res, Em['C2'][:, :, k] = _second_order(Em['B2'][idx[:, k], :, :], Y_res, 
-                                                                  Em['C2'][:, :, k], R, Em['n2'],
+            Y_em[:, j2], Y_res, Em['C2'][:, :, k] = _second_order(Em['B2'][idx[:, k], :, :], Y_res,
+                                                                  Em['C2'][:, :,
+                                                                           k], R, Em['n2'],
                                                                   m2, lambdax)
 
         # 3rd order component functions: individual
         if (maxorder == 3):
-            Y_em[:, j3], Em['C3'][:, :, k] = _third_order(Em['B3'][idx[:, k], :, :], Y_res, 
+            Y_em[:, j3], Em['C3'][:, :, k] = _third_order(Em['B3'][idx[:, k], :, :], Y_res,
                                                           Em['C3'][:, :, k], R, Em['n3'], m3, lambdax)
 
         # Identify significant and insignificant terms
@@ -299,14 +317,16 @@ def _init(X, Y, settings):
 
     # STRUCTURE Em: Initialization
     Em = {'nterms': np.zeros(K), 'RMSE': np.zeros(K), 'm': m, 'Y_e': np.zeros((R, K)), 'f0': np.zeros(K),
-            'c1': c1, 'C1': np.zeros((m1, n1, K)), 'C2': np.zeros((1, 1, K)), 'C3': np.zeros((1, 1, K)), 
-            'n': n, 'n1': n1, 'n2': n2, 'n3': n3, 'maxorder': maxorder, 'select': np.zeros((n, K)),
-            'B1': np.zeros((N, m1, n1))}
+          'c1': c1, 'C1': np.zeros((m1, n1, K)), 'C2': np.zeros((1, 1, K)), 'C3': np.zeros((1, 1, K)),
+          'n': n, 'n1': n1, 'n2': n2, 'n3': n3, 'maxorder': maxorder, 'select': np.zeros((n, K)),
+          'B1': np.zeros((N, m1, n1))}
 
     if (maxorder >= 2):
-        Em.update({'c2': c2, 'B2': np.zeros((N, m2, n2)), 'C2': np.zeros((m2, n2, K))})
+        Em.update({'c2': c2, 'B2': np.zeros((N, m2, n2)),
+                  'C2': np.zeros((m2, n2, K))})
     if (maxorder >= 3):
-        Em.update({'c3': c3, 'B3': np.zeros((N, m3, n3)), 'C3': np.zeros((m3, n3, K))})
+        Em.update({'c3': c3, 'B3': np.zeros((N, m3, n3)),
+                  'C3': np.zeros((m3, n3, K))})
 
     # Compute cubic B-spline
     Em['B1'] = B_spline(X_n, m, d)
@@ -316,7 +336,7 @@ def _init(X, Y, settings):
         beta = np.array(list(itertools.product(range(m1), repeat=2)))
         for k, j in itertools.product(range(n2), range(m2)):
             Em['B2'][:, j, k] = np.multiply(
-                Em['B1'][:, beta[j, 0], Em['c2'][k, 0]], 
+                Em['B1'][:, beta[j, 0], Em['c2'][k, 0]],
                 Em['B1'][:, beta[j, 1], Em['c2'][k, 1]])
 
     # Compute B values for third order
@@ -328,7 +348,7 @@ def _init(X, Y, settings):
         for k, j in itertools.product(range(n3), range(m3)):
             Emc3_k = Em['c3'][k]
             beta_j = beta[j]
-            Em['B3'][:, j, k] = np.multiply(np.multiply(EmB1[:, beta_j[0], Emc3_k[0]], 
+            Em['B3'][:, j, k] = np.multiply(np.multiply(EmB1[:, beta_j[0], Emc3_k[0]],
                                                         EmB1[:, beta_j[1], Emc3_k[1]]),
                                             EmB1[:, beta_j[2], Emc3_k[2]])
 
@@ -361,7 +381,7 @@ def _init(X, Y, settings):
 
 def B_spline(X, m, d):
     """Generate cubic B-splines using scipy basis_element method. 
-    
+
     Knot points (`t`) are automatically determined.
 
     References
@@ -378,9 +398,9 @@ def B_spline(X, m, d):
     for j, i in itertools.product(range(d), range(m+3)):
         k_i = k[i]
         t = np.arange(k_i-2, k_i+3) / m
-        temp = interpolate.BSpline.basis_element(t)(X[:,j]) * np.power(m,3)
+        temp = interpolate.BSpline.basis_element(t)(X[:, j]) * np.power(m, 3)
         B[:, i, j] = np.where(temp < 0, 0, temp)
-    
+
     return B
 
 
@@ -396,7 +416,7 @@ def _first_order(B1, Y_res, C1, R, n1, m1, maxiter, lambdax):
         B11 = np.matmul(np.transpose(B1[:, :, j]), B1[:, :, j])
 
         # if it is ill-conditioned matrix, the default value is zero
-        if np.all(np.linalg.svd(B11)[1]): # sigma, diagonal matrix, from svd
+        if np.all(np.linalg.svd(B11)[1]):  # sigma, diagonal matrix, from svd
             T1[:, :, j] = np.linalg.solve(np.add(B11, np.multiply(
                 lambdax, np.identity(m1))), np.transpose(B1[:, :, j]))
 
@@ -442,7 +462,7 @@ def _second_order(B2, Y_res, C2, R, n2, m2, lambdax):
         B22 = np.matmul(np.transpose(B2[:, :, j]), B2[:, :, j])
 
         # if it is ill-conditioned matrix, the default value is zero
-        if np.all(np.linalg.svd(B22)[1]): # sigma, diagonal matrix, from svd
+        if np.all(np.linalg.svd(B22)[1]):  # sigma, diagonal matrix, from svd
             T2[:, :, j] = np.linalg.solve(np.add(B22, np.multiply(
                 lambdax, np.identity(m2))), np.transpose(B2[:, :, j]))
 
@@ -470,7 +490,7 @@ def _third_order(B3, Y_res, C3, R, n3, m3, lambdax):
         B33 = np.matmul(np.transpose(B3[:, :, j]), B3[:, :, j])
 
         # if it is ill-conditioned matrix, the default value is zero
-        if np.all(np.linalg.svd(B33)[1]): # sigma, diagonal matrix, from svd
+        if np.all(np.linalg.svd(B33)[1]):  # sigma, diagonal matrix, from svd
             T3[:, :, j] = np.linalg.solve(np.add(B33, np.multiply(
                 lambdax, np.identity(m3))), np.transpose(B3[:, :, j]))
 
@@ -539,7 +559,7 @@ def ancova(Y, Y_em, V_Y, R, n):
 
         # Structural contribution of jth term   ( = Eq. 20 of Li et al )
         S_a[j] = C[0, 0] / V_Y
-        
+
         # Correlative contribution of jth term  ( = Eq. 21 of Li et al )
         S_b[j] = C[0, 1] / V_Y
 
@@ -636,10 +656,10 @@ def _finalize(problem, SA, Em, d, alpha, maxorder, RT, Y_em, bootstrap_idx, X, Y
 
 def emulate(self, X, Y=None):
     '''Emulates model output with new input data. 
-    
+
     Generates B-Splines with new input matrix, X, and multiplies it with 
     coefficient matrix, C. 
-    
+
     Compares emulated results with observed vector, Y.
 
     Returns
@@ -673,7 +693,7 @@ def emulate(self, X, Y=None):
         m3 = C3.shape[0]
         c3 = np.asarray(list(itertools.combinations(np.arange(0, d), 3)))
         n3 = c3.shape[0]
-    
+
     # Initialize emulated Y's
     Y_em = np.zeros((N, n1+n2+n3))
 
@@ -687,7 +707,7 @@ def emulate(self, X, Y=None):
         B2 = np.zeros((N, m2, n2))
         beta = np.array(list(itertools.product(range(m1), repeat=2)))
         for k, j in itertools.product(range(n2), range(m2)):
-            B2[:, j, k] = np.multiply(B1[:, beta[j, 0], c2[k, 0]], 
+            B2[:, j, k] = np.multiply(B1[:, beta[j, 0], c2[k, 0]],
                                       B1[:, beta[j, 1], c2[k, 1]])
     if (maxorder == 3):
         B3 = np.zeros((N, m3, n3))
@@ -695,9 +715,9 @@ def emulate(self, X, Y=None):
         for k, j in itertools.product(range(n3), range(m3)):
             Emc3_k = c3[k]
             beta_j = beta[j]
-            B3[:, j, k] = np.multiply(np.multiply(B1[:, beta_j[0], Emc3_k[0]], 
-                                                        B1[:, beta_j[1], Emc3_k[1]]),
-                                            B1[:, beta_j[2], Emc3_k[2]])
+            B3[:, j, k] = np.multiply(np.multiply(B1[:, beta_j[0], Emc3_k[0]],
+                                                  B1[:, beta_j[1], Emc3_k[1]]),
+                                      B1[:, beta_j[2], Emc3_k[2]])
 
     # Calculate emulated output: First Order
     for j in range(0, n1):
@@ -761,19 +781,20 @@ def _print(Si, d):
     for i in range(len(Si['Sa'])):
         if i < d:
             print(format1 % (Si['Term'][i], Si['Sa'][i], Si['Sa_conf'][i], Si['Sb'][i], Si['Sb_conf'][i], Si['S'][i],
-                                Si['S_conf'][i], Si['ST'][i], Si['ST_conf'][i], np.sum(Si['select'][i])))
+                             Si['S_conf'][i], Si['ST'][i], Si['ST_conf'][i], np.sum(Si['select'][i])))
         else:
             print(format2 % (Si['Term'][i], Si['Sa'][i], Si['Sa_conf'][i], Si['Sb'][i], Si['Sb_conf'][i], Si['S'][i],
-                                Si['S_conf'][i], np.sum(Si['select'][i])))
+                             Si['S_conf'][i], np.sum(Si['select'][i])))
 
     print('------------------------------------------------------------------------------------')
 
     format3 = (
         "%-11s   \t %5.2f (\261%.2f) %5.2f (\261%.2f) %5.2f (\261%.2f)")
     print(format3 % ('Sum', Si['Sa_sum'], Si['Sa_sum_conf'],
-                        Si['Sb_sum'], Si['Sb_sum_conf'], Si['S_sum'], Si['S_sum_conf']))
-    
-    keys = ('Sa_sum', 'Sb_sum', 'S_sum', 'Sa_sum_conf', 'Sb_sum_conf', 'S_sum_conf')
+                     Si['Sb_sum'], Si['Sb_sum_conf'], Si['S_sum'], Si['S_sum_conf']))
+
+    keys = ('Sa_sum', 'Sb_sum', 'S_sum',
+            'Sa_sum_conf', 'Sb_sum_conf', 'S_sum_conf')
     for k in keys:
         Si.pop(k, None)
 
@@ -822,7 +843,7 @@ def cli_action(args):
     lambdax = args.lambdax
     options = options = {'maxorder': mor, 'maxiter': mit, 'm': m,
                          'K': K, 'R': R, 'alpha': alpha, 'lambdax': lambdax, 'print_to_console': True}
-    
+
     if len(X.shape) == 1:
         X = X.reshape((len(X), 1))
 
