@@ -477,25 +477,24 @@ def B_spline(X, m, d):
 def _first_order(B1, Y_res, C1, R, n1, m1, maxiter, lambdax):
     """Compute first order sensitivities."""
     Y_i = np.zeros((R, n1))       # Initialize 1st order contributions
-    T1 = np.zeros((m1, R))    # Initialize T(emporary) matrix - 1st
+    T1 = np.zeros((m1, R, n1))    # Initialize T(emporary) matrix - 1st
     it = 0                        # Initialize iteration counter
 
-    lam_eye_m1 = lambdax * identity(m1)  # pre-calculate for reuse
-
+    lam_eye_m1 = lambdax * identity(m1)
     Bmm = np.einsum('ijb,ikb -> bjk', B1, B1)
+
     # First order individual estimation
     for j in range(n1):
-        B1_j = B1[:, :, j]
         # Regularized least squares inversion ( minimize || C1 ||_2 )
-        # B11 = B1_j.T @ B1_j
+        B1_j = B1[:, :, j]
         B11 = Bmm[j, :, :]
 
         # if it is ill-conditioned matrix, the default value is zero
         if np.all(svd(B11)[1]):  # sigma, diagonal matrix, from svd
-            T1[:, :] = lin_solve(B11 + lam_eye_m1, B1_j.T)
+            T1[:, :, j] = lin_solve(B11 + lam_eye_m1, B1_j.T)
 
-        C1[:, j] = (T1 @ Y_res).reshape(m1)
-        Y_i[:, j] = B1_j @ C1[:, j]
+        C1[:, j] = (T1[:, :, j] @ Y_res).reshape(m1)
+        Y_i[:, j] = (B1[:, :, j] @ C1[:, j])
 
     # Backfitting Method
     var1b_old = np.sum(np.square(C1), axis=0)
@@ -507,7 +506,7 @@ def _first_order(B1, Y_res, C1, R, n1, m1, maxiter, lambdax):
                 if j != z:
                     Y_r = Y_r - (B1[:, :, z] @ C1[:, z]).reshape(R, 1)
 
-            C1[:, j] = (T1 @ Y_r).reshape(m1)
+            C1[:, j] = (T1[:, :, j] @ Y_r).reshape(m1)
 
         var1b_new = np.sum(np.square(C1), axis=0)
         varmax = np.max(np.absolute(var1b_new - var1b_old))
