@@ -482,19 +482,17 @@ def _first_order(B1, Y_res, C1, R, n1, m1, maxiter, lambdax):
 
     lam_eye_m1 = lambdax * identity(m1)  # pre-calculate for reuse
 
-    Bmm = np.einsum('bij,jkb -> bik', B1.T, B1)
-
+    Bmm = np.einsum('ijb,ikb -> bjk', B1, B1)
     # First order individual estimation
     for j in range(n1):
         B1_j = B1[:, :, j]
-        B1_j_T = B1[:, :, j].T
         # Regularized least squares inversion ( minimize || C1 ||_2 )
-        # B11 = B1_j_T @ B1_j
+        # B11 = B1_j.T @ B1_j
         B11 = Bmm[j, :, :]
 
         # if it is ill-conditioned matrix, the default value is zero
         if np.all(svd(B11)[1]):  # sigma, diagonal matrix, from svd
-            T1[:, :] = lin_solve(B11 + lam_eye_m1, B1_j_T)
+            T1[:, :] = lin_solve(B11 + lam_eye_m1, B1_j.T)
 
         C1[:, j] = (T1 @ Y_res).reshape(m1)
         Y_i[:, j] = B1_j @ C1[:, j]
@@ -509,7 +507,7 @@ def _first_order(B1, Y_res, C1, R, n1, m1, maxiter, lambdax):
                 if j != z:
                     Y_r = Y_r - (B1[:, :, z] @ C1[:, z]).reshape(R, 1)
 
-            C1[:, j] = (T1[:, :] @ Y_r).reshape(m1)
+            C1[:, j] = (T1 @ Y_r).reshape(m1)
 
         var1b_new = np.sum(np.square(C1), axis=0)
         varmax = np.max(np.absolute(var1b_new - var1b_old))
@@ -518,10 +516,8 @@ def _first_order(B1, Y_res, C1, R, n1, m1, maxiter, lambdax):
 
     # Now compute first-order terms
     for j in range(n1):
-        # Y_i[:, j] = B1[:, :, j] @ C1[:, j]
-
         # Subtract each first order term from residuals
-        Y_res = np.subtract(Y_res, Y_i[:, j].reshape(R, 1))
+        Y_res = Y_res - Y_i[:, j].reshape(R, 1)
 
     return (Y_i, Y_res, C1)
 
@@ -536,17 +532,16 @@ def _second_order(B2, Y_res, C2, R, n2, m2, lambdax):
     # First order individual estimation
     # B2.T : 28, 25, 2304 -> bij
     # B2   : 2304, 25, 28 -> jkb
-    # np.allclose(np.einsum('bij,jkb -> bik', B2.T, B2)[0, :, :], B2[:, :, 0].T @ B2[:, :, 0])
-    Bmm = np.einsum('bij,jkb -> bik', B2.T, B2)
+    # np.allclose(np.einsum('ijb,ikb -> bjk', B2, B2)[0, :, :], B2[:, :, 0].T @ B2[:, :, 0])
+    Bmm = np.einsum('ijb,ikb -> bjk', B2, B2)
     for j in range(n2):
         B2_j = B2[:, :, j]
-        B2_j_t = B2_j.T
         # Regularized least squares inversion ( minimize || C1 ||_2 )
-        B22 = Bmm[j, :, :]  # B2_j_t @ B2_j
+        B22 = Bmm[j, :, :]  # B2_j.T @ B2_j
 
         # if it is ill-conditioned matrix, the default value is zero
         if np.all(svd(B22)[1]):  # sigma, diagonal matrix, from svd
-            T2[:, :] = lin_solve(B22 + lam_eye_m2, B2_j_t)
+            T2[:, :] = lin_solve(B22 + lam_eye_m2, B2_j.T)
 
         C2[:, j] = (T2 @ Y_res).reshape(m2)
         Y_ij[:, j] = B2_j @ C2[:, j]
@@ -567,18 +562,17 @@ def _third_order(B3, Y_res, C3, R, n3, m3, lambdax):
     lam_eye_m3 = (lambdax * identity(m3))  # pre-calculate for reuse
 
     # First order individual estimation
-    Bmm = np.einsum('bij,jkb -> bik', B3.T, B3)
+    Bmm = np.einsum('ijb,ikb -> bjk', B3, B3)
     for j in range(n3):
         B3_j = B3[:, :, j]
-        B3_j_t = B3_j.T
 
         # Regularized least squares inversion ( minimize || C1 ||_2 )
-        # B33 = B3_j_t @ B3_j
+        # B33 = B3_j.T @ B3_j
         B33 = Bmm[j, :, :]
 
         # if it is ill-conditioned matrix, the default value is zero
         if np.all(svd(B33)[1]):  # sigma, diagonal matrix, from svd
-            T3[:, :] = lin_solve(B33 + lam_eye_m3, B3_j_t)
+            T3[:, :] = lin_solve(B33 + lam_eye_m3, B3_j.T)
 
         C3[:, j] = (T3 @ Y_res).reshape(m3)
         Y_ijk[:, j] = B3_j @ C3[:, j]
