@@ -12,11 +12,12 @@ from numpy import identity
 import pandas as pd
 from scipy import (stats, special, interpolate)
 
-from SALib.plotting.hdmr import plot as hdmr_plot
-
 from . import common_args
 from ..util import read_param_file, ResultDict
 from matplotlib import pyplot as plt
+
+from SALib.plotting.hdmr import plot as hdmr_plot
+from SALib.util.problem import ProblemSpec
 
 
 __all__ = ['analyze', 'cli_parse', 'cli_action']
@@ -29,7 +30,7 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
             print_to_console: bool = False, seed: int = None) -> Dict:
     """High-Dimensional Model Representation (HDMR) using B-spline functions.
 
-    HDMR is used for variance-based global sensitivity analysis (GSA) with
+    HDMR is used for variance-based global sensitivity analysis (GSA) with 
     correlated and uncorrelated inputs. This function uses as input
 
     - a N x d matrix of N different d-vectors of model inputs (factors/parameters)
@@ -37,11 +38,11 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
 
     Returns:
     - each factor's first, second, and third order sensitivity coefficient
-      (separated in total, structural and correlative contributions),
+      (separated in total, structural and correlative contributions), 
     - an estimate of their 95% confidence intervals (from bootstrap method)
     - the coefficients of the significant B-spline basis functions that
-      govern output,
-    - Y (determined by an F-test of the error residuals of the HDMR model
+      govern output, 
+    - Y (determined by an F-test of the error residuals of the HDMR model 
       (emulator) with/without a given first, second and/or
       third order B-spline). These coefficients define an emulator that can
       be used to predict the output, Y, of the original (CPU-intensive)
@@ -85,7 +86,7 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
     R : int (100-N/2, default: N/2)
         Number of bootstrap samples. Will be set to length of `Y` if `K` is set to 1.
 
-    alpha : float (0.5-1)
+    alpha : float (0.5-1) 
         Confidence interval F-test
 
     lambdax : float (0-10, default: 0.01)
@@ -386,7 +387,7 @@ def _init(X, Y, settings):
 
 
 def B_spline(X, m, d):
-    """Generate cubic B-splines using scipy basis_element method.
+    """Generate cubic B-splines using scipy basis_element method. 
 
     Knot points (`t`) are automatically determined.
 
@@ -451,6 +452,8 @@ def _first_order(B1, Y_res, C1, R, n1, m1, maxiter, lambdax):
 
     # Now compute first-order terms
     for j in range(n1):
+        Y_i[:, j] = B1[:, :, j] @ C1[:, j]
+
         # Subtract each first order term from residuals
         Y_res = Y_res - Y_i[:, j].reshape(R, 1)
 
@@ -462,21 +465,20 @@ def _second_order(B2, Y_res, C2, R, n2, m2, lambdax):
     Y_ij = np.zeros((R, n2))      # Initialize 1st order contributions
     T2 = np.zeros((m2, R))    # Initialize T(emporary) matrix - 1st
 
-    lam_eye_m2 = (lambdax * identity(m2))  # pre-calculate for reuse
+    lam_eye_m2 = lambdax * identity(m2)
 
     # First order individual estimation
-    # B2.T : 28, 25, 2304 -> bij
-    # B2   : 2304, 25, 28 -> jkb
-    # np.allclose(np.einsum('ijb,ikb -> bjk', B2, B2)[0, :, :], B2[:, :, 0].T @ B2[:, :, 0])
     Bmm = np.einsum('ijb,ikb -> bjk', B2, B2)
     for j in range(n2):
-        B2_j = B2[:, :, j]
         # Regularized least squares inversion ( minimize || C1 ||_2 )
-        B22 = Bmm[j, :, :]  # B2_j.T @ B2_j
+        B2_j = B2[:, :, j]
+        B22 = Bmm[j, :, :]
 
         # if it is ill-conditioned matrix, the default value is zero
         if np.all(svd(B22)[1]):  # sigma, diagonal matrix, from svd
             T2[:, :] = lin_solve(B22 + lam_eye_m2, B2_j.T)
+        else:
+            T2.fill(0.0)
 
         C2[:, j] = (T2 @ Y_res).reshape(m2)
         Y_ij[:, j] = B2_j @ C2[:, j]
@@ -494,20 +496,21 @@ def _third_order(B3, Y_res, C3, R, n3, m3, lambdax):
     Y_ijk = np.zeros((R, n3))      # Initialize 1st order contributions
     T3 = np.zeros((m3, R))     # Initialize T(emporary) matrix - 1st
 
-    lam_eye_m3 = (lambdax * identity(m3))  # pre-calculate for reuse
+    lam_eye_m3 = lambdax * identity(m3)
+
+    Bmm = np.einsum('ijb,ikb -> bjk', B3, B3)
 
     # First order individual estimation
-    Bmm = np.einsum('ijb,ikb -> bjk', B3, B3)
     for j in range(n3):
-        B3_j = B3[:, :, j]
-
         # Regularized least squares inversion ( minimize || C1 ||_2 )
-        # B33 = B3_j.T @ B3_j
+        B3_j = B3[:, :, j]
         B33 = Bmm[j, :, :]
 
         # if it is ill-conditioned matrix, the default value is zero
         if np.all(svd(B33)[1]):  # sigma, diagonal matrix, from svd
             T3[:, :] = lin_solve(B33 + lam_eye_m3, B3_j.T)
+        else:
+            T3.fill(0.0)
 
         C3[:, j] = (T3 @ Y_res).reshape(m3)
         Y_ijk[:, j] = B3_j @ C3[:, j]
@@ -556,7 +559,7 @@ def f_test(Y, f0, Y_em, R, alpha, m1, m2, m3, n1, n2, n3, n):
 def ancova(Y, Y_em, V_Y, R, n):
     """Analysis of Covariance."""
     # Compute the sum of all Y_em terms
-    Y0 = np.sum(Y_em[:, :], axis=1)
+    Y0 = np.sum(Y_em, axis=1)
 
     # Initialize each variable
     S, S_a, S_b = [np.zeros((n,)) for _ in range(3)]
@@ -740,25 +743,24 @@ def emulate(self, X, Y=None):
 
     # Calculate emulated output: First Order
     for j in range(0, n1):
-        Y_em[:, j] = np.matmul(B1[:, :, j], C1[:, j])
+        Y_em[:, j] = B1[:, :, j] @ C1[:, j]
 
     # Second Order
     if maxorder > 1:
         for j in range(n1, n1+n2):
-            Y_em[:, j] = np.matmul(B2[:, :, j-n1], C2[:, j-n1])
+            Y_em[:, j] = B2[:, :, j-n1] @ C2[:, j-n1]
 
     # Third Order
     if maxorder == 3:
         for j in range(n1+n2, n1+n2+n3):
-            Y_em[:, j] = np.matmul(B3[:, :, j-n1-n2], C3[:, j-n1-n2])
+            Y_em[:, j] = B3[:, :, j-n1-n2] @ C3[:, j-n1-n2]
 
     Y_mean = 0
     if Y is not None:
         Y_mean = np.mean(Y)
         self['Y_test'] = Y
 
-    emulated = np.sum(Y_em, axis=1)+Y_mean
-    self['emulated'] = emulated
+    self['emulated'] = np.sum(Y_em, axis=1)+Y_mean
 
 
 def to_df(self):
