@@ -658,13 +658,17 @@ def _finalize(problem, SA, Em, d, alpha, maxorder, RT, Y_em, bootstrap_idx, X, Y
     Si['X'] = X
     Si['Y'] = Y
 
-    Si.problem = problem
+    Si.emulate = MethodType(emulate, Si)
     Si.to_df = MethodType(to_df, Si)
 
     Si._plot = Si.plot
     Si.plot = MethodType(plot, Si)
 
-    Si.emulate = MethodType(emulate, Si)
+    if not isinstance(problem, ProblemSpec):
+        Si.problem = problem
+    else:
+        problem.update(Si)
+        problem.emulate = MethodType(emulate, problem)
 
     return Si
 
