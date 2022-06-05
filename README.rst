@@ -33,8 +33,8 @@ Included methods
   `Saltelli et al. 1999 <http://amstat.tandfonline.com/doi/abs/10.1080/00401706.1999.10485594>`__, `Pujol (2006) in Iooss et al., (2021) <http://scitation.aip.org/content/aip/journal/jcp/59/8/10.1063/1.1680571>`__)
 
 * Random Balance Designs - Fourier Amplitude Sensitivity Test (RBD-FAST) (`Tarantola et al. 2006 <https://hal.archives-ouvertes.fr/hal-01065897/file/Tarantola06RESS_HAL.pdf>`__,
-  `Plischke 2010 <https://doi.org/10.1016/j.ress.2009.11.005>`__, 
-  `Tissot et al. 2012 <https://doi.org/10.1016/j.ress.2012.06.010>`__) 
+  `Plischke 2010 <https://doi.org/10.1016/j.ress.2009.11.005>`__,
+  `Tissot et al. 2012 <https://doi.org/10.1016/j.ress.2012.06.010>`__)
 
 * Delta
   Moment-Independent Measure (`Borgonovo 2007 <http://www.sciencedirect.com/science/article/pii/S0951832006000883>`__,
@@ -43,10 +43,10 @@ Included methods
 * Derivative-based Global Sensitivity Measure (DGSM) (`Sobol and
   Kucherenko 2009 <http://www.sciencedirect.com/science/article/pii/S0378475409000354>`__)
 
-* Fractional Factorial Sensitivity Analysis 
+* Fractional Factorial Sensitivity Analysis
   (`Saltelli et al. 2008 <http://www.wiley.com/WileyCDA/WileyTitle/productCd-0470059974.html>`__)
 
-* High-Dimensional Model Representation (HDMR) 
+* High-Dimensional Model Representation (HDMR)
   (`Rabitz et al. 1999 <https://doi.org/10.1016/S0010-4655(98)00152-0>`__, `Li et al. 2010 <https://doi.org/10.1021/jp9096919>`__)
 
 * PAWN (`Pianosi and Wagener 2018 <10.1016/j.envsoft.2018.07.019>`__, `Pianosi and Wagener 2015 <https://doi.org/10.1016/j.envsoft.2015.01.004>`__)
@@ -111,7 +111,7 @@ section in the documentation <https://salib.readthedocs.io/en/latest/advanced.ht
 Method chaining approach
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Chaining calls is supported from SALib v1.4 
+Chaining calls is supported from SALib v1.4
 
 .. code:: python
 
@@ -155,13 +155,30 @@ How to cite SALib
 
 If you would like to use our software, please cite it using the following:
 
+    Iwanaga, T., Usher, W., & Herman, J. (2022).
+    Toward SALib 2.0: Advancing the accessibility and interpretability of global sensitivity analyses.
+    Socio-Environmental Systems Modelling, 4, 18155. 
+    doi:10.18174/sesmo.18155
+
     Herman, J. and Usher, W. (2017) SALib: An open-source Python library for
     sensitivity analysis. Journal of Open Source Software, 2(9).
     doi:10.21105/joss.00097
 
 |paper status|
 
-If you use BibTeX, cite using the following entry::
+If you use BibTeX, cite using the following entries::
+
+    @article{Iwanaga2022,
+      title = {Toward {SALib} 2.0: {Advancing} the accessibility and interpretability of global sensitivity analyses},
+      volume = {4},
+      url = {https://sesmo.org/article/view/18155},
+      doi = {10.18174/sesmo.18155},
+      journal = {Socio-Environmental Systems Modelling},
+      author = {Iwanaga, Takuya and Usher, William and Herman, Jonathan},
+      month = may,
+      year = {2022},
+      pages = {18155},
+    }
 
     @article{Herman2017,
       doi = {10.21105/joss.00097},
@@ -175,6 +192,7 @@ If you use BibTeX, cite using the following entry::
       title = {{SALib}: An open-source Python library for Sensitivity Analysis},
       journal = {The Journal of Open Source Software}
     }
+
 
 Projects that use SALib
 -----------------------
