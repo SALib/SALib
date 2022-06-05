@@ -4,13 +4,15 @@
 from collections import OrderedDict
 import pkgutil
 from typing import Dict, Tuple
+import warnings
 
 import numpy as np  # type: ignore
 import scipy as sp  # type: ignore
 from scipy import stats
 from typing import List
 
-from .util_funcs import (avail_approaches, read_param_file, _check_bounds, _check_groups)
+from .util_funcs import (
+    avail_approaches, read_param_file, _check_bounds, _check_groups)
 from .problem import ProblemSpec
 from .results import ResultDict
 
@@ -35,7 +37,8 @@ def _scale_samples(params: np.ndarray, bounds: List):
     lower_bounds, upper_bounds = _check_bounds(bounds)
 
     if np.any(lower_bounds >= upper_bounds):
-        raise ValueError("Bounds are not legal (upper bound must be greater than lower bound)")
+        raise ValueError(
+            "Bounds are not legal (upper bound must be greater than lower bound)")
 
     # This scales the samples in-place, by using the optional output
     # argument for the numpy ufunctions
@@ -104,7 +107,8 @@ def _unscale_samples(params, bounds):
     upper_bounds = b[:, 1]
 
     if np.any(lower_bounds >= upper_bounds):
-        raise ValueError("Bounds are not legal (upper bound must be greater than lower bound)")
+        raise ValueError(
+            "Bounds are not legal (upper bound must be greater than lower bound)")
 
     # This scales the samples in-place, by using the optional output
     # argument for the numpy ufunctions
@@ -128,9 +132,13 @@ def _nonuniform_scale_samples(params, bounds, dists):
     dists : list
         list of distributions, one for each parameter
             unif: uniform with lower and upper bounds
-            triang: triangular with width (scale) and location of peak
-                    location of peak is in percentage of width
-                    lower bound assumed to be zero
+            triang: triangular with lower and upper bounds, as well as
+                    location of peak
+                    The location of peak is in percentage of width
+                    e.g. :code:`[1.0, 3.0, 0.5]` indicates 1.0 to 3.0 with a peak at 2.0
+
+                    A soon-to-be deprecated two-value format assumes the lower bound to be 0
+                    e.g. :code:`[3, 0.5]` assumes 0 to 3, with a peak at 1.5
             norm: normal distribution with mean and standard deviation
             truncnorm: truncated normal distribution with upper and lower
                     bounds, mean and standard deviation
@@ -144,17 +152,37 @@ def _nonuniform_scale_samples(params, bounds, dists):
     # loop over the parameters
     for i in range(conv_params.shape[1]):
         # setting first and second arguments for distributions
-        b1 = b[i][0]
-        b2 = b[i][1]
+        b1 = b[i][0]  # ending
+        b2 = b[i][1]  # 0-1
 
         if dists[i] == 'triang':
+            if len(b[i]) == 3:
+                loc_start = b[i][0]  # loc start
+                b1 = b[i][1]  # triangular distribution end
+                b2 = b[i][2]  # 0-1 aka c
+            elif len(b[i]) == 2:
+                msg = ("Two-value format for triangular distributions detected.\n"
+                    "To remove this message, specify the distribution start, "
+                    "end, and peak (three values) "
+                    "instead of the current two-value format "
+                    "(distribution end and peak, with start assumed to be 0)\n"
+                    "The two-value format will be deprecated in SALib v1.5"
+                )
+                warnings.warn(msg, DeprecationWarning, stacklevel=2)
+
+                loc_start = 0
+                b1 = b[i][0]
+                b2 = b[i][1]
+            else:
+                raise ValueError("Unknown triangular distribution specification. Check problem specification.")
+
             # checking for correct parameters
-            if b1 <= 0 or b2 <= 0 or b2 >= 1:
+            if b1 <= 0 or b2 <= 0 or b2 >= 1 or loc_start > b1:
                 raise ValueError("""Triangular distribution: Scale must be
-                    greater than zero; peak on interval [0,1]""")
+                    greater than zero; peak on interval [0,1], triangular start value must be smaller than end value""")
             else:
                 conv_params[:, i] = sp.stats.triang.ppf(
-                    params[:, i], c=b2, scale=b1, loc=0)
+                    params[:, i], c=b2, scale=b1-loc_start, loc=loc_start)
 
         elif dists[i] == 'unif':
             if b1 >= b2:
@@ -218,7 +246,7 @@ def extract_group_names(groups: List) -> Tuple:
     Parameters
     ----------
     groups : List
-        
+
 
     Returns
     -------
