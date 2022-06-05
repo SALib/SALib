@@ -135,6 +135,10 @@ def _nonuniform_scale_samples(params, bounds, dists):
             triang: triangular with lower and upper bounds, as well as
                     location of peak
                     The location of peak is in percentage of width
+                    e.g. :code:`[1.0, 3.0, 0.5]` indicates 1.0 to 3.0 with a peak at 2.0
+
+                    A soon-to-be deprecated two-value format assumes the lower bound to be 0
+                    e.g. :code:`[3, 0.5]` assumes 0 to 3, with a peak at 1.5
             norm: normal distribution with mean and standard deviation
             truncnorm: truncated normal distribution with upper and lower
                     bounds, mean and standard deviation
