@@ -15,14 +15,18 @@ def plot(Si):
     plt.close("all")
 
     # Extract necessary data from Si
-    problem = Si.problem
-    Em = Si["Em"]
-    RT = Si["RT"]
-    Y_em = Si["Y_em"]
-    idx = Si["idx"]
-    X = Si["X"]
-    Y = Si["Y"]
+    try:
+        problem = Si.problem
+    except AttributeError:
+        problem = Si
 
+    Em = Si['Em']
+    RT = Si['RT']
+    Y_em = Si['Y_em']
+    idx = Si['idx']
+    X = Si['X']
+    Y = Si['Y']
+    
     # Get number of bootstrap from Runtime and sample size N
     K = RT.shape[1]
     N = Y.shape[0]
