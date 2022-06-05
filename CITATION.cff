@@ -11,10 +11,9 @@ authors:
   given-names: "Jon"
   orcid: "0000-0002-4081-3175"
 title: "Toward SALib 2.0: Advancing the accessibility and interpretability of global sensitivity analyses"
-version: 1.0
-doi: 10.18174/sesmo.18155
+version: 1.4.6
+doi: 10.21105/joss.00097
 date-released: 2022-05-01
-preferred-citation: article
 url: "https://github.com/SALib/SALib"
 preferred-citation:
   type: article
