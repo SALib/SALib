@@ -10,7 +10,7 @@ authors:
 - family-names: "Herman"
   given-names: "Jon"
   orcid: "0000-0002-4081-3175"
-title: "Toward SALib 2.0: Advancing the accessibility and interpretability of global sensitivity analyses"
+title: "SALib: An open-source Python library for sensitivity analysis"
 version: 1.4.6
 doi: 10.21105/joss.00097
 date-released: 2022-05-01
