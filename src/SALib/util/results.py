@@ -17,7 +17,7 @@ class ResultDict(dict):
                             index=self['names'])
 
     def plot(self, ax=None):
-        '''Create bar chart of results'''
+        '''Create bar chart of results.'''
         Si_df = self.to_df()
 
         if isinstance(Si_df, (list, tuple)):
