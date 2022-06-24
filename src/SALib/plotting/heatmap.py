@@ -1,3 +1,4 @@
+from typing import Iterable
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -9,13 +10,42 @@ __all__ = ['heatmap']
 CONF_COLUMN = '_conf'
 
 
-def heatmap(sp, metric: str, title: str = None, ax=None):
+def heatmap_Y(sp, index: str, metrics: list = None) -> np.ndarray:
+    """Produce data for heatmap plot for a single sensitivity index across one
+    or more outputs."""
+    if isinstance(metrics, str):
+        metrics = [metrics]
+
+    if len(sp['outputs']) == 1:
+        fig_data = np.array([sp.analysis[index]])
+    else:
+        fig_data = np.array([sp.analysis[index][m] for m in metrics])
+
+    return fig_data
+
+
+def heatmap_Si(sp, metric: str, indices: list = None) -> np.ndarray:
+    """Produce data for heatmap plot for a single output across one
+    or more sensitivity indices."""
+    if isinstance(indices, str):
+        indices = [indices]
+
+    if len(sp['outputs']) > 1:
+        fig_data = np.array([sp.analysis[idx][metric] for idx in indices])
+    else:
+        fig_data = np.array([sp.analysis[idx] for idx in indices])
+
+    return fig_data
+
+
+def heatmap(sp, metric, index, title: str = None, ax=None):
     """Plot a heatmap of the target metric.
 
     Parameters
     ----------
     sp : object, SALib ProblemSpec
-    metric : str, metric to target ('S1', 'ST', etc)
+    metric : str, metric to plot. Defaults to first metric/result output if not given.
+    index : str, sensitivity indices to plot ('S1', 'ST', etc)
     title : str, plot title to use
     ax : axes object, matplotlib axes object to assign figure to.
 
@@ -28,24 +58,61 @@ def heatmap(sp, metric: str, title: str = None, ax=None):
     else:
         fig = plt.gcf()
 
-    if len(sp['outputs']) > 1:
-        res_display = np.array([sp.analysis[out][metric]
-                                for out in sp['outputs']])
+    if metric is None:
+        metric = sp['outputs'][0]
+
+    if isinstance(metric, str):
+        assert metric in sp['outputs'], f"Specified model output '{metric}' not found"
+
+    if isinstance(metric, str) and isinstance(index, str):
+        if len(sp['outputs']) == 1:
+            res_display = np.array([sp.analysis[index]])
+        else:
+            res_display = np.array([sp.analysis[index][metric]])
     else:
-        res_display = np.array([sp.analysis[metric]])
+        if isinstance(index, (list, tuple)) or index is None:
+            if index is None:
+                index = [k for k in sp.analysis.keys()
+                         if not k.endswith(CONF_COLUMN) and k != "names"]
+            print(index)
+            res_display = heatmap_Si(sp, metric, index)
+        elif isinstance(metric, (list, tuple)) or metric is None:
+            if metric is None:
+                metric = sp["outputs"]
+            res_display = heatmap_Y(sp, index, metric)
+
+    is_idx_def = isinstance(index, (str, list, tuple))
 
     ax.imshow(res_display)
     fig.colorbar(ax.images[0], ax=ax, shrink=0.9)
 
     if title is None:
-        title = metric
+        if is_idx_def:
+            d_met = metric
+            if isinstance(d_met, (list, tuple)):
+                d_met = d_met[0]
+            # Use generic title if metric not defined
+            title = f"Sensitivity of {d_met}"
+        else:
+            title = metric
 
     ax.set_title(title)
-    
-    ax.xaxis.set_ticks(range(0, len(sp['names'])))
-    ax.xaxis.set_ticklabels(sp['names'], rotation=90)
 
-    ax.yaxis.set_ticks(range(0, len(sp['outputs'])))
-    ax.yaxis.set_ticklabels(sp['outputs'])
+    if isinstance(metric, str):
+        metric = [metric]
+    if isinstance(index, str):
+        index = [index]
+
+    # Get unique groups (if defined) while maintaining order of group names
+    disp_names = [*dict.fromkeys(sp.get('groups', sp["names"]))]
+    ax.xaxis.set_ticks(range(0, len(disp_names)))
+    ax.xaxis.set_ticklabels(disp_names, rotation=90)
+
+    if is_idx_def:
+        ax.yaxis.set_ticks(range(0, len(index)))
+        ax.yaxis.set_ticklabels(index)
+    else:
+        ax.yaxis.set_ticks(range(0, len(metric)))
+        ax.yaxis.set_ticklabels(metric)
 
     return ax
