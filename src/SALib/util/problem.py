@@ -469,13 +469,14 @@ class ProblemSpec(dict):
 
         return axes
 
-    def heatmap(self, metric: str, title: str = None, ax=None):
+    def heatmap(self, index: str = None, metric: str = None, title: str = None, ax=None):
         """Plot results as a heatmap.
 
         Parameters
         ----------
-        metric : str, name of metric to plot, dependent on what 
+        index : str, name of index to plot, dependent on what
                     analysis was conducted (ST, S1, etc)
+        metric : str, name of output to analyze
         title : str, title of plot to use (defaults to the same as `metric`)
         ax : axes object, matplotlib axes object to use for plot.
                 Creates a new figure if not provided.
@@ -486,7 +487,7 @@ class ProblemSpec(dict):
         """
         from SALib.plotting.heatmap import heatmap  # type: ignore
 
-        return heatmap(self, metric, title, ax)
+        return heatmap(self, metric, index, title, ax)
 
     def _wrap_func(self, func, *args, **kwargs):
         # Create wrapped partial function to allow passing of additional args
