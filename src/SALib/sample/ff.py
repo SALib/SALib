@@ -1,7 +1,7 @@
 """The sampling implementation of fractional factorial method
 
 This implementation is based on the formulation put forward in
-[`Saltelli et al. 2008 <http://www.wiley.com/WileyCDA/WileyTitle/productCd-0470059974.html>`_]
+[`Saltelli et al. 2008 <http://doi.org/10.1002/9780470725184>`_]
 
 """
 
@@ -68,7 +68,6 @@ def generate_contrast(problem):
     num_vars = problem['num_vars']
 
     # Find the smallest n, such that num_vars < k
-    k = [2 ** n for n in range(16)]
     k_chosen = 2 ** find_smallest(num_vars)
 
     # Generate the fractional factorial contrast
@@ -92,12 +91,14 @@ def sample(problem, seed=None):
     as a check for errors in the analyze procedure.
 
     This algorithm is an implementation of that contained in Saltelli et al
-    [`Saltelli et al. 2008 <http://www.wiley.com/WileyCDA/WileyTitle/productCd-0470059974.html>`_]
+    [`Saltelli et al. 2008 <http://doi.org/10.1002/9780470725184>`_]
 
     Parameters
     ----------
     problem : dict
         The problem definition
+    seed : int
+        Seed to generate a random number
 
     Returns
     -------
@@ -106,11 +107,12 @@ def sample(problem, seed=None):
 
     References
     ----------
-    .. [1] Saltelli, A., Ratto, M., Andres, T., Campolongo, F., Cariboni, J., Gatelli, D., 
-           Saisana, M., Tarantola, S., 2008. 
-           Global Sensitivity Analysis: The Primer. 
+    .. [1] Saltelli, A., Ratto, M., Andres, T., Campolongo, F.,
+           Cariboni, J., Gatelli, D.,
+           Saisana, M., Tarantola, S., 2008.
+           Global Sensitivity Analysis: The Primer.
            Wiley, West Sussex, U.K.
-           https://dx.doi.org/10.1002/9780470725184
+           http://doi.org/10.1002/9780470725184
 
     """
     if seed:

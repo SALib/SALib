@@ -63,7 +63,6 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
     seed : int
         Seed to generate a random number
 
-
     Returns
     -------
     Si : dict

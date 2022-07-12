@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from . import common_args
-from ..util import (read_param_file, compute_groups_matrix, ResultDict,
+from ..util import (read_param_file, ResultDict,
                     extract_group_names, _check_groups)
 from types import MethodType
 
@@ -45,9 +45,14 @@ def analyze(problem, Y, calc_second_order=True, num_resamples=100,
         The confidence interval level (default 0.95)
     print_to_console : bool
         Print results directly to console (default False)
+    parallel : bool
+        Perform analysis in parallel if True
+    n_processors : int
+        Number of parallel processes (only used if parallel is True)
     keep_resamples : bool
         Whether or not to store intermediate resampling results (default False)
-
+    seed : int
+        Seed to generate a random number
 
     References
     ----------
@@ -183,7 +188,8 @@ def second_order(A, ABj, ABk, BAj, B):
     return Vjk - Sj - Sk
 
 
-def create_Si_dict(D: int, num_resamples: int, keep_resamples: bool, calc_second_order: bool):
+def create_Si_dict(D: int, num_resamples: int, keep_resamples: bool,
+                   calc_second_order: bool):
     """initialize empty dict to store sensitivity indices"""
     S = ResultDict((k, np.zeros(D))
                    for k in ('S1', 'S1_conf', 'ST', 'ST_conf'))
@@ -267,13 +273,14 @@ def create_task_list(D, calc_second_order, n_processors):
     return tasks, n_processors
 
 
-def Si_list_to_dict(S_list, D: int, num_resamples: int, keep_resamples:bool, calc_second_order: bool):
+def Si_list_to_dict(S_list, D: int, num_resamples: int, keep_resamples: bool,
+                    calc_second_order: bool):
     """Convert the parallel output into the regular dict format for
     printing/returning"""
     S = create_Si_dict(D, num_resamples, keep_resamples, calc_second_order)
     L = []
-    for l in S_list:  # first reformat to flatten
-        L += l
+    for list in S_list:  # first reformat to flatten
+        L += list
 
     for s in L:  # First order (+conf.)
         if s[2] is None:

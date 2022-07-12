@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict
 import math
 import warnings
 
@@ -12,26 +12,30 @@ from ..util import (scale_samples, read_param_file,
 
 def sample(problem: Dict, N: int, calc_second_order: bool = True,
            skip_values: int = None):
-    """Generates model inputs using Saltelli's extension of the Sobol' sequence.
+    """Generates model inputs using Saltelli's extension of the Sobol' sequence
 
     The Sobol' sequence is a popular quasi-random low-discrepancy sequence used
     to generate uniform samples of parameter space.
 
-    Returns a NumPy matrix containing the model inputs using Saltelli's sampling
-    scheme. Saltelli's scheme extends the Sobol' sequence in a way to reduce
+    Returns a NumPy matrix containing the model inputs using Saltelli's
+    sampling scheme.
+    Saltelli's scheme extends the Sobol' sequence in a way to reduce
     the error rates in the resulting sensitivity index calculations. If
-    `calc_second_order` is False, the resulting matrix has ``N * (D + 2)`` rows,
-    where ``D`` is the number of parameters. If `calc_second_order` is `True`,
-    the resulting matrix has ``N * (2D + 2)`` rows. These model inputs are
-    intended to be used with :func:`SALib.analyze.sobol.analyze`.
+    `calc_second_order` is False, the resulting matrix has ``N * (D + 2)``
+    rows, where ``D`` is the number of parameters.
+    If `calc_second_order` is `True`, the resulting matrix has ``N * (2D + 2)``
+    rows.
+    These model inputs are intended to be used with
+    :func:`SALib.analyze.sobol.analyze`.
 
     Notes
     -----
     The initial points of the Sobol' sequence has some repetition (see Table 2
     in Campolongo [1]), which can be avoided by setting the `skip_values`
-    parameter. Skipping values reportedly improves the uniformity of samples. It
-    has been shown, however, that naively skipping values may reduce accuracy,
-    increasing the number of samples needed to achieve convergence (see Owen [2]).
+    parameter. Skipping values reportedly improves the uniformity of samples.
+    It has been shown that naively skipping values may reduce accuracy,
+    increasing the number of samples needed to achieve convergence
+    (see Owen [2]).
 
     A recommendation adopted here is that both `skip_values` and `N` be a power
     of 2, where `N` is the desired number of samples (see [2] and discussion in
@@ -40,8 +44,8 @@ def sample(problem: Dict, N: int, calc_second_order: bool = True,
 
     The method now defaults to setting `skip_values` to a power of two that is
     ``>= N``. If `skip_values` is provided, the method now raises a UserWarning
-    in cases where sample sizes may be sub-optimal according to the recommendation
-    above.
+    in cases where sample sizes may be sub-optimal according to the
+    recommendation above.
 
     Parameters
     ----------
@@ -60,14 +64,16 @@ def sample(problem: Dict, N: int, calc_second_order: bool = True,
     References
     ----------
     .. [1] Campolongo, F., Saltelli, A., Cariboni, J., 2011.
-           From screening to quantitative sensitivity analysis. A unified approach.
+           From screening to quantitative sensitivity analysis.
+           A unified approach.
            Computer Physics Communications 182, 978–988.
            https://doi.org/10.1016/j.cpc.2010.12.039
 
     .. [2] Owen, A. B., 2020.
            On dropping the first Sobol' point.
            arXiv:2008.08051 [cs, math, stat].
-           Available at: http://arxiv.org/abs/2008.08051 (Accessed: 20 April 2021).
+           Available at: http://arxiv.org/abs/2008.08051
+           (Accessed: 20 April 2021).
 
     .. [3] Saltelli, A., 2002.
            Making best use of model evaluations to compute sensitivity indices.
@@ -111,17 +117,19 @@ def sample(problem: Dict, N: int, calc_second_order: bool = True,
             warnings.warn(msg)
 
         # warning when N > skip_values
-        # (see: https://github.com/scipy/scipy/pull/10844#issuecomment-673029539)
+        # see https://github.com/scipy/scipy/pull/10844#issuecomment-673029539
         n_exp = int(math.log(N, 2))
         m_exp = int(math.log(M, 2))
         if n_exp > m_exp:
             msg = (
-                "Convergence may not be valid as the number of requested samples is"
+                "Convergence may not be valid as the number of "
+                "requested samples is"
                 f" > `skip_values` ({N} > {M})."
             )
             warnings.warn(msg)
     elif skip_values == 0:
-        warnings.warn("Duplicate samples will be taken as no points are skipped.")
+        warnings.warn(
+            "Duplicate samples will be taken as no points are skipped.")
     else:
         assert isinstance(skip_values, int) and skip_values >= 0, \
             "`skip_values` must be a positive integer."
@@ -155,7 +163,8 @@ def sample(problem: Dict, N: int, calc_second_order: bool = True,
         # Cross-sample elements of "B" into "A"
         for k in range(Dg):
             for j in range(D):
-                if (not groups and j == k) or (groups and group_names[k] == groups[j]):
+                if (not groups and j == k) or \
+                   (groups and group_names[k] == groups[j]):
                     saltelli_sequence[index, j] = base_sequence[i, j + D]
                 else:
                     saltelli_sequence[index, j] = base_sequence[i, j]
@@ -167,7 +176,8 @@ def sample(problem: Dict, N: int, calc_second_order: bool = True,
         if calc_second_order:
             for k in range(Dg):
                 for j in range(D):
-                    if (not groups and j == k) or (groups and group_names[k] == groups[j]):
+                    if (not groups and j == k) or \
+                       (groups and group_names[k] == groups[j]):
                         saltelli_sequence[index, j] = base_sequence[i, j]
                     else:
                         saltelli_sequence[index, j] = base_sequence[i, j + D]
@@ -199,12 +209,15 @@ def cli_parse(parser):
                         choices=[1, 2],
                         help='Maximum order of sensitivity indices \
                            to calculate')
-    parser.add_argument('--skip-values', type=int, required=False, default=None,
-                        help='Number of sample points to skip (default: next largest power of 2 from `samples`)')
+    parser.add_argument('--skip-values', type=int, required=False,
+                        default=None,
+                        help='Number of sample points to skip \
+                            (default: next largest power of 2 from `samples`)')
 
-    # hacky way to remove an argument (seed option is not relevant for Saltelli)
+    # hacky way to remove an argument (seed option not relevant for Saltelli)
     remove_opts = [x for x in parser._actions if x.dest == 'seed']
-    [parser._handle_conflict_resolve(None, [('--seed', x), ('-s', x)]) for x in remove_opts]
+    [parser._handle_conflict_resolve(
+        None, [('--seed', x), ('-s', x)]) for x in remove_opts]
 
     return parser
 

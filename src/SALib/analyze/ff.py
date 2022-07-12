@@ -42,6 +42,8 @@ def analyze(problem, X, Y, second_order=False, print_to_console=False,
         Include interaction effects
     print_to_console: bool, default=False
         Print results directly to console
+    seed : int
+        Seed to generate a random number
 
 
     Returns
@@ -53,11 +55,12 @@ def analyze(problem, X, Y, second_order=False, print_to_console=False,
 
     References
     ----------
-    .. [1] Saltelli, A., Ratto, M., Andres, T., Campolongo, F., Cariboni, J., Gatelli, D., 
-           Saisana, M., Tarantola, S., 2008. 
-           Global Sensitivity Analysis: The Primer. 
+    .. [1] Saltelli, A., Ratto, M., Andres, T., Campolongo, F.,
+           Cariboni, J., Gatelli, D.,
+           Saisana, M., Tarantola, S., 2008.
+           Global Sensitivity Analysis: The Primer.
            Wiley, West Sussex, U.K.
-           https://dx.doi.org/10.1002/9780470725184
+           http://doi.org/10.1002/9780470725184
 
 
     Examples

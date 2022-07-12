@@ -9,7 +9,8 @@ from . import common_args
 from ..util import read_param_file, ResultDict
 
 
-def analyze(problem, X, Y, M=10, num_resamples=100, conf_level=0.95, print_to_console=False, seed=None):
+def analyze(problem, X, Y, M=10, num_resamples=100, conf_level=0.95,
+            print_to_console=False, seed=None):
     """Performs the Random Balanced Design - Fourier Amplitude Sensitivity Test
     (RBD-FAST) on model outputs.
 
@@ -36,6 +37,8 @@ def analyze(problem, X, Y, M=10, num_resamples=100, conf_level=0.95, print_to_co
         the Fourier series decomposition (default 10)
     print_to_console : bool
         Print results directly to console (default False)
+    seed : int
+        Seed to generate a random number
 
 
     References
@@ -82,7 +85,7 @@ def analyze(problem, X, Y, M=10, num_resamples=100, conf_level=0.95, print_to_co
         S1 = unskew_S1(S1, M, N)
         Si['S1'][i] = S1
         Si['S1_conf'][i] = bootstrap(X[:, i], Y, M, num_resamples, conf_level)
-    
+
     if print_to_console:
         print(Si.to_df())
 
@@ -161,7 +164,8 @@ def cli_action(args):
     Y = np.loadtxt(args.model_output_file,
                    delimiter=args.delimiter,
                    usecols=(args.column,))
-    analyze(problem, X, Y, M=args.M, num_resamples=args.resamples, print_to_console=True, seed=args.seed)
+    analyze(problem, X, Y, M=args.M, num_resamples=args.resamples,
+            print_to_console=True, seed=args.seed)
 
 
 if __name__ == "__main__":

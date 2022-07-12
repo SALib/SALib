@@ -1,5 +1,6 @@
+repos:
 -   repo: git://github.com/pre-commit/pre-commit-hooks
-    sha: v0.8.0
+    rev: v0.8.0
     hooks:
     -   id: trailing-whitespace
     -   id: autopep8-wrapper
