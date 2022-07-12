@@ -145,7 +145,7 @@ def _nonuniform_scale_samples(params, bounds, dists):
                     bounds, mean and standard deviation
             lognorm: lognormal with ln-space mean and standard deviation
         str - distribution applied to all parameters
-            multi_norm: Correlated distribution using the Cholesky 
+            multi_norm: Correlated distribution using the Cholesky
             decomposition approach.
             In this case `bounds` specifies mean (first column) and desired
             covariance (other columns).
@@ -160,11 +160,11 @@ def _nonuniform_scale_samples(params, bounds, dists):
     if is_str and (dists == 'multi_norm'):
         assert b.shape[0] == conv_len and  \
                 b.shape[1] == conv_len + 1, \
-            "Bounds should have shape matching (num_vars, (num_vars+1))"
+                "Bounds should have shape matching (num_vars, (num_vars+1))"
 
         # first element is a mean value
         means = b[:, 0]
-        cov   = b[:, 1:] 
+        cov = b[:, 1:]
         n_std = sp.stats.norm.ppf(params)
         conv_params = np.dot(cholesky(cov, lower=True), n_std.T).T + means
 
@@ -172,8 +172,8 @@ def _nonuniform_scale_samples(params, bounds, dists):
     elif is_str:
         valid_multi_dists = ['multi_norm']
         raise ValueError('Multi distributions: choose one of %s' %
-                            ", ".join(valid_multi_dists))
-    
+                         ", ".join(valid_multi_dists))
+
     if isinstance(dists, list):
         # loop over the parameters
         for i in range(conv_len):
@@ -181,106 +181,83 @@ def _nonuniform_scale_samples(params, bounds, dists):
             b1 = b[i][0]
             b2 = b[i][1]
 
-    # loop over the parameters
-    for i in range(conv_params.shape[1]):
-        # setting first and second arguments for distributions
-        b1 = b[i][0]
-        b2 = b[i][1]
+            if dists[i] == 'triang':
+                if len(b[i]) == 3:
+                    loc_start = b[i][0]  # loc start
+                    b1 = b[i][1]  # triangular distribution end
+                    b2 = b[i][2]  # 0-1 aka c
+                elif len(b[i]) == 2:
+                    msg = ("Two-value format for triangular distributions detected.\n"
+                        "To remove this message, specify the distribution start, "
+                        "end, and peak (three values) "
+                        "instead of the current two-value format "
+                        "(distribution end and peak, with start assumed to be 0)\n"
+                        "The two-value format will be deprecated in SALib v1.5"
+                    )
+                    warnings.warn(msg, DeprecationWarning, stacklevel=2)
 
-        if dists[i] == 'triang':
-            if len(b[i]) == 3:
-                loc_start = b[i][0]  # loc start
-                b1 = b[i][1]  # triangular distribution end
-                b2 = b[i][2]  # 0-1 aka c
-            elif len(b[i]) == 2:
-                msg = ("Two-value format for triangular distributions detected.\n"
-                    "To remove this message, specify the distribution start, "
-                    "end, and peak (three values) "
-                    "instead of the current two-value format "
-                    "(distribution end and peak, with start assumed to be 0)\n"
-                    "The two-value format will be deprecated in SALib v1.5"
-                )
-                warnings.warn(msg, DeprecationWarning, stacklevel=2)
+                    loc_start = 0
+                    b1 = b[i][0]
+                    b2 = b[i][1]
+                else:
+                    raise ValueError("Unknown triangular distribution specification. Check problem specification.")
 
-                loc_start = 0
-                b1 = b[i][0]
-                b2 = b[i][1]
-            else:
-                raise ValueError("Unknown triangular distribution specification. Check problem specification.")
+                # checking for correct parameters
+                if b1 <= 0 or b2 <= 0 or b2 >= 1 or loc_start > b1:
+                    raise ValueError("""Triangular distribution: Scale must be
+                        greater than zero; peak on interval [0,1], triangular start value must be smaller than end value""")
+                else:
+                    conv_params[:, i] = sp.stats.triang.ppf(
+                        params[:, i], c=b2, scale=b1-loc_start, loc=loc_start)
 
-            # checking for correct parameters
-            if b1 <= 0 or b2 <= 0 or b2 >= 1 or loc_start > b1:
-                raise ValueError("""Triangular distribution: Scale must be
-                    greater than zero; peak on interval [0,1], triangular start value must be smaller than end value""")
-            else:
-                conv_params[:, i] = sp.stats.triang.ppf(
-                    params[:, i], c=b2, scale=b1-loc_start, loc=loc_start)
+            elif dists[i] == 'unif':
+                if b1 >= b2:
+                    raise ValueError("""Uniform distribution: lower bound
+                        must be less than upper bound""")
 
-        elif dists[i] == 'unif':
-            if b1 >= b2:
-                raise ValueError("""Uniform distribution: lower bound
-                    must be less than upper bound""")
-            else:
                 conv_params[:, i] = params[:, i] * (b2 - b1) + b1
 
-        elif dists[i] == 'norm':
-            if b2 <= 0:
-                raise ValueError("""Normal distribution: stdev must be > 0""")
-            else:
+            elif dists[i] == 'norm':
+                if b2 <= 0:
+                    raise ValueError("""Normal distribution: stdev must be > 0""")
+
                 conv_params[:, i] = sp.stats.norm.ppf(
                     params[:, i], loc=b1, scale=b2)
 
-        # Truncated normal distribution
-        # parameters are lower bound and upper bound, mean and stdev
-        elif dists[i] == 'truncnorm':
-            b3 = b[i][2]
-            b4 = b[i][3]
-            if b4 <= 0:
-                raise ValueError(
-                    """Truncated normal distribution: stdev must
-                    be > 0"""
-                )
-            if b1 >= b2:
-                raise ValueError(
-                    """Truncated normal distribution: lower bound
-                    must be less than upper bound"""
-                )
+            # Truncated normal distribution
+            # parameters are lower bound and upper bound, mean and stdev
+            elif dists[i] == 'truncnorm':
+                b3 = b[i][2]
+                b4 = b[i][3]
+                if b4 <= 0:
+                    raise ValueError(
+                        """Truncated normal distribution: stdev must
+                        be > 0"""
+                    )
+                if b1 >= b2:
+                    raise ValueError(
+                        """Truncated normal distribution: lower bound
+                        must be less than upper bound"""
+                    )
+                else:
+                    conv_params[:, i] = sp.stats.truncnorm.ppf(
+                        params[:, i], (b1 - b3) / b4, (b2 - b3) / b4, loc=b3, scale=b4
+                    )
+
+            # lognormal distribution (ln-space, not base-10)
+            # paramters are ln-space mean and standard deviation
+            elif dists[i] == 'lognorm':
+                # checking for valid parameters
+                if b2 <= 0:
+                    raise ValueError(
+                        """Lognormal distribution: stdev must be > 0""")
+                else:
+                    conv_params[:, i] = np.exp(
+                        sp.stats.norm.ppf(params[:, i], loc=b1, scale=b2))
             else:
-                conv_params[:, i] = sp.stats.truncnorm.ppf(
-                    params[:, i], (b1 - b3) / b4, (b2 - b3) / b4, loc=b3, scale=b4
-                )
-
-        # lognormal distribution (ln-space, not base-10)
-        # paramters are ln-space mean and standard deviation
-        elif dists[i] == 'lognorm':
-            # checking for valid parameters
-            if b2 <= 0:
-                raise ValueError(
-                    """Lognormal distribution: stdev must be > 0""")
-            else:
-                conv_params[:, i] = np.exp(
-                    sp.stats.norm.ppf(params[:, i], loc=b1, scale=b2))
-        else:
-            valid_dists = ['unif', 'triang', 'norm', 'lognorm']
-            raise ValueError('Distributions: choose one of %s' %
-                             ", ".join(valid_dists))
-    
-    elif isinstance(dists, str):
-        if dists == 'multi_norm':
-            assert b.shape[0] == conv_params.shape[1] and  \
-                   b.shape[1] == conv_params.shape[1] + 1, \
-                "bounds should have shape of num_vars*(num_vars+1)!"
-
-            # first element is a mean value, 
-            means = b[:, 0]
-            cov   = b[:, 1:] 
-            n_std = sp.stats.norm.ppf(params)
-            conv_params = np.dot(cholesky(cov, lower=True), n_std.T).T + means
-
-        else:
-            valid_multi_dists = ['multi_norm']
-            raise ValueError('Multi distributions: choose one of %s' %
-                                ", ".join(valid_multi_dists))
+                valid_dists = ['unif', 'triang', 'norm', 'lognorm']
+                raise ValueError('Distributions: choose one of %s' %
+                                 ", ".join(valid_dists))
     else:
         raise TypeError("dists should be of list or str type!")
 
@@ -300,7 +277,7 @@ def extract_group_names(groups: List) -> Tuple:
 
     Returns
     -------
-    tuple : names, number of groups    
+    tuple : names, number of groups
     """
     names = list(OrderedDict.fromkeys(groups))
     number = len(names)
