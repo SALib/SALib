@@ -28,6 +28,8 @@ def sample(
     These model inputs are intended to be used with
     :func:`SALib.analyze.sobol.analyze`.
 
+    .. deprecated:: 1.4.6
+
     Notes
     -----
     The initial points of the Sobol' sequence has some repetition (see Table 2
@@ -91,6 +93,12 @@ def sample(
            https://github.com/scipy/scipy/pull/10844#issuecomment-672186615
            https://github.com/scipy/scipy/pull/10844#issuecomment-673029539
     """
+    warnings.warn(
+        "`salib.sample.saltelli` will be removed in SALib 1.5. Please use"
+        " `salib.sample.sobol`",
+        category=DeprecationWarning, stacklevel=2
+    )
+
     # bit-shift test to check if `N` == 2**n
     if not ((N & (N - 1) == 0) and (N != 0 and N - 1 != 0)):
         msg = f"""
