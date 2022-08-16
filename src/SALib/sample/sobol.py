@@ -14,6 +14,7 @@ def sample(
     *,
     calc_second_order: bool = True,
     scramble: bool = True
+    seed: Optional[Union[int, np.random.Generator]] = None
 ):
     """Generates model inputs using Saltelli's extension of the Sobol' sequence
 
@@ -51,6 +52,12 @@ def sample(
         Calculate second-order sensitivities (default True)
     scramble : bool
         Default is True.
+    seed : {None, int, `numpy.random.Generator`}, optional
+        If `seed` is None the `numpy.random.Generator` generator is used.
+        If `seed` is an int, a new ``Generator`` instance is used,
+        seeded with `seed`.
+        If `seed` is already a ``Generator`` instance then that instance is
+        used. Default is None.
 
     References
     ----------
@@ -82,7 +89,7 @@ def sample(
     groups = _check_groups(problem)
 
     # Create base sequence - could be any type of sampling
-    qrng = qmc.Sobol(d=2*D, scramble=scramble)
+    qrng = qmc.Sobol(d=2*D, scramble=scramble, seed=seed)
     base_sequence = qrng.random(N)
 
     if not groups:
