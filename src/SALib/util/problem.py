@@ -1,11 +1,9 @@
 import warnings
 import importlib
 from types import MethodType
-
-from multiprocess import Pool, cpu_count
-from pathos.pp import ParallelPythonPool as pp_Pool
 from functools import partial, wraps
 
+from multiprocess import Pool, cpu_count
 import numpy as np
 
 import SALib.sample as samplers
@@ -20,6 +18,13 @@ try:
     from p_tqdm import p_imap
 except ImportError:
     ptqdm_available = False
+
+try:
+    from pathos.pp import ParallelPythonPool as pp_Pool
+    pathos_available = True
+except ImportError:
+    pathos_available = False
+
 
 __all__ = ["ProblemSpec"]
 
@@ -262,6 +267,13 @@ class ProblemSpec(dict):
         ----------
         self : ProblemSpec object
         """
+        if not pathos_available:
+            raise RuntimeError(
+                "Pathos is required to run in distributed mode. Please install"
+                " with `pip install pathos` or"
+                " `conda install pathos -c conda-forge`"
+            )
+
         if verbose:
             from pathos.parallel import stats
 
