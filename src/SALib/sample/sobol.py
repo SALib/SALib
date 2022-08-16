@@ -1,11 +1,13 @@
-from typing import Dict
+import warnings
+from typing import Dict, Optional, Union
 
 import numpy as np
 from scipy.stats import qmc
 
 from . import common_args
-from ..util import (scale_samples, read_param_file,
-                    compute_groups_matrix, _check_groups)
+from ..util import (
+    scale_samples, read_param_file, compute_groups_matrix, _check_groups
+)
 
 
 def sample(
@@ -13,10 +15,12 @@ def sample(
     N: int,
     *,
     calc_second_order: bool = True,
-    scramble: bool = True
+    scramble: bool = True,
+    skip_values: int = 0,
     seed: Optional[Union[int, np.random.Generator]] = None
 ):
-    """Generates model inputs using Saltelli's extension of the Sobol' sequence
+    """
+    Generates model inputs using Saltelli's extension of the Sobol' sequence.
 
     The Sobol' sequence is a popular quasi-random low-discrepancy sequence used
     to generate uniform samples of parameter space.
@@ -35,9 +39,12 @@ def sample(
     Notes
     -----
     The initial points of the Sobol' sequence has some repetition (see Table 2
-    in Campolongo [1]_), which can be avoided by setting the `skip_values`
-    parameter. Skipping values reportedly improves the uniformity of samples.
-    It has been shown that naively skipping values may reduce accuracy,
+    in Campolongo [1]_), which can be avoided by scrambling the sequence.
+
+    Another option, not recommended and available for educational purposes,
+    is to use the `skip_values` parameter.
+    Skipping values reportedly improves the uniformity of samples.
+    But, it has been shown that naively skipping values may reduce accuracy,
     increasing the number of samples needed to achieve convergence
     (see Owen [2]_).
 
@@ -48,10 +55,15 @@ def sample(
     N : int
         The number of samples to generate.
         Ideally a power of 2 and <= `skip_values`.
-    calc_second_order : bool
-        Calculate second-order sensitivities (default True)
-    scramble : bool
+    calc_second_order : bool, optional
+        Calculate second-order sensitivities. Default is True.
+    scramble : bool, optional
+        If True, use LMS+shift scrambling. Otherwise, no scrambling is done.
         Default is True.
+    skip_values : int, optional
+        Number of points in Sobol' sequence to skip, ideally a value of base 2.
+        It's recommended not to change this value and use `scramble` instead.
+        Default is 0.
     seed : {None, int, `numpy.random.Generator`}, optional
         If `seed` is None the `numpy.random.Generator` generator is used.
         If `seed` is an int, a new ``Generator`` instance is used,
@@ -90,6 +102,34 @@ def sample(
 
     # Create base sequence - could be any type of sampling
     qrng = qmc.Sobol(d=2*D, scramble=scramble, seed=seed)
+
+    # fast-forward logic
+    if skip_values > 0:
+        M = skip_values
+        if not ((M & (M-1) == 0) and (M != 0 and M-1 != 0)):
+            msg = f"""
+            Convergence properties of the Sobol' sequence is only valid if
+            `skip_values` ({M}) is a power of 2.
+            """
+            warnings.warn(msg, stacklevel=2)
+
+        # warning when N > skip_values
+        # see https://github.com/scipy/scipy/pull/10844#issuecomment-673029539
+        n_exp = int(np.log(N, 2))
+        m_exp = int(np.log(M, 2))
+        if n_exp > m_exp:
+            msg = (
+                "Convergence may not be valid as the number of "
+                "requested samples is"
+                f" > `skip_values` ({N} > {M})."
+            )
+            warnings.warn(msg, stacklevel=2)
+
+        qrng.fast_forward(M)
+    elif skip_values < 0 or isinstance(skip_values, int):
+        raise ValueError("`skip_values` must be a positive integer.")
+
+    # sample Sobol' sequence
     base_sequence = qrng.random(N)
 
     if not groups:
