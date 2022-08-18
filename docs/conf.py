@@ -8,6 +8,7 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
+from datetime import date
 import os
 import sys
 import inspect
@@ -99,7 +100,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "SALib"
-copyright = "2021, Jon Herman, Will Usher and others"
+copyright = f"{date.today().year}, Jon Herman, Will Usher and others"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -161,7 +162,8 @@ html_theme_options = {
     "github_url": "https://github.com/salib/salib",
     "navbar_end": ["theme-switcher", "version-switcher", "navbar-icon-links"],
     "switcher": {
-        "json_url": "https://scipy.github.io/devdocs/_static/version_switcher.json",
+        # "json_url": "https://salib.readthedocs.io/en/latest/_static/version_switcher.json",
+        "json_url": "https://raw.githubusercontent.com/tupui/SALib/pydata-sphinx-theme/docs/_static/version_switcher.json",
         "version_match": version,
   }
 }

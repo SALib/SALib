@@ -1,0 +1,12 @@
+[
+    {
+        "name": "dev",
+        "version": "dev",
+        "url": "https://salib.readthedocs.io/en/latest/"
+    },
+    {
+        "name": "1.4.5 (stable)",
+        "version":"1.4.5",
+        "url": "https://salib.readthedocs.io/en/stable/"
+    }
+]
