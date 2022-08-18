@@ -12,8 +12,6 @@ If you would like to use our software, please cite it using the following:
     sensitivity analysis. Journal of Open Source Software, 2(9).
     doi:10.21105/joss.00097
 
-|paper status|
-
 If you use BibTeX, cite using the following entries::
 
     @article{Iwanaga2022,
