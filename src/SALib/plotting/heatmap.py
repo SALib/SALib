@@ -114,8 +114,7 @@ def heatmap(sp, metric, index, title: str = None, ax=None):
 
     # Account for indices that may have been filtered out
     # e.g., cannot easily show second-order values at the moment
-    disp_idx = res_display.shape[1] - 1
-
+    disp_idx = res_display.shape[0]
     if is_idx_def:
         ax.yaxis.set_ticks(range(0, len(index[0:disp_idx])))
         ax.yaxis.set_ticklabels(index[0:disp_idx])
