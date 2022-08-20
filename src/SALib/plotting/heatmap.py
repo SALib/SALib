@@ -112,9 +112,13 @@ def heatmap(sp, metric, index, title: str = None, ax=None):
     ax.xaxis.set_ticks(range(0, len(disp_names)))
     ax.xaxis.set_ticklabels(disp_names, rotation=90)
 
+    # Account for indices that may have been filtered out
+    # e.g., cannot easily show second-order values at the moment
+    disp_idx = res_display.shape[1] - 1
+
     if is_idx_def:
-        ax.yaxis.set_ticks(range(0, len(index)))
-        ax.yaxis.set_ticklabels(index)
+        ax.yaxis.set_ticks(range(0, len(index[0:disp_idx])))
+        ax.yaxis.set_ticklabels(index[0:disp_idx])
     else:
         ax.yaxis.set_ticks(range(0, len(metric)))
         ax.yaxis.set_ticklabels(metric)
