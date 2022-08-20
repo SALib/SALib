@@ -68,13 +68,12 @@ def heatmap(sp, metric, index, title: str = None, ax=None):
         if len(sp['outputs']) == 1:
             res_display = np.array([sp.analysis[index]])
         else:
-            res_display = np.array([sp.analysis[index][metric]])
+            res_display = np.array([sp.analysis[metric][index]])
     else:
         if isinstance(index, (list, tuple)) or index is None:
             if index is None:
                 index = [k for k in sp.analysis.keys()
                          if not k.endswith(CONF_COLUMN) and k != "names"]
-            print(index)
             res_display = heatmap_Si(sp, metric, index)
         elif isinstance(metric, (list, tuple)) or metric is None:
             if metric is None:
@@ -104,7 +103,10 @@ def heatmap(sp, metric, index, title: str = None, ax=None):
         index = [index]
 
     # Get unique groups (if defined) while maintaining order of group names
-    disp_names = [*dict.fromkeys(sp.get('groups', sp["names"]))]
+    disp_names = sp['groups']
+    if disp_names is None:
+        disp_names = sp['names']
+
     ax.xaxis.set_ticks(range(0, len(disp_names)))
     ax.xaxis.set_ticklabels(disp_names, rotation=90)
 
