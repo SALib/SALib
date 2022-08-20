@@ -33,8 +33,9 @@ def heatmap_Si(sp, metric: str, indices: list = None) -> np.ndarray:
     if len(sp['outputs']) > 1:
         fig_data = np.array([sp.analysis[idx][metric] for idx in indices])
     else:
-        fig_data = np.array([sp.analysis[idx] for idx in indices])
-
+        si_shape = sp.analysis[indices[0]].shape
+        fig_data = np.array([sp.analysis[idx] for idx in indices
+                             if sp.analysis[idx].shape == si_shape])
     return fig_data
 
 
@@ -74,6 +75,7 @@ def heatmap(sp, metric, index, title: str = None, ax=None):
             if index is None:
                 index = [k for k in sp.analysis.keys()
                          if not k.endswith(CONF_COLUMN) and k != "names"]
+
             res_display = heatmap_Si(sp, metric, index)
         elif isinstance(metric, (list, tuple)) or metric is None:
             if metric is None:
