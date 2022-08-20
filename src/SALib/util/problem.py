@@ -487,7 +487,7 @@ class ProblemSpec(dict):
         """
         from SALib.plotting.heatmap import heatmap  # type: ignore
 
-        return heatmap(self, metric, index, title, ax)
+        return heatmap(self, index, metric, title, ax)
 
     def _wrap_func(self, func, *args, **kwargs):
         # Create wrapped partial function to allow passing of additional args
