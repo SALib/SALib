@@ -3,6 +3,8 @@ sys.path.append('../..')
 
 from SALib import ProblemSpec
 from SALib.test_functions import Ishigami
+from SALib.plotting.heatmap import heatmap
+
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -66,4 +68,28 @@ ax1.set_yscale('log')
 ax2.set_yscale('log')
 
 ax1.set_title("Customized matplotlib plot")
+plt.show()
+
+
+# Plot sensitivity indices as a heatmap
+# Note that plotting methods return a matplotlib axes object
+fig, ax1 = plt.subplots(1, 1, figsize=(4, 4))
+ax1 = sp.heatmap(ax=ax1)
+ax1.set_title("Basic heatmap")
+plt.show()
+
+
+# Another heatmap plot with more fine-grain control
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 6))
+
+heatmap(sp, None, 'ST', 'Total Order Sensitivity', ax1)
+heatmap(sp, None, 'S1', 'First Order Sensitivity', ax2)
+plt.show()
+
+# Yet another heatmap example
+fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(10, 6), sharex=True, constrained_layout=True)
+sp.heatmap(None, 'ST', 'Total Order', ax=ax1)
+sp.heatmap(None, 'ST_conf', 'Total Order Conf.', ax=ax2)
+sp.heatmap(None, 'S1', 'First Order', ax=ax3)
+sp.heatmap(None, 'S1_conf', 'First Order Conf.', ax=ax4)
 plt.show()
