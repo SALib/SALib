@@ -474,9 +474,9 @@ class ProblemSpec(dict):
 
         Parameters
         ----------
-        metric : str, name of output to analyze
-        index : str, name of index to plot, dependent on what
-                    analysis was conducted (ST, S1, etc)
+        metric : str or None, name of output to analyze (display all if `None`)
+        index : str or None, name of index to plot, dependent on what
+                    analysis was conducted (ST, S1, etc; displays all if `None`)
         title : str, title of plot to use (defaults to the same as `metric`)
         ax : axes object, matplotlib axes object to use for plot.
                 Creates a new figure if not provided.
