@@ -200,9 +200,15 @@ def cli_parse(parser):
         '--max-order', type=int, required=False, default=2, choices=[1, 2],
         help='Maximum order of sensitivity indices to calculate'
     )
+
     parser.add_argument(
         '--scramble', type=int, required=False, default=True,
         help='Use scrambled sequence'
+    )
+    
+    parser.add_argument(
+        '--skip-values', type=int, required=False, default=None,
+        help='Number of sample points to skip (default: next largest power of 2 from `samples`). Not recommended (use `scramble` instead).'
     )
 
     # hacky way to remove an argument (seed option not relevant for Saltelli)
