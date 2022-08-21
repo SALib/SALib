@@ -70,7 +70,7 @@ plt.show()
 
 # Plot sensitivity indices as a heatmap
 # Note that plotting methods return a matplotlib axes object
-ax = sp.heatmap()
+ax = sp.heatmap("Y")
 ax.set_title("Basic heatmap")
 plt.show()
 
@@ -81,6 +81,7 @@ fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 6))
 sp.heatmap('Y', 'ST', 'Total Order Sensitivity', ax1)
 sp.heatmap('Y', 'S1', 'First Order Sensitivity', ax2)
 plt.show()
+
 
 # Yet another heatmap example
 fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(10, 6), sharex=True, constrained_layout=True)
