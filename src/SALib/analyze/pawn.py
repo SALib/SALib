@@ -48,6 +48,9 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray, S: int = 10,
 
     This implementation ignores all NaNs.
 
+    When applied to grouped factors, the analysis is conducted on each factor
+    individually, and the mean of their results are reported.
+
 
     Parameters
     ----------
@@ -99,12 +102,12 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray, S: int = 10,
     if seed:
         np.random.seed(seed)
 
+    D = problem['num_vars']
     groups = _check_groups(problem)
     if not groups:
-        D = problem['num_vars']
         var_names = problem['names']
     else:
-        var_names, D = extract_group_names(problem.get('groups', []))
+        var_names, _ = extract_group_names(problem.get('groups', []))
 
     results = np.full((D, 5), np.nan)
     temp_pawn = np.full((S, D), np.nan)
@@ -137,7 +140,20 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray, S: int = 10,
         med = np.nanmedian(p_ind)
         maxs = np.nanmax(p_ind)
         cv = np.nanstd(p_ind) / mean
-        results[d_i] = [mins, mean, med, maxs, cv]
+        results[d_i, :] = [mins, mean, med, maxs, cv]
+    
+    if groups:
+        groups = np.array(groups)
+        unique_grps = [*dict.fromkeys(groups)]
+        tmp = np.full((len(unique_grps), 5), np.nan)
+
+        # Take the mean of effects from parameters that are grouped together
+        for grp_id, grp in enumerate(unique_grps):
+            tmp[grp_id, :] = np.mean(results[groups == grp, :], axis=0)
+
+        results = tmp
+        tmp = None
+
 
     Si = ResultDict([
         ('minimum', results[:, 0]),
