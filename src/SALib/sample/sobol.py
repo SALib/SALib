@@ -63,6 +63,7 @@ def sample(
     skip_values : int, optional
         Number of points in Sobol' sequence to skip, ideally a value of base 2.
         It's recommended not to change this value and use `scramble` instead.
+        `scramble` and `skip_values` can be used together.
         Default is 0.
     seed : {None, int, `numpy.random.Generator`}, optional
         If `seed` is None the `numpy.random.Generator` generator is used.
@@ -142,6 +143,7 @@ def sample(
         saltelli_sequence = np.zeros([(2 * Dg + 2) * N, D])
     else:
         saltelli_sequence = np.zeros([(Dg + 2) * N, D])
+
     index = 0
 
     for i in range(N):
@@ -205,10 +207,11 @@ def cli_parse(parser):
         '--scramble', type=int, required=False, default=True,
         help='Use scrambled sequence'
     )
-    
+
     parser.add_argument(
         '--skip-values', type=int, required=False, default=None,
-        help='Number of sample points to skip (default: next largest power of 2 from `samples`). Not recommended (use `scramble` instead).'
+        help='Number of sample points to skip (default: next largest power of'
+             ' 2 from `samples`). Not recommended (use `scramble` instead).'
     )
 
     # hacky way to remove an argument (seed option not relevant for Saltelli)
