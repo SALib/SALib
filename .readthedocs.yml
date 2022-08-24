@@ -16,10 +16,5 @@ sphinx:
 formats:
   - pdf
 
-python:
-  version: "3.8"
-  install:
-    - requirements: docs/requirements.txt
-
 conda:
   environment: environment.yml

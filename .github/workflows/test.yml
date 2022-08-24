@@ -56,7 +56,7 @@ jobs:
       - name: Install package
         run: |
           conda activate SALib
-          pip install .
+          pip install .[test]
 
       - name: Test
         run: |

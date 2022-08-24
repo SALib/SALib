@@ -9,6 +9,14 @@ dependencies:
   - matplotlib>=3.2.2
   - scipy>=1.7.3
   - pathos>=0.2.5
+  # tests
+  - pytest
+  - pytest-cov
+  # dev
+  - pre-commit
+  - hatch
+  # doc
+  - sphinx
   - numpydoc
   - pip
   - pip:
