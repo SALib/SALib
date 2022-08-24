@@ -4,21 +4,27 @@ from itertools import combinations
 import numpy as np  # type: ignore
 from typing import List, Tuple, Union
 
-from . strategy import Strategy
+from .strategy import Strategy
 
 
 class LocalOptimisation(Strategy):
-    """Implements the local optimisation algorithm using the Strategy interface
-    """
+    """Implements the local optimisation algorithm using the Strategy interface"""
 
-    def _sample(self, input_sample, num_samples,
-                num_params, k_choices, num_groups=None):
-        return self.find_local_maximum(input_sample, num_samples, num_params,
-                                       k_choices, num_groups)
+    def _sample(
+        self, input_sample, num_samples, num_params, k_choices, num_groups=None
+    ):
+        return self.find_local_maximum(
+            input_sample, num_samples, num_params, k_choices, num_groups
+        )
 
-    def find_local_maximum(self, input_sample: np.ndarray, N: int,
-                           num_params: int, k_choices: int,
-                           num_groups: int = None) -> List:
+    def find_local_maximum(
+        self,
+        input_sample: np.ndarray,
+        N: int,
+        num_params: int,
+        k_choices: int,
+        num_groups: int = None,
+    ) -> List:
         """Find the most different trajectories in the input sample using a
         local approach
 
@@ -43,9 +49,9 @@ class LocalOptimisation(Strategy):
         -------
         list
         """
-        distance_matrix = self.compute_distance_matrix(input_sample, N,
-                                                       num_params, num_groups,
-                                                       local_optimization=True)
+        distance_matrix = self.compute_distance_matrix(
+            input_sample, N, num_params, num_groups, local_optimization=True
+        )
 
         tot_indices_list = []
         tot_max_array = np.zeros(k_choices - 1)
@@ -58,8 +64,7 @@ class LocalOptimisation(Strategy):
 
             for row_nr, row in enumerate(distance_matrix):
                 indices = tuple(row.argsort()[-i:][::-1]) + (row_nr,)
-                row_maxima_i[row_nr] = self.sum_distances(
-                    indices, distance_matrix)
+                row_maxima_i[row_nr] = self.sum_distances(indices, distance_matrix)
                 indices_list.append(indices)
 
             # Find the indices belonging to the maximum distance
@@ -85,15 +90,12 @@ class LocalOptimisation(Strategy):
                 m += 1
 
             tot_indices_list.append(m_max_ind)
-            tot_max_array[i -
-                          1] = self.sum_distances(m_max_ind, distance_matrix)
+            tot_max_array[i - 1] = self.sum_distances(m_max_ind, distance_matrix)
 
-        tot_max = self.get_max_sum_ind(
-            tot_indices_list, tot_max_array, "tot", "tot")
+        tot_max = self.get_max_sum_ind(tot_indices_list, tot_max_array, "tot", "tot")
         return sorted(tot_max)
 
-    def sum_distances(self, indices: Tuple,
-                      distance_matrix: np.ndarray) -> np.ndarray:
+    def sum_distances(self, indices: Tuple, distance_matrix: np.ndarray) -> np.ndarray:
         """Calculate combinatorial distance between a select group of
         trajectories, indicated by indices
 
@@ -118,14 +120,18 @@ class LocalOptimisation(Strategy):
         combs = np.array(tuple(zip(*combs_tup)))
 
         # Calculate distance (vectorized)
-        dist = np.sqrt(
-            np.sum(np.square(distance_matrix[combs[0], combs[1]]), axis=0))
+        dist = np.sqrt(np.sum(np.square(distance_matrix[combs[0], combs[1]]), axis=0))
 
         return dist
 
-    def get_max_sum_ind(self, indices_list: List[Tuple], distances: np.ndarray,
-                        i: Union[str, int], m: Union[str, int]) -> Tuple:
-        '''Get the indices that belong to the maximum distance in `distances`
+    def get_max_sum_ind(
+        self,
+        indices_list: List[Tuple],
+        distances: np.ndarray,
+        i: Union[str, int],
+        m: Union[str, int],
+    ) -> Tuple:
+        """Get the indices that belong to the maximum distance in `distances`
 
         Parameters
         ----------
@@ -139,19 +145,20 @@ class LocalOptimisation(Strategy):
         Returns
         -------
         list
-        '''
+        """
         if len(indices_list) != len(distances):
-            msg = "Indices and distances are lists of different length." + \
-                "Length indices_list = {} and length distances = {}." + \
-                "In loop i = {}  and m =  {}"
-            raise ValueError(msg.format(
-                len(indices_list), len(distances), i, m))
+            msg = (
+                "Indices and distances are lists of different length."
+                + "Length indices_list = {} and length distances = {}."
+                + "In loop i = {}  and m =  {}"
+            )
+            raise ValueError(msg.format(len(indices_list), len(distances), i, m))
 
         max_index = distances.argsort()[-1:][::-1]
         return tuple(indices_list[max_index[0]])
 
     def add_indices(self, indices: Tuple, distance_matrix: np.ndarray) -> List:
-        '''Adds extra indices for the combinatorial problem.
+        """Adds extra indices for the combinatorial problem.
 
         Parameters
         ----------
@@ -163,7 +170,7 @@ class LocalOptimisation(Strategy):
         >>> add_indices((1,2), numpy.array((5,5)))
         [(1, 2, 3), (1, 2, 4), (1, 2, 5)]
 
-        '''
+        """
         list_new_indices = []
         for i in range(len(distance_matrix)):
             if i not in indices:

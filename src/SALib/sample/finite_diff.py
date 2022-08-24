@@ -7,9 +7,16 @@ from . import sobol_sequence
 from ..util import scale_samples, read_param_file
 
 
-def sample(problem: Dict, N: int, delta: float = 0.01,
-           seed: int = None, skip_values: int = 1024) -> np.ndarray:
-    """Generate matrix of samples for derivative-based global sensitivity measure (dgsm).
+def sample(
+    problem: Dict,
+    N: int,
+    delta: float = 0.01,
+    seed: int = None,
+    skip_values: int = 1024,
+) -> np.ndarray:
+    """
+    Generate matrix of samples for derivative-based global sensitivity measure (dgsm).
+
     Start from a QMC (Sobol') sequence and finite difference with delta % steps
 
     Parameters
@@ -50,8 +57,8 @@ def sample(problem: Dict, N: int, delta: float = 0.01,
     if seed:
         np.random.seed(seed)
 
-    D = problem['num_vars']
-    bounds = problem['bounds']
+    D = problem["num_vars"]
+    bounds = problem["bounds"]
 
     # Create base sequence - could be any type of sampling
     base_sequence = sobol_sequence.sample(N + skip_values, D)
@@ -72,10 +79,8 @@ def sample(problem: Dict, N: int, delta: float = 0.01,
             bnd_j = bounds[j]
             temp[j] = base_sequence[i, j] * delta
             dgsm_sequence[index, :] = base_sequence[i, :] + temp
-            dgsm_sequence[index, j] = min(
-                dgsm_sequence[index, j], bnd_j[1])
-            dgsm_sequence[index, j] = max(
-                dgsm_sequence[index, j], bnd_j[0])
+            dgsm_sequence[index, j] = min(dgsm_sequence[index, j], bnd_j[1])
+            dgsm_sequence[index, j] = max(dgsm_sequence[index, j], bnd_j[0])
             index += 1
 
     return dgsm_sequence
@@ -92,9 +97,14 @@ def cli_parse(parser):
     ----------
     Updated argparse object
     """
-    parser.add_argument('-d', '--delta', type=float,
-                        required=False, default=0.01,
-                        help='Finite difference step size (percent)')
+    parser.add_argument(
+        "-d",
+        "--delta",
+        type=float,
+        required=False,
+        default=0.01,
+        help="Finite difference step size (percent)",
+    )
     return parser
 
 
@@ -107,8 +117,12 @@ def cli_action(args):
     """
     problem = read_param_file(args.paramfile)
     param_values = sample(problem, args.samples, args.delta, seed=args.seed)
-    np.savetxt(args.output, param_values, delimiter=args.delimiter,
-               fmt='%.' + str(args.precision) + 'e')
+    np.savetxt(
+        args.output,
+        param_values,
+        delimiter=args.delimiter,
+        fmt="%." + str(args.precision) + "e",
+    )
 
 
 if __name__ == "__main__":

@@ -21,6 +21,6 @@ def evaluate(values):
     """
 
     Y = np.zeros([values.shape[0]])
-    Y = np.sum(values,axis=1)
+    Y = np.sum(values, axis=1)
 
     return Y

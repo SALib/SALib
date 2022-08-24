@@ -7,7 +7,7 @@ Thanks to all those who have [contributed so far](https://github.com/SALib/SALib
 ## Asking Questions, Reporting Bugs
 
 We use Github issues to keep track of bugs and to answer questions about the use
-of the library.  
+of the library.
 
 For bugs, [create a new issue](https://github.com/SALib/SALib/issues/new)
 on Github with the label `bug`. Use this to describe the nature of the bug and

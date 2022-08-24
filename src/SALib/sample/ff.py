@@ -26,7 +26,7 @@ def find_smallest(num_vars):
         Smallest exponent of two greater than `num_vars`
     """
     for x in range(10):
-        if num_vars <= 2 ** x:
+        if num_vars <= 2**x:
             return x
 
 
@@ -39,19 +39,18 @@ def extend_bounds(problem):
         The problem definition
     """
 
-    num_vars = problem['num_vars']
+    num_vars = problem["num_vars"]
     num_ff_vars = 2 ** find_smallest(num_vars)
     num_dummy_variables = num_ff_vars - num_vars
 
-    bounds = list(problem['bounds'])
-    names = problem['names']
+    bounds = list(problem["bounds"])
+    names = problem["names"]
     if num_dummy_variables > 0:
         bounds.extend([[0, 1] for x in range(num_dummy_variables)])
-        names.extend(["dummy_" + str(var)
-                      for var in range(num_dummy_variables)])
-        problem['bounds'] = bounds
-        problem['names'] = names
-        problem['num_vars'] = num_ff_vars
+        names.extend(["dummy_" + str(var) for var in range(num_dummy_variables)])
+        problem["bounds"] = bounds
+        problem["names"] = names
+        problem["num_vars"] = num_ff_vars
 
     return problem
 
@@ -65,7 +64,7 @@ def generate_contrast(problem):
         The problem definition
     """
 
-    num_vars = problem['num_vars']
+    num_vars = problem["num_vars"]
 
     # Find the smallest n, such that num_vars < k
     k_chosen = 2 ** find_smallest(num_vars)
@@ -118,7 +117,7 @@ def sample(problem, seed=None):
     if seed:
         np.random.seed(seed)
     contrast = generate_contrast(problem)
-    sample = np.array((contrast + 1.) / 2, dtype=float)
+    sample = np.array((contrast + 1.0) / 2, dtype=float)
     problem = extend_bounds(problem)
 
     sample = scale_samples(sample, problem)
@@ -138,8 +137,12 @@ def cli_action(args):
     """
     problem = read_param_file(args.paramfile)
     param_values = sample(problem, seed=args.seed)
-    np.savetxt(args.output, param_values, delimiter=args.delimiter,
-               fmt='%.' + str(args.precision) + 'e')
+    np.savetxt(
+        args.output,
+        param_values,
+        delimiter=args.delimiter,
+        fmt="%." + str(args.precision) + "e",
+    )
 
 
 if __name__ == "__main__":

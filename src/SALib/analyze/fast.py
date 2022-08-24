@@ -6,8 +6,15 @@ from . import common_args
 from ..util import read_param_file, ResultDict
 
 
-def analyze(problem, Y, M=4, num_resamples=100, conf_level=0.95,
-            print_to_console=False, seed=None):
+def analyze(
+    problem,
+    Y,
+    M=4,
+    num_resamples=100,
+    conf_level=0.95,
+    print_to_console=False,
+    seed=None,
+):
     """Perform extended Fourier Amplitude Sensitivity Test on model outputs
 
     Returns a dictionary with keys 'S1' and 'ST', where each entry is a list of
@@ -62,7 +69,7 @@ def analyze(problem, Y, M=4, num_resamples=100, conf_level=0.95,
     if seed:
         np.random.seed(seed)
 
-    D = problem['num_vars']
+    D = problem["num_vars"]
 
     if Y.size % (D) == 0:
         N = int(Y.size / D)
@@ -77,21 +84,20 @@ def analyze(problem, Y, M=4, num_resamples=100, conf_level=0.95,
     omega_0 = math.floor((N - 1) / (2 * M))
 
     # Calculate and Output the First and Total Order Values
-    Si = ResultDict((k, [None] * D)
-                    for k in ['S1', 'ST', 'S1_conf', 'ST_conf'])
-    Si['names'] = problem['names']
+    Si = ResultDict((k, [None] * D) for k in ["S1", "ST", "S1_conf", "ST_conf"])
+    Si["names"] = problem["names"]
     for i in range(D):
         z = np.arange(i * N, (i + 1) * N)
 
         Y_l = Y[z]
 
         S1, ST = compute_orders(Y_l, N, M, omega_0)
-        Si['S1'][i] = S1
-        Si['ST'][i] = ST
+        Si["S1"][i] = S1
+        Si["ST"][i] = ST
 
         S1_d_conf, ST_d_conf = bootstrap(Y_l, M, num_resamples, conf_level)
-        Si['S1_conf'][i] = S1_d_conf
-        Si['ST_conf'][i] = ST_d_conf
+        Si["S1_conf"][i] = S1_d_conf
+        Si["ST_conf"][i] = ST_d_conf
 
     if print_to_console:
         print(Si.to_df())
@@ -153,24 +159,35 @@ def cli_parse(parser):
     ----------
     Updated argparse object
     """
-    parser.add_argument('-M', '--M', type=int, required=False,
-                        default=4,
-                        help='Inference parameter')
-    parser.add_argument('-r', '--resamples', type=int, required=False,
-                        default=100,
-                        help='Number of bootstrap resamples for Sobol '
-                        'confidence intervals')
+    parser.add_argument(
+        "-M", "--M", type=int, required=False, default=4, help="Inference parameter"
+    )
+    parser.add_argument(
+        "-r",
+        "--resamples",
+        type=int,
+        required=False,
+        default=100,
+        help="Number of bootstrap resamples for Sobol " "confidence intervals",
+    )
 
     return parser
 
 
 def cli_action(args):
     problem = read_param_file(args.paramfile)
-    Y = np.loadtxt(args.model_output_file,
-                   delimiter=args.delimiter, usecols=(args.column,))
+    Y = np.loadtxt(
+        args.model_output_file, delimiter=args.delimiter, usecols=(args.column,)
+    )
 
-    analyze(problem, Y, M=args.M, num_resamples=args.resamples,
-            print_to_console=True, seed=args.seed)
+    analyze(
+        problem,
+        Y,
+        M=args.M,
+        num_resamples=args.resamples,
+        print_to_console=True,
+        seed=args.seed,
+    )
 
 
 if __name__ == "__main__":

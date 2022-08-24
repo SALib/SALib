@@ -3,21 +3,23 @@ from SALib.plotting.bar import plot as barplot
 
 
 class ResultDict(dict):
-    '''Dictionary holding analysis results.
+    """Dictionary holding analysis results.
 
     Conversion methods (e.g. to Pandas DataFrames) to be attached as necessary
     by each implementing method
-    '''
+    """
+
     def __init__(self, *args, **kwargs):
         super(ResultDict, self).__init__(*args, **kwargs)
 
     def to_df(self):
-        '''Convert dict structure into Pandas DataFrame.'''
-        return pd.DataFrame({k: v for k, v in self.items() if k != 'names'},
-                            index=self['names'])
+        """Convert dict structure into Pandas DataFrame."""
+        return pd.DataFrame(
+            {k: v for k, v in self.items() if k != "names"}, index=self["names"]
+        )
 
     def plot(self, ax=None):
-        '''Create bar chart of results'''
+        """Create bar chart of results"""
         Si_df = self.to_df()
 
         if isinstance(Si_df, (list, tuple)):

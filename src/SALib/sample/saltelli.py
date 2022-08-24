@@ -6,12 +6,12 @@ import numpy as np
 
 from . import common_args
 from . import sobol_sequence
-from ..util import (scale_samples, read_param_file,
-                    compute_groups_matrix, _check_groups)
+from ..util import scale_samples, read_param_file, compute_groups_matrix, _check_groups
 
 
-def sample(problem: Dict, N: int, calc_second_order: bool = True,
-           skip_values: int = None):
+def sample(
+    problem: Dict, N: int, calc_second_order: bool = True, skip_values: int = None
+):
     """Generates model inputs using Saltelli's extension of the Sobol' sequence
 
     The Sobol' sequence is a popular quasi-random low-discrepancy sequence used
@@ -92,7 +92,7 @@ def sample(problem: Dict, N: int, calc_second_order: bool = True,
            https://github.com/scipy/scipy/pull/10844#issuecomment-673029539
     """
     # bit-shift test to check if `N` == 2**n
-    if not ((N & (N-1) == 0) and (N != 0 and N-1 != 0)):
+    if not ((N & (N - 1) == 0) and (N != 0 and N - 1 != 0)):
         msg = f"""
         Convergence properties of the Sobol' sequence is only valid if
         `N` ({N}) is equal to `2^n`.
@@ -101,7 +101,7 @@ def sample(problem: Dict, N: int, calc_second_order: bool = True,
 
     if skip_values is None:
         # If not specified, set skip_values to next largest power of 2
-        skip_values = int(2**math.ceil(math.log(N)/math.log(2)))
+        skip_values = int(2 ** math.ceil(math.log(N) / math.log(2)))
 
         # 16 is arbitrarily selected here to avoid initial points
         # for very low sample sizes
@@ -109,7 +109,7 @@ def sample(problem: Dict, N: int, calc_second_order: bool = True,
 
     elif skip_values > 0:
         M = skip_values
-        if not ((M & (M-1) == 0) and (M != 0 and M-1 != 0)):
+        if not ((M & (M - 1) == 0) and (M != 0 and M - 1 != 0)):
             msg = f"""
             Convergence properties of the Sobol' sequence is only valid if
             `skip_values` ({M}) is a power of 2.
@@ -128,17 +128,17 @@ def sample(problem: Dict, N: int, calc_second_order: bool = True,
             )
             warnings.warn(msg)
     elif skip_values == 0:
-        warnings.warn(
-            "Duplicate samples will be taken as no points are skipped.")
+        warnings.warn("Duplicate samples will be taken as no points are skipped.")
     else:
-        assert isinstance(skip_values, int) and skip_values >= 0, \
-            "`skip_values` must be a positive integer."
+        assert (
+            isinstance(skip_values, int) and skip_values >= 0
+        ), "`skip_values` must be a positive integer."
 
-    D = problem['num_vars']
+    D = problem["num_vars"]
     groups = _check_groups(problem)
 
     if not groups:
-        Dg = problem['num_vars']
+        Dg = problem["num_vars"]
     else:
         G, group_names = compute_groups_matrix(groups)
         Dg = len(set(group_names))
@@ -163,8 +163,7 @@ def sample(problem: Dict, N: int, calc_second_order: bool = True,
         # Cross-sample elements of "B" into "A"
         for k in range(Dg):
             for j in range(D):
-                if (not groups and j == k) or \
-                   (groups and group_names[k] == groups[j]):
+                if (not groups and j == k) or (groups and group_names[k] == groups[j]):
                     saltelli_sequence[index, j] = base_sequence[i, j + D]
                 else:
                     saltelli_sequence[index, j] = base_sequence[i, j]
@@ -176,8 +175,9 @@ def sample(problem: Dict, N: int, calc_second_order: bool = True,
         if calc_second_order:
             for k in range(Dg):
                 for j in range(D):
-                    if (not groups and j == k) or \
-                       (groups and group_names[k] == groups[j]):
+                    if (not groups and j == k) or (
+                        groups and group_names[k] == groups[j]
+                    ):
                         saltelli_sequence[index, j] = base_sequence[i, j]
                     else:
                         saltelli_sequence[index, j] = base_sequence[i, j + D]
@@ -205,19 +205,30 @@ def cli_parse(parser):
     ----------
     Updated argparse object
     """
-    parser.add_argument('--max-order', type=int, required=False, default=2,
-                        choices=[1, 2],
-                        help='Maximum order of sensitivity indices \
-                           to calculate')
-    parser.add_argument('--skip-values', type=int, required=False,
-                        default=None,
-                        help='Number of sample points to skip \
-                            (default: next largest power of 2 from `samples`)')
+    parser.add_argument(
+        "--max-order",
+        type=int,
+        required=False,
+        default=2,
+        choices=[1, 2],
+        help="Maximum order of sensitivity indices \
+                           to calculate",
+    )
+    parser.add_argument(
+        "--skip-values",
+        type=int,
+        required=False,
+        default=None,
+        help="Number of sample points to skip \
+                            (default: next largest power of 2 from `samples`)",
+    )
 
     # hacky way to remove an argument (seed option not relevant for Saltelli)
-    remove_opts = [x for x in parser._actions if x.dest == 'seed']
-    [parser._handle_conflict_resolve(
-        None, [('--seed', x), ('-s', x)]) for x in remove_opts]
+    remove_opts = [x for x in parser._actions if x.dest == "seed"]
+    [
+        parser._handle_conflict_resolve(None, [("--seed", x), ("-s", x)])
+        for x in remove_opts
+    ]
 
     return parser
 
@@ -230,11 +241,18 @@ def cli_action(args):
     args : argparse namespace
     """
     problem = read_param_file(args.paramfile)
-    param_values = sample(problem, args.samples,
-                          calc_second_order=(args.max_order == 2),
-                          skip_values=args.skip_values)
-    np.savetxt(args.output, param_values, delimiter=args.delimiter,
-               fmt='%.' + str(args.precision) + 'e')
+    param_values = sample(
+        problem,
+        args.samples,
+        calc_second_order=(args.max_order == 2),
+        skip_values=args.skip_values,
+    )
+    np.savetxt(
+        args.output,
+        param_values,
+        delimiter=args.delimiter,
+        fmt="%." + str(args.precision) + "e",
+    )
 
 
 if __name__ == "__main__":

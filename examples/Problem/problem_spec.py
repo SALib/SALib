@@ -4,10 +4,10 @@ Showcases method chaining, and parallel model runs using 2 processors.
 
 The following caveats apply:
 
-1. Functions passed into `sample`, `analyze` and `evaluate` must 
-   accept a numpy array of `X` values as the first parameter, and return a 
+1. Functions passed into `sample`, `analyze` and `evaluate` must
+   accept a numpy array of `X` values as the first parameter, and return a
    numpy array of results.
-2. Parallel evaluation/analysis is only beneficial for long-running models 
+2. Parallel evaluation/analysis is only beneficial for long-running models
    or large datasets
 3. Currently, results must fit in memory - no on-disk caching is provided.
 """
@@ -21,22 +21,26 @@ import numpy as np
 import time
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # Create the SALib Problem specification
-    sp = ProblemSpec({
-        'names': ['x1', 'x2', 'x3'],
-        'groups': None,
-        'bounds': [[-np.pi, np.pi]]*3,
-        'outputs': ['Y']
-    })
+    sp = ProblemSpec(
+        {
+            "names": ["x1", "x2", "x3"],
+            "groups": None,
+            "bounds": [[-np.pi, np.pi]] * 3,
+            "outputs": ["Y"],
+        }
+    )
 
     # Single core example
     start = time.perf_counter()
-    (sp.sample_saltelli(2**15)
+    (
+        sp.sample_saltelli(2**15)
         .evaluate(Ishigami.evaluate)
-        .analyze_sobol(calc_second_order=True, conf_level=0.95))
-    print("Time taken with 1 core:", time.perf_counter() - start, '\n')
+        .analyze_sobol(calc_second_order=True, conf_level=0.95)
+    )
+    print("Time taken with 1 core:", time.perf_counter() - start, "\n")
 
     # Same above example, but passing in specific functions
     # (sp.sample(saltelli.sample, 25000, calc_second_order=True)
@@ -60,27 +64,32 @@ if __name__ == '__main__':
 
     # Parallel example
     start = time.perf_counter()
-    (sp.sample(saltelli.sample, 2**15)
-         # can specify number of processors to use with `nprocs`
-         # this will be capped to the number of detected processors
-         # or, in the case of analysis, the number of outputs.
-        .evaluate(Ishigami.evaluate, nprocs=2)
-        .analyze_sobol(calc_second_order=True, conf_level=0.95, nprocs=2))
-    print("Time taken with 2 cores:", time.perf_counter() - start, '\n')
+    (
+        sp.sample(saltelli.sample, 2**15)
+        # can specify number of processors to use with `nprocs`
+        # this will be capped to the number of detected processors
+        # or, in the case of analysis, the number of outputs.
+        .evaluate(Ishigami.evaluate, nprocs=2).analyze_sobol(
+            calc_second_order=True, conf_level=0.95, nprocs=2
+        )
+    )
+    print("Time taken with 2 cores:", time.perf_counter() - start, "\n")
 
     print(sp)
-    
+
     # Distributed example
     # Specify itself as servers as an example
-    servers = ('localhost:55774',
-               'localhost:55775',
-               'localhost:55776')
+    servers = ("localhost:55774", "localhost:55775", "localhost:55776")
 
     start = time.perf_counter()
-    (sp.sample(saltelli.sample, 2**15)
-        .evaluate_distributed(Ishigami.evaluate, nprocs=2, servers=servers, verbose=True)
-        .analyze(sobol.analyze, calc_second_order=True, conf_level=0.95))
-    print("Time taken with distributed cores:", time.perf_counter() - start, '\n')
+    (
+        sp.sample(saltelli.sample, 2**15)
+        .evaluate_distributed(
+            Ishigami.evaluate, nprocs=2, servers=servers, verbose=True
+        )
+        .analyze(sobol.analyze, calc_second_order=True, conf_level=0.95)
+    )
+    print("Time taken with distributed cores:", time.perf_counter() - start, "\n")
 
     print(sp)
 

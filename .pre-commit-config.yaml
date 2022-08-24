@@ -11,7 +11,6 @@ repos:
     -   id: check-merge-conflict
     -   id: detect-private-key
     -   id: end-of-file-fixer
-    -   id: requirements-txt-fixer
 
 -   repo: https://github.com/psf/black
     rev: 22.6.0
@@ -23,5 +22,10 @@ repos:
     rev: 5.0.4
     hooks:
     -   id: flake8
+        exclude: "src/SALib/sample/directions.py"
         args:
           - "--max-line-length=88"
+          # whitespace before ':'
+          # line too long
+          # module level import not at top of file
+          - "--extend-ignore=E203,E402"

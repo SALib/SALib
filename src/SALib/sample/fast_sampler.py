@@ -3,7 +3,7 @@ import math
 import numpy as np
 
 from . import common_args
-from .. util import scale_samples, read_param_file
+from ..util import scale_samples, read_param_file
 
 
 def sample(problem, N, M=4, seed=None):
@@ -45,10 +45,12 @@ def sample(problem, N, M=4, seed=None):
         np.random.seed(seed)
 
     if N <= 4 * M**2:
-        raise ValueError("""
-        Sample size N > 4M^2 is required. M=4 by default.""")
+        raise ValueError(
+            """
+        Sample size N > 4M^2 is required. M=4 by default."""
+        )
 
-    D = problem['num_vars']
+    D = problem["num_vars"]
 
     omega = np.zeros([D])
     omega[0] = math.floor((N - 1) / (2 * M))
@@ -96,8 +98,15 @@ def cli_parse(parser):
     ----------
     Updated argparse object
     """
-    parser.add_argument('-M', '--m-coef', type=int, required=False, default=4,
-                        help='M coefficient, default 4', dest='M')
+    parser.add_argument(
+        "-M",
+        "--m-coef",
+        type=int,
+        required=False,
+        default=4,
+        help="M coefficient, default 4",
+        dest="M",
+    )
 
     return parser
 
@@ -111,8 +120,12 @@ def cli_action(args):
     """
     problem = read_param_file(args.paramfile)
     param_values = sample(problem, N=args.samples, M=args.M, seed=args.seed)
-    np.savetxt(args.output, param_values, delimiter=args.delimiter,
-               fmt='%.' + str(args.precision) + 'e')
+    np.savetxt(
+        args.output,
+        param_values,
+        delimiter=args.delimiter,
+        fmt="%." + str(args.precision) + "e",
+    )
 
 
 if __name__ == "__main__":

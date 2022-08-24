@@ -6,7 +6,7 @@ Group sampling (Sobol and Morris methods only)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 It is sometimes useful to perform sensitivity analysis on groups of input variables to reduce the number of model runs required, when variables belong to the same component of a model, or there is some reason to believe that they should behave similarly.
 
-Groups can be specified in two ways for the Sobol and Morris methods. 
+Groups can be specified in two ways for the Sobol and Morris methods.
 
 First, as a fourth column in the parameter file:
 
@@ -70,16 +70,16 @@ In :ref:`basics`, we generate a uniform sample of parameter space.
     import numpy as np
 
     problem = {
-        'num_vars': 3, 
-        'names': ['x1', 'x2', 'x3'], 
-        'bounds': [[-3.14159265359, 3.14159265359], 
-                   [-3.14159265359, 3.14159265359], 
+        'num_vars': 3,
+        'names': ['x1', 'x2', 'x3'],
+        'bounds': [[-3.14159265359, 3.14159265359],
+                   [-3.14159265359, 3.14159265359],
                    [-3.14159265359, 3.14159265359]]
     }
 
     param_values = saltelli.sample(problem, 1024)
 
-SALib is also capable of generating alternate sampling distributions by 
+SALib is also capable of generating alternate sampling distributions by
 specifying a :code:`dists` entry in the :code:`problem` specification.
 
 As implied in the basic example, a uniform distribution is the default.
@@ -113,5 +113,3 @@ An example specification is shown below:
         'groups': ['G1', 'G2', 'G1'],
         'dists': ['unif', 'lognorm', 'triang']
     }
-
-
