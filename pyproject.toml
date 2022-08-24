@@ -75,7 +75,7 @@ build.exclude = [
 ]
 
 [tool.pytest.ini_options]
-addopts = "--cov SALib --cov-report html --verbose"
+addopts = "--durations 10"
 testpaths = [
     "tests",
 ]
