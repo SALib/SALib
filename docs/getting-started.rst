@@ -21,7 +21,7 @@ We encourage users use the latest stable version.
 
     git clone https://github.com/SALib/SALib.git
     cd SALib
-    python setup.py develop
+    pip install .
 
 
 Installing Prerequisite Software
@@ -39,7 +39,7 @@ installed with the following command:
     pip install matplotlib
 
 The packages are normally included with most Python bundles, such as Anaconda and Canopy.
-In any case, they are installed automatically when using pip or setuptools to install
+In any case, they are installed automatically when using pip to install
 SALib.
 
 

@@ -59,6 +59,7 @@ jobs:
           pip install .[test]
 
       - name: Test
+        if: matrix.python-version != '3.10'
         run: |
           conda activate SALib
           pytest
