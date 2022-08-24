@@ -20,8 +20,7 @@ jobs:
       run:
         shell: bash -l {0}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: Set up conda
         uses: conda-incubator/setup-miniconda@v2
@@ -65,9 +64,9 @@ jobs:
           pytest
 
       - name: Test with coverage and uploads
-      if: matrix.python-version == '3.10'
-      run: |
-        conda activate SALib
-        python -m pip install coveralls
-        pytest --cov SALib --cov-report html --verbose
-        coveralls
+        if: matrix.python-version == '3.10'
+        run: |
+          conda activate SALib
+          python -m pip install coveralls
+          pytest --cov SALib --cov-report html --verbose
+          coveralls
