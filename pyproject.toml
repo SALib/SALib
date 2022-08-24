@@ -13,6 +13,9 @@ authors = [
   { name = "Jon Herman", email = "jdherman8@gmail.com" },
   { name = "Will Usher" },
 ]
+maintainers = [
+  { name = "SALib contributors" },
+]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
   "Programming Language :: Python :: 3",
@@ -73,6 +76,7 @@ build.targets.sdist.exclude = [
   "*.cff",
   ".*",
 ]
+build.targets.wheel.packages = ["src/SALib"]
 
 [tool.pytest.ini_options]
 addopts = "--durations 10"
