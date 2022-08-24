@@ -13,8 +13,14 @@ repos:
     -   id: end-of-file-fixer
     -   id: requirements-txt-fixer
 
+-   repo: https://github.com/psf/black
+    rev: 22.6.0
+    hooks:
+    -   id: black
+        exclude: "src/SALib/sample/directions.py"
+
 -   repo: https://gitlab.com/pycqa/flake8
-    rev: 4.0.1
+    rev: 5.0.4
     hooks:
     -   id: flake8
         args:

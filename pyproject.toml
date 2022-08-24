@@ -70,6 +70,7 @@ build.targets.sdist.exclude = [
   "docs",
   "examples",
   "paper",
+  "tests",
   "*.md",
   "*.rst",
   "*.yml",
