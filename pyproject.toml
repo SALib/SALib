@@ -62,6 +62,17 @@ Documentation = "https://salib.readthedocs.io"
 
 [tool.hatch]
 version.path = "src/SALib/__init__.py"
+build.exclude = [
+  ".github",
+  "docs",
+  "examples",
+  "paper",
+  "*.md",
+  "*.rst",
+  "*.yml",
+  "*.cff",
+  ".*",
+]
 
 [tool.pytest.ini_options]
 addopts = "--cov SALib --cov-report html --verbose"
