@@ -62,7 +62,7 @@ Documentation = "https://salib.readthedocs.io"
 
 [tool.hatch]
 version.path = "src/SALib/__init__.py"
-build.exclude = [
+build.targets.sdist.exclude = [
   ".github",
   "docs",
   "examples",
