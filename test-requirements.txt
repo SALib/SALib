@@ -1,4 +1,0 @@
-pre-commit
-pytest
-pytest-cov
-recommonmark

@@ -1,8 +1,70 @@
 [build-system]
-# AVOID CHANGING REQUIRES: IT WILL BE UPDATED BY PYSCAFFOLD!
-requires = ["setuptools>=46.1.0", "setuptools_scm[toml]>=5", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.setuptools_scm]
-# See configuration details in https://github.com/pypa/setuptools_scm
-version_scheme = "no-guess-dev"
+[project]
+name = "SALib"
+dynamic = ["version"]
+description = "Tools for sensitivity analysis. Contains Sobol', Morris, and FAST methods"
+readme = "README.rst"
+requires-python = ">=3.8"
+license = "MIT"
+authors = [
+  { name = "Jon Herman", email = "jdherman8@gmail.com" },
+  { name = "Will Usher" },
+]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "License :: OSI Approved :: MIT License",
+  "Intended Audience :: End Users/Desktop",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "Operating System :: OS Independent",
+]
+
+dependencies = [
+  "numpy>=1.20.3",
+  "scipy>=1.7.3",
+  "matplotlib>=3.2.2",
+  "pandas>=1.1.2",
+  "pathos>=0.2.5",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-cov",
+]
+
+doc = [
+    "sphinx",
+    "myst_parser",
+    "numpydoc"
+]
+
+dev = [
+    "SALib[test]",
+    "SALib[doc]",
+    "pre-commit",
+    "hatch",
+]
+
+[project.scripts]
+salib = "SALib.scripts.salib:main"
+
+[project.urls]
+Documentation = "https://salib.readthedocs.io"
+"Source code" = "https://github.com/SALib/SALib"
+
+[tool.hatch]
+version.path = "src/SALib/__init__.py"
+
+[tool.pytest.ini_options]
+addopts = "--cov SALib --cov-report html --verbose"
+testpaths = [
+    "tests",
+]
