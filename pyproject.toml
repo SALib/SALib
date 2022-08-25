@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling>=1.8.1"]
 build-backend = "hatchling.build"
 
 [project]
@@ -77,7 +77,6 @@ build.targets.sdist.exclude = [
   "*.cff",
   ".*",
 ]
-build.targets.wheel.packages = ["src/SALib"]
 
 [tool.pytest.ini_options]
 addopts = "--durations 10"
