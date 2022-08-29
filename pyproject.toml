@@ -5,13 +5,14 @@ build-backend = "hatchling.build"
 [project]
 name = "SALib"
 dynamic = ["version"]
-description = "Tools for sensitivity analysis. Contains Sobol', Morris, and FAST methods"
+description = "Tools for global sensitivity analysis. Contains Sobol', Morris, FAST, DGSM, PAWN, HDMR, Moment Independent and fractional factorial methods"
 readme = "README.rst"
 requires-python = ">=3.8"
 license = "MIT"
 authors = [
   { name = "Jon Herman", email = "jdherman8@gmail.com" },
   { name = "Will Usher" },
+  { name = "Takuya Iwanaga" },
 ]
 maintainers = [
   { name = "SALib contributors" },
