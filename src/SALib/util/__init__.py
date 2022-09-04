@@ -177,7 +177,7 @@ def _nonuniform_scale_samples(params, bounds, dists):
                 raise ValueError("Unknown triangular distribution specification. Check problem specification.")
 
             # checking for correct parameters
-            if b1 <= 0 or b2 <= 0 or b2 >= 1 or loc_start > b1:
+            if b1 <= 0 or b2 < 0 or b2 >= 1 or loc_start > b1:
                 raise ValueError("""Triangular distribution: Scale must be
                     greater than zero; peak on interval [0,1], triangular start value must be smaller than end value""")
             else:
