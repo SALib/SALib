@@ -5,9 +5,7 @@ import numpy as np
 from scipy.stats import qmc
 
 from . import common_args
-from ..util import (
-    scale_samples, read_param_file, compute_groups_matrix, _check_groups
-)
+from ..util import scale_samples, read_param_file, compute_groups_matrix, _check_groups
 
 
 def sample(
@@ -17,7 +15,7 @@ def sample(
     calc_second_order: bool = True,
     scramble: bool = True,
     skip_values: int = 0,
-    seed: Optional[Union[int, np.random.Generator]] = None
+    seed: Optional[Union[int, np.random.Generator]] = None,
 ):
     """
     Generates model inputs using Saltelli's extension of the Sobol' sequence.
@@ -98,16 +96,16 @@ def sample(
            The Second IMACS Seminar on Monte Carlo Methods 55, 271–280.
            https://doi.org/10.1016/S0378-4754(00)00270-6
     """
-    D = problem['num_vars']
+    D = problem["num_vars"]
     groups = _check_groups(problem)
 
     # Create base sequence - could be any type of sampling
-    qrng = qmc.Sobol(d=2*D, scramble=scramble, seed=seed)
+    qrng = qmc.Sobol(d=2 * D, scramble=scramble, seed=seed)
 
     # fast-forward logic
     if skip_values > 0:
         M = skip_values
-        if not ((M & (M-1) == 0) and (M != 0 and M-1 != 0)):
+        if not ((M & (M - 1) == 0) and (M != 0 and M - 1 != 0)):
             msg = f"""
             Convergence properties of the Sobol' sequence is only valid if
             `skip_values` ({M}) is a power of 2.
@@ -134,7 +132,7 @@ def sample(
     base_sequence = qrng.random(N)
 
     if not groups:
-        Dg = problem['num_vars']
+        Dg = problem["num_vars"]
     else:
         G, group_names = compute_groups_matrix(groups)
         Dg = len(set(group_names))
@@ -156,8 +154,7 @@ def sample(
         # Cross-sample elements of "B" into "A"
         for k in range(Dg):
             for j in range(D):
-                if (not groups and j == k) or \
-                   (groups and group_names[k] == groups[j]):
+                if (not groups and j == k) or (groups and group_names[k] == groups[j]):
                     saltelli_sequence[index, j] = base_sequence[i, j + D]
                 else:
                     saltelli_sequence[index, j] = base_sequence[i, j]
@@ -169,8 +166,9 @@ def sample(
         if calc_second_order:
             for k in range(Dg):
                 for j in range(D):
-                    if (not groups and j == k) or \
-                       (groups and group_names[k] == groups[j]):
+                    if (not groups and j == k) or (
+                        groups and group_names[k] == groups[j]
+                    ):
                         saltelli_sequence[index, j] = base_sequence[i, j]
                     else:
                         saltelli_sequence[index, j] = base_sequence[i, j + D]
@@ -199,25 +197,37 @@ def cli_parse(parser):
     Updated argparse object
     """
     parser.add_argument(
-        '--max-order', type=int, required=False, default=2, choices=[1, 2],
-        help='Maximum order of sensitivity indices to calculate'
+        "--max-order",
+        type=int,
+        required=False,
+        default=2,
+        choices=[1, 2],
+        help="Maximum order of sensitivity indices to calculate",
     )
 
     parser.add_argument(
-        '--scramble', type=int, required=False, default=True,
-        help='Use scrambled sequence'
+        "--scramble",
+        type=int,
+        required=False,
+        default=True,
+        help="Use scrambled sequence",
     )
 
     parser.add_argument(
-        '--skip-values', type=int, required=False, default=None,
-        help='Number of sample points to skip (default: next largest power of'
-             ' 2 from `samples`). Not recommended (use `scramble` instead).'
+        "--skip-values",
+        type=int,
+        required=False,
+        default=None,
+        help="Number of sample points to skip (default: next largest power of"
+        " 2 from `samples`). Not recommended (use `scramble` instead).",
     )
 
     # hacky way to remove an argument (seed option not relevant for Saltelli)
-    remove_opts = [x for x in parser._actions if x.dest == 'seed']
-    [parser._handle_conflict_resolve(None, [('--seed', x), ('-s', x)])
-     for x in remove_opts]
+    remove_opts = [x for x in parser._actions if x.dest == "seed"]
+    [
+        parser._handle_conflict_resolve(None, [("--seed", x), ("-s", x)])
+        for x in remove_opts
+    ]
 
     return parser
 
@@ -231,12 +241,17 @@ def cli_action(args):
     """
     problem = read_param_file(args.paramfile)
     param_values = sample(
-        problem, args.samples,
+        problem,
+        args.samples,
         calc_second_order=(args.max_order == 2),
-        scramble=args.scramble
+        scramble=args.scramble,
     )
-    np.savetxt(args.output, param_values, delimiter=args.delimiter,
-               fmt='%.' + str(args.precision) + 'e')
+    np.savetxt(
+        args.output,
+        param_values,
+        delimiter=args.delimiter,
+        fmt="%." + str(args.precision) + "e",
+    )
 
 
 if __name__ == "__main__":

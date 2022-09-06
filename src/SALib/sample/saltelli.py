@@ -96,7 +96,8 @@ def sample(
     warnings.warn(
         "`salib.sample.saltelli` will be removed in SALib 1.5. Please use"
         " `salib.sample.sobol`",
-        category=DeprecationWarning, stacklevel=2
+        category=DeprecationWarning,
+        stacklevel=2,
     )
 
     # bit-shift test to check if `N` == 2**n
