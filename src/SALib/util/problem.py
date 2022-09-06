@@ -21,6 +21,7 @@ except ImportError:
 
 try:
     from pathos.pp import ParallelPythonPool as pp_Pool
+
     pathos_available = True
 except ImportError:
     pathos_available = False
