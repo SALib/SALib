@@ -61,7 +61,16 @@ First, create a new issue on GitHub with the label `bug`. Use this to describe t
 
 Then, please create a new branch with the name `bug_xxx` where xxx is the number of the issue.
 
-If possible, write a test which reproduces the bug. The tests are stored in the `SALib/tests/` folder, and are run using `pytest` from the root folder of the library.  You can run the tests with the command `python setup.py test`.
+If possible, write a test which reproduces the bug. The tests are stored in the `SALib/tests/` folder, and are run using `pytest` from the root folder of the library.
+You can run the tests with the command `pytest` from the root project directory. Individual tests can be run with by specifying a file, or file and test function.
+
+For example::
+
+```bash
+$ pytest  # run all tests
+$ pytest tests/test_file.py  # run tests within a specific file
+$ pytest tests/test_file.py::specific_function  # run a specific test
+```
 
 Then, fix the bug in the code so that the test passes.
 
