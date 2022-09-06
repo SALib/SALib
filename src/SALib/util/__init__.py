@@ -150,7 +150,7 @@ def _nonuniform_scale_samples(params, bounds, dists):
                     bounds, mean and standard deviation
             lognorm: lognormal with ln-space mean and standard deviation
     """
-    b = np.array(bounds)
+    b = np.array(bounds, dtype=object)
 
     # initializing matrix for converted values
     conv_params = np.empty_like(params)

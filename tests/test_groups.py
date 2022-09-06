@@ -18,11 +18,11 @@ def test_sobol_group_analysis():
             "names": ["P1", "P2", "P3", "P4", "P5", "P6"],
             "bounds": [
                 [0.0, 1.0],
-                [1.0, 0.75],
+                [0.0, 1.0, 0.75],
                 [0.0, 0.2],
                 [0.0, 0.2],
                 [-1.0, 1.0],
-                [1.0, 0.25],
+                [0.0, 1.0, 0.25],
             ],
             "dists": ["unif", "triang", "norm", "lognorm", "unif", "triang"],
             "groups": ["A", "B"] * 3,
