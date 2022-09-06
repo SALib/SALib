@@ -30,7 +30,7 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
             print_to_console: bool = False, seed: int = None) -> Dict:
     """High-Dimensional Model Representation (HDMR) using B-spline functions.
 
-    HDMR is used for variance-based global sensitivity analysis (GSA) with 
+    HDMR is used for variance-based global sensitivity analysis (GSA) with
     correlated and uncorrelated inputs. This function uses as input
 
     - a N x d matrix of N different d-vectors of model inputs (factors/parameters)
@@ -38,11 +38,11 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
 
     Returns:
     - each factor's first, second, and third order sensitivity coefficient
-      (separated in total, structural and correlative contributions), 
+      (separated in total, structural and correlative contributions),
     - an estimate of their 95% confidence intervals (from bootstrap method)
     - the coefficients of the significant B-spline basis functions that
-      govern output, 
-    - Y (determined by an F-test of the error residuals of the HDMR model 
+      govern output,
+    - Y (determined by an F-test of the error residuals of the HDMR model
       (emulator) with/without a given first, second and/or
       third order B-spline). These coefficients define an emulator that can
       be used to predict the output, Y, of the original (CPU-intensive)
@@ -86,7 +86,7 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
     R : int (100-N/2, default: N/2)
         Number of bootstrap samples. Will be set to length of `Y` if `K` is set to 1.
 
-    alpha : float (0.5-1) 
+    alpha : float (0.5-1)
         Confidence interval F-test
 
     lambdax : float (0-10, default: 0.01)
@@ -231,29 +231,36 @@ def _compute(X, Y, settings, init_vars):
         tic = time.time()  # Start timer
 
         # Extract the "right" Y values
-        Y_id[:, 0] = Y[idx[:, k]]
+        Y_id[:] = Y[idx[:, k]]
 
         # Compute the variance of the model output
         SA['V_Y'][k, 0] = np.var(Y_id)
 
         # Mean of the output
-        Em['f0'][k] = np.sum(Y_id[:, 0]) / R
+        Em['f0'][k] = np.sum(Y_id) / R
 
         # Compute residuals
         Y_res = Y_id - Em['f0'][k]
 
         # 1st order component functions: ind/backfitting
-        Y_em[:, j1], Y_res, Em['C1'][:, :, k] = _first_order(Em['B1'][idx[:, k], :, :], Y_res,
-                                                             Em['C1'][:, :,
-                                                                      k], R, Em['n1'], m1,
-                                                             maxiter, lambdax)
+        Y_em[:, j1], Y_res, Em['C1'][:, :, k] = _first_order(Em['B1'][idx[:, k], :, :],
+                                                             Y_res,
+                                                             Em['C1'][:, :, k],
+                                                             R,
+                                                             Em['n1'],
+                                                             m1,
+                                                             maxiter,
+                                                             lambdax)
 
         # 2nd order component functions: individual
         if (maxorder > 1):
-            Y_em[:, j2], Y_res, Em['C2'][:, :, k] = _second_order(Em['B2'][idx[:, k], :, :], Y_res,
-                                                                  Em['C2'][:, :,
-                                                                           k], R, Em['n2'],
-                                                                  m2, lambdax)
+            Y_em[:, j2], Y_res, Em['C2'][:, :, k] = _second_order(Em['B2'][idx[:, k], :, :],
+                                                                  Y_res,
+                                                                  Em['C2'][:, :, k],
+                                                                  R,
+                                                                  Em['n2'],
+                                                                  m2,
+                                                                  lambdax)
 
         # 3rd order component functions: individual
         if (maxorder == 3):
@@ -274,7 +281,7 @@ def _compute(X, Y, settings, init_vars):
         SA['S'][:, k], SA['Sa'][:, k], SA['Sb'][:, k] = ancova(Y_id, Y_em, SA['V_Y'][k],
                                                                R, Em['n'])
 
-        RT[0, k] = time.time() - tic  # Compute CPU time kth emulator
+        RT[k] = time.time() - tic  # Compute CPU time kth emulator
 
     return (SA, Em, RT, Y_em, idx)
 
@@ -370,7 +377,7 @@ def _init(X, Y, settings):
     }
 
     # Return runtime
-    RT = np.zeros((1, K))
+    RT = np.zeros(K)
 
     # Initialize emulator matrix
     Y_em = np.zeros((R, Em['n']))
@@ -381,13 +388,13 @@ def _init(X, Y, settings):
     j3 = range(n1 + n2, n1 + n2 + n3)
 
     # Initialize temporary Y_id for bootstrap
-    Y_id = np.zeros((R, 1))
+    Y_id = np.zeros(R)
 
     return [Em, idx, SA, RT, Y_em, Y_id, m1, m2, m3, j1, j2, j3]
 
 
 def B_spline(X, m, d):
-    """Generate cubic B-splines using scipy basis_element method. 
+    """Generate cubic B-splines using scipy basis_element method.
 
     Knot points (`t`) are automatically determined.
 
@@ -418,20 +425,23 @@ def _first_order(B1, Y_res, C1, R, n1, m1, maxiter, lambdax):
     it = 0                        # Initialize iteration counter
 
     lam_eye_m1 = lambdax * identity(m1)
-    Bmm = np.einsum('ijb,ikb -> bjk', B1, B1)
+
+    # Avoid memory allocations by using temporary store
+    B1_j = np.empty(B1[:, :, 0].shape)
+    B11 = np.empty((m1, m1))
 
     # First order individual estimation
     for j in range(n1):
         # Regularized least squares inversion ( minimize || C1 ||_2 )
-        B1_j = B1[:, :, j]
-        B11 = Bmm[j, :, :]
+        B1_j[:, :] = B1[:, :, j]
+        B11[:, :] = B1_j.T @ B1_j
 
         # if it is ill-conditioned matrix, the default value is zero
         if np.all(svd(B11)[1]):  # sigma, diagonal matrix, from svd
             T1[:, :, j] = lin_solve(B11 + lam_eye_m1, B1_j.T)
 
-        C1[:, j] = (T1[:, :, j] @ Y_res).reshape(m1)
-        Y_i[:, j] = (B1[:, :, j] @ C1[:, j])
+        C1[:, j] = T1[:, :, j] @ Y_res
+        Y_i[:, j] = B1_j @ C1[:, j]
 
     # Backfitting Method
     var1b_old = np.sum(np.square(C1), axis=0)
@@ -441,9 +451,9 @@ def _first_order(B1, Y_res, C1, R, n1, m1, maxiter, lambdax):
             Y_r = Y_res
             for z in range(n1):
                 if j != z:
-                    Y_r = Y_r - (B1[:, :, z] @ C1[:, z]).reshape(R, 1)
+                    Y_r = Y_r - B1[:, :, z] @ C1[:, z]
 
-            C1[:, j] = (T1[:, :, j] @ Y_r).reshape(m1)
+            C1[:, j] = (T1[:, :, j] @ Y_r)
 
         var1b_new = np.sum(np.square(C1), axis=0)
         varmax = np.max(np.absolute(var1b_new - var1b_old))
@@ -455,7 +465,7 @@ def _first_order(B1, Y_res, C1, R, n1, m1, maxiter, lambdax):
         Y_i[:, j] = B1[:, :, j] @ C1[:, j]
 
         # Subtract each first order term from residuals
-        Y_res = Y_res - Y_i[:, j].reshape(R, 1)
+        Y_res = Y_res - Y_i[:, j]
 
     return (Y_i, Y_res, C1)
 
@@ -467,26 +477,29 @@ def _second_order(B2, Y_res, C2, R, n2, m2, lambdax):
 
     lam_eye_m2 = lambdax * identity(m2)
 
+    # Avoid memory allocations by using temporary store
+    B2_j = np.empty(B2[:, :, 0].shape)
+    B22 = np.empty((m2, m2))
+
     # First order individual estimation
-    Bmm = np.einsum('ijb,ikb -> bjk', B2, B2)
     for j in range(n2):
         # Regularized least squares inversion ( minimize || C1 ||_2 )
-        B2_j = B2[:, :, j]
-        B22 = Bmm[j, :, :]
+        B2_j[:, :] = B2[:, :, j]
+        B22[:, :] = B2_j.T @ B2_j
 
         # if it is ill-conditioned matrix, the default value is zero
         if np.all(svd(B22)[1]):  # sigma, diagonal matrix, from svd
             T2[:, :] = lin_solve(B22 + lam_eye_m2, B2_j.T)
         else:
-            T2.fill(0.0)
+            T2[:, :] = 0.0
 
-        C2[:, j] = (T2 @ Y_res).reshape(m2)
+        C2[:, j] = T2 @ Y_res
         Y_ij[:, j] = B2_j @ C2[:, j]
 
     # Now compute second-order terms
     for j in range(n2):
         # Subtract each first order term from residuals
-        Y_res = Y_res - Y_ij[:, j].reshape(R, 1)
+        Y_res = Y_res - Y_ij[:, j]
 
     return (Y_ij, Y_res, C2)
 
@@ -498,21 +511,23 @@ def _third_order(B3, Y_res, C3, R, n3, m3, lambdax):
 
     lam_eye_m3 = lambdax * identity(m3)
 
-    Bmm = np.einsum('ijb,ikb -> bjk', B3, B3)
+    # Avoid memory allocations by using temporary store
+    B3_j = np.empty(B3[:, :, 0].shape)
+    B33 = np.empty((m3,m3))
 
     # First order individual estimation
     for j in range(n3):
         # Regularized least squares inversion ( minimize || C1 ||_2 )
-        B3_j = B3[:, :, j]
-        B33 = Bmm[j, :, :]
+        B3_j[:, :] = B3[:, :, j]
+        B33[:, :] = B3_j.T @ B3_j
 
         # if it is ill-conditioned matrix, the default value is zero
         if np.all(svd(B33)[1]):  # sigma, diagonal matrix, from svd
             T3[:, :] = lin_solve(B33 + lam_eye_m3, B3_j.T)
         else:
-            T3.fill(0.0)
+            T3[:, :] = 0.0
 
-        C3[:, j] = (T3 @ Y_res).reshape(m3)
+        C3[:, j] = T3 @ Y_res
         Y_ijk[:, j] = B3_j @ C3[:, j]
 
     return (Y_ijk, C3)
@@ -521,7 +536,7 @@ def _third_order(B3, Y_res, C3, R, n3, m3, lambdax):
 def f_test(Y, f0, Y_em, R, alpha, m1, m2, m3, n1, n2, n3, n):
     """Use F-test for model selection."""
     # Initialize ind with zeros (all terms insignificant)
-    select = np.zeros((n, 1))
+    select = np.zeros(n)
 
     # Determine the significant components of the HDMR model via the F-test
     Y_res0 = Y - f0
@@ -529,7 +544,7 @@ def f_test(Y, f0, Y_em, R, alpha, m1, m2, m3, n1, n2, n3, n):
     p0 = 0
     for i in range(n):
         # model with ith term included
-        Y_res1 = Y_res0 - Y_em[:, i].reshape(R, 1)
+        Y_res1 = Y_res0 - Y_em[:, i]
 
         # Number of parameters of proposed model (order dependent)
         if i <= n1:
@@ -553,7 +568,7 @@ def f_test(Y, f0, Y_em, R, alpha, m1, m2, m3, n1, n2, n3, n):
             # ith term is significant and should be included in model
             select[i] = 1
 
-    return select.reshape(n)
+    return select
 
 
 def ancova(Y, Y_em, V_Y, R, n):
@@ -562,12 +577,12 @@ def ancova(Y, Y_em, V_Y, R, n):
     Y0 = np.sum(Y_em, axis=1)
 
     # Initialize each variable
-    S, S_a, S_b = [np.zeros((n,)) for _ in range(3)]
+    S, S_a, S_b = np.zeros((3, n))
 
     # Analysis of covariance
     for j in range(n):
         # Covariance matrix of jth term of Y_em and actual Y
-        C = np.cov(np.stack((Y_em[:, j], Y.reshape(R)), axis=0))
+        C = np.cov(np.stack((Y_em[:, j], Y), axis=0))
 
         # Total sensitivity of jth term         ( = Eq. 19 of Li et al )
         S[j] = C[0, 1] / V_Y
@@ -618,18 +633,22 @@ def _finalize(problem, SA, Em, d, alpha, maxorder, RT, Y_em, bootstrap_idx, X, Y
 
     # Fill Expansion Terms
     ct = 0
+    p_names = problem['names']
+    p_c2 = Em['c2']
+    # p_c3 = Em['c3']
     for i in range(Em['n1']):
-        Si['Term'][ct] = problem['names'][i]
+        Si['Term'][ct] = p_names[i]
         ct += 1
 
     for i in range(Em['n2']):
-        Si['Term'][ct] = '/'.join([problem['names'][Em['c2'][i, 0]],
-                                   problem['names'][Em['c2'][i, 1]]])
+        Si['Term'][ct] = '/'.join([p_names[p_c2[i, 0]],
+                                   p_names[p_c2[i, 1]]])
         ct += 1
 
     for i in range(Em['n3']):
-        Si['Term'][ct] = '/'.join([problem['names'][Em['c3'][i, 0]],
-                                   problem['names'][Em['c3'][i, 1]], problem['names'][Em['c3'][i, 2]]])
+        Si['Term'][ct] = '/'.join([p_names[Em['c3'][i, 0]],
+                                   p_names[Em['c3'][i, 1]],
+                                   p_names[Em['c3'][i, 2]]])
         ct += 1
 
     # Assign Bootstrap Results to Si Dict
