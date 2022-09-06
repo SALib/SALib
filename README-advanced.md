@@ -102,17 +102,17 @@ from SALib.test_functions import Ishigami
 import numpy as np
 
 problem = {
-     'num_vars': 3, 
-     'names': ['x1', 'x2', 'x3'], 
-     'bounds': [[-3.14159265359, 3.14159265359], 
-               [-3.14159265359, 3.14159265359], 
+     'num_vars': 3,
+     'names': ['x1', 'x2', 'x3'],
+     'bounds': [[-3.14159265359, 3.14159265359],
+               [-3.14159265359, 3.14159265359],
                [-3.14159265359, 3.14159265359]]
 }
 
 param_values = saltelli.sample(problem, 1024)
 ```
 
-SALib is also capable of generating alternate sampling distributions by 
+SALib is also capable of generating alternate sampling distributions by
 specifying a `dist` entry in the `problem` specification.
 
 As implied in the basic example, a uniform distribution is the default.
@@ -145,4 +145,3 @@ problem = {
      'dists': ['unif', 'lognorm', 'triang']
 }
 ```
-

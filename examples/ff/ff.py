@@ -4,10 +4,10 @@ from SALib.analyze.ff import analyze
 from SALib.sample.ff import sample
 from SALib.util import read_param_file
 
-sys.path.append('../..')
+sys.path.append("../..")
 
 # Read the parameter range file and generate samples
-problem = read_param_file('../../src/SALib/test_functions/params/Ishigami.txt')
+problem = read_param_file("../../src/SALib/test_functions/params/Ishigami.txt")
 # or define manually without a parameter file:
 # problem = {
 #  'num_vars': 3,

@@ -1,7 +1,6 @@
 from __future__ import division
 
 from pytest import raises
-import numpy as np
 
 from SALib.analyze import hdmr
 from SALib.sample import latin
@@ -10,7 +9,7 @@ from SALib.util import read_param_file
 
 
 def setup_samples(N=10000):
-    param_file = 'src/SALib/test_functions/params/Ishigami.txt'
+    param_file = "src/SALib/test_functions/params/Ishigami.txt"
     problem = read_param_file(param_file)
     param_values = latin.sample(problem, 10000)
     return problem, param_values
@@ -52,11 +51,7 @@ def test_over_bootstrap_sample_size():
 
 
 def test_incorrect_maxorder_setting():
-    problem = {
-        'num_vars': 2,
-        'names': ['x1', 'x2'],
-        'bounds': [[0, 1]*2]
-    }
+    problem = {"num_vars": 2, "names": ["x1", "x2"], "bounds": [[0, 1] * 2]}
     X = latin.sample(problem, 10000)
     Y = linear_model_1.evaluate(X)
     with raises(RuntimeError):
@@ -71,11 +66,7 @@ def test_incorrect_lambdax():
 
 
 def test_dim_mismatch():
-    problem = {
-        'num_vars': 2,
-        'names': ['x1', 'x2'],
-        'bounds': [[0, 1]*2]
-    }
+    problem = {"num_vars": 2, "names": ["x1", "x2"], "bounds": [[0, 1] * 2]}
     X = latin.sample(problem, 10000)
     Y = linear_model_1.evaluate(X)
     with raises(RuntimeError):

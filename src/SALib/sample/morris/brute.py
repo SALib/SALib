@@ -9,17 +9,23 @@ from typing import List
 
 
 class BruteForce(Strategy):
-    """Implements the brute force optimisation strategy
-    """
+    """Implements the brute force optimisation strategy"""
 
-    def _sample(self, input_sample, num_samples,
-                num_params, k_choices, num_groups=None):
-        return self.brute_force_most_distant(input_sample, num_samples,
-                                             num_params, k_choices, num_groups)
+    def _sample(
+        self, input_sample, num_samples, num_params, k_choices, num_groups=None
+    ):
+        return self.brute_force_most_distant(
+            input_sample, num_samples, num_params, k_choices, num_groups
+        )
 
-    def brute_force_most_distant(self, input_sample: np.ndarray, num_samples: int,
-                                 num_params: int, k_choices: int,
-                                 num_groups: int=None) -> List:
+    def brute_force_most_distant(
+        self,
+        input_sample: np.ndarray,
+        num_samples: int,
+        num_params: int,
+        k_choices: int,
+        num_groups: int = None,
+    ) -> List:
         """Use brute force method to find most distant trajectories
 
         Parameters
@@ -38,18 +44,22 @@ class BruteForce(Strategy):
         -------
         list
         """
-        scores = self.find_most_distant(input_sample,
-                                        num_samples,
-                                        num_params,
-                                        k_choices,
-                                        num_groups)
+        scores = self.find_most_distant(
+            input_sample, num_samples, num_params, k_choices, num_groups
+        )
 
         maximum_combo = self.find_maximum(scores, num_samples, k_choices)
 
         return maximum_combo
 
-    def find_most_distant(self, input_sample: np.ndarray, num_samples: int,
-                          num_params: int, k_choices:int, num_groups: int=None) -> np.ndarray:
+    def find_most_distant(
+        self,
+        input_sample: np.ndarray,
+        num_samples: int,
+        num_params: int,
+        k_choices: int,
+        num_groups: int = None,
+    ) -> np.ndarray:
         """
         Finds the 'k_choices' most distant choices from the
         'num_samples' trajectories contained in 'input_sample'
@@ -77,10 +87,9 @@ class BruteForce(Strategy):
 
         # First compute the distance matrix for each possible pairing
         # of trajectories and store in a shared-memory array
-        distance_matrix = self.compute_distance_matrix(input_sample,
-                                                       num_samples,
-                                                       num_params,
-                                                       num_groups)
+        distance_matrix = self.compute_distance_matrix(
+            input_sample, num_samples, num_params, num_groups
+        )
 
         # Initialise the output array
         chunk = int(1e6)
@@ -92,13 +101,13 @@ class BruteForce(Strategy):
         combo_gen = combinations(range(num_samples), k_choices)
         scores = np.zeros(number_of_combinations, dtype=np.float32)
         # Generate the pairwise indices once
-        pairwise = np.array(
-            [y for y in combinations(range(k_choices), 2)])
+        pairwise = np.array([y for y in combinations(range(k_choices), 2)])
 
         mappable = self.mappable
         for combos in self.grouper(chunk, combo_gen):
-            scores[(counter * chunk):((counter + 1) * chunk)] \
-                = mappable(combos, pairwise, distance_matrix)
+            scores[(counter * chunk) : ((counter + 1) * chunk)] = mappable(
+                combos, pairwise, distance_matrix
+            )
             counter += 1
         return scores
 
@@ -113,7 +122,7 @@ class BruteForce(Strategy):
 
     @staticmethod
     def mappable(combos, pairwise, distance_matrix):
-        '''
+        """
         Obtains scores from the distance_matrix for each pairwise combination
         held in the combos array
 
@@ -122,16 +131,20 @@ class BruteForce(Strategy):
         combos : numpy.ndarray
         pairwise : numpy.ndarray
         distance_matrix : numpy.ndarray
-        '''
+        """
         combos = np.array(combos)
         # Create a list of all pairwise combination for each combo in combos
-        combo_list = combos[:, pairwise[:, ]]
+        combo_list = combos[
+            :,
+            pairwise[
+                :,
+            ],
+        ]
 
         addresses = (combo_list[:, :, 1], combo_list[:, :, 0])
 
         all_distances = distance_matrix[addresses]
-        new_scores = np.sqrt(
-            np.einsum('ij,ij->i', all_distances, all_distances))
+        new_scores = np.sqrt(np.einsum("ij,ij->i", all_distances, all_distances))
         return new_scores
 
     def find_maximum(self, scores, N, k_choices):
@@ -151,8 +164,9 @@ class BruteForce(Strategy):
             raise TypeError("Scores input is not a numpy array")
 
         index_of_maximum = int(scores.argmax())
-        maximum_combo = self.nth(combinations(
-            range(N), k_choices), index_of_maximum, None)
+        maximum_combo = self.nth(
+            combinations(range(N), k_choices), index_of_maximum, None
+        )
         return sorted(maximum_combo)
 
     @staticmethod

@@ -25,7 +25,7 @@ salib analyze hdmr ^
   -R 500 ^
   -a 0.95 ^
   -lambda 0.01
-  
+
 PAUSE
 
 REM Options:

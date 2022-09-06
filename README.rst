@@ -157,7 +157,7 @@ If you would like to use our software, please cite it using the following:
 
     Iwanaga, T., Usher, W., & Herman, J. (2022).
     Toward SALib 2.0: Advancing the accessibility and interpretability of global sensitivity analyses.
-    Socio-Environmental Systems Modelling, 4, 18155. 
+    Socio-Environmental Systems Modelling, 4, 18155.
     doi:10.18174/sesmo.18155
 
     Herman, J. and Usher, W. (2017) SALib: An open-source Python library for

@@ -20,6 +20,12 @@ def evaluate(values):
             https://doi.org/10.1021/jp9096919
     """
     Y = np.zeros([values.shape[0]])
-    Y = 5 * values[:,0] + 4 * values[:,1] + 3 * values[:,2] + 2 * values[:,3] + values[:,4] 
+    Y = (
+        5 * values[:, 0]
+        + 4 * values[:, 1]
+        + 3 * values[:, 2]
+        + 2 * values[:, 3]
+        + values[:, 4]
+    )
 
     return Y

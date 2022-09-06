@@ -7,10 +7,13 @@ from scipy.optimize import brentq
 FLOAT_OR_ARRAY = Union[float, np.array]
 
 
-def lake_problem(X: FLOAT_OR_ARRAY, a: FLOAT_OR_ARRAY = 0.1,
-                 q: FLOAT_OR_ARRAY = 2.0,
-                 b: FLOAT_OR_ARRAY = 0.42,
-                 eps: FLOAT_OR_ARRAY = 0.02) -> float:
+def lake_problem(
+    X: FLOAT_OR_ARRAY,
+    a: FLOAT_OR_ARRAY = 0.1,
+    q: FLOAT_OR_ARRAY = 2.0,
+    b: FLOAT_OR_ARRAY = 0.42,
+    eps: FLOAT_OR_ARRAY = 0.02,
+) -> float:
     """Lake Problem as given in Hadka et al., (2015) and Kwakkel (2017)
     modified for use as a test function.
 
@@ -56,7 +59,7 @@ def lake_problem(X: FLOAT_OR_ARRAY, a: FLOAT_OR_ARRAY = 0.1,
     * float, phosphorus pollution for a point in time
     """
     Xq = X**q
-    X_t1 = X + a + (Xq / (1.0 + Xq)) - (b*X) + eps
+    X_t1 = X + a + (Xq / (1.0 + Xq)) - (b * X) + eps
 
     return X_t1
 
@@ -103,15 +106,17 @@ def evaluate_lake(values: np.ndarray, seed=101) -> np.ndarray:
 
     sq_mean = mean**2
     sq_std = stdev**2
-    eps = rng.lognormal(log(sq_mean / sqrt(sq_std + sq_mean)),
-                        sqrt(log(1.0 + sq_std / sq_mean)),
-                        size=nvars)
+    eps = rng.lognormal(
+        log(sq_mean / sqrt(sq_std + sq_mean)),
+        sqrt(log(1.0 + sq_std / sq_mean)),
+        size=nvars,
+    )
 
     Y = np.zeros((nvars, nvars))
     for t in range(nvars):
         # First X value will be last Y value (should be 0 as we are filling
         # an array of zeros)
-        Y[t] = lake_problem(Y[t-1], a, q, b, eps)
+        Y[t] = lake_problem(Y[t - 1], a, q, b, eps)
 
     return Y
 
@@ -143,12 +148,12 @@ def evaluate(values: np.ndarray, nvars: int = 100, seed=101):
         a_i = a[i]
         q_i = q[i]
 
-        Pcrit = brentq(lambda x: x**q_i/(1.0+x**q_i) - b[i]*x, 0.01, 1.5)
+        Pcrit = brentq(lambda x: x**q_i / (1.0 + x**q_i) - b[i] * x, 0.01, 1.5)
 
         reliability = len(tmp[tmp < Pcrit]) / nvars
 
         max_P = np.max(tmp)
-        utility = np.sum(alpha[i]*a_i*np.power(delta[i], np.arange(nvars)))
+        utility = np.sum(alpha[i] * a_i * np.power(delta[i], np.arange(nvars)))
 
         # In practice, `a` will be set by a separate decision model
         # See [2] in docstring for `lake_problem()`
@@ -161,25 +166,31 @@ def evaluate(values: np.ndarray, nvars: int = 100, seed=101):
     return Y
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     from SALib.sample import latin
     from SALib.analyze import delta
 
     SEED_VAL = 101
 
     LAKE_SPEC = {
-        'num_vars': 7,
-        'names': ['a', 'q', 'b', 'mean', 'stdev', 'delta', 'alpha'],
-        'bounds': [[0.0, 0.1], [2.0, 4.5], [0.1, 0.45], [0.01, 0.05],
-                   [0.001, 0.005], [0.93, 0.99], [0.2, 0.5]],
-        'outputs': ['max_P', 'Utility', 'Inertia', 'Reliability']
+        "num_vars": 7,
+        "names": ["a", "q", "b", "mean", "stdev", "delta", "alpha"],
+        "bounds": [
+            [0.0, 0.1],
+            [2.0, 4.5],
+            [0.1, 0.45],
+            [0.01, 0.05],
+            [0.001, 0.005],
+            [0.93, 0.99],
+            [0.2, 0.5],
+        ],
+        "outputs": ["max_P", "Utility", "Inertia", "Reliability"],
     }
 
     latin_samples = latin.sample(LAKE_SPEC, 1000, seed=SEED_VAL)
     Y = evaluate(latin_samples)
 
-    for i, name in enumerate(LAKE_SPEC['outputs']):
+    for i, name in enumerate(LAKE_SPEC["outputs"]):
         Si = delta.analyze(LAKE_SPEC, latin_samples, Y[:, i])
         print(name)
         print(Si.to_df())
