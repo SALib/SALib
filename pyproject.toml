@@ -47,7 +47,8 @@ test = [
 doc = [
     "sphinx",
     "myst_parser",
-    "numpydoc"
+    "numpydoc",
+    "pydata-sphinx-theme>=0.10"
 ]
 
 dev = [
