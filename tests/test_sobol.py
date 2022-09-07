@@ -166,9 +166,9 @@ def test_Sobol_G_using_sobol():
 
 
 def test_constant_output():
-    '''
-    Test case where there is no variance in model outputs, which should produce 0 sensitivity.
-    '''
+    """
+    No variance in model outputs, which should produce 0 sensitivity.
+    """
 
     def mock_model(X):
         r, _ = X.shape
