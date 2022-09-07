@@ -6,8 +6,9 @@ from . import common_args
 from ..util import read_param_file, ResultDict
 
 
-def analyze(problem, X, Y, num_resamples=100,
-            conf_level=0.95, print_to_console=False, seed=None):
+def analyze(
+    problem, X, Y, num_resamples=100, conf_level=0.95, print_to_console=False, seed=None
+):
     """Calculates Derivative-based Global Sensitivity Measure on model outputs.
 
     Returns a dictionary with keys 'vi', 'vi_std', 'dgsm', and 'dgsm_conf',
@@ -36,6 +37,8 @@ def analyze(problem, X, Y, num_resamples=100,
         The confidence interval level (default 0.95)
     print_to_console : bool
         Print results directly to console (default False)
+    seed : int
+        Seed to generate a random number
 
 
     References
@@ -54,7 +57,7 @@ def analyze(problem, X, Y, num_resamples=100,
     if seed:
         np.random.seed(seed)
 
-    D = problem['num_vars']
+    D = problem["num_vars"]
     Y_size = Y.size
 
     if Y_size % (D + 1) == 0:
@@ -76,26 +79,21 @@ def analyze(problem, X, Y, num_resamples=100,
     X_base = X[0:Y_size:step, :]
 
     # First order (+conf.) and Total order (+conf.)
-    keys = ('vi', 'vi_std', 'dgsm', 'dgsm_conf')
+    keys = ("vi", "vi_std", "dgsm", "dgsm_conf")
     S = ResultDict((k, np.empty(D)) for k in keys)
-    S['names'] = problem['names']
+    S["names"] = problem["names"]
 
-    bounds = problem['bounds']
+    bounds = problem["bounds"]
     for j in range(D):
-        perturbed[:, j] = Y[(j + 1):Y_size:step]
-        X_perturbed[:, j] = X[(j + 1):Y_size:step, j]
+        perturbed[:, j] = Y[(j + 1) : Y_size : step]
+        X_perturbed[:, j] = X[(j + 1) : Y_size : step, j]
 
         diff = X_perturbed[:, j] - X_base[:, j]
         perturbed_j = perturbed[:, j]
-        S['vi'][j], S['vi_std'][j] = calc_vi_stats(base,
-                                                   perturbed_j,
-                                                   diff)
-        S['dgsm'][j], S['dgsm_conf'][j] = calc_dgsm(base,
-                                                    perturbed_j,
-                                                    diff,
-                                                    bounds[j],
-                                                    num_resamples,
-                                                    conf_level)
+        S["vi"][j], S["vi_std"][j] = calc_vi_stats(base, perturbed_j, diff)
+        S["dgsm"][j], S["dgsm_conf"][j] = calc_dgsm(
+            base, perturbed_j, diff, bounds[j], num_resamples, conf_level
+        )
 
     if print_to_console:
         print(S.to_df())
@@ -111,7 +109,7 @@ def calc_vi_stats(base, perturbed, x_delta):
 
     Same as calc_vi_mean but returns standard deviation as well.
     """
-    dfdx = ((perturbed - base) / x_delta)**2
+    dfdx = ((perturbed - base) / x_delta) ** 2
     return np.mean(dfdx), np.std(dfdx)
 
 
@@ -120,7 +118,7 @@ def calc_vi_mean(base, perturbed, x_delta):
 
     Same as calc_vi_stats but only returns the mean.
     """
-    dfdx = ((perturbed - base) / x_delta)**2
+    dfdx = ((perturbed - base) / x_delta) ** 2
     return dfdx.mean()
 
 
@@ -130,7 +128,7 @@ def calc_dgsm(base, perturbed, x_delta, bounds, num_resamples, conf_level):
     """
     D = np.var(base)
     vi = calc_vi_mean(base, perturbed, x_delta)
-    dgsm = vi * (bounds[1] - bounds[0])**2 / (D * np.pi**2)
+    dgsm = vi * (bounds[1] - bounds[0]) ** 2 / (D * np.pi**2)
 
     len_base = len(base)
     s = np.empty(num_resamples)
@@ -143,27 +141,44 @@ def calc_dgsm(base, perturbed, x_delta, bounds, num_resamples, conf_level):
 
 
 def cli_parse(parser):
-    parser.add_argument('-X', '--model-input-file', type=str,
-                        required=True, default=None,
-                        help='Model input file')
-    parser.add_argument('-r', '--resamples', type=int, required=False,
-                        default=1000,
-                        help='Number of bootstrap resamples for Sobol \
-                           confidence intervals')
+    parser.add_argument(
+        "-X",
+        "--model-input-file",
+        type=str,
+        required=True,
+        default=None,
+        help="Model input file",
+    )
+    parser.add_argument(
+        "-r",
+        "--resamples",
+        type=int,
+        required=False,
+        default=1000,
+        help="Number of bootstrap resamples for Sobol \
+                           confidence intervals",
+    )
     return parser
 
 
 def cli_action(args):
     problem = read_param_file(args.paramfile)
 
-    Y = np.loadtxt(args.model_output_file,
-                   delimiter=args.delimiter, usecols=(args.column,))
+    Y = np.loadtxt(
+        args.model_output_file, delimiter=args.delimiter, usecols=(args.column,)
+    )
     X = np.loadtxt(args.model_input_file, delimiter=args.delimiter, ndmin=2)
     if len(X.shape) == 1:
         X = X.reshape((len(X), 1))
 
-    analyze(problem, X, Y, num_resamples=args.resamples, print_to_console=True,
-            seed=args.seed)
+    analyze(
+        problem,
+        X,
+        Y,
+        num_resamples=args.resamples,
+        print_to_console=True,
+        seed=args.seed,
+    )
 
 
 if __name__ == "__main__":

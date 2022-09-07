@@ -1,9 +1,6 @@
 """High-level tests to ensure grouped analyses convert to Pandas DataFrame."""
 
-from typing import Dict, List
-
 import numpy as np
-from numpy.testing import assert_equal, assert_allclose
 
 from SALib import ProblemSpec
 
@@ -21,11 +18,11 @@ def test_sobol_group_analysis():
             "names": ["P1", "P2", "P3", "P4", "P5", "P6"],
             "bounds": [
                 [0.0, 1.0],
-                [1.0, 0.75],
+                [0.0, 1.0, 0.75],
                 [0.0, 0.2],
                 [0.0, 0.2],
                 [-1.0, 1.0],
-                [1.0, 0.25],
+                [0.0, 1.0, 0.25],
             ],
             "dists": ["unif", "triang", "norm", "lognorm", "unif", "triang"],
             "groups": ["A", "B"] * 3,
@@ -33,11 +30,11 @@ def test_sobol_group_analysis():
     )
 
     # fmt: off
-    (group_spec  
+    (group_spec
         .sample_saltelli(128)
         .evaluate(example_func)
         .analyze_sobol()
-    )
+    )   # noqa: E124
     # fmt: on
 
     ST, S1, S2 = group_spec.to_df()
@@ -48,7 +45,7 @@ def test_sobol_group_analysis():
 
 
 def test_morris_group_analysis():
-    """Ensure valid groupings are returned from the Morris analysis method.
+    r"""Ensure valid groupings are returned from the Morris analysis method.
 
     Note: $\mu$ and $\sigma$ values will be NaN. See [1].
 
@@ -56,8 +53,8 @@ def test_morris_group_analysis():
     References
     ----------
 
-    .. [1] Campolongo, F., Cariboni, J., Saltelli, A., 2007. 
-           An effective screening design for sensitivity analysis of large models. 
+    .. [1] Campolongo, F., Cariboni, J., Saltelli, A., 2007.
+           An effective screening design for sensitivity analysis of large models.
            Environmental Modelling & Software, 22, 1509–1518.
            https://dx.doi.org/10.1016/j.envsoft.2006.10.004
     """
@@ -70,11 +67,11 @@ def test_morris_group_analysis():
     )
 
     # fmt: off
-    (group_spec  
+    (group_spec
         .sample_morris(100)
         .evaluate(example_func)
         .analyze_morris()
-    )
+    )  # noqa: E124
     # fmt: on
 
     res = group_spec.to_df()
@@ -88,4 +85,3 @@ def test_morris_group_analysis():
 if __name__ == "__main__":
     test_sobol_group_analysis()
     test_morris_group_analysis()
-

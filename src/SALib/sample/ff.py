@@ -1,7 +1,7 @@
 """The sampling implementation of fractional factorial method
 
 This implementation is based on the formulation put forward in
-[`Saltelli et al. 2008 <http://www.wiley.com/WileyCDA/WileyTitle/productCd-0470059974.html>`_]
+[`Saltelli et al. 2008 <http://doi.org/10.1002/9780470725184>`_]
 
 """
 
@@ -26,7 +26,7 @@ def find_smallest(num_vars):
         Smallest exponent of two greater than `num_vars`
     """
     for x in range(10):
-        if num_vars <= 2 ** x:
+        if num_vars <= 2**x:
             return x
 
 
@@ -39,19 +39,18 @@ def extend_bounds(problem):
         The problem definition
     """
 
-    num_vars = problem['num_vars']
+    num_vars = problem["num_vars"]
     num_ff_vars = 2 ** find_smallest(num_vars)
     num_dummy_variables = num_ff_vars - num_vars
 
-    bounds = list(problem['bounds'])
-    names = problem['names']
+    bounds = list(problem["bounds"])
+    names = problem["names"]
     if num_dummy_variables > 0:
         bounds.extend([[0, 1] for x in range(num_dummy_variables)])
-        names.extend(["dummy_" + str(var)
-                      for var in range(num_dummy_variables)])
-        problem['bounds'] = bounds
-        problem['names'] = names
-        problem['num_vars'] = num_ff_vars
+        names.extend(["dummy_" + str(var) for var in range(num_dummy_variables)])
+        problem["bounds"] = bounds
+        problem["names"] = names
+        problem["num_vars"] = num_ff_vars
 
     return problem
 
@@ -65,10 +64,9 @@ def generate_contrast(problem):
         The problem definition
     """
 
-    num_vars = problem['num_vars']
+    num_vars = problem["num_vars"]
 
     # Find the smallest n, such that num_vars < k
-    k = [2 ** n for n in range(16)]
     k_chosen = 2 ** find_smallest(num_vars)
 
     # Generate the fractional factorial contrast
@@ -92,12 +90,14 @@ def sample(problem, seed=None):
     as a check for errors in the analyze procedure.
 
     This algorithm is an implementation of that contained in Saltelli et al
-    [`Saltelli et al. 2008 <http://www.wiley.com/WileyCDA/WileyTitle/productCd-0470059974.html>`_]
+    [`Saltelli et al. 2008 <http://doi.org/10.1002/9780470725184>`_]
 
     Parameters
     ----------
     problem : dict
         The problem definition
+    seed : int
+        Seed to generate a random number
 
     Returns
     -------
@@ -106,17 +106,18 @@ def sample(problem, seed=None):
 
     References
     ----------
-    .. [1] Saltelli, A., Ratto, M., Andres, T., Campolongo, F., Cariboni, J., Gatelli, D., 
-           Saisana, M., Tarantola, S., 2008. 
-           Global Sensitivity Analysis: The Primer. 
+    .. [1] Saltelli, A., Ratto, M., Andres, T., Campolongo, F.,
+           Cariboni, J., Gatelli, D.,
+           Saisana, M., Tarantola, S., 2008.
+           Global Sensitivity Analysis: The Primer.
            Wiley, West Sussex, U.K.
-           https://dx.doi.org/10.1002/9780470725184
+           http://doi.org/10.1002/9780470725184
 
     """
     if seed:
         np.random.seed(seed)
     contrast = generate_contrast(problem)
-    sample = np.array((contrast + 1.) / 2, dtype=float)
+    sample = np.array((contrast + 1.0) / 2, dtype=float)
     problem = extend_bounds(problem)
 
     sample = scale_samples(sample, problem)
@@ -136,8 +137,12 @@ def cli_action(args):
     """
     problem = read_param_file(args.paramfile)
     param_values = sample(problem, seed=args.seed)
-    np.savetxt(args.output, param_values, delimiter=args.delimiter,
-               fmt='%.' + str(args.precision) + 'e')
+    np.savetxt(
+        args.output,
+        param_values,
+        delimiter=args.delimiter,
+        fmt="%." + str(args.precision) + "e",
+    )
 
 
 if __name__ == "__main__":

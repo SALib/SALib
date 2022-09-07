@@ -5,7 +5,7 @@ https://keepachangelog.com/en/1.0.0/
 
 ## [1.4.5]
 
-- Adjusted Saltelli sampling to follow recommendation of Owen (2020) 
+- Adjusted Saltelli sampling to follow recommendation of Owen (2020)
   (http://arxiv.org/abs/2008.08051; https://github.com/scipy/scipy/pull/10844#issuecomment-672186615)
 - Initial support for parallel analysis
 - Updated Sobol' G-function analytic results (PR #464, Issues #335 #461)
@@ -52,7 +52,7 @@ Shortlist of changes since v1.3.x
 
 - Many documentation improvements
 - Explicitly mention extended FAST in documentation
-- Saltelli sampling: Warnings displayed when selected samples do not meet 
+- Saltelli sampling: Warnings displayed when selected samples do not meet
   requirements (PR #416).
 - Group sampling and analysis enabled for Sobol' and morris
 - Enhanced DataFrame support for groups

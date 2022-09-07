@@ -1,5 +1,6 @@
 import sys
-sys.path.append('../..')
+
+sys.path.append("../..")
 
 from SALib.analyze import fast
 from SALib.sample import fast_sampler
@@ -7,7 +8,7 @@ from SALib.test_functions import Ishigami
 from SALib.util import read_param_file
 
 # Read the parameter range file and generate samples
-problem = read_param_file('../../src/SALib/test_functions/params/Ishigami.txt')
+problem = read_param_file("../../src/SALib/test_functions/params/Ishigami.txt")
 
 # Generate samples
 param_values = fast_sampler.sample(problem, 1000, seed=100)

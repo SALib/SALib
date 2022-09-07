@@ -1,6 +1,5 @@
 import pkgutil
 import csv
-from warnings import warn
 
 import numpy as np
 
@@ -18,11 +17,12 @@ def avail_approaches(pkg):
     method : list
         A list of available submodules
     """
-    methods = [modname for importer, modname, ispkg in
-               pkgutil.walk_packages(path=pkg.__path__)
-               if modname not in
-               ['common_args', 'directions', 'sobol_sequence']
-               and 'test' not in modname]
+    methods = [
+        modname
+        for importer, modname, ispkg in pkgutil.walk_packages(path=pkg.__path__)
+        if modname not in ["common_args", "directions", "sobol_sequence"]
+        and "test" not in modname
+    ]
 
     return methods
 
@@ -60,56 +60,61 @@ def read_param_file(filename, delimiter=None):
     groups = []
     dists = []
     num_vars = 0
-    fieldnames = ['name', 'lower_bound', 'upper_bound', 'group', 'dist']
+    fieldnames = ["name", "lower_bound", "upper_bound", "group", "dist"]
 
-    with open(filename, 'r') as csvfile:
+    with open(filename, "r") as csvfile:
         dialect = csv.Sniffer().sniff(csvfile.read(1024), delimiters=delimiter)
         csvfile.seek(0)
-        reader = csv.DictReader(
-            csvfile, fieldnames=fieldnames, dialect=dialect)
+        reader = csv.DictReader(csvfile, fieldnames=fieldnames, dialect=dialect)
         for row in reader:
-            if row['name'].strip().startswith('#'):
+            if row["name"].strip().startswith("#"):
                 pass
             else:
                 num_vars += 1
-                names.append(row['name'])
-                bounds.append(
-                    [float(row['lower_bound']), float(row['upper_bound'])])
+                names.append(row["name"])
+                bounds.append([float(row["lower_bound"]), float(row["upper_bound"])])
 
                 # If the fourth column does not contain a group name, use
                 # the parameter name
-                if row['group'] is None:
-                    groups.append(row['name'])
-                elif row['group'] == 'NA':
-                    groups.append(row['name'])
+                if row["group"] is None:
+                    groups.append(row["name"])
+                elif row["group"] == "NA":
+                    groups.append(row["name"])
                 else:
-                    groups.append(row['group'])
+                    groups.append(row["group"])
 
                 # If the fifth column does not contain a distribution
                 # use uniform
-                if row['dist'] is None:
-                    dists.append('unif')
+                if row["dist"] is None:
+                    dists.append("unif")
                 else:
-                    dists.append(row['dist'])
+                    dists.append(row["dist"])
 
     if groups == names:
         groups = None
     elif len(set(groups)) == 1:
-        raise ValueError("""Only one group defined, results will not be
-            meaningful""")
+        raise ValueError(
+            """Only one group defined, results will not be
+            meaningful"""
+        )
 
     # setting dists to none if all are uniform
     # because non-uniform scaling is not needed
-    if all([d == 'unif' for d in dists]):
+    if all([d == "unif" for d in dists]):
         dists = None
 
-    return {'names': names, 'bounds': bounds, 'num_vars': num_vars,
-            'groups': groups, 'dists': dists}
+    return {
+        "names": names,
+        "bounds": bounds,
+        "num_vars": num_vars,
+        "groups": groups,
+        "dists": dists,
+    }
 
 
 def _check_groups(problem):
     """Check if there is more than 1 group."""
-    groups = problem.get('groups')
+    groups = problem.get("groups")
     if not groups:
         return False
 

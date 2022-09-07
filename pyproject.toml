@@ -1,8 +1,92 @@
 [build-system]
-# AVOID CHANGING REQUIRES: IT WILL BE UPDATED BY PYSCAFFOLD!
-requires = ["setuptools>=46.1.0", "setuptools_scm[toml]>=5", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling>=1.8.1"]
+build-backend = "hatchling.build"
 
-[tool.setuptools_scm]
-# See configuration details in https://github.com/pypa/setuptools_scm
-version_scheme = "no-guess-dev"
+[project]
+name = "SALib"
+dynamic = ["version"]
+description = "Tools for global sensitivity analysis. Contains Sobol', Morris, FAST, DGSM, PAWN, HDMR, Moment Independent and fractional factorial methods"
+readme = "README.rst"
+requires-python = ">=3.8"
+license = "MIT"
+authors = [
+  { name = "Jon Herman", email = "jdherman8@gmail.com" },
+  { name = "Will Usher" },
+  { name = "Takuya Iwanaga" },
+]
+maintainers = [
+  { name = "SALib contributors" },
+]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "License :: OSI Approved :: MIT License",
+  "Intended Audience :: End Users/Desktop",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "Operating System :: OS Independent",
+]
+
+dependencies = [
+  "numpy>=1.20.3",
+  "scipy>=1.7.3",
+  "matplotlib>=3.2.2",
+  "pandas>=1.1.2",
+  "multiprocess",
+]
+
+[project.optional-dependencies]
+distributed = [
+    "pathos>=0.2.5",
+]
+
+test = [
+    "SALib[distributed]",
+    "pytest",
+    "pytest-cov",
+]
+
+doc = [
+    "sphinx",
+    "myst_parser",
+    "numpydoc"
+]
+
+dev = [
+    "SALib[distributed]",
+    "SALib[test]",
+    "SALib[doc]",
+    "pre-commit",
+    "hatch",
+]
+
+[project.scripts]
+salib = "SALib.scripts.salib:main"
+
+[project.urls]
+Documentation = "https://salib.readthedocs.io"
+"Source code" = "https://github.com/SALib/SALib"
+
+[tool.hatch]
+version.path = "src/SALib/__init__.py"
+build.targets.sdist.exclude = [
+  ".github",
+  "docs",
+  "examples",
+  "paper",
+  "tests",
+  "*.md",
+  "*.rst",
+  "*.yml",
+  "*.cff",
+  ".*",
+]
+
+[tool.pytest.ini_options]
+addopts = "--durations 10"
+testpaths = [
+    "tests",
+]

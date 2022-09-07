@@ -21,7 +21,7 @@ Two options:
 
 1. Use SALib to generate the samples, run the model yourself, then use the
    results with SALib.
-2. Wrap the model with a Python function. The only requirement is that the 
+2. Wrap the model with a Python function. The only requirement is that the
    function should accept a numpy array of sample values.
    This is the approach most users will take.
 

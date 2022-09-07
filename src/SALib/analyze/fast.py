@@ -6,8 +6,16 @@ from . import common_args
 from ..util import read_param_file, ResultDict
 
 
-def analyze(problem, Y, M=4, num_resamples=100, conf_level=0.95, print_to_console=False, seed=None):
-    """Performs the extended Fourier Amplitude Sensitivity Test (eFAST) on model outputs.
+def analyze(
+    problem,
+    Y,
+    M=4,
+    num_resamples=100,
+    conf_level=0.95,
+    print_to_console=False,
+    seed=None,
+):
+    """Perform extended Fourier Amplitude Sensitivity Test on model outputs
 
     Returns a dictionary with keys 'S1' and 'ST', where each entry is a list of
     size D (the number of parameters) containing the indices in the same order
@@ -31,12 +39,14 @@ def analyze(problem, Y, M=4, num_resamples=100, conf_level=0.95, print_to_consol
         the Fourier series decomposition (default 4)
     print_to_console : bool
         Print results directly to console (default False)
-
+    seed : int
+        Seed to generate a random number
 
     References
     ----------
-    .. [1] Cukier, R. I., C. M. Fortuin, K. E. Shuler, A. G. Petschek, and J. H.
-           Schaibly (1973).  "Study of the sensitivity of coupled reaction
+    .. [1] Cukier, R. I., C. M. Fortuin, K. E. Shuler, A. G. Petschek,
+           and J. H. Schaibly (1973).
+           "Study of the sensitivity of coupled reaction
            systems to uncertainties in rate coefficients."  J. Chem. Phys.,
            59(8):3873-3878, doi:10.1063/1.1680571.
 
@@ -59,7 +69,7 @@ def analyze(problem, Y, M=4, num_resamples=100, conf_level=0.95, print_to_consol
     if seed:
         np.random.seed(seed)
 
-    D = problem['num_vars']
+    D = problem["num_vars"]
 
     if Y.size % (D) == 0:
         N = int(Y.size / D)
@@ -74,43 +84,49 @@ def analyze(problem, Y, M=4, num_resamples=100, conf_level=0.95, print_to_consol
     omega_0 = math.floor((N - 1) / (2 * M))
 
     # Calculate and Output the First and Total Order Values
-    Si = ResultDict((k, [None] * D) for k in ['S1', 'ST', 'S1_conf', 'ST_conf'])
-    Si['names'] = problem['names']
+    Si = ResultDict((k, [None] * D) for k in ["S1", "ST", "S1_conf", "ST_conf"])
+    Si["names"] = problem["names"]
     for i in range(D):
-        l = np.arange(i * N, (i + 1) * N)
+        z = np.arange(i * N, (i + 1) * N)
 
-        Y_l = Y[l]
+        Y_l = Y[z]
 
         S1, ST = compute_orders(Y_l, N, M, omega_0)
-        Si['S1'][i] = S1
-        Si['ST'][i] = ST
+        Si["S1"][i] = S1
+        Si["ST"][i] = ST
 
-        S1_d_conf, ST_d_conf = bootstrap(Y_l, N, M, omega_0, num_resamples, conf_level)
-        Si['S1_conf'][i] = S1_d_conf
-        Si['ST_conf'][i] = ST_d_conf
-    
+        S1_d_conf, ST_d_conf = bootstrap(Y_l, M, num_resamples, conf_level)
+        Si["S1_conf"][i] = S1_d_conf
+        Si["ST_conf"][i] = ST_d_conf
+
     if print_to_console:
         print(Si.to_df())
 
     return Si
 
 
-def compute_orders(outputs, N, M, omega):
+def compute_orders(outputs: np.ndarray, N: int, M: int, omega: int):
     f = np.fft.fft(outputs)
-    Sp = np.power(np.absolute(f[np.arange(1, int((N + 1) / 2))]) / N, 2)
+    Sp = np.power(np.absolute(f[np.arange(1, math.ceil(N / 2))]) / N, 2)
+
     V = 2.0 * np.sum(Sp)
 
     # Calculate first and total order
-    D1 = 2.0 * np.sum(Sp[np.arange(1, M + 1) * int(omega) - 1])
-    Dt = 2.0 * np.sum(Sp[np.arange(int(omega / 2.0))])
+    D1 = 2.0 * np.sum(Sp[np.arange(1, M + 1) * omega - 1])
+    Dt = 2.0 * np.sum(Sp[np.arange(math.floor(omega / 2.0))])
 
     return (D1 / V), (1.0 - Dt / V)
 
 
-def bootstrap(Y, N, M, omega_0, resamples, conf_level):
+def bootstrap(Y: np.ndarray, M: int, resamples: int, conf_level: float):
+    """Compute CIs.
+
+    Infers ``N`` from results of sub-sample ``Y`` and re-estimates omega (ω)
+    for the above ``N``.
+    """
     # Use half of available data each time
     T_data = Y.shape[0]
-    n_size = int(T_data * 0.5)
+    n_size = math.ceil(T_data * 0.5)
 
     res_S1 = np.zeros(resamples)
     res_ST = np.zeros(resamples)
@@ -118,7 +134,10 @@ def bootstrap(Y, N, M, omega_0, resamples, conf_level):
         sample_idx = np.random.choice(T_data, replace=True, size=n_size)
         Y_rs = Y[sample_idx]
 
-        S1, ST = compute_orders(Y_rs, N, M, omega_0)
+        N = len(Y_rs)
+        omega = math.floor((N - 1) / (2 * M))
+
+        S1, ST = compute_orders(Y_rs, N, M, omega)
         res_S1[i] = S1
         res_ST[i] = ST
 
@@ -140,25 +159,35 @@ def cli_parse(parser):
     ----------
     Updated argparse object
     """
-    parser.add_argument('-M', '--M', type=int, required=False,
-                        default=4,
-                        help='Inference parameter')
-    parser.add_argument('-r', '--resamples', type=int, required=False,
-                        default=100,
-                        help='Number of bootstrap resamples for Sobol '
-                        'confidence intervals')
+    parser.add_argument(
+        "-M", "--M", type=int, required=False, default=4, help="Inference parameter"
+    )
+    parser.add_argument(
+        "-r",
+        "--resamples",
+        type=int,
+        required=False,
+        default=100,
+        help="Number of bootstrap resamples for Sobol " "confidence intervals",
+    )
 
     return parser
 
 
-
 def cli_action(args):
     problem = read_param_file(args.paramfile)
-    Y = np.loadtxt(args.model_output_file,
-                   delimiter=args.delimiter, usecols=(args.column,))
+    Y = np.loadtxt(
+        args.model_output_file, delimiter=args.delimiter, usecols=(args.column,)
+    )
 
-    analyze(problem, Y, M=args.M, num_resamples=args.resamples, 
-            print_to_console=True, seed=args.seed)
+    analyze(
+        problem,
+        Y,
+        M=args.M,
+        num_resamples=args.resamples,
+        print_to_console=True,
+        seed=args.seed,
+    )
 
 
 if __name__ == "__main__":

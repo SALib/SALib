@@ -5,38 +5,45 @@ from pytest import raises, fixture, warns, mark
 import numpy as np
 import warnings
 
-from SALib.sample.morris.morris import (sample,
-                                        _check_group_membership,
-                                        _check_if_num_levels_is_even,
-                                        _compute_optimised_trajectories,
-                                        _generate_p_star,
-                                        _compute_b_star,
-                                        _generate_trajectory,
-                                        _generate_x_star)
+from SALib.sample.morris.morris import (
+    sample,
+    _check_group_membership,
+    _check_if_num_levels_is_even,
+    _compute_optimised_trajectories,
+    _generate_p_star,
+    _compute_b_star,
+    _generate_trajectory,
+    _generate_x_star,
+)
 
-from SALib.util import (read_param_file, compute_groups_matrix,
-                        _define_problem_with_groups, _compute_delta)
+from SALib.util import (
+    read_param_file,
+    compute_groups_matrix,
+    _define_problem_with_groups,
+    _compute_delta,
+)
 
 
-@fixture(scope='function')
+@fixture(scope="function")
 def setup_input():
-    input_1 = [[0, 1 / 3.], [0, 1.], [2 / 3., 1.]]
-    input_2 = [[0, 1 / 3.], [2 / 3., 1 / 3.], [2 / 3., 1.]]
-    input_3 = [[2 / 3., 0], [2 / 3., 2 / 3.], [0, 2 / 3.]]
-    input_4 = [[1 / 3., 1.], [1., 1.], [1, 1 / 3.]]
-    input_5 = [[1 / 3., 1.], [1 / 3., 1 / 3.], [1, 1 / 3.]]
-    input_6 = [[1 / 3., 2 / 3.], [1 / 3., 0], [1., 0]]
-    input_sample = np.concatenate([input_1, input_2, input_3,
-                                   input_4, input_5, input_6])
+    input_1 = [[0, 1 / 3.0], [0, 1.0], [2 / 3.0, 1.0]]
+    input_2 = [[0, 1 / 3.0], [2 / 3.0, 1 / 3.0], [2 / 3.0, 1.0]]
+    input_3 = [[2 / 3.0, 0], [2 / 3.0, 2 / 3.0], [0, 2 / 3.0]]
+    input_4 = [[1 / 3.0, 1.0], [1.0, 1.0], [1, 1 / 3.0]]
+    input_5 = [[1 / 3.0, 1.0], [1 / 3.0, 1 / 3.0], [1, 1 / 3.0]]
+    input_6 = [[1 / 3.0, 2 / 3.0], [1 / 3.0, 0], [1.0, 0]]
+    input_sample = np.concatenate(
+        [input_1, input_2, input_3, input_4, input_5, input_6]
+    )
     return input_sample
 
 
-@fixture(scope='function')
+@fixture(scope="function")
 def expected_sample():
-    input_1 = [[0, 1 / 3.], [0, 1.], [2 / 3., 1.]]
-    input_3 = [[2 / 3., 0], [2 / 3., 2 / 3.], [0, 2 / 3.]]
-    input_4 = [[1 / 3., 1.], [1., 1.], [1, 1 / 3.]]
-    input_6 = [[1 / 3., 2 / 3.], [1 / 3., 0], [1., 0]]
+    input_1 = [[0, 1 / 3.0], [0, 1.0], [2 / 3.0, 1.0]]
+    input_3 = [[2 / 3.0, 0], [2 / 3.0, 2 / 3.0], [0, 2 / 3.0]]
+    input_4 = [[1 / 3.0, 1.0], [1.0, 1.0], [1, 1 / 3.0]]
+    input_6 = [[1 / 3.0, 2 / 3.0], [1 / 3.0, 0], [1.0, 0]]
     return np.concatenate([input_1, input_3, input_4, input_6])
 
 
@@ -66,26 +73,27 @@ def test_even_num_levels_no_warning(setup_param_file_with_groups):
         warnings.simplefilter("always")
         # Check that num_levels warning is not raised
         sample(problem, 10, num_levels=4)
-        
+
         if len(w) > 0:
             needle = "num_levels should be an even number, sample may be biased"
             messages = [str(m.message) for m in w]
             msg_check = [needle in hay for hay in messages]
-            assert not any(msg_check), \
-                "Inappropriate num_levels warning raised when all okay"
+            assert not any(
+                msg_check
+            ), "Inappropriate num_levels warning raised when all okay"
 
 
 def test_group_in_param_file_read(setup_param_file_with_groups):
-    '''
+    """
     Tests that groups in a parameter file are read correctly
-    '''
+    """
     parameter_file = setup_param_file_with_groups
     problem = read_param_file(parameter_file)
-    groups, group_names = compute_groups_matrix(problem.get('groups'))
+    groups, group_names = compute_groups_matrix(problem.get("groups"))
 
-    assert_equal(problem['names'], ["Test 1", "Test 2", "Test 3"])
+    assert_equal(problem["names"], ["Test 1", "Test 2", "Test 3"])
     assert_equal(groups, np.array([[1, 0], [1, 0], [0, 1]], dtype=int))
-    assert_equal(group_names, ['Group 1', 'Group 2'])
+    assert_equal(group_names, ["Group 1", "Group 2"])
 
 
 def test_optimal_trajectories_lt_samples(setup_param_file):
@@ -96,8 +104,7 @@ def test_optimal_trajectories_lt_samples(setup_param_file):
     num_levels = 4
 
     with raises(ValueError):
-        sample(problem, samples, num_levels,
-               optimal_trajectories=samples)
+        sample(problem, samples, num_levels, optimal_trajectories=samples)
 
 
 def test_optimal_trajectories_lt_10(setup_param_file):
@@ -109,8 +116,7 @@ def test_optimal_trajectories_lt_10(setup_param_file):
 
     optimal_trajectories = 11
     with raises(ValueError):
-        sample(problem, samples, num_levels,
-               optimal_trajectories=optimal_trajectories)
+        sample(problem, samples, num_levels, optimal_trajectories=optimal_trajectories)
 
 
 def test_optimal_trajectories_gte_one(setup_param_file):
@@ -122,55 +128,54 @@ def test_optimal_trajectories_gte_one(setup_param_file):
     optimal_trajectories = 1
 
     with raises(ValueError):
-        sample(problem, samples, num_levels,
-               optimal_trajectories)
+        sample(problem, samples, num_levels, optimal_trajectories)
 
 
 def test_find_optimum_trajectories(setup_input, expected_sample):
     N = 6
-    problem = {'num_vars': 2, 'names': ['x1', 'x2'], 'groups': None}
+    problem = {"num_vars": 2, "names": ["x1", "x2"], "groups": None}
     k_choices = 4
 
     problem = _define_problem_with_groups(problem)
 
-    output = _compute_optimised_trajectories(
-        problem, setup_input, N, k_choices)
+    output = _compute_optimised_trajectories(problem, setup_input, N, k_choices)
     expected = expected_sample
     np.testing.assert_equal(output, expected)
 
 
 def test_catch_inputs_not_in_zero_one_range(setup_input):
-    problem = {'num_vars': 2, 'groups': None}
+    problem = {"num_vars": 2, "groups": None}
     k_choices = 4
     N = 10
     with raises(ValueError):
-        _compute_optimised_trajectories(problem, setup_input * 10, N,
-                                        k_choices)
+        _compute_optimised_trajectories(problem, setup_input * 10, N, k_choices)
 
 
 def test_group_sample_fails_with_wrong_G_matrix():
     N = 6
     num_levels = 4
 
-    problem = {'bounds': [[0., 1.], [0., 1.], [0., 1.], [0., 1.]],
-               'num_vars': 4,
-               'groups': list([1, 2, 3])}
+    problem = {
+        "bounds": [[0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0]],
+        "num_vars": 4,
+        "groups": list([1, 2, 3]),
+    }
 
     with raises(ValueError) as err:
         sample(problem, N, num_levels)
 
-    assert "Number of entries in \'groups\' should be the same as in " \
-           "\'names\'" in str(err.value)
+    assert "Number of entries in 'groups' should be the same as in " "'names'" in str(
+        err.value
+    )
 
 
 class TestGroupSampleGeneration:
-
     def test_generate_p_star(self):
-        '''
+        """
         Matrix P* - size (g * g) - describes order in which groups move
         each row contains one element equal to 1, all others are 0
         no two columns have 1s in the same position
-        '''
+        """
         for i in range(1, 100):
             output = _generate_p_star(i)
             if np.any(np.sum(output, 0) != np.ones(i)):
@@ -181,8 +186,9 @@ class TestGroupSampleGeneration:
     def test_compute_delta(self):
         fixture = np.arange(2, 10)
         output = [_compute_delta(f) for f in fixture]
-        desired = np.array([1.0, 0.75, 0.666667, 0.625,
-                            0.6, 0.583333, 0.571429, 0.5625])
+        desired = np.array(
+            [1.0, 0.75, 0.666667, 0.625, 0.6, 0.583333, 0.571429, 0.5625]
+        )
         assert_allclose(output, desired, rtol=1e-2)
 
     def test_generate_trajectory(self):
@@ -197,38 +203,37 @@ class TestGroupSampleGeneration:
         assert_equal(output.shape[1], 3)
 
     def test_compute_B_star(self):
-        '''
+        """
         Tests for expected output
 
         Taken from example 3.2 in Saltelli et al. (2008) pg 122
-        '''
+        """
 
         k = 3
         g = 2
 
-        x_star = np.array([[1. / 3, 1. / 3, 0.]])
+        x_star = np.array([[1.0 / 3, 1.0 / 3, 0.0]])
         J = np.ones((g + 1, k))
         G = np.array([[1, 0], [0, 1], [0, 1]])
         D_star = np.array([[1, 0, 0], [0, -1, 0], [0, 0, 1]])
         P_star = np.array([[1, 0], [0, 1]])
-        delta = 2. / 3
+        delta = 2.0 / 3
         B = np.tril(np.ones([g + 1, g], dtype=int), -1)
 
-        desired = np.array([[1. / 3, 1, 0], [1, 1, 0], [1, 1. / 3, 2. / 3]])
+        desired = np.array([[1.0 / 3, 1, 0], [1, 1, 0], [1, 1.0 / 3, 2.0 / 3]])
 
         output = _compute_b_star(J, x_star, delta, B, G, P_star, D_star)
         assert_allclose(output, desired)
 
     def test_generate_x_star(self):
-        """
-        """
+        """ """
         num_params = 4
         num_levels = 4
 
         np.random.seed(10)
         actual = _generate_x_star(num_params, num_levels)
         print(actual)
-        expected = np.array([[0.333333, 0.333333, 0., 0.333333]])
+        expected = np.array([[0.333333, 0.333333, 0.0, 0.333333]])
         assert_allclose(actual, expected, rtol=1e-05)
 
     def test_define_problem_with_groups_all_ok(self):
@@ -237,9 +242,10 @@ class TestGroupSampleGeneration:
         each variable.
         """
         problem = {
-            'num_vars': 8,
-            'names': ['x1', 'x2', 'x3', 'x4', 'x5', 'x6', 'x7', 'x8'],
-            'groups': ['G1', 'G1', 'G1', 'G2', 'G2', 'G2', 'G3', 'G3']}
+            "num_vars": 8,
+            "names": ["x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8"],
+            "groups": ["G1", "G1", "G1", "G2", "G2", "G2", "G3", "G3"],
+        }
 
         expected = problem
 
@@ -253,13 +259,15 @@ class TestGroupSampleGeneration:
         all.
         """
         problem = {
-            'num_vars': 8,
-            'names': ['x1', 'x2', 'x3', 'x4', 'x5', 'x6', 'x7', 'x8']}
+            "num_vars": 8,
+            "names": ["x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8"],
+        }
 
         expected = {
-            'num_vars': 8,
-            'names': ['x1', 'x2', 'x3', 'x4', 'x5', 'x6', 'x7', 'x8'],
-            'groups': ['x1', 'x2', 'x3', 'x4', 'x5', 'x6', 'x7', 'x8']}
+            "num_vars": 8,
+            "names": ["x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8"],
+            "groups": ["x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8"],
+        }
 
         result = _define_problem_with_groups(problem)
 
@@ -272,9 +280,10 @@ class TestGroupSampleGeneration:
         variables.
         """
         problem = {
-            'num_vars': 8,
-            'names': ['x1', 'x2', 'x3', 'x4', 'x5', 'x6', 'x7', 'x8'],
-            'groups': ['G1', 'G1', 'G1', 'G2', 'G2', 'G2']}
+            "num_vars": 8,
+            "names": ["x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8"],
+            "groups": ["G1", "G1", "G1", "G2", "G2", "G2"],
+        }
 
         with raises(ValueError):
             _define_problem_with_groups(problem)

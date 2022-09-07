@@ -1,8 +1,8 @@
-'''
+"""
 Created on 30 Jun 2015
 
 @author: will2
-'''
+"""
 
 import numpy as np
 from . import common_args
@@ -14,8 +14,7 @@ from SALib.util import read_param_file, ResultDict
 from SALib.sample.ff import generate_contrast, extend_bounds
 
 
-def analyze(problem, X, Y, second_order=False, print_to_console=False,
-            seed=None):
+def analyze(problem, X, Y, second_order=False, print_to_console=False, seed=None):
     """Perform a fractional factorial analysis
 
     Returns a dictionary with keys 'ME' (main effect) and 'IE' (interaction
@@ -42,6 +41,8 @@ def analyze(problem, X, Y, second_order=False, print_to_console=False,
         Include interaction effects
     print_to_console: bool, default=False
         Print results directly to console
+    seed : int
+        Seed to generate a random number
 
 
     Returns
@@ -53,11 +54,12 @@ def analyze(problem, X, Y, second_order=False, print_to_console=False,
 
     References
     ----------
-    .. [1] Saltelli, A., Ratto, M., Andres, T., Campolongo, F., Cariboni, J., Gatelli, D., 
-           Saisana, M., Tarantola, S., 2008. 
-           Global Sensitivity Analysis: The Primer. 
+    .. [1] Saltelli, A., Ratto, M., Andres, T., Campolongo, F.,
+           Cariboni, J., Gatelli, D.,
+           Saisana, M., Tarantola, S., 2008.
+           Global Sensitivity Analysis: The Primer.
            Wiley, West Sussex, U.K.
-           https://dx.doi.org/10.1002/9780470725184
+           http://doi.org/10.1002/9780470725184
 
 
     Examples
@@ -70,21 +72,20 @@ def analyze(problem, X, Y, second_order=False, print_to_console=False,
         np.random.seed(seed)
 
     problem = extend_bounds(problem)
-    num_vars = problem['num_vars']
+    num_vars = problem["num_vars"]
 
     X = generate_contrast(problem)
 
-    main_effect = (1. / (2 * num_vars)) * np.dot(Y, X)
+    main_effect = (1.0 / (2 * num_vars)) * np.dot(Y, X)
 
-    Si = ResultDict((k, [None] * num_vars)
-                    for k in ['names', 'ME'])
-    Si['ME'] = main_effect
-    Si['names'] = problem['names']
+    Si = ResultDict((k, [None] * num_vars) for k in ["names", "ME"])
+    Si["ME"] = main_effect
+    Si["names"] = problem["names"]
 
     if second_order:
         interaction_names, interaction_effects = interactions(problem, Y)
-        Si['interaction_names'] = interaction_names
-        Si['IE'] = interaction_effects
+        Si["interaction_names"] = interaction_names
+        Si["IE"] = interaction_effects
 
     Si.to_df = MethodType(to_df, Si)
 
@@ -96,26 +97,25 @@ def analyze(problem, X, Y, second_order=False, print_to_console=False,
 
 
 def to_df(self):
-    '''Conversion method to Pandas DataFrame. To be attached to ResultDict.
+    """Conversion method to Pandas DataFrame. To be attached to ResultDict.
 
     Returns
     -------
     main_effect, inter_effect: tuple
         A tuple of DataFrames for main effects and interaction effects.
         The second element (for interactions) will be `None` if not available.
-    '''
-    names = self['names']
-    main_effect = self['ME']
-    interactions = self.get('IE', None)
+    """
+    names = self["names"]
+    main_effect = self["ME"]
+    interactions = self.get("IE", None)
 
     inter_effect = None
     if interactions:
-        interaction_names = self.get('interaction_names')
+        interaction_names = self.get("interaction_names")
         names = [name for name in names if not isinstance(name, list)]
-        inter_effect = pd.DataFrame({'IE': interactions},
-                                    index=interaction_names)
+        inter_effect = pd.DataFrame({"IE": interactions}, index=interaction_names)
 
-    main_effect = pd.DataFrame({'ME': main_effect}, index=names)
+    main_effect = pd.DataFrame({"ME": main_effect}, index=names)
 
     return main_effect, inter_effect
 
@@ -140,8 +140,8 @@ def interactions(problem, Y):
     IE: list
         The sensitivity indices for the pairwise interactions
     """
-    names = problem['names']
-    num_vars = problem['num_vars']
+    names = problem["names"]
+    num_vars = problem["num_vars"]
 
     X = generate_contrast(problem)
 
@@ -153,30 +153,41 @@ def interactions(problem, Y):
             x = X[:, col] * X[:, col_2]
             var_names = (names[col_2], names[col])
             ie_names.append(var_names)
-            IE.append((1. / (2 * num_vars)) * np.dot(Y, x))
+            IE.append((1.0 / (2 * num_vars)) * np.dot(Y, x))
 
     return ie_names, IE
 
 
 def cli_parse(parser):
-    parser.add_argument('-X', '--model-input-file', type=str,
-                        required=True, default=None,
-                        help='Model input file')
-    parser.add_argument('--max-order', type=int, required=False, default=2,
-                        choices=[1, 2], help='Maximum order of sensitivity \
-                           indices to calculate')
+    parser.add_argument(
+        "-X",
+        "--model-input-file",
+        type=str,
+        required=True,
+        default=None,
+        help="Model input file",
+    )
+    parser.add_argument(
+        "--max-order",
+        type=int,
+        required=False,
+        default=2,
+        choices=[1, 2],
+        help="Maximum order of sensitivity \
+                           indices to calculate",
+    )
     return parser
 
 
 def cli_action(args):
     problem = read_param_file(args.paramfile)
-    Y = np.loadtxt(args.model_output_file,
-                   delimiter=args.delimiter, usecols=(args.column,))
+    Y = np.loadtxt(
+        args.model_output_file, delimiter=args.delimiter, usecols=(args.column,)
+    )
     X = np.loadtxt(args.model_input_file, delimiter=args.delimiter, ndmin=2)
     if len(X.shape) == 1:
         X = X.reshape((len(X), 1))
-    analyze(problem, X, Y, (args.max_order == 2), print_to_console=True,
-            seed=args.seed)
+    analyze(problem, X, Y, (args.max_order == 2), print_to_console=True, seed=args.seed)
 
 
 if __name__ == "__main__":

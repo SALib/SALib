@@ -6,7 +6,7 @@ import tempfile
 
 @pytest.fixture
 def make_temporary_file():
-    """ Returns a temporary file name
+    """Returns a temporary file name
 
     Returns
     =========
@@ -17,7 +17,7 @@ def make_temporary_file():
         return openfile.name
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def setup_function(make_temporary_file):
     filename = make_temporary_file
     with open(filename, "w+") as ofile:
@@ -26,7 +26,7 @@ def setup_function(make_temporary_file):
     return filename
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def setup_param_file(make_temporary_file):
     filename = make_temporary_file
     with open(filename, "w") as ofile:
@@ -36,7 +36,7 @@ def setup_param_file(make_temporary_file):
     return filename
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def setup_param_file_with_groups(make_temporary_file):
     filename = make_temporary_file
     with open(filename, "w") as ofile:
@@ -46,7 +46,7 @@ def setup_param_file_with_groups(make_temporary_file):
     return filename
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def setup_param_groups_prime(make_temporary_file):
     filename = make_temporary_file
     with open(filename, "w") as ofile:

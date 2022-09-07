@@ -3,19 +3,49 @@ import numpy as np
 from scipy.stats import norm
 
 from . import common_args
-from ..util import (read_param_file, compute_groups_matrix, ResultDict,
-                    _define_problem_with_groups, _compute_delta, _check_groups)
+from ..util import (
+    read_param_file,
+    compute_groups_matrix,
+    ResultDict,
+    _define_problem_with_groups,
+    _compute_delta,
+    _check_groups,
+)
 
 
-def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
-            num_resamples: int = 100, conf_level: float = 0.95,
-            print_to_console: bool = False, num_levels: int = 4,
-            seed=None) -> np.ndarray:
+def analyze(
+    problem: Dict,
+    X: np.ndarray,
+    Y: np.ndarray,
+    num_resamples: int = 100,
+    conf_level: float = 0.95,
+    print_to_console: bool = False,
+    num_levels: int = 4,
+    seed=None,
+) -> Dict:
     """Perform Morris Analysis on model outputs.
 
-    Returns a dictionary with keys 'mu', 'mu_star', 'sigma', and
-    'mu_star_conf', where each entry is a list of parameters containing
-    the indices in the same order as the parameter file.
+    Returns a result set with keys ``mu``, ``mu_star``, ``sigma``, and
+    ``mu_star_conf``, where each entry corresponds to the parameters
+    defined in the problem spec or parameter file.
+
+    - ``mu`` metric indicates the mean of the distribution
+    - ``mu_star`` metric indicates the mean of the distribution of absolute
+        values
+    - ``sigma`` is the standard deviation of the distribution
+
+    Notes
+    -----
+    When applied with groups, the ``mu`` metric is less reliable as the effect
+    from parameters within a group become averaged out.
+
+    The ``mu_star`` metric avoids this issue as it indicates the mean of the
+    absolute values. If the direction of effects is important, Campolongo et
+    al., [2] suggest comparing ``mu_star`` with ``mu``. If ``mu`` is low
+    and ``mu_star`` is high, then the effects are of different signs.
+
+    ``sigma`` is used as an indicator of interactions between parameters, or
+    groups of parameters.
 
 
     Notes
@@ -45,7 +75,6 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
     seed : int
         Seed to generate a random number
 
-
     Returns
     -------
     Si : dict
@@ -60,12 +89,15 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
 
     References
     ----------
-    .. [1] Morris, M. (1991).  "Factorial Sampling Plans for Preliminary
-           Computational Experiments."  Technometrics, 33(2):161-174,
+    .. [1] Morris, M. (1991).
+            "Factorial Sampling Plans for Preliminary
+             Computational Experiments."
+           Technometrics, 33(2):161-174,
            doi:10.1080/00401706.1991.10484804.
 
-    .. [2] Campolongo, F., J. Cariboni, and A. Saltelli (2007).  "An effective
-           screening design for sensitivity analysis of large models."
+    .. [2] Campolongo, F., J. Cariboni, and A. Saltelli (2007).
+            "An effective screening design for sensitivity analysis
+             of large models."
            Environmental Modelling & Software, 22(10):1509-1518,
            doi:10.1016/j.envsoft.2006.10.004.
 
@@ -87,7 +119,7 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
 
     delta = _compute_delta(num_levels)
 
-    num_vars = problem['num_vars']
+    num_vars = problem["num_vars"]
     groups = _check_groups(problem)
     if not groups:
         number_of_groups = num_vars
@@ -99,23 +131,32 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
     num_trajectories = int(Y.size / (number_of_groups + 1))
     trajectory_size = int(Y.size / num_trajectories)
 
-    elementary_effects = _compute_elementary_effects(X, Y,
-                                                     trajectory_size, delta)
+    elementary_effects = _compute_elementary_effects(X, Y, trajectory_size, delta)
 
-    Si = _compute_statistical_outputs(elementary_effects, num_vars,
-                                      num_resamples, conf_level, groups,
-                                      unique_group_names)
+    Si = _compute_statistical_outputs(
+        elementary_effects,
+        num_vars,
+        num_resamples,
+        conf_level,
+        groups,
+        unique_group_names,
+    )
 
     if print_to_console:
         print(Si.to_df())
 
     return Si
 
-def _compute_statistical_outputs(elementary_effects: np.ndarray, num_vars: int,
-                                 num_resamples: int, conf_level: float,
-                                 groups: np.ndarray,
-                                 unique_group_names: List) -> ResultDict:
-    """ Computes the statistical parameters related to Morris method.
+
+def _compute_statistical_outputs(
+    elementary_effects: np.ndarray,
+    num_vars: int,
+    num_resamples: int,
+    conf_level: float,
+    groups: np.ndarray,
+    unique_group_names: List,
+) -> ResultDict:
+    """Computes the statistical parameters related to Morris method.
 
     Parameters
     ----------
@@ -138,27 +179,31 @@ def _compute_statistical_outputs(elementary_effects: np.ndarray, num_vars: int,
         Morris statistical parameters.
     """
 
-    Si = ResultDict((k, [None] * num_vars) for k in ['names', 'mu', 'mu_star',
-                                                     'sigma', 'mu_star_conf'])
+    Si = ResultDict(
+        (k, [None] * num_vars)
+        for k in ["names", "mu", "mu_star", "sigma", "mu_star_conf"]
+    )
 
     mu = np.average(elementary_effects, 1)
     mu_star = np.average(np.abs(elementary_effects), 1)
     sigma = np.std(elementary_effects, axis=1, ddof=1)
-    mu_star_conf = _compute_mu_star_confidence(elementary_effects, num_vars,
-                                               num_resamples, conf_level)
+    mu_star_conf = _compute_mu_star_confidence(
+        elementary_effects, num_vars, num_resamples, conf_level
+    )
 
-    Si['names'] = unique_group_names
-    Si['mu'] = _compute_grouped_sigma(mu, groups)
-    Si['mu_star'] = _compute_grouped_metric(mu_star, groups)
-    Si['sigma'] = _compute_grouped_sigma(sigma, groups)
-    Si['mu_star_conf'] = _compute_grouped_metric(mu_star_conf, groups)
+    Si["names"] = unique_group_names
+    Si["mu"] = _compute_grouped_sigma(mu, groups)
+    Si["mu_star"] = _compute_grouped_metric(mu_star, groups)
+    Si["sigma"] = _compute_grouped_sigma(sigma, groups)
+    Si["mu_star_conf"] = _compute_grouped_metric(mu_star_conf, groups)
 
     return Si
 
 
-def _compute_grouped_sigma(ungrouped_sigma: np.ndarray,
-                           groups: np.ndarray) -> np.ndarray:
-    """ Sigma values for the groups.
+def _compute_grouped_sigma(
+    ungrouped_sigma: np.ndarray, groups: np.ndarray
+) -> np.ndarray:
+    """Sigma values for the groups.
 
     Returns sigma for the groups of parameter values in the argument
     ungrouped_metric where the group consists of no more than
@@ -185,9 +230,10 @@ def _compute_grouped_sigma(ungrouped_sigma: np.ndarray,
     return sigma
 
 
-def _compute_grouped_metric(ungrouped_metric: np.ndarray,
-                            groups: np.ndarray) -> np.ndarray:
-    """ Computes the mean value for the groups of parameter values.
+def _compute_grouped_metric(
+    ungrouped_metric: np.ndarray, groups: np.ndarray
+) -> np.ndarray:
+    """Computes the mean value for the groups of parameter values.
 
     Parameters
     ----------
@@ -204,17 +250,20 @@ def _compute_grouped_metric(ungrouped_metric: np.ndarray,
 
     groups = np.array(groups, dtype=bool)
 
-    mu_star_masked = np.ma.masked_array(ungrouped_metric * groups.T,
-                                        mask=(groups ^ 1).T)
+    mu_star_masked = np.ma.masked_array(
+        ungrouped_metric * groups.T, mask=(groups ^ 1).T
+    )
     mean_of_mu_star = np.ma.mean(mu_star_masked, axis=1)
 
     return mean_of_mu_star
 
 
-def _reorganize_output_matrix(output_array: np.ndarray,
-                              value_increased: np.ndarray,
-                              value_decreased: np.ndarray,
-                              increase: bool = True) -> np.ndarray:
+def _reorganize_output_matrix(
+    output_array: np.ndarray,
+    value_increased: np.ndarray,
+    value_decreased: np.ndarray,
+    increase: bool = True,
+) -> np.ndarray:
     """Reorganize the output matrix.
 
     This method reorganizes the output matrix in a way that allows the
@@ -246,21 +295,20 @@ def _reorganize_output_matrix(output_array: np.ndarray,
         pad_up = (0, 1)
         pad_lo = (1, 0)
 
-    value_increased = np.pad(value_increased, ((0, 0), pad_up, (0, 0)),
-                             'constant')
-    value_decreased = np.pad(value_decreased, ((0, 0), pad_lo, (0, 0)),
-                             'constant')
+    value_increased = np.pad(value_increased, ((0, 0), pad_up, (0, 0)), "constant")
+    value_decreased = np.pad(value_decreased, ((0, 0), pad_lo, (0, 0)), "constant")
 
-    res = np.einsum('ik,ikj->ij', output_array,
-                    value_increased + value_decreased)
+    res = np.einsum("ik,ikj->ij", output_array, value_increased + value_decreased)
 
     return res.T
 
 
-def _compute_elementary_effects(model_inputs: np.ndarray,
-                                model_outputs: np.ndarray,
-                                trajectory_size: int,
-                                delta: float) -> np.ndarray:
+def _compute_elementary_effects(
+    model_inputs: np.ndarray,
+    model_outputs: np.ndarray,
+    trajectory_size: int,
+    delta: float,
+) -> np.ndarray:
     """Computes the Morris elementary effects.
 
     Parameters
@@ -281,35 +329,35 @@ def _compute_elementary_effects(model_inputs: np.ndarray,
     elementary_effects : np.array
         Elementary effects for each parameter
     """
-    num_trajectories = _calculate_number_trajectories(model_inputs,
-                                                      trajectory_size)
+    num_trajectories = _calculate_number_trajectories(model_inputs, trajectory_size)
 
-    output_matrix = _reshape_model_outputs(model_outputs, num_trajectories,
-                                           trajectory_size)
-    input_matrix = _reshape_model_inputs(model_inputs, num_trajectories,
-                                         trajectory_size)
+    output_matrix = _reshape_model_outputs(
+        model_outputs, num_trajectories, trajectory_size
+    )
+    input_matrix = _reshape_model_inputs(
+        model_inputs, num_trajectories, trajectory_size
+    )
 
     delta_variables = _calculate_delta_input_variables(input_matrix)
     value_increased = delta_variables > 0
     value_decreased = delta_variables < 0
 
-    result_increased = _reorganize_output_matrix(output_matrix,
-                                                 value_increased,
-                                                 value_decreased)
-    result_decreased = _reorganize_output_matrix(output_matrix,
-                                                 value_increased,
-                                                 value_decreased,
-                                                 increase=False)
+    result_increased = _reorganize_output_matrix(
+        output_matrix, value_increased, value_decreased
+    )
+    result_decreased = _reorganize_output_matrix(
+        output_matrix, value_increased, value_decreased, increase=False
+    )
 
-    elementary_effects = _calc_results_difference(result_increased,
-                                                  result_decreased)
+    elementary_effects = _calc_results_difference(result_increased, result_decreased)
     np.divide(elementary_effects, delta, out=elementary_effects)
 
     return elementary_effects
 
 
-def _calc_results_difference(result_up: np.ndarray,
-                             result_lo: np.ndarray) -> np.ndarray:
+def _calc_results_difference(
+    result_up: np.ndarray, result_lo: np.ndarray
+) -> np.ndarray:
     """Computes the difference between the output points.
 
     Parameters
@@ -343,14 +391,14 @@ def _calculate_delta_input_variables(input_matrix: np.ndarray) -> np.ndarray:
     delta_variables: np.ndarray
         Variation of each variable, for each point in the trajectory.
     """
-    delta_variables = np.subtract(input_matrix[:, 1:, :],
-                                  input_matrix[:, 0:-1, :])
+    delta_variables = np.subtract(input_matrix[:, 1:, :], input_matrix[:, 0:-1, :])
 
     return delta_variables
 
 
-def _calculate_number_trajectories(model_inputs: np.ndarray,
-                                   trajectory_size: int) -> int:
+def _calculate_number_trajectories(
+    model_inputs: np.ndarray, trajectory_size: int
+) -> int:
     """Calculate the number of trajectories.
 
     Parameters
@@ -371,8 +419,9 @@ def _calculate_number_trajectories(model_inputs: np.ndarray,
     return num_trajectories
 
 
-def _reshape_model_inputs(model_inputs: np.ndarray, num_trajectories: int,
-                          trajectory_size: int) -> np.ndarray:
+def _reshape_model_inputs(
+    model_inputs: np.ndarray, num_trajectories: int, trajectory_size: int
+) -> np.ndarray:
     """Reshapes the model inputs' matrix.
 
     Parameters
@@ -390,13 +439,13 @@ def _reshape_model_inputs(model_inputs: np.ndarray, num_trajectories: int,
         Reshaped input matrix.
     """
     num_vars = model_inputs.shape[1]
-    input_matrix = model_inputs.reshape(num_trajectories, trajectory_size,
-                                        num_vars)
+    input_matrix = model_inputs.reshape(num_trajectories, trajectory_size, num_vars)
     return input_matrix
 
 
-def _reshape_model_outputs(model_outputs: np.ndarray, num_trajectories: int,
-                           trajectory_size: int):
+def _reshape_model_outputs(
+    model_outputs: np.ndarray, num_trajectories: int, trajectory_size: int
+):
     """Reshapes the model outputs' matrix.
 
     Parameters
@@ -417,9 +466,9 @@ def _reshape_model_outputs(model_outputs: np.ndarray, num_trajectories: int,
     return output_matrix
 
 
-def _compute_mu_star_confidence(elementary_effects: np.ndarray, num_vars: int,
-                                num_resamples: int,
-                                conf_level: float) -> np.ndarray:
+def _compute_mu_star_confidence(
+    elementary_effects: np.ndarray, num_vars: int, num_resamples: int, conf_level: float
+) -> np.ndarray:
     """Computes the confidence intervals for the mu_star variable.
 
     Uses bootstrapping where the elementary effects are resampled with
@@ -448,15 +497,15 @@ def _compute_mu_star_confidence(elementary_effects: np.ndarray, num_vars: int,
     mu_star_conf = []
     for j in range(num_vars):
         ee = elementary_effects[j, :]
-        resample_index = np.random.randint(len(ee),
-                                           size=(num_resamples, len(ee)))
+        resample_index = np.random.randint(len(ee), size=(num_resamples, len(ee)))
         ee_resampled = ee[resample_index]
 
         # Compute average of the absolute values over each of the resamples
         mu_star_resampled = np.average(np.abs(ee_resampled), axis=1)
 
-        mu_star_conf.append(norm.ppf(0.5 + conf_level / 2)
-                            * mu_star_resampled.std(ddof=1))
+        mu_star_conf.append(
+            norm.ppf(0.5 + conf_level / 2) * mu_star_resampled.std(ddof=1)
+        )
 
     mu_star_conf = np.asarray(mu_star_conf)
 
@@ -464,7 +513,7 @@ def _compute_mu_star_confidence(elementary_effects: np.ndarray, num_vars: int,
 
 
 def _check_if_array_of_floats(array_x: np.ndarray):
-    """ Checks if an arrays is made of floats. If not, raises an error.
+    """Checks if an arrays is made of floats. If not, raises an error.
 
     Parameters
     ----------
@@ -472,36 +521,65 @@ def _check_if_array_of_floats(array_x: np.ndarray):
         Array to be checked
     """
     msg = "dtype of {} array must be 'float', float32 or float64"
-    if array_x.dtype not in ['float', 'float32', 'float64']:
+    if array_x.dtype not in ["float", "float32", "float64"]:
         raise ValueError(msg.format(array_x))
 
 
 def cli_parse(parser):
-    parser.add_argument('-X', '--model-input-file', type=str,
-                        required=True, default=None,
-                        help='Model input file')
-    parser.add_argument('-r', '--resamples', type=int, required=False,
-                        default=1000,
-                        help='Number of bootstrap resamples for Sobol \
-                           confidence intervals')
-    parser.add_argument('-l', '--levels', type=int, required=False,
-                        default=4, help='Number of grid levels \
-                           (Morris only)')
-    parser.add_argument('--grid-jump', type=int, required=False,
-                        default=2, help='Grid jump size (Morris only)')
+    parser.add_argument(
+        "-X",
+        "--model-input-file",
+        type=str,
+        required=True,
+        default=None,
+        help="Model input file",
+    )
+    parser.add_argument(
+        "-r",
+        "--resamples",
+        type=int,
+        required=False,
+        default=1000,
+        help="Number of bootstrap resamples for Sobol \
+                           confidence intervals",
+    )
+    parser.add_argument(
+        "-l",
+        "--levels",
+        type=int,
+        required=False,
+        default=4,
+        help="Number of grid levels \
+                           (Morris only)",
+    )
+    parser.add_argument(
+        "--grid-jump",
+        type=int,
+        required=False,
+        default=2,
+        help="Grid jump size (Morris only)",
+    )
     return parser
 
 
 def cli_action(args):
     problem = read_param_file(args.paramfile)
-    Y = np.loadtxt(args.model_output_file,
-                   delimiter=args.delimiter, usecols=(args.column,))
+    Y = np.loadtxt(
+        args.model_output_file, delimiter=args.delimiter, usecols=(args.column,)
+    )
     X = np.loadtxt(args.model_input_file, delimiter=args.delimiter, ndmin=2)
     if len(X.shape) == 1:
         X = X.reshape((len(X), 1))
 
-    analyze(problem, X, Y, num_resamples=args.resamples, print_to_console=True,
-            num_levels=args.levels, seed=args.seed)
+    analyze(
+        problem,
+        X,
+        Y,
+        num_resamples=args.resamples,
+        print_to_console=True,
+        num_levels=args.levels,
+        seed=args.seed,
+    )
 
 
 if __name__ == "__main__":

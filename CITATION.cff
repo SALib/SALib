@@ -1,14 +1,38 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 authors:
-- family-names: "Herman"
-  given-names: "Jon"
-  orcid: "0000-0002-4081-3175"
+- family-names: "Iwanaga"
+  given-names: "Takuya"
+  orcid: "0000-0001-8173-0870"
 - family-names: "Usher"
   given-names: "Will"
   orcid: "0000-0001-9367-1791"
+- family-names: "Herman"
+  given-names: "Jon"
+  orcid: "0000-0002-4081-3175"
 title: "SALib: An open-source Python library for sensitivity analysis"
-version: 1.0
+version: 1.4.6
 doi: 10.21105/joss.00097
-date-released: 2017-01-08
+date-released: 2022-05-01
 url: "https://github.com/SALib/SALib"
+preferred-citation:
+  type: article
+  authors:
+  - family-names: "Iwanaga"
+    given-names: "Takuya"
+    orcid: "0000-0001-8173-0870"
+  - family-names: "Usher"
+    given-names: "Will"
+    orcid: "0000-0001-9367-1791"
+  - family-names: "Herman"
+    given-names: "Jon"
+    orcid: "0000-0002-4081-3175"
+  doi: "10.18174/sesmo.18155"
+  journal: "Socio-Environmental Systems Modelling"
+  month: 5
+  start: 1 # First page number
+  end: 15 # Last page number
+  title: "Toward SALib 2.0: Advancing the accessibility and interpretability of global sensitivity analyses"
+  issue: 1
+  volume: 4
+  year: 2022

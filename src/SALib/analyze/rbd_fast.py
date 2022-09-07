@@ -9,7 +9,16 @@ from . import common_args
 from ..util import read_param_file, ResultDict
 
 
-def analyze(problem, X, Y, M=10, num_resamples=100, conf_level=0.95, print_to_console=False, seed=None):
+def analyze(
+    problem,
+    X,
+    Y,
+    M=10,
+    num_resamples=100,
+    conf_level=0.95,
+    print_to_console=False,
+    seed=None,
+):
     """Performs the Random Balanced Design - Fourier Amplitude Sensitivity Test
     (RBD-FAST) on model outputs.
 
@@ -36,6 +45,8 @@ def analyze(problem, X, Y, M=10, num_resamples=100, conf_level=0.95, print_to_co
         the Fourier series decomposition (default 10)
     print_to_console : bool
         Print results directly to console (default False)
+    seed : int
+        Seed to generate a random number
 
 
     References
@@ -43,6 +54,7 @@ def analyze(problem, X, Y, M=10, num_resamples=100, conf_level=0.95, print_to_co
     .. [1] S. Tarantola, D. Gatelli and T. Mara (2006) "Random Balance Designs
           for the Estimation of First Order Global Sensitivity Indices",
           Reliability Engineering and System Safety, 91:6, 717-727
+          https://doi.org/10.1016/j.ress.2005.06.003
 
     .. [2] Elmar Plischke (2010) "An effective algorithm for computing global
           sensitivity indices (EASI) Reliability Engineering & System Safety",
@@ -69,19 +81,19 @@ def analyze(problem, X, Y, M=10, num_resamples=100, conf_level=0.95, print_to_co
     if seed:
         np.random.seed(seed)
 
-    D = problem['num_vars']
+    D = problem["num_vars"]
     N = Y.size
 
     # Calculate and Output the First Order Value
-    Si = ResultDict((k, [None] * D) for k in ['S1', 'S1_conf'])
-    Si['names'] = problem['names']
+    Si = ResultDict((k, [None] * D) for k in ["S1", "S1_conf"])
+    Si["names"] = problem["names"]
 
     for i in range(D):
         S1 = compute_first_order(permute_outputs(X[:, i], Y), M)
         S1 = unskew_S1(S1, M, N)
-        Si['S1'][i] = S1
-        Si['S1_conf'][i] = bootstrap(X[:, i], Y, M, num_resamples, conf_level)
-    
+        Si["S1"][i] = S1
+        Si["S1_conf"][i] = bootstrap(X[:, i], Y, M, num_resamples, conf_level)
+
     if print_to_console:
         print(Si.to_df())
 
@@ -100,15 +112,16 @@ def permute_outputs(X, Y):
 
     """
     permutation_index = np.argsort(X)
-    permutation_index = np.concatenate([permutation_index[::2],
-                                        permutation_index[1::2][::-1]])
+    permutation_index = np.concatenate(
+        [permutation_index[::2], permutation_index[1::2][::-1]]
+    )
     return Y[permutation_index]
 
 
 def compute_first_order(permuted_outputs, M):
     _, Pxx = periodogram(permuted_outputs)
     V = np.sum(Pxx[1:])
-    D1 = np.sum(Pxx[1: M + 1])
+    D1 = np.sum(Pxx[1 : M + 1])
     return D1 / V
 
 
@@ -141,26 +154,38 @@ def bootstrap(X_d, Y, M, resamples, conf_level):
 
 
 def cli_parse(parser):
-    parser.add_argument('-X', '--model-input-file',
-                        type=str, required=True, help='Model input file')
-    parser.add_argument('-M', '--M', type=int, required=False,
-                        default=10,
-                        help='Inference parameter')
-    parser.add_argument('-r', '--resamples', type=int, required=False,
-                        default=100,
-                        help='Number of bootstrap resamples for Sobol '
-                        'confidence intervals')
+    parser.add_argument(
+        "-X", "--model-input-file", type=str, required=True, help="Model input file"
+    )
+    parser.add_argument(
+        "-M", "--M", type=int, required=False, default=10, help="Inference parameter"
+    )
+    parser.add_argument(
+        "-r",
+        "--resamples",
+        type=int,
+        required=False,
+        default=100,
+        help="Number of bootstrap resamples for Sobol " "confidence intervals",
+    )
     return parser
 
 
 def cli_action(args):
     problem = read_param_file(args.paramfile)
-    X = np.loadtxt(args.model_input_file,
-                   delimiter=args.delimiter)
-    Y = np.loadtxt(args.model_output_file,
-                   delimiter=args.delimiter,
-                   usecols=(args.column,))
-    analyze(problem, X, Y, M=args.M, num_resamples=args.resamples, print_to_console=True, seed=args.seed)
+    X = np.loadtxt(args.model_input_file, delimiter=args.delimiter)
+    Y = np.loadtxt(
+        args.model_output_file, delimiter=args.delimiter, usecols=(args.column,)
+    )
+    analyze(
+        problem,
+        X,
+        Y,
+        M=args.M,
+        num_resamples=args.resamples,
+        print_to_console=True,
+        seed=args.seed,
+    )
 
 
 if __name__ == "__main__":
