@@ -83,15 +83,17 @@ plt.show()
 # Another heatmap plot with more fine-grain control
 # Displays Total and First-Order sensitivities in separate subplots
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 6))
-sp.heatmap('Y', 'ST', 'Total Order Sensitivity', ax1)
-sp.heatmap('Y', 'S1', 'First Order Sensitivity', ax2)
+sp.heatmap("Y", "ST", "Total Order Sensitivity", ax1)
+sp.heatmap("Y", "S1", "First Order Sensitivity", ax2)
 plt.show()
 
 
 # Yet another heatmap example
-fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(10, 6), sharex=True, constrained_layout=True)
-sp.heatmap('Y', 'ST', 'Total Order', ax=ax1)
-sp.heatmap('Y', 'ST_conf', 'Total Order Conf.', ax=ax2)
-sp.heatmap('Y', 'S1', 'First Order', ax=ax3)
-sp.heatmap('Y', 'S1_conf', 'First Order Conf.', ax=ax4)
+fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(
+    2, 2, figsize=(10, 6), sharex=True, constrained_layout=True
+)
+sp.heatmap("Y", "ST", "Total Order", ax=ax1)
+sp.heatmap("Y", "ST_conf", "Total Order Conf.", ax=ax2)
+sp.heatmap("Y", "S1", "First Order", ax=ax3)
+sp.heatmap("Y", "S1_conf", "First Order Conf.", ax=ax4)
 plt.show()

@@ -2,11 +2,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-__all__ = ['heatmap']
+__all__ = ["heatmap"]
 
 
 # magic string indicating DF columns holding conf bound values
-CONF_COLUMN = '_conf'
+CONF_COLUMN = "_conf"
 
 
 def heatmap(sp, metric: str, index: str, title: str = None, ax=None):
@@ -30,12 +30,12 @@ def heatmap(sp, metric: str, index: str, title: str = None, ax=None):
         fig = plt.gcf()
 
     if metric is None:
-        metric = sp['outputs'][0]
+        metric = sp["outputs"][0]
 
     if isinstance(metric, str):
-        assert metric in sp['outputs'], f"Specified model output '{metric}' not found"
+        assert metric in sp["outputs"], f"Specified model output '{metric}' not found"
 
-    is_multi_output = len(sp['outputs']) > 1
+    is_multi_output = len(sp["outputs"]) > 1
     if not index:
         if is_multi_output:
             index = list(sp.analysis[metric].keys())
@@ -69,9 +69,9 @@ def heatmap(sp, metric: str, index: str, title: str = None, ax=None):
         metric = [metric]
 
     # Get unique groups (if defined) while maintaining order of group names
-    disp_names = sp['groups']
+    disp_names = sp["groups"]
     if disp_names is None:
-        disp_names = sp['names']
+        disp_names = sp["names"]
 
     ax.xaxis.set_ticks(range(0, len(disp_names)))
     ax.xaxis.set_ticklabels(disp_names, rotation=90)
