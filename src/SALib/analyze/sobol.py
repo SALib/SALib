@@ -1,3 +1,6 @@
+from types import MethodType
+from warnings import warn
+
 from scipy.stats import norm
 
 import numpy as np
@@ -5,11 +8,16 @@ import pandas as pd
 
 from . import common_args
 from ..util import read_param_file, ResultDict, extract_group_names, _check_groups
-from types import MethodType
 
 from multiprocessing import Pool, cpu_count
 from functools import partial
 from itertools import combinations, zip_longest
+
+
+CONST_RESULT_MSG = (
+    "Constant values encountered, indicating the model evaluations "
+    "(or subset of evaluations) produced identical values."
+)
 
 
 def analyze(
@@ -188,6 +196,7 @@ def first_order(A, AB, B):
     """
     y = np.r_[A, B]
     if y.ptp() == 0:
+        warn(CONST_RESULT_MSG)
         return np.array([0.0])
 
     return np.mean(B * (AB - A), axis=0) / np.var(y, axis=0)
@@ -200,6 +209,7 @@ def total_order(A, AB, B):
     """
     y = np.r_[A, B]
     if y.ptp() == 0:
+        warn(CONST_RESULT_MSG)
         return np.array([0.0])
 
     return 0.5 * np.mean((A - AB) ** 2, axis=0) / np.var(y, axis=0)
@@ -209,6 +219,7 @@ def second_order(A, ABj, ABk, BAj, B):
     """Second order estimator following Saltelli 2002"""
     y = np.r_[A, B]
     if y.ptp() == 0:
+        warn(CONST_RESULT_MSG)
         return np.array([0.0])
 
     Vjk = np.mean(BAj * ABk - A * B, axis=0) / np.var(y, axis=0)
