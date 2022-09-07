@@ -78,6 +78,9 @@ if __name__ == "__main__":
     print(sp)
 
     # Distributed example
+    # This example requires an additional dependency (Pathos) to be installed
+    # `pip install pathos` or `conda install pathos -c conda-forge`
+
     # Specify itself as servers as an example
     servers = ("localhost:55774", "localhost:55775", "localhost:55776")
 

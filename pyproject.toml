@@ -35,11 +35,16 @@ dependencies = [
   "scipy>=1.7.3",
   "matplotlib>=3.2.2",
   "pandas>=1.1.2",
-  "pathos>=0.2.5",
+  "multiprocess",
 ]
 
 [project.optional-dependencies]
+distributed = [
+    "pathos>=0.2.5",
+]
+
 test = [
+    "SALib[distributed]",
     "pytest",
     "pytest-cov",
 ]
@@ -51,6 +56,7 @@ doc = [
 ]
 
 dev = [
+    "SALib[distributed]",
     "SALib[test]",
     "SALib[doc]",
     "pre-commit",
