@@ -162,7 +162,7 @@ def test_Sobol_G_using_sobol():
     Si = sobol.analyze(problem, model_results, calc_second_order=False)
 
     expected = Sobol_G.sensitivity_index(a)
-    assert_allclose(Si['S1'], expected, atol=1e-2, rtol=1e-6)
+    assert_allclose(Si["S1"], expected, atol=1e-2, rtol=1e-6)
 
 
 def test_constant_output():
@@ -174,37 +174,49 @@ def test_constant_output():
         r, _ = X.shape
         return np.array([0.4] * r)
 
-    problem = {'num_vars': 3,
-               'names': ['x1', 'x2', 'x3'],
-               'bounds': [[0, 1], [0, 1], [0, 1]]}
+    problem = {
+        "num_vars": 3,
+        "names": ["x1", "x2", "x3"],
+        "bounds": [[0, 1], [0, 1], [0, 1]],
+    }
     N = 256
     param_values = saltelli.sample(problem, N, calc_second_order=False)
     model_results = mock_model(param_values)
     Si = sobol.analyze(problem, model_results, calc_second_order=False)
 
-    assert np.all(Si['S1'] == 0.0), 'Constant outputs should produce 0 first order sensitivity'
-    assert np.all(Si['ST'] == 0.0), 'Constant outputs should produce 0 total order sensitivity'
-    assert np.all(Si['S1_conf'] == 0.0), 'Constant outputs should produce 0 CI'
-    assert np.all(Si['ST_conf'] == 0.0), 'Constant outputs should produce 0 CI'
+    assert np.all(
+        Si["S1"] == 0.0
+    ), "Constant outputs should produce 0 first order sensitivity"
+    assert np.all(
+        Si["ST"] == 0.0
+    ), "Constant outputs should produce 0 total order sensitivity"
+    assert np.all(Si["S1_conf"] == 0.0), "Constant outputs should produce 0 CI"
+    assert np.all(Si["ST_conf"] == 0.0), "Constant outputs should produce 0 CI"
 
 
 def test_grouped_constant_output():
-    '''Test case where there is no variance in model outputs for grouped factors.'''
+    """Test case where there is no variance in model outputs for grouped factors."""
 
     def mock_model(X):
         r, _ = X.shape
         return np.array([0.4] * r)
 
-    problem = {'num_vars': 3,
-               'names': ['x1', 'x2', 'x3'],
-               'groups': ['A', 'B', 'A'],
-               'bounds': [[0, 1], [0, 1], [0, 1]]}
+    problem = {
+        "num_vars": 3,
+        "names": ["x1", "x2", "x3"],
+        "groups": ["A", "B", "A"],
+        "bounds": [[0, 1], [0, 1], [0, 1]],
+    }
     N = 256
     param_values = saltelli.sample(problem, N, calc_second_order=False)
     model_results = mock_model(param_values)
     Si = sobol.analyze(problem, model_results, calc_second_order=False)
 
-    assert np.all(Si['S1'] == 0.0), 'Constant outputs should produce 0 first order sensitivity'
-    assert np.all(Si['ST'] == 0.0), 'Constant outputs should produce 0 total order sensitivity'
-    assert np.all(Si['S1_conf'] == 0.0), 'Constant outputs should produce 0 CI'
-    assert np.all(Si['ST_conf'] == 0.0), 'Constant outputs should produce 0 CI'
+    assert np.all(
+        Si["S1"] == 0.0
+    ), "Constant outputs should produce 0 first order sensitivity"
+    assert np.all(
+        Si["ST"] == 0.0
+    ), "Constant outputs should produce 0 total order sensitivity"
+    assert np.all(Si["S1_conf"] == 0.0), "Constant outputs should produce 0 CI"
+    assert np.all(Si["ST_conf"] == 0.0), "Constant outputs should produce 0 CI"

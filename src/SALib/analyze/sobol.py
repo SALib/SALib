@@ -139,11 +139,11 @@ def analyze(
 
             var_diff = np.r_[A[r], B[r]].ptp()
             if var_diff != 0.0:
-                S['S1_conf'][j] = Z * S1_conf_j.std(ddof=1)
+                S["S1_conf"][j] = Z * S1_conf_j.std(ddof=1)
             else:
-                S['S1_conf'][j] = 0.0
+                S["S1_conf"][j] = 0.0
 
-            S['ST'][j] = total_order(A, AB[:, j], B)
+            S["ST"][j] = total_order(A, AB[:, j], B)
 
             ST_conf_j = total_order(A[r], AB[r, j], B[r])
 
@@ -151,9 +151,9 @@ def analyze(
                 S["ST_conf_all"][:, j] = ST_conf_j
 
             if var_diff != 0.0:
-                S['ST_conf'][j] = Z * ST_conf_j.std(ddof=1)
+                S["ST_conf"][j] = Z * ST_conf_j.std(ddof=1)
             else:
-                S['ST_conf'][j] = 0.0
+                S["ST_conf"][j] = 0.0
 
         # Second order (+conf.)
         if calc_second_order:
