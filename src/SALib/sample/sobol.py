@@ -222,13 +222,6 @@ def cli_parse(parser):
         " 2 from `samples`). Not recommended (use `scramble` instead).",
     )
 
-    # hacky way to remove an argument (seed option not relevant for Saltelli)
-    remove_opts = [x for x in parser._actions if x.dest == "seed"]
-    [
-        parser._handle_conflict_resolve(None, [("--seed", x), ("-s", x)])
-        for x in remove_opts
-    ]
-
     return parser
 
 
