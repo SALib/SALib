@@ -48,7 +48,10 @@ def evaluate(values, a=None, delta=None, alpha=None):
 
         delta_inbetween = delta[(delta < 0) | (delta > 1)]
         if delta_inbetween.any():
-            raise ValueError("Sobol G function called with delta values less than zero or greater than one")
+            raise ValueError(
+                "Sobol G function called with delta values less than zero or"
+                " greater than one"
+            )
 
     if alpha is None:
         alpha = np.ones_like(a)
@@ -58,14 +61,16 @@ def evaluate(values, a=None, delta=None, alpha=None):
 
         alpha_gto = alpha <= 0.0
         if alpha_gto.any():
-            raise ValueError("Sobol G function called with alpha values less than or equal to zero")
+            raise ValueError(
+                "Sobol G function called with alpha values less than or equal to zero"
+            )
 
     ltz = values < 0
     gto = values > 1
 
-    if ltz.any() == True:
+    if ltz.any():
         raise ValueError("Sobol G function called with values less than zero")
-    elif gto.any() == True:
+    elif gto.any():
         raise ValueError("Sobol G function called with values greater than one")
 
     Y = np.ones([values.shape[0]])
@@ -74,7 +79,7 @@ def evaluate(values, a=None, delta=None, alpha=None):
         shift_of_x = row + delta
         integral = np.modf(shift_of_x)[1]
         mod_x = shift_of_x - integral
-        temp_y = (np.abs(2 * mod_x - 1)**alpha)
+        temp_y = np.abs(2 * mod_x - 1) ** alpha
         y_elements = ((1 + alpha) * temp_y + a) / (1 + a)
         Y[i] = np.prod(y_elements)
 

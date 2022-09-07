@@ -1,9 +1,8 @@
 repos:
--   repo: git://github.com/pre-commit/pre-commit-hooks
-    rev: v0.8.0
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.3.0
     hooks:
     -   id: trailing-whitespace
-    -   id: autopep8-wrapper
     -   id: check-added-large-files
     -   id: check-ast
     -   id: check-byte-order-marker
@@ -12,5 +11,21 @@ repos:
     -   id: check-merge-conflict
     -   id: detect-private-key
     -   id: end-of-file-fixer
+
+-   repo: https://github.com/psf/black
+    rev: 22.6.0
+    hooks:
+    -   id: black
+        exclude: "src/SALib/sample/directions.py"
+
+-   repo: https://gitlab.com/pycqa/flake8
+    rev: 5.0.4
+    hooks:
     -   id: flake8
-    -   id: requirements-txt-fixer
+        exclude: "src/SALib/sample/directions.py"
+        args:
+          - "--max-line-length=88"
+          # whitespace before ':'
+          # line too long
+          # module level import not at top of file
+          - "--extend-ignore=E203,E402"

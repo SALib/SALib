@@ -4,13 +4,17 @@ import numpy as np
 from scipy.stats import ks_2samp
 
 from . import common_args
-from ..util import (read_param_file, ResultDict,
-                    extract_group_names, _check_groups)
+from ..util import read_param_file, ResultDict, extract_group_names, _check_groups
 
 
-def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray, S: int = 10,
-            print_to_console: bool = False,
-            seed: int = None):
+def analyze(
+    problem: Dict,
+    X: np.ndarray,
+    Y: np.ndarray,
+    S: int = 10,
+    print_to_console: bool = False,
+    seed: int = None,
+):
     """Performs PAWN sensitivity analysis.
 
     The PAWN method [1] is a moment-independent approach to Global Sensitivity
@@ -47,6 +51,9 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray, S: int = 10,
         all samplers
 
     This implementation ignores all NaNs.
+
+    When applied to grouped factors, the analysis is conducted on each factor
+    individually, and the mean of their results are reported.
 
 
     Parameters
@@ -99,24 +106,24 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray, S: int = 10,
     if seed:
         np.random.seed(seed)
 
+    D = problem["num_vars"]
     groups = _check_groups(problem)
     if not groups:
-        D = problem['num_vars']
-        var_names = problem['names']
+        var_names = problem["names"]
     else:
-        var_names, D = extract_group_names(problem.get('groups', []))
+        var_names, _ = extract_group_names(problem.get("groups", []))
 
     results = np.full((D, 5), np.nan)
     temp_pawn = np.full((S, D), np.nan)
 
-    step = (1/S)
+    step = 1 / S
     for d_i in range(D):
-        seq = np.arange(0, 1+step, step)
+        seq = np.arange(0, 1 + step, step)
         X_di = X[:, d_i]
         X_q = np.nanquantile(X_di, seq)
 
         for s in range(S):
-            Y_sel = Y[(X_di >= X_q[s]) & (X_di < X_q[s+1])]
+            Y_sel = Y[(X_di >= X_q[s]) & (X_di < X_q[s + 1])]
             if len(Y_sel) == 0:
                 # no available samples
                 continue
@@ -137,16 +144,30 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray, S: int = 10,
         med = np.nanmedian(p_ind)
         maxs = np.nanmax(p_ind)
         cv = np.nanstd(p_ind) / mean
-        results[d_i] = [mins, mean, med, maxs, cv]
+        results[d_i, :] = [mins, mean, med, maxs, cv]
 
-    Si = ResultDict([
-        ('minimum', results[:, 0]),
-        ('mean', results[:, 1]),
-        ('median', results[:, 2]),
-        ('maximum', results[:, 3]),
-        ('CV', results[:, 4]),
-    ])
-    Si['names'] = var_names
+    if groups:
+        groups = np.array(groups)
+        unique_grps = [*dict.fromkeys(groups)]
+        tmp = np.full((len(unique_grps), 5), np.nan)
+
+        # Take the mean of effects from parameters that are grouped together
+        for grp_id, grp in enumerate(unique_grps):
+            tmp[grp_id, :] = np.mean(results[groups == grp, :], axis=0)
+
+        results = tmp
+        tmp = None
+
+    Si = ResultDict(
+        [
+            ("minimum", results[:, 0]),
+            ("mean", results[:, 1]),
+            ("median", results[:, 2]),
+            ("maximum", results[:, 3]),
+            ("CV", results[:, 4]),
+        ]
+    )
+    Si["names"] = var_names
 
     if print_to_console:
         print(Si.to_df())
@@ -155,22 +176,22 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray, S: int = 10,
 
 
 def cli_parse(parser):
-    parser.add_argument('-X', '--model-input-file',
-                        type=str, required=True, help='Model input file')
+    parser.add_argument(
+        "-X", "--model-input-file", type=str, required=True, help="Model input file"
+    )
 
-    parser.add_argument('-S', '--slices',
-                        type=int, required=False,
-                        help='Number of slices to take')
+    parser.add_argument(
+        "-S", "--slices", type=int, required=False, help="Number of slices to take"
+    )
     return parser
 
 
 def cli_action(args):
     problem = read_param_file(args.paramfile)
-    X = np.loadtxt(args.model_input_file,
-                   delimiter=args.delimiter)
-    Y = np.loadtxt(args.model_output_file,
-                   delimiter=args.delimiter,
-                   usecols=(args.column,))
+    X = np.loadtxt(args.model_input_file, delimiter=args.delimiter)
+    Y = np.loadtxt(
+        args.model_output_file, delimiter=args.delimiter, usecols=(args.column,)
+    )
     analyze(problem, X, Y, S=args.slices, print_to_console=True, seed=args.seed)
 
 

@@ -1,12 +1,9 @@
 import warnings
 import importlib
 from types import MethodType
+from functools import partial, wraps
 
 from multiprocess import Pool, cpu_count
-from pathos.pp import ParallelPythonPool as pp_Pool
-from functools import partial, wraps
-import itertools as it
-
 import numpy as np
 
 import SALib.sample as samplers
@@ -22,12 +19,20 @@ try:
 except ImportError:
     ptqdm_available = False
 
-__all__ = ['ProblemSpec']
+try:
+    from pathos.pp import ParallelPythonPool as pp_Pool
+
+    pathos_available = True
+except ImportError:
+    pathos_available = False
+
+
+__all__ = ["ProblemSpec"]
 
 
 class ProblemSpec(dict):
-    """Dictionary-like object representing an SALib Problem specification.
-    """
+    """Dictionary-like object representing an SALib Problem specification."""
+
     def __init__(self, *args, **kwargs):
         super(ProblemSpec, self).__init__(*args, **kwargs)
 
@@ -37,9 +42,9 @@ class ProblemSpec(dict):
         self._results = None
         self._analysis = None
 
-        self['num_vars'] = len(self['names'])
-        if 'groups' not in self:
-            self['groups'] = None
+        self["num_vars"] = len(self["names"])
+        if "groups" not in self:
+            self["groups"] = None
 
         self._add_samplers()
         self._add_analyzers()
@@ -51,9 +56,9 @@ class ProblemSpec(dict):
     @samples.setter
     def samples(self, vals):
         cols = vals.shape[1]
-        if cols != self['num_vars']:
+        if cols != self["num_vars"]:
             msg = "Mismatched sample size: Expected "
-            msg += "{} cols, got {}".format(self['num_vars'], cols)
+            msg += "{} cols, got {}".format(self["num_vars"], cols)
             raise ValueError(msg)
 
         self._samples = vals
@@ -73,16 +78,16 @@ class ProblemSpec(dict):
         else:
             cols = vals.shape[1]
 
-        out_cols = self.get('outputs', None)
+        out_cols = self.get("outputs", None)
         if out_cols is None:
             if cols == 1:
-                self['outputs'] = ['Y']
+                self["outputs"] = ["Y"]
             else:
-                self['outputs'] = [f'Y{i}' for i in range(1, cols+1)]
+                self["outputs"] = [f"Y{i}" for i in range(1, cols + 1)]
         else:
-            if cols != len(self['outputs']):
+            if cols != len(self["outputs"]):
                 msg = "Mismatched sample size: Expected "
-                msg += "{} cols, got {}".format(self['outputs'], cols)
+                msg += "{} cols, got {}".format(self["outputs"], cols)
                 raise ValueError(msg)
 
         self._results = vals
@@ -128,8 +133,10 @@ class ProblemSpec(dict):
     def set_results(self, results: np.ndarray):
         """Set previously available model results."""
         if self.samples is not None:
-            assert self.samples.shape[0] == results.shape[0], \
-                "Provided result array does not match existing number of existing samples!"
+            assert self.samples.shape[0] == results.shape[0], (
+                "Provided result array does not match existing number of"
+                " existing samples!"
+            )
 
         self.results = results
 
@@ -159,8 +166,8 @@ class ProblemSpec(dict):
         ----------
         self : ProblemSpec object
         """
-        if 'nprocs' in kwargs:
-            nprocs = kwargs.pop('nprocs')
+        if "nprocs" in kwargs:
+            nprocs = kwargs.pop("nprocs")
             return self.evaluate_parallel(func, *args, nprocs=nprocs, **kwargs)
 
         self.results = func(self._samples, *args, **kwargs)
@@ -193,7 +200,9 @@ class ProblemSpec(dict):
         ----------
         self : ProblemSpec object
         """
-        warnings.warn("Parallel evaluation is an experimental feature and may not work.")
+        warnings.warn(
+            "Parallel evaluation is an experimental feature and may not work."
+        )
 
         if self._samples is None:
             raise RuntimeError("Sampling not yet conducted")
@@ -203,7 +212,9 @@ class ProblemSpec(dict):
             nprocs = max_procs
         else:
             if nprocs > max_procs:
-                warnings.warn(f"{nprocs} processors requested but only {max_procs} found.")
+                warnings.warn(
+                    f"{nprocs} processors requested but only {max_procs} found."
+                )
             nprocs = min(max_procs, nprocs)
 
         # Create wrapped partial function to allow passing of additional args
@@ -223,7 +234,9 @@ class ProblemSpec(dict):
 
         return self
 
-    def evaluate_distributed(self, func, *args, nprocs=1, servers=None, verbose=False, **kwargs):
+    def evaluate_distributed(
+        self, func, *args, nprocs=1, servers=None, verbose=False, **kwargs
+    ):
         """Distribute model evaluation across a cluster.
 
         Usage Conditions:
@@ -255,15 +268,25 @@ class ProblemSpec(dict):
         ----------
         self : ProblemSpec object
         """
+        if not pathos_available:
+            raise RuntimeError(
+                "Pathos is required to run in distributed mode. Please install"
+                " with `pip install pathos` or"
+                " `conda install pathos -c conda-forge`"
+            )
+
         if verbose:
             from pathos.parallel import stats
 
-        warnings.warn("Distributed evaluation is an untested experimental feature and may not work.")
+        warnings.warn(
+            "Distributed evaluation is an untested experimental feature and"
+            " may not work."
+        )
 
         workers = pp_Pool(nprocs, servers=servers)
 
         # Split into even chunks
-        chunks = np.array_split(self._samples, int(nprocs)*len(servers), axis=0)
+        chunks = np.array_split(self._samples, int(nprocs) * len(servers), axis=0)
 
         tmp_f = self._wrap_func(func)
 
@@ -272,7 +295,7 @@ class ProblemSpec(dict):
         self.results = self._collect_results(res)
 
         if verbose:
-            print(stats(), '\n')
+            print(stats(), "\n")
 
         workers.clear()
 
@@ -301,7 +324,7 @@ class ProblemSpec(dict):
         ----------
         self : ProblemSpec object
         """
-        if self['num_vars'] == 1 or (self['groups'] and len('groups') == 1):
+        if self["num_vars"] == 1 or (self["groups"] and len("groups") == 1):
             msg = (
                 "There is only a single parameter or group defined. There is "
                 "no point in conducting sensitivity analysis as any and all"
@@ -309,30 +332,30 @@ class ProblemSpec(dict):
             )
             raise ValueError(msg)
 
-        if 'nprocs' in kwargs:
+        if "nprocs" in kwargs:
             # Call parallel method instead
             return self.analyze_parallel(func, *args, **kwargs)
 
         if self._results is None:
             raise RuntimeError("Model not yet evaluated")
 
-        if 'X' in func.__code__.co_varnames:
+        if "X" in func.__code__.co_varnames:
             # enforce passing of X if expected
             func = partial(func, *args, X=self._samples, **kwargs)
         else:
             func = partial(func, *args, **kwargs)
 
-        out_cols = self.get('outputs', None)
+        out_cols = self.get("outputs", None)
         if out_cols is None:
             if len(self._results.shape) == 1:
-                self['outputs'] = ['Y']
+                self["outputs"] = ["Y"]
             else:
                 num_cols = self._results.shape[1]
-                self['outputs'] = [f'Y{i}' for i in range(1, num_cols+1)]
+                self["outputs"] = [f"Y{i}" for i in range(1, num_cols + 1)]
 
-        if len(self['outputs']) > 1:
+        if len(self["outputs"]) > 1:
             self._analysis = {}
-            for i, out in enumerate(self['outputs']):
+            for i, out in enumerate(self["outputs"]):
                 self._analysis[out] = func(self, Y=self._results[:, i])
         else:
             self._analysis = func(self, Y=self._results)
@@ -368,25 +391,28 @@ class ProblemSpec(dict):
         if self._results is None:
             raise RuntimeError("Model not yet evaluated")
 
-        if 'X' in func.__code__.co_varnames:
+        if "X" in func.__code__.co_varnames:
             # enforce passing of X if expected
             func = partial(func, *args, X=self._samples, **kwargs)
         else:
             func = partial(func, *args, **kwargs)
 
-        out_cols = self.get('outputs', None)
+        out_cols = self.get("outputs", None)
         if out_cols is None:
             if len(self._results.shape) == 1:
-                self['outputs'] = ['Y']
+                self["outputs"] = ["Y"]
             else:
                 num_cols = self._results.shape[1]
-                self['outputs'] = [f'Y{i}' for i in range(1, num_cols+1)]
+                self["outputs"] = [f"Y{i}" for i in range(1, num_cols + 1)]
 
         # Cap number of processors used
-        Yn = len(self['outputs'])
+        Yn = len(self["outputs"])
         if Yn == 1:
             # Only single output, cannot parallelize
-            warnings.warn(f"Analysis was not parallelized: {nprocs} processors requested for 1 output.")
+            warnings.warn(
+                f"Analysis was not parallelized: {nprocs} processors requested"
+                f" for 1 output."
+            )
 
             res = func(self, Y=self._results)
         else:
@@ -398,19 +424,25 @@ class ProblemSpec(dict):
 
             if ptqdm_available:
                 # Display progress bar if available
-                res = p_imap(lambda y: func(self, Y=y),
-                             [self._results[:, i] for i in range(Yn)],
-                             num_cpus=nprocs)
+                res = p_imap(
+                    lambda y: func(self, Y=y),
+                    [self._results[:, i] for i in range(Yn)],
+                    num_cpus=nprocs,
+                )
             else:
                 with Pool(nprocs) as pool:
-                    res = list(pool.imap(lambda y: func(self, Y=y),
-                               [self._results[:, i] for i in range(Yn)]))
+                    res = list(
+                        pool.imap(
+                            lambda y: func(self, Y=y),
+                            [self._results[:, i] for i in range(Yn)],
+                        )
+                    )
 
         # Assign by output name if more than 1 output, otherwise
         # attach directly
         if Yn > 1:
             self._analysis = {}
-            for out, Si in zip(self['outputs'], list(res)):
+            for out, Si in zip(self["outputs"], list(res)):
                 self._analysis[out] = Si
         else:
             self._analysis = res
@@ -438,7 +470,7 @@ class ProblemSpec(dict):
         if self._analysis is None:
             raise RuntimeError("Analysis not yet conducted")
 
-        num_rows = len(self['outputs'])
+        num_rows = len(self["outputs"])
         if num_rows == 1:
             return self._analysis.plot()
 
@@ -453,10 +485,11 @@ class ProblemSpec(dict):
             # have to divide by 2 to account for CI columns
             num_cols = len(self._analysis[fk]) // 2
 
-        p_width = max(num_cols*3, 5)
-        p_height = max(num_rows*3, 6)
-        _, axes = plt.subplots(num_rows, num_cols, sharey=True,
-                               figsize=(p_width, p_height))
+        p_width = max(num_cols * 3, 5)
+        p_height = max(num_rows * 3, 6)
+        _, axes = plt.subplots(
+            num_rows, num_cols, sharey=True, figsize=(p_width, p_height)
+        )
         for res, ax in zip(self._analysis, axes):
             self._analysis[res].plot(ax=ax)
 
@@ -493,7 +526,7 @@ class ProblemSpec(dict):
         # Create wrapped partial function to allow passing of additional args
         tmp_f = func
         if (len(args) > 0) or (len(kwargs) > 0):
-            tmp_f = lambda x: func(x, *args, **kwargs)
+            tmp_f = lambda x: func(x, *args, **kwargs)  # noqa
 
         return tmp_f
 
@@ -512,13 +545,14 @@ class ProblemSpec(dict):
         i = 0
         for r in res:
             r_len = len(r)
-            final_res[i:i+r_len] = r
+            final_res[i : i + r_len] = r
             i += r_len
 
         return final_res
 
     def _method_creator(self, func, method):
         """Generate convenience methods for specified `method`."""
+
         @wraps(func)
         def modfunc(self, *args, **kwargs):
             return getattr(self, method)(func, *args, **kwargs)
@@ -528,18 +562,26 @@ class ProblemSpec(dict):
     def _add_samplers(self):
         """Dynamically add available SALib samplers as ProblemSpec methods."""
         for sampler in avail_approaches(samplers):
-            func = getattr(importlib.import_module('SALib.sample.{}'.format(sampler)), 'sample')
-            method_name = "sample_{}".format(sampler.replace('_sampler', ''))
+            func = getattr(
+                importlib.import_module("SALib.sample.{}".format(sampler)), "sample"
+            )
+            method_name = "sample_{}".format(sampler.replace("_sampler", ""))
 
-            self.__setattr__(method_name, MethodType(self._method_creator(func, 'sample'), self))
+            self.__setattr__(
+                method_name, MethodType(self._method_creator(func, "sample"), self)
+            )
 
     def _add_analyzers(self):
         """Dynamically add available SALib analyzers as ProblemSpec methods."""
         for analyzer in avail_approaches(analyzers):
-            func = getattr(importlib.import_module('SALib.analyze.{}'.format(analyzer)), 'analyze')
-            method_name = "analyze_{}".format(analyzer.replace('_analyzer', ''))
+            func = getattr(
+                importlib.import_module("SALib.analyze.{}".format(analyzer)), "analyze"
+            )
+            method_name = "analyze_{}".format(analyzer.replace("_analyzer", ""))
 
-            self.__setattr__(method_name, MethodType(self._method_creator(func, 'analyze'), self))
+            self.__setattr__(
+                method_name, MethodType(self._method_creator(func, "analyze"), self)
+            )
 
     def __str__(self):
         if self._samples is not None:
@@ -547,19 +589,19 @@ class ProblemSpec(dict):
             if len(arr_shape) == 1:
                 arr_shape = (arr_shape[0], 1)
             nr, nx = arr_shape
-            print('Samples:')
-            print(f'\t{nx} parameters:', self['names'])
-            print(f'\t{nr} evaluations', '\n')
+            print("Samples:")
+            print(f"\t{nx} parameters:", self["names"])
+            print(f"\t{nr} evaluations", "\n")
         if self._results is not None:
             arr_shape = self._results.shape
             if len(arr_shape) == 1:
                 arr_shape = (arr_shape[0], 1)
             nr, ny = arr_shape
-            print('Outputs:')
-            print(f"\t{ny} outputs:", self['outputs'])
-            print(f'\t{nr} evaluations', '\n')
+            print("Outputs:")
+            print(f"\t{ny} outputs:", self["outputs"])
+            print(f"\t{nr} evaluations", "\n")
         if self._analysis is not None:
-            print('Analysis:')
+            print("Analysis:")
             an_res = self._analysis
 
             allowed_types = (list, tuple)
@@ -579,14 +621,15 @@ class ProblemSpec(dict):
                             print(df, "\n")
                     else:
                         print(dfs, "\n")
-        return ''
+        return ""
 
 
 def _check_spec_attributes(spec: ProblemSpec):
-    assert 'names' in spec, "Names not defined"
-    assert 'bounds' in spec, "Bounds not defined"
-    assert len(spec['bounds']) == len(spec['names']), \
-        f"""Number of bounds do not match number of names
+    assert "names" in spec, "Names not defined"
+    assert "bounds" in spec, "Bounds not defined"
+    assert len(spec["bounds"]) == len(
+        spec["names"]
+    ), f"""Number of bounds do not match number of names
         Number of names:
         {len(spec['names'])} | {spec['names']}
         ----------------

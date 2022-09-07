@@ -7,9 +7,15 @@ from . import common_args
 from ..util import read_param_file, ResultDict
 
 
-def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
-            num_resamples: int = 100, conf_level: float = 0.95,
-            print_to_console: bool = False, seed: int = None) -> Dict:
+def analyze(
+    problem: Dict,
+    X: np.ndarray,
+    Y: np.ndarray,
+    num_resamples: int = 100,
+    conf_level: float = 0.95,
+    print_to_console: bool = False,
+    seed: int = None,
+) -> Dict:
     """Perform Delta Moment-Independent Analysis on model outputs.
 
     Returns a dictionary with keys 'delta', 'delta_conf', 'S1', and 'S1_conf',
@@ -59,37 +65,39 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
     if seed:
         np.random.seed(seed)
 
-    D = problem['num_vars']
+    D = problem["num_vars"]
     N = Y.size
 
     if not 0 < conf_level < 1:
         raise RuntimeError("Confidence level must be between 0-1.")
 
     # equal frequency partition
-    exp = (2.0 / (7.0 + np.tanh((1500.0 - N) / 500.0)))
-    M = int(np.round( min(int(np.ceil(N**exp)), 48) ))
+    exp = 2.0 / (7.0 + np.tanh((1500.0 - N) / 500.0))
+    M = int(np.round(min(int(np.ceil(N**exp)), 48)))
     m = np.linspace(0, N, M + 1)
     Ygrid = np.linspace(np.min(Y), np.max(Y), 100)
 
-    keys = ('delta', 'delta_conf', 'S1', 'S1_conf')
+    keys = ("delta", "delta_conf", "S1", "S1_conf")
     S = ResultDict((k, np.zeros(D)) for k in keys)
-    S['names'] = problem['names']
+    S["names"] = problem["names"]
 
     try:
         for i in range(D):
             X_i = X[:, i]
-            S['delta'][i], S['delta_conf'][i] = bias_reduced_delta(
-                Y, Ygrid, X_i, m, num_resamples, conf_level)
-            S['S1'][i] = sobol_first(Y, X_i, m)
-            S['S1_conf'][i] = sobol_first_conf(
-                Y, X_i, m, num_resamples, conf_level)
+            S["delta"][i], S["delta_conf"][i] = bias_reduced_delta(
+                Y, Ygrid, X_i, m, num_resamples, conf_level
+            )
+            S["S1"][i] = sobol_first(Y, X_i, m)
+            S["S1_conf"][i] = sobol_first_conf(Y, X_i, m, num_resamples, conf_level)
     except np.linalg.LinAlgError as e:
         msg = "Singular matrix detected\n"
-        msg += "This may be due to the sample size ({}) being too small\n".format(Y.size)
+        msg += "This may be due to the sample size ({}) being too small\n".format(
+            Y.size
+        )
         msg += "If this is not the case, check Y values or raise an issue with the\n"
         msg += "SALib team"
 
-        raise np.linalg.LinAlgError(msg)
+        raise np.linalg.LinAlgError(msg) from e
 
     if print_to_console:
         print(S.to_df())
@@ -100,9 +108,9 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
 def calc_delta(Y, Ygrid, X, m):
     """Plischke et al. (2013) delta index estimator (eqn 26) for d_hat."""
     N = len(Y)
-    fy = gaussian_kde(Y, bw_method='silverman')(Ygrid)
+    fy = gaussian_kde(Y, bw_method="silverman")(Ygrid)
     abs_fy = np.abs(fy)
-    xr = rankdata(X, method='ordinal')
+    xr = rankdata(X, method="ordinal")
 
     d_hat = 0
     for j in range(len(m) - 1):
@@ -111,7 +119,7 @@ def calc_delta(Y, Ygrid, X, m):
 
         Y_ix = Y[ix]
         if not np.all(np.equal(Y_ix, Y_ix[0])):
-            fyc = gaussian_kde(Y_ix, bw_method='silverman')(Ygrid)
+            fyc = gaussian_kde(Y_ix, bw_method="silverman")(Ygrid)
             fy_ = np.abs(fy - fyc)
         else:
             fy_ = abs_fy
@@ -137,14 +145,14 @@ def bias_reduced_delta(Y, Ygrid, X, m, num_resamples, conf_level):
 
 
 def sobol_first(Y, X, m):
-    xr = rankdata(X, method='ordinal')
+    xr = rankdata(X, method="ordinal")
     Vi = 0
     N = len(Y)
     Y_mean = Y.mean()
     for j in range(len(m) - 1):
         ix = np.where((xr > m[j]) & (xr <= m[j + 1]))[0]
         nm = len(ix)
-        Vi += (nm / N) * ((Y[ix].mean() - Y_mean)**2)
+        Vi += (nm / N) * ((Y[ix].mean() - Y_mean) ** 2)
     return Vi / np.var(Y)
 
 
@@ -161,26 +169,43 @@ def sobol_first_conf(Y, X, m, num_resamples, conf_level):
 
 
 def cli_parse(parser):
-    parser.add_argument('-X', '--model-input-file', type=str, required=True,
-                        default=None,
-                        help='Model input file')
-    parser.add_argument('-r', '--resamples', type=int, required=False,
-                        default=10,
-                        help='Number of bootstrap resamples for \
-                           Sobol confidence intervals')
+    parser.add_argument(
+        "-X",
+        "--model-input-file",
+        type=str,
+        required=True,
+        default=None,
+        help="Model input file",
+    )
+    parser.add_argument(
+        "-r",
+        "--resamples",
+        type=int,
+        required=False,
+        default=10,
+        help="Number of bootstrap resamples for \
+                           Sobol confidence intervals",
+    )
     return parser
 
 
 def cli_action(args):
     problem = read_param_file(args.paramfile)
-    Y = np.loadtxt(args.model_output_file,
-                   delimiter=args.delimiter, usecols=(args.column,))
+    Y = np.loadtxt(
+        args.model_output_file, delimiter=args.delimiter, usecols=(args.column,)
+    )
     X = np.loadtxt(args.model_input_file, delimiter=args.delimiter, ndmin=2)
     if len(X.shape) == 1:
         X = X.reshape((len(X), 1))
 
-    analyze(problem, X, Y, num_resamples=args.resamples, print_to_console=True,
-            seed=args.seed)
+    analyze(
+        problem,
+        X,
+        Y,
+        num_resamples=args.resamples,
+        print_to_console=True,
+        seed=args.seed,
+    )
 
 
 if __name__ == "__main__":

@@ -41,21 +41,23 @@ def sample(problem, N, seed=None):
     if seed:
         np.random.seed(seed)
 
-    groups = problem.get('groups')
+    groups = problem.get("groups")
     if groups:
         num_groups = len(set(groups))
         G, group_names = compute_groups_matrix(groups)
     else:
-        num_groups = problem['num_vars']
+        num_groups = problem["num_vars"]
 
-    result = np.empty([num_samples, problem['num_vars']])
+    result = np.empty([num_samples, problem["num_vars"]])
     temp = np.empty([num_samples])
     d = 1.0 / num_samples
 
-    temp = np.array([np.random.uniform(low=sample * d,
-                                       high=(sample + 1) * d,
-                                       size=num_groups)
-                     for sample in range(num_samples)])
+    temp = np.array(
+        [
+            np.random.uniform(low=sample * d, high=(sample + 1) * d, size=num_groups)
+            for sample in range(num_samples)
+        ]
+    )
 
     for group in range(num_groups):
 
@@ -86,8 +88,12 @@ def cli_action(args):
     """
     problem = read_param_file(args.paramfile)
     param_values = sample(problem, args.samples, seed=args.seed)
-    np.savetxt(args.output, param_values, delimiter=args.delimiter,
-               fmt='%.' + str(args.precision) + 'e')
+    np.savetxt(
+        args.output,
+        param_values,
+        delimiter=args.delimiter,
+        fmt="%." + str(args.precision) + "e",
+    )
 
 
 if __name__ == "__main__":
