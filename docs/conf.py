@@ -100,6 +100,7 @@ project = "SALib"
 copyright = f"{date.today().year}, Jon Herman, Will Usher and others"
 
 import SALib
+
 version = SALib.__version__
 release = version
 
@@ -154,13 +155,13 @@ html_theme_options = {
     "github_url": "https://github.com/salib/salib",
     "navbar_end": ["theme-switcher", "version-switcher", "navbar-icon-links"],
     "switcher": {
-        # "json_url": "https://salib.readthedocs.io/en/latest/_static/version_switcher.json",
-        "json_url": "https://raw.githubusercontent.com/tupui/SALib/pydata-sphinx-theme/docs/_static/version_switcher.json",
+        # "json_url": "https://salib.readthedocs.io/en/latest/_static/version_switcher.json",  # noqa
+        "json_url": "https://raw.githubusercontent.com/tupui/SALib/pydata-sphinx-theme/docs/_static/version_switcher.json",  # noqa
         "version_match": version,
-   }
+    },
 }
 
-html_title = f"SALib's documentation"
+html_title = "SALib's documentation"
 
 # Add any paths that contain custom themes here, relative to this directory.
 # html_theme_path = []
