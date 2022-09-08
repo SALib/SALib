@@ -13,7 +13,7 @@ exogenous factors on outputs of interest.
 `pandas <http://https://pandas.pydata.org/>`__,
 Python 3 (from SALib v1.2 onwards SALib does not officially support Python 2)
 
-**Installation:** ``pip install SALib`` or ``python setup.py install`` or ``conda install SALib``
+**Installation:** ``pip install SALib`` or ``pip install .`` or ``conda install SALib``
 
 **Build Status:** |Build Status| **Test Coverage:** |Coverage Status|
 
