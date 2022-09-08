@@ -6,8 +6,9 @@ Getting Started
 Installing SALib
 ----------------
 
-To install the latest stable version of SALib using pip, together with all the
-dependencies, run the following command:
+To install the latest stable version of SALib
+via pip from `PyPI <https://pypi.org/project/SALib>`__.
+together with all the dependencies, run the following command:
 
 ::
 
@@ -28,15 +29,14 @@ Installing Prerequisite Software
 --------------------------------
 
 SALib requires `NumPy <http://www.numpy.org/>`_, `SciPy <http://www.scipy.org/>`_,
+`pandas <http://https://pandas.pydata.org/>`_,
 and `matplotlib <http://matplotlib.org/>`_ installed on your computer.  Using
 `pip <https://pip.pypa.io/en/stable/installing/>`_, these libraries can be
 installed with the following command:
 
 ::
 
-    pip install numpy
-    pip install scipy
-    pip install matplotlib
+    pip install numpy scipy pandas matplotlib
 
 The packages are normally included with most Python bundles, such as Anaconda and Canopy.
 In any case, they are installed automatically when using pip to install
