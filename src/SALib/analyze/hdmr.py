@@ -36,10 +36,28 @@ def analyze(
     print_to_console: bool = False,
     seed: int = None,
 ) -> Dict:
-    """High-Dimensional Model Representation (HDMR) using B-spline functions.
+    """This method computes global sensitivity indices using meta-modeling 
+    technique called High Dimensional Model Representation (HDMR).
 
-    HDMR is used for variance-based global sensitivity analysis (GSA) with
-    correlated and uncorrelated inputs. This function uses as input
+    HDMR itself is not a sensitivity analysis method but it is a surrogate model. 
+    It constructs a map of relationship between sets of high dimensional input 
+    and output system variables [1]. This I/O relation can be constructed using 
+    different basis functions (orthonormal polynomials, splines, etc.). The 
+    model decomposition can be expressed as
+
+    .. math::
+        \widehat{y} = \sum_{u \subseteq \{1, 2, ..., d \}} f_u
+    
+    where u represents any subset including empty set.
+
+    The HDMR method becomes extremely useful when number of sample points are not
+    enough for Monte Carlo simulation as in Sobol's method. It uses least-square
+    regression to reduce the number of samples and thus number of function (model)
+    evaluations. Another advantage of this method is that it can account for
+    correlation among the model input. Unlike other variance-based methods, the main
+    effects are combination of structural (uncorrelated) part and correlated part.
+    
+    This method uses as input
 
     - a N x d matrix of N different d-vectors of model inputs (factors/parameters)
     - a N x 1 vector of corresponding model outputs
@@ -128,7 +146,11 @@ def analyze(
 
     References
     ----------
-    .. [1] Genyuan Li, H. Rabitz, P.E. Yelvington, O.O. Oluwole, F. Bacon,
+    .. [1] Rabitz, H. and Aliş, Ö.F., "General foundations of high dimensional 
+            model representations", Journal of Mathematical Chemistry 25, 197–233 (1999). 
+            https://doi.org/10.1023/A:1019188517934
+
+    .. [2] Genyuan Li, H. Rabitz, P.E. Yelvington, O.O. Oluwole, F. Bacon,
             C.E. Kolb, and J. Schoendorf, "Global Sensitivity Analysis for
             Systems with Independent and/or Correlated Inputs", Journal of
             Physical Chemistry A, Vol. 114 (19), pp. 6022 - 6032, 2010,
