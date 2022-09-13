@@ -18,6 +18,7 @@ dependencies:
   # doc
   - sphinx
   - numpydoc
+  - pydata-sphinx-theme>=0.10
   - pip
   - pip:
     - myst_parser
