@@ -155,8 +155,7 @@ html_theme_options = {
     "github_url": "https://github.com/salib/salib",
     "navbar_end": ["theme-switcher", "version-switcher", "navbar-icon-links"],
     "switcher": {
-        # "json_url": "https://salib.readthedocs.io/en/latest/_static/version_switcher.json",  # noqa
-        "json_url": "https://raw.githubusercontent.com/tupui/SALib/pydata-sphinx-theme/docs/_static/version_switcher.json",  # noqa
+        "json_url": "https://salib.readthedocs.io/en/latest/_static/version_switcher.json",  # noqa
         "version_match": version,
     },
 }
