@@ -766,7 +766,7 @@ def _finalize(problem, SA, Em, d, alpha, maxorder, RT, Y_em, bootstrap_idx, X, Y
 
 
 def emulate(self, X, Y=None):
-    '''Emulates model output with new input data.
+    """Emulates model output with new input data.
 
     Generates B-Splines with new input matrix, X, and multiplies it with
     coefficient matrix, C.
@@ -883,10 +883,7 @@ def _print(Si, d):
     print(
         "Term    \t      Sa            Sb             S             ST         #select "
     )
-    print(
-        "---------------------------------------------------------------------"
-        "---------------"
-    )
+    print("-" * 84)  # Header break
 
     format1 = "%-11s   \t %5.2f (\261%.2f) %5.2f (\261%.2f) %5.2f (\261%.2f) %5.2f (\261%.2f)    %-3.0f"  # noqa: E501
     format2 = "%-11s   \t %5.2f (\261%.2f) %5.2f (\261%.2f) %5.2f (\261%.2f)                  %-3.0f"  # noqa: E501
@@ -923,10 +920,7 @@ def _print(Si, d):
                 )
             )
 
-    print(
-        "---------------------------------------------------------------------"
-        "---------------"
-    )
+    print("-" * 84)  # Header break
 
     format3 = "%-11s   \t %5.2f (\261%.2f) %5.2f (\261%.2f) %5.2f (\261%.2f)"
     print(
