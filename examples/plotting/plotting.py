@@ -4,6 +4,7 @@ sys.path.append("../..")
 
 from SALib import ProblemSpec
 from SALib.test_functions import Ishigami
+from SALib.plotting.bar import plot as barplot
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -55,8 +56,6 @@ axes[0].set_title("Example custom plot with log scale")
 # Other custom layouts can be created in the usual matplotlib style
 # with the basic bar plotter.
 
-from SALib.plotting.bar import plot as barplot
-
 # Example: Direct control of plot elements
 fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(6, 16))
 
@@ -71,4 +70,30 @@ ax1.set_yscale("log")
 ax2.set_yscale("log")
 
 ax1.set_title("Customized matplotlib plot")
+plt.show()
+
+
+# Plot sensitivity indices as a heatmap
+# Note that plotting methods return a matplotlib axes object
+ax = sp.heatmap("Y")
+ax.set_title("Basic heatmap")
+plt.show()
+
+
+# Another heatmap plot with more fine-grain control
+# Displays Total and First-Order sensitivities in separate subplots
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 6))
+sp.heatmap("Y", "ST", "Total Order Sensitivity", ax1)
+sp.heatmap("Y", "S1", "First Order Sensitivity", ax2)
+plt.show()
+
+
+# Yet another heatmap example
+fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(
+    2, 2, figsize=(10, 6), sharex=True, constrained_layout=True
+)
+sp.heatmap("Y", "ST", "Total Order", ax=ax1)
+sp.heatmap("Y", "ST_conf", "Total Order Conf.", ax=ax2)
+sp.heatmap("Y", "S1", "First Order", ax=ax3)
+sp.heatmap("Y", "S1_conf", "First Order Conf.", ax=ax4)
 plt.show()
