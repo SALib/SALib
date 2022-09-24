@@ -146,8 +146,7 @@ def analyze(
         np.random.seed(seed)
 
     # Initial part: Check input arguments and define HDMR variables
-    settings = _check_settings(
-        X, Y, maxorder, maxiter, m, K, R, alpha, lambdax)
+    settings = _check_settings(X, Y, maxorder, maxiter, m, K, R, alpha, lambdax)
     init_vars = _init(X, Y, settings)
 
     # Sensitivity Analysis Computation with/without bootstraping
