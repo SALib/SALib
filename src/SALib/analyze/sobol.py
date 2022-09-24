@@ -1,3 +1,6 @@
+from types import MethodType
+from warnings import warn
+
 from scipy.stats import norm
 
 import numpy as np
@@ -5,11 +8,16 @@ import pandas as pd
 
 from . import common_args
 from ..util import read_param_file, ResultDict, extract_group_names, _check_groups
-from types import MethodType
 
 from multiprocessing import Pool, cpu_count
 from functools import partial
 from itertools import combinations, zip_longest
+
+
+CONST_RESULT_MSG = (
+    "Constant values encountered, indicating model evaluations "
+    "(or subset of evaluations) produced identical values."
+)
 
 
 def analyze(
@@ -129,14 +137,23 @@ def analyze(
             if keep_resamples:
                 S["S1_conf_all"][:, j] = S1_conf_j
 
-            S["S1_conf"][j] = Z * S1_conf_j.std(ddof=1)
+            var_diff = np.r_[A[r], B[r]].ptp()
+            if var_diff != 0.0:
+                S["S1_conf"][j] = Z * S1_conf_j.std(ddof=1)
+            else:
+                S["S1_conf"][j] = 0.0
+
             S["ST"][j] = total_order(A, AB[:, j], B)
+
             ST_conf_j = total_order(A[r], AB[r, j], B[r])
 
             if keep_resamples:
                 S["ST_conf_all"][:, j] = ST_conf_j
 
-            S["ST_conf"][j] = Z * ST_conf_j.std(ddof=1)
+            if var_diff != 0.0:
+                S["ST_conf"][j] = Z * ST_conf_j.std(ddof=1)
+            else:
+                S["ST_conf"][j] = 0.0
 
         # Second order (+conf.)
         if calc_second_order:
@@ -177,7 +194,12 @@ def first_order(A, AB, B):
     First order estimator following Saltelli et al. 2010 CPC, normalized by
     sample variance
     """
-    return np.mean(B * (AB - A), axis=0) / np.var(np.r_[A, B], axis=0)
+    y = np.r_[A, B]
+    if y.ptp() == 0:
+        warn(CONST_RESULT_MSG)
+        return np.array([0.0])
+
+    return np.mean(B * (AB - A), axis=0) / np.var(y, axis=0)
 
 
 def total_order(A, AB, B):
@@ -185,12 +207,22 @@ def total_order(A, AB, B):
     Total order estimator following Saltelli et al. 2010 CPC, normalized by
     sample variance
     """
-    return 0.5 * np.mean((A - AB) ** 2, axis=0) / np.var(np.r_[A, B], axis=0)
+    y = np.r_[A, B]
+    if y.ptp() == 0:
+        warn(CONST_RESULT_MSG)
+        return np.array([0.0])
+
+    return 0.5 * np.mean((A - AB) ** 2, axis=0) / np.var(y, axis=0)
 
 
 def second_order(A, ABj, ABk, BAj, B):
     """Second order estimator following Saltelli 2002"""
-    Vjk = np.mean(BAj * ABk - A * B, axis=0) / np.var(np.r_[A, B], axis=0)
+    y = np.r_[A, B]
+    if y.ptp() == 0:
+        warn(CONST_RESULT_MSG)
+        return np.array([0.0])
+
+    Vjk = np.mean(BAj * ABk - A * B, axis=0) / np.var(y, axis=0)
     Sj = first_order(A, ABj, B)
     Sk = first_order(A, ABk, B)
 
