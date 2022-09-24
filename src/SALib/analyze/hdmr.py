@@ -10,7 +10,7 @@ from numpy.linalg import svd
 from numpy import identity
 
 import pandas as pd
-from scipy import (stats, special, interpolate)
+from scipy import stats, special, interpolate
 
 from . import common_args
 from ..util import read_param_file, ResultDict
@@ -19,14 +19,23 @@ from SALib.plotting.hdmr import plot as hdmr_plot
 from SALib.util.problem import ProblemSpec
 
 
-__all__ = ['analyze', 'cli_parse', 'cli_action']
+__all__ = ["analyze", "cli_parse", "cli_action"]
 
 
-def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
-            maxorder: int = 2, maxiter: int = 100,
-            m: int = 2, K: int = 20, R: int = None, alpha: float = 0.95,
-            lambdax: float = 0.01,
-            print_to_console: bool = False, seed: int = None) -> Dict:
+def analyze(
+    problem: Dict,
+    X: np.ndarray,
+    Y: np.ndarray,
+    maxorder: int = 2,
+    maxiter: int = 100,
+    m: int = 2,
+    K: int = 20,
+    R: int = None,
+    alpha: float = 0.95,
+    lambdax: float = 0.01,
+    print_to_console: bool = False,
+    seed: int = None,
+) -> Dict:
     """High-Dimensional Model Representation (HDMR) using B-spline functions.
 
     HDMR is used for variance-based global sensitivity analysis (GSA) with
@@ -137,8 +146,7 @@ def analyze(problem: Dict, X: np.ndarray, Y: np.ndarray,
         np.random.seed(seed)
 
     # Initial part: Check input arguments and define HDMR variables
-    settings = _check_settings(
-        X, Y, maxorder, maxiter, m, K, R, alpha, lambdax)
+    settings = _check_settings(X, Y, maxorder, maxiter, m, K, R, alpha, lambdax)
     init_vars = _init(X, Y, settings)
 
     # Sensitivity Analysis Computation with/without bootstraping
@@ -255,30 +263,34 @@ def _compute(X, Y, settings, init_vars):
         SA["V_Y"][k, 0] = np.var(Y_id)
 
         # Mean of the output
-        Em['f0'][k] = np.sum(Y_id) / R
+        Em["f0"][k] = np.sum(Y_id) / R
 
         # Compute residuals
         Y_res = Y_id - Em["f0"][k]
 
         # 1st order component functions: ind/backfitting
-        Y_em[:, j1], Y_res, Em['C1'][:, :, k] = _first_order(Em['B1'][idx[:, k], :, :],
-                                                             Y_res,
-                                                             Em['C1'][:, :, k],
-                                                             R,
-                                                             Em['n1'],
-                                                             m1,
-                                                             maxiter,
-                                                             lambdax)
+        Y_em[:, j1], Y_res, Em["C1"][:, :, k] = _first_order(
+            Em["B1"][idx[:, k], :, :],
+            Y_res,
+            Em["C1"][:, :, k],
+            R,
+            Em["n1"],
+            m1,
+            maxiter,
+            lambdax,
+        )
 
         # 2nd order component functions: individual
-        if (maxorder > 1):
-            Y_em[:, j2], Y_res, Em['C2'][:, :, k] = _second_order(Em['B2'][idx[:, k], :, :],
-                                                                  Y_res,
-                                                                  Em['C2'][:, :, k],
-                                                                  R,
-                                                                  Em['n2'],
-                                                                  m2,
-                                                                  lambdax)
+        if maxorder > 1:
+            Y_em[:, j2], Y_res, Em["C2"][:, :, k] = _second_order(
+                Em["B2"][idx[:, k], :, :],
+                Y_res,
+                Em["C2"][:, :, k],
+                R,
+                Em["n2"],
+                m2,
+                lambdax,
+            )
 
         # 3rd order component functions: individual
         if maxorder == 3:
@@ -473,9 +485,9 @@ def B_spline(X, m, d):
 
 def _first_order(B1, Y_res, C1, R, n1, m1, maxiter, lambdax):
     """Compute first order sensitivities."""
-    Y_i = np.zeros((R, n1))       # Initialize 1st order contributions
-    T1 = np.zeros((m1, R, n1))    # Initialize T(emporary) matrix - 1st
-    it = 0                        # Initialize iteration counter
+    Y_i = np.empty((R, n1))  # Initialize 1st order contributions
+    T1 = np.empty((m1, R, n1))  # Initialize T(emporary) matrix - 1st
+    it = 0  # Initialize iteration counter
 
     lam_eye_m1 = lambdax * identity(m1)
 
@@ -506,7 +518,7 @@ def _first_order(B1, Y_res, C1, R, n1, m1, maxiter, lambdax):
                 if j != z:
                     Y_r = Y_r - B1[:, :, z] @ C1[:, z]
 
-            C1[:, j] = (T1[:, :, j] @ Y_r)
+            C1[:, j] = T1[:, :, j] @ Y_r
 
         var1b_new = np.sum(np.square(C1), axis=0)
         varmax = np.max(np.absolute(var1b_new - var1b_old))
@@ -525,8 +537,8 @@ def _first_order(B1, Y_res, C1, R, n1, m1, maxiter, lambdax):
 
 def _second_order(B2, Y_res, C2, R, n2, m2, lambdax):
     """Compute second order sensitivities."""
-    Y_ij = np.zeros((R, n2))      # Initialize 1st order contributions
-    T2 = np.zeros((m2, R))    # Initialize T(emporary) matrix - 1st
+    Y_ij = np.empty((R, n2))  # Initialize 2nd order contributions
+    T2 = np.empty((m2, R))  # Initialize T(emporary) matrix - 1st
 
     lam_eye_m2 = lambdax * identity(m2)
 
@@ -559,14 +571,14 @@ def _second_order(B2, Y_res, C2, R, n2, m2, lambdax):
 
 def _third_order(B3, Y_res, C3, R, n3, m3, lambdax):
     """Compute third order sensitivities."""
-    Y_ijk = np.zeros((R, n3))      # Initialize 1st order contributions
-    T3 = np.zeros((m3, R))     # Initialize T(emporary) matrix - 1st
+    Y_ijk = np.empty((R, n3))  # Initialize 3rd order contributions
+    T3 = np.empty((m3, R))  # Initialize T(emporary) matrix - 1st
 
     lam_eye_m3 = lambdax * identity(m3)
 
     # Avoid memory allocations by using temporary store
     B3_j = np.empty(B3[:, :, 0].shape)
-    B33 = np.empty((m3,m3))
+    B33 = np.empty((m3, m3))
 
     # First order individual estimation
     for j in range(n3):
@@ -703,22 +715,21 @@ def _finalize(problem, SA, Em, d, alpha, maxorder, RT, Y_em, bootstrap_idx, X, Y
 
     # Fill Expansion Terms
     ct = 0
-    p_names = problem['names']
-    p_c2 = Em['c2']
+    p_names = problem["names"]
+    p_c2 = Em["c2"]
     # p_c3 = Em['c3']
-    for i in range(Em['n1']):
-        Si['Term'][ct] = p_names[i]
+    for i in range(Em["n1"]):
+        Si["Term"][ct] = p_names[i]
         ct += 1
 
-    for i in range(Em['n2']):
-        Si['Term'][ct] = '/'.join([p_names[p_c2[i, 0]],
-                                   p_names[p_c2[i, 1]]])
+    for i in range(Em["n2"]):
+        Si["Term"][ct] = "/".join([p_names[p_c2[i, 0]], p_names[p_c2[i, 1]]])
         ct += 1
 
-    for i in range(Em['n3']):
-        Si['Term'][ct] = '/'.join([p_names[Em['c3'][i, 0]],
-                                   p_names[Em['c3'][i, 1]],
-                                   p_names[Em['c3'][i, 2]]])
+    for i in range(Em["n3"]):
+        Si["Term"][ct] = "/".join(
+            [p_names[Em["c3"][i, 0]], p_names[Em["c3"][i, 1]], p_names[Em["c3"][i, 2]]]
+        )
         ct += 1
 
     # Assign Bootstrap Results to Si Dict
@@ -837,20 +848,20 @@ def emulate(self, X, Y=None):
 
     # Second Order
     if maxorder > 1:
-        for j in range(n1, n1+n2):
-            Y_em[:, j] = B2[:, :, j-n1] @ C2[:, j-n1]
+        for j in range(n1, n1 + n2):
+            Y_em[:, j] = B2[:, :, j - n1] @ C2[:, j - n1]
 
     # Third Order
     if maxorder == 3:
-        for j in range(n1+n2, n1+n2+n3):
-            Y_em[:, j] = B3[:, :, j-n1-n2] @ C3[:, j-n1-n2]
+        for j in range(n1 + n2, n1 + n2 + n3):
+            Y_em[:, j] = B3[:, :, j - n1 - n2] @ C3[:, j - n1 - n2]
 
     Y_mean = 0
     if Y is not None:
         Y_mean = np.mean(Y)
         self["Y_test"] = Y
 
-    self['emulated'] = np.sum(Y_em, axis=1)+Y_mean
+    self["emulated"] = np.sum(Y_em, axis=1) + Y_mean
 
 
 def to_df(self):
