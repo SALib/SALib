@@ -140,11 +140,18 @@ def bias_reduced_delta(Y, Ygrid, X, m, num_resamples, conf_level):
         r_i = r[i, :]
         d[i] = calc_delta(Y[r_i], Ygrid, X[r_i], m)
 
-    d = 2 * d_hat - d
+    d = 2.0 * d_hat - d
     return (d.mean(), norm.ppf(0.5 + conf_level / 2) * d.std(ddof=1))
 
 
 def sobol_first(Y, X, m):
+    # pre-process to catch constant array
+    # see: https://github.com/numpy/numpy/issues/9631
+    if Y.ptp() == 0.0:
+        # Catch constant results
+        # If Y does not change then it is not sensitive to anything...
+        return 0.0
+
     xr = rankdata(X, method="ordinal")
     Vi = 0
     N = len(Y)
@@ -153,6 +160,7 @@ def sobol_first(Y, X, m):
         ix = np.where((xr > m[j]) & (xr <= m[j + 1]))[0]
         nm = len(ix)
         Vi += (nm / N) * ((Y[ix].mean() - Y_mean) ** 2)
+
     return Vi / np.var(Y)
 
 
