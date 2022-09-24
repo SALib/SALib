@@ -2,21 +2,24 @@
 
 """
 from collections import OrderedDict
-import pkgutil
 from typing import Dict, Tuple
+import warnings
 
 import numpy as np  # type: ignore
 import scipy as sp  # type: ignore
-from scipy import stats
 from typing import List
 
-from .util_funcs import (avail_approaches, read_param_file, _check_bounds, _check_groups)
-from .problem import ProblemSpec
-from .results import ResultDict
+from .util_funcs import (  # noqa: F401, E402
+    avail_approaches,
+    read_param_file,
+    _check_bounds,
+    _check_groups,
+)  # noqa: F401, E402
+from .problem import ProblemSpec  # noqa: F401, E402
+from .results import ResultDict  # noqa: F401, E402
 
 
-__all__ = ["scale_samples", "read_param_file",
-           "ResultDict", "avail_approaches"]
+__all__ = ["scale_samples", "read_param_file", "ResultDict", "avail_approaches"]
 
 
 def _scale_samples(params: np.ndarray, bounds: List):
@@ -35,17 +38,19 @@ def _scale_samples(params: np.ndarray, bounds: List):
     lower_bounds, upper_bounds = _check_bounds(bounds)
 
     if np.any(lower_bounds >= upper_bounds):
-        raise ValueError("Bounds are not legal (upper bound must be greater than lower bound)")
+        raise ValueError(
+            "Bounds are not legal (upper bound must be greater than lower bound)"
+        )
 
     # This scales the samples in-place, by using the optional output
     # argument for the numpy ufunctions
     # The calculation is equivalent to:
     #   sample * (upper_bound - lower_bound) + lower_bound
-    np.add(np.multiply(params,
-                       (upper_bounds - lower_bounds),
-                       out=params),
-           lower_bounds,
-           out=params)
+    np.add(
+        np.multiply(params, (upper_bounds - lower_bounds), out=params),
+        lower_bounds,
+        out=params,
+    )
 
 
 def scale_samples(params: np.ndarray, problem: Dict):
@@ -66,8 +71,8 @@ def scale_samples(params: np.ndarray, problem: Dict):
     ----------
     np.ndarray, scaled samples
     """
-    bounds = problem['bounds']
-    dists = problem.get('dists')
+    bounds = problem["bounds"]
+    dists = problem.get("dists")
 
     if dists is None:
         _scale_samples(params, bounds)
@@ -78,10 +83,9 @@ def scale_samples(params: np.ndarray, problem: Dict):
             msg += "Num distributions: {}".format(len(dists))
             raise ValueError(msg)
 
-        params = _nonuniform_scale_samples(
-            params, bounds, dists)
+        params = _nonuniform_scale_samples(params, bounds, dists)
 
-    problem['sample_scaled'] = True
+    problem["sample_scaled"] = True
 
     return params
     # limited_params = limit_samples(params, upper_bound, lower_bound, dists)
@@ -104,15 +108,19 @@ def _unscale_samples(params, bounds):
     upper_bounds = b[:, 1]
 
     if np.any(lower_bounds >= upper_bounds):
-        raise ValueError("Bounds are not legal (upper bound must be greater than lower bound)")
+        raise ValueError(
+            "Bounds are not legal (upper bound must be greater than lower bound)"
+        )
 
     # This scales the samples in-place, by using the optional output
     # argument for the numpy ufunctions
     # The calculation is equivalent to:
     #   (sample - lower_bound) / (upper_bound - lower_bound)
-    np.divide(np.subtract(params, lower_bounds, out=params),
-              np.subtract(upper_bounds, lower_bounds),
-              out=params)
+    np.divide(
+        np.subtract(params, lower_bounds, out=params),
+        np.subtract(upper_bounds, lower_bounds),
+        out=params,
+    )
 
 
 def _nonuniform_scale_samples(params, bounds, dists):
@@ -128,15 +136,21 @@ def _nonuniform_scale_samples(params, bounds, dists):
     dists : list
         list of distributions, one for each parameter
             unif: uniform with lower and upper bounds
-            triang: triangular with width (scale) and location of peak
-                    location of peak is in percentage of width
-                    lower bound assumed to be zero
+            triang: triangular with lower and upper bounds, as well as
+                    location of peak
+                    The location of peak is in percentage of width
+                    e.g. :code:`[1.0, 3.0, 0.5]` indicates 1.0 to 3.0 with a
+                    peak at 2.0
+
+                    A soon-to-be deprecated two-value format assumes the lower
+                    bound to be 0
+                    e.g. :code:`[3, 0.5]` assumes 0 to 3, with a peak at 1.5
             norm: normal distribution with mean and standard deviation
             truncnorm: truncated normal distribution with upper and lower
                     bounds, mean and standard deviation
             lognorm: lognormal with ln-space mean and standard deviation
     """
-    b = np.array(bounds)
+    b = np.array(bounds, dtype=object)
 
     # initializing matrix for converted values
     conv_params = np.empty_like(params)
@@ -144,35 +158,64 @@ def _nonuniform_scale_samples(params, bounds, dists):
     # loop over the parameters
     for i in range(conv_params.shape[1]):
         # setting first and second arguments for distributions
-        b1 = b[i][0]
-        b2 = b[i][1]
+        b1 = b[i][0]  # ending
+        b2 = b[i][1]  # 0-1
 
-        if dists[i] == 'triang':
+        if dists[i] == "triang":
+            if len(b[i]) == 3:
+                loc_start = b[i][0]  # loc start
+                b1 = b[i][1]  # triangular distribution end
+                b2 = b[i][2]  # 0-1 aka c
+            elif len(b[i]) == 2:
+                msg = (
+                    "Two-value format for triangular distributions detected.\n"
+                    "To remove this message, specify the distribution start, "
+                    "end, and peak (three values) "
+                    "instead of the current two-value format "
+                    "(distribution end and peak, with start assumed to be 0)\n"
+                    "The two-value format will be deprecated in SALib v1.5"
+                )
+                warnings.warn(msg, DeprecationWarning, stacklevel=2)
+
+                loc_start = 0
+                b1 = b[i][0]
+                b2 = b[i][1]
+            else:
+                raise ValueError(
+                    "Unknown triangular distribution specification. Check"
+                    " problem specification."
+                )
+
             # checking for correct parameters
-            if b1 <= 0 or b2 <= 0 or b2 >= 1:
-                raise ValueError("""Triangular distribution: Scale must be
-                    greater than zero; peak on interval [0,1]""")
+            if b1 <= 0 or b2 <= 0 or b2 >= 1 or loc_start > b1:
+                raise ValueError(
+                    """Triangular distribution: Scale must be
+                    greater than zero; peak on interval [0,1], triangular
+                    start value must be smaller than end value"""
+                )
             else:
                 conv_params[:, i] = sp.stats.triang.ppf(
-                    params[:, i], c=b2, scale=b1, loc=0)
+                    params[:, i], c=b2, scale=b1 - loc_start, loc=loc_start
+                )
 
-        elif dists[i] == 'unif':
+        elif dists[i] == "unif":
             if b1 >= b2:
-                raise ValueError("""Uniform distribution: lower bound
-                    must be less than upper bound""")
+                raise ValueError(
+                    """Uniform distribution: lower bound
+                    must be less than upper bound"""
+                )
             else:
                 conv_params[:, i] = params[:, i] * (b2 - b1) + b1
 
-        elif dists[i] == 'norm':
+        elif dists[i] == "norm":
             if b2 <= 0:
                 raise ValueError("""Normal distribution: stdev must be > 0""")
             else:
-                conv_params[:, i] = sp.stats.norm.ppf(
-                    params[:, i], loc=b1, scale=b2)
+                conv_params[:, i] = sp.stats.norm.ppf(params[:, i], loc=b1, scale=b2)
 
         # Truncated normal distribution
         # parameters are lower bound and upper bound, mean and stdev
-        elif dists[i] == 'truncnorm':
+        elif dists[i] == "truncnorm":
             b3 = b[i][2]
             b4 = b[i][3]
             if b4 <= 0:
@@ -192,19 +235,18 @@ def _nonuniform_scale_samples(params, bounds, dists):
 
         # lognormal distribution (ln-space, not base-10)
         # paramters are ln-space mean and standard deviation
-        elif dists[i] == 'lognorm':
+        elif dists[i] == "lognorm":
             # checking for valid parameters
             if b2 <= 0:
-                raise ValueError(
-                    """Lognormal distribution: stdev must be > 0""")
+                raise ValueError("""Lognormal distribution: stdev must be > 0""")
             else:
                 conv_params[:, i] = np.exp(
-                    sp.stats.norm.ppf(params[:, i], loc=b1, scale=b2))
+                    sp.stats.norm.ppf(params[:, i], loc=b1, scale=b2)
+                )
 
         else:
-            valid_dists = ['unif', 'triang', 'norm', 'truncnorm', 'lognorm']
-            raise ValueError('Distributions: choose one of %s' %
-                             ", ".join(valid_dists))
+            valid_dists = ["unif", "triang", "norm", "truncnorm", "lognorm"]
+            raise ValueError("Distributions: choose one of %s" % ", ".join(valid_dists))
 
     return conv_params
 
@@ -218,11 +260,11 @@ def extract_group_names(groups: List) -> Tuple:
     Parameters
     ----------
     groups : List
-        
+
 
     Returns
     -------
-    tuple : names, number of groups    
+    tuple : names, number of groups
     """
     names = list(OrderedDict.fromkeys(groups))
     number = len(names)
@@ -284,11 +326,12 @@ def _define_problem_with_groups(problem: Dict) -> Dict:
         define it
     """
     # Checks if there isn't a key 'groups' or if it exists and is set to 'None'
-    if 'groups' not in problem or not problem['groups']:
-        problem['groups'] = problem['names']
-    elif len(problem['groups']) != problem['num_vars']:
-        raise ValueError("Number of entries in \'groups\' should be the same "
-                         "as in \'names\'")
+    if "groups" not in problem or not problem["groups"]:
+        problem["groups"] = problem["names"]
+    elif len(problem["groups"]) != problem["num_vars"]:
+        raise ValueError(
+            "Number of entries in 'groups' should be the same " "as in 'names'"
+        )
     return problem
 
 

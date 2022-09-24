@@ -35,7 +35,7 @@ Method of Morris
    :noindex:
 
 Sobol' Sensitivity Analysis
---------------------------
+---------------------------
 
 .. autofunction:: SALib.sample.saltelli.sample
    :noindex:

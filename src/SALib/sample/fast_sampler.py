@@ -3,16 +3,17 @@ import math
 import numpy as np
 
 from . import common_args
-from .. util import scale_samples, read_param_file
+from ..util import scale_samples, read_param_file
 
 
 def sample(problem, N, M=4, seed=None):
-    """Generate model inputs for the extended Fourier Amplitude Sensitivity Test (eFAST).
+    """Generate model inputs for extended Fourier Amplitude Sensitivity Test
 
-    Returns a NumPy matrix containing the model inputs required by the extended Fourier
-    Amplitude sensitivity test.  The resulting matrix contains N * D rows and D
-    columns, where D is the number of parameters. The samples generated are
-    intended to be used by :func:`SALib.analyze.fast.analyze`.
+    Returns a NumPy matrix containing the model inputs required by the extended
+    Fourier Amplitude sensitivity test.  The resulting matrix contains N * D
+    rows and D columns, where D is the number of parameters.
+    The samples generated are intended to be used by
+    :func:`SALib.analyze.fast.analyze`.
 
     Parameters
     ----------
@@ -23,14 +24,16 @@ def sample(problem, N, M=4, seed=None):
     M : int
         The interference parameter, i.e., the number of harmonics to sum in the
         Fourier series decomposition (default 4)
+    seed : int
+        Seed to generate a random number
 
     References
     ----------
-    .. [1] Cukier, R.I., Fortuin, C.M., Shuler, K.E., Petschek, A.G., 
-           Schaibly, J.H., 1973. 
-           Study of the sensitivity of coupled reaction systems to uncertainties 
-           in rate coefficients. I theory. 
-           Journal of Chemical Physics 59, 3873–3878. 
+    .. [1] Cukier, R.I., Fortuin, C.M., Shuler, K.E., Petschek, A.G.,
+           Schaibly, J.H., 1973.
+           Study of the sensitivity of coupled reaction systems to
+           uncertainties in rate coefficients. I theory.
+           Journal of Chemical Physics 59, 3873–3878.
            https://doi.org/10.1063/1.1680571
 
     .. [2] Saltelli, A., S. Tarantola, and K. P.-S. Chan (1999).  "A
@@ -42,10 +45,12 @@ def sample(problem, N, M=4, seed=None):
         np.random.seed(seed)
 
     if N <= 4 * M**2:
-        raise ValueError("""
-        Sample size N > 4M^2 is required. M=4 by default.""")
+        raise ValueError(
+            """
+        Sample size N > 4M^2 is required. M=4 by default."""
+        )
 
-    D = problem['num_vars']
+    D = problem["num_vars"]
 
     omega = np.zeros([D])
     omega[0] = math.floor((N - 1) / (2 * M))
@@ -67,7 +72,7 @@ def sample(problem, N, M=4, seed=None):
         omega2[i] = omega[0]
         idx = list(range(i)) + list(range(i + 1, D))
         omega2[idx] = omega[1:]
-        l = range(i * N, (i + 1) * N)
+        z = range(i * N, (i + 1) * N)
 
         # random phase shift on [0, 2pi) following Saltelli et al.
         # Technometrics 1999
@@ -75,7 +80,7 @@ def sample(problem, N, M=4, seed=None):
 
         for j in range(D):
             g = 0.5 + (1 / math.pi) * np.arcsin(np.sin(omega2[j] * s + phi))
-            X[l, j] = g
+            X[z, j] = g
 
     X = scale_samples(X, problem)
 
@@ -93,8 +98,15 @@ def cli_parse(parser):
     ----------
     Updated argparse object
     """
-    parser.add_argument('-M', '--m-coef', type=int, required=False, default=4,
-                        help='M coefficient, default 4', dest='M')
+    parser.add_argument(
+        "-M",
+        "--m-coef",
+        type=int,
+        required=False,
+        default=4,
+        help="M coefficient, default 4",
+        dest="M",
+    )
 
     return parser
 
@@ -108,8 +120,12 @@ def cli_action(args):
     """
     problem = read_param_file(args.paramfile)
     param_values = sample(problem, N=args.samples, M=args.M, seed=args.seed)
-    np.savetxt(args.output, param_values, delimiter=args.delimiter,
-               fmt='%.' + str(args.precision) + 'e')
+    np.savetxt(
+        args.output,
+        param_values,
+        delimiter=args.delimiter,
+        fmt="%." + str(args.precision) + "e",
+    )
 
 
 if __name__ == "__main__":

@@ -16,10 +16,15 @@ sphinx:
 formats:
   - pdf
 
+build:
+  os: "ubuntu-22.04"
+  tools:
+    python: "mambaforge-4.10"
+
 python:
-  version: "3.8"
   install:
-    - requirements: docs/requirements.txt
+    - method: pip
+      path: .
 
 conda:
   environment: environment.yml

@@ -3,25 +3,40 @@ How to cite SAlib
 
 If you would like to use our software, please cite it using the following:
 
+    Iwanaga, T., Usher, W., & Herman, J. (2022).
+    Toward SALib 2.0: Advancing the accessibility and interpretability of global sensitivity analyses.
+    Socio-Environmental Systems Modelling, 4, 18155.
+    doi:10.18174/sesmo.18155
+
     Herman, J. and Usher, W. (2017) SALib: An open-source Python library for
     sensitivity analysis. Journal of Open Source Software, 2(9).
     doi:10.21105/joss.00097
 
-|paper status|
+If you use BibTeX, cite using the following entries::
 
-If you use BibTeX, cite using the following entry::
+    @article{Iwanaga2022,
+      title = {Toward {SALib} 2.0: {Advancing} the accessibility and interpretability of global sensitivity analyses},
+      volume = {4},
+      url = {https://sesmo.org/article/view/18155},
+      doi = {10.18174/sesmo.18155},
+      journal = {Socio-Environmental Systems Modelling},
+      author = {Iwanaga, Takuya and Usher, William and Herman, Jonathan},
+      month = may,
+      year = {2022},
+      pages = {18155},
+    }
 
     @article{Herman2017,
-        doi = {10.21105/joss.00097},
-        url = {https://doi.org/10.21105/joss.00097},
-        year  = {2017},
-        month = {jan},
-        publisher = {The Open Journal},
-        volume = {2},
-        number = {9},
-        author = {Jon Herman and Will Usher},
-        title = {{SALib}: An open-source Python library for Sensitivity Analysis},
-        journal = {The Journal of Open Source Software}
+      doi = {10.21105/joss.00097},
+      url = {https://doi.org/10.21105/joss.00097},
+      year  = {2017},
+      month = {jan},
+      publisher = {The Open Journal},
+      volume = {2},
+      number = {9},
+      author = {Jon Herman and Will Usher},
+      title = {{SALib}: An open-source Python library for Sensitivity Analysis},
+      journal = {The Journal of Open Source Software}
     }
 
 

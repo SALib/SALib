@@ -1,5 +1,6 @@
 import sys
-sys.path.append('../..')
+
+sys.path.append("../..")
 
 from SALib.analyze import sobol
 from SALib.sample import saltelli
@@ -8,7 +9,7 @@ from SALib.util import read_param_file
 
 
 # Read the parameter range file and generate samples
-problem = read_param_file('../../src/SALib/test_functions/params/Ishigami.txt')
+problem = read_param_file("../../src/SALib/test_functions/params/Ishigami.txt")
 
 # Generate samples
 param_values = saltelli.sample(problem, 1024, calc_second_order=True, skip_values=2048)
@@ -19,7 +20,9 @@ Y = Ishigami.evaluate(param_values)
 
 # Perform the sensitivity analysis using the model output
 # Specify which column of the output file to analyze (zero-indexed)
-Si = sobol.analyze(problem, Y, calc_second_order=True, conf_level=0.95, print_to_console=True)
+Si = sobol.analyze(
+    problem, Y, calc_second_order=True, conf_level=0.95, print_to_console=True
+)
 # Returns a dictionary with keys 'S1', 'S1_conf', 'ST', and 'ST_conf'
 # e.g. Si['S1'] contains the first-order index for each parameter,
 # in the same order as the parameter file
