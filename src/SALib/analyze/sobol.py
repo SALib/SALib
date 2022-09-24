@@ -15,7 +15,7 @@ from itertools import combinations, zip_longest
 
 
 CONST_RESULT_MSG = (
-    "Constant values encountered, indicating the model evaluations "
+    "Constant values encountered, indicating model evaluations "
     "(or subset of evaluations) produced identical values."
 )
 
