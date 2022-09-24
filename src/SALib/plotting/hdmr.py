@@ -15,7 +15,11 @@ def plot(Si):
     plt.close("all")
 
     # Extract necessary data from Si
-    problem = Si.problem
+    try:
+        problem = Si.problem
+    except AttributeError:
+        problem = Si
+
     Em = Si["Em"]
     RT = Si["RT"]
     Y_em = Si["Y_em"]
