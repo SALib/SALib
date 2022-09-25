@@ -28,7 +28,7 @@ def plot(Si):
     Y = Si["Y"]
 
     # Get number of bootstrap from Runtime and sample size N
-    K = RT.shape[1]
+    K = RT.shape[0]
     N = Y.shape[0]
     row = 2
     col = 5
