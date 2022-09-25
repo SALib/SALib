@@ -63,6 +63,7 @@ def analyze(
     - a N x 1 vector of corresponding model outputs
 
     Returns:
+
     - each factor's first, second, and third order sensitivity coefficient
       (separated in total, structural and correlative contributions),
     - an estimate of their 95% confidence intervals (from bootstrap method)
