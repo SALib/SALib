@@ -44,6 +44,7 @@ def analyze(
     -----
     Compatible with:
         `saltelli` : :func:`SALib.sample.saltelli.sample`
+        `sobol` : :func:`SALib.sample.sobol.sample`
 
 
 
