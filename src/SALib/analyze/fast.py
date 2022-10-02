@@ -28,6 +28,13 @@ def analyze(
         `fast_sampler` : :func:`SALib.sample.fast_sampler.sample`
 
 
+    Examples
+    --------
+        >>> X = fast_sampler.sample(problem, 1000)
+        >>> Y = Ishigami.evaluate(X)
+        >>> Si = fast.analyze(problem, Y, print_to_console=False)
+
+
     Parameters
     ----------
     problem : dict
@@ -58,13 +65,6 @@ def analyze(
     .. [3] Pujol, G. (2006)
            fast99 - R `sensitivity` package
            https://github.com/cran/sensitivity/blob/master/R/fast99.R
-
-
-    Examples
-    --------
-        >>> X = fast_sampler.sample(problem, 1000)
-        >>> Y = Ishigami.evaluate(X)
-        >>> Si = fast.analyze(problem, Y, print_to_console=False)
     """
     if seed:
         np.random.seed(seed)
