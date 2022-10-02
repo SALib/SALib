@@ -100,6 +100,7 @@ Then, create a new branch with a useful name, such as `new_method_method_name`. 
 
 Finally, submit a pull request. Either @willu47 or @jdherman will review the pull request and merge in your changes.
 
+
 ### Other Enhancements
 
 Contributions not related to new methods are also welcome. These might include new test functions (see [SALib.test_functions](https://github.com/SALib/SALib/tree/main/SALib/test_functions) for how these are set up), or other code that is general across some or all of the methods. This general code is currently included in [SALib.util.\_\_init\_\_.py](https://github.com/SALib/SALib/blob/main/SALib/util/__init__.py).
@@ -136,3 +137,15 @@ a release:
 7. Check documentation is built and deployed to readthedocs (http://salib.readthedocs.org)
 8. Check that auto-generated PR is auto-merged on the conda-forge feedstock repo (conda-forge/salib-feedstock)
 9. Update development roadmap on GitHub
+
+## Building a local copy of the documentation
+
+Assuming the current location is the project root (the `SALib` directory):
+
+```bash
+$ conda install pydata-sphinx-theme myst-parser -c conda-forge
+$ sphinx-build -b html docs docs/html
+```
+
+A copy of the documentation will be in the `docs/html` directory.
+Open `index.html` to view it.
