@@ -44,7 +44,14 @@ def analyze(
     -----
     Compatible with:
         `saltelli` : :func:`SALib.sample.saltelli.sample`
+        `sobol` : :func:`SALib.sample.sobol.sample`
 
+
+    Examples
+    --------
+        >>> X = saltelli.sample(problem, 512)
+        >>> Y = Ishigami.evaluate(X)
+        >>> Si = sobol.analyze(problem, Y, print_to_console=True)
 
 
     Parameters
@@ -84,13 +91,6 @@ def analyze(
            output.  Design and estimator for the total sensitivity index."
            Computer Physics Communications, 181(2):259-270,
            doi:10.1016/j.cpc.2009.09.018.
-
-
-    Examples
-    --------
-        >>> X = saltelli.sample(problem, 512)
-        >>> Y = Ishigami.evaluate(X)
-        >>> Si = sobol.analyze(problem, Y, print_to_console=True)
     """
     if seed:
         # Set seed to ensure CIs are the same
@@ -348,17 +348,26 @@ def Si_list_to_dict(
 def Si_to_pandas_dict(S_dict):
     """Convert Si information into Pandas DataFrame compatible dict.
 
+
+    Examples
+    --------
+        >>> X = saltelli.sample(problem, 512)
+        >>> Y = Ishigami.evaluate(X)
+        >>> Si = sobol.analyze(problem, Y, print_to_console=True)
+        >>> T_Si, first_Si, (idx, second_Si) = sobol.Si_to_pandas_dict(Si, problem)
+
+
     Parameters
     ----------
     S_dict : ResultDict
         Sobol sensitivity indices
 
     See Also
-    ----------
+    --------
     Si_list_to_dict
 
     Returns
-    ----------
+    -------
     tuple : of total, first, and second order sensitivities.
             Total and first order are dicts.
             Second order sensitivities contain a tuple of parameter name
@@ -366,13 +375,6 @@ def Si_to_pandas_dict(S_dict):
             sensitivities.
             If no second order indices found, then returns tuple of
             (None, None)
-
-    Examples
-    --------
-    >>> X = saltelli.sample(problem, 512)
-    >>> Y = Ishigami.evaluate(X)
-    >>> Si = sobol.analyze(problem, Y, print_to_console=True)
-    >>> T_Si, first_Si, (idx, second_Si) = sobol.Si_to_pandas_dict(Si, problem)
     """
     problem = S_dict.problem
     total_order = {"ST": S_dict["ST"], "ST_conf": S_dict["ST_conf"]}

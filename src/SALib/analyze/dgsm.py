@@ -22,6 +22,13 @@ def analyze(
         `finite_diff` : :func:`SALib.sample.finite_diff.sample`
 
 
+    Examples
+    --------
+        >>> X = finite_diff.sample(problem, 1000)
+        >>> Y = Ishigami.evaluate(X)
+        >>> Si = dgsm.analyze(problem, Y, print_to_console=False)
+
+
     Parameters
     ----------
     problem : dict
@@ -47,12 +54,6 @@ def analyze(
            sensitivity measures and their link with global sensitivity
            indices." Mathematics and Computers in Simulation, 79(10):3009-3017,
            doi:10.1016/j.matcom.2009.01.023.
-
-    Examples
-    --------
-        >>> X = finite_diff.sample(problem, 1000)
-        >>> Y = Ishigami.evaluate(X)
-        >>> Si = dgsm.analyze(problem, Y, print_to_console=False)
     """
     if seed:
         np.random.seed(seed)

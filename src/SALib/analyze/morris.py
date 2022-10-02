@@ -54,6 +54,14 @@ def analyze(
         `morris` : :func:`SALib.sample.morris.sample`
 
 
+    Examples
+    --------
+        >>> X = morris.sample(problem, 1000, num_levels=4)
+        >>> Y = Ishigami.evaluate(X)
+        >>> Si = morris.analyze(problem, X, Y, conf_level=0.95,
+        >>>                     print_to_console=True, num_levels=4)
+
+
     Parameters
     ----------
     problem : dict
@@ -100,14 +108,6 @@ def analyze(
              of large models."
            Environmental Modelling & Software, 22(10):1509-1518,
            doi:10.1016/j.envsoft.2006.10.004.
-
-
-    Examples
-    --------
-        >>> X = morris.sample(problem, 1000, num_levels=4)
-        >>> Y = Ishigami.evaluate(X)
-        >>> Si = morris.analyze(problem, X, Y, conf_level=0.95,
-        >>>                     print_to_console=True, num_levels=4)
     """
     if seed:
         np.random.seed(seed)

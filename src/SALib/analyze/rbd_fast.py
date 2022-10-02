@@ -32,6 +32,13 @@ def analyze(
         all samplers
 
 
+    Examples
+    --------
+        >>> X = latin.sample(problem, 1000)
+        >>> Y = Ishigami.evaluate(X)
+        >>> Si = rbd_fast.analyze(problem, X, Y, print_to_console=False)
+
+
     Parameters
     ----------
     problem : dict
@@ -70,13 +77,6 @@ def analyze(
           simulation of a brick building in a hot and humid climate",
           Journal of Building Performance Simulation.
           doi:10.1080/19401493.2015.1112430
-
-
-    Examples
-    --------
-        >>> X = latin.sample(problem, 1000)
-        >>> Y = Ishigami.evaluate(X)
-        >>> Si = rbd_fast.analyze(problem, X, Y, print_to_console=False)
     """
     if seed:
         np.random.seed(seed)

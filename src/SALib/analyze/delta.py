@@ -29,6 +29,13 @@ def analyze(
         all samplers
 
 
+    Examples
+    --------
+        >>> X = latin.sample(problem, 1000)
+        >>> Y = Ishigami.evaluate(X)
+        >>> Si = delta.analyze(problem, X, Y, print_to_console=True)
+
+
     Parameters
     ----------
     problem : dict
@@ -54,13 +61,6 @@ def analyze(
     .. [2] Plischke, E., E. Borgonovo, and C. L. Smith (2013). "Global
            sensitivity measures from given data." European Journal of
            Operational Research, 226(3):536-550, doi:10.1016/j.ejor.2012.11.047.
-
-
-    Examples
-    --------
-        >>> X = latin.sample(problem, 1000)
-        >>> Y = Ishigami.evaluate(X)
-        >>> Si = delta.analyze(problem, X, Y, print_to_console=True)
     """
     if seed:
         np.random.seed(seed)

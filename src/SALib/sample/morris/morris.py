@@ -63,8 +63,8 @@ def sample(
     difference, but the ratio between number of optimal trajectories and the
     sample size results in an exponentially increasing number of scores that
     must be computed to find the optimal combination of trajectories. We
-    suggest going no higher than 4 from a pool of 100 samples with this "brute
-    force" approach.
+    suggest going no higher than 4 levels from a pool of 100 samples with this
+    "brute force" approach.
 
     Ruano et al., [3] proposed an alternative approach with an iterative
     process that maximizes the distance between subgroups of generated
@@ -73,7 +73,8 @@ def sample(
     produce the most optimal spread of trajectories, but are at least locally
     maximized and significantly reduce the time taken to select trajectories.
     With ``local_optimization = True`` (which is default), it is possible to
-    go higher than the previously suggested 4 from 100.
+    go higher than the previously suggested 4 levels from a pool of 100
+    samples.
 
     Parameters
     ----------

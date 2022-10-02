@@ -36,47 +36,33 @@ def analyze(
     print_to_console: bool = False,
     seed: int = None,
 ) -> Dict:
-    """This method computes global sensitivity indices using meta-modeling
-    technique called High Dimensional Model Representation (HDMR).
+    """Compute global sensitivity indices using the meta-modeling technique
+    known as High-Dimensional Model Representation (HDMR).
 
-    HDMR itself is not a sensitivity analysis method but it is a surrogate model.
-    It constructs a map of relationship between sets of high dimensional input
-    and output system variables [1]. This I/O relation can be constructed using
-    different basis functions (orthonormal polynomials, splines, etc.). The
-    model decomposition can be expressed as
+    HDMR itself is not a sensitivity analysis method but a surrogate modeling
+    approach. It constructs a map of relationship between sets of high
+    dimensional inputs and output system variables [1]. This I/O relation can
+    be constructed using different basis functions (orthonormal polynomials,
+    splines, etc.). The model decomposition can be expressed as
 
     .. math::
         \\widehat{y} = \\sum_{u \\subseteq \\{1, 2, ..., d \\}} f_u
 
-    where u represents any subset including empty set.
+    where u represents any subset including an empty set.
 
-    The HDMR method becomes extremely useful when number of sample points are not
-    enough for Monte Carlo simulation as in Sobol's method. It uses least-square
-    regression to reduce the number of samples and thus number of function (model)
-    evaluations. Another advantage of this method is that it can account for
-    correlation among the model input. Unlike other variance-based methods, the main
-    effects are combination of structural (uncorrelated) part and correlated part.
+    HDMR becomes extremely useful when the computational cost of obtaining
+    sufficient Monte Carlo samples are prohibitive, as may be the case with
+    Sobol's method. It uses least-square regression to reduce the required
+    number of samples and thus the number of function (model) evaluations.
+    Another advantage of this method is that it can account for correlation
+    among the model input. Unlike other variance-based methods, the main
+    effects are the combination of structural (uncorrelated) and
+    correlated contributions.
 
     This method uses as input
 
     - a N x d matrix of N different d-vectors of model inputs (factors/parameters)
     - a N x 1 vector of corresponding model outputs
-
-    Returns:
-
-    - each factor's first, second, and third order sensitivity coefficient
-      (separated in total, structural and correlative contributions),
-    - an estimate of their 95% confidence intervals (from bootstrap method)
-    - the coefficients of the significant B-spline basis functions that
-      govern output,
-    - Y (determined by an F-test of the error residuals of the HDMR model
-      (emulator) with/without a given first, second and/or
-      third order B-spline). These coefficients define an emulator that can
-      be used to predict the output, Y, of the original (CPU-intensive)
-      model for any d-vector of model inputs. For uncorrelated model inputs
-      (columns of X are independent), the HDMR sensitivity indices reduce
-      to a single index (= structural contribution), consistent with their
-      values derived from commonly used variance-based GSA methods.
 
 
     Notes
@@ -84,7 +70,27 @@ def analyze(
     Compatible with:
         all samplers
 
-    Contributed by @sahin-abdullah (sahina@uci.edu)
+    Sets an `emulate` method allowing re-use of the emulator.
+
+
+    Examples
+    --------
+    .. code-block:: python
+        :linenos:
+
+        sp = ProblemSpec({
+            'names': ['X1', 'X2', 'X3'],
+            'bounds': [[-np.pi, np.pi]] * 3,
+            # 'groups': ['A', 'B', 'A'],
+            'outputs': ['Y']
+        })
+
+        (sp.sample_saltelli(2048)
+            .evaluate(Ishigami.evaluate)
+            .analyze_hdmr()
+        )
+
+        sp.emulate()
 
 
     Parameters
@@ -120,26 +126,34 @@ def analyze(
         Regularization term
 
     print_to_console : bool
-        Print results directly to console (default False)
+        Print results directly to console (default: False)
 
     seed : bool
-        Set a seed value
+        Seed to generate a random number
 
 
     Returns
     -------
     Si : ResultDict,
-        Sa: Uncorrelated contribution
-        Sa_conf: Confidence interval of Sa
-        Sb: Correlated contribution
-        Sb_conf: Confidence interval of Sb
-        S: Total contribution of a particular term
-        S_conf: Confidence interval of S
-        ST: Total contribution of a particular dimension/parameter
+        Sa : Uncorrelated contribution of a term
+
+        Sa_conf : Confidence interval of Sa
+
+        Sb : Correlated contribution of a term
+
+        Sb_conf : Confidence interval of Sb
+
+        S : Total contribution of a particular term
+           Sum of Sa and Sb, representing first/second/third order sensitivity indices
+
+        S_conf : Confidence interval of S
+
+        ST : Total contribution of a particular dimension/parameter
+
         ST_conf: Confidence interval of ST
-        Sa: Uncorrelated contribution
         select: Number of selection (F-Test)
-        Em: Result set
+
+        Em : Emulator result set
             C1: First order coefficient
             C2: Second order coefficient
             C3: Third Order coefficient
@@ -149,7 +163,7 @@ def analyze(
     ----------
     .. [1] Rabitz, H. and Aliş, Ö.F.,
            "General foundations of high dimensional model representations",
-           Journal of Mathematical Chemistry 25, 197–233 (1999)
+           Journal of Mathematical Chemistry 25, 197-233 (1999)
            https://doi.org/10.1023/A:1019188517934
 
     .. [2] Genyuan Li, H. Rabitz, P.E. Yelvington, O.O. Oluwole, F. Bacon,
@@ -158,13 +172,6 @@ def analyze(
              Correlated Inputs",
            Journal of Physical Chemistry A, Vol. 114 (19), pp. 6022 - 6032, 2010,
            https://doi.org/10.1021/jp9096919
-
-
-    Examples
-    --------
-        >>> X = saltelli.sample(problem, 512)
-        >>> Y = Ishigami.evaluate(X)
-        >>> Si = hdmr.analyze(problem, X, Y, **options)
     """
     # Random Seed
     if seed:
