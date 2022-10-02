@@ -73,8 +73,8 @@ def analyze(
     Sets an `emulate` method allowing re-use of the emulator.
 
 
-    Example
-    -------
+    Examples
+    --------
     .. code-block:: python
         :linenos:
 

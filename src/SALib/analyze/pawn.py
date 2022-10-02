@@ -56,6 +56,13 @@ def analyze(
     individually, and the mean of their results are reported.
 
 
+    Examples
+    --------
+        >>> X = latin.sample(problem, 1000)
+        >>> Y = Ishigami.evaluate(X)
+        >>> Si = pawn.analyze(problem, X, Y, S=10, print_to_console=False)
+
+
     Parameters
     ----------
     problem : dict
@@ -76,13 +83,13 @@ def analyze(
     ----------
     .. [1] Pianosi, F., Wagener, T., 2015.
            A simple and efficient method for global sensitivity analysis
-           based on cumulative distribution functions.
-           Environmental Modelling & Software 67, 1–11.
+           based on cumulative distribution functions.
+           Environmental Modelling & Software 67, 1-11.
            https://doi.org/10.1016/j.envsoft.2015.01.004
 
     .. [2] Pianosi, F., Wagener, T., 2018.
            Distribution-based sensitivity analysis from a generic input-output sample.
-           Environmental Modelling & Software 108, 197–207.
+           Environmental Modelling & Software 108, 197-207.
            https://doi.org/10.1016/j.envsoft.2018.07.019
 
     .. [3] Baroni, G., Francke, T., 2020.
@@ -95,13 +102,6 @@ def analyze(
            GSA-cvd
            Combining variance- and distribution-based global sensitivity analysis
            https://github.com/baronig/GSA-cvd
-
-
-    Examples
-    --------
-        >>> X = latin.sample(problem, 1000)
-        >>> Y = Ishigami.evaluate(X)
-        >>> Si = pawn.analyze(problem, X, Y, S=10, print_to_console=False)
     """
     if seed:
         np.random.seed(seed)

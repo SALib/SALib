@@ -29,6 +29,13 @@ def analyze(problem, X, Y, second_order=False, print_to_console=False, seed=None
         `ff` : :func:`SALib.sample.ff.sample`
 
 
+    Examples
+    --------
+        >>> X = sample(problem)
+        >>> Y = X[:, 0] + (0.1 * X[:, 1]) + ((1.2 * X[:, 2]) * (0.2 + X[:, 0]))
+        >>> analyze(problem, X, Y, second_order=True, print_to_console=True)
+
+
     Parameters
     ----------
     problem: dict
@@ -60,13 +67,6 @@ def analyze(problem, X, Y, second_order=False, print_to_console=False, seed=None
            Global Sensitivity Analysis: The Primer.
            Wiley, West Sussex, U.K.
            http://doi.org/10.1002/9780470725184
-
-
-    Examples
-    --------
-        >>> X = sample(problem)
-        >>> Y = X[:, 0] + (0.1 * X[:, 1]) + ((1.2 * X[:, 2]) * (0.2 + X[:, 0]))
-        >>> analyze(problem, X, Y, second_order=True, print_to_console=True)
     """
     if seed:
         np.random.seed(seed)
