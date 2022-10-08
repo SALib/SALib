@@ -61,7 +61,7 @@ def analyze(problem, X, Y, second_order=False, print_to_console=False, seed=None
 
     References
     ----------
-    .. [1] Saltelli, A., Ratto, M., Andres, T., Campolongo, F.,
+    1. Saltelli, A., Ratto, M., Andres, T., Campolongo, F.,
            Cariboni, J., Gatelli, D.,
            Saisana, M., Tarantola, S., 2008.
            Global Sensitivity Analysis: The Primer.

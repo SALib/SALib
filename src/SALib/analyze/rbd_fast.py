@@ -58,21 +58,21 @@ def analyze(
 
     References
     ----------
-    .. [1] S. Tarantola, D. Gatelli and T. Mara (2006) "Random Balance Designs
+    1. S. Tarantola, D. Gatelli and T. Mara (2006) "Random Balance Designs
           for the Estimation of First Order Global Sensitivity Indices",
           Reliability Engineering and System Safety, 91:6, 717-727
           https://doi.org/10.1016/j.ress.2005.06.003
 
-    .. [2] Elmar Plischke (2010) "An effective algorithm for computing global
+    2. Elmar Plischke (2010) "An effective algorithm for computing global
           sensitivity indices (EASI) Reliability Engineering & System Safety",
           95:4, 354-360. doi:10.1016/j.ress.2009.11.005
 
-    .. [3] Jean-Yves Tissot, Clémentine Prieur (2012) "Bias correction for the
+    3. Jean-Yves Tissot, Clémentine Prieur (2012) "Bias correction for the
           estimation of sensitivity indices based on random balance designs.",
           Reliability Engineering and System Safety, Elsevier, 107, 205-213.
           doi:10.1016/j.ress.2012.06.010
 
-    .. [4] Jeanne Goffart, Mickael Rabouille & Nathan Mendes (2015)
+    4. Jeanne Goffart, Mickael Rabouille & Nathan Mendes (2015)
           "Uncertainty and sensitivity analysis applied to hygrothermal
           simulation of a brick building in a hot and humid climate",
           Journal of Building Performance Simulation.

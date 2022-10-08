@@ -42,16 +42,16 @@ def sample(
 
     References
     ----------
-    .. [1] Sobol', I.M., Kucherenko, S., 2009.
-           Derivative based global sensitivity measures and their link with
+    1. Sobol', I.M., Kucherenko, S., 2009.
+       Derivative based global sensitivity measures and their link with
            global sensitivity indices.
-           Mathematics and Computers in Simulation 79, 3009–3017.
-           https://doi.org/10.1016/j.matcom.2009.01.023
+       Mathematics and Computers in Simulation 79, 3009-3017.
+       https://doi.org/10.1016/j.matcom.2009.01.023
 
-    .. [2] Sobol', I.M., Kucherenko, S., 2010.
-           Derivative based global sensitivity measures.
-           Procedia - Social and Behavioral Sciences 2, 7745–7746.
-           https://doi.org/10.1016/j.sbspro.2010.05.208
+    2. Sobol', I.M., Kucherenko, S., 2010.
+       Derivative based global sensitivity measures.
+       Procedia - Social and Behavioral Sciences 2, 7745-7746.
+       https://doi.org/10.1016/j.sbspro.2010.05.208
 
     """
     if seed:
