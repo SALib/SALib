@@ -50,7 +50,7 @@ def analyze(
 
     References
     ----------
-    .. [1] Sobol, I. M. and S. Kucherenko (2009). "Derivative based global
+    1. Sobol, I. M. and S. Kucherenko (2009). "Derivative based global
            sensitivity measures and their link with global sensitivity
            indices." Mathematics and Computers in Simulation, 79(10):3009-3017,
            doi:10.1016/j.matcom.2009.01.023.

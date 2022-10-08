@@ -51,20 +51,22 @@ def analyze(
 
     References
     ----------
-    .. [1] Cukier, R. I., C. M. Fortuin, K. E. Shuler, A. G. Petschek,
-           and J. H. Schaibly (1973).
-           "Study of the sensitivity of coupled reaction
-           systems to uncertainties in rate coefficients."  J. Chem. Phys.,
-           59(8):3873-3878, doi:10.1063/1.1680571.
+    1. Cukier, R. I., C. M. Fortuin, K. E. Shuler, A. G. Petschek, and
+       J. H. Schaibly (1973).
+       Study of the sensitivity of coupled reaction systems to
+       uncertainties in rate coefficients.
+       J. Chem. Phys., 59(8):3873-3878
+       doi:10.1063/1.1680571
 
-    .. [2] Saltelli, A., S. Tarantola, and K. P.-S. Chan (1999).  "A
-           Quantitative Model-Independent Method for Global Sensitivity
-           Analysis of Model Output."  Technometrics, 41(1):39-56,
-           doi:10.1080/00401706.1999.10485594.
+    2. Saltelli, A., S. Tarantola, and K. P.-S. Chan (1999).  
+       A Quantitative Model-Independent Method for Global Sensitivity Analysis
+       of Model Output.
+       Technometrics, 41(1):39-56,
+       doi:10.1080/00401706.1999.10485594.
 
-    .. [3] Pujol, G. (2006)
-           fast99 - R `sensitivity` package
-           https://github.com/cran/sensitivity/blob/master/R/fast99.R
+    3. Pujol, G. (2006)
+       fast99 - R `sensitivity` package
+       https://github.com/cran/sensitivity/blob/master/R/fast99.R
     """
     if seed:
         np.random.seed(seed)

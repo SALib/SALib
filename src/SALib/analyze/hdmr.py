@@ -161,12 +161,12 @@ def analyze(
 
     References
     ----------
-    .. [1] Rabitz, H. and Aliş, Ö.F.,
+    1. Rabitz, H. and Aliş, Ö.F.,
            "General foundations of high dimensional model representations",
            Journal of Mathematical Chemistry 25, 197-233 (1999)
            https://doi.org/10.1023/A:1019188517934
 
-    .. [2] Genyuan Li, H. Rabitz, P.E. Yelvington, O.O. Oluwole, F. Bacon,
+    2. Genyuan Li, H. Rabitz, P.E. Yelvington, O.O. Oluwole, F. Bacon,
              C.E. Kolb, and J. Schoendorf,
            "Global Sensitivity Analysis for Systems with Independent and/or
              Correlated Inputs",

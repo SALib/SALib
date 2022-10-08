@@ -106,12 +106,12 @@ def sample(problem, seed=None):
 
     References
     ----------
-    .. [1] Saltelli, A., Ratto, M., Andres, T., Campolongo, F.,
+    1. Saltelli, A., Ratto, M., Andres, T., Campolongo, F.,
            Cariboni, J., Gatelli, D.,
            Saisana, M., Tarantola, S., 2008.
-           Global Sensitivity Analysis: The Primer.
-           Wiley, West Sussex, U.K.
-           http://doi.org/10.1002/9780470725184
+       Global Sensitivity Analysis: The Primer.
+       Wiley, West Sussex, U.K.
+       http://doi.org/10.1002/9780470725184
 
     """
     if seed:

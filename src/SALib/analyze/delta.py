@@ -54,11 +54,11 @@ def analyze(
 
     References
     ----------
-    .. [1] Borgonovo, E. (2007). "A new uncertainty importance measure."
+    1. Borgonovo, E. (2007). "A new uncertainty importance measure."
            Reliability Engineering & System Safety, 92(6):771-784,
            doi:10.1016/j.ress.2006.04.015.
 
-    .. [2] Plischke, E., E. Borgonovo, and C. L. Smith (2013). "Global
+    2. Plischke, E., E. Borgonovo, and C. L. Smith (2013). "Global
            sensitivity measures from given data." European Journal of
            Operational Research, 226(3):536-550, doi:10.1016/j.ejor.2012.11.047.
     """

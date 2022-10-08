@@ -65,31 +65,31 @@ def sample(
 
     References
     ----------
-    .. [1] Campolongo, F., Saltelli, A., Cariboni, J., 2011.
+    1. Campolongo, F., Saltelli, A., Cariboni, J., 2011.
            From screening to quantitative sensitivity analysis.
            A unified approach.
-           Computer Physics Communications 182, 978–988.
+           Computer Physics Communications 182, 978-988.
            https://doi.org/10.1016/j.cpc.2010.12.039
 
-    .. [2] Owen, A. B., 2020.
+    2. Owen, A. B., 2020.
            On dropping the first Sobol' point.
            arXiv:2008.08051 [cs, math, stat].
            Available at: http://arxiv.org/abs/2008.08051
            (Accessed: 20 April 2021).
 
-    .. [3] Saltelli, A., 2002.
+    3. Saltelli, A., 2002.
            Making best use of model evaluations to compute sensitivity indices.
-           Computer Physics Communications 145, 280–297.
+           Computer Physics Communications 145, 280-297.
            https://doi.org/10.1016/S0010-4655(02)00280-1
 
-    .. [4] Sobol', I.M., 2001.
+    4. Sobol', I.M., 2001.
            Global sensitivity indices for nonlinear mathematical models and
            their Monte Carlo estimates.
            Mathematics and Computers in Simulation,
-           The Second IMACS Seminar on Monte Carlo Methods 55, 271–280.
+           The Second IMACS Seminar on Monte Carlo Methods 55, 271-280.
            https://doi.org/10.1016/S0378-4754(00)00270-6
 
-    .. [5] Discussion: https://github.com/scipy/scipy/pull/10844
+    5. Discussion: https://github.com/scipy/scipy/pull/10844
            https://github.com/scipy/scipy/pull/10844#issuecomment-672186615
            https://github.com/scipy/scipy/pull/10844#issuecomment-673029539
     """
