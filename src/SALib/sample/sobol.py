@@ -103,7 +103,7 @@ def sample(
     qrng = qmc.Sobol(d=2 * D, scramble=scramble, seed=seed)
 
     # fast-forward logic
-    if skip_values > 0:
+    if skip_values > 0 and isinstance(skip_values, int):
         M = skip_values
         if not ((M & (M - 1) == 0) and (M != 0 and M - 1 != 0)):
             msg = f"""
@@ -125,7 +125,7 @@ def sample(
             warnings.warn(msg, stacklevel=2)
 
         qrng.fast_forward(M)
-    elif skip_values < 0 or isinstance(skip_values, int):
+    elif skip_values < 0 or not isinstance(skip_values, int):
         raise ValueError("`skip_values` must be a positive integer.")
 
     # sample Sobol' sequence
