@@ -11,7 +11,7 @@ authors:
   given-names: "Jon"
   orcid: "0000-0002-4081-3175"
 title: "SALib: An open-source Python library for sensitivity analysis"
-version: 1.4.6
+version: 1.4.6.1
 doi: 10.21105/joss.00097
 date-released: 2022-05-01
 url: "https://github.com/SALib/SALib"
