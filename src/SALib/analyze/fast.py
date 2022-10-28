@@ -15,25 +15,22 @@ def analyze(
     print_to_console=False,
     seed=None,
 ):
-    """Perform extended Fourier Amplitude Sensitivity Test on model outputs
+    """Perform extended Fourier Amplitude Sensitivity Test on model outputs.
 
     Returns a dictionary with keys 'S1' and 'ST', where each entry is a list of
     size D (the number of parameters) containing the indices in the same order
     as the parameter file.
-
 
     Notes
     -----
     Compatible with:
         `fast_sampler` : :func:`SALib.sample.fast_sampler.sample`
 
-
     Examples
     --------
         >>> X = fast_sampler.sample(problem, 1000)
         >>> Y = Ishigami.evaluate(X)
         >>> Si = fast.analyze(problem, Y, print_to_console=False)
-
 
     Parameters
     ----------
