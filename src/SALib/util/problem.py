@@ -240,9 +240,11 @@ class ProblemSpec(dict):
         """Distribute model evaluation across a cluster.
 
         Usage Conditions:
+
         * The provided function needs to accept a numpy array of inputs as
           its first parameter
         * The provided function must return a numpy array of results
+
 
         Parameters
         ----------
