@@ -114,8 +114,8 @@ def sample(
 
         # warning when N > skip_values
         # see https://github.com/scipy/scipy/pull/10844#issuecomment-673029539
-        n_exp = int(np.log(N, 2))
-        m_exp = int(np.log(M, 2))
+        n_exp = int(np.log2(N))
+        m_exp = int(np.log2(M))
         if n_exp > m_exp:
             msg = (
                 "Convergence may not be valid as the number of "
