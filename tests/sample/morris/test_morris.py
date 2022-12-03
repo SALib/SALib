@@ -292,19 +292,16 @@ class TestGroupSampleGeneration:
         """
         Checks if a warn is raised when the number of tests is odd
         """
-        with warns(None) as record:
+        with warns(UserWarning):
             _check_if_num_levels_is_even(5)
-
-        assert record
 
     def test_check_if_num_levels_is_even_check_even(self):
         """
         Checks if a warn is not raised when the number of tests is even.
         """
-        with warns(None) as record:
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
             _check_if_num_levels_is_even(4)
-
-        assert not record
 
     @mark.xfail()
     def test_check_group_membership_all_ok(self):
