@@ -47,9 +47,6 @@ def analyze(
     ``sigma`` is used as an indicator of interactions between parameters, or
     groups of parameters.
 
-
-    Notes
-    -----
     Compatible with:
         `morris` : :func:`SALib.sample.morris.sample`
 
