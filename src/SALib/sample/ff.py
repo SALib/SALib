@@ -2,7 +2,6 @@
 
 This implementation is based on the formulation put forward in
 [`Saltelli et al. 2008 <http://doi.org/10.1002/9780470725184>`_]
-
 """
 
 from scipy.linalg import hadamard
@@ -13,7 +12,7 @@ from ..util import scale_samples, read_param_file
 
 def find_smallest(num_vars):
     """Find the smallest exponent of two that is greater than the number
-    of variables
+    of variables.
 
     Parameters
     ----------
@@ -31,7 +30,7 @@ def find_smallest(num_vars):
 
 
 def extend_bounds(problem):
-    """Extends the problem bounds to the nearest power of two
+    """Extends the problem bounds to the nearest power of two.
 
     Parameters
     ----------
@@ -56,7 +55,7 @@ def extend_bounds(problem):
 
 
 def generate_contrast(problem):
-    """Generates the raw sample from the problem file
+    """Generates the raw sample from the problem file.
 
     Parameters
     ----------
@@ -76,7 +75,7 @@ def generate_contrast(problem):
 
 
 def sample(problem, seed=None):
-    """Generates model inputs using a fractional factorial sample
+    """Generates model inputs using a fractional factorial sample.
 
     Returns a NumPy matrix containing the model inputs required for a
     fractional factorial analysis.
@@ -103,16 +102,13 @@ def sample(problem, seed=None):
     -------
     sample : :class:`numpy.array`
 
-
     References
     ----------
     1. Saltelli, A., Ratto, M., Andres, T., Campolongo, F.,
-           Cariboni, J., Gatelli, D.,
-           Saisana, M., Tarantola, S., 2008.
+       Cariboni, J., Gatelli, D., Saisana, M., Tarantola, S., 2008.
        Global Sensitivity Analysis: The Primer.
        Wiley, West Sussex, U.K.
        http://doi.org/10.1002/9780470725184
-
     """
     if seed:
         np.random.seed(seed)
