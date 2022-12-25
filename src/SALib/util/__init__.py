@@ -68,7 +68,7 @@ def scale_samples(params: np.ndarray, problem: Dict):
         SALib problem specification
 
     Returns
-    ----------
+    -------
     np.ndarray, scaled samples
     """
     bounds = problem["bounds"]

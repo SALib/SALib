@@ -412,7 +412,7 @@ def to_df(self):
     """Conversion method to Pandas DataFrame. To be attached to ResultDict.
 
     Returns
-    --------
+    -------
     List : of Pandas DataFrames in order of Total, First, Second
 
     Example

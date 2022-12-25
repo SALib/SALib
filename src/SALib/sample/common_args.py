@@ -9,7 +9,7 @@ def setup(parser):
     parser : argparse object
 
     Returns
-    ----------
+    -------
     Updated argparse object
     """
     parser.add_argument(
@@ -45,7 +45,7 @@ def create(cli_parser=None):
         Function to add method specific arguments to parser
 
     Returns
-    ----------
+    -------
     argparse object
     """
     parser = argparse.ArgumentParser(
@@ -72,7 +72,7 @@ def run_cli(cli_parser, run_sample, known_args=None):
         Additional arguments to parse
 
     Returns
-    ----------
+    -------
     argparse object
     """
     parser = create(cli_parser)

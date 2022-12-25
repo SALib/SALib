@@ -37,7 +37,7 @@ def sample(
         How many values of the Sobol sequence to skip
 
     Returns
-    ----------
+    -------
     np.array : DGSM sequence
 
     References
@@ -94,7 +94,7 @@ def cli_parse(parser):
     parser : argparse object
 
     Returns
-    ----------
+    -------
     Updated argparse object
     """
     parser.add_argument(

@@ -211,7 +211,7 @@ def cli_parse(parser):
     parser : argparse object
 
     Returns
-    ----------
+    -------
     Updated argparse object
     """
     parser.add_argument(
