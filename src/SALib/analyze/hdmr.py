@@ -64,14 +64,12 @@ def analyze(
     - a N x d matrix of N different d-vectors of model inputs (factors/parameters)
     - a N x 1 vector of corresponding model outputs
 
-
     Notes
     -----
     Compatible with:
         all samplers
 
     Sets an `emulate` method allowing re-use of the emulator.
-
 
     Examples
     --------
@@ -91,7 +89,6 @@ def analyze(
         )
 
         sp.emulate()
-
 
     Parameters
     ----------
@@ -131,7 +128,6 @@ def analyze(
     seed : bool
         Seed to generate a random number
 
-
     Returns
     -------
     Si : ResultDict,
@@ -144,13 +140,14 @@ def analyze(
         Sb_conf : Confidence interval of Sb
 
         S : Total contribution of a particular term
-           Sum of Sa and Sb, representing first/second/third order sensitivity indices
+            Sum of Sa and Sb, representing first/second/third order sensitivity indices
 
         S_conf : Confidence interval of S
 
         ST : Total contribution of a particular dimension/parameter
 
         ST_conf: Confidence interval of ST
+
         select: Number of selection (F-Test)
 
         Em : Emulator result set
@@ -900,7 +897,7 @@ def to_df(self):
     """Conversion method to Pandas DataFrame. To be attached to ResultDict.
 
     Returns
-    ========
+    -------
     Pandas DataFrame
     """
     names = self["names"]
