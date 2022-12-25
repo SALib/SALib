@@ -30,6 +30,8 @@ Supported Methods
   (`Saltelli et al. 2008 <http://www.wiley.com/WileyCDA/WileyTitle/productCd-0470059974.html>`_)
 * High Dimensional Model Representation
   (`Li et al. 2010 <https://pubs.acs.org/doi/pdf/10.1021/jp9096919>`_)
+* PAWN
+  (`Pianosi and Wagener 2018 <10.1016/j.envsoft.2018.07.019>`__, `Pianosi and Wagener 2015 <https://doi.org/10.1016/j.envsoft.2015.01.004>`__)
 
 
 .. toctree::
