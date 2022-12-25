@@ -13,7 +13,7 @@ def avail_approaches(pkg):
         module to inspect
 
     Returns
-    ---------
+    -------
     method : list
         A list of available submodules
     """

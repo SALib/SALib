@@ -113,7 +113,7 @@ class ProblemSpec(dict):
             Additional keyword arguments passed to `func`
 
         Returns
-        ----------
+        -------
         self : ProblemSpec object
         """
         # Clear model output and analysis results to avoid confusion
@@ -163,7 +163,7 @@ class ProblemSpec(dict):
             Additional keyword arguments passed to `func`
 
         Returns
-        ----------
+        -------
         self : ProblemSpec object
         """
         if "nprocs" in kwargs:
@@ -197,7 +197,7 @@ class ProblemSpec(dict):
             Additional keyword arguments passed to `func`
 
         Returns
-        ----------
+        -------
         self : ProblemSpec object
         """
         warnings.warn(
@@ -267,7 +267,7 @@ class ProblemSpec(dict):
             Additional keyword arguments passed to `func`
 
         Returns
-        ----------
+        -------
         self : ProblemSpec object
         """
         if not pathos_available:
@@ -323,7 +323,7 @@ class ProblemSpec(dict):
             Additional keyword arguments passed to `func`
 
         Returns
-        ----------
+        -------
         self : ProblemSpec object
         """
         if self["num_vars"] == 1 or (self["groups"] and len("groups") == 1):
@@ -385,7 +385,7 @@ class ProblemSpec(dict):
             Additional keyword arguments passed to `func`
 
         Returns
-        ----------
+        -------
         self : ProblemSpec object
         """
         warnings.warn("Parallel analysis is an experimental feature and may not work.")
