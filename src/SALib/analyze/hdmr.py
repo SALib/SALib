@@ -48,7 +48,7 @@ def analyze(
     .. math::
         \\widehat{y} = \\sum_{u \\subseteq \\{1, 2, ..., d \\}} f_u
 
-    where u represents any subset including an empty set.
+    where :math:`u` represents any subset including an empty set.
 
     HDMR becomes extremely useful when the computational cost of obtaining
     sufficient Monte Carlo samples are prohibitive, as may be the case with
@@ -146,29 +146,28 @@ def analyze(
 
         ST : Total contribution of a particular dimension/parameter
 
-        ST_conf: Confidence interval of ST
+        ST_conf : Confidence interval of ST
 
-        select: Number of selection (F-Test)
+        select : Number of selection (F-Test)
 
         Em : Emulator result set
             C1: First order coefficient
             C2: Second order coefficient
             C3: Third Order coefficient
 
-
     References
     ----------
     1. Rabitz, H. and Aliş, Ö.F.,
-           "General foundations of high dimensional model representations",
-           Journal of Mathematical Chemistry 25, 197-233 (1999)
-           https://doi.org/10.1023/A:1019188517934
+       "General foundations of high dimensional model representations",
+       Journal of Mathematical Chemistry 25, 197-233 (1999)
+       https://doi.org/10.1023/A:1019188517934
 
     2. Genyuan Li, H. Rabitz, P.E. Yelvington, O.O. Oluwole, F. Bacon,
-             C.E. Kolb, and J. Schoendorf,
-           "Global Sensitivity Analysis for Systems with Independent and/or
-             Correlated Inputs",
-           Journal of Physical Chemistry A, Vol. 114 (19), pp. 6022 - 6032, 2010,
-           https://doi.org/10.1021/jp9096919
+       C.E. Kolb, and J. Schoendorf,
+       "Global Sensitivity Analysis for Systems with Independent and/or
+       Correlated Inputs",
+       Journal of Physical Chemistry A, Vol. 114 (19), pp. 6022 - 6032, 2010,
+       https://doi.org/10.1021/jp9096919
     """
     # Random Seed
     if seed:
