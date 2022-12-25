@@ -79,6 +79,7 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.autosectionlabel",
     "myst_parser",
+    "numpydoc",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
