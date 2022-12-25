@@ -15,7 +15,7 @@ def sample(
     skip_values: int = 1024,
 ) -> np.ndarray:
     """
-    Generate matrix of samples for derivative-based global sensitivity measure (dgsm).
+    Generate matrix of samples for Derivative-based Global Sensitivity Measure (DGSM).
 
     Start from a QMC (Sobol') sequence and finite difference with delta % steps
 
@@ -23,16 +23,12 @@ def sample(
     ----------
     problem : dict
         SALib problem specification
-
     N : int
         Number of samples
-
     delta : float
         Finite difference step size (percent)
-
     seed : int or None
         Random seed value
-
     skip_values : int
         How many values of the Sobol sequence to skip
 
@@ -52,7 +48,6 @@ def sample(
        Derivative based global sensitivity measures.
        Procedia - Social and Behavioral Sciences 2, 7745-7746.
        https://doi.org/10.1016/j.sbspro.2010.05.208
-
     """
     if seed:
         np.random.seed(seed)
