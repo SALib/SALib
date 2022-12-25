@@ -408,6 +408,7 @@ For multi-output models, sensitivity results for individual
 outputs can be extracted:
 
 .. code:: python
+
     sp.analysis['Y1']['S1']  # First order for Y1
     sp.analysis['Y2']['S2']  # Second order for Y2
 
@@ -427,6 +428,7 @@ In the example below, the figures are collected and the y-axis for the first sub
 is set to use log scale.
 
 .. code:: python
+
     import matplotlib.pyplot as plt
 
     axes = sp.plot()
