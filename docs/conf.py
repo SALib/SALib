@@ -71,13 +71,13 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.intersphinx",
     "sphinx.ext.todo",
-    "sphinx.ext.autosummary",
+    # "sphinx.ext.autosummary",
     "sphinx.ext.viewcode",
     "sphinx.ext.coverage",
     "sphinx.ext.doctest",
     "sphinx.ext.ifconfig",
     "sphinx.ext.mathjax",
-    "sphinx.ext.autosectionlabel",
+    # "sphinx.ext.autosectionlabel",
     "myst_parser",
     "numpydoc",
 ]
@@ -90,6 +90,11 @@ source_suffix = {
     ".rst": "restructuredtext",
     ".md": "markdown",
 }
+
+# ignore autosummary
+autosummary_generate = False
+autosummary_imported_members = False
+numpydoc_class_members_toctree = False
 
 # The encoding of source files.
 # source_encoding = 'utf-8-sig'
