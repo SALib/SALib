@@ -40,7 +40,7 @@ def sample(
     ----------
     1. Sobol', I.M., Kucherenko, S., 2009.
        Derivative based global sensitivity measures and their link with
-           global sensitivity indices.
+       global sensitivity indices.
        Mathematics and Computers in Simulation 79, 3009-3017.
        https://doi.org/10.1016/j.matcom.2009.01.023
 
