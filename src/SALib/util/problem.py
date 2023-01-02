@@ -31,7 +31,14 @@ __all__ = ["ProblemSpec"]
 
 
 class ProblemSpec(dict):
-    """Dictionary-like object representing an SALib Problem specification."""
+    """Dictionary-like object representing an SALib Problem specification.
+
+    Attributes
+    ----------
+    samples : np.array, of generated samples
+    results : np.array, of evaluations (i.e., model outputs)
+    analysis : np.array or dict, of sensitivity indices
+    """
 
     def __init__(self, *args, **kwargs):
         super(ProblemSpec, self).__init__(*args, **kwargs)
