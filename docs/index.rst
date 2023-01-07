@@ -45,5 +45,6 @@ Supported Methods
    License <license>
    Authors <authors>
    Projects that use SALib <citations>
+   Developers Guide <developers_guide>
    Changes <changelog>
    Complete Module Reference <api/modules>

@@ -89,6 +89,8 @@ concise workflow. The sampling, evaluation and analysis trifecta can be run with
         .analyze_sobol()
     )
 
+    total_Si, first_Si, second_Si = so.to_df()
+
     sp.plot()
     sp.heatmap()
 
@@ -136,7 +138,7 @@ As seen above, the :code:`ProblemSpec` simply wraps around a :code:`dict`.
 
 Here, the default is to assume all inputs are uniformly distributed.
 
-See :ref:`Advanced Examples` on how to provide further details, including alternate distributions.
+See :doc:`advanced` on how to provide further details, including alternate distributions.
 
 .. note::
 
@@ -245,11 +247,11 @@ If a sample has already been defined, this can be provided to the interface like
 
 where :code:`X` is a numpy array.
 
-.. seealso::
+.. note::
     :code:`sp.set_results(Y)` can be used to set existing results.
 
 .. warning::
-    Care must be taken to not inappropriate mix and match sampling and analysis methods.
+    Care must be taken to avoid inappropriately mix-and-matching sampling and analysis methods.
     For example, Sobol' analysis must be conducted with a Sobol' sample.
 
 
@@ -266,6 +268,12 @@ Here, we use the Ishigami function as an example.
     sp.evaluate(Ishigami.evaluate)
 
 
+.. note::
+    SALib also supports parallel model evaluation with
+    `sp.evaluate_parallel()`. It is assumed that all results
+    can be held in memory.
+
+
 The Ishigami module provides an :code:`evaluate` function that
 looks something like:
 
@@ -276,7 +284,7 @@ looks something like:
 
 The actual implementation can be seen `here <https://github.com/SALib/SALib/blob/4a7c4b362df395cd62f8cc549030a2f6d03964c4/src/SALib/test_functions/Ishigami.py#L4>`_.
 
-Note that the inputs (:code:`X`) are in the first position.
+Note that the inputs (:code:`X`) is the first argument.
 
 .. tip::
     For user-provided models, a wrapper can be written. A wrapper is
@@ -453,6 +461,8 @@ heatmap.
     :width: 800
     :align: center
 
+
+.. _Another example:
 
 Another Example
 ---------------
