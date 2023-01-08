@@ -1,5 +1,5 @@
 ======
-Basics with the SALib Interface
+SALib Interface Basics
 ======
 
 The earlier example is repeated on this page with the SALib `ProblemSpec` interface.
@@ -8,7 +8,7 @@ find easier to use. Note that the interface does add computational overhead
 (thereby increasing runtimes) as it provides additional checks for users.
 
 Developers who wish to integrate SALib into their own work may wish to use the
-core API instead.
+core API as detailed in the first example instead.
 
 The Ishigami function
 ---------------------
@@ -392,16 +392,20 @@ Basic plotting facilities are provided for convenience.
 
 All plotting methods will return matplotlib axes objects to allow later adjustment.
 
-In the example below, the figures are collected and the y-axis for the first subplot
-is set to use log scale.
+In the example below, the figure is created, the y-axis for the first subplot
+is set to use log scale, and the figure size is adjusted with :code:`matplotlib`.
 
 .. code:: python
 
     import matplotlib.pyplot as plt
 
+
     axes = sp.plot()
     axes[0].set_yscale('log')
+    fig = plt.gcf()  # get current figure
+    fig.set_size_inches(10, 4)
     plt.tight_layout()
+
 
 
 .. figure:: assets/example_mod_plot.svg
