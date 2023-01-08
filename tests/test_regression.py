@@ -241,7 +241,7 @@ def test_regression_sobol_groups_dists():
     problem = {
         "num_vars": 3,
         "names": ["x1", "x2", "x3"],
-        "bounds": [[-np.pi, np.pi], [1.0, 0.2], [3, 0.5]],
+        "bounds": [[-np.pi, np.pi], [1.0, 0.2], [0.0, 3, 0.5]],
         "groups": ["G1", "G2", "G1"],
         "dists": ["unif", "lognorm", "triang"],
     }

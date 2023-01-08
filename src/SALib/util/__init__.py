@@ -128,8 +128,6 @@ def _nonuniform_scale_samples(params, bounds, dists):
 
     Parameters
     ----------
-    problem : dict
-        problem definition including bounds
     params : numpy.ndarray
         numpy array of dimensions num_params-by-N,
         where N is the number of samples
