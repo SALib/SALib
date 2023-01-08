@@ -184,8 +184,6 @@ second-order indices, resulting in a smaller sample matrix with
     The documentation for each method lists a brief overview and includes 
     references to provide further details.
 
-    All sampling methods can be accessed with :code:`sp.sample_[name of method]`.
-
 
 A generic :code:`sp.sample` method is also available, allowing use of your own
 sampling function. 
