@@ -27,7 +27,7 @@ What is SALib?
 
 SALib is an open source library written in Python for performing
 sensitivity analyses.  SALib provides a decoupled workflow, meaning it does not
-require direct interaction with the mathematical or computational model.  Instead,
+directly interface with the mathematical or computational model.  Instead,
 SALib is responsible for generating the model inputs, using one of the
 :code:`sample` functions, and computing the sensitivity indices from the model
 outputs, using one of the :code:`analyze` functions.  A typical sensitivity
@@ -51,253 +51,76 @@ we will walk you through a simple example.
 An Example
 ----------
 In this example, we will perform a Sobol' sensitivity analysis of the Ishigami
-function, shown below.  The Ishigami function is commonly used to test
-uncertainty and sensitivity analysis methods because it exhibits strong
-nonlinearity and nonmonotonicity.
+function (shown below) using the core SALib functions. The example is repeated
+in the next tutorial using an object-oriented interface which some may find
+easier to use.
+
+The Ishigami function is commonly used to test uncertainty and sensitivity 
+analysis methods because it exhibits strong nonlinearity and nonmonotonicity.
 
 .. math::
 
     f(x) = sin(x_1) + a sin^2(x_2) + b x_3^4 sin(x_1)
 
-
-The ProblemSpec Interface
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-SALib provides a single interface from which all methods can be accessed.
-The interface is called the :code:`ProblemSpec` (the Problem Specification).
-One advantage to the interface is the method chaining approach which offers a
-concise workflow. The sampling, evaluation and analysis trifecta can be run with:
-
-.. code:: python
-
-    import numpy as np
-
-    from SALib.test_functions import Ishigami
-    from SALib import ProblemSpec
-
-
-    sp = ProblemSpec({
-            "names": ["x1", "x2", "x3"],
-            "groups": None,
-            "bounds": [[-np.pi, np.pi]] * 3,
-            "outputs": ["Y"],
-        })
-
-    (
-        sp.sample_sobol(1024)
-        .evaluate(Ishigami.evaluate)
-        .analyze_sobol()
-    )
-
-    total_Si, first_Si, second_Si = so.to_df()
-
-    sp.plot()
-    sp.heatmap()
-
-
-Each step in the above is outlined in the sections below.
-
-
 Importing SALib
 ~~~~~~~~~~~~~~~
 
-First, the necessary packages are imported.
-
-Here, we import numpy as well as the Ishigami test function (to use for this example)
-and the :code:`ProblemSpec` interface.
+The first step is the import the necessary libraries.  In SALib, the
+:code:`sample` and :code:`analyze` functions are stored in separate
+Python modules.  For example, below we import the :code:`saltelli` sample
+function and the :code:`sobol` analyze function.  We also import the Ishigami
+function, which is provided as a test function within SALib.  Lastly, we
+import :code:`numpy`, as it is used by SALib to store the model inputs and
+outputs in a matrix.
 
 .. code:: python
 
-    import numpy as np
-
+    from SALib.sample import saltelli
+    from SALib.analyze import sobol
     from SALib.test_functions import Ishigami
-    from SALib import ProblemSpec
-
+    import numpy as np
 
 Defining the Model Inputs
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Next, we must define the model inputs.  The Ishigami function has three inputs,
 :math:`x_1, x_2, x_3` where :math:`x_i \in [-\pi, \pi]`.  In SALib, we define
-a :code:`dict` which holds the names of the inputs, and the bounds on each input.
-Optionally, the expected output(s) can also be named.
+a :code:`dict` defining the number of inputs, the names of the inputs, and
+the bounds on each input, as shown below.
 
 .. code:: python
 
-    sp = ProblemSpec({
+    problem = {
+        'num_vars': 3,
         'names': ['x1', 'x2', 'x3'],
-        'bounds': [
-            [-np.pi, np.pi],  # bounds for x1
-            [-np.pi, np.pi],  # ... x2
-            [-np.pi, np.pi]   # ... x3
-        ],
-        'outputs': ['Y']
-    })
+        'bounds': [[-3.14159265359, 3.14159265359],
+                   [-3.14159265359, 3.14159265359],
+                   [-3.14159265359, 3.14159265359]]
+    }
 
-As seen above, the :code:`ProblemSpec` simply wraps around a :code:`dict`.
+Generate Samples
+~~~~~~~~~~~~~~~~
 
-Here, the default is to assume all inputs are uniformly distributed.
-
-See :doc:`advanced` on how to provide further details, including alternate distributions.
-
-.. note::
-
-    If :code:`outputs` is not provided, then SALib will
-    automatically create generic names.
-
-    :code:`Y` for a single output
-    :code:`Y1, Y2, ... Yn` for multiple outputs
-
-
-Method Chaining
-~~~~~~~~~~~~~~~
-
-Since we are performing a Sobol' sensitivity analysis, we need to generate
-samples using the Sobol' sampler, run the model, then analyze the outputs.
-
-In the example above, all the steps are expressed as a `method chain <https://en.wikipedia.org/wiki/Method_chaining>`_
+Next, we generate the samples.  Since we are performing a Sobol' sensitivity
+analysis, we need to generate samples using the Saltelli sampler, as shown
+below.
 
 .. code:: python
 
-    (
-        sp.sample_sobol(1024)
-        .evaluate(Ishigami.evaluate)
-        .analyze_sobol()
-    )
+    param_values = saltelli.sample(problem, 1024)
 
-That said, each step can be run individually (shown with default arguments).
+Here, :code:`param_values` is a NumPy matrix.  If we run
+:code:`param_values.shape`, we see that the matrix is 8000 by 3.  The Saltelli
+sampler generated 8000 samples.  The Saltelli sampler generates
+:math:`N*(2D+2)` samples, where in this example N is 1024 (the argument we
+supplied) and D is 3 (the number of model inputs). The keyword argument :code:`calc_second_order=False` will exclude second-order indices, resulting in a smaller sample matrix with :math:`N*(D+2)` rows instead.
 
-.. code:: python
+Run Model
+~~~~~~~~~
 
-    sp.sample_sobol(1024)
-    sp.evaluate(Ishigami.evaluate)
-    sp.analyze_sobol(print_to_console=False, calc_second_order=True)
-
-
-The :code:`samples`, :code:`results`, and results of :code:`analysis` are all held inside the :code:`sp` object.
-If needed, these may be extracted via their respective attributes.
-
-.. code:: python
-
-    X = sp.samples
-    y = sp.results
-    S = sp.analysis
-
-
-Internally, all data is handled as a numpy array/matrix.
-
-.. tip::
-
-    All sampling, evaluation and analysis methods may be accessed
-    through the ProblemSpec interface and follow a standard pattern.
-
-    - Sampling methods can be accessed with :code:`sp.sample_[name of method]`
-    - Likewise, for analysis methods use :code:`sp.analyze_[name of method]`
-
-    See the documentation of each method for further information.
-
-
-Generating Samples
-~~~~~~~~~~~~~~~~~~
-
-In this example we are using the Sobol' sampling method (shown below with the default value for :code:`calc_second_order`).
-
-.. code:: python
-
-    sp.sample_sobol(1024, calc_second_order=True)
-
-
-If we run :code:`sp.samples.shape`, we will see the matrix is 8192 by 3.
-In other words, the Sobol' sampler generated :math:`N*(2D+2)` samples, 
-where in this example N is 1024 (the argument we supplied) and D is 3 
-(the number of model inputs).
-
-The keyword argument :code:`calc_second_order=False` will exclude 
-second-order indices, resulting in a smaller sample matrix with 
-:math:`N*(D+2)` rows instead.
-
-.. note::
-
-    Specific sampling methods have their own requirements and behaviours.
-    The documentation for each method lists a brief overview and includes 
-    references to provide further details.
-
-    All sampling methods can be accessed with :code:`sp.sample_[name of method]`.
-
-
-A generic :code:`sp.sample` method is also available, allowing use of your own
-sampling function. 
-
-.. code:: python
-
-    sp.sample(my_sampler, *args, **kwargs)
-
-
-The provided function must follow two requirements.
-
-1. A :code:`ProblemSpec` must be accepted as its first argument.  
-   This can simply be defined as a dictionary following the same format as outlined above.
-2. The function must return a numpy array.
-
-If a sample has already been defined, this can be provided to the interface like so:
-
-.. code:: python
-
-    sp.set_samples(X)
-
-where :code:`X` is a numpy array.
-
-.. note::
-    :code:`sp.set_results(Y)` can be used to set existing results.
-
-.. warning::
-    Care must be taken to avoid inappropriately mix-and-matching sampling and analysis methods.
-    For example, Sobol' analysis must be conducted with a Sobol' sample.
-
-
-Running a Model
-~~~~~~~~~~~~~~~
-
-If the model is written in Python, and is written such that it
-can accept a numpy array as an input in its first position, then 
-it may be called directly with the interface. 
-Here, we use the Ishigami function as an example.
-
-.. code:: python
-
-    sp.evaluate(Ishigami.evaluate)
-
-
-.. note::
-    SALib also supports parallel model evaluation with
-    `sp.evaluate_parallel()`. It is assumed that all results
-    can be held in memory.
-
-
-The Ishigami module provides an :code:`evaluate` function that
-looks something like:
-
-.. code:: python
-
-    def evaluate(X: np.ndarray, A: float = 7.0, B: float = 0.1):
-
-
-The actual implementation can be seen `here <https://github.com/SALib/SALib/blob/4a7c4b362df395cd62f8cc549030a2f6d03964c4/src/SALib/test_functions/Ishigami.py#L4>`_.
-
-Note that the inputs (:code:`X`) is the first argument.
-
-.. tip::
-    For user-provided models, a wrapper can be written. A wrapper is
-    a function that accepts parameters in the expected order, then 
-    runs the model itself.
-
-    See also: :ref:`Another Example` , `functools.partial <https://docs.python.org/3/library/functools.html#functools.partial>`_
-
-
-Note that SALib does not require direct interaction with the model.
-
-If the model is written in Python, then it may be run manually without SALib. 
-Generally, you will loop over each sample input and evaluate the model:
+As mentioned above, SALib is not involved in the evaluation of the mathematical
+or computational model.  If the model is written in Python, then generally you
+will loop over each sample input and evaluate the model:
 
 .. code:: python
 
@@ -306,16 +129,12 @@ Generally, you will loop over each sample input and evaluate the model:
     for i, X in enumerate(param_values):
         Y[i] = evaluate_model(X)
 
-    # Provide the results to the interface
-    sp.set_results(Y)
-
-
-If the model is not written in Python, then the samples can be saved to a text file:
+If the model is not written in Python, then the samples can be saved to a text
+file:
 
 .. code:: python
 
-    np.savetxt("param_values.txt", sp.samples)
-
+    np.savetxt("param_values.txt", param_values)
 
 Each line in :code:`param_values.txt` is one input to the model.  The output
 from the model should be saved to another file with a similar format: one
@@ -325,100 +144,72 @@ output on each line.  The outputs can then be loaded with:
 
     Y = np.loadtxt("outputs.txt", float)
 
-    # Provide the results to the interface
-    sp.set_results(Y)
+In this example, we are using the Ishigami function provided by SALib.  We
+can evaluate these test functions as shown below:
 
+.. code:: python
+
+    Y = Ishigami.evaluate(param_values)
 
 Perform Analysis
 ~~~~~~~~~~~~~~~~
 
-With the model outputs loaded, we can finally compute the sensitivity
-indices.  In this example, we use Sobol' analysis, which will compute
+With the model outputs loaded into Python, we can finally compute the sensitivity
+indices.  In this example, we use :code:`sobol.analyze`, which will compute
 first, second, and total-order indices.
 
 .. code:: python
 
-    sp.analyze_sobol()
+    Si = sobol.analyze(problem, Y)
 
-
-We see an overview of the results once we print out the interface:
+:code:`Si` is a Python :code:`dict` with the keys :code:`"S1"`,
+:code:`"S2"`, :code:`"ST"`, :code:`"S1_conf"`, :code:`"S2_conf"`, and
+:code:`"ST_conf"`.  The :code:`_conf` keys store the corresponding confidence
+intervals, typically with a confidence level of 95%. Use the keyword argument :code:`print_to_console=True` to print all indices. Or, we can print the individual values from :code:`Si` as shown below.
 
 .. code:: python
 
-    print(sp)
+    print(Si['S1'])
 
+    [ 0.316832  0.443763 0.012203 ]
 
-    Samples:
-	3 parameters: ['x1', 'x2', 'x3']
-	8192 evaluations 
-
-    Outputs:
-        1 outputs: ['Y']
-        8192 evaluations 
-
-    Analysis:
-            ST   ST_conf
-    x1  0.557271  0.078640
-    x2  0.442311  0.040564
-    x3  0.247103  0.025728 
-
-            S1   S1_conf
-    x1  0.317728  0.060368
-    x2  0.442253  0.056459
-    x3  0.002556  0.054109 
-
-                    S2   S2_conf
-    (x1, x2) -0.000604  0.071442
-    (x1, x3)  0.247521  0.096797
-    (x2, x3) -0.002954  0.072420
-
-
-Here :code:`ST`, :code:`S1`, and :code:`S2` relate to the
-total, first-order, and second-order sensitivity indices respectively.
-Those ending with `_conf` indicate the corresponding confidence intervals,
-typically with a confidence level of 95%.
-
-We see that x1 and x2 exhibit first-order sensitivities but x3 appears to
+Here, we see that x1 and x2 exhibit first-order sensitivities but x3 appears to
 have no first-order effects.
 
+.. code:: python
+
+    print(Si['ST'])
+
+    [ 0.555860  0.441898   0.244675]
+
 If the total-order indices are substantially larger than the first-order
-indices, then there is likely higher-order interactions occurring.
-We can look at the second-order indices to see these higher-order interactions:
+indices, then there is likely higher-order interactions occurring.  We can look
+at the second-order indices to see these higher-order interactions:
 
 .. code:: python
 
-    y_S2 = sp.analysis['S2']
-    print("x1-x2:", y_S2[0,1])
-    print("x1-x3:", y_S2[0,2])
-    print("x2-x3:", y_S2[1,2])
+    print("x1-x2:", Si['S2'][0,1])
+    print("x1-x3:", Si['S2'][0,2])
+    print("x2-x3:", Si['S2'][1,2])
 
     x1-x2: 0.0092542
     x1-x3: 0.2381721
     x2-x3: -0.0048877
 
+We can see there are strong interactions between x1 and x3.  Some computing
+error will appear in the sensitivity indices.  For example, we observe a
+negative value for the x2-x3 index.  Typically, these computing errors shrink as
+the number of samples increases.
 
-Results can also be extracted as Pandas DataFrames for further analysis.
+The output can then be converted to a Pandas DataFrame for further analysis.
 
 .. code:: python
 
     total_Si, first_Si, second_Si = Si.to_df()
 
-
-If the sample was created with :code:`calc_second_order=False`
-then the second order sensitivities will not be returned
-
-.. code:: python
-
-    total_Si, first_Si = Si.to_df()
-
-
-For multi-output models, sensitivity results for individual
-outputs can be extracted:
-
-.. code:: python
-
-    sp.analysis['Y1']['S1']  # First order for Y1
-    sp.analysis['Y2']['S2']  # Second order for Y2
+    # Note that if the sample was created with `calc_second_order=False`
+    # Then the second order sensitivities will not be returned
+    # total_Si, first_Si = Si.to_df()
 
 
 Basic Plotting
@@ -430,47 +221,15 @@ Basic plotting facilities are provided for convenience.
 
     Si.plot()
 
-All plotting methods will return matplotlib axes objects to allow later adjustment.
+The :code:`plot()` method returns matplotlib axes objects to allow later adjustment.
 
-In the example below, the figures are collected and the y-axis for the first subplot
-is set to use log scale.
-
-.. code:: python
-
-    import matplotlib.pyplot as plt
-
-    axes = sp.plot()
-    axes[0].set_yscale('log')
-    plt.tight_layout()
-
-
-.. figure:: assets/example_mod_plot.svg
-    :width: 800
-    :align: center
-
-
-In addition to the basic :code:`plot()` command, SALib can also produce a basic
-heatmap.
-
-.. code:: python
-
-    sp.heatmap()
-
-
-.. figure:: assets/example_heatmap_plot.svg
-    :width: 800
-    :align: center
-
-
-.. _Another example:
 
 Another Example
 ---------------
 
 When the model you want to analyse depends on parameters that are not part of
 the sensitivity analysis, like position or time, the analysis can be performed
-for each time/position "bin" separately. This can be useful for the purpose of
-factor mapping, to identify where in parameter space the model is sensitive to.
+for each time/position "bin" separately.
 
 Consider the example of a parabola:
 
@@ -488,7 +247,8 @@ We start with a set of imports:
     import numpy as np
     import matplotlib.pyplot as plt
 
-    from SALib import ProblemSpec
+    from SALib.sample import saltelli
+    from SALib.analyze import sobol
 
 and define the parabola:
 
@@ -502,45 +262,34 @@ The :code:`dict` describing the problem contains therefore only :math:`a` and :m
 
 .. code:: python
 
-    sp = ProblemSpec({
+    problem = {
+        'num_vars': 2,
         'names': ['a', 'b'],
-        'bounds': [[0, 1]]*2,
-    })
+        'bounds': [[0, 1]]*2
+    }
 
 The triad of sampling, evaluating and analysing becomes:
 
 .. code:: python
 
-    # Create "bins" of x
+    # sample
+    param_values = saltelli.sample(problem, 2**6)
+
+    # evaluate
     x = np.linspace(-1, 1, 100)
+    y = np.array([parabola(x, *params) for params in param_values])
 
-    # Create wrapper (runs each a, b combination separately)
-    def wrapped_parabola(ab, x=x):
-        y = np.zeros((ab.shape[0], x.shape[0]))
-        for i, (a, b) in enumerate(ab):
-            y[i,:] = parabola(x, a, b)
-        
-        return y
+    # analyse
+    sobol_indices = [sobol.analyze(problem, Y) for Y in y.T]
 
-    (
-        sp.sample_sobol(2**6)
-        .evaluate(wrapped_parabola)
-        .analyze_sobol()
-    )
-
-Note how we analyzed for each :math:`x` separately.
+Note how we analysed for each :math:`x` separately.
 
 Now we can extract the first-order Sobol indices for each bin of :math:`x` and plot:
 
 .. code:: python
 
-    # Get first order sensitivities for all outputs
-    S1s = np.array([sp.analysis[_y]['S1'] for _y in sp['outputs']])
+    S1s = np.array([s['S1'] for s in sobol_indices])
 
-    # Get model outputs
-    y = sp.results
-
-    # Set up figure
     fig = plt.figure(figsize=(10, 6), constrained_layout=True)
     gs = fig.add_gridspec(2, 2)
 
@@ -548,7 +297,6 @@ Now we can extract the first-order Sobol indices for each bin of :math:`x` and p
     ax1 = fig.add_subplot(gs[0, 1])
     ax2 = fig.add_subplot(gs[1, 1])
 
-    # Populate figure subplots
     for i, ax in enumerate([ax1, ax2]):
         ax.plot(x, S1s[:, i],
                 label=r'S1$_\mathregular{{{}}}$'.format(problem["names"][i]),
@@ -581,11 +329,9 @@ Now we can extract the first-order Sobol indices for each bin of :math:`x` and p
 
     plt.show()
 
-
 .. figure:: assets/example_parabola.svg
     :width: 800
     :align: center
-
 
 With the help of the plots, we interprete the Sobol indices. At
 :math:`x=0`, the variation in :math:`y` can be explained to 100 % by
