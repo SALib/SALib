@@ -54,6 +54,7 @@ def lake_problem(
         natural inflows of phosphorus (pollution), see [3]
 
 
+
     Returns
     -------
     float, phosphorus pollution for a point in time
