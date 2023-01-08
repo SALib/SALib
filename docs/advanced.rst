@@ -40,6 +40,7 @@ Or in the `problem` dictionary:
 
 But the output is printed by group:
 ::
+
                 ST   ST_conf
     Group_1  0.555309  0.084058
     Group_2  0.684332  0.057449
