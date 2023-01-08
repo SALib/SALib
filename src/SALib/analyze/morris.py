@@ -47,9 +47,6 @@ def analyze(
     ``sigma`` is used as an indicator of interactions between parameters, or
     groups of parameters.
 
-
-    Notes
-    -----
     Compatible with:
         `morris` : :func:`SALib.sample.morris.sample`
 
@@ -97,17 +94,16 @@ def analyze(
 
     References
     ----------
-    .. [1] Morris, M. (1991).
-            "Factorial Sampling Plans for Preliminary
-             Computational Experiments."
-           Technometrics, 33(2):161-174,
-           doi:10.1080/00401706.1991.10484804.
+    1. Morris, M. (1991).
+       Factorial Sampling Plans for Preliminary Computational Experiments.
+       Technometrics, 33(2):161-174,
+       doi:10.1080/00401706.1991.10484804.
 
-    .. [2] Campolongo, F., J. Cariboni, and A. Saltelli (2007).
-            "An effective screening design for sensitivity analysis
-             of large models."
-           Environmental Modelling & Software, 22(10):1509-1518,
-           doi:10.1016/j.envsoft.2006.10.004.
+    2. Campolongo, F., J. Cariboni, and A. Saltelli (2007).
+       An effective screening design for sensitivity analysis
+       of large models.
+       Environmental Modelling & Software, 22(10):1509-1518,
+       doi:10.1016/j.envsoft.2006.10.004.
     """
     if seed:
         np.random.seed(seed)

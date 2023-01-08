@@ -81,24 +81,24 @@ def analyze(
 
     References
     ----------
-    .. [1] Pianosi, F., Wagener, T., 2015.
+    1. Pianosi, F., Wagener, T., 2015.
            A simple and efficient method for global sensitivity analysis
            based on cumulative distribution functions.
            Environmental Modelling & Software 67, 1-11.
            https://doi.org/10.1016/j.envsoft.2015.01.004
 
-    .. [2] Pianosi, F., Wagener, T., 2018.
+    2. Pianosi, F., Wagener, T., 2018.
            Distribution-based sensitivity analysis from a generic input-output sample.
            Environmental Modelling & Software 108, 197-207.
            https://doi.org/10.1016/j.envsoft.2018.07.019
 
-    .. [3] Baroni, G., Francke, T., 2020.
+    3. Baroni, G., Francke, T., 2020.
            An effective strategy for combining variance- and
            distribution-based global sensitivity analysis.
            Environmental Modelling & Software, 134, 104851.
            https://doi.org/10.1016/j.envsoft.2020.104851
 
-    .. [4] Baroni, G., Francke, T., 2020.
+    4. Baroni, G., Francke, T., 2020.
            GSA-cvd
            Combining variance- and distribution-based global sensitivity analysis
            https://github.com/baronig/GSA-cvd

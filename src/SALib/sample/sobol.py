@@ -17,8 +17,7 @@ def sample(
     skip_values: int = 0,
     seed: Optional[Union[int, np.random.Generator]] = None,
 ):
-    """
-    Generates model inputs using Saltelli's extension of the Sobol' sequence.
+    """Generates model inputs using Saltelli's extension of the Sobol' sequence.
 
     The Sobol' sequence is a popular quasi-random low-discrepancy sequence used
     to generate uniform samples of parameter space.
@@ -31,25 +30,26 @@ def sample(
     rows, where ``D`` is the number of parameters.
     If `calc_second_order` is `True`, the resulting matrix has ``N * (2D + 2)``
     rows.
+
     These model inputs are intended to be used with
     :func:`SALib.analyze.sobol.analyze`.
-
-    Notes
+	
+	Notes
     -----
     The initial points of the Sobol' sequence has some repetition (see Table 2
-    in Campolongo [1]_), which can be avoided by scrambling the sequence.
+    in Campolongo [1]__), which can be avoided by scrambling the sequence.
 
     Another option, not recommended and available for educational purposes,
     is to use the `skip_values` parameter.
     Skipping values reportedly improves the uniformity of samples.
     But, it has been shown that naively skipping values may reduce accuracy,
     increasing the number of samples needed to achieve convergence
-    (see Owen [2]_).
+    (see Owen [2]__).
 
-    Parameters
+	Parameters
     ----------
-    problem : dict
-        The problem definition
+    problem : dict, 
+        The problem definition.
     N : int
         The number of samples to generate.
         Ideally a power of 2 and <= `skip_values`.
@@ -72,29 +72,29 @@ def sample(
 
     References
     ----------
-    .. [1] Campolongo, F., Saltelli, A., Cariboni, J., 2011.
-           From screening to quantitative sensitivity analysis.
-           A unified approach.
-           Computer Physics Communications 182, 978–988.
-           https://doi.org/10.1016/j.cpc.2010.12.039
+    1. Campolongo, F., Saltelli, A., Cariboni, J., 2011.
+       From screening to quantitative sensitivity analysis.
+       A unified approach.
+       Computer Physics Communications 182, 978-988.
+       https://doi.org/10.1016/j.cpc.2010.12.039
 
-    .. [2] Owen, A. B., 2020.
-           On dropping the first Sobol' point.
-           arXiv:2008.08051 [cs, math, stat].
-           Available at: http://arxiv.org/abs/2008.08051
-           (Accessed: 20 April 2021).
+    2. Owen, A. B., 2020.
+       On dropping the first Sobol' point.
+       arXiv:2008.08051 [cs, math, stat].
+       Available at: http://arxiv.org/abs/2008.08051
+       (Accessed: 20 April 2021).
 
-    .. [3] Saltelli, A., 2002.
-           Making best use of model evaluations to compute sensitivity indices.
-           Computer Physics Communications 145, 280–297.
-           https://doi.org/10.1016/S0010-4655(02)00280-1
+    3. Saltelli, A., 2002.
+       Making best use of model evaluations to compute sensitivity indices.
+       Computer Physics Communications 145, 280-297.
+       https://doi.org/10.1016/S0010-4655(02)00280-1
 
-    .. [4] Sobol', I.M., 2001.
-           Global sensitivity indices for nonlinear mathematical models and
-           their Monte Carlo estimates.
-           Mathematics and Computers in Simulation,
-           The Second IMACS Seminar on Monte Carlo Methods 55, 271–280.
-           https://doi.org/10.1016/S0378-4754(00)00270-6
+    4. Sobol', I.M., 2001.
+       Global sensitivity indices for nonlinear mathematical models and
+       their Monte Carlo estimates.
+       Mathematics and Computers in Simulation,
+       The Second IMACS Seminar on Monte Carlo Methods 55, 271-280.
+       https://doi.org/10.1016/S0378-4754(00)00270-6
     """
     D = problem["num_vars"]
     groups = _check_groups(problem)
@@ -193,7 +193,7 @@ def cli_parse(parser):
     parser : argparse object
 
     Returns
-    ----------
+    -------
     Updated argparse object
     """
     parser.add_argument(

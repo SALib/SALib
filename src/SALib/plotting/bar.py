@@ -9,7 +9,7 @@ def plot(Si_df, ax=None):
 
 
     Examples
-    ----------
+    --------
         >>> from SALib.plotting.bar import plot as barplot
         >>> from SALib.test_functions import Ishigami
         >>>
@@ -27,7 +27,7 @@ def plot(Si_df, ax=None):
     * Si_df: pd.DataFrame, of sensitivity results
 
     Returns
-    ----------
+    -------
     * ax : matplotlib axes object
     """
     conf_cols = Si_df.columns.str.contains(CONF_COLUMN)

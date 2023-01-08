@@ -15,25 +15,22 @@ def analyze(
     print_to_console=False,
     seed=None,
 ):
-    """Perform extended Fourier Amplitude Sensitivity Test on model outputs
+    """Perform extended Fourier Amplitude Sensitivity Test on model outputs.
 
     Returns a dictionary with keys 'S1' and 'ST', where each entry is a list of
     size D (the number of parameters) containing the indices in the same order
     as the parameter file.
-
 
     Notes
     -----
     Compatible with:
         `fast_sampler` : :func:`SALib.sample.fast_sampler.sample`
 
-
     Examples
     --------
         >>> X = fast_sampler.sample(problem, 1000)
         >>> Y = Ishigami.evaluate(X)
         >>> Si = fast.analyze(problem, Y, print_to_console=False)
-
 
     Parameters
     ----------
@@ -51,20 +48,22 @@ def analyze(
 
     References
     ----------
-    .. [1] Cukier, R. I., C. M. Fortuin, K. E. Shuler, A. G. Petschek,
-           and J. H. Schaibly (1973).
-           "Study of the sensitivity of coupled reaction
-           systems to uncertainties in rate coefficients."  J. Chem. Phys.,
-           59(8):3873-3878, doi:10.1063/1.1680571.
+    1. Cukier, R. I., C. M. Fortuin, K. E. Shuler, A. G. Petschek, and
+       J. H. Schaibly (1973).
+       Study of the sensitivity of coupled reaction systems to
+       uncertainties in rate coefficients.
+       J. Chem. Phys., 59(8):3873-3878
+       doi:10.1063/1.1680571
 
-    .. [2] Saltelli, A., S. Tarantola, and K. P.-S. Chan (1999).  "A
-           Quantitative Model-Independent Method for Global Sensitivity
-           Analysis of Model Output."  Technometrics, 41(1):39-56,
-           doi:10.1080/00401706.1999.10485594.
+    2. Saltelli, A., S. Tarantola, and K. P.-S. Chan (1999).  
+       A Quantitative Model-Independent Method for Global Sensitivity Analysis
+       of Model Output.
+       Technometrics, 41(1):39-56,
+       doi:10.1080/00401706.1999.10485594.
 
-    .. [3] Pujol, G. (2006)
-           fast99 - R `sensitivity` package
-           https://github.com/cran/sensitivity/blob/master/R/fast99.R
+    3. Pujol, G. (2006)
+       fast99 - R `sensitivity` package
+       https://github.com/cran/sensitivity/blob/master/R/fast99.R
     """
     if seed:
         np.random.seed(seed)
@@ -156,7 +155,7 @@ def cli_parse(parser):
     parser : argparse object
 
     Returns
-    ----------
+    -------
     Updated argparse object
     """
     parser.add_argument(

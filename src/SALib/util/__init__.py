@@ -19,7 +19,7 @@ from .problem import ProblemSpec  # noqa: F401, E402
 from .results import ResultDict  # noqa: F401, E402
 
 
-__all__ = ["scale_samples", "read_param_file", "ResultDict", "avail_approaches"]
+__all__ = ["scale_samples", "read_param_file", "avail_approaches"]
 
 
 def _scale_samples(params: np.ndarray, bounds: List):
@@ -68,7 +68,7 @@ def scale_samples(params: np.ndarray, problem: Dict):
         SALib problem specification
 
     Returns
-    ----------
+    -------
     np.ndarray, scaled samples
     """
     bounds = problem["bounds"]

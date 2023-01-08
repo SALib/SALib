@@ -106,23 +106,23 @@ def sample(
 
     References
     ----------
-    .. [1] Morris, M.D., 1991.
-           Factorial Sampling Plans for Preliminary Computational Experiments.
-           Technometrics 33, 161–174.
-           https://doi.org/10.1080/00401706.1991.10484804
+    1. Morris, M.D., 1991.
+       Factorial Sampling Plans for Preliminary Computational Experiments.
+       Technometrics 33, 161-174.
+       https://doi.org/10.1080/00401706.1991.10484804
 
-    .. [2] Campolongo, F., Cariboni, J., & Saltelli, A. 2007.
-           An effective screening design for sensitivity analysis of large
-            models.
-           Environmental Modelling & Software, 22(10), 1509–1518.
-           https://doi.org/10.1016/j.envsoft.2006.10.004
+    2. Campolongo, F., Cariboni, J., & Saltelli, A. 2007.
+       An effective screening design for sensitivity analysis of large
+       models.
+       Environmental Modelling & Software, 22(10), 1509-1518.
+       https://doi.org/10.1016/j.envsoft.2006.10.004
 
-    .. [3] Ruano, M.V., Ribes, J., Seco, A., Ferrer, J., 2012.
-           An improved sampling strategy based on trajectory design for
-            application of the Morris method to systems with many input
-            factors.
-           Environmental Modelling & Software 37, 103–109.
-           https://doi.org/10.1016/j.envsoft.2012.03.008
+    3. Ruano, M.V., Ribes, J., Seco, A., Ferrer, J., 2012.
+       An improved sampling strategy based on trajectory design for
+       application of the Morris method to systems with many input
+       factors.
+       Environmental Modelling & Software 37, 103-109.
+       https://doi.org/10.1016/j.envsoft.2012.03.008
     """
     if seed:
         np.random.seed(seed)

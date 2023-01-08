@@ -21,7 +21,7 @@ def parse_subargs(module, parser, method, opts):
         A list of argument options to parse
 
     Returns
-    ---------
+    -------
     subargs : argparser namespace object
     """
     module.cli_args(parser)

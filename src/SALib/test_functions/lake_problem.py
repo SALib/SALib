@@ -14,8 +14,7 @@ def lake_problem(
     b: FLOAT_OR_ARRAY = 0.42,
     eps: FLOAT_OR_ARRAY = 0.02,
 ) -> float:
-    """Lake Problem as given in Hadka et al., (2015) and Kwakkel (2017)
-    modified for use as a test function.
+    """Lake Problem as given in Hadka et al., (2015) and Kwakkel (2017) modified for use as a test function.
 
     The `mean` and `stdev` parameters control the log normal distribution of
     natural inflows (`epsilon` in [1] and [2]).
@@ -23,15 +22,14 @@ def lake_problem(
     References
     ----------
     .. [1] Hadka, D., Herman, J., Reed, P., Keller, K., (2015).
-           "An open source framework for many-objective robust decision
-                making."
-           Environmental Modelling & Software 74, 114–129.
+           "An open source framework for many-objective robust decision making."
+           Environmental Modelling & Software 74, 114-129.
            doi:10.1016/j.envsoft.2015.07.014
 
     .. [2] Kwakkel, J.H, (2017). "The Exploratory Modeling Workbench: An open
            source toolkit for exploratory modeling, scenario discovery, and
            (multi-objective) robust decision making."
-           Environmental Modelling & Software 96, 239–250.
+           Environmental Modelling & Software 96, 239-250.
            doi:10.1016/j.envsoft.2017.06.054
 
     .. [3] Singh, R., Reed, P., Keller, K., (2015). "Many-objective robust
@@ -39,6 +37,7 @@ def lake_problem(
            threshold response."
            Ecology and Society 20.
            doi:10.5751/ES-07687-200312
+
 
     Parameters
     ----------
@@ -52,11 +51,13 @@ def lake_problem(
         decay rate for phosphorus
         (0.1 to 0.45, where default 0.42 is irreversible, as described in [1])
     eps : float or np.ndarray
-          natural inflows of phosphorus (pollution), see [3]
+        natural inflows of phosphorus (pollution), see [3]
+
+
 
     Returns
     -------
-    * float, phosphorus pollution for a point in time
+    float, phosphorus pollution for a point in time
     """
     Xq = X**q
     X_t1 = X + a + (Xq / (1.0 + Xq)) - (b * X) + eps
