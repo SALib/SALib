@@ -1,6 +1,15 @@
 # Developers Guide
 
 
+## Running tests
+
+To run tests, run the following command from the SALib project directory.
+
+```bash
+$ pytest
+```
+
+
 ## Building documentation locally
 
 Notes here assumes you are at the root of the project directory.
