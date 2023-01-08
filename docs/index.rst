@@ -39,6 +39,7 @@ Supported Methods
 
    Getting started <getting-started>
    Basics <basics>
+   Basics with the SALib Interface <basics_with_interface>
    Advanced <advanced>
    API <api>
 
