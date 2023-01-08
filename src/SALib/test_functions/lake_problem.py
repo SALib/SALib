@@ -51,12 +51,12 @@ def lake_problem(
         decay rate for phosphorus
         (0.1 to 0.45, where default 0.42 is irreversible, as described in [1])
     eps : float or np.ndarray
-          natural inflows of phosphorus (pollution), see [3]
+        natural inflows of phosphorus (pollution), see [3]
 
 
     Returns
     -------
-    * float, phosphorus pollution for a point in time
+    float, phosphorus pollution for a point in time
     """
     Xq = X**q
     X_t1 = X + a + (Xq / (1.0 + Xq)) - (b * X) + eps
