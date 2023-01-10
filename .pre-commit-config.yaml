@@ -18,8 +18,8 @@ repos:
     -   id: black
         exclude: "src/SALib/sample/directions.py"
 
--   repo: https://gitlab.com/pycqa/flake8
-    rev: 5.0.4
+-   repo: https://github.com/PyCQA/flake8
+    rev: 6.0.0
     hooks:
     -   id: flake8
         exclude: "src/SALib/sample/directions.py"
