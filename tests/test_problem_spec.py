@@ -166,14 +166,10 @@ def test_parallel_multi_output():
     )
 
     assert (
-        np.testing.assert_allclose(
-            sp.results, psp.results, atol=1e-10
-        ) is None
+        np.testing.assert_allclose(sp.results, psp.results, atol=1e-10) is None
     ), "Model results not equal!"
     assert (
-        np.testing.assert_allclose(
-            sp.analysis, psp.analysis, atol=1e-10
-        ) is None
+        np.testing.assert_allclose(sp.analysis, psp.analysis, atol=1e-10) is None
     ), "Analysis results not equal!"
 
 

@@ -65,7 +65,7 @@ def analyze(
        https://doi.org/10.1016/j.ress.2005.06.003
 
     2. Elmar Plischke (2010)
-        An effective algorithm for computing global sensitivity indices 
+        An effective algorithm for computing global sensitivity indices
         (EASI),
         Reliability Engineering & System Safety,
         95:4, 354-360. doi:10.1016/j.ress.2009.11.005

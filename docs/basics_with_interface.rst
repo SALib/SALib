@@ -4,7 +4,7 @@ SALib Interface Basics
 
 The earlier example is repeated on this page with the SALib `ProblemSpec` interface.
 The interface provides an object-oriented approach to using SALib which some may
-find easier to use. Note that the interface does add computational overhead 
+find easier to use. Note that the interface does add computational overhead
 (thereby increasing runtimes) as it provides additional checks for users.
 
 Developers who wish to integrate SALib into their own work may wish to use the
@@ -170,23 +170,23 @@ In this example we are using the Sobol' sampling method (shown below with the de
 
 
 If we run :code:`sp.samples.shape`, we will see the matrix is 8192 by 3.
-In other words, the Sobol' sampler generated :math:`N*(2D+2)` samples, 
-where in this example N is 1024 (the argument we supplied) and D is 3 
+In other words, the Sobol' sampler generated :math:`N*(2D+2)` samples,
+where in this example N is 1024 (the argument we supplied) and D is 3
 (the number of model inputs).
 
-The keyword argument :code:`calc_second_order=False` will exclude 
-second-order indices, resulting in a smaller sample matrix with 
+The keyword argument :code:`calc_second_order=False` will exclude
+second-order indices, resulting in a smaller sample matrix with
 :math:`N*(D+2)` rows instead.
 
 .. note::
 
     Specific sampling methods have their own requirements and behaviours.
-    The documentation for each method lists a brief overview and includes 
+    The documentation for each method lists a brief overview and includes
     references to provide further details.
 
 
 A generic :code:`sp.sample` method is also available, allowing use of your own
-sampling function. 
+sampling function.
 
 .. code:: python
 
@@ -195,7 +195,7 @@ sampling function.
 
 The provided function must follow two requirements.
 
-1. A :code:`ProblemSpec` must be accepted as its first argument.  
+1. A :code:`ProblemSpec` must be accepted as its first argument.
    This can simply be defined as a dictionary following the same format as outlined above.
 2. The function must return a numpy array.
 
@@ -219,8 +219,8 @@ Running a Model
 ~~~~~~~~~~~~~~~
 
 If the model is written in Python, and is written such that it
-can accept a numpy array as an input in its first position, then 
-it may be called directly with the interface. 
+can accept a numpy array as an input in its first position, then
+it may be called directly with the interface.
 Here, we use the Ishigami function as an example.
 
 .. code:: python
@@ -248,7 +248,7 @@ Note that the inputs (:code:`X`) is the first argument.
 
 .. tip::
     For user-provided models, a wrapper can be written. A wrapper is
-    a function that accepts parameters in the expected order, then 
+    a function that accepts parameters in the expected order, then
     runs the model itself.
 
     See also: :ref:`Another Example` , `functools.partial <https://docs.python.org/3/library/functools.html#functools.partial>`_
@@ -256,7 +256,7 @@ Note that the inputs (:code:`X`) is the first argument.
 
 Note that SALib does not require direct interaction with the model.
 
-If the model is written in Python, then it may be run manually without SALib. 
+If the model is written in Python, then it may be run manually without SALib.
 Generally, you will loop over each sample input and evaluate the model:
 
 .. code:: python
@@ -310,22 +310,22 @@ We see an overview of the results once we print out the interface:
 
     Samples:
 	3 parameters: ['x1', 'x2', 'x3']
-	8192 evaluations 
+	8192 evaluations
 
     Outputs:
         1 outputs: ['Y']
-        8192 evaluations 
+        8192 evaluations
 
     Analysis:
             ST   ST_conf
     x1  0.557271  0.078640
     x2  0.442311  0.040564
-    x3  0.247103  0.025728 
+    x3  0.247103  0.025728
 
             S1   S1_conf
     x1  0.317728  0.060368
     x2  0.442253  0.056459
-    x3  0.002556  0.054109 
+    x3  0.002556  0.054109
 
                     S2   S2_conf
     (x1, x2) -0.000604  0.071442
@@ -483,7 +483,7 @@ The triad of sampling, evaluating and analysing becomes:
         y = np.zeros((ab.shape[0], x.shape[0]))
         for i, (a, b) in enumerate(ab):
             y[i,:] = parabola(x, a, b)
-        
+
         return y
 
     (

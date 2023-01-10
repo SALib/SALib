@@ -55,7 +55,7 @@ function (shown below) using the core SALib functions. The example is repeated
 in the next tutorial using an object-oriented interface which some may find
 easier to use.
 
-The Ishigami function is commonly used to test uncertainty and sensitivity 
+The Ishigami function is commonly used to test uncertainty and sensitivity
 analysis methods because it exhibits strong nonlinearity and nonmonotonicity.
 
 .. math::

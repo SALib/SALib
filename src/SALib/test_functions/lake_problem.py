@@ -14,7 +14,8 @@ def lake_problem(
     b: FLOAT_OR_ARRAY = 0.42,
     eps: FLOAT_OR_ARRAY = 0.02,
 ) -> float:
-    """Lake Problem as given in Hadka et al., (2015) and Kwakkel (2017) modified for use as a test function.
+    """Lake Problem as given in Hadka et al., (2015) and Kwakkel (2017)
+    modified for use as a test function.
 
     The `mean` and `stdev` parameters control the log normal distribution of
     natural inflows (`epsilon` in [1] and [2]).

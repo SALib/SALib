@@ -33,8 +33,8 @@ def sample(
 
     These model inputs are intended to be used with
     :func:`SALib.analyze.sobol.analyze`.
-	
-	Notes
+
+    Notes
     -----
     The initial points of the Sobol' sequence has some repetition (see Table 2
     in Campolongo [1]__), which can be avoided by scrambling the sequence.
@@ -46,9 +46,9 @@ def sample(
     increasing the number of samples needed to achieve convergence
     (see Owen [2]__).
 
-	Parameters
+    Parameters
     ----------
-    problem : dict, 
+    problem : dict,
         The problem definition.
     N : int
         The number of samples to generate.

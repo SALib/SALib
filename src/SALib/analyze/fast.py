@@ -55,7 +55,7 @@ def analyze(
        J. Chem. Phys., 59(8):3873-3878
        doi:10.1063/1.1680571
 
-    2. Saltelli, A., S. Tarantola, and K. P.-S. Chan (1999).  
+    2. Saltelli, A., S. Tarantola, and K. P.-S. Chan (1999).
        A Quantitative Model-Independent Method for Global Sensitivity Analysis
        of Model Output.
        Technometrics, 41(1):39-56,
