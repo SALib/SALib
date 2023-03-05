@@ -22,39 +22,41 @@ def analyze(
     """
     Perform Regional Sensitivity Analysis (RSA), also known as Monte Carlo Filtering.
 
-    In a usual RSA, a desirable region of output space is defined. Outputs which fall within
-    this region is categorized as being "behavioral" ($B$), and those outside are described
-    as being "non-behavioral" ($\\bar{B}$). The input factors are also partitioned into
-    behavioral and non-behavioral subsets, such that $f(X_{i}|B) -> (Y|B)$ and
-    $f(X_{i}|\\bar{B}) -> (Y|\\bar{B})$. The distribution between the two sub-samples are
-    compared for each factor. The greater the difference between the two distributions, the
-    more important the given factor is in driving model outputs.
+    In a usual RSA, a desirable region of output space is defined. Outputs which fall
+    within this region is categorized as being "behavioral" (:math:`B`), and those
+    outside are described as being "non-behavioral" (:math:`\\bar{B}`). The input
+    factors are also partitioned into behavioral and non-behavioral subsets, such that
+    :math:`f(X_{i}|B) -> (Y|B)` and :math:`f(X_{i}|\\bar{B}) -> (Y|\\bar{B})`. The
+    distribution between the two sub-samples are compared for each factor. The greater
+    the difference between the two distributions, the more important the given factor
+    is in driving model outputs.
 
-    The approach implemented in SALib partitions factor or output space into $b$ bins
-    (default: 20) according to their percentile values. Output space is targeted for analysis
-    by default (`target="Y"`), such that $(Y|b_{i})$ is mapped back to $X_{i}|b_{i}$.
-    In other words, we treat outputs falling within a given bin ($b_{i}$) corresponding to
-    their inputs as behavioral, and those outside the bin as non-behavioral. This aids in
-    answering the question "Which $X_{i}$ contributes most toward a given range of outputs?".
-    Factor space can also be assessed (`target="X"`), such that $f(X_{i}|b_{i}) -> (Y|b_{i})$
-    and $f(X_{i}|b_{~i}) -> (Y|b_{~i})$. This aids in answering the question "where in factor
-    space are outputs most sensitive to?"
+    The approach implemented in SALib partitions factor or output space into :math:`b`
+    bins (default: 20) according to their percentile values. Output space is targeted
+    for analysis by default (`target="Y"`), such that :math:`(Y|b_{i})` is mapped back
+    to :math:`X_{i}|b_{i}`. In other words, we treat outputs falling within a given bin
+    (:math:`b_{i}`) corresponding to their inputs as behavioral, and those outside the
+    bin as non-behavioral. This aids in answering the question "Which :math:`X_{i}`
+    contributes most toward a given range of outputs?". Factor space can also be
+    assessed (`target="X"`), such that :math:`f(X_{i}|b_{i}) -> (Y|b_{i})` and
+    :math:`f(X_{i}|b_{~i}) -> (Y|b_{~i})`. This aids in answering the question "where
+    in factor space are outputs most sensitive to?"
 
-    The $k$-samples Anderson-Darling test is used to compare distributions.
-    Results of the analysis are normalized so that values will be $\\in [0, 1]$, and indicate
-    relative sensitivity across factor space. Larger values indicate greater dissimilarity
-    (thus, sensitivity).
+    The $k$-samples Anderson-Darling test is used to compare distributions. Results of
+    the analysis are normalized so that values will be ::math:`\\in [0, 1]`, and
+    indicate relative sensitivity across factor space. Larger values indicate greater
+    dissimilarity (thus, sensitivity).
 
     Notes
     -----
     Compatible with:
         all samplers
 
-    When applied to grouped factors, the analysis is conducted on each factor individually,
-    and the mean of the results for a group are reported.
+    When applied to grouped factors, the analysis is conducted on each factor
+    individually, and the mean of the results for a group are reported.
 
-    Increasing the value of \$S\$ increases the granularity of the analysis (across factor space),
-    but necessitates larger sample sizes.
+    Increasing the value of :math:`S` increases the granularity of the analysis
+    (across factor space), but necessitates larger sample sizes.
 
     This analysis will produce NaNs, indicating areas of factor space that did not have
     any samples, or for which the outputs were constant.
@@ -92,7 +94,8 @@ def analyze(
     Global Sensitivity Analysis: The Primer.
     Wiley, West Sussex, U.K.
     https://dx.doi.org/10.1002/9780470725184
-    Accessible at: http://www.andreasaltelli.eu/file/repository/Primer_Corrected_2022.pdf
+    Accessible at:
+    http://www.andreasaltelli.eu/file/repository/Primer_Corrected_2022.pdf
     """
     groups = _check_groups(problem)
     if not groups:
