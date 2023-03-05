@@ -44,8 +44,8 @@ def analyze(
 
     The $k$-samples Anderson-Darling test is used to compare distributions. Results of
     the analysis are normalized so that values will be ::math:`\\in [0, 1]`, and
-    indicate relative sensitivity across factor space. Larger values indicate greater
-    dissimilarity (thus, sensitivity).
+    indicate relative sensitivity across factor/output space. Larger values indicate
+    greater dissimilarity (thus, sensitivity).
 
     Notes
     -----
