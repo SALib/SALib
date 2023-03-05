@@ -96,8 +96,6 @@ def test_sp_setters():
 
 @pytest.mark.filterwarnings("ignore::UserWarning")
 def test_parallel_single_output():
-    import pandas as pd
-
     # Create the SALib Problem specification
     sp = ProblemSpec(
         {
@@ -126,16 +124,9 @@ def test_parallel_single_output():
     assert (
         np.testing.assert_equal(sp.results, psp.results) is None
     ), "Model results not equal!"
-
-    x_df = pd.DataFrame(sp.analysis)
-    y_df = pd.DataFrame(psp.analysis)
-    for col in pd.DataFrame(sp.analysis):
-        z = [
-            np.testing.assert_allclose(x, y)
-            for x, y in zip(x_df.loc[:, col], y_df.loc[:, col])
-        ]
-
-        assert not any(z), "Analysis results are not equal!"
+    assert (
+        np.testing.assert_equal(sp.analysis, psp.analysis) is None
+    ), "Analysis results not equal!"
 
 
 @pytest.mark.filterwarnings("ignore::UserWarning")
