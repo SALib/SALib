@@ -469,7 +469,7 @@ class ProblemSpec(dict):
 
         raise RuntimeError("Analysis not yet conducted")
 
-    def plot(self):
+    def plot(self, **kwargs):
         """Plot results as a bar chart.
 
         Returns
@@ -481,7 +481,7 @@ class ProblemSpec(dict):
 
         num_rows = len(self["outputs"])
         if num_rows == 1:
-            return self._analysis.plot()
+            return self._analysis.plot(**kwargs)
 
         try:
             plt
@@ -500,7 +500,7 @@ class ProblemSpec(dict):
             num_rows, num_cols, sharey=True, figsize=(p_width, p_height)
         )
         for res, ax in zip(self._analysis, axes):
-            self._analysis[res].plot(ax=ax)
+            self._analysis[res].plot(ax=ax, **kwargs)
 
             try:
                 ax[0].set_title(res)
