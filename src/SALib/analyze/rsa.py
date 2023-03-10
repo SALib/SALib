@@ -138,10 +138,15 @@ def rsa(X: np.ndarray, y: np.ndarray, bins: int = 10, target="X") -> np.ndarray:
 
     # Pre-allocated arrays to store data/results
     seq = np.append(np.arange(0.0, 1.0, (1 / bins)), 1.0)
-    X_di = np.zeros(N)
-    X_q = np.zeros(bins + 1)
-    r_s = np.full((bins, D), np.nan)
-    sel = np.zeros(N, dtype=bool)
+    X_di = np.empty(N)  # store of factor values
+    r_s = np.full((bins, D), np.nan)  # results
+
+    if target == "X":
+        t_arr = X_di  # target factor space for analysis
+        m_arr = y  # map behavioral region of factor space to output space
+    elif target == "Y":
+        t_arr = y  # target output space for analysis
+        m_arr = X_di  # map outputs back to factor space
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
