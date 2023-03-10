@@ -187,6 +187,20 @@ def rsa(X: np.ndarray, y: np.ndarray, bins: int = 10, target="X") -> np.ndarray:
     return (r_s - min_val) / (np.nanmax(r_s) - min_val)
 
 
+def _has_samples(y, sel):
+    """Check if the given region of factor space has > 0 samples.
+
+    Returns
+    -------
+    bool, true if > 0 non-unique samples are found, false otherwise.
+    """
+    return (
+        (np.count_nonzero(sel) != 0)
+        and (len(y[~sel]) != 0)
+        and np.unique(y[sel]).size > 1
+    )
+
+
 def to_df(self):
     """Conversion to Pandas DataFrame specific to Regional Sensitivity Analysis results.
 
