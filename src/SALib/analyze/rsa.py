@@ -153,40 +153,19 @@ def rsa(X: np.ndarray, y: np.ndarray, bins: int = 10, target="X") -> np.ndarray:
         for d_i in range(D):
             X_di[:] = X[:, d_i]
 
-            if target == "X":
-                X_q[:] = np.quantile(X_di, seq)
-                sel[:] = (X_q[0] <= X_di) & (X_di <= X_q[1])
-            elif target == "Y":
-                y_q = np.quantile(y, seq)
-                sel[:] = (y_q[0] <= y) & (y <= y_q[1])
+            # Assess first bin separately, making sure that the
+            # bin edges are inclusive of the lower bound
+            quants = np.quantile(t_arr, seq)
+            b = (quants[0] <= t_arr) & (t_arr <= quants[1])
+            if _has_samples(y, b):
+                r_s[0, d_i] = anderson_ksamp((m_arr[b], m_arr[~b])).statistic
 
-            if (
-                (np.count_nonzero(sel) != 0)
-                and (len(y[~sel]) != 0)
-                and np.unique(y[sel]).size > 1
-            ):
-                if target == "X":
-                    r_s[0, d_i] = anderson_ksamp((y[sel], y[~sel])).statistic
-                elif target == "Y":
-                    r_s[0, d_i] = anderson_ksamp((X_di[sel], X_di[~sel])).statistic
-
+            # Then assess the other bins
             for s in range(1, bins):
-                if target == "X":
-                    sel[:] = (X_q[s] < X_di) & (X_di <= X_q[s + 1])
-                elif target == "Y":
-                    sel[:] = (y_q[s] <= y) & (y <= y_q[s + 1])
+                b = (quants[s] < t_arr) & (t_arr <= quants[s + 1])
 
-                if (
-                    (np.count_nonzero(sel) == 0)
-                    or (len(y[~sel]) == 0)
-                    or np.unique(y[sel]).size == 1
-                ):
-                    continue
-
-                if target == "X":
-                    r_s[s, d_i] = anderson_ksamp((y[sel], y[~sel])).statistic
-                elif target == "Y":
-                    r_s[s, d_i] = anderson_ksamp((X_di[sel], X_di[~sel])).statistic
+                if _has_samples(y, b):
+                    r_s[s, d_i] = anderson_ksamp((m_arr[b], m_arr[~b])).statistic
 
     min_val = np.nanmin(r_s)
     return (r_s - min_val) / (np.nanmax(r_s) - min_val)
