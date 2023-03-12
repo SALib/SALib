@@ -47,6 +47,7 @@ Supported Methods
    Basics <basics>
    SALib Interface <basics_with_interface>
    Advanced <advanced>
+   FAQ <faq>
    API <api>
 
    License <license>
