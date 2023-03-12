@@ -28,19 +28,20 @@ We encourage users use the latest stable version.
 Installing Prerequisite Software
 --------------------------------
 
-SALib requires `NumPy <http://www.numpy.org/>`_, `SciPy <http://www.scipy.org/>`_,
-`pandas <http://https://pandas.pydata.org/>`_,
-and `matplotlib <http://matplotlib.org/>`_ installed on your computer.  Using
-`pip <https://pip.pypa.io/en/stable/installing/>`_, these libraries can be
-installed with the following command:
+Core dependencies include:
+- `NumPy <http://www.numpy.org/>`_
+- `SciPy <http://www.scipy.org/>`_
+- `pandas <http://https://pandas.pydata.org/>`_
+- `matplotlib <http://matplotlib.org/>`_
+
+These should be installed automatically alongside SALib but otherwise they
+can be installed with the following command:
 
 ::
 
     pip install numpy scipy pandas matplotlib
 
 The packages are normally included with most Python bundles, such as Anaconda and Canopy.
-In any case, they are installed automatically when using pip to install
-SALib.
 
 
 Testing Installation
