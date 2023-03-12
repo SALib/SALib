@@ -125,7 +125,10 @@ def analyze(
     if not 0 < conf_level < 1:
         raise RuntimeError("Confidence level must be between 0-1.")
 
-    # normalize the model output
+    # Normalize the model output.
+    # Estimates of the Sobol' indices can be biased for non-centered outputs
+    # so we center here by normalizing with the standard deviation.
+    # Other approaches opt to subtract the mean.
     Y = (Y - Y.mean()) / Y.std()
 
     A, B, AB, BA = separate_output_values(Y, D, N, calc_second_order)
