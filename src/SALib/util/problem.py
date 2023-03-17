@@ -642,6 +642,9 @@ class ProblemSpec(dict):
                     else:
                         rep += f"{dfs}:\n"
 
+        if len(rep) == 0:
+            rep = "ProblemSpec does not currently contain any samples, evaluations or results."
+
         return rep
 
 
