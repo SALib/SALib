@@ -5,8 +5,12 @@ SALib - Sensitivity Analysis Library in Python
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.160164.svg
    :target: https://doi.org/10.5281/zenodo.160164
 
+.. image:: https://img.shields.io/badge/DOI-10.18174%2Fsesmo.18155-blue
+  :target: https://sesmo.org/article/view/18155
+
 .. image:: http://joss.theoj.org/papers/431262803744581c1d4b6a95892d3343/status.svg
   :target: http://joss.theoj.org/papers/431262803744581c1d4b6a95892d3343
+
 
 Python implementations of commonly used sensitivity analysis methods, including
 Sobol, Morris, and FAST methods. Useful in systems modeling to calculate the
@@ -31,7 +35,9 @@ Supported Methods
 * High Dimensional Model Representation
   (`Li et al. 2010 <https://pubs.acs.org/doi/pdf/10.1021/jp9096919>`_)
 * PAWN
-  (`Pianosi and Wagener 2018 <10.1016/j.envsoft.2018.07.019>`__, `Pianosi and Wagener 2015 <https://doi.org/10.1016/j.envsoft.2015.01.004>`__)
+  (`Pianosi and Wagener 2018 <https://dx.doi.org/10.1016/j.envsoft.2018.07.019>`__, `Pianosi and Wagener 2015 <https://doi.org/10.1016/j.envsoft.2015.01.004>`__)
+* * Regional Sensitivity Analysis
+  (based on `Saltelli et al. 2008 <https://dx.doi.org/10.1002/9780470725184>`__, `Pianosi et al., 2016 <https://dx.doi.org/10.1016/j.envsoft.2016.02.008>`__)
 
 
 .. toctree::

@@ -49,7 +49,9 @@ Included methods
 * High-Dimensional Model Representation (HDMR)
   (`Rabitz et al. 1999 <https://doi.org/10.1016/S0010-4655(98)00152-0>`__, `Li et al. 2010 <https://doi.org/10.1021/jp9096919>`__)
 
-* PAWN (`Pianosi and Wagener 2018 <10.1016/j.envsoft.2018.07.019>`__, `Pianosi and Wagener 2015 <https://doi.org/10.1016/j.envsoft.2015.01.004>`__)
+* PAWN (`Pianosi and Wagener 2018 <https://dx.doi.org/10.1016/j.envsoft.2018.07.019>`__, `Pianosi and Wagener 2015 <https://doi.org/10.1016/j.envsoft.2015.01.004>`__)
+
+* Regional Sensitivity Analysis (based on `Saltelli et al. 2008 <https://dx.doi.org/10.1002/9780470725184>`__, `Pianosi et al., 2016 <https://dx.doi.org/10.1016/j.envsoft.2016.02.008>`__)
 
 
 **Contributing:** see `here <CONTRIBUTING.md>`__
