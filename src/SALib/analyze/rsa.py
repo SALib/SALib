@@ -42,7 +42,7 @@ def analyze(
     :math:`f(X_{i}|b_{~i}) -> (Y|b_{~i})`. This aids in answering the question "where
     in factor space are outputs most sensitive to?"
 
-    The $k$-samples Anderson-Darling test is used to compare distributions. Results of
+    The $k$-sample Anderson-Darling test is used to compare distributions. Results of
     the analysis are normalized so that values will be ::math:`\\in [0, 1]`, and
     indicate relative sensitivity across factor/output space. Larger values indicate
     greater dissimilarity (thus, sensitivity).
