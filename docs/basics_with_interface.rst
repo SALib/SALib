@@ -50,7 +50,7 @@ concise workflow. The sampling, evaluation and analysis trifecta can be run with
         .analyze_sobol()
     )
 
-    total_Si, first_Si, second_Si = so.to_df()
+    total_Si, first_Si, second_Si = sp.to_df()
 
     sp.plot()
     sp.heatmap()
