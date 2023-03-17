@@ -595,44 +595,51 @@ class ProblemSpec(dict):
             )
 
     def __str__(self):
+        rep = ""
         if self._samples is not None:
             arr_shape = self._samples.shape
             if len(arr_shape) == 1:
                 arr_shape = (arr_shape[0], 1)
             nr, nx = arr_shape
-            print("Samples:")
-            print(f"\t{nx} parameters:", self["names"])
-            print(f"\t{nr} evaluations", "\n")
+            rep += (
+                "Samples:\n"
+                f"\t{nx} parameters: {self['names']}\n"
+                f"\t{nr} evaluations\n"
+            )
         if self._results is not None:
             arr_shape = self._results.shape
             if len(arr_shape) == 1:
                 arr_shape = (arr_shape[0], 1)
             nr, ny = arr_shape
-            print("Outputs:")
-            print(f"\t{ny} outputs:", self["outputs"])
-            print(f"\t{nr} evaluations", "\n")
+            rep += (
+                "Outputs:\n"
+                f"\t{ny} outputs: {self['outputs']}\n"
+                f"\t{nr} evaluations\n"
+            )
         if self._analysis is not None:
-            print("Analysis:")
+            rep += "Analysis:\n"
             an_res = self._analysis
 
             allowed_types = (list, tuple)
             if isinstance(an_res, ResultDict):
                 an_res = an_res.to_df()
                 if not isinstance(an_res, allowed_types):
-                    print(an_res, "\n")
+                    rep += f"{an_res}\n"
                 else:
                     for df in an_res:
-                        print(df, "\n")
+                        rep += f"{df}\n"
             elif isinstance(an_res, dict):
                 for res_name in an_res:
-                    print("{}:".format(res_name))
+                    rep += "{}:\n".format(res_name)
+
                     dfs = an_res[res_name].to_df()
                     if isinstance(dfs, allowed_types):
                         for df in dfs:
-                            print(df, "\n")
+                            rep += f"{df}:\n"
                     else:
-                        print(dfs, "\n")
-        return ""
+                        rep += f"{dfs}:\n"
+
+        return rep
 
 
 def _check_spec_attributes(spec: ProblemSpec):
