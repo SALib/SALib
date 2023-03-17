@@ -594,6 +594,9 @@ class ProblemSpec(dict):
                 method_name, MethodType(self._method_creator(func, "analyze"), self)
             )
 
+    def _repr_pretty_(self, p, cycle):
+        p.text(str(self) if not cycle else "...")
+
     def __str__(self):
         rep = ""
         if self._samples is not None:
