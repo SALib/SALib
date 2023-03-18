@@ -26,24 +26,25 @@ def analyze(
     within this region is categorized as being "behavioral" (:math:`B`), and those
     outside are described as being "non-behavioral" (:math:`\\bar{B}`). The input
     factors are also partitioned into behavioral and non-behavioral subsets, such that
-    :math:`f(X_{i}|B) -> (Y|B)` and :math:`f(X_{i}|\\bar{B}) -> (Y|\\bar{B})`. The
-    distribution between the two sub-samples are compared for each factor. The greater
-    the difference between the two distributions, the more important the given factor
-    is in driving model outputs.
+    :math:`f(X_{i}|B) \\rightarrow (Y|B)` and :math:`f(X_{i}|\\bar{B}) \\rightarrow
+    (Y|\\bar{B})`. The distribution between the two sub-samples are compared for each
+    factor. The greater the difference between the two distributions, the more
+    important the given factor is in driving model outputs.
 
     The approach implemented in SALib partitions factor or output space into :math:`b`
     bins (default: 20) according to their percentile values. Output space is targeted
-    for analysis by default (`target="Y"`), such that :math:`(Y|b_{i})` is mapped back
-    to :math:`X_{i}|b_{i}`. In other words, we treat outputs falling within a given bin
-    (:math:`b_{i}`) corresponding to their inputs as behavioral, and those outside the
-    bin as non-behavioral. This aids in answering the question "Which :math:`X_{i}`
-    contributes most toward a given range of outputs?". Factor space can also be
-    assessed (`target="X"`), such that :math:`f(X_{i}|b_{i}) -> (Y|b_{i})` and
-    :math:`f(X_{i}|b_{~i}) -> (Y|b_{~i})`. This aids in answering the question "where
-    in factor space are outputs most sensitive to?"
+    for analysis by default (:code:`target="Y"`), such that :math:`(Y|b_{i})` is
+    mapped back to :math:`(X_{i}|b_{i})`. In other words, we treat outputs falling
+    within a given bin (:math:`b_{i}`) corresponding to their inputs as behavioral, and
+    those outside the bin as non-behavioral. This aids in answering the question
+    "Which :math:`X_{i}` contributes most toward a given range of outputs?". Factor
+    space can also be assessed (:code:`target="X"`), such that :math:`f(X_{i}|b_{i})
+    \\rightarrow (Y|b_{i})` and :math:`f(X_{i}|b_{\\sim i}) \\rightarrow
+    (Y|b_{\\sim i})`. This aids in answering the question "where in factor space are
+    outputs most sensitive to?"
 
     The $k$-sample Anderson-Darling test is used to compare distributions. Results of
-    the analysis are normalized so that values will be ::math:`\\in [0, 1]`, and
+    the analysis are normalized so that values will be :math:`\\in [0, 1]`, and
     indicate relative sensitivity across factor/output space. Larger values indicate
     greater dissimilarity (thus, sensitivity).
 
