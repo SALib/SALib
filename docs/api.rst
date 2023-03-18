@@ -75,3 +75,9 @@ High-Dimensional Model Representation
 
 .. autofunction:: SALib.analyze.hdmr.analyze
    :noindex:
+
+Regional Sensitivity Analysis
+-------------------------------------
+
+.. autofunction:: SALib.analyze.rsa.analyze
+   :noindex:
