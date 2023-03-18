@@ -50,7 +50,7 @@ concise workflow. The sampling, evaluation and analysis trifecta can be run with
         .analyze_sobol()
     )
 
-    total_Si, first_Si, second_Si = so.to_df()
+    total_Si, first_Si, second_Si = sp.to_df()
 
     sp.plot()
     sp.heatmap()
@@ -408,7 +408,7 @@ is set to use log scale, and the figure size is adjusted with :code:`matplotlib`
 
 
 
-.. figure:: assets/example_mod_plot.svg
+.. figure:: ../assets/example_mod_plot.svg
     :width: 800
     :align: center
 
@@ -421,7 +421,7 @@ heatmap.
     sp.heatmap()
 
 
-.. figure:: assets/example_heatmap_plot.svg
+.. figure:: ../assets/example_heatmap_plot.svg
     :width: 800
     :align: center
 
@@ -546,7 +546,7 @@ Now we can extract the first-order Sobol indices for each bin of :math:`x` and p
     plt.show()
 
 
-.. figure:: assets/example_parabola.svg
+.. figure:: ../assets/example_parabola.svg
     :width: 800
     :align: center
 

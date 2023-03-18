@@ -329,7 +329,7 @@ Now we can extract the first-order Sobol indices for each bin of :math:`x` and p
 
     plt.show()
 
-.. figure:: assets/example_parabola.svg
+.. figure:: ../assets/example_parabola.svg
     :width: 800
     :align: center
 

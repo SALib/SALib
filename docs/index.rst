@@ -40,18 +40,38 @@ Supported Methods
   (based on `Saltelli et al. 2008 <https://dx.doi.org/10.1002/9780470725184>`__, `Pianosi et al., 2016 <https://dx.doi.org/10.1016/j.envsoft.2016.02.008>`__)
 
 
+Getting Started
+---------------
+
 .. toctree::
    :maxdepth: 2
 
-   Getting started <getting-started>
-   Basics <basics>
-   SALib Interface <basics_with_interface>
-   Advanced <advanced>
-   API <api>
+   Getting started <user_guide/getting-started>
+   Basics <user_guide/basics>
+   SALib Interface <user_guide/basics_with_interface>
+   Advanced <user_guide/advanced>
+   Wrappers <user_guide/wrappers>
+   FAQ <user_guide/faq>
+
+
+For Developers
+--------------
+
+.. toctree::
+    :maxdepth: 2
+
+    API <api>
+    Developers Guide <developers_guide>
+    Changes <changelog>
+    Complete Module Reference <api/modules>
+
+
+Other Info
+----------
+
+.. toctree::
+    :maxdepth: 2
 
    License <license>
    Authors <authors>
    Projects that use SALib <citations>
-   Developers Guide <developers_guide>
-   Changes <changelog>
-   Complete Module Reference <api/modules>
