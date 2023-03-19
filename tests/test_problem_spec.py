@@ -2,6 +2,7 @@ import pytest
 import copy
 
 import numpy as np
+import pandas as pd
 
 from SALib import ProblemSpec
 from SALib.test_functions import Ishigami
@@ -125,12 +126,11 @@ def test_parallel_single_output():
         np.testing.assert_allclose(sp.results, psp.results, rtol=1e-3, atol=1e-3)
         is None
     ), "Model results not equal!"
-    assert (
-        np.testing.assert_assert_allcloseequal(
-            sp.analysis, psp.analysis, rtol=1e-3, atol=1e-3
-        )
-        is None
-    ), "Analysis results not equal!"
+
+    for (col, x) in sp.analysis.items():
+        assert (
+            np.testing.assert_allclose(x, psp.analysis[col]) is None
+        ), "Analysis results not equal!"
 
 
 @pytest.mark.filterwarnings("ignore::UserWarning")
@@ -169,12 +169,25 @@ def test_parallel_multi_output():
         .analyze_sobol(calc_second_order=True, conf_level=0.95, nprocs=2, seed=101)
     )
 
-    assert (
-        np.testing.assert_equal(sp.results, psp.results) is None
-    ), "Model results not equal!"
-    assert (
-        np.testing.assert_equal(sp.analysis, psp.analysis) is None
-    ), "Analysis results not equal!"
+    x_df = pd.DataFrame(sp.results)
+    y_df = pd.DataFrame(psp.results)
+    for col in pd.DataFrame(sp.results):
+        z = [
+            np.testing.assert_allclose(x, y)
+            for x, y in zip(x_df.loc[:, col], y_df.loc[:, col])
+        ]
+
+        assert not any(z), "Model results are not equal!"
+
+    x_df = pd.DataFrame(sp.analysis)
+    y_df = pd.DataFrame(psp.analysis)
+    for col in pd.DataFrame(sp.analysis):
+        z = [
+            np.testing.assert_allclose(x, y)
+            for x, y in zip(x_df.loc[:, col], y_df.loc[:, col])
+        ]
+
+        assert not any(z), "Analysis results are not equal!"
 
 
 def test_single_parameter():
