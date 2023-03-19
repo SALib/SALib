@@ -744,13 +744,13 @@ def _finalize(problem, SA, Em, d, alpha, maxorder, RT, Y_em, bootstrap_idx, X, Y
     # Fill Expansion Terms
     ct = 0
     p_names = problem["names"]
-    
+
     if maxorder == 2:
         p_c2 = Em["c2"]
     elif maxorder == 3:
         p_c2 = Em["c2"]
-        p_c3 = Em['c3']
-        
+        p_c3 = Em["c3"]
+
     for i in range(Em["n1"]):
         Si["Term"][ct] = p_names[i]
         ct += 1
@@ -839,7 +839,7 @@ def emulate(self, X, Y=None):
     m1 = m + 3
     n1, n2, n3 = d, 0, 0
     maxorder = 1
-    
+
     if C2.shape[0] != 1:
         maxorder = 2
         m2 = C2.shape[0]
