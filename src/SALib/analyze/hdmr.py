@@ -177,7 +177,7 @@ def analyze(
     settings = _check_settings(X, Y, maxorder, maxiter, m, K, R, alpha, lambdax)
     init_vars = _init(X, Y, settings)
 
-    # Sensitivity Analysis Computation with/without bootstraping
+    # Sensitivity Analysis Computation with/without bootstrapping
     SA, Em, RT, Y_em, idx = _compute(X, Y, settings, init_vars)
 
     # Finalize results
@@ -228,7 +228,7 @@ def _check_settings(X, Y, maxorder, maxiter, m, K, R, alpha, lambdax):
     # Important next check for maxorder - as maxorder relates to d
     if (d == 2) and (maxorder > 2):
         raise RuntimeError(
-            'SALib-HDMR ERRROR: Field "maxorder" of options has to be 2 as'
+            'SALib-HDMR ERROR: Field "maxorder" of options has to be 2 as'
             " d = 2 (X has two columns)"
         )
 
@@ -373,7 +373,7 @@ def _init(X, Y, settings):
         # No Bootstrap
         idx = np.arange(0, N).reshape(N, 1)
     else:
-        # Now setup the boostrap matrix with selection matrix, idx, for samples
+        # Now setup the bootstrap matrix with selection matrix, idx, for samples
         idx = np.argsort(np.random.rand(N, K), axis=0)[:R]
 
     # Compute normalized X-values
@@ -397,7 +397,7 @@ def _init(X, Y, settings):
         c3 = np.asarray(list(itertools.combinations(np.arange(0, d), 3)))
         n3 = c3.shape[0]
 
-    # calulate total number of coefficients
+    # calculate total number of coefficients
     n = n1 + n2 + n3
 
     # Initialize m1, m2 and m3 - number of coefficients first, second, third

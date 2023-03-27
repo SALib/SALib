@@ -232,7 +232,7 @@ def _nonuniform_scale_samples(params, bounds, dists):
                 )
 
         # lognormal distribution (ln-space, not base-10)
-        # paramters are ln-space mean and standard deviation
+        # parameters are ln-space mean and standard deviation
         elif dists[i] == "lognorm":
             # checking for valid parameters
             if b2 <= 0:
