@@ -173,8 +173,8 @@ class ProblemSpec(dict):
         -------
         self : ProblemSpec object
         """
-        if "nprocs" in kwargs:
-            nprocs = kwargs.pop("nprocs")
+        nprocs = kwargs.pop("nprocs", 1)
+        if nprocs > 1:
             return self.evaluate_parallel(func, *args, nprocs=nprocs, **kwargs)
 
         self.results = func(self._samples, *args, **kwargs)
