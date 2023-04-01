@@ -745,11 +745,10 @@ def _finalize(problem, SA, Em, d, alpha, maxorder, RT, Y_em, bootstrap_idx, X, Y
     ct = 0
     p_names = problem["names"]
 
-    if maxorder == 2:
+    if maxorder > 1:
         p_c2 = Em["c2"]
-    elif maxorder == 3:
-        p_c2 = Em["c2"]
-        p_c3 = Em["c3"]
+        if maxorder == 3:
+            p_c3 = Em["c3"]
 
     for i in range(Em["n1"]):
         Si["Term"][ct] = p_names[i]
@@ -761,7 +760,7 @@ def _finalize(problem, SA, Em, d, alpha, maxorder, RT, Y_em, bootstrap_idx, X, Y
 
     for i in range(Em["n3"]):
         Si["Term"][ct] = "/".join(
-            [p_names[Em["c3"][i, 0]], p_names[Em["c3"][i, 1]], p_names[Em["c3"][i, 2]]]
+            [p_names[p_c3[i, 0]], p_names[p_c3[i, 1]], p_names[p_c3[i, 2]]]
         )
         ct += 1
 
