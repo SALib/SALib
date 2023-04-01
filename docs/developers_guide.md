@@ -35,3 +35,13 @@ In a command prompt
 > cd docs
 > sphinx-build . ./html
 ```
+
+## Prior to submitting a PR
+
+Run the below to catch any formatting issues.
+
+```bash
+# pre-commit install
+
+pre-commit run --all-files
+```
