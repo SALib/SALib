@@ -1,7 +1,8 @@
 import math
 import numpy as np
 from typing import Dict
-from itertools import combinations as comb
+from numpy.linalg import det
+from itertools import combinations as comb, product
 from collections import defaultdict, namedtuple
 
 
@@ -163,3 +164,88 @@ def _core_params(N, d, poly_order, max_order, bootstrap, subset, extended_base) 
     )
 
     return hdmr
+
+
+def _basis_matrix(X, hdmr, max_order, extended_base):
+    # Compute normalized X-values
+    X_n = (X - np.tile(X.min(0), (hdmr.N, 1))) / np.tile((X.max(0)) - X.min(0), (hdmr.N, 1))
+    
+    # Compute Orthonormal Polynomial Coefficients
+    coeff = _orth_poly_coeff(X, hdmr.p_o)
+    # Initialize Basis Matrix
+    b_m = np.zeros((hdmr.N, hdmr.a_tnt))
+    # Start Column Counter
+    col = 0
+
+    # First order columns of basis matrix
+    for i in range(hdmr.d):
+        for j in range(hdmr.p_o):
+            b_m[:, col] = np.polyval(coeff[j, :, i], X_n[:, i])
+            col += 1
+
+    # Second order columns of basis matrix
+    if max_order > 1:
+        for i in _prod(range(0, hdmr.d-1), range(1, hdmr.d)):
+            if extended_base:
+                b_m[:, col:col+hdmr.p_o] = b_m[:, i[0]*hdmr.p_o:(i[0]+1)*hdmr.p_o]
+                col += hdmr.p_o
+                b_m[:, col:col+hdmr.p_o] = b_m[:, i[1]*hdmr.p_o:(i[1]+1)*hdmr.p_o]
+                col += hdmr.p_o
+            
+            for j in _prod(range(i[0]*hdmr.p_o, (i[0]+1)*hdmr.p_o), range(i[1]*hdmr.p_o, (i[1]+1)*hdmr.p_o)):
+                b_m[:, col] = np.multiply(b_m[:, j[0]], b_m[:, j[1]])
+                col += 1
+    
+    # Third order columns of basis matrix
+    if max_order == 3:
+        for i in _prod(range(0, hdmr.d-2), range(1, hdmr.d-1), range(2, hdmr.d)):
+            if extended_base:
+                b_m[:, col:col+hdmr.p_o] = b_m[:, i[0]*hdmr.p_o:(i[0]+1)*hdmr.p_o]
+                col += hdmr.p_o
+                b_m[:, col:col+hdmr.p_o] = b_m[:, i[1]*hdmr.p_o:(i[1]+1)*hdmr.p_o]
+                col += hdmr.p_o
+                b_m[:, col:col+hdmr.p_o] = b_m[:, i[2]*hdmr.p_o:(i[2]+1)*hdmr.p_o]
+                col += hdmr.p_o
+                b_m[:, col:col+hdmr.p_o**2] = b_m[:, hdmr.tnt1+i[0]*(hdmr.p_o**2):hdmr.tnt1+(i[0]+1)*(hdmr.p_o**2)]
+                col += hdmr.p_o**2
+                b_m[:, col:col+hdmr.p_o**2] = b_m[:, hdmr.tnt1+i[1]*(hdmr.p_o**2):hdmr.tnt1+(i[1]+1)*(hdmr.p_o**2)]
+                col += hdmr.p_o**2
+                b_m[:, col:col+hdmr.p_o**2] = b_m[:, hdmr.tnt1+i[2]*(hdmr.p_o**2):hdmr.tnt1+(i[2]+1)*(hdmr.p_o**2)]
+                col += hdmr.p_o**2
+
+            for j in _prod(range(i[0]*hdmr.p_o, (i[0]+1)*hdmr.p_o), range(i[1]*hdmr.p_o, (i[1]+1)*hdmr.p_o), range(i[2]*hdmr.p_o, (i[2]+1)*hdmr.p_o)):
+                b_m[:, col] = np.multiply(b_m[:, j[0]], b_m[:, j[1]], b_m[:, j[2]])
+                col += 1
+
+
+def _orth_poly_coeff(X, hdmr):
+    k = 0
+    M = np.zeros((hdmr.p_o+1, hdmr.p_o+1, hdmr.d))
+    for i in range(hdmr.d):
+        k = 0
+        for j in range(hdmr.p_o+1):
+            for z in range(hdmr.p_o+1):
+                M[j, z, i] = sum(X[:, i]**k) / hdmr.N
+                k += 1
+            k = j + 1
+    coeff = np.zeros((hdmr.p_o, hdmr.p_o+1, hdmr.d))
+    for i in range(hdmr.d):
+        for j in range(hdmr.p_o):
+            for k in range(j+2):
+                z = list(range(j+2))
+                z.pop(k)
+                det_ij = det(M[:j+1,:j+1, i]) * det(M[:j+2, :j+2, i])
+                coeff[j, j+1-k, i] = (-1)**(j+k+1) * det(M[:j+1, z, i]) / np.sqrt(det_ij)
+
+    return coeff
+
+
+def _prod(*inputs):
+    seen = set()
+    for prod in product(*inputs):
+        prod_set = frozenset(prod)
+        if len(prod_set) == 1:
+            continue
+        if prod_set not in seen:
+            seen.add(prod_set)
+            yield prod
