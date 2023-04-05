@@ -34,7 +34,9 @@ def analyze(
     # Instantiate Core Parameters
     hdmr = _core_params(*X.shape, poly_order, max_order, bootstrap, subset, extended_base)
     # Calculate HDMR Basis Matrix   
-    b_m = _basis_matrix(X, hdmr, max_order, poly_order, extended_base)
+    b_m = _basis_matrix(X, hdmr, max_order, extended_base)
+    # Functional ANOVA decomposition
+    _fanova(b_m, hdmr, Y, bootstrap, max_order, extended_base)
 
 
 def _check_args(X, Y, max_order, poly_order, bootstrap, subset, alpha):
@@ -133,7 +135,7 @@ def _core_params(N, d, poly_order, max_order, bootstrap, subset, extended_base) 
             cp['n_coeff'][2] += 3*poly_order + 3*poly_order**2
 
     # Setup Bootstrap (if bootstrap > 1)
-    idx = np.arange(0, N) if bootstrap == 1 else np.argsort(np.random.rand(N, bootstrap), axis=0)[:subset]
+    idx = np.arange(0, N).reshape(-1, 1) if bootstrap == 1 else np.argsort(np.random.rand(N, bootstrap), axis=0)[:subset]
  
     CoreParams = namedtuple('CoreParams', ['N', 'd', 'p_o', 'nc1', 'nc2', 'nc3', 'nc_t', 'nt1', 'nt2', 'nt3', 
                            'tnt1', 'tnt2', 'tnt3', 'a_tnt', 'idx', 'beta', 
@@ -159,10 +161,10 @@ def _core_params(N, d, poly_order, max_order, bootstrap, subset, extended_base) 
         idx,
         np.asarray(list(comb(np.arange(0, d), 2))),
         np.asarray(list(comb(np.arange(0, d), 3))),
-        np.empty((sum(cp['n_comp_func']), bootstrap)),
-        np.empty((sum(cp['n_comp_func']), bootstrap)),
-        np.empty((sum(cp['n_comp_func']), bootstrap)),
-        np.empty((sum(cp['n_comp_func']), bootstrap))
+        np.zeros((sum(cp['n_comp_func']), bootstrap)),
+        np.zeros((sum(cp['n_comp_func']), bootstrap)),
+        np.zeros((sum(cp['n_comp_func']), bootstrap)),
+        np.zeros((sum(cp['n_comp_func']), bootstrap))
     )
 
     return hdmr
@@ -173,7 +175,7 @@ def _basis_matrix(X, hdmr, max_order, extended_base):
     X_n = (X - np.tile(X.min(0), (hdmr.N, 1))) / np.tile((X.max(0)) - X.min(0), (hdmr.N, 1))
     
     # Compute Orthonormal Polynomial Coefficients
-    coeff = _orth_poly_coeff(X, hdmr.p_o)
+    coeff = _orth_poly_coeff(X, hdmr)
     # Initialize Basis Matrix
     b_m = np.zeros((hdmr.N, hdmr.a_tnt))
     # Start Column Counter
@@ -219,6 +221,8 @@ def _basis_matrix(X, hdmr, max_order, extended_base):
                 b_m[:, col] = np.multiply(b_m[:, j[0]], b_m[:, j[1]], b_m[:, j[2]])
                 col += 1
 
+    return b_m
+
 
 def _orth_poly_coeff(X, hdmr):
     k = 0
@@ -253,6 +257,19 @@ def _prod(*inputs):
             yield prod
 
 
+def _fanova(b_m, hdmr, Y, bootstrap, max_order, extended_base):
+    for t in range(bootstrap):
+        # Extract model output for a corresponding bootstrap iteration
+        Y_idx = Y[hdmr.idx[:, t], 0]
+        # Subtract mean from it
+        Y_idx -= np.mean(Y_idx)
+        
+        if extended_base:
+            cost = _cost_matrix(b_m[hdmr.idx[:, t], :], hdmr, bootstrap, max_order)
+        else:
+            continue
+
+
 def _cost_matrix(b_m, hdmr, bootstrap, max_order):
     cost = np.zeros((hdmr.a_tnt, hdmr.a_tnt))
 
@@ -262,13 +279,13 @@ def _cost_matrix(b_m, hdmr, bootstrap, max_order):
     range_3rd_2 = lambda x: range(hdmr.tnt1+hdmr.tnt2+(x)*hdmr.tnt3, hdmr.tnt1+hdmr.tnt2+(x)*hdmr.tnt3+3*hdmr.p_o+3*hdmr.p_o**2)
                                   
     if max_order > 1:
-        sr_i = np.mean(b_m, axis=0).flatten()
+        sr_i = np.mean(b_m, axis=0, keepdims=True)
         sr_ij = np.zeros((2*hdmr.p_o+1, hdmr.nt2))
         ct = 0
         for _ in _prod(range(0, hdmr.d-1), range(1, hdmr.d)):
             sr_ij[0, :] = sr_i[0, range_2nd_1(ct)]
-            sr_ij[1:, :] = b_m[:, range_2nd_2(ct)].transpose() @ b_m[:, range_2nd_1(ct)]
-            cost[range_2nd_1(ct), range_2nd_1(ct)] = sr_ij.transpose() @ sr_ij
+            sr_ij[1:, :] = (b_m[:, range_2nd_2(ct)].transpose() @ b_m[:, range_2nd_1(ct)]) / bootstrap
+            cost[np.ix_(range_2nd_1(ct), range_2nd_1(ct))] = sr_ij.transpose() @ sr_ij
             ct += 1
     if max_order == 3:
         sr_ijk = np.zeros((3*hdmr.p_o+3*hdmr.p_o**2+1, hdmr.tnt3))
@@ -276,6 +293,7 @@ def _cost_matrix(b_m, hdmr, bootstrap, max_order):
         for _ in _prod(range(0, hdmr.d-2), range(1, hdmr.d-1), range(2, hdmr.d)):
             sr_ijk[0, :] = sr_i[0, range_3rd_1(ct)]
             sr_ijk[1:, :] = b_m[:, range_3rd_2(ct)].transpose() @ b_m[:, range_3rd_1(ct)]
-            cost[range_3rd_1(ct), range_3rd_1(ct)] = sr_ijk.transpose() @ sr_ijk
+            cost[np.ix_(range_3rd_1(ct), range_3rd_1(ct))] = sr_ijk.transpose() @ sr_ijk
+            ct += 1
     
     return cost
