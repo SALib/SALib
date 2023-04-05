@@ -33,6 +33,8 @@ def analyze(
     _check_args(X, Y, max_order, poly_order, bootstrap, subset, alpha)
     # Instantiate Core Parameters
     hdmr = _core_params(*X.shape, poly_order, max_order, bootstrap, subset, extended_base)
+    # Calculate HDMR Basis Matrix   
+    b_m = _basis_matrix(X, hdmr, max_order, poly_order, extended_base)
 
 
 def _check_args(X, Y, max_order, poly_order, bootstrap, subset, alpha):
@@ -249,3 +251,31 @@ def _prod(*inputs):
         if prod_set not in seen:
             seen.add(prod_set)
             yield prod
+
+
+def _cost_matrix(b_m, hdmr, bootstrap, max_order):
+    cost = np.zeros((hdmr.a_tnt, hdmr.a_tnt))
+
+    range_2nd_1 = lambda x: range(hdmr.tnt1+(x)*hdmr.nt2, hdmr.tnt1+(x+1)*hdmr.nt2)
+    range_2nd_2 = lambda x: range(hdmr.tnt1+(x)*hdmr.nt2, hdmr.tnt1+(x)*hdmr.nt2+hdmr.p_o*2)
+    range_3rd_1 = lambda x: range(hdmr.tnt1+hdmr.tnt2+(x)*hdmr.nt3, hdmr.tnt1+hdmr.tnt2+(x+1)*hdmr.nt3)
+    range_3rd_2 = lambda x: range(hdmr.tnt1+hdmr.tnt2+(x)*hdmr.tnt3, hdmr.tnt1+hdmr.tnt2+(x)*hdmr.tnt3+3*hdmr.p_o+3*hdmr.p_o**2)
+                                  
+    if max_order > 1:
+        sr_i = np.mean(b_m, axis=0).flatten()
+        sr_ij = np.zeros((2*hdmr.p_o+1, hdmr.nt2))
+        ct = 0
+        for _ in _prod(range(0, hdmr.d-1), range(1, hdmr.d)):
+            sr_ij[0, :] = sr_i[0, range_2nd_1(ct)]
+            sr_ij[1:, :] = b_m[:, range_2nd_2(ct)].transpose() @ b_m[:, range_2nd_1(ct)]
+            cost[range_2nd_1(ct), range_2nd_1(ct)] = sr_ij.transpose() @ sr_ij
+            ct += 1
+    if max_order == 3:
+        sr_ijk = np.zeros((3*hdmr.p_o+3*hdmr.p_o**2+1, hdmr.tnt3))
+        ct = 0
+        for _ in _prod(range(0, hdmr.d-2), range(1, hdmr.d-1), range(2, hdmr.d)):
+            sr_ijk[0, :] = sr_i[0, range_3rd_1(ct)]
+            sr_ijk[1:, :] = b_m[:, range_3rd_2(ct)].transpose() @ b_m[:, range_3rd_1(ct)]
+            cost[range_3rd_1(ct), range_3rd_1(ct)] = sr_ijk.transpose() @ sr_ijk
+    
+    return cost
