@@ -2,6 +2,7 @@ import math
 import numpy as np
 from typing import Dict
 from numpy.linalg import det
+from scipy.linalg import pinv, svd, LinAlgError
 from itertools import combinations as comb, product
 from collections import defaultdict, namedtuple
 
@@ -266,6 +267,7 @@ def _fanova(b_m, hdmr, Y, bootstrap, max_order, extended_base):
         
         if extended_base:
             cost = _cost_matrix(b_m[hdmr.idx[:, t], :], hdmr, bootstrap, max_order)
+            solution = _d_morph(b_m[hdmr.idx[:, t], :], cost, Y_idx, bootstrap, hdmr)
         else:
             continue
 
@@ -284,16 +286,43 @@ def _cost_matrix(b_m, hdmr, bootstrap, max_order):
         ct = 0
         for _ in _prod(range(0, hdmr.d-1), range(1, hdmr.d)):
             sr_ij[0, :] = sr_i[0, range_2nd_1(ct)]
-            sr_ij[1:, :] = (b_m[:, range_2nd_2(ct)].transpose() @ b_m[:, range_2nd_1(ct)]) / bootstrap
-            cost[np.ix_(range_2nd_1(ct), range_2nd_1(ct))] = sr_ij.transpose() @ sr_ij
+            sr_ij[1:, :] = (b_m[:, range_2nd_2(ct)].T @ b_m[:, range_2nd_1(ct)]) / bootstrap
+            cost[np.ix_(range_2nd_1(ct), range_2nd_1(ct))] = sr_ij.T @ sr_ij
             ct += 1
     if max_order == 3:
         sr_ijk = np.zeros((3*hdmr.p_o+3*hdmr.p_o**2+1, hdmr.tnt3))
         ct = 0
         for _ in _prod(range(0, hdmr.d-2), range(1, hdmr.d-1), range(2, hdmr.d)):
             sr_ijk[0, :] = sr_i[0, range_3rd_1(ct)]
-            sr_ijk[1:, :] = b_m[:, range_3rd_2(ct)].transpose() @ b_m[:, range_3rd_1(ct)]
-            cost[np.ix_(range_3rd_1(ct), range_3rd_1(ct))] = sr_ijk.transpose() @ sr_ijk
+            sr_ijk[1:, :] = b_m[:, range_3rd_2(ct)].T @ b_m[:, range_3rd_1(ct)]
+            cost[np.ix_(range_3rd_1(ct), range_3rd_1(ct))] = sr_ijk.T @ sr_ijk
             ct += 1
     
     return cost
+
+
+def _d_morph(b_m, cost, Y_idx, bootstrap, hdmr):
+    # Left Matrix Multiplication with the transpose of cost matrix
+    a = (b_m.T @ b_m) / bootstrap # LHS
+    b = (b_m.T @ Y_idx) / bootstrap # RHS
+    try:
+        # Pseudo-Inverse of LHS
+        a_inv, rank = pinv(a, atol=max(a.shape)*np.finfo(np.float64).eps, return_rank=True)
+        # Least-Square Solution
+        x = a_inv @ b
+        # Projection Matrix
+        pr = np.eye(hdmr.a_tnt) - (a_inv @ a)
+        pb = pr @ cost
+        U, _, Vh = svd(pb)
+    except LinAlgError:
+        print("Pseudo-Inverse did not converge")
+    
+    nullity = b_m.shape[0] - rank
+    V = Vh.T
+    U = np.delete(U, range(0, nullity), axis=1)
+    V = np.delete(V, range(0, nullity), axis=1)
+
+    # D-Morph Regression Solution
+    x_dm = V @ pinv(U.T@V) @ U.T @ x
+
+    return x_dm
