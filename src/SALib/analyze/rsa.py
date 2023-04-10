@@ -62,6 +62,9 @@ def analyze(
     This analysis will produce NaNs, indicating areas of factor space that did not have
     any samples, or for which the outputs were constant.
 
+    Analysis results are normalized against the maximum value such that 1.0 indicates
+    the greatest sensitivity.
+
     Parameters
     ----------
     problem : dict
@@ -168,8 +171,7 @@ def rsa(X: np.ndarray, y: np.ndarray, bins: int = 10, target="X") -> np.ndarray:
                 if _has_samples(y, b):
                     r_s[s, d_i] = anderson_ksamp((m_arr[b], m_arr[~b])).statistic
 
-    min_val = np.nanmin(r_s)
-    return (r_s - min_val) / (np.nanmax(r_s) - min_val)
+    return r_s / np.nanmax(r_s)
 
 
 def _has_samples(y, sel):
