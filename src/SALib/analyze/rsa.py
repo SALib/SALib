@@ -43,10 +43,10 @@ def analyze(
     (Y|b_{\\sim i})`. This aids in answering the question "where in factor space are
     outputs most sensitive to?"
 
-    The $k$-sample Anderson-Darling test is used to compare distributions. Results of
-    the analysis are normalized so that values will be :math:`\\in [0, 1]`, and
-    indicate relative sensitivity across factor/output space. Larger values indicate
-    greater dissimilarity (thus, sensitivity).
+    The :math:`k`-sample Anderson-Darling test is used to compare distributions.
+    Results of the analysis are normalized so that values will be :math:`\\in [0, 1]`,
+    and indicate relative sensitivity across factor/output space. Larger values
+    indicate greater dissimilarity (thus, sensitivity).
 
     Notes
     -----
@@ -56,11 +56,14 @@ def analyze(
     When applied to grouped factors, the analysis is conducted on each factor
     individually, and the mean of the results for a group are reported.
 
-    Increasing the value of :math:`S` increases the granularity of the analysis
+    Increasing the value of :code:`bins` increases the granularity of the analysis
     (across factor space), but necessitates larger sample sizes.
 
     This analysis will produce NaNs, indicating areas of factor space that did not have
     any samples, or for which the outputs were constant.
+
+    Analysis results are normalized against the maximum value such that 1.0 indicates
+    the greatest sensitivity.
 
     Parameters
     ----------
@@ -168,8 +171,7 @@ def rsa(X: np.ndarray, y: np.ndarray, bins: int = 10, target="X") -> np.ndarray:
                 if _has_samples(y, b):
                     r_s[s, d_i] = anderson_ksamp((m_arr[b], m_arr[~b])).statistic
 
-    min_val = np.nanmin(r_s)
-    return (r_s - min_val) / (np.nanmax(r_s) - min_val)
+    return r_s / np.nanmax(r_s)
 
 
 def _has_samples(y, sel):
