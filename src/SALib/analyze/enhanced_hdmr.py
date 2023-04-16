@@ -37,7 +37,7 @@ def analyze(
     # Calculate HDMR Basis Matrix   
     b_m = _basis_matrix(X, hdmr, max_order, extended_base)
     # Functional ANOVA decomposition
-    _fanova(b_m, hdmr, Y, bootstrap, max_order, extended_base)
+    _fanova(b_m, hdmr, Y, bootstrap, max_order, subset, extended_base)
 
 
 def _check_args(X, Y, max_order, poly_order, bootstrap, subset, alpha):
@@ -176,7 +176,7 @@ def _basis_matrix(X, hdmr, max_order, extended_base):
     X_n = (X - np.tile(X.min(0), (hdmr.N, 1))) / np.tile((X.max(0)) - X.min(0), (hdmr.N, 1))
     
     # Compute Orthonormal Polynomial Coefficients
-    coeff = _orth_poly_coeff(X, hdmr)
+    coeff = _orth_poly_coeff(X_n, hdmr)
     # Initialize Basis Matrix
     b_m = np.zeros((hdmr.N, hdmr.a_tnt))
     # Start Column Counter
@@ -185,7 +185,7 @@ def _basis_matrix(X, hdmr, max_order, extended_base):
     # First order columns of basis matrix
     for i in range(hdmr.d):
         for j in range(hdmr.p_o):
-            b_m[:, col] = np.polyval(coeff[j, :, i], X_n[:, i])
+            b_m[:, col] = np.polyval(coeff[j, :j+2, i], X_n[:, i])
             col += 1
 
     # Second order columns of basis matrix
@@ -211,15 +211,15 @@ def _basis_matrix(X, hdmr, max_order, extended_base):
                 col += hdmr.p_o
                 b_m[:, col:col+hdmr.p_o] = b_m[:, i[2]*hdmr.p_o:(i[2]+1)*hdmr.p_o]
                 col += hdmr.p_o
-                b_m[:, col:col+hdmr.p_o**2] = b_m[:, hdmr.tnt1+i[0]*(hdmr.p_o**2):hdmr.tnt1+(i[0]+1)*(hdmr.p_o**2)]
+                b_m[:, col:col+hdmr.p_o**2] = b_m[:, hdmr.tnt1+(2*hdmr.nt1)*(i[0]+1)+i[0]*(hdmr.p_o**2):hdmr.tnt1+(i[0]+1)*(hdmr.p_o**2+2*hdmr.nt1)]
                 col += hdmr.p_o**2
-                b_m[:, col:col+hdmr.p_o**2] = b_m[:, hdmr.tnt1+i[1]*(hdmr.p_o**2):hdmr.tnt1+(i[1]+1)*(hdmr.p_o**2)]
+                b_m[:, col:col+hdmr.p_o**2] = b_m[:, hdmr.tnt1+(2*hdmr.nt1)*(i[1]+1)+i[1]*(hdmr.p_o**2):hdmr.tnt1+(i[1]+1)*(hdmr.p_o**2+2*hdmr.nt1)]
                 col += hdmr.p_o**2
-                b_m[:, col:col+hdmr.p_o**2] = b_m[:, hdmr.tnt1+i[2]*(hdmr.p_o**2):hdmr.tnt1+(i[2]+1)*(hdmr.p_o**2)]
+                b_m[:, col:col+hdmr.p_o**2] = b_m[:, hdmr.tnt1+(2*hdmr.nt1)*(i[2]+1)+i[2]*(hdmr.p_o**2):hdmr.tnt1+(i[2]+1)*(hdmr.p_o**2+2*hdmr.nt1)]
                 col += hdmr.p_o**2
 
             for j in _prod(range(i[0]*hdmr.p_o, (i[0]+1)*hdmr.p_o), range(i[1]*hdmr.p_o, (i[1]+1)*hdmr.p_o), range(i[2]*hdmr.p_o, (i[2]+1)*hdmr.p_o)):
-                b_m[:, col] = np.multiply(b_m[:, j[0]], b_m[:, j[1]], b_m[:, j[2]])
+                b_m[:, col] = np.multiply(np.multiply(b_m[:, j[0]], b_m[:, j[1]]), b_m[:, j[2]])
                 col += 1
 
     return b_m
@@ -258,7 +258,7 @@ def _prod(*inputs):
             yield prod
 
 
-def _fanova(b_m, hdmr, Y, bootstrap, max_order, extended_base):
+def _fanova(b_m, hdmr, Y, bootstrap, max_order, subset, extended_base):
     for t in range(bootstrap):
         # Extract model output for a corresponding bootstrap iteration
         Y_idx = Y[hdmr.idx[:, t], 0]
@@ -266,8 +266,9 @@ def _fanova(b_m, hdmr, Y, bootstrap, max_order, extended_base):
         Y_idx -= np.mean(Y_idx)
         
         if extended_base:
-            cost = _cost_matrix(b_m[hdmr.idx[:, t], :], hdmr, bootstrap, max_order)
+            cost = _cost_matrix(b_m[hdmr.idx[:, t], :], hdmr, subset, max_order)
             solution = _d_morph(b_m[hdmr.idx[:, t], :], cost, Y_idx, bootstrap, hdmr)
+            Y_e = _comp_func(b_m, solution, subset, hdmr, max_order)
         else:
             continue
 
@@ -301,10 +302,10 @@ def _cost_matrix(b_m, hdmr, bootstrap, max_order):
     return cost
 
 
-def _d_morph(b_m, cost, Y_idx, bootstrap, hdmr):
+def _d_morph(b_m, cost, Y_idx, subset, hdmr):
     # Left Matrix Multiplication with the transpose of cost matrix
-    a = (b_m.T @ b_m) / bootstrap # LHS
-    b = (b_m.T @ Y_idx) / bootstrap # RHS
+    a = (b_m.T @ b_m) / subset # LHS
+    b = (b_m.T @ Y_idx) / subset # RHS
     try:
         # Pseudo-Inverse of LHS
         a_inv, rank = pinv(a, atol=max(a.shape)*np.finfo(np.float64).eps, return_rank=True)
@@ -317,12 +318,38 @@ def _d_morph(b_m, cost, Y_idx, bootstrap, hdmr):
     except LinAlgError:
         print("Pseudo-Inverse did not converge")
     
-    nullity = b_m.shape[0] - rank
+    nullity = b_m.shape[1] - rank
     V = Vh.T
     U = np.delete(U, range(0, nullity), axis=1)
     V = np.delete(V, range(0, nullity), axis=1)
 
     # D-Morph Regression Solution
-    x_dm = V @ pinv(U.T@V) @ U.T @ x
+    x_dm = V @ pinv(U.T @ V) @ U.T @ x
 
-    return x_dm
+    return x_dm.flatten()
+
+
+def _comp_func(b_m, x, subset, hdmr, max_order):
+    Y_t = np.zeros((subset, hdmr.a_tnt))
+    Y_e = np.zeros((subset, hdmr.nc_t))
+
+    # Temporary matrix
+    Y_t = np.multiply(b_m, np.tile(x, [subset, 1]))
+
+    # First order component functions
+    for i in range(hdmr.nc1):
+        Y_e[:, i] = np.sum(Y_t[:, i*hdmr.p_o,(i+1)*hdmr.p_o], axis=1)
+
+    # Second order component functions
+    if max_order > 1:
+        for i in range(hdmr.nc2):
+            Y_e[:, hdmr.nc1+i] = np.sum(Y_t[:, hdmr.tnt1+(i)*hdmr.nt2:hdmr.tnt1+(i+1)*hdmr.nt2], axis=1)
+
+    # Third order component functions
+    if max_order == 3:
+        for i in range(hdmr.nc3):
+            Y_e[:, hdmr.nc1+hdmr.nc2+i] = np.sum(Y_t[:, hdmr.tnt1+hdmr.tnt2+(i)*hdmr.nt3, hdmr.tnt1+hdmr.tnt2+(i+1)*hdmr.nt3], axis=1)
+        
+    return Y_e
+
+
