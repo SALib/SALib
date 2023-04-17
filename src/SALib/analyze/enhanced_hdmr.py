@@ -251,7 +251,7 @@ def _prod(*inputs):
     seen = set()
     for prod in product(*inputs):
         prod_set = frozenset(prod)
-        if len(prod_set) == 1:
+        if len(prod_set) != len(prod):
             continue
         if prod_set not in seen:
             seen.add(prod_set)
@@ -268,9 +268,15 @@ def _fanova(b_m, hdmr, Y, bootstrap, max_order, subset, extended_base):
         if extended_base:
             cost = _cost_matrix(b_m[hdmr.idx[:, t], :], hdmr, subset, max_order)
             solution = _d_morph(b_m[hdmr.idx[:, t], :], cost, Y_idx, bootstrap, hdmr)
-            Y_e = _comp_func(b_m, solution, subset, hdmr, max_order)
         else:
-            continue
+            _first_order()
+            _second_order()
+            _third_order()
+
+        # Calculate component functions         
+        Y_e = _comp_func(b_m[hdmr.idx[:, t], :], solution, subset, hdmr, max_order)
+        # Sensitivity Analysis
+        _ancova(Y_idx, Y_e, hdmr, t)
 
 
 def _cost_matrix(b_m, hdmr, bootstrap, max_order):
@@ -279,7 +285,7 @@ def _cost_matrix(b_m, hdmr, bootstrap, max_order):
     range_2nd_1 = lambda x: range(hdmr.tnt1+(x)*hdmr.nt2, hdmr.tnt1+(x+1)*hdmr.nt2)
     range_2nd_2 = lambda x: range(hdmr.tnt1+(x)*hdmr.nt2, hdmr.tnt1+(x)*hdmr.nt2+hdmr.p_o*2)
     range_3rd_1 = lambda x: range(hdmr.tnt1+hdmr.tnt2+(x)*hdmr.nt3, hdmr.tnt1+hdmr.tnt2+(x+1)*hdmr.nt3)
-    range_3rd_2 = lambda x: range(hdmr.tnt1+hdmr.tnt2+(x)*hdmr.tnt3, hdmr.tnt1+hdmr.tnt2+(x)*hdmr.tnt3+3*hdmr.p_o+3*hdmr.p_o**2)
+    range_3rd_2 = lambda x: range(hdmr.tnt1+hdmr.tnt2+(x)*hdmr.nt3, hdmr.tnt1+hdmr.tnt2+(x)*hdmr.nt3+3*hdmr.p_o+3*hdmr.p_o**2)
                                   
     if max_order > 1:
         sr_i = np.mean(b_m, axis=0, keepdims=True)
@@ -291,7 +297,7 @@ def _cost_matrix(b_m, hdmr, bootstrap, max_order):
             cost[np.ix_(range_2nd_1(ct), range_2nd_1(ct))] = sr_ij.T @ sr_ij
             ct += 1
     if max_order == 3:
-        sr_ijk = np.zeros((3*hdmr.p_o+3*hdmr.p_o**2+1, hdmr.tnt3))
+        sr_ijk = np.zeros((3*hdmr.p_o+3*hdmr.p_o**2+1, hdmr.nt3))
         ct = 0
         for _ in _prod(range(0, hdmr.d-2), range(1, hdmr.d-1), range(2, hdmr.d)):
             sr_ijk[0, :] = sr_i[0, range_3rd_1(ct)]
@@ -338,7 +344,7 @@ def _comp_func(b_m, x, subset, hdmr, max_order):
 
     # First order component functions
     for i in range(hdmr.nc1):
-        Y_e[:, i] = np.sum(Y_t[:, i*hdmr.p_o,(i+1)*hdmr.p_o], axis=1)
+        Y_e[:, i] = np.sum(Y_t[:, i*hdmr.p_o:(i+1)*hdmr.p_o], axis=1)
 
     # Second order component functions
     if max_order > 1:
@@ -348,8 +354,32 @@ def _comp_func(b_m, x, subset, hdmr, max_order):
     # Third order component functions
     if max_order == 3:
         for i in range(hdmr.nc3):
-            Y_e[:, hdmr.nc1+hdmr.nc2+i] = np.sum(Y_t[:, hdmr.tnt1+hdmr.tnt2+(i)*hdmr.nt3, hdmr.tnt1+hdmr.tnt2+(i+1)*hdmr.nt3], axis=1)
+            Y_e[:, hdmr.nc1+hdmr.nc2+i] = np.sum(Y_t[:, hdmr.tnt1+hdmr.tnt2+(i)*hdmr.nt3:hdmr.tnt1+hdmr.tnt2+(i+1)*hdmr.nt3], axis=1)
         
     return Y_e
 
 
+def _ancova(Y, Y_e, hdmr, t):
+    """Analysis of Covariance."""
+    # Compute the sum of all Y_em terms
+    Y_sum = np.sum(Y_e, axis=1)
+
+    # Total Variance
+    tot_v = np.var(Y)
+
+    # Analysis of covariance
+    for j in range(hdmr.nc_t):
+        # Covariance matrix of jth term of Y_em and actual Y
+        c = np.cov(np.stack((Y_e[:, j], Y), axis=0))
+
+        # Total sensitivity of jth term         ( = Eq. 19 of Li et al )
+        hdmr.S[j, t] = c[0, 1] / tot_v
+
+        # Covariance matrix of jth term with emulator Y without jth term
+        c = np.cov(np.stack((Y_e[:, j], Y_sum - Y_e[:, j]), axis=0))
+
+        # Structural contribution of jth term   ( = Eq. 20 of Li et al )
+        hdmr.Sa[j, t] = c[0, 0] / tot_v
+
+        # Correlative contribution of jth term  ( = Eq. 21 of Li et al )
+        hdmr.Sb[j, t] = c[0, 1] / tot_v
