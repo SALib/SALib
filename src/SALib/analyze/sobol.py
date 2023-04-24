@@ -129,7 +129,7 @@ def analyze(
     # Estimates of the Sobol' indices can be biased for non-centered outputs
     # so we center here by normalizing with the standard deviation.
     # Other approaches opt to subtract the mean.
-    # Y = (Y - Y.mean()) / Y.std()
+    #  Y = (Y - Y.mean()) / Y.std()
 
     # Mahesh Lal Maskey (USDA-ARS SWMRU, Hydrological Modeling Scientist) Modified because above expression valid for `DataFrame` only not the `numpy ndarray`
     if np.isnan(Y.mean()):
