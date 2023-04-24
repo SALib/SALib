@@ -129,7 +129,13 @@ def analyze(
     # Estimates of the Sobol' indices can be biased for non-centered outputs
     # so we center here by normalizing with the standard deviation.
     # Other approaches opt to subtract the mean.
-    Y = (Y - Y.mean()) / Y.std()
+    # Y = (Y - Y.mean()) / Y.std()
+
+    # Mahesh Lal Maskey (USDA-ARS SWMRU, Hydrological Modeling Scientist) Modified because above expression valid for `DataFrame` only not the `numpy ndarray`
+    if np.isnan(Y.mean()):
+        Y = (Y - np.nanmean(Y)) / np.nanstd(Y)
+    else:
+        Y = (Y - Y.mean()) / Y.std() # which is not for ndarray    
 
     A, B, AB, BA = separate_output_values(Y, D, N, calc_second_order)
     r = rng(N, size=(N, num_resamples))
@@ -197,31 +203,61 @@ def analyze(
     return S
 
 
+# def first_order(A, AB, B):
+#     """
+#     First order estimator following Saltelli et al. 2010 CPC, normalized by
+#     sample variance
+#     """
+#     y = np.r_[A, B]
+#     if y.ptp() == 0:
+#         warn(CONST_RESULT_MSG)
+#         return np.array([0.0])
+
+#     return np.mean(B * (AB - A), axis=0) / np.var(y, axis=0)
+
 def first_order(A, AB, B):
     """
     First order estimator following Saltelli et al. 2010 CPC, normalized by
     sample variance
     """
-    y = np.r_[A, B]
-    if y.ptp() == 0:
-        warn(CONST_RESULT_MSG)
-        return np.array([0.0])
+    fo = np.mean(B * (AB - A), axis=0) / np.var(np.r_[A, B], axis=0)
 
-    return np.mean(B * (AB - A), axis=0) / np.var(y, axis=0)
+    # to avoid the nan_values (Mahesh L Maskey, 04/23/2023)
 
+    if (type(fo) == np.float64) | (type(fo) == np.float):
+            if np.isnan(fo):
+                if len([fo]) == 1:
+                    fo = np.nanmean(B * (AB - A), axis=0) / np.nanvar(np.r_[A, B], axis=0)
+            else:
+                fo = np.mean(B * (AB - A), axis=0) / np.var(np.r_[A, B], axis=0)
+    return fo
+
+# def total_order(A, AB, B):
+#     """
+#     Total order estimator following Saltelli et al. 2010 CPC, normalized by
+#     sample variance
+#     """
+#     y = np.r_[A, B]
+#     if y.ptp() == 0:
+#         warn(CONST_RESULT_MSG)
+#         return np.array([0.0])
+
+#     return 0.5 * np.mean((A - AB) ** 2, axis=0) / np.var(y, axis=0)
 
 def total_order(A, AB, B):
     """
     Total order estimator following Saltelli et al. 2010 CPC, normalized by
     sample variance
     """
-    y = np.r_[A, B]
-    if y.ptp() == 0:
-        warn(CONST_RESULT_MSG)
-        return np.array([0.0])
-
-    return 0.5 * np.mean((A - AB) ** 2, axis=0) / np.var(y, axis=0)
-
+    to = 0.5 * np.mean((A - AB) ** 2, axis=0) / np.var(np.r_[A, B], axis=0)
+    # to avoid the nan_values (Mahesh L Maskey, 04/23/2023)
+    if (type(to)==np.float64) | (type(to)==np.float):
+        if np.isnan(to):
+            if len([to]) == 1:
+                to = 0.5 * np.nanmean((A - AB) ** 2, axis=0) / np.nanvar(np.r_[A, B], axis=0)
+        else:
+            to = 0.5 * np.mean((A - AB) ** 2, axis=0) / np.var(np.r_[A, B], axis=0)
+    return to
 
 def second_order(A, ABj, ABk, BAj, B):
     """Second order estimator following Saltelli 2002"""
