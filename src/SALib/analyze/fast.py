@@ -104,18 +104,38 @@ def analyze(
     return Si
 
 
-def compute_orders(outputs: np.ndarray, N: int, M: int, omega: int):
-    f = np.fft.fft(outputs)
-    Sp = np.power(np.absolute(f[np.arange(1, math.ceil(N / 2))]) / N, 2)
+# def compute_orders(outputs: np.ndarray, N: int, M: int, omega: int):
+#     f = np.fft.fft(outputs)
+#     Sp = np.power(np.absolute(f[np.arange(1, math.ceil(N / 2))]) / N, 2)
 
+#     V = 2.0 * np.sum(Sp)
+
+#     # Calculate first and total order
+#     D1 = 2.0 * np.sum(Sp[np.arange(1, M + 1) * omega - 1])
+#     Dt = 2.0 * np.sum(Sp[np.arange(math.floor(omega / 2.0))])
+
+#     return (D1 / V), (1.0 - Dt / V)
+
+def compute_orders(outputs, N, M, omega):
+    if np.isnan(np.mean(outputs)):
+        idnan = np.isnan(outputs)
+        outputs2 = outputs.copy()
+        outputs2[idnan] = np.nanmean(outputs)
+        outputs = outputs2
+
+    f = np.fft.fft(outputs)
+    # To match the size of array, Mahesh L Maskey 04/23/2023
+    try:
+        Sp = np.power(np.absolute(f[np.arange(1, int((N + 1) / 2))]) / N, 2)
+    except:
+        Sp = np.power(np.absolute(f[np.arange(1, int(((N + 1) / 2)-1))]) / N, 2)
     V = 2.0 * np.sum(Sp)
 
     # Calculate first and total order
-    D1 = 2.0 * np.sum(Sp[np.arange(1, M + 1) * omega - 1])
-    Dt = 2.0 * np.sum(Sp[np.arange(math.floor(omega / 2.0))])
+    D1 = 2.0 * np.sum(Sp[np.arange(1, M + 1) * int(omega) - 1])
+    Dt = 2.0 * np.sum(Sp[np.arange(int(omega / 2.0))])
 
     return (D1 / V), (1.0 - Dt / V)
-
 
 def bootstrap(Y: np.ndarray, M: int, resamples: int, conf_level: float):
     """Compute CIs.
