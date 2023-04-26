@@ -276,8 +276,8 @@ def _fanova(b_m, hdmr, Y, bootstrap, max_order, subset, extended_base, max_iter,
             cost = _cost_matrix(b_m[hdmr.idx[:, t], :], hdmr, subset, max_order)
             _d_morph(b_m[hdmr.idx[:, t], :], cost, Y_idx, bootstrap, hdmr)
         else:
-            _first_order(b_m[hdmr.idx[:, t], :hdmr.tnt1], Y_idx, subset, max_iter, lambdax, hdmr)
-            _second_order(b_m[hdmr.idx[:, t], hdmr.tnt1:hdmr.tnt1+hdmr.tnt2], Y_idx, subset, lambdax, hdmr)
+            Y_res = _first_order(b_m[hdmr.idx[:, t], :hdmr.tnt1], Y_idx, subset, max_iter, lambdax, hdmr)
+            _second_order(b_m[hdmr.idx[:, t], hdmr.tnt1:hdmr.tnt1+hdmr.tnt2], Y_res, subset, lambdax, max_iter, hdmr)
             _third_order()
 
         # Calculate component functions         
@@ -350,7 +350,7 @@ def _first_order(b_m1, Y_idx, subset, max_iter, lambdax, hdmr):
     n1 = hdmr.nt1
     # L2 Penalty
     lambda_eye = lambdax * np.identity(n1)
-    for i in range(hdmr.d):
+    for i in range(hdmr.nc1):
         try:
             # Left hand side
             a = (b_m1[:, i*n1:n1*(i+1)].T @ b_m1[:, i*n1:n1*(i+1)]) / subset
@@ -387,6 +387,60 @@ def _first_order(b_m1, Y_idx, subset, max_iter, lambdax, hdmr):
 
         if (var_max < 1e-4) or (iter > max_iter): 
             break
+
+    return Y_idx - np.sum(Y_i, axis=1)
+
+
+def _second_order(b_m2, Y_res, subset, lambdax, max_iter, hdmr):
+    """Compute second order component functions sequentially"""
+    # Temporary second order component matrix
+    Y_ij = np.empty((subset, hdmr.nc2))
+    # To increase readibility
+    n2 = hdmr.nt2
+    # Initialize iteration counter
+    iter = 0
+    # L2 Penalty
+    lambda_eye = lambdax * np.identity(n2)
+    for i in range(hdmr.nc2):
+        try:
+            # Left hand side
+            a = (b_m2[:, i*n2:n2*(i+1)].T @ b_m2[:, i*n2:n2*(i+1)]) / subset
+            # Adding L2 Penalty (Ridge Regression)
+            a += lambda_eye
+            # Right hand side
+            b = (b_m2[:, i*n2:n2*(i+1)].T @ Y_res) / subset
+            # Solution
+            hdmr.x[hdmr.tnt1+i*n2:hdmr.tnt1+n2*(i+1)] = solve(a, b)
+            # Component functions
+            Y_ij[:, i] = b_m2[:, i*n2:n2*(i+1)] @ hdmr.x[i*n2:n2*(i+1)]
+        except LinAlgError:
+            print("Least-square regression did not converge. Please increase L2 penalty term!")
+
+    var_old = np.square(hdmr.x[hdmr.tnt1:hdmr.tnt1+hdmr.tnt2])
+    # Backfitting method
+    while True:
+        for i in range(hdmr.nc2):
+            z = list(range(hdmr.nc2))
+            z.remove(i)
+            Y_r = Y_res - np.sum(Y_ij[:, z], axis=1)
+            # Left hand side
+            a = (b_m2[:, i*n2:n2*(i+1)].T @ b_m2[:, i*n2:n2*(i+1)]) / subset
+            # Right hand side
+            b = (b_m2[:, i*n2:n2*(i+1)].T @ Y_r) / subset
+            # Solution
+            hdmr.x[hdmr.tnt1+i*n2:hdmr.tnt1+n2*(i+1)] = solve(a, b)
+            # Component functions
+            Y_ij[:, i] = b_m2[:, i*n2:n2*(i+1)] @ hdmr.x[i*n2:n2*(i+1)]
+
+        var_max = np.absolute(var_old - np.square(hdmr.x[hdmr.tnt1:hdmr.tnt1+hdmr.tnt2])).max()
+        iter += 1
+
+        if (var_max < 1e-4) or (iter > max_iter): 
+            break
+
+        var_old = np.square(hdmr.x[hdmr.tnt1:hdmr.tnt1+hdmr.tnt2])
+
+    return Y_res - np.sum(Y_ij, axis=1)
 
 
 def _comp_func(b_m, x, subset, hdmr, max_order):
