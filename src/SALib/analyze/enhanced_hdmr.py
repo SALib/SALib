@@ -277,11 +277,13 @@ def _fanova(b_m, hdmr, Y, bootstrap, max_order, subset, extended_base, max_iter,
             _d_morph(b_m[hdmr.idx[:, t], :], cost, Y_idx, bootstrap, hdmr)
         else:
             Y_res = _first_order(b_m[hdmr.idx[:, t], :hdmr.tnt1], Y_idx, subset, max_iter, lambdax, hdmr)
-            _second_order(b_m[hdmr.idx[:, t], hdmr.tnt1:hdmr.tnt1+hdmr.tnt2], Y_res, subset, lambdax, max_iter, hdmr)
-            _third_order()
+            if max_order > 1:
+                Y_res = _second_order(b_m[hdmr.idx[:, t], hdmr.tnt1:hdmr.tnt1+hdmr.tnt2], Y_res, subset, lambdax, max_iter, hdmr)
+            if max_order == 3:
+                _third_order(b_m[hdmr.idx[:, t], hdmr.tnt1+hdmr.tnt2:], Y_res, subset, lambdax, hdmr)
 
         # Calculate component functions         
-        Y_e = _comp_func(b_m[hdmr.idx[:, t], :], solution, subset, hdmr, max_order)
+        Y_e = _comp_func(b_m[hdmr.idx[:, t], :], subset, hdmr, max_order)
         # Sensitivity Analysis
         _ancova(Y_idx, Y_e, hdmr, t)
 
@@ -382,11 +384,12 @@ def _first_order(b_m1, Y_idx, subset, max_iter, lambdax, hdmr):
             Y_i[:, i] = b_m1[:, i*n1:n1*(i+1)] @ hdmr.x[i*n1:n1*(i+1)]
 
         var_max = np.absolute(var_old - np.square(hdmr.x[:hdmr.tnt1])).max()
-        var_old = np.square(hdmr.x[:hdmr.tnt1])
         iter += 1
 
         if (var_max < 1e-4) or (iter > max_iter): 
             break
+
+        var_old = np.square(hdmr.x[:hdmr.tnt1])
 
     return Y_idx - np.sum(Y_i, axis=1)
 
@@ -412,7 +415,7 @@ def _second_order(b_m2, Y_res, subset, lambdax, max_iter, hdmr):
             # Solution
             hdmr.x[hdmr.tnt1+i*n2:hdmr.tnt1+n2*(i+1)] = solve(a, b)
             # Component functions
-            Y_ij[:, i] = b_m2[:, i*n2:n2*(i+1)] @ hdmr.x[i*n2:n2*(i+1)]
+            Y_ij[:, i] = b_m2[:, i*n2:n2*(i+1)] @ hdmr.x[hdmr.tnt1+i*n2:hdmr.tnt1+n2*(i+1)]
         except LinAlgError:
             print("Least-square regression did not converge. Please increase L2 penalty term!")
 
@@ -430,7 +433,7 @@ def _second_order(b_m2, Y_res, subset, lambdax, max_iter, hdmr):
             # Solution
             hdmr.x[hdmr.tnt1+i*n2:hdmr.tnt1+n2*(i+1)] = solve(a, b)
             # Component functions
-            Y_ij[:, i] = b_m2[:, i*n2:n2*(i+1)] @ hdmr.x[i*n2:n2*(i+1)]
+            Y_ij[:, i] = b_m2[:, i*n2:n2*(i+1)] @ hdmr.x[hdmr.tnt1+i*n2:hdmr.tnt1+n2*(i+1)]
 
         var_max = np.absolute(var_old - np.square(hdmr.x[hdmr.tnt1:hdmr.tnt1+hdmr.tnt2])).max()
         iter += 1
@@ -443,12 +446,32 @@ def _second_order(b_m2, Y_res, subset, lambdax, max_iter, hdmr):
     return Y_res - np.sum(Y_ij, axis=1)
 
 
-def _comp_func(b_m, x, subset, hdmr, max_order):
+def _third_order(b_m3, Y_res, subset, lambdax, hdmr):
+    """Compute third order component functions sequentially"""
+    # To increase readibility
+    n3 = hdmr.nt3
+    # L2 Penalty
+    lambda_eye = lambdax * np.identity(n3)
+    for i in range(hdmr.nc3):
+        try:
+            # Left hand side
+            a = (b_m3[:, i*n3:n3*(i+1)].T @ b_m3[:, i*n3:n3*(i+1)]) / subset
+            # Adding L2 Penalty (Ridge Regression)
+            a += lambda_eye
+            # Right hand side
+            b = (b_m3[:, i*n3:n3*(i+1)].T @ Y_res) / subset
+            # Solution
+            hdmr.x[hdmr.tnt1+hdmr.tnt2+i*n3:hdmr.tnt1+hdmr.tnt2+n3*(i+1)] = solve(a, b)
+        except LinAlgError:
+            print("Least-square regression did not converge. Please increase L2 penalty term!")
+
+
+def _comp_func(b_m, subset, hdmr, max_order):
     Y_t = np.zeros((subset, hdmr.a_tnt))
     Y_e = np.zeros((subset, hdmr.nc_t))
 
     # Temporary matrix
-    Y_t = np.multiply(b_m, np.tile(x, [subset, 1]))
+    Y_t = np.multiply(b_m, np.tile(hdmr.x, [subset, 1]))
 
     # First order component functions
     for i in range(hdmr.nc1):
