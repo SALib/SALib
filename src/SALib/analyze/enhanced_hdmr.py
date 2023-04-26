@@ -2,7 +2,7 @@ import math
 import numpy as np
 from typing import Dict
 from numpy.linalg import det
-from scipy.linalg import pinv, svd, LinAlgError
+from scipy.linalg import pinv, svd, LinAlgError, solve
 from itertools import combinations as comb, product
 from collections import defaultdict, namedtuple
 
@@ -18,6 +18,8 @@ def analyze(
     poly_order: int = 2,
     bootstrap: int = 20,
     subset: int = None,
+    max_iter: int = None,
+    lambdax: float = None,
     alpha: float = 0.95,
     extended_base: bool = True,
     print_to_console: bool = False,
@@ -37,7 +39,7 @@ def analyze(
     # Calculate HDMR Basis Matrix   
     b_m = _basis_matrix(X, hdmr, max_order, extended_base)
     # Functional ANOVA decomposition
-    _fanova(b_m, hdmr, Y, bootstrap, max_order, subset, extended_base)
+    _fanova(b_m, hdmr, Y, bootstrap, max_order, subset, extended_base, max_iter, lambdax)
 
 
 def _check_args(X, Y, max_order, poly_order, bootstrap, subset, alpha):
@@ -139,7 +141,7 @@ def _core_params(N, d, poly_order, max_order, bootstrap, subset, extended_base) 
     idx = np.arange(0, N).reshape(-1, 1) if bootstrap == 1 else np.argsort(np.random.rand(N, bootstrap), axis=0)[:subset]
  
     CoreParams = namedtuple('CoreParams', ['N', 'd', 'p_o', 'nc1', 'nc2', 'nc3', 'nc_t', 'nt1', 'nt2', 'nt3', 
-                           'tnt1', 'tnt2', 'tnt3', 'a_tnt', 'idx', 'beta', 
+                           'tnt1', 'tnt2', 'tnt3', 'a_tnt', 'x', 'idx', 'beta', 
                            'gamma', 'S', 'Sa', 'Sb', 'ST'])
     
     hdmr = CoreParams(
@@ -159,6 +161,11 @@ def _core_params(N, d, poly_order, max_order, bootstrap, subset, extended_base) 
         cp['n_coeff'][0] * cp['n_comp_func'][0] + \
         cp['n_coeff'][1] * cp['n_comp_func'][1] + \
         cp['n_coeff'][2] * cp['n_comp_func'][2],
+        np.zeros(
+            cp['n_coeff'][0] * cp['n_comp_func'][0] + \
+            cp['n_coeff'][1] * cp['n_comp_func'][1] + \
+            cp['n_coeff'][2] * cp['n_comp_func'][2]
+        ),
         idx,
         np.asarray(list(comb(np.arange(0, d), 2))),
         np.asarray(list(comb(np.arange(0, d), 3))),
@@ -258,7 +265,7 @@ def _prod(*inputs):
             yield prod
 
 
-def _fanova(b_m, hdmr, Y, bootstrap, max_order, subset, extended_base):
+def _fanova(b_m, hdmr, Y, bootstrap, max_order, subset, extended_base, max_iter, lambdax):
     for t in range(bootstrap):
         # Extract model output for a corresponding bootstrap iteration
         Y_idx = Y[hdmr.idx[:, t], 0]
@@ -267,10 +274,10 @@ def _fanova(b_m, hdmr, Y, bootstrap, max_order, subset, extended_base):
         
         if extended_base:
             cost = _cost_matrix(b_m[hdmr.idx[:, t], :], hdmr, subset, max_order)
-            solution = _d_morph(b_m[hdmr.idx[:, t], :], cost, Y_idx, bootstrap, hdmr)
+            _d_morph(b_m[hdmr.idx[:, t], :], cost, Y_idx, bootstrap, hdmr)
         else:
-            _first_order()
-            _second_order()
+            _first_order(b_m[hdmr.idx[:, t], :hdmr.tnt1], Y_idx, subset, max_iter, lambdax, hdmr)
+            _second_order(b_m[hdmr.idx[:, t], hdmr.tnt1:hdmr.tnt1+hdmr.tnt2], Y_idx, subset, lambdax, hdmr)
             _third_order()
 
         # Calculate component functions         
@@ -330,9 +337,56 @@ def _d_morph(b_m, cost, Y_idx, subset, hdmr):
     V = np.delete(V, range(0, nullity), axis=1)
 
     # D-Morph Regression Solution
-    x_dm = V @ pinv(U.T @ V) @ U.T @ x
+    hdmr.x = V @ pinv(U.T @ V) @ U.T @ x
 
-    return x_dm.flatten()
+
+def _first_order(b_m1, Y_idx, subset, max_iter, lambdax, hdmr):
+    """Compute first order component functions sequentially"""
+    # Temporary first order component matrix
+    Y_i = np.empty((subset, hdmr.nc1))
+    # Initialize iter
+    iter = 0
+    # To increase readibility
+    n1 = hdmr.nt1
+    # L2 Penalty
+    lambda_eye = lambdax * np.identity(n1)
+    for i in range(hdmr.d):
+        try:
+            # Left hand side
+            a = (b_m1[:, i*n1:n1*(i+1)].T @ b_m1[:, i*n1:n1*(i+1)]) / subset
+            # Adding L2 Penalty (Ridge Regression)
+            a += lambda_eye
+            # Right hand side
+            b = (b_m1[:, i*n1:n1*(i+1)].T @ Y_idx) / subset
+            # Solution
+            hdmr.x[i*n1:n1*(i+1)] = solve(a, b)
+            # Component functions
+            Y_i[:, i] = b_m1[:, i*n1:n1*(i+1)] @ hdmr.x[i*n1:n1*(i+1)]
+        except LinAlgError:
+            print("Least-square regression did not converge. Please increase L2 penalty term!")
+
+    # Backfitting method
+    var_old = np.square(hdmr.x[:hdmr.tnt1])
+    while True:
+        for i in range(hdmr.d):
+            z = list(range(hdmr.d))
+            z.remove(i)
+            Y_res = Y_idx - np.sum(Y_i[:, z], axis=1)
+            # Left hand side
+            a = (b_m1[:, i*n1:n1*(i+1)].T @ b_m1[:, i*n1:n1*(i+1)]) / subset
+            # Right hand side
+            b = (b_m1[:, i*n1:n1*(i+1)].T @ Y_res) / subset
+            # Solution
+            hdmr.x[i*n1:n1*(i+1)] = solve(a, b)
+            # Component functions
+            Y_i[:, i] = b_m1[:, i*n1:n1*(i+1)] @ hdmr.x[i*n1:n1*(i+1)]
+
+        var_max = np.absolute(var_old - np.square(hdmr.x[:hdmr.tnt1])).max()
+        var_old = np.square(hdmr.x[:hdmr.tnt1])
+        iter += 1
+
+        if (var_max < 1e-4) or (iter > max_iter): 
+            break
 
 
 def _comp_func(b_m, x, subset, hdmr, max_order):
