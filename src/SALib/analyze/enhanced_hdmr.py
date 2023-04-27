@@ -7,9 +7,6 @@ from itertools import combinations as comb, product
 from collections import defaultdict, namedtuple
 
 
-
-
-
 def analyze(
     problem: Dict,
     X: np.ndarray,
@@ -104,20 +101,77 @@ def _check_args(X, Y, max_order, poly_order, bootstrap, subset, alpha):
         )
     
 
-def _core_params(N, d, poly_order, max_order, bootstrap, subset, extended_base) -> namedtuple:
-    """ Core Parameters of HDMR expansion. Please see detailed explanation below
+def _core_params(N: int, d: int, poly_order: int, max_order: int, 
+                 bootstrap: int, subset: int, extended_base: bool) -> namedtuple:
+    """ 
+    This function establishes core parameters of HDMR expansion in a namedtuple datatype. 
+    These parameters are being used across all functions and procedures. 
 
-    nc1: Number of component functions in 1st order
-    nc2: Number of component functions in 2nd order
-    nc3: Number of component functions in 3rd order
-    nc_t: Total number of component functions
-    nt1: Total number of terms(columns) for a given 1st order component function
-    nt2: Total number of terms(columns) for a given 2nd order component function
-    nt3: Total number of terms(columns) for a given 3rd order component function
-    tnt1: Total number of terms(columns) for all 1st order component functions
-    tnt2: Total number of terms(columns) for all 2nd order component functions
-    tnt3: Total number of terms(columns) for all 3rd order component functions
-    a_tnt: All terms (columns) in a hdmr expansion """
+    Parameters
+    ----------
+    N : int
+        Number of samples in input matrix `X`.
+    d : int
+        Dimensionality of the problem.
+    poly_order : int
+        Polynomial order to be used to calculated orthonormal polynomial.
+    max_order : int
+        Maximum functional ANOVA expansion order.
+    bootstrap : int
+        Number of iteration to be used in bootstrap.
+    subset : int
+        Number of samples to be used in bootstrap.
+    extended_base : bool
+        Whether to use extended basis matrix or not. 
+
+    Returns
+    -------
+    hdmr : namedtuple
+        A variable that hold core parameters of hdmr expansion
+
+    Attributes
+    ----------
+    N : int
+        Number of samples in input matrix `X`.
+    d : int
+        Dimensionality of the problem.
+    p_o : int
+        Polynomial order to be used to calculated orthonormal polynomial.
+    nc1 : int
+        Number of component functions in 1st order.
+    nc2 : int
+        Number of component functions in 2nd order.
+    nc3 int
+        Number of component functions in 3rd order.
+    nc_t : int
+        Total number of component functions.
+    nt1 : int
+        Total number of terms(columns) for a given 1st order component function
+    nt2 : int
+        Total number of terms(columns) for a given 2nd order component function
+    nt3 : int
+        Total number of terms(columns) for a given 3rd order component function
+    tnt1 : int
+        Total number of terms(columns) for all 1st order component functions
+    tnt2 : int
+        Total number of terms(columns) for all 2nd order component functions
+    tnt3 : int
+        Total number of terms(columns) for all 3rd order component functions
+    a_tnt : int
+        All terms (columns) in a hdmr expansion 
+    x : numpy.array
+        Solution of hdmr expansion
+    idx : numpy.array
+        Indexes of subsamples to be used for bootstrap
+    S : numpy.array
+        Sensitivity indexes of component functions
+    Sa : numpy.array
+        Sensitivity indexes of component functions (uncorrelated contribution)
+    Sb : numpy.array
+        Sensitivity indexes of component functions (correlated contribution)
+    ST : numpy.array
+        Total Sensitivity indexes of features/inputs
+    """
 
     cp = defaultdict(int)
     cp['n_comp_func'], cp['n_coeff'] = [0] * 3, [0] * 3
@@ -141,8 +195,7 @@ def _core_params(N, d, poly_order, max_order, bootstrap, subset, extended_base) 
     idx = np.arange(0, N).reshape(-1, 1) if bootstrap == 1 else np.argsort(np.random.rand(N, bootstrap), axis=0)[:subset]
  
     CoreParams = namedtuple('CoreParams', ['N', 'd', 'p_o', 'nc1', 'nc2', 'nc3', 'nc_t', 'nt1', 'nt2', 'nt3', 
-                           'tnt1', 'tnt2', 'tnt3', 'a_tnt', 'x', 'idx', 'beta', 
-                           'gamma', 'S', 'Sa', 'Sb', 'ST'])
+                           'tnt1', 'tnt2', 'tnt3', 'a_tnt', 'x', 'idx', 'S', 'Sa', 'Sb', 'ST'])
     
     hdmr = CoreParams(
         N,
@@ -167,8 +220,6 @@ def _core_params(N, d, poly_order, max_order, bootstrap, subset, extended_base) 
             cp['n_coeff'][2] * cp['n_comp_func'][2]
         ),
         idx,
-        np.asarray(list(comb(np.arange(0, d), 2))),
-        np.asarray(list(comb(np.arange(0, d), 3))),
         np.zeros((sum(cp['n_comp_func']), bootstrap)),
         np.zeros((sum(cp['n_comp_func']), bootstrap)),
         np.zeros((sum(cp['n_comp_func']), bootstrap)),
