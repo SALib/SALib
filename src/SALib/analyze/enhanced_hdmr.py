@@ -103,8 +103,7 @@ def _check_args(X, Y, max_order, poly_order, bootstrap, subset, alpha):
 
 def _core_params(N: int, d: int, poly_order: int, max_order: int, 
                  bootstrap: int, subset: int, extended_base: bool) -> namedtuple:
-    """ 
-    This function establishes core parameters of HDMR expansion in a namedtuple datatype. 
+    """ This function establishes core parameters of HDMR expansion in a namedtuple datatype. 
     These parameters are being used across all functions and procedures. 
 
     Parameters
@@ -230,6 +229,27 @@ def _core_params(N: int, d: int, poly_order: int, max_order: int,
 
 
 def _basis_matrix(X, hdmr, max_order, extended_base):
+    """ Basis matrix represents the base of the component functions.
+    It is built with orthonormal polynomials for each inputs so that
+    it represents the data at its best. Linear combination of columns 
+    of this matrix forms the component functions. 
+
+    Parameters
+    ----------
+    X : numpy.array
+        Model input matrix
+    hdmr : namedtuple
+        Core parameters of hdmr expansion
+    max_order : int
+        Maximum functional ANOVA expansion order
+    extended_base : bool
+        Whether to use extended basis matrix or not
+
+    Returns
+    -------
+    b_m : numpy.array
+        Basis matrix
+    """
     # Compute normalized X-values
     X_n = (X - np.tile(X.min(0), (hdmr.N, 1))) / np.tile((X.max(0)) - X.min(0), (hdmr.N, 1))
     
@@ -284,6 +304,27 @@ def _basis_matrix(X, hdmr, max_order, extended_base):
 
 
 def _orth_poly_coeff(X, hdmr):
+    """ Calculated orthonormal polynomial coefficients based on a given input matrix `X`
+
+    Parameters
+    ----------
+    X : numpy.array
+        Input matrix `X`
+    hdmr : namedtuple
+        Core parameters of hdmr expansion
+
+    Returns
+    -------
+    coeff : numpy.array
+        Orthonormal polynomial coefficients from highes degree to constant term
+          with trailing zeros
+
+    Notes
+    ----------
+    Please see the reference below
+
+    .. [1] Szegő, G. 1975. . Orthogonal Polynomials. American Mathematical Society.
+    """
     k = 0
     M = np.zeros((hdmr.p_o+1, hdmr.p_o+1, hdmr.d))
     for i in range(hdmr.d):
@@ -305,9 +346,21 @@ def _orth_poly_coeff(X, hdmr):
     return coeff
 
 
-def _prod(*inputs):
+def _prod(*args):
+    """ Generator that returns unique cartesian product of given tuple arguments
+
+    Parameters
+    ----------
+    *args : List[Tuple]
+        Variable length argument list.
+
+    Yields
+    ------
+    Tuple
+        A non-duplicate numbers in a tuple.
+    """
     seen = set()
-    for prod in product(*inputs):
+    for prod in product(*args):
         prod_set = frozenset(prod)
         if len(prod_set) != len(prod):
             continue
@@ -317,6 +370,40 @@ def _prod(*inputs):
 
 
 def _fanova(b_m, hdmr, Y, bootstrap, max_order, subset, extended_base, max_iter, lambdax):
+    """ Functional ANOVA decomposition provides two main approach namely
+    extended base approach and non-extended base approach which follow the guidelines 
+    from [1] and [2]. Extended base in this manner is to provide additional information
+    to guarantee hierarchical orthogonality. 
+
+    Parameters
+    ----------
+    b_m : numpy.array
+        Basis matrix
+    hdmr : namedtuple
+        Core parameters of hdmr expansion
+    Y : numpy.array
+        Model output
+    bootstrap : int
+        Number of iteration to be used in bootstrap
+    max_order : int
+        Maximum functional ANOVA expansion order
+    subset : int
+        Number of samples to be used in bootstrap
+    extended_base : bool
+        Whether to use extended basis matrix or not
+    max_iter : int
+        Maximum number of iteration used in backfitting algorithm
+    lambdax : float
+        Penalty term for ridge regression
+
+    Notes
+    -----
+    .. [1] Li, G., Rabitz, H., Yelvington, P., Oluwole, O., Bacon, F., Kolb, C., and Schoendorf, J. 2010. 
+        Global Sensitivity Analysis for Systems with Independent and/or Correlated Inputs. 
+        The Journal of Physical Chemistry A, 114(19), p.6022-6032.
+    .. [2] Li, G., Rabitz, H. General formulation of HDMR component functions with independent and correlated variables. 
+        J Math Chem 50, 99–130 (2012). https://doi.org/10.1007/s10910-011-9898-0
+    """
     for t in range(bootstrap):
         # Extract model output for a corresponding bootstrap iteration
         Y_idx = Y[hdmr.idx[:, t], 0]
@@ -329,7 +416,7 @@ def _fanova(b_m, hdmr, Y, bootstrap, max_order, subset, extended_base, max_iter,
         else:
             Y_res = _first_order(b_m[hdmr.idx[:, t], :hdmr.tnt1], Y_idx, subset, max_iter, lambdax, hdmr)
             if max_order > 1:
-                Y_res = _second_order(b_m[hdmr.idx[:, t], hdmr.tnt1:hdmr.tnt1+hdmr.tnt2], Y_res, subset, lambdax, max_iter, hdmr)
+                Y_res = _second_order(b_m[hdmr.idx[:, t], hdmr.tnt1:hdmr.tnt1+hdmr.tnt2], Y_res, subset, max_iter, lambdax, hdmr)
             if max_order == 3:
                 _third_order(b_m[hdmr.idx[:, t], hdmr.tnt1+hdmr.tnt2:], Y_res, subset, lambdax, hdmr)
 
@@ -339,7 +426,27 @@ def _fanova(b_m, hdmr, Y, bootstrap, max_order, subset, extended_base, max_iter,
         _ancova(Y_idx, Y_e, hdmr, t)
 
 
-def _cost_matrix(b_m, hdmr, bootstrap, max_order):
+def _cost_matrix(b_m, hdmr, subset, max_order):
+    """ Cost matrix holds the information about hierarchical orthogonality.
+    This matrix is arranged in such a way that it satisfies component functions
+    that hiearchical to each other are orthogonal. 
+
+    Parameters
+    ----------
+    b_m : numpy.array
+        Basis matrix
+    hdmr : namedtuple
+        Core parameters of hdmr expansion
+    subset : int
+        Number of samples to be used in bootstrap
+    max_order : int
+        Maximum functional ANOVA expansion order
+    
+    Returns
+    -------
+    cost : numpy.array
+        Cost matrix
+    """
     cost = np.zeros((hdmr.a_tnt, hdmr.a_tnt))
 
     range_2nd_1 = lambda x: range(hdmr.tnt1+(x)*hdmr.nt2, hdmr.tnt1+(x+1)*hdmr.nt2)
@@ -353,7 +460,7 @@ def _cost_matrix(b_m, hdmr, bootstrap, max_order):
         ct = 0
         for _ in _prod(range(0, hdmr.d-1), range(1, hdmr.d)):
             sr_ij[0, :] = sr_i[0, range_2nd_1(ct)]
-            sr_ij[1:, :] = (b_m[:, range_2nd_2(ct)].T @ b_m[:, range_2nd_1(ct)]) / bootstrap
+            sr_ij[1:, :] = (b_m[:, range_2nd_2(ct)].T @ b_m[:, range_2nd_1(ct)]) / subset
             cost[np.ix_(range_2nd_1(ct), range_2nd_1(ct))] = sr_ij.T @ sr_ij
             ct += 1
     if max_order == 3:
@@ -369,6 +476,30 @@ def _cost_matrix(b_m, hdmr, bootstrap, max_order):
 
 
 def _d_morph(b_m, cost, Y_idx, subset, hdmr):
+    """ D-Morph Regression finds the best solution that aligns with the cost
+    matrix. Cost matrix in this case represents the hierarchical orthogonality 
+    between component functions. 
+
+    Parameters
+    ----------
+    b_m : numpy.array
+        Basis matrix for all component functions
+    cost : numpy.array
+        Cost matrix that satisfies hierarchical orthogonality
+    Y_idx : numpy.array
+        Model output for a single bootstrap iteration
+    subset : int
+        Number of subsamples
+    hdmr : namedtuple
+        Core parameters of hdmr expansion
+
+    Notes
+    -----
+    Detailed information about D-Morph Regression can be found at
+    .. [1] Li, G., Rey-de-Castro, R. & Rabitz, H. D-MORPH regression for modeling 
+        with fewer unknown parameters than observation data. 
+        J Math Chem 50, 1747–1764 (2012). https://doi.org/10.1007/s10910-012-0004-z
+    """
     # Left Matrix Multiplication with the transpose of cost matrix
     a = (b_m.T @ b_m) / subset # LHS
     b = (b_m.T @ Y_idx) / subset # RHS
@@ -394,7 +525,34 @@ def _d_morph(b_m, cost, Y_idx, subset, hdmr):
 
 
 def _first_order(b_m1, Y_idx, subset, max_iter, lambdax, hdmr):
-    """Compute first order component functions sequentially"""
+    """ Sequential determination of first order component functions.
+    First, it computes component functions via ridge regression, i.e. 
+    fitting model inputs/features to the model output. Later, it takes
+    advantage of backfitting algorithm to satisfy hierarchical orthogonality.
+    Backfitting algorithm does not guarantee the hierarchical orthogonality.
+    We suggest to set extended base option to `True` for those who want to
+    guaranteed functional ANOVA expansion.
+
+    Parameters
+    ----------
+    b_m1 : numpy.array
+        Basis matrix for first-order component functions
+    Y_idx : numpy.array
+        Model output for a single bootstrap iteration
+    subset : int
+        Number of subsamples
+    max_iter : int
+        Maximum number of iteration used in backfitting algorithm
+    lambdax : float
+        Penalty term for ridge regression
+    hdmr : namedtuple
+        Core parameters of hdmr expansion
+
+    Returns
+    -------
+    Y_res : numpy.array
+        Residual model output
+    """
     # Temporary first order component matrix
     Y_i = np.empty((subset, hdmr.nc1))
     # Initialize iter
@@ -445,8 +603,35 @@ def _first_order(b_m1, Y_idx, subset, max_iter, lambdax, hdmr):
     return Y_idx - np.sum(Y_i, axis=1)
 
 
-def _second_order(b_m2, Y_res, subset, lambdax, max_iter, hdmr):
-    """Compute second order component functions sequentially"""
+def _second_order(b_m2, Y_res, subset, max_iter, lambdax, hdmr):
+    """ Sequential determination of second-order component functions.
+    First, it computes component functions via ridge regression, i.e. 
+    fitting model inputs/features to the model output. Later, it takes
+    advantage of backfitting algorithm to satisfy hierarchical orthogonality.
+    Backfitting algorithm does not guarantee the hierarchical orthogonality.
+    We suggest to set extended base option to `True` for those who want to
+    guaranteed functional ANOVA expansion.
+
+    Parameters
+    ----------
+    b_m2 : numpy.array
+        Basis matrix for second-order component functions
+    Y_res : numpy.array
+        Residual model output
+    subset : int
+        Number of subsamples
+    max_iter : int
+        Maximum number of iteration used in backfitting algorithm
+    lambdax : float
+        Penalty term for ridge regression
+    hdmr : namedtuple
+        Core parameters of hdmr expansion
+
+    Returns
+    -------
+    Y_res : numpy.array
+        Residual model output
+    """
     # Temporary second order component matrix
     Y_ij = np.empty((subset, hdmr.nc2))
     # To increase readibility
@@ -498,7 +683,28 @@ def _second_order(b_m2, Y_res, subset, lambdax, max_iter, hdmr):
 
 
 def _third_order(b_m3, Y_res, subset, lambdax, hdmr):
-    """Compute third order component functions sequentially"""
+    """ Sequential determination of third-order component functions.
+    it computes component functions via ridge regression, i.e. 
+    fitting model inputs/features to the model output. 
+
+    Parameters
+    ----------
+    b_m3 : numpy.array
+        Basis matrix for third-order component functions
+    Y_res : numpy.array
+        Residual model output
+    subset : int
+        Number of subsamples
+    lambdax : float
+        Penalty term for ridge regression
+    hdmr : namedtuple
+        Core parameters of hdmr expansion
+
+    Notes
+    -----
+    Backfitting algorithm is not used here because the residual model
+    output, `Y_res`, might not be converged to arrays of zero.
+    """
     # To increase readibility
     n3 = hdmr.nt3
     # L2 Penalty
@@ -518,6 +724,24 @@ def _third_order(b_m3, Y_res, subset, lambdax, hdmr):
 
 
 def _comp_func(b_m, subset, hdmr, max_order):
+    """ Computes the component function based on basis matrix and the solution
+
+    Parameters
+    ----------
+    b_m : numpy.array
+        Basis matrix
+    subset : int
+        Number of samples used in bootstrap
+    hdmr : namedtuple
+        Core parameters of hdmr expansion
+    max_order : int
+        Maximum order of hdmr expansion
+
+    Returns
+    -------
+    Y_e : numpy.array
+        Emualated model output for each components
+    """
     Y_t = np.zeros((subset, hdmr.a_tnt))
     Y_e = np.zeros((subset, hdmr.nc_t))
 
@@ -541,27 +765,48 @@ def _comp_func(b_m, subset, hdmr, max_order):
     return Y_e
 
 
-def _ancova(Y, Y_e, hdmr, t):
-    """Analysis of Covariance."""
+def _ancova(Y_idx, Y_e, hdmr, t):
+    """ Analysis of Covariance. It calculates uncorrelated and correlated contribution
+    to the model output variance
+
+    Parameters
+    ----------
+    Y_idx : numpy.array
+        Model output for a single bootstrap iteration
+    Y_e : numpy.array
+        Emulated output
+    hdmr : namedtuple
+        Core parameters of hdmr expansion
+    t : int
+        Iteration step of bootstrap
+
+    Notes
+    -----
+    Please see the reference below
+
+    .. [1] Li, G., Rabitz, H., Yelvington, P., Oluwole, O., Bacon, F., Kolb, C., and Schoendorf, J. 2010. 
+        Global Sensitivity Analysis for Systems with Independent and/or Correlated Inputs. 
+        The Journal of Physical Chemistry A, 114(19), p.6022-6032.
+    """
     # Compute the sum of all Y_em terms
     Y_sum = np.sum(Y_e, axis=1)
 
     # Total Variance
-    tot_v = np.var(Y)
+    tot_v = np.var(Y_idx)
 
     # Analysis of covariance
     for j in range(hdmr.nc_t):
         # Covariance matrix of jth term of Y_em and actual Y
-        c = np.cov(np.stack((Y_e[:, j], Y), axis=0))
+        c = np.cov(np.stack((Y_e[:, j], Y_idx), axis=0))
 
-        # Total sensitivity of jth term         ( = Eq. 19 of Li et al )
-        hdmr.S[j, t] = c[0, 1] / tot_v
+        # Total sensitivity of jth term
+        hdmr.S[j, t] = c[0, 1] / tot_v # Eq. 19
 
         # Covariance matrix of jth term with emulator Y without jth term
         c = np.cov(np.stack((Y_e[:, j], Y_sum - Y_e[:, j]), axis=0))
 
-        # Structural contribution of jth term   ( = Eq. 20 of Li et al )
-        hdmr.Sa[j, t] = c[0, 0] / tot_v
+        # Structural contribution of jth term
+        hdmr.Sa[j, t] = c[0, 0] / tot_v # Eq. 20
 
-        # Correlative contribution of jth term  ( = Eq. 21 of Li et al )
-        hdmr.Sb[j, t] = c[0, 1] / tot_v
+        # Correlative contribution of jth term
+        hdmr.Sb[j, t] = c[0, 1] / tot_v # Eq. 21
