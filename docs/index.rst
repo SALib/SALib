@@ -8,8 +8,8 @@ SALib - Sensitivity Analysis Library in Python
 .. image:: https://img.shields.io/badge/DOI-10.18174%2Fsesmo.18155-blue
   :target: https://sesmo.org/article/view/18155
 
-.. image:: http://joss.theoj.org/papers/431262803744581c1d4b6a95892d3343/status.svg
-  :target: http://joss.theoj.org/papers/431262803744581c1d4b6a95892d3343
+.. image:: https://joss.theoj.org/papers/10.21105/joss.00097/status.svg
+  :target: https://doi.org/10.21105/joss.00097
 
 
 Python implementations of commonly used sensitivity analysis methods, including
