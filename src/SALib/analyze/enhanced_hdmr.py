@@ -8,15 +8,15 @@ from collections import defaultdict, namedtuple
 
 
 def analyze(
-    problem: Dict,
     X: np.ndarray,
     Y: np.ndarray,
+    problem: Dict = None,
     max_order: int = 2,
     poly_order: int = 2,
     bootstrap: int = 20,
-    subset: int = None,
-    max_iter: int = None,
-    lambdax: float = None,
+    subset: int = 500,
+    max_iter: int = 100,
+    lambdax: float = 0.01,
     alpha: float = 0.95,
     extended_base: bool = True,
     print_to_console: bool = False,
@@ -30,7 +30,8 @@ def analyze(
     # Make sure Y, output array, is a matrix
     Y = Y.reshape(-1, 1)
     # Check arguments
-    _check_args(X, Y, max_order, poly_order, bootstrap, subset, alpha)
+    _check_args(X, Y, problem, max_order, poly_order, bootstrap, 
+                subset, max_iter, lambdax, alpha, extended_base)
     # Instantiate Core Parameters
     hdmr = _core_params(*X.shape, poly_order, max_order, bootstrap, subset, extended_base)
     # Calculate HDMR Basis Matrix   
@@ -39,11 +40,27 @@ def analyze(
     _fanova(b_m, hdmr, Y, bootstrap, max_order, subset, extended_base, max_iter, lambdax)
 
 
-def _check_args(X, Y, max_order, poly_order, bootstrap, subset, alpha):
-    """Perform checks to ensure all parameters are within usable/expected ranges."""
+def _check_args(X, Y, problem, max_order, poly_order, bootstrap, 
+                subset, max_iter, lambdax, alpha, extended_base):
+    """Validates all parameters to ensure that they are within the limits"""
     # Get dimensionality of numpy arrays
     N, d = X.shape
     y_row = Y.shape[0]  
+
+    if problem.has_key("num_vars") and problem["num_vars"] == d:
+        raise ValueError(
+            "Problem definition must be consistent with the number of dimension in matrix X"
+        )
+    
+    if problem.has_key("names") and len(problem["names"]) == d:
+        raise ValueError(
+            "Problem definition must be consistent with the number of  dimension in matrix X"
+        )
+    
+    if problem.has_key("bounds") and len(problem["bounds"]) == d:
+        raise ValueError(
+            "Problem definition must be consistent with the number of  dimension in matrix X"
+        )
 
     # Now check input-output mismatch
     if d == 1:
@@ -65,39 +82,58 @@ def _check_args(X, Y, max_order, poly_order, bootstrap, subset, alpha):
     
     if max_order not in (1, 2, 3):
         raise ValueError(
-            f'Field "max_order" of options should be an integer with values of'
+            f"Field 'max_order' of options should be an integer with values of"
             f" 1, 2 or 3, got {max_order}"
         )
 
     # Important next check for max_order - as max_order relates to d
     if (d == 2) and (max_order > 2):
         raise ValueError(
-            'SALib-HDMR ERRROR: Field "max_order" of options has to be 2 as'
+            "SALib-HDMR ERRROR: Field 'max_order' of options has to be 2 as"
             " d = 2 (X has two columns)"
         )
 
     if poly_order not in np.arange(1, 11):
-        raise ValueError('Field "k" of options should be an integer between 1 to 10.')
+        raise ValueError(
+            "Field 'k' of options should be an integer between 1 to 10."
+            )
 
     if bootstrap not in np.arange(1, 101):
         raise ValueError(
             'Field "bootstrap" of options should be an integer between 1 to 100.'
         )
 
+    if (bootstrap == 1) and (subset != y_row):
+            subset = y_row
+
     if subset is None:
         subset = y_row // 2
     elif subset not in np.arange(300, N + 1):
         raise ValueError(
-            f'Field "subset" of options should be an integer between 300 and {N},'
-            f" the number of rows matrix X."
+            f"Field 'subset' of options should be an integer between 300 and {N}, "
+            f"the number of rows matrix X."
         )
-
-    if (bootstrap == 1) and (subset != y_row):
-        subset = y_row
 
     if alpha < 0.5 or alpha > 1.0:
         raise ValueError(
             'Field "alpha" of options should be a float between 0.5 to 1.0'
+        )
+    
+    if not isinstance(extended_base, bool):
+        raise ValueError(
+            "Field 'extended_base' must be True or False"
+        )
+    else:
+        max_iter = None
+    
+    if max_iter not in np.arange(100, 1000):
+        raise ValueError(
+            "Field 'max_iter' should be between 100 and 1000"
+        )
+    
+    if lambdax < 0.0 or lambdax > 10:
+        raise ValueError(
+            "Field 'lambdax' should be in between 0 and 10"
         )
     
 
