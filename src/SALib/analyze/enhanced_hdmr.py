@@ -3,6 +3,7 @@ import numpy as np
 from typing import Dict
 from numpy.linalg import det
 from scipy.linalg import pinv, svd, LinAlgError, solve
+from scipy.stats import f
 from itertools import combinations as comb, product
 from collections import defaultdict, namedtuple
 
@@ -37,7 +38,7 @@ def analyze(
     # Calculate HDMR Basis Matrix   
     b_m = _basis_matrix(X, hdmr, max_order, extended_base)
     # Functional ANOVA decomposition
-    _fanova(b_m, hdmr, Y, bootstrap, max_order, subset, extended_base, max_iter, lambdax)
+    _fanova(b_m, hdmr, Y, bootstrap, max_order, subset, extended_base, max_iter, lambdax, alpha)
 
 
 def _check_args(X, Y, problem, max_order, poly_order, bootstrap, 
@@ -206,6 +207,8 @@ def _core_params(N: int, d: int, poly_order: int, max_order: int,
         Sensitivity indexes of component functions (correlated contribution)
     ST : numpy.array
         Total Sensitivity indexes of features/inputs
+    signf : numpy.array
+        Signigicance level for each bootstrap iteration
     """
 
     cp = defaultdict(int)
@@ -230,7 +233,7 @@ def _core_params(N: int, d: int, poly_order: int, max_order: int,
     idx = np.arange(0, N).reshape(-1, 1) if bootstrap == 1 else np.argsort(np.random.rand(N, bootstrap), axis=0)[:subset]
  
     CoreParams = namedtuple('CoreParams', ['N', 'd', 'p_o', 'nc1', 'nc2', 'nc3', 'nc_t', 'nt1', 'nt2', 'nt3', 
-                           'tnt1', 'tnt2', 'tnt3', 'a_tnt', 'x', 'idx', 'S', 'Sa', 'Sb', 'ST'])
+                           'tnt1', 'tnt2', 'tnt3', 'a_tnt', 'x', 'idx', 'S', 'Sa', 'Sb', 'ST', 'signf'])
     
     hdmr = CoreParams(
         N,
@@ -255,6 +258,7 @@ def _core_params(N: int, d: int, poly_order: int, max_order: int,
             cp['n_coeff'][2] * cp['n_comp_func'][2]
         ),
         idx,
+        np.zeros((sum(cp['n_comp_func']), bootstrap)),
         np.zeros((sum(cp['n_comp_func']), bootstrap)),
         np.zeros((sum(cp['n_comp_func']), bootstrap)),
         np.zeros((sum(cp['n_comp_func']), bootstrap)),
@@ -405,7 +409,7 @@ def _prod(*args):
             yield prod
 
 
-def _fanova(b_m, hdmr, Y, bootstrap, max_order, subset, extended_base, max_iter, lambdax):
+def _fanova(b_m, hdmr, Y, bootstrap, max_order, subset, extended_base, max_iter, lambdax, alpha):
     """ Functional ANOVA decomposition provides two main approach namely
     extended base approach and non-extended base approach which follow the guidelines 
     from [1] and [2]. Extended base in this manner is to provide additional information
@@ -431,6 +435,8 @@ def _fanova(b_m, hdmr, Y, bootstrap, max_order, subset, extended_base, max_iter,
         Maximum number of iteration used in backfitting algorithm
     lambdax : float
         Penalty term for ridge regression
+    alpha : float
+        Significant level
 
     Notes
     -----
@@ -458,6 +464,8 @@ def _fanova(b_m, hdmr, Y, bootstrap, max_order, subset, extended_base, max_iter,
 
         # Calculate component functions         
         Y_e = _comp_func(b_m[hdmr.idx[:, t], :], subset, hdmr, max_order)
+        # Test significancy
+        _f_test(Y_idx, Y_e, subset, alpha, hdmr, t)
         # Sensitivity Analysis
         _ancova(Y_idx, Y_e, hdmr, t)
 
@@ -846,3 +854,34 @@ def _ancova(Y_idx, Y_e, hdmr, t):
 
         # Correlative contribution of jth term
         hdmr.Sb[j, t] = c[0, 1] / tot_v # Eq. 21
+
+
+def _f_test(Y_idx, Y_e, subset, alpha, hdmr, t):
+    """ Finds which term makes significant contribution to the model output.
+    This statistical analysis is done by F-test which uses F-distribution.
+    """
+    # Sum of squared residuals of bigger model (all params included)
+    SSR1 = ((Y_idx - np.sum(Y_e, axis=1))**2).sum()
+    # All parameters
+    p1 = hdmr.a_tnt
+    # Now adding each term to the model
+    for i in range(hdmr.nc_t):
+        # Model with ith term excluded
+        Y_res = Y_idx - Y_e[:, i]
+        # Number of parameters of proposed model (order dependent)
+        if i < hdmr.nc1:
+            p0 = p1 - hdmr.nt1  # 1st order
+        elif hdmr.nc1 <= i < (hdmr.nc1 + hdmr.nc2):
+            p0 = p1 - hdmr.nt2  # 2nd order
+        else:
+            p0 = p1 - hdmr.nt3  # 3rd order
+        # Sum of squared residuals of smaller model (all params except current terms)
+        SSR0 = np.sum(np.square(Y_res))
+        # Now calculate the F_stat (F_stat > 0 -> SSR1 < SSR0 )
+        F_stat = ((SSR0 - SSR1) / (p1 - p0)) / (SSR1 / (subset - p1))
+        # Now calculate critical F value
+        F_crit = f.ppf(q=alpha, dfn=p1 - p0, dfd=subset - p1)
+        # Now determine whether to accept ith component into model
+        if F_stat > F_crit:
+            # ith term is significant and should be included in model
+            hdmr.signf[i, t] = 1
