@@ -790,6 +790,7 @@ def _first_order(b_m1, Y_idx, max_iter, lambdax, hdmr):
     # Backfitting method
     var_old = np.square(hdmr.x[: hdmr.tnt1])
     while True:
+    while not ((var_max < 1e-4) or (iter > max_iter)):
         for i in range(hdmr.d):
             z = list(range(hdmr.d))
             z.remove(i)
@@ -807,9 +808,6 @@ def _first_order(b_m1, Y_idx, max_iter, lambdax, hdmr):
 
         var_max = np.absolute(var_old - np.square(hdmr.x[: hdmr.tnt1])).max()
         iter += 1
-
-        if (var_max < 1e-4) or (iter > max_iter):
-            break
 
         var_old = np.square(hdmr.x[: hdmr.tnt1])
 
