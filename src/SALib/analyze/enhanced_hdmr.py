@@ -14,9 +14,9 @@ from ..util import read_param_file, ResultDict
 
 
 def analyze(
+    problem: Dict,
     X: np.ndarray,
     Y: np.ndarray,
-    problem: Dict = None,
     max_order: int = 2,
     poly_order: int = 2,
     bootstrap: int = 20,
@@ -35,9 +35,9 @@ def analyze(
 
     # Check arguments
     Y, problem, subset, max_iter = _check_args(
+        problem,
         X,
         Y,
-        problem,
         max_order,
         poly_order,
         bootstrap,
@@ -65,9 +65,9 @@ def analyze(
 
 
 def _check_args(
+    problem,
     X,
     Y,
-    problem,
     max_order,
     poly_order,
     bootstrap,

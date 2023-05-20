@@ -36,7 +36,7 @@ options = {
     "return_emulator": False,
 }
 # Run SALib-HDMR
-Si = enhanced_hdmr.analyze(X, Y, problem, **options)
+Si = enhanced_hdmr.analyze(problem, X, Y, **options)
 
 # Displays sensitivity results and HDMR training results
 Si.plot()
