@@ -338,6 +338,8 @@ def _core_params(
         ],
     )
 
+    n_comp_func = cp["n_comp_func"]
+    n_coeff = cp["n_coeff"]
     hdmr = CoreParams(
         N,
         d,
@@ -345,30 +347,30 @@ def _core_params(
         extended_base,
         subset,
         poly_order,
-        cp["n_comp_func"][0],
-        cp["n_comp_func"][1],
-        cp["n_comp_func"][2],
-        sum(cp["n_comp_func"]),
-        cp["n_coeff"][0],
-        cp["n_coeff"][1],
-        cp["n_coeff"][2],
-        cp["n_coeff"][0] * cp["n_comp_func"][0],
-        cp["n_coeff"][1] * cp["n_comp_func"][1],
-        cp["n_coeff"][2] * cp["n_comp_func"][2],
-        cp["n_coeff"][0] * cp["n_comp_func"][0]
-        + cp["n_coeff"][1] * cp["n_comp_func"][1]
-        + cp["n_coeff"][2] * cp["n_comp_func"][2],
+        n_comp_func[0],
+        n_comp_func[1],
+        n_comp_func[2],
+        sum(n_comp_func),
+        n_coeff[0],
+        n_coeff[1],
+        n_coeff[2],
+        n_coeff[0] * n_comp_func[0],
+        n_coeff[1] * n_comp_func[1],
+        n_coeff[2] * n_comp_func[2],
+        n_coeff[0] * n_comp_func[0]
+        + n_coeff[1] * n_comp_func[1]
+        + n_coeff[2] * n_comp_func[2],
         np.zeros(
-            cp["n_coeff"][0] * cp["n_comp_func"][0]
-            + cp["n_coeff"][1] * cp["n_comp_func"][1]
-            + cp["n_coeff"][2] * cp["n_comp_func"][2]
+            n_coeff[0] * n_comp_func[0]
+            + n_coeff[1] * n_comp_func[1]
+            + n_coeff[2] * n_comp_func[2]
         ),
         idx,
-        np.zeros((sum(cp["n_comp_func"]), bootstrap)),
-        np.zeros((sum(cp["n_comp_func"]), bootstrap)),
-        np.zeros((sum(cp["n_comp_func"]), bootstrap)),
-        np.zeros((sum(cp["n_comp_func"]), bootstrap)),
-        np.zeros((sum(cp["n_comp_func"]), bootstrap)),
+        np.zeros((sum(n_comp_func), bootstrap)),
+        np.zeros((sum(n_comp_func), bootstrap)),
+        np.zeros((sum(n_comp_func), bootstrap)),
+        np.zeros((sum(n_comp_func), bootstrap)),
+        np.zeros((sum(n_comp_func), bootstrap)),
         np.array(list(comb(range(d), 2))),
         np.array(list(comb(range(d), 3))),  # Returns empty list when d < 3
         f0,
