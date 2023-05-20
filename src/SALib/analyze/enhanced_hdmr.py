@@ -789,10 +789,10 @@ def _first_order(b_m1, Y_idx, max_iter, lambdax, hdmr):
 
     # Backfitting method
     var_old = np.square(hdmr.x[: hdmr.tnt1])
-    while True:
+    z_t = list(range(hdmr.d))
     while not ((var_max < 1e-4) or (iter > max_iter)):
         for i in range(hdmr.d):
-            z = list(range(hdmr.d))
+            z = z_t[:]
             z.remove(i)
             Y_res = Y_idx - np.sum(Y_i[:, z], axis=1)
             # Left hand side
