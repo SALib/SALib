@@ -510,12 +510,12 @@ def _orth_poly_coeff(X, hdmr):
 
     .. [1] Szegő, G. 1975. . Orthogonal Polynomials. American Mathematical Society.
     """
-    k = 0
-    M = np.zeros((hdmr.p_o + 1, hdmr.p_o + 1, hdmr.d))
+    p_o_1 = hdmr.p_o + 1
+    M = np.zeros((p_o_1, p_o_1, hdmr.d))
     for i in range(hdmr.d):
         k = 0
-        for j in range(hdmr.p_o + 1):
-            for z in range(hdmr.p_o + 1):
+        for j in range(p_o_1):
+            for z in range(p_o_1):
                 M[j, z, i] = sum(X[:, i] ** k) / hdmr.N
                 k += 1
             k = j + 1
