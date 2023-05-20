@@ -4,8 +4,8 @@ import numpy as np
 from pandas import DataFrame as df
 from typing import Dict
 from types import MethodType
-from numpy.linalg import det, norm
-from scipy.linalg import pinv, svd, diagsvd, LinAlgError, solve
+from numpy.linalg import det, pinv, matrix_rank
+from scipy.linalg import svd, LinAlgError, solve
 from scipy import stats, special
 from itertools import combinations as comb, product
 from collections import defaultdict, namedtuple
@@ -581,14 +581,9 @@ def _d_morph(b_m, cost, Y_idx, subset, hdmr):
     a = (b_m.T @ b_m) / subset # LHS
     b = (b_m.T @ Y_idx) / subset # RHS
     try:
-        U, s, Vh = svd(a, lapack_driver='gesvd')
-        S = np.diag(s)
-        D_inv = np.linalg.inv(S)
-        D_pls = diagsvd(D_inv, D_inv.shape[0], U.shape[1])
-        a_pinv = Vh.T @ D_pls @ U.T
-        rank = np.linalg_matrix_rank(a)
-        # # Pseudo-Inverse of LHS
-        # a_inv, rank = pinv(a, atol=max(a.shape)*np.finfo(norm(a)).eps, return_rank=True)
+        # Pseudo-Inverse of LHS
+        a_pinv = pinv(a, hermitian=True)
+        rank = matrix_rank(a)
         # Least-Square Solution
         x = a_pinv @ b
         # Projection Matrix
@@ -598,7 +593,7 @@ def _d_morph(b_m, cost, Y_idx, subset, hdmr):
     except LinAlgError:
         print("Pseudo-Inverse did not converge")
     
-    nullity = b_m.shape.min() - rank
+    nullity = min(b_m.shape) - rank
     V = Vh.T
     U = np.delete(U, range(0, nullity), axis=1)
     V = np.delete(V, range(0, nullity), axis=1)
