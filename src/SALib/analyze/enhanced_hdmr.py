@@ -404,16 +404,15 @@ def _basis_matrix(X, hdmr):
 
     # Compute Orthonormal Polynomial Coefficients
     coeff = _orth_poly_coeff(X_n, hdmr)
+
     # Initialize Basis Matrix
     b_m = np.zeros((hdmr.N, hdmr.a_tnt))
-    # Start Column Counter
-    col = 0
 
     # First order columns of basis matrix
-    for i in range(hdmr.d):
-        for j in range(hdmr.p_o):
-            b_m[:, col] = np.polyval(coeff[j, : j + 2, i], X_n[:, i])
-            col += 1
+    col = 0
+    for i, j in product(range(hdmr.d), range(hdmr.p_o)):
+        b_m[:, col] = np.polyval(coeff[j, : j + 2, i], X_n[:, i])
+        col += 1
 
     # Second order columns of basis matrix
     if hdmr.max_order > 1:
@@ -520,16 +519,17 @@ def _orth_poly_coeff(X, hdmr):
                 M[j, z, i] = sum(X[:, i] ** k) / hdmr.N
                 k += 1
             k = j + 1
-    coeff = np.zeros((hdmr.p_o, hdmr.p_o + 1, hdmr.d))
-    for i in range(hdmr.d):
-        for j in range(hdmr.p_o):
-            for k in range(j + 2):
-                z = list(range(j + 2))
-                z.pop(k)
-                det_ij = det(M[: j + 1, : j + 1, i]) * det(M[: j + 2, : j + 2, i])
-                coeff[j, j + 1 - k, i] = (
-                    (-1) ** (j + k + 1) * det(M[: j + 1, z, i]) / np.sqrt(det_ij)
-                )
+
+    coeff = np.zeros((hdmr.p_o, p_o_1, hdmr.d))
+    for i, j in product(range(hdmr.d), range(hdmr.p_o)):
+        z = range(j + 2)
+        for k in z:
+            z__k = list(z)
+            z__k.pop(k)
+            det_ij = det(M[: j + 1, : j + 1, i]) * det(M[: j + 2, : j + 2, i])
+            coeff[j, j + 1 - k, i] = (
+                (-1) ** (j + k + 1) * det(M[: j + 1, z__k, i]) / np.sqrt(det_ij)
+            )
 
     return coeff
 
