@@ -27,19 +27,31 @@ def analyze(
     extended_base: bool = True,
     print_to_console: bool = False,
     return_emulator: bool = False,
-    seed: int = None
+    seed: int = None,
 ) -> Dict:
-    
     # Random Seed
     if seed:
         np.random.seed(seed)
 
     # Check arguments
-    Y, problem, subset, max_iter =  _check_args(X, Y, problem, max_order, poly_order, bootstrap, 
-                subset, max_iter, lambdax, alpha, extended_base)
+    Y, problem, subset, max_iter = _check_args(
+        X,
+        Y,
+        problem,
+        max_order,
+        poly_order,
+        bootstrap,
+        subset,
+        max_iter,
+        lambdax,
+        alpha,
+        extended_base,
+    )
     # Instantiate Core Parameters
-    hdmr = _core_params(*X.shape, np.mean(Y), poly_order, max_order, bootstrap, subset, extended_base)
-    # Calculate HDMR Basis Matrix   
+    hdmr = _core_params(
+        *X.shape, np.mean(Y), poly_order, max_order, bootstrap, subset, extended_base
+    )
+    # Calculate HDMR Basis Matrix
     b_m = _basis_matrix(X, hdmr)
     # Functional ANOVA decomposition
     _fanova(b_m, hdmr, Y, bootstrap, max_iter, lambdax, alpha)
@@ -52,15 +64,26 @@ def analyze(
     return Si
 
 
-def _check_args(X, Y, problem, max_order, poly_order, bootstrap, 
-                subset, max_iter, lambdax, alpha, extended_base):
+def _check_args(
+    X,
+    Y,
+    problem,
+    max_order,
+    poly_order,
+    bootstrap,
+    subset,
+    max_iter,
+    lambdax,
+    alpha,
+    extended_base,
+):
     """Validates all parameters to ensure that they are within the limits"""
     # Make sure Y, output array, is a matrix
     Y = Y.reshape(-1, 1)
 
     # Get dimensions of input-output
     N, d = X.shape
-    y_row = Y.shape[0]  
+    y_row = Y.shape[0]
 
     # If parameter names are not defined
     if not "names" in problem:
@@ -79,13 +102,13 @@ def _check_args(X, Y, problem, max_order, poly_order, bootstrap,
         raise ValueError(
             "SALib-HDMR Error: Problem definition must be consistent with the number of dimension in matrix X"
         )
-    
+
     # If the length of 'names' in ProblemSpec != Columns in X matrix
     if "names" in problem and len(problem["names"]) != d:
         raise ValueError(
             "SALib-HDMR Error: Problem definition must be consistent with the number of  dimension in matrix X"
         )
-    
+
     # If the length of 'bounds' in ProblemSpec != Columns in X matrix
     if "bounds" in problem and len(problem["bounds"]) != d:
         raise ValueError(
@@ -98,18 +121,18 @@ def _check_args(X, Y, problem, max_order, poly_order, bootstrap,
             "SALib-HDMR Error: Matrix X contains only a single column: No point to do"
             " sensitivity analysis when d = 1."
         )
-    
+
     if N < 300:
         raise RuntimeError(
             f"SALib-HDMR Error: Number of samples in the input matrix X, {N}, is insufficient. Need at least 300."
         )
-    
+
     if N != y_row:
         raise ValueError(
             f"SALib-HDMR Error: Dimension mismatch. The number of outputs ({y_row}) should match"
             f" number of samples ({N})"
         )
-    
+
     if max_order not in (1, 2, 3):
         raise ValueError(
             f"SALib-HDMR Error: 'max_order' key of options should be an integer with values of"
@@ -119,12 +142,14 @@ def _check_args(X, Y, problem, max_order, poly_order, bootstrap,
     # Important next check for max_order - as max_order relates to d
     if (d == 2) and (max_order > 2):
         max_order = 2
-        warnings.warn("SALib-HDMR Warning: max_order is set to 2 due to lack of third input factor")
+        warnings.warn(
+            "SALib-HDMR Warning: max_order is set to 2 due to lack of third input factor"
+        )
 
     if poly_order not in np.arange(1, 11):
         raise ValueError(
             "SALib-HDMR Error: 'poly_order' key of options should be an integer between 1 to 10."
-            )
+        )
 
     if bootstrap not in np.arange(1, 101):
         raise ValueError(
@@ -132,7 +157,7 @@ def _check_args(X, Y, problem, max_order, poly_order, bootstrap,
         )
 
     if (bootstrap == 1) and (subset != y_row):
-            subset = y_row
+        subset = y_row
 
     if subset is None:
         subset = y_row // 2
@@ -146,7 +171,7 @@ def _check_args(X, Y, problem, max_order, poly_order, bootstrap,
         raise ValueError(
             "SALib-HDMR Error: 'alpha' key of options should be a float between 0.5 to 1.0"
         )
-    
+
     if extended_base:
         max_iter = None
     else:
@@ -154,19 +179,27 @@ def _check_args(X, Y, problem, max_order, poly_order, bootstrap,
             raise ValueError(
                 "SALib-HDMR Error: 'max_iter' key of options should be between 100 and 1000"
             )
-    
+
     if lambdax < 0.0 or lambdax > 10:
         raise ValueError(
             "SALib-HDMR Error: 'lambdax' key of options should be in between 0 and 10"
         )
-    
-    return Y, problem, subset, max_iter
-    
 
-def _core_params(N: int, d: int, f0: float, poly_order: int, max_order: int, 
-                 bootstrap: int, subset: int, extended_base: bool) -> namedtuple:
-    """ This function establishes core parameters of HDMR expansion in a namedtuple datatype. 
-    These parameters are being used across all functions and procedures. 
+    return Y, problem, subset, max_iter
+
+
+def _core_params(
+    N: int,
+    d: int,
+    f0: float,
+    poly_order: int,
+    max_order: int,
+    bootstrap: int,
+    subset: int,
+    extended_base: bool,
+) -> namedtuple:
+    """This function establishes core parameters of HDMR expansion in a namedtuple datatype.
+    These parameters are being used across all functions and procedures.
 
     Parameters
     ----------
@@ -185,7 +218,7 @@ def _core_params(N: int, d: int, f0: float, poly_order: int, max_order: int,
     subset : int
         Number of samples to be used in bootstrap.
     extended_base : bool
-        Whether to use extended basis matrix or not. 
+        Whether to use extended basis matrix or not.
 
     Returns
     -------
@@ -201,7 +234,7 @@ def _core_params(N: int, d: int, f0: float, poly_order: int, max_order: int,
     max_order : int
         Maximum functional ANOVA expansion order.
     ext_base : bool
-        Whether to use extended basis matrix or not. 
+        Whether to use extended basis matrix or not.
     subset : int
         Number of samples to be used in bootstrap.
     p_o : int
@@ -227,7 +260,7 @@ def _core_params(N: int, d: int, f0: float, poly_order: int, max_order: int,
     tnt3 : int
         Total number of terms(columns) for all 3rd order component functions
     a_tnt : int
-        All terms (columns) in a hdmr expansion 
+        All terms (columns) in a hdmr expansion
     x : numpy.array
         Solution of hdmr expansion
     idx : numpy.array
@@ -249,31 +282,62 @@ def _core_params(N: int, d: int, f0: float, poly_order: int, max_order: int,
     """
 
     cp = defaultdict(int)
-    cp['n_comp_func'], cp['n_coeff'] = [0] * 3, [0] * 3
-    cp['n_comp_func'][0] = d
-    cp['n_coeff'][0] = poly_order
-    
+    cp["n_comp_func"], cp["n_coeff"] = [0] * 3, [0] * 3
+    cp["n_comp_func"][0] = d
+    cp["n_coeff"][0] = poly_order
+
     if max_order > 1:
-        cp['n_comp_func'][1] = math.comb(d, 2)
-        cp['n_coeff'][1] = poly_order**2
+        cp["n_comp_func"][1] = math.comb(d, 2)
+        cp["n_coeff"][1] = poly_order**2
         if extended_base:
-            cp['n_coeff'][1] += 2*poly_order 
-        
+            cp["n_coeff"][1] += 2 * poly_order
 
     if max_order == 3:
-        cp['n_comp_func'][2] = math.comb(d, 3)
-        cp['n_coeff'][2] = poly_order**3
+        cp["n_comp_func"][2] = math.comb(d, 3)
+        cp["n_coeff"][2] = poly_order**3
         if extended_base:
-            cp['n_coeff'][2] += 3*poly_order + 3*poly_order**2
+            cp["n_coeff"][2] += 3 * poly_order + 3 * poly_order**2
 
     # Setup Bootstrap (if bootstrap > 1)
-    idx = np.arange(0, N).reshape(-1, 1) if bootstrap == 1 else np.argsort(np.random.rand(N, bootstrap), axis=0)[:subset]
- 
-    CoreParams = namedtuple('CoreParams', ['N', 'd', 'max_order', 'ext_base', 'subset', 'p_o', 'nc1',
-                                           'nc2', 'nc3', 'nc_t', 'nt1', 'nt2', 'nt3', 'tnt1', 'tnt2', 
-                                           'tnt3', 'a_tnt', 'x', 'idx', 'S', 'Sa', 'Sb', 'ST', 
-                                           'signf', 'beta', 'gamma', 'f0'])
-    
+    idx = (
+        np.arange(0, N).reshape(-1, 1)
+        if bootstrap == 1
+        else np.argsort(np.random.rand(N, bootstrap), axis=0)[:subset]
+    )
+
+    CoreParams = namedtuple(
+        "CoreParams",
+        [
+            "N",
+            "d",
+            "max_order",
+            "ext_base",
+            "subset",
+            "p_o",
+            "nc1",
+            "nc2",
+            "nc3",
+            "nc_t",
+            "nt1",
+            "nt2",
+            "nt3",
+            "tnt1",
+            "tnt2",
+            "tnt3",
+            "a_tnt",
+            "x",
+            "idx",
+            "S",
+            "Sa",
+            "Sb",
+            "ST",
+            "signf",
+            "beta",
+            "gamma",
+            "f0",
+        ],
+    )
+
     hdmr = CoreParams(
         N,
         d,
@@ -281,43 +345,43 @@ def _core_params(N: int, d: int, f0: float, poly_order: int, max_order: int,
         extended_base,
         subset,
         poly_order,
-        cp['n_comp_func'][0],
-        cp['n_comp_func'][1],
-        cp['n_comp_func'][2],
-        sum(cp['n_comp_func']),
-        cp['n_coeff'][0],
-        cp['n_coeff'][1],
-        cp['n_coeff'][2],
-        cp['n_coeff'][0] * cp['n_comp_func'][0],
-        cp['n_coeff'][1] * cp['n_comp_func'][1],
-        cp['n_coeff'][2] * cp['n_comp_func'][2],
-        cp['n_coeff'][0] * cp['n_comp_func'][0] + \
-        cp['n_coeff'][1] * cp['n_comp_func'][1] + \
-        cp['n_coeff'][2] * cp['n_comp_func'][2],
+        cp["n_comp_func"][0],
+        cp["n_comp_func"][1],
+        cp["n_comp_func"][2],
+        sum(cp["n_comp_func"]),
+        cp["n_coeff"][0],
+        cp["n_coeff"][1],
+        cp["n_coeff"][2],
+        cp["n_coeff"][0] * cp["n_comp_func"][0],
+        cp["n_coeff"][1] * cp["n_comp_func"][1],
+        cp["n_coeff"][2] * cp["n_comp_func"][2],
+        cp["n_coeff"][0] * cp["n_comp_func"][0]
+        + cp["n_coeff"][1] * cp["n_comp_func"][1]
+        + cp["n_coeff"][2] * cp["n_comp_func"][2],
         np.zeros(
-            cp['n_coeff'][0] * cp['n_comp_func'][0] + \
-            cp['n_coeff'][1] * cp['n_comp_func'][1] + \
-            cp['n_coeff'][2] * cp['n_comp_func'][2]
+            cp["n_coeff"][0] * cp["n_comp_func"][0]
+            + cp["n_coeff"][1] * cp["n_comp_func"][1]
+            + cp["n_coeff"][2] * cp["n_comp_func"][2]
         ),
         idx,
-        np.zeros((sum(cp['n_comp_func']), bootstrap)),
-        np.zeros((sum(cp['n_comp_func']), bootstrap)),
-        np.zeros((sum(cp['n_comp_func']), bootstrap)),
-        np.zeros((sum(cp['n_comp_func']), bootstrap)),
-        np.zeros((sum(cp['n_comp_func']), bootstrap)),
+        np.zeros((sum(cp["n_comp_func"]), bootstrap)),
+        np.zeros((sum(cp["n_comp_func"]), bootstrap)),
+        np.zeros((sum(cp["n_comp_func"]), bootstrap)),
+        np.zeros((sum(cp["n_comp_func"]), bootstrap)),
+        np.zeros((sum(cp["n_comp_func"]), bootstrap)),
         np.array(list(comb(range(d), 2))),
-        np.array(list(comb(range(d), 3))), # Returns empty list when d < 3
-        f0
+        np.array(list(comb(range(d), 3))),  # Returns empty list when d < 3
+        f0,
     )
 
     return hdmr
 
 
 def _basis_matrix(X, hdmr):
-    """ Basis matrix represents the base of the component functions.
+    """Basis matrix represents the base of the component functions.
     It is built with orthonormal polynomials for each inputs so that
-    it represents the data at its best. Linear combination of columns 
-    of this matrix forms the component functions. 
+    it represents the data at its best. Linear combination of columns
+    of this matrix forms the component functions.
 
     Parameters
     ----------
@@ -332,8 +396,10 @@ def _basis_matrix(X, hdmr):
         Basis matrix
     """
     # Compute normalized X-values
-    X_n = (X - np.tile(X.min(0), (hdmr.N, 1))) / np.tile((X.max(0)) - X.min(0), (hdmr.N, 1))
-    
+    X_n = (X - np.tile(X.min(0), (hdmr.N, 1))) / np.tile(
+        (X.max(0)) - X.min(0), (hdmr.N, 1)
+    )
+
     # Compute Orthonormal Polynomial Coefficients
     coeff = _orth_poly_coeff(X_n, hdmr)
     # Initialize Basis Matrix
@@ -344,48 +410,85 @@ def _basis_matrix(X, hdmr):
     # First order columns of basis matrix
     for i in range(hdmr.d):
         for j in range(hdmr.p_o):
-            b_m[:, col] = np.polyval(coeff[j, :j+2, i], X_n[:, i])
+            b_m[:, col] = np.polyval(coeff[j, : j + 2, i], X_n[:, i])
             col += 1
 
     # Second order columns of basis matrix
     if hdmr.max_order > 1:
-        for i in _prod(range(0, hdmr.d-1), range(1, hdmr.d)):
+        for i in _prod(range(0, hdmr.d - 1), range(1, hdmr.d)):
             if hdmr.ext_base:
-                b_m[:, col:col+hdmr.p_o] = b_m[:, i[0]*hdmr.p_o:(i[0]+1)*hdmr.p_o]
+                b_m[:, col : col + hdmr.p_o] = b_m[
+                    :, i[0] * hdmr.p_o : (i[0] + 1) * hdmr.p_o
+                ]
                 col += hdmr.p_o
-                b_m[:, col:col+hdmr.p_o] = b_m[:, i[1]*hdmr.p_o:(i[1]+1)*hdmr.p_o]
+                b_m[:, col : col + hdmr.p_o] = b_m[
+                    :, i[1] * hdmr.p_o : (i[1] + 1) * hdmr.p_o
+                ]
                 col += hdmr.p_o
-            
-            for j in _prod(range(i[0]*hdmr.p_o, (i[0]+1)*hdmr.p_o), range(i[1]*hdmr.p_o, (i[1]+1)*hdmr.p_o)):
+
+            for j in _prod(
+                range(i[0] * hdmr.p_o, (i[0] + 1) * hdmr.p_o),
+                range(i[1] * hdmr.p_o, (i[1] + 1) * hdmr.p_o),
+            ):
                 b_m[:, col] = np.multiply(b_m[:, j[0]], b_m[:, j[1]])
                 col += 1
-    
+
     # Third order columns of basis matrix
     if hdmr.max_order == 3:
-        for i in _prod(range(0, hdmr.d-2), range(1, hdmr.d-1), range(2, hdmr.d)):
+        for i in _prod(range(0, hdmr.d - 2), range(1, hdmr.d - 1), range(2, hdmr.d)):
             if hdmr.ext_base:
-                b_m[:, col:col+hdmr.p_o] = b_m[:, i[0]*hdmr.p_o:(i[0]+1)*hdmr.p_o]
+                b_m[:, col : col + hdmr.p_o] = b_m[
+                    :, i[0] * hdmr.p_o : (i[0] + 1) * hdmr.p_o
+                ]
                 col += hdmr.p_o
-                b_m[:, col:col+hdmr.p_o] = b_m[:, i[1]*hdmr.p_o:(i[1]+1)*hdmr.p_o]
+                b_m[:, col : col + hdmr.p_o] = b_m[
+                    :, i[1] * hdmr.p_o : (i[1] + 1) * hdmr.p_o
+                ]
                 col += hdmr.p_o
-                b_m[:, col:col+hdmr.p_o] = b_m[:, i[2]*hdmr.p_o:(i[2]+1)*hdmr.p_o]
+                b_m[:, col : col + hdmr.p_o] = b_m[
+                    :, i[2] * hdmr.p_o : (i[2] + 1) * hdmr.p_o
+                ]
                 col += hdmr.p_o
-                b_m[:, col:col+hdmr.p_o**2] = b_m[:, hdmr.tnt1+(2*hdmr.nt1)*(i[0]+1)+i[0]*(hdmr.p_o**2):hdmr.tnt1+(i[0]+1)*(hdmr.p_o**2+2*hdmr.nt1)]
+                b_m[:, col : col + hdmr.p_o**2] = b_m[
+                    :,
+                    hdmr.tnt1
+                    + (2 * hdmr.nt1) * (i[0] + 1)
+                    + i[0] * (hdmr.p_o**2) : hdmr.tnt1
+                    + (i[0] + 1) * (hdmr.p_o**2 + 2 * hdmr.nt1),
+                ]
                 col += hdmr.p_o**2
-                b_m[:, col:col+hdmr.p_o**2] = b_m[:, hdmr.tnt1+(2*hdmr.nt1)*(i[1]+1)+i[1]*(hdmr.p_o**2):hdmr.tnt1+(i[1]+1)*(hdmr.p_o**2+2*hdmr.nt1)]
+                b_m[:, col : col + hdmr.p_o**2] = b_m[
+                    :,
+                    hdmr.tnt1
+                    + (2 * hdmr.nt1) * (i[1] + 1)
+                    + i[1] * (hdmr.p_o**2) : hdmr.tnt1
+                    + (i[1] + 1) * (hdmr.p_o**2 + 2 * hdmr.nt1),
+                ]
                 col += hdmr.p_o**2
-                b_m[:, col:col+hdmr.p_o**2] = b_m[:, hdmr.tnt1+(2*hdmr.nt1)*(i[2]+1)+i[2]*(hdmr.p_o**2):hdmr.tnt1+(i[2]+1)*(hdmr.p_o**2+2*hdmr.nt1)]
+                b_m[:, col : col + hdmr.p_o**2] = b_m[
+                    :,
+                    hdmr.tnt1
+                    + (2 * hdmr.nt1) * (i[2] + 1)
+                    + i[2] * (hdmr.p_o**2) : hdmr.tnt1
+                    + (i[2] + 1) * (hdmr.p_o**2 + 2 * hdmr.nt1),
+                ]
                 col += hdmr.p_o**2
 
-            for j in _prod(range(i[0]*hdmr.p_o, (i[0]+1)*hdmr.p_o), range(i[1]*hdmr.p_o, (i[1]+1)*hdmr.p_o), range(i[2]*hdmr.p_o, (i[2]+1)*hdmr.p_o)):
-                b_m[:, col] = np.multiply(np.multiply(b_m[:, j[0]], b_m[:, j[1]]), b_m[:, j[2]])
+            for j in _prod(
+                range(i[0] * hdmr.p_o, (i[0] + 1) * hdmr.p_o),
+                range(i[1] * hdmr.p_o, (i[1] + 1) * hdmr.p_o),
+                range(i[2] * hdmr.p_o, (i[2] + 1) * hdmr.p_o),
+            ):
+                b_m[:, col] = np.multiply(
+                    np.multiply(b_m[:, j[0]], b_m[:, j[1]]), b_m[:, j[2]]
+                )
                 col += 1
 
     return b_m
 
 
 def _orth_poly_coeff(X, hdmr):
-    """ Calculated orthonormal polynomial coefficients based on a given input matrix `X`
+    """Calculated orthonormal polynomial coefficients based on a given input matrix `X`
 
     Parameters
     ----------
@@ -407,28 +510,30 @@ def _orth_poly_coeff(X, hdmr):
     .. [1] Szegő, G. 1975. . Orthogonal Polynomials. American Mathematical Society.
     """
     k = 0
-    M = np.zeros((hdmr.p_o+1, hdmr.p_o+1, hdmr.d))
+    M = np.zeros((hdmr.p_o + 1, hdmr.p_o + 1, hdmr.d))
     for i in range(hdmr.d):
         k = 0
-        for j in range(hdmr.p_o+1):
-            for z in range(hdmr.p_o+1):
-                M[j, z, i] = sum(X[:, i]**k) / hdmr.N
+        for j in range(hdmr.p_o + 1):
+            for z in range(hdmr.p_o + 1):
+                M[j, z, i] = sum(X[:, i] ** k) / hdmr.N
                 k += 1
             k = j + 1
-    coeff = np.zeros((hdmr.p_o, hdmr.p_o+1, hdmr.d))
+    coeff = np.zeros((hdmr.p_o, hdmr.p_o + 1, hdmr.d))
     for i in range(hdmr.d):
         for j in range(hdmr.p_o):
-            for k in range(j+2):
-                z = list(range(j+2))
+            for k in range(j + 2):
+                z = list(range(j + 2))
                 z.pop(k)
-                det_ij = det(M[:j+1,:j+1, i]) * det(M[:j+2, :j+2, i])
-                coeff[j, j+1-k, i] = (-1)**(j+k+1) * det(M[:j+1, z, i]) / np.sqrt(det_ij)
+                det_ij = det(M[: j + 1, : j + 1, i]) * det(M[: j + 2, : j + 2, i])
+                coeff[j, j + 1 - k, i] = (
+                    (-1) ** (j + k + 1) * det(M[: j + 1, z, i]) / np.sqrt(det_ij)
+                )
 
     return coeff
 
 
 def _prod(*args):
-    """ Generator that returns unique cartesian product of given tuple arguments
+    """Generator that returns unique cartesian product of given tuple arguments
 
     Parameters
     ----------
@@ -451,10 +556,10 @@ def _prod(*args):
 
 
 def _fanova(b_m, hdmr, Y, bootstrap, max_iter, lambdax, alpha):
-    """ Functional ANOVA decomposition provides two main approach namely
-    extended base approach and non-extended base approach which follow the guidelines 
+    """Functional ANOVA decomposition provides two main approach namely
+    extended base approach and non-extended base approach which follow the guidelines
     from [1] and [2]. Extended base in this manner is to provide additional information
-    to guarantee hierarchical orthogonality. 
+    to guarantee hierarchical orthogonality.
 
     Parameters
     ----------
@@ -475,10 +580,10 @@ def _fanova(b_m, hdmr, Y, bootstrap, max_iter, lambdax, alpha):
 
     Notes
     -----
-    .. [1] Li, G., Rabitz, H., Yelvington, P., Oluwole, O., Bacon, F., Kolb, C., and Schoendorf, J. 2010. 
-        Global Sensitivity Analysis for Systems with Independent and/or Correlated Inputs. 
+    .. [1] Li, G., Rabitz, H., Yelvington, P., Oluwole, O., Bacon, F., Kolb, C., and Schoendorf, J. 2010.
+        Global Sensitivity Analysis for Systems with Independent and/or Correlated Inputs.
         The Journal of Physical Chemistry A, 114(19), p.6022-6032.
-    .. [2] Li, G., Rabitz, H. General formulation of HDMR component functions with independent and correlated variables. 
+    .. [2] Li, G., Rabitz, H. General formulation of HDMR component functions with independent and correlated variables.
         J Math Chem 50, 99–130 (2012). https://doi.org/10.1007/s10910-011-9898-0
     """
     for t in range(bootstrap):
@@ -486,18 +591,28 @@ def _fanova(b_m, hdmr, Y, bootstrap, max_iter, lambdax, alpha):
         Y_idx = Y[hdmr.idx[:, t], 0]
         # Subtract mean from it
         Y_idx -= np.mean(Y_idx)
-        
+
         if hdmr.ext_base:
             cost = _cost_matrix(b_m[hdmr.idx[:, t], :], hdmr)
             _d_morph(b_m[hdmr.idx[:, t], :], cost, Y_idx, bootstrap, hdmr)
         else:
-            Y_res = _first_order(b_m[hdmr.idx[:, t], :hdmr.tnt1], Y_idx, max_iter, lambdax, hdmr)
+            Y_res = _first_order(
+                b_m[hdmr.idx[:, t], : hdmr.tnt1], Y_idx, max_iter, lambdax, hdmr
+            )
             if hdmr.max_order > 1:
-                Y_res = _second_order(b_m[hdmr.idx[:, t], hdmr.tnt1:hdmr.tnt1+hdmr.tnt2], Y_res, max_iter, lambdax, hdmr)
+                Y_res = _second_order(
+                    b_m[hdmr.idx[:, t], hdmr.tnt1 : hdmr.tnt1 + hdmr.tnt2],
+                    Y_res,
+                    max_iter,
+                    lambdax,
+                    hdmr,
+                )
             if hdmr.max_order == 3:
-                _third_order(b_m[hdmr.idx[:, t], hdmr.tnt1+hdmr.tnt2:], Y_res, lambdax, hdmr)
+                _third_order(
+                    b_m[hdmr.idx[:, t], hdmr.tnt1 + hdmr.tnt2 :], Y_res, lambdax, hdmr
+                )
 
-        # Calculate component functions         
+        # Calculate component functions
         Y_e = _comp_func(b_m[hdmr.idx[:, t], :], hdmr)
         # Test significancy
         _f_test(Y_idx, Y_e, alpha, hdmr, t)
@@ -508,9 +623,9 @@ def _fanova(b_m, hdmr, Y, bootstrap, max_iter, lambdax, alpha):
 
 
 def _cost_matrix(b_m, hdmr):
-    """ Cost matrix holds the information about hierarchical orthogonality.
+    """Cost matrix holds the information about hierarchical orthogonality.
     This matrix is arranged in such a way that it satisfies component functions
-    that hiearchical to each other are orthogonal. 
+    that hiearchical to each other are orthogonal.
 
     Parameters
     ----------
@@ -518,7 +633,7 @@ def _cost_matrix(b_m, hdmr):
         Basis matrix
     hdmr : namedtuple
         Core parameters of hdmr expansion
-    
+
     Returns
     -------
     cost : numpy.array
@@ -526,36 +641,50 @@ def _cost_matrix(b_m, hdmr):
     """
     cost = np.zeros((hdmr.a_tnt, hdmr.a_tnt))
 
-    range_2nd_1 = lambda x: range(hdmr.tnt1+(x)*hdmr.nt2, hdmr.tnt1+(x+1)*hdmr.nt2)
-    range_2nd_2 = lambda x: range(hdmr.tnt1+(x)*hdmr.nt2, hdmr.tnt1+(x)*hdmr.nt2+hdmr.p_o*2)
-    range_3rd_1 = lambda x: range(hdmr.tnt1+hdmr.tnt2+(x)*hdmr.nt3, hdmr.tnt1+hdmr.tnt2+(x+1)*hdmr.nt3)
-    range_3rd_2 = lambda x: range(hdmr.tnt1+hdmr.tnt2+(x)*hdmr.nt3, hdmr.tnt1+hdmr.tnt2+(x)*hdmr.nt3+3*hdmr.p_o+3*hdmr.p_o**2)
-                                  
+    range_2nd_1 = lambda x: range(
+        hdmr.tnt1 + (x) * hdmr.nt2, hdmr.tnt1 + (x + 1) * hdmr.nt2
+    )
+    range_2nd_2 = lambda x: range(
+        hdmr.tnt1 + (x) * hdmr.nt2, hdmr.tnt1 + (x) * hdmr.nt2 + hdmr.p_o * 2
+    )
+    range_3rd_1 = lambda x: range(
+        hdmr.tnt1 + hdmr.tnt2 + (x) * hdmr.nt3,
+        hdmr.tnt1 + hdmr.tnt2 + (x + 1) * hdmr.nt3,
+    )
+    range_3rd_2 = lambda x: range(
+        hdmr.tnt1 + hdmr.tnt2 + (x) * hdmr.nt3,
+        hdmr.tnt1 + hdmr.tnt2 + (x) * hdmr.nt3 + 3 * hdmr.p_o + 3 * hdmr.p_o**2,
+    )
+
     if hdmr.max_order > 1:
         sr_i = np.mean(b_m, axis=0, keepdims=True)
-        sr_ij = np.zeros((2*hdmr.p_o+1, hdmr.nt2))
+        sr_ij = np.zeros((2 * hdmr.p_o + 1, hdmr.nt2))
         ct = 0
-        for _ in _prod(range(0, hdmr.d-1), range(1, hdmr.d)):
+        for _ in _prod(range(0, hdmr.d - 1), range(1, hdmr.d)):
             sr_ij[0, :] = sr_i[0, range_2nd_1(ct)]
-            sr_ij[1:, :] = (b_m[:, range_2nd_2(ct)].T @ b_m[:, range_2nd_1(ct)]) / hdmr.subset
+            sr_ij[1:, :] = (
+                b_m[:, range_2nd_2(ct)].T @ b_m[:, range_2nd_1(ct)]
+            ) / hdmr.subset
             cost[np.ix_(range_2nd_1(ct), range_2nd_1(ct))] = sr_ij.T @ sr_ij
             ct += 1
     if hdmr.max_order == 3:
-        sr_ijk = np.zeros((3*hdmr.p_o+3*hdmr.p_o**2+1, hdmr.nt3))
+        sr_ijk = np.zeros((3 * hdmr.p_o + 3 * hdmr.p_o**2 + 1, hdmr.nt3))
         ct = 0
-        for _ in _prod(range(0, hdmr.d-2), range(1, hdmr.d-1), range(2, hdmr.d)):
+        for _ in _prod(range(0, hdmr.d - 2), range(1, hdmr.d - 1), range(2, hdmr.d)):
             sr_ijk[0, :] = sr_i[0, range_3rd_1(ct)]
-            sr_ijk[1:, :] = b_m[:, range_3rd_2(ct)].T @ b_m[:, range_3rd_1(ct)] / hdmr.subset
+            sr_ijk[1:, :] = (
+                b_m[:, range_3rd_2(ct)].T @ b_m[:, range_3rd_1(ct)] / hdmr.subset
+            )
             cost[np.ix_(range_3rd_1(ct), range_3rd_1(ct))] = sr_ijk.T @ sr_ijk
             ct += 1
-    
+
     return cost
 
 
 def _d_morph(b_m, cost, Y_idx, subset, hdmr):
-    """ D-Morph Regression finds the best solution that aligns with the cost
-    matrix. Cost matrix in this case represents the hierarchical orthogonality 
-    between component functions. 
+    """D-Morph Regression finds the best solution that aligns with the cost
+    matrix. Cost matrix in this case represents the hierarchical orthogonality
+    between component functions.
 
     Parameters
     ----------
@@ -573,13 +702,13 @@ def _d_morph(b_m, cost, Y_idx, subset, hdmr):
     Notes
     -----
     Detailed information about D-Morph Regression can be found at
-    .. [1] Li, G., Rey-de-Castro, R. & Rabitz, H. D-MORPH regression for modeling 
-        with fewer unknown parameters than observation data. 
+    .. [1] Li, G., Rey-de-Castro, R. & Rabitz, H. D-MORPH regression for modeling
+        with fewer unknown parameters than observation data.
         J Math Chem 50, 1747–1764 (2012). https://doi.org/10.1007/s10910-012-0004-z
     """
     # Left Matrix Multiplication with the transpose of cost matrix
-    a = (b_m.T @ b_m) / subset # LHS
-    b = (b_m.T @ Y_idx) / subset # RHS
+    a = (b_m.T @ b_m) / subset  # LHS
+    b = (b_m.T @ Y_idx) / subset  # RHS
     try:
         # Pseudo-Inverse of LHS
         a_pinv = pinv(a, hermitian=True)
@@ -603,8 +732,8 @@ def _d_morph(b_m, cost, Y_idx, subset, hdmr):
 
 
 def _first_order(b_m1, Y_idx, max_iter, lambdax, hdmr):
-    """ Sequential determination of first order component functions.
-    First, it computes component functions via ridge regression, i.e. 
+    """Sequential determination of first order component functions.
+    First, it computes component functions via ridge regression, i.e.
     fitting model inputs/features to the model output. Later, it takes
     advantage of backfitting algorithm to satisfy hierarchical orthogonality.
     Backfitting algorithm does not guarantee the hierarchical orthogonality.
@@ -640,48 +769,54 @@ def _first_order(b_m1, Y_idx, max_iter, lambdax, hdmr):
     for i in range(hdmr.nc1):
         try:
             # Left hand side
-            a = (b_m1[:, i*n1:n1*(i+1)].T @ b_m1[:, i*n1:n1*(i+1)]) / hdmr.subset
+            a = (
+                b_m1[:, i * n1 : n1 * (i + 1)].T @ b_m1[:, i * n1 : n1 * (i + 1)]
+            ) / hdmr.subset
             # Adding L2 Penalty (Ridge Regression)
             a += lambda_eye
             # Right hand side
-            b = (b_m1[:, i*n1:n1*(i+1)].T @ Y_idx) / hdmr.subset
+            b = (b_m1[:, i * n1 : n1 * (i + 1)].T @ Y_idx) / hdmr.subset
             # Solution
-            hdmr.x[i*n1:n1*(i+1)] = solve(a, b)
+            hdmr.x[i * n1 : n1 * (i + 1)] = solve(a, b)
             # Component functions
-            Y_i[:, i] = b_m1[:, i*n1:n1*(i+1)] @ hdmr.x[i*n1:n1*(i+1)]
+            Y_i[:, i] = b_m1[:, i * n1 : n1 * (i + 1)] @ hdmr.x[i * n1 : n1 * (i + 1)]
         except LinAlgError:
-            print("Least-square regression did not converge. Please increase L2 penalty term!")
+            print(
+                "Least-square regression did not converge. Please increase L2 penalty term!"
+            )
 
     # Backfitting method
-    var_old = np.square(hdmr.x[:hdmr.tnt1])
+    var_old = np.square(hdmr.x[: hdmr.tnt1])
     while True:
         for i in range(hdmr.d):
             z = list(range(hdmr.d))
             z.remove(i)
             Y_res = Y_idx - np.sum(Y_i[:, z], axis=1)
             # Left hand side
-            a = (b_m1[:, i*n1:n1*(i+1)].T @ b_m1[:, i*n1:n1*(i+1)]) / hdmr.subset
+            a = (
+                b_m1[:, i * n1 : n1 * (i + 1)].T @ b_m1[:, i * n1 : n1 * (i + 1)]
+            ) / hdmr.subset
             # Right hand side
-            b = (b_m1[:, i*n1:n1*(i+1)].T @ Y_res) / hdmr.subset
+            b = (b_m1[:, i * n1 : n1 * (i + 1)].T @ Y_res) / hdmr.subset
             # Solution
-            hdmr.x[i*n1:n1*(i+1)] = solve(a, b)
+            hdmr.x[i * n1 : n1 * (i + 1)] = solve(a, b)
             # Component functions
-            Y_i[:, i] = b_m1[:, i*n1:n1*(i+1)] @ hdmr.x[i*n1:n1*(i+1)]
+            Y_i[:, i] = b_m1[:, i * n1 : n1 * (i + 1)] @ hdmr.x[i * n1 : n1 * (i + 1)]
 
-        var_max = np.absolute(var_old - np.square(hdmr.x[:hdmr.tnt1])).max()
+        var_max = np.absolute(var_old - np.square(hdmr.x[: hdmr.tnt1])).max()
         iter += 1
 
-        if (var_max < 1e-4) or (iter > max_iter): 
+        if (var_max < 1e-4) or (iter > max_iter):
             break
 
-        var_old = np.square(hdmr.x[:hdmr.tnt1])
+        var_old = np.square(hdmr.x[: hdmr.tnt1])
 
     return Y_idx - np.sum(Y_i, axis=1)
 
 
 def _second_order(b_m2, Y_res, max_iter, lambdax, hdmr):
-    """ Sequential determination of second-order component functions.
-    First, it computes component functions via ridge regression, i.e. 
+    """Sequential determination of second-order component functions.
+    First, it computes component functions via ridge regression, i.e.
     fitting model inputs/features to the model output. Later, it takes
     advantage of backfitting algorithm to satisfy hierarchical orthogonality.
     Backfitting algorithm does not guarantee the hierarchical orthogonality.
@@ -717,19 +852,26 @@ def _second_order(b_m2, Y_res, max_iter, lambdax, hdmr):
     for i in range(hdmr.nc2):
         try:
             # Left hand side
-            a = (b_m2[:, i*n2:n2*(i+1)].T @ b_m2[:, i*n2:n2*(i+1)]) / hdmr.subset
+            a = (
+                b_m2[:, i * n2 : n2 * (i + 1)].T @ b_m2[:, i * n2 : n2 * (i + 1)]
+            ) / hdmr.subset
             # Adding L2 Penalty (Ridge Regression)
             a += lambda_eye
             # Right hand side
-            b = (b_m2[:, i*n2:n2*(i+1)].T @ Y_res) / hdmr.subset
+            b = (b_m2[:, i * n2 : n2 * (i + 1)].T @ Y_res) / hdmr.subset
             # Solution
-            hdmr.x[hdmr.tnt1+i*n2:hdmr.tnt1+n2*(i+1)] = solve(a, b)
+            hdmr.x[hdmr.tnt1 + i * n2 : hdmr.tnt1 + n2 * (i + 1)] = solve(a, b)
             # Component functions
-            Y_ij[:, i] = b_m2[:, i*n2:n2*(i+1)] @ hdmr.x[hdmr.tnt1+i*n2:hdmr.tnt1+n2*(i+1)]
+            Y_ij[:, i] = (
+                b_m2[:, i * n2 : n2 * (i + 1)]
+                @ hdmr.x[hdmr.tnt1 + i * n2 : hdmr.tnt1 + n2 * (i + 1)]
+            )
         except LinAlgError:
-            print("Least-square regression did not converge. Please increase L2 penalty term!")
+            print(
+                "Least-square regression did not converge. Please increase L2 penalty term!"
+            )
 
-    var_old = np.square(hdmr.x[hdmr.tnt1:hdmr.tnt1+hdmr.tnt2])
+    var_old = np.square(hdmr.x[hdmr.tnt1 : hdmr.tnt1 + hdmr.tnt2])
     # Backfitting method
     while True:
         for i in range(hdmr.nc2):
@@ -737,29 +879,36 @@ def _second_order(b_m2, Y_res, max_iter, lambdax, hdmr):
             z.remove(i)
             Y_r = Y_res - np.sum(Y_ij[:, z], axis=1)
             # Left hand side
-            a = (b_m2[:, i*n2:n2*(i+1)].T @ b_m2[:, i*n2:n2*(i+1)]) / hdmr.subset
+            a = (
+                b_m2[:, i * n2 : n2 * (i + 1)].T @ b_m2[:, i * n2 : n2 * (i + 1)]
+            ) / hdmr.subset
             # Right hand side
-            b = (b_m2[:, i*n2:n2*(i+1)].T @ Y_r) / hdmr.subset
+            b = (b_m2[:, i * n2 : n2 * (i + 1)].T @ Y_r) / hdmr.subset
             # Solution
-            hdmr.x[hdmr.tnt1+i*n2:hdmr.tnt1+n2*(i+1)] = solve(a, b)
+            hdmr.x[hdmr.tnt1 + i * n2 : hdmr.tnt1 + n2 * (i + 1)] = solve(a, b)
             # Component functions
-            Y_ij[:, i] = b_m2[:, i*n2:n2*(i+1)] @ hdmr.x[hdmr.tnt1+i*n2:hdmr.tnt1+n2*(i+1)]
+            Y_ij[:, i] = (
+                b_m2[:, i * n2 : n2 * (i + 1)]
+                @ hdmr.x[hdmr.tnt1 + i * n2 : hdmr.tnt1 + n2 * (i + 1)]
+            )
 
-        var_max = np.absolute(var_old - np.square(hdmr.x[hdmr.tnt1:hdmr.tnt1+hdmr.tnt2])).max()
+        var_max = np.absolute(
+            var_old - np.square(hdmr.x[hdmr.tnt1 : hdmr.tnt1 + hdmr.tnt2])
+        ).max()
         iter += 1
 
-        if (var_max < 1e-4) or (iter > max_iter): 
+        if (var_max < 1e-4) or (iter > max_iter):
             break
 
-        var_old = np.square(hdmr.x[hdmr.tnt1:hdmr.tnt1+hdmr.tnt2])
+        var_old = np.square(hdmr.x[hdmr.tnt1 : hdmr.tnt1 + hdmr.tnt2])
 
     return Y_res - np.sum(Y_ij, axis=1)
 
 
 def _third_order(b_m3, Y_res, lambdax, hdmr):
-    """ Sequential determination of third-order component functions.
-    it computes component functions via ridge regression, i.e. 
-    fitting model inputs/features to the model output. 
+    """Sequential determination of third-order component functions.
+    it computes component functions via ridge regression, i.e.
+    fitting model inputs/features to the model output.
 
     Parameters
     ----------
@@ -784,19 +933,25 @@ def _third_order(b_m3, Y_res, lambdax, hdmr):
     for i in range(hdmr.nc3):
         try:
             # Left hand side
-            a = (b_m3[:, i*n3:n3*(i+1)].T @ b_m3[:, i*n3:n3*(i+1)]) / hdmr.subset
+            a = (
+                b_m3[:, i * n3 : n3 * (i + 1)].T @ b_m3[:, i * n3 : n3 * (i + 1)]
+            ) / hdmr.subset
             # Adding L2 Penalty (Ridge Regression)
             a += lambda_eye
             # Right hand side
-            b = (b_m3[:, i*n3:n3*(i+1)].T @ Y_res) / hdmr.subset
+            b = (b_m3[:, i * n3 : n3 * (i + 1)].T @ Y_res) / hdmr.subset
             # Solution
-            hdmr.x[hdmr.tnt1+hdmr.tnt2+i*n3:hdmr.tnt1+hdmr.tnt2+n3*(i+1)] = solve(a, b)
+            hdmr.x[
+                hdmr.tnt1 + hdmr.tnt2 + i * n3 : hdmr.tnt1 + hdmr.tnt2 + n3 * (i + 1)
+            ] = solve(a, b)
         except LinAlgError:
-            print("Least-square regression did not converge. Please increase L2 penalty term!")
+            print(
+                "Least-square regression did not converge. Please increase L2 penalty term!"
+            )
 
 
 def _comp_func(b_m, hdmr):
-    """ Computes the component function based on basis matrix and the solution
+    """Computes the component function based on basis matrix and the solution
 
     Parameters
     ----------
@@ -818,23 +973,36 @@ def _comp_func(b_m, hdmr):
 
     # First order component functions
     for i in range(hdmr.nc1):
-        Y_e[:, i] = np.sum(Y_t[:, i*hdmr.p_o:(i+1)*hdmr.p_o], axis=1)
+        Y_e[:, i] = np.sum(Y_t[:, i * hdmr.p_o : (i + 1) * hdmr.p_o], axis=1)
 
     # Second order component functions
     if hdmr.max_order > 1:
         for i in range(hdmr.nc2):
-            Y_e[:, hdmr.nc1+i] = np.sum(Y_t[:, hdmr.tnt1+(i)*hdmr.nt2:hdmr.tnt1+(i+1)*hdmr.nt2], axis=1)
+            Y_e[:, hdmr.nc1 + i] = np.sum(
+                Y_t[:, hdmr.tnt1 + (i) * hdmr.nt2 : hdmr.tnt1 + (i + 1) * hdmr.nt2],
+                axis=1,
+            )
 
     # Third order component functions
     if hdmr.max_order == 3:
         for i in range(hdmr.nc3):
-            Y_e[:, hdmr.nc1+hdmr.nc2+i] = np.sum(Y_t[:, hdmr.tnt1+hdmr.tnt2+(i)*hdmr.nt3:hdmr.tnt1+hdmr.tnt2+(i+1)*hdmr.nt3], axis=1)
-        
+            Y_e[:, hdmr.nc1 + hdmr.nc2 + i] = np.sum(
+                Y_t[
+                    :,
+                    hdmr.tnt1
+                    + hdmr.tnt2
+                    + (i) * hdmr.nt3 : hdmr.tnt1
+                    + hdmr.tnt2
+                    + (i + 1) * hdmr.nt3,
+                ],
+                axis=1,
+            )
+
     return Y_e
 
 
 def _ancova(Y_idx, Y_e, hdmr, t):
-    """ Analysis of Covariance. It calculates uncorrelated and correlated contribution
+    """Analysis of Covariance. It calculates uncorrelated and correlated contribution
     to the model output variance
 
     Parameters
@@ -852,8 +1020,8 @@ def _ancova(Y_idx, Y_e, hdmr, t):
     -----
     Please see the reference below
 
-    .. [1] Li, G., Rabitz, H., Yelvington, P., Oluwole, O., Bacon, F., Kolb, C., and Schoendorf, J. 2010. 
-        Global Sensitivity Analysis for Systems with Independent and/or Correlated Inputs. 
+    .. [1] Li, G., Rabitz, H., Yelvington, P., Oluwole, O., Bacon, F., Kolb, C., and Schoendorf, J. 2010.
+        Global Sensitivity Analysis for Systems with Independent and/or Correlated Inputs.
         The Journal of Physical Chemistry A, 114(19), p.6022-6032.
     """
     # Compute the sum of all Y_em terms
@@ -868,24 +1036,24 @@ def _ancova(Y_idx, Y_e, hdmr, t):
         c = np.cov(np.stack((Y_e[:, j], Y_idx), axis=0))
 
         # Total sensitivity of jth term
-        hdmr.S[j, t] = c[0, 1] / tot_v # Eq. 19
+        hdmr.S[j, t] = c[0, 1] / tot_v  # Eq. 19
 
         # Covariance matrix of jth term with emulator Y without jth term
         c = np.cov(np.stack((Y_e[:, j], Y_sum - Y_e[:, j]), axis=0))
 
         # Structural contribution of jth term
-        hdmr.Sa[j, t] = c[0, 0] / tot_v # Eq. 20
+        hdmr.Sa[j, t] = c[0, 0] / tot_v  # Eq. 20
 
         # Correlative contribution of jth term
-        hdmr.Sb[j, t] = c[0, 1] / tot_v # Eq. 21
+        hdmr.Sb[j, t] = c[0, 1] / tot_v  # Eq. 21
 
 
 def _f_test(Y_idx, Y_e, alpha, hdmr, t):
-    """ Finds which term makes significant contribution to the model output.
+    """Finds which term makes significant contribution to the model output.
     This statistical analysis is done by F-test which uses F-distribution.
     """
     # Sum of squared residuals of bigger model (all params included)
-    SSR1 = ((Y_idx - np.sum(Y_e, axis=1))**2).sum()
+    SSR1 = ((Y_idx - np.sum(Y_e, axis=1)) ** 2).sum()
     # All parameters
     p1 = hdmr.a_tnt
     # Now adding each term to the model
@@ -932,8 +1100,12 @@ def _finalize(problem, hdmr, alpha, return_emulator):
     )
     Si = ResultDict((k, np.zeros(hdmr.nc_t)) for k in keys)
     Si["Term"] = [None] * hdmr.nc_t
-    Si["ST"] = [np.nan,] * hdmr.nc_t
-    Si["ST_conf"] = [np.nan,] * hdmr.nc_t
+    Si["ST"] = [
+        np.nan,
+    ] * hdmr.nc_t
+    Si["ST_conf"] = [
+        np.nan,
+    ] * hdmr.nc_t
 
     # Z score
     def z(p):
@@ -965,13 +1137,19 @@ def _finalize(problem, hdmr, alpha, return_emulator):
 
     if hdmr.max_order > 1:
         for i in range(hdmr.nc2):
-            Si["Term"][ct] = "/".join([problem["names"][hdmr.beta[i, 0]], problem["names"][hdmr.beta[i, 1]]])
+            Si["Term"][ct] = "/".join(
+                [problem["names"][hdmr.beta[i, 0]], problem["names"][hdmr.beta[i, 1]]]
+            )
             ct += 1
 
     if hdmr.max_order == 3:
         for i in range(hdmr.nc3):
             Si["Term"][ct] = "/".join(
-                [problem["names"][hdmr.gamma[i, 0]], problem["names"][hdmr.gamma[i, 1]], problem["names"][hdmr.gamma[i, 2]]]
+                [
+                    problem["names"][hdmr.gamma[i, 0]],
+                    problem["names"][hdmr.gamma[i, 1]],
+                    problem["names"][hdmr.gamma[i, 2]],
+                ]
             )
             ct += 1
 
@@ -998,7 +1176,7 @@ def _finalize(problem, hdmr, alpha, return_emulator):
     if return_emulator:
         Si["hdmr"] = hdmr
         Si.emulate = MethodType(emulate, Si)
-        
+
     # Bind Pandas Dataframe conversion to the ResultDict
     Si.to_df = MethodType(to_df, Si)
 
@@ -1035,7 +1213,7 @@ def emulate(self, X):
     Y_em : numpy.array
         Emulated output
     """
-    # Calculate HDMR Basis Matrix   
+    # Calculate HDMR Basis Matrix
     b_m = _basis_matrix(X, self["hdmr"])
 
     # Take average solution over bootstrap
