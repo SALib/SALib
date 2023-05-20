@@ -784,7 +784,7 @@ def _first_order(b_m1, Y_idx, max_iter, lambdax, hdmr):
             Y_i[:, i] = b_m1[:, i * n1 : n1 * (i + 1)] @ hdmr.x[i * n1 : n1 * (i + 1)]
         except LinAlgError:
             print(
-                "Least-square regression did not converge. Please increase L2 penalty term!"
+                "Least-square regression did not converge. Try increasing L2 penalty term."
             )
 
     # Backfitting method
