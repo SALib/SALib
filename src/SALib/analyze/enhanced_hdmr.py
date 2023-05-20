@@ -1126,29 +1126,32 @@ def _finalize(problem, hdmr, alpha, return_emulator):
         Si["ST_conf"][r] = mult * np.std(TS)
 
     # Generate index column for printing results
-    ct = 0
-
-    for i in range(hdmr.d):
-        Si["Term"][ct] = problem["names"][i]
-        ct += 1
-
     if hdmr.max_order > 1:
         for i in range(hdmr.nc2):
-            Si["Term"][ct] = "/".join(
-                [problem["names"][hdmr.beta[i, 0]], problem["names"][hdmr.beta[i, 1]]]
+            Si["Term"].extend(
+                [
+                    "/".join(
+                        [
+                            problem["names"][hdmr.beta[i, 0]],
+                            problem["names"][hdmr.beta[i, 1]],
+                        ]
+                    )
+                ]
             )
-            ct += 1
 
     if hdmr.max_order == 3:
         for i in range(hdmr.nc3):
-            Si["Term"][ct] = "/".join(
+            Si["Term"].extend(
                 [
-                    problem["names"][hdmr.gamma[i, 0]],
-                    problem["names"][hdmr.gamma[i, 1]],
-                    problem["names"][hdmr.gamma[i, 2]],
+                    "/".join(
+                        [
+                            problem["names"][hdmr.gamma[i, 0]],
+                            problem["names"][hdmr.gamma[i, 1]],
+                            problem["names"][hdmr.gamma[i, 2]],
+                        ]
+                    )
                 ]
             )
-            ct += 1
 
     # Assign Bootstrap Results to Si Dict
     Si["Sa"] = np.mean(hdmr.Sa, axis=1)
