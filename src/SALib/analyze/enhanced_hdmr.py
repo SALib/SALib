@@ -416,72 +416,70 @@ def _basis_matrix(X, hdmr):
 
     # Second order columns of basis matrix
     if hdmr.max_order > 1:
-        for i in _prod(range(0, hdmr.d - 1), range(1, hdmr.d)):
+        for i, j in _prod(range(0, hdmr.d - 1), range(1, hdmr.d)):
             if hdmr.ext_base:
-                b_m[:, col : col + hdmr.p_o] = b_m[
-                    :, i[0] * hdmr.p_o : (i[0] + 1) * hdmr.p_o
-                ]
-                col += hdmr.p_o
-                b_m[:, col : col + hdmr.p_o] = b_m[
-                    :, i[1] * hdmr.p_o : (i[1] + 1) * hdmr.p_o
-                ]
+                b_m[:, col : col + hdmr.p_o] = b_m[:, i * hdmr.p_o : (i + 1) * hdmr.p_o]
                 col += hdmr.p_o
 
-            for j in _prod(
-                range(i[0] * hdmr.p_o, (i[0] + 1) * hdmr.p_o),
-                range(i[1] * hdmr.p_o, (i[1] + 1) * hdmr.p_o),
+                b_m[:, col : col + hdmr.p_o] = b_m[:, j * hdmr.p_o : (j + 1) * hdmr.p_o]
+                col += hdmr.p_o
+
+            for k1, k2 in _prod(
+                range(i * hdmr.p_o, (i + 1) * hdmr.p_o),
+                range(j * hdmr.p_o, (j + 1) * hdmr.p_o),
             ):
-                b_m[:, col] = np.multiply(b_m[:, j[0]], b_m[:, j[1]])
+                b_m[:, col] = np.multiply(b_m[:, k1], b_m[:, k2])
                 col += 1
 
     # Third order columns of basis matrix
     if hdmr.max_order == 3:
-        for i in _prod(range(0, hdmr.d - 2), range(1, hdmr.d - 1), range(2, hdmr.d)):
+        for i, j, k in _prod(
+            range(0, hdmr.d - 2), range(1, hdmr.d - 1), range(2, hdmr.d)
+        ):
             if hdmr.ext_base:
-                b_m[:, col : col + hdmr.p_o] = b_m[
-                    :, i[0] * hdmr.p_o : (i[0] + 1) * hdmr.p_o
-                ]
+                b_m[:, col : col + hdmr.p_o] = b_m[:, i * hdmr.p_o : (i + 1) * hdmr.p_o]
                 col += hdmr.p_o
-                b_m[:, col : col + hdmr.p_o] = b_m[
-                    :, i[1] * hdmr.p_o : (i[1] + 1) * hdmr.p_o
-                ]
-                col += hdmr.p_o
-                b_m[:, col : col + hdmr.p_o] = b_m[
-                    :, i[2] * hdmr.p_o : (i[2] + 1) * hdmr.p_o
-                ]
-                col += hdmr.p_o
-                b_m[:, col : col + hdmr.p_o**2] = b_m[
-                    :,
-                    hdmr.tnt1
-                    + (2 * hdmr.nt1) * (i[0] + 1)
-                    + i[0] * (hdmr.p_o**2) : hdmr.tnt1
-                    + (i[0] + 1) * (hdmr.p_o**2 + 2 * hdmr.nt1),
-                ]
-                col += hdmr.p_o**2
-                b_m[:, col : col + hdmr.p_o**2] = b_m[
-                    :,
-                    hdmr.tnt1
-                    + (2 * hdmr.nt1) * (i[1] + 1)
-                    + i[1] * (hdmr.p_o**2) : hdmr.tnt1
-                    + (i[1] + 1) * (hdmr.p_o**2 + 2 * hdmr.nt1),
-                ]
-                col += hdmr.p_o**2
-                b_m[:, col : col + hdmr.p_o**2] = b_m[
-                    :,
-                    hdmr.tnt1
-                    + (2 * hdmr.nt1) * (i[2] + 1)
-                    + i[2] * (hdmr.p_o**2) : hdmr.tnt1
-                    + (i[2] + 1) * (hdmr.p_o**2 + 2 * hdmr.nt1),
-                ]
-                col += hdmr.p_o**2
 
-            for j in _prod(
-                range(i[0] * hdmr.p_o, (i[0] + 1) * hdmr.p_o),
-                range(i[1] * hdmr.p_o, (i[1] + 1) * hdmr.p_o),
-                range(i[2] * hdmr.p_o, (i[2] + 1) * hdmr.p_o),
+                b_m[:, col : col + hdmr.p_o] = b_m[:, j * hdmr.p_o : (j + 1) * hdmr.p_o]
+                col += hdmr.p_o
+
+                b_m[:, col : col + hdmr.p_o] = b_m[:, k * hdmr.p_o : (k + 1) * hdmr.p_o]
+                col += hdmr.p_o
+
+                p_o_2 = hdmr.p_o**2
+                b_m[:, col : col + p_o_2] = b_m[
+                    :,
+                    hdmr.tnt1
+                    + (2 * hdmr.nt1) * (i + 1)
+                    + i * p_o_2 : hdmr.tnt1
+                    + (i + 1) * (p_o_2 + 2 * hdmr.nt1),
+                ]
+                col += p_o_2
+
+                b_m[:, col : col + p_o_2] = b_m[
+                    :,
+                    hdmr.tnt1
+                    + (2 * hdmr.nt1) * (j + 1)
+                    + j * p_o_2 : hdmr.tnt1
+                    + (j + 1) * (p_o_2 + 2 * hdmr.nt1),
+                ]
+                col += p_o_2
+                b_m[:, col : col + p_o_2] = b_m[
+                    :,
+                    hdmr.tnt1
+                    + (2 * hdmr.nt1) * (k + 1)
+                    + k * p_o_2 : hdmr.tnt1
+                    + (k + 1) * (p_o_2 + 2 * hdmr.nt1),
+                ]
+                col += p_o_2
+
+            for l1, l2, l3 in _prod(
+                range(i * hdmr.p_o, (i + 1) * hdmr.p_o),
+                range(j * hdmr.p_o, (j + 1) * hdmr.p_o),
+                range(k * hdmr.p_o, (k + 1) * hdmr.p_o),
             ):
                 b_m[:, col] = np.multiply(
-                    np.multiply(b_m[:, j[0]], b_m[:, j[1]]), b_m[:, j[2]]
+                    np.multiply(b_m[:, l1], b_m[:, l2]), b_m[:, l3]
                 )
                 col += 1
 
@@ -723,7 +721,7 @@ def _d_morph(b_m, cost, Y_idx, subset, hdmr):
         U, _, Vh = svd(pb)
     except LinAlgError:
         print("Pseudo-Inverse did not converge")
-    
+
     nullity = min(b_m.shape) - rank
     V = Vh.T
     U = np.delete(U, range(0, nullity), axis=1)
