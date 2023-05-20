@@ -1099,13 +1099,10 @@ def _finalize(problem, hdmr, alpha, return_emulator):
         "S_sum_conf",
     )
     Si = ResultDict((k, np.zeros(hdmr.nc_t)) for k in keys)
-    Si["Term"] = [None] * hdmr.nc_t
-    Si["ST"] = [
-        np.nan,
-    ] * hdmr.nc_t
-    Si["ST_conf"] = [
-        np.nan,
-    ] * hdmr.nc_t
+
+    Si["Term"] = problem["names"]
+    Si["ST"] = np.full(hdmr.nc_t, np.nan)
+    Si["ST_conf"] = np.full(hdmr.nc_t, np.nan)
 
     # Z score
     def z(p):
