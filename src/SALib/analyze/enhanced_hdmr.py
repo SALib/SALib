@@ -106,13 +106,13 @@ def _check_args(
     # If the length of 'names' in ProblemSpec != Columns in X matrix
     if "names" in problem and len(problem["names"]) != d:
         raise ValueError(
-            "SALib-HDMR Error: Problem definition must be consistent with the number of  dimension in matrix X"
+            "SALib-HDMR Error: Problem definition must be consistent with the number of dimension in matrix X"
         )
 
     # If the length of 'bounds' in ProblemSpec != Columns in X matrix
     if "bounds" in problem and len(problem["bounds"]) != d:
         raise ValueError(
-            "SALib-HDMR Error: Problem definition must be consistent with the number of  dimension in matrix X"
+            "SALib-HDMR Error: Problem definition must be consistent with the number of dimension in matrix X"
         )
 
     # Now check input-output mismatch
@@ -210,7 +210,7 @@ def _core_params(
     f0 : float
         Zero-th component function
     poly_order : int
-        Polynomial order to be used to calculated orthonormal polynomial.
+        Polynomial order to be used to calculate orthonormal polynomial.
     max_order : int
         Maximum functional ANOVA expansion order.
     bootstrap : int
