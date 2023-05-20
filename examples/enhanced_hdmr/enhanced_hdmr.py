@@ -32,7 +32,7 @@ options = {
     "lambdax": 0.01,
     "alpha": 0.95,
     "extended_base": True,
-    "print_to_console": False,
+    "print_to_console": True,
     "return_emulator": False,
 }
 # Run SALib-HDMR
