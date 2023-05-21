@@ -1168,7 +1168,7 @@ def _finalize(problem, hdmr, alpha, return_emulator):
     Si["S_sum_conf"] = mult * np.std(np.sum(hdmr.S))
 
     # F-test # of selection to print out
-    Si["select"] = hdmr.signf.flatten()
+    Si["select"] = 100 * hdmr.signf.mean(axis=1)
 
     # Bind emulator method to the ResultDict
     if return_emulator:
@@ -1224,17 +1224,18 @@ def emulate(self, X):
 
 
 def _print(Si):
-    d = len(Si["ST"])
+    nc_t = len(Si["Sa"])
+    d = np.isnan(Si["ST"]).sum()
     print("\n")
     print(
-        "Term    \t      Sa            Sb             S             ST         #select "
+        "Term    \t      Sa            Sb             S             ST         Significancy "
     )
-    print("-" * 84)  # Header break
+    print("-" * 88)  # Header break
 
-    format1 = "%-11s   \t %5.2f (\261%.2f) %5.2f (\261%.2f) %5.2f (\261%.2f) %5.2f (\261%.2f)    %-3.0f"  # noqa: E501
-    format2 = "%-11s   \t %5.2f (\261%.2f) %5.2f (\261%.2f) %5.2f (\261%.2f)                  %-3.0f"  # noqa: E501
+    format1 = "%-11s   \t %5.2f (\261%.2f) %5.2f (\261%.2f) %5.2f (\261%.2f) %5.2f (\261%.2f)    %-3.2f%%"  # noqa: E501
+    format2 = "%-11s   \t %5.2f (\261%.2f) %5.2f (\261%.2f) %5.2f (\261%.2f)                  %-3.2f%%"  # noqa: E501
 
-    for i in range(len(Si["Sa"])):
+    for i in range(nc_t):
         if i < d:
             print(
                 format1
@@ -1248,7 +1249,7 @@ def _print(Si):
                     Si["S_conf"][i],
                     Si["ST"][i],
                     Si["ST_conf"][i],
-                    np.sum(Si["select"][i]),
+                    Si["select"][i],
                 )
             )
         else:
@@ -1262,11 +1263,11 @@ def _print(Si):
                     Si["Sb_conf"][i],
                     Si["S"][i],
                     Si["S_conf"][i],
-                    np.sum(Si["select"][i]),
+                    Si["select"][i],
                 )
             )
 
-    print("-" * 84)  # Header break
+    print("-" * 88)  # Header break
 
     format3 = "%-11s   \t %5.2f (\261%.2f) %5.2f (\261%.2f) %5.2f (\261%.2f)"
     print(
