@@ -15,12 +15,14 @@ def analyze(
     conf_level: float = 0.95,
     print_to_console: bool = False,
     seed: int = None,
+    Nr: int = None,
 ) -> Dict:
     """Perform Delta Moment-Independent Analysis on model outputs.
 
-    Returns a dictionary with keys 'delta', 'delta_conf', 'S1', and 'S1_conf',
-    where each entry is a list of size D (the number of parameters) containing
-    the indices in the same order as the parameter file.
+    Returns a dictionary with keys 'delta', 'delta_conf', 'S1', and 'S1_conf' 
+    (first-order sobol indices), where each entry is a list of size D 
+    (the number of parameters) containing the indices in the same order as the 
+    parameter file. 
 
 
     Notes
@@ -50,6 +52,8 @@ def analyze(
         The confidence interval level (default 0.95)
     print_to_console : bool
         Print results directly to console (default False)
+    Nr: int
+        Number of samples to use when resampling (bootstrap) (default None)
 
 
     References
@@ -66,15 +70,16 @@ def analyze(
         np.random.seed(seed)
 
     D = problem["num_vars"]
-    N = Y.size
+    if Nr is None:
+        Nr = Y.size
 
     if not 0 < conf_level < 1:
         raise RuntimeError("Confidence level must be between 0-1.")
 
     # equal frequency partition
-    exp = 2.0 / (7.0 + np.tanh((1500.0 - N) / 500.0))
-    M = int(np.round(min(int(np.ceil(N**exp)), 48)))
-    m = np.linspace(0, N, M + 1)
+    exp = 2.0 / (7.0 + np.tanh((1500.0 - Nr) / 500.0))
+    M = int(np.round(min(int(np.ceil(Nr**exp)), 48)))
+    m = np.linspace(0, Nr, M + 1)
     Ygrid = np.linspace(np.min(Y), np.max(Y), 100)
 
     keys = ("delta", "delta_conf", "S1", "S1_conf")
@@ -85,10 +90,11 @@ def analyze(
         for i in range(D):
             X_i = X[:, i]
             S["delta"][i], S["delta_conf"][i] = bias_reduced_delta(
-                Y, Ygrid, X_i, m, num_resamples, conf_level
+                Y, Ygrid, X_i, m, num_resamples, conf_level, Nr
             )
-            S["S1"][i] = sobol_first(Y, X_i, m)
-            S["S1_conf"][i] = sobol_first_conf(Y, X_i, m, num_resamples, conf_level)
+            ind = np.random.randint(Y.size, size=Nr)
+            S["S1"][i] = sobol_first(Y[ind], X_i[ind], m)
+            S["S1_conf"][i] = sobol_first_conf(Y, X_i, m, num_resamples, conf_level, Nr)
     except np.linalg.LinAlgError as e:
         msg = "Singular matrix detected\n"
         msg += "This may be due to the sample size ({}) being too small\n".format(
@@ -130,13 +136,16 @@ def calc_delta(Y, Ygrid, X, m):
     return d_hat
 
 
-def bias_reduced_delta(Y, Ygrid, X, m, num_resamples, conf_level):
+def bias_reduced_delta(Y, Ygrid, X, m, num_resamples, conf_level, Nr):
     """Plischke et al. 2013 bias reduction technique (eqn 30)"""
     d = np.empty(num_resamples)
-    d_hat = calc_delta(Y, Ygrid, X, m)
 
     N = len(Y)
-    r = np.random.randint(N, size=(num_resamples, N))
+    if Nr is None: 
+        Nr = N
+    ind = np.random.randint(N, size=Nr)
+    d_hat = calc_delta(Y[ind], Ygrid, X[ind], m)
+    r = np.random.randint(N, size=(num_resamples, Nr))
     for i in range(num_resamples):
         r_i = r[i, :]
         d[i] = calc_delta(Y[r_i], Ygrid, X[r_i], m)
@@ -165,11 +174,13 @@ def sobol_first(Y, X, m):
     return Vi / np.var(Y)
 
 
-def sobol_first_conf(Y, X, m, num_resamples, conf_level):
+def sobol_first_conf(Y, X, m, num_resamples, conf_level, Nr):
     s = np.zeros(num_resamples)
 
     N = len(Y)
-    r = np.random.randint(N, size=(num_resamples, N))
+    if Nr is None: 
+        Nr = N
+    r = np.random.randint(N, size=(num_resamples, Nr))
     for i in range(num_resamples):
         r_i = r[i, :]
         s[i] = sobol_first(Y[r_i], X[r_i], m)
