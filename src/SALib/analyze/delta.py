@@ -16,6 +16,7 @@ def analyze(
     print_to_console: bool = False,
     seed: int = None,
     Nr: int = None,
+    analyze_sobol: bool = True,
 ) -> Dict:
     """Perform Delta Moment-Independent Analysis on model outputs.
 
@@ -54,6 +55,8 @@ def analyze(
         Print results directly to console (default False)
     Nr: int
         Number of samples to use when resampling (bootstrap) (default None)
+    analyze_sobol: int
+        Also compute first-order sobol indices and their confidence intervals (default True)
 
 
     References
@@ -92,9 +95,10 @@ def analyze(
             S["delta"][i], S["delta_conf"][i] = bias_reduced_delta(
                 Y, Ygrid, X_i, m, num_resamples, conf_level, Nr
             )
-            ind = np.random.randint(Y.size, size=Nr)
-            S["S1"][i] = sobol_first(Y[ind], X_i[ind], m)
-            S["S1_conf"][i] = sobol_first_conf(Y, X_i, m, num_resamples, conf_level, Nr)
+            if analyze_sobol:
+                ind = np.random.randint(Y.size, size=Nr)
+                S["S1"][i] = sobol_first(Y[ind], X_i[ind], m)
+                S["S1_conf"][i] = sobol_first_conf(Y, X_i, m, num_resamples, conf_level, Nr)
     except np.linalg.LinAlgError as e:
         msg = "Singular matrix detected\n"
         msg += "This may be due to the sample size ({}) being too small\n".format(
