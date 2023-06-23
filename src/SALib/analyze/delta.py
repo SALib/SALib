@@ -15,8 +15,8 @@ def analyze(
     conf_level: float = 0.95,
     print_to_console: bool = False,
     seed: int = None,
-    Nr: int = None,
-    analyze_sobol: bool = True,
+    y_resamples : int = None,
+    method : str = "all",
 ) -> Dict:
     """Perform Delta Moment-Independent Analysis on model outputs.
 
@@ -53,10 +53,10 @@ def analyze(
         The confidence interval level (default 0.95)
     print_to_console : bool
         Print results directly to console (default False)
-    Nr: int
+    y_resamples : int
         Number of samples to use when resampling (bootstrap) (default None)
-    analyze_sobol: int
-        Also compute first-order sobol indices and their confidence intervals (default True)
+    method : str
+        Whether to compute "delta", "sobol" or both ("all") indices (default "all")
 
 
     References
@@ -73,16 +73,19 @@ def analyze(
         np.random.seed(seed)
 
     D = problem["num_vars"]
-    if Nr is None:
-        Nr = Y.size
+    if y_resamples is None:
+        y_resamples = Y.size
+    
+    if not y_resamples <= Y.size:
+        raise ValueError("y_resamples must be less-equal than the total  number of samples")
 
     if not 0 < conf_level < 1:
         raise RuntimeError("Confidence level must be between 0-1.")
 
     # equal frequency partition
-    exp = 2.0 / (7.0 + np.tanh((1500.0 - Nr) / 500.0))
-    M = int(np.round(min(int(np.ceil(Nr**exp)), 48)))
-    m = np.linspace(0, Nr, M + 1)
+    exp = 2.0 / (7.0 + np.tanh((1500.0 - y_resamples) / 500.0))
+    M = int(np.round(min(int(np.ceil(y_resamples**exp)), 48)))
+    m = np.linspace(0, y_resamples, M + 1)
     Ygrid = np.linspace(np.min(Y), np.max(Y), 100)
 
     keys = ("delta", "delta_conf", "S1", "S1_conf")
@@ -92,13 +95,14 @@ def analyze(
     try:
         for i in range(D):
             X_i = X[:, i]
-            S["delta"][i], S["delta_conf"][i] = bias_reduced_delta(
-                Y, Ygrid, X_i, m, num_resamples, conf_level, Nr
-            )
-            if analyze_sobol:
-                ind = np.random.randint(Y.size, size=Nr)
+            if method in ["all", "delta"]:
+                S["delta"][i], S["delta_conf"][i] = bias_reduced_delta(
+                    Y, Ygrid, X_i, m, num_resamples, conf_level, y_resamples
+                )
+            if method in ["all","sobol"]:
+                ind = np.random.randint(Y.size, size=y_resamples)
                 S["S1"][i] = sobol_first(Y[ind], X_i[ind], m)
-                S["S1_conf"][i] = sobol_first_conf(Y, X_i, m, num_resamples, conf_level, Nr)
+                S["S1_conf"][i] = sobol_first_conf(Y, X_i, m, num_resamples, conf_level, y_resamples)
     except np.linalg.LinAlgError as e:
         msg = "Singular matrix detected\n"
         msg += "This may be due to the sample size ({}) being too small\n".format(
@@ -210,6 +214,23 @@ def cli_parse(parser):
         help="Number of bootstrap resamples for \
                            Sobol confidence intervals",
     )
+    parser.add_argument(
+        "-m",
+        "--method",
+        type=str,
+        required=False,
+        default="all",
+        help="Method to compute sensitivities \
+                    'delta', 'sobol' or 'all'",
+    )
+    parser.add_argument(
+        "--y_resamples",
+        type=int,
+        required=False,
+        default=None,
+        help="Number of samples to use when \
+                    resampling (bootstrap)",
+    )
     return parser
 
 
@@ -229,6 +250,8 @@ def cli_action(args):
         num_resamples=args.resamples,
         print_to_console=True,
         seed=args.seed,
+        method=args.method,
+        y_resamples=arg.y_resamples,
     )
 
 
