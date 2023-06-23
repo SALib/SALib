@@ -6,15 +6,12 @@ Python implementations of commonly used sensitivity analysis methods. Useful in 
 
 **Requirements:** [NumPy](http://www.numpy.org/), [SciPy](http://www.scipy.org/), [matplotlib](http://matplotlib.org/)
 
-**Installation:** `pip install SALib` or `python setup.py install`
+**Installation:** ``pip install SALib`` or ``pip install .`` or ``conda install SALib``
 
-**Build Status:** [![Build Status](https://travis-ci.org/SALib/SALib.svg?branch=master)](https://travis-ci.org/SALib/SALib)    **Test Coverage:** [![Coverage Status](https://img.shields.io/coveralls/SALib/SALib.svg)](https://coveralls.io/r/SALib/SALib)
+**SALib Paper:** [![status](https://joss.theoj.org/papers/10.21105/joss.00097/status.svg)](https://doi.org/10.21105/joss.00097)
 
-**Code Issues:** [![Code Issues](https://www.quantifiedcode.com/api/v1/project/ed62e70f899e4ec8af4ea6b2212d4b30/badge.svg)](https://www.quantifiedcode.com/app/project/ed62e70f899e4ec8af4ea6b2212d4b30)
-
- **SALib Paper:** [![status](http://joss.theoj.org/papers/431262803744581c1d4b6a95892d3343/status.svg)](http://joss.theoj.org/papers/431262803744581c1d4b6a95892d3343)
  
- ```
+```
 Herman, J. and Usher, W. (2017) SALib: An open-source Python library for sensitivity analysis. Journal of Open Source Software, 2(9).
 ```
 
@@ -26,13 +23,25 @@ Herman, J. and Usher, W. (2017) SALib: An open-source Python library for sensiti
 
 * Fourier Amplitude Sensitivity Test (FAST) ([Cukier et al. 1973](http://scitation.aip.org/content/aip/journal/jcp/59/8/10.1063/1.1680571), [Saltelli et al. 1999](http://amstat.tandfonline.com/doi/abs/10.1080/00401706.1999.10485594))
 
+* Random Balance Designs - Fourier Amplitude Sensitivity Test (RBD-FAST) ([Tarantola et al. 2006](https://hal.archives-ouvertes.fr/hal-01065897/file/Tarantola06RESS_HAL.pdf),
+  [Plischke 2010](https://doi.org/10.1016/j.ress.2009.11.005),
+  [Tissot et al. 2012](https://doi.org/10.1016/j.ress.2012.06.010))
+
 * Delta Moment-Independent Measure ([Borgonovo 2007](http://www.sciencedirect.com/science/article/pii/S0951832006000883), [Plischke et al. 2013](http://www.sciencedirect.com/science/article/pii/S0377221712008995))
 
 * Derivative-based Global Sensitivity Measure (DGSM) ([Sobol and Kucherenko 2009](http://www.sciencedirect.com/science/article/pii/S0378475409000354))
 
 * Fractional Factorial Sensitivity Analysis ([Saltelli et al. 2008](http://www.wiley.com/WileyCDA/WileyTitle/productCd-0470059974.html))
 
-**Contributing:** see [here](https://github.com/SALib/SALib/blob/master/CONTRIBUTING.md)
+* High-Dimensional Model Representation (HDMR)
+  ([Rabitz et al. 1999](https://doi.org/10.1016/S0010-4655(98)00152-0), [Li et al. 2010](https://doi.org/10.1021/jp9096919))
+
+* PAWN ([Pianosi and Wagener 2018](https://dx.doi.org/10.1016/j.envsoft.2018.07.019), [Pianosi and Wagener 2015](https://doi.org/10.1016/j.envsoft.2015.01.004))
+
+* Regional Sensitivity Analysis (based on [Saltelli et al. 2008](https://dx.doi.org/10.1002/9780470725184), [Pianosi et al., 2016](https://dx.doi.org/10.1016/j.envsoft.2016.02.008))
+
+
+**Contributing:** see [here](https://github.com/SALib/SALib/blob/main/CONTRIBUTING.md)
 
 ### Quick Start
 ```python
@@ -60,6 +69,7 @@ Si = sobol.analyze(problem, Y, print_to_console=False)
 ```
 
 It's also possible to specify the parameter bounds in a file with 3 columns:
+
 ```
 # name lower_bound upper_bound
 P1 0.0 1.0
@@ -68,15 +78,16 @@ P2 0.0 5.0
 ```
 
 Then the `problem` dictionary above can be created from the `read_param_file` function:
+
 ```python
 from SALib.util import read_param_file
 problem = read_param_file('/path/to/file.txt')
 # ... same as above
 ```
 
-Lots of other options are included for parameter files, as well as a command-line interface. See the [advanced readme](https://github.com/SALib/SALib/blob/master/README-advanced.md).
+Lots of other options are included for parameter files, as well as a command-line interface. See the [advanced readme](https://github.com/SALib/SALib/blob/main/README-advanced.md).
 
-Also check out the [examples](https://github.com/SALib/SALib/tree/master/examples) for a full description of options for each method.
+Also check out the [examples](https://github.com/SALib/SALib/tree/main/examples) for a full description of options for each method.
 
 ### License
-Copyright (C) 2017 Jon Herman, Will Usher, and others. Versions v0.5 and later are released under the [MIT license](https://github.com/SALib/SALib/blob/master/LICENSE.md).
+Copyright (C) 2017 Jon Herman, Will Usher, and others. Versions v0.5 and later are released under the [MIT license](https://github.com/SALib/SALib/blob/main/LICENSE.md).
