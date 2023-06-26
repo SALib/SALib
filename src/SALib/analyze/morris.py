@@ -16,6 +16,7 @@ from ..util import (
 def analyze(
     problem: Dict,
     X: np.ndarray,
+    SX: np.ndarray,
     Y: np.ndarray,
     num_resamples: int = 100,
     conf_level: float = 0.95,
@@ -65,6 +66,8 @@ def analyze(
         The problem definition
     X : numpy.array
         The NumPy matrix containing the model inputs of dtype=float
+    SX: numpy.array
+        The NumPy matrix containing the model nominal inputs of dtype=float
     Y : numpy.array
         The NumPy array containing the model outputs of dtype=float
     num_resamples : int
@@ -104,6 +107,11 @@ def analyze(
        of large models.
        Environmental Modelling & Software, 22(10):1509-1518,
        doi:10.1016/j.envsoft.2006.10.004.
+
+    3. Sin and Gearney (2009)
+       Improving the Morris Method for Sensitivity Analysis 
+       by Scaling the Elementary Effects.
+       19th European Symposium on Computer Aided Process Engineering ESCAPE19:925-930
     """
     if seed:
         np.random.seed(seed)
@@ -127,7 +135,7 @@ def analyze(
     num_trajectories = int(Y.size / (number_of_groups + 1))
     trajectory_size = int(Y.size / num_trajectories)
 
-    elementary_effects = _compute_elementary_effects(X, Y, trajectory_size, delta)
+    elementary_effects, see_trajectory = _compute_elementary_effects(X, SX, Y, trajectory_size, delta)
 
     Si = _compute_statistical_outputs(
         elementary_effects,
@@ -135,7 +143,8 @@ def analyze(
         num_resamples,
         conf_level,
         groups,
-        unique_group_names,
+        unique_group_names, 
+        see_trajectory,
     )
 
     if print_to_console:
@@ -151,6 +160,7 @@ def _compute_statistical_outputs(
     conf_level: float,
     groups: np.ndarray,
     unique_group_names: List,
+    see_trajectory: np.ndarray
 ) -> ResultDict:
     """Computes the statistical parameters related to Morris method.
 
@@ -177,21 +187,22 @@ def _compute_statistical_outputs(
 
     Si = ResultDict(
         (k, [None] * num_vars)
-        for k in ["names", "mu", "mu_star", "sigma", "mu_star_conf"]
+        for k in ["names", "mu", "mu_star", "sigma", "mu_star_conf", "standardised_EE"]
     )
 
     mu = np.average(elementary_effects, 1)
     mu_star = np.average(np.abs(elementary_effects), 1)
     sigma = np.std(elementary_effects, axis=1, ddof=1)
     mu_star_conf = _compute_mu_star_confidence(
-        elementary_effects, num_vars, num_resamples, conf_level
-    )
+        elementary_effects, num_vars, num_resamples, conf_level)
+    standardised_EE = np.average(np.abs(see_trajectory), 1)
 
     Si["names"] = unique_group_names
     Si["mu"] = _compute_grouped_sigma(mu, groups)
     Si["mu_star"] = _compute_grouped_metric(mu_star, groups)
     Si["sigma"] = _compute_grouped_sigma(sigma, groups)
     Si["mu_star_conf"] = _compute_grouped_metric(mu_star_conf, groups)
+    Si["standardised_EE"] = standardised_EE
 
     return Si
 
@@ -301,6 +312,7 @@ def _reorganize_output_matrix(
 
 def _compute_elementary_effects(
     model_inputs: np.ndarray,
+    nominal_model_inputs: np.ndarray,
     model_outputs: np.ndarray,
     trajectory_size: int,
     delta: float,
@@ -311,6 +323,10 @@ def _compute_elementary_effects(
     ----------
     model_inputs: np.ndarray
         matrix of inputs to the model under analysis.
+        x-by-r where x is the number of variables and
+        r is the number of rows (a function of x and num_trajectories)
+    nominal_model_inputs: np.ndarray
+        matrix of nominal inputs to the model under analysis.
         x-by-r where x is the number of variables and
         r is the number of rows (a function of x and num_trajectories)
     model_outputs: np.ndarray
@@ -347,9 +363,37 @@ def _compute_elementary_effects(
 
     elementary_effects = _calc_results_difference(result_increased, result_decreased)
     np.divide(elementary_effects, delta, out=elementary_effects)
+    
+    def _calculate_step_size_x(input_matrix):
+        """
+        This function calculates the step of the dx at nominal values
+        """
+        max_y = np.max(input_matrix, axis=1)
+        min_y = np.min(input_matrix, axis=1)
 
-    return elementary_effects
+        delta = max_y - min_y
+        return delta
+    
+    see_dy = _calc_results_difference(result_increased, result_decreased)
 
+    input_matrix_nominal = _reshape_model_inputs(
+    nominal_model_inputs, num_trajectories, trajectory_size
+    )
+
+    dx_trajectory = _calculate_step_size_x(input_matrix_nominal)
+    
+    see_dy_dx = np.divide(see_dy, dx_trajectory.T)
+
+    sigma_x_pertrajectory = np.std(input_matrix_nominal, axis=1)
+    sigma_y_pertrajectory = np.std(output_matrix, axis=1)
+
+    divisor = sigma_y_pertrajectory
+
+    adjustment_trajectory = sigma_x_pertrajectory / divisor[:, np.newaxis]
+
+    scaled_elementary_effect = see_dy_dx*adjustment_trajectory.T
+
+    return elementary_effects, scaled_elementary_effect
 
 def _calc_results_difference(
     result_up: np.ndarray, result_lo: np.ndarray
@@ -566,10 +610,14 @@ def cli_action(args):
     X = np.loadtxt(args.model_input_file, delimiter=args.delimiter, ndmin=2)
     if len(X.shape) == 1:
         X = X.reshape((len(X), 1))
+    NOMX = np.loadtxt(args.model_input_file, delimiter=args.delimiter, ndmin=2)
+    if len(NOMX.shape) == 1:
+        NOMX = NOMX.reshape((len(NOMX), 1))
 
     analyze(
         problem,
         X,
+        NOMX,
         Y,
         num_resamples=args.resamples,
         print_to_console=True,
