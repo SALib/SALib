@@ -187,7 +187,7 @@ def _compute_statistical_outputs(
 
     Si = ResultDict(
         (k, [None] * num_vars)
-        for k in ["names", "mu", "mu_star", "sigma", "mu_star_conf", "standardised_EE"]
+        for k in ["names", "mu", "mu_star", "sigma", "mu_star_conf", "scaled_EE"]
     )
 
     mu = np.average(elementary_effects, 1)
@@ -195,14 +195,14 @@ def _compute_statistical_outputs(
     sigma = np.std(elementary_effects, axis=1, ddof=1)
     mu_star_conf = _compute_mu_star_confidence(
         elementary_effects, num_vars, num_resamples, conf_level)
-    standardised_EE = np.average(np.abs(see_trajectory), 1)
+    scaled_EE = np.average(np.abs(see_trajectory), 1)
 
     Si["names"] = unique_group_names
     Si["mu"] = _compute_grouped_sigma(mu, groups)
     Si["mu_star"] = _compute_grouped_metric(mu_star, groups)
     Si["sigma"] = _compute_grouped_sigma(sigma, groups)
     Si["mu_star_conf"] = _compute_grouped_metric(mu_star_conf, groups)
-    Si["standardised_EE"] = standardised_EE
+    Si["scaled_EE"] = scaled_EE
 
     return Si
 
