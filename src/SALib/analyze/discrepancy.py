@@ -39,6 +39,22 @@ def analyze(
     Compatible with:
         all samplers
 
+    Based on 2D sub projections of ``[Xi,Y]``, the discrepancy of each sample
+    is calculated which gives a value for all ``Xi``. This information is used
+    as a sensitivity indice.
+
+    This measure is very fast and is visually explainable. Considering two
+    variables ``X1`` and ``X2``, ``X1`` is more influential than ``X2`` when
+    the scatterplot of ``X1`` against ``Y`` displays a more discernible shape
+    than the scatterplot of ``X2`` against ``Y``.
+
+    For the method to work properly, the input parameter space need to be
+    uniformely covered as the quality of the measure depends on the value of
+    the discrepancy. Taking a 2D sub projection, if the distribution of sample
+    along ``Xi`` is not uniform, it will have an impact on the discrepancy,
+    the value will increase, i.e. the importance of this parameter would be
+    inflated.
+
     References
     ----------
     1. A. Puy, P.T. Roy and A. Saltelli. 2023. Discrepancy measures for
