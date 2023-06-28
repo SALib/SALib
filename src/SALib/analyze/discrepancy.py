@@ -4,7 +4,7 @@ import numpy as np
 from scipy.stats import qmc
 
 from SALib.analyze import common_args
-from SALib.util import read_param_file, ResultDict
+from SALib.util import read_param_file, ResultDict, _check_groups
 
 
 def analyze(
@@ -71,6 +71,7 @@ def analyze(
 
     """
     D = problem["num_vars"]
+    groups = _check_groups(problem)
     Y = Y.reshape(-1, 1)
 
     bounds = np.asarray(problem["bounds"]).T
@@ -84,6 +85,17 @@ def analyze(
     ]
 
     s_discrepancy = s_discrepancy / np.sum(s_discrepancy)
+
+    if groups:
+        groups = np.array(groups)
+        unique_grps = [*dict.fromkeys(groups)]
+        tmp = np.full((len(unique_grps), 1), np.nan)
+
+        # Take the mean of effects from parameters that are grouped together
+        for grp_id, grp in enumerate(unique_grps):
+            tmp[grp_id, :] = np.mean(s_discrepancy[groups == grp], axis=0)
+
+        s_discrepancy = tmp.flatten()
 
     keys = ("s_discrepancy",)
     Si = ResultDict((k, np.zeros(D)) for k in keys)
