@@ -258,15 +258,15 @@ def _check_args(
     y_row = Y.shape[0]
 
     # If parameter names are not defined
-    if not "names" in problem:
+    if "names" not in problem:
         problem["names"] = [f"x_{i}" for i in range(d)]
 
     # If parameter bounds are not defined
-    if not "bounds" in problem:
+    if "bounds" not in problem:
         problem["bounds"] = [[X[:, i].min(), X[:, i].max()] for i in range(d)]
 
     # If parameter num_vars are not defined
-    if not "num_vars" in problem:
+    if "num_vars" not in problem:
         problem["num_vars"] = d
 
     # If the length of 'num_vars' in ProblemSpec != Columns in X matrix
