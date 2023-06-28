@@ -16,6 +16,7 @@ from ..util import read_param_file, ResultDict
 
 __all__ = ["analyze", "cli_parse", "cli_action"]
 
+
 def analyze(
     problem: Dict,
     X: np.ndarray,
@@ -45,8 +46,8 @@ def analyze(
 
     .. math::
         \\tilde{y} \\approx \\widehat{y} &= f_0 + \\sum_{i=1}^{d} f_i(x_i) + 
-              \\sum_{i=1}^{d-1} \\sum{j=i+1}^{d} f_{ij} (x_{ij}) + 
-              \\sum_{i=1}^{d-2} \\sum{j=i+1}^{d-1} 
+              \\sum_{i=1}^{d-1} \\sum_{j=i+1}^{d} f_{ij} (x_{ij}) + 
+              \\sum_{i=1}^{d-2} \\sum_{j=i+1}^{d-1} 
               \\sum_{j+1}^{d} f_{ijk} (x_{ijk}) + \\epsilon \\
 
         \\widehat{y} &= f_0 + \\sum_{u \\subseteq \\{1, 2, ..., d \\}}^{2^n - 1}
@@ -213,7 +214,14 @@ def analyze(
     )
     # Instantiate Core Parameters
     hdmr, Si = _core_params(
-        problem, *X.shape, np.mean(Y), poly_order, max_order, bootstrap, subset, extended_base
+        problem,
+        *X.shape,
+        np.mean(Y),
+        poly_order,
+        max_order,
+        bootstrap,
+        subset,
+        extended_base,
     )
     # Calculate HDMR Basis Matrix
     b_m = _basis_matrix(X, hdmr)
@@ -306,9 +314,7 @@ def _check_args(
     # Important next check for max_order - as max_order relates to d
     if (d == 2) and (max_order > 2):
         max_order = 2
-        warnings.warn(
-            "max_order is set to 2 due to lack of third input factor"
-        )
+        warnings.warn("max_order is set to 2 due to lack of third input factor")
 
     if poly_order not in np.arange(1, 11):
         raise ValueError(
@@ -319,12 +325,10 @@ def _check_args(
         raise ValueError(
             "'bootstrap' key of options should be an integer between 1 to 100."
         )
-    
+
     if (bootstrap == 1) and (subset != y_row):
         subset = y_row
-        warnings.warn(
-            f"subset is set to {y_row} due to no bootstrap"
-        )
+        warnings.warn(f"subset is set to {y_row} due to no bootstrap")
 
     if subset is None:
         subset = y_row // 2
@@ -335,22 +339,16 @@ def _check_args(
         )
 
     if alpha < 0.5 or alpha > 1.0:
-        raise ValueError(
-            "'alpha' key of options should be a float between 0.5 to 1.0"
-        )
+        raise ValueError("'alpha' key of options should be a float between 0.5 to 1.0")
 
     if extended_base:
         max_iter = None
     else:
         if max_iter not in np.arange(100, 1000):
-            raise ValueError(
-                "'max_iter' key of options should be between 100 and 1000"
-            )
+            raise ValueError("'max_iter' key of options should be between 100 and 1000")
 
     if l2_penalty < 0.0 or l2_penalty > 10:
-        raise ValueError(
-            "'l2_penalty' key of options should be in between 0 and 10"
-        )
+        raise ValueError("'l2_penalty' key of options should be in between 0 and 10")
 
     return Y, problem, subset, max_iter
 
@@ -366,9 +364,9 @@ def _core_params(
     subset: int,
     extended_base: bool,
 ) -> Tuple[namedtuple, ResultDict]:
-    """This function establishes the core parameters of an HDMR 
-    (High Dimensional Model Representation) expansion and returns 
-    them in a namedtuple an ResultDict datatype. These parameters 
+    """This function establishes the core parameters of an HDMR
+    (High Dimensional Model Representation) expansion and returns
+    them in a namedtuple an ResultDict datatype. These parameters
     are used across all functions and procedures related to HDMR.
 
     Parameters
@@ -532,7 +530,7 @@ def _core_params(
             "beta",
             "gamma",
             "f0",
-        ]
+        ],
     )
 
     n_comp_func = cp["n_comp_func"]
@@ -557,12 +555,14 @@ def _core_params(
         n_coeff[0] * n_comp_func[0]
         + n_coeff[1] * n_comp_func[1]
         + n_coeff[2] * n_comp_func[2],
-        np.zeros((
-            n_coeff[0] * n_comp_func[0]
-            + n_coeff[1] * n_comp_func[1]
-            + n_coeff[2] * n_comp_func[2],
-            bootstrap
-        )),
+        np.zeros(
+            (
+                n_coeff[0] * n_comp_func[0]
+                + n_coeff[1] * n_comp_func[1]
+                + n_coeff[2] * n_comp_func[2],
+                bootstrap,
+            )
+        ),
         idx,
         np.array(list(comb(range(d), 2))),
         np.array(list(comb(range(d), 3))),  # Returns empty list when d < 3
@@ -585,9 +585,12 @@ def _core_params(
         "S_sum",
         "S_sum_conf",
     )
-    Si = ResultDict((k, np.zeros((hdmr.nc_t, bootstrap))) 
-                    if k in ('S', 'Sa', 'Sb', 'Signf') 
-                    else (k, np.zeros(hdmr.nc_t)) for k in keys)
+    Si = ResultDict(
+        (k, np.zeros((hdmr.nc_t, bootstrap)))
+        if k in ("S", "Sa", "Sb", "Signf")
+        else (k, np.zeros(hdmr.nc_t))
+        for k in keys
+    )
     Si["Term"] = problem["names"]
     Si["ST"] = np.full(hdmr.nc_t, np.nan)
     Si["ST_conf"] = np.full(hdmr.nc_t, np.nan)
@@ -620,14 +623,13 @@ def _core_params(
                 ]
             )
 
-
     return (hdmr, Si)
 
 
 def _basis_matrix(X, hdmr):
-    """The basis matrix represents the foundation of the component functions. 
+    """The basis matrix represents the foundation of the component functions.
     It is constructed using orthonormal polynomials for each input variable,
-    ensuring that it captures the data optimally. The component functions are 
+    ensuring that it captures the data optimally. The component functions are
     formed by linearly combining the columns of this matrix.
 
     Parameters
@@ -732,7 +734,7 @@ def _basis_matrix(X, hdmr):
 
 
 def _orth_poly_coeff(X, hdmr):
-    """Calculates the coefficients of orthonormal polynomials based on a given 
+    """Calculates the coefficients of orthonormal polynomials based on a given
     input matrix `X`
 
     Parameters
@@ -802,10 +804,10 @@ def _prod(*args):
 
 
 def _fanova(b_m, hdmr, Si, Y, bootstrap, max_iter, l2_penalty, alpha):
-    """The functional ANOVA decomposition offers two main approaches: 
-    the extended base approach and the non-extended base approach. These 
-    approaches follow the guidelines presented in [1] and [2]. The 
-    extended base approach provides additional information to ensure 
+    """The functional ANOVA decomposition offers two main approaches:
+    the extended base approach and the non-extended base approach. These
+    approaches follow the guidelines presented in [1] and [2]. The
+    extended base approach provides additional information to ensure
     hierarchical orthogonality.
 
     Parameters
@@ -836,12 +838,12 @@ def _fanova(b_m, hdmr, Si, Y, bootstrap, max_iter, l2_penalty, alpha):
 
     Notes
     -----
-    .. [1] Li, G., Rabitz, H., Yelvington, P., Oluwole, O., Bacon, F., Kolb, C., 
-        and Schoendorf, J. 2010. Global Sensitivity Analysis for Systems with 
-        Independent and/or Correlated Inputs. The Journal of Physical Chemistry A, 
+    .. [1] Li, G., Rabitz, H., Yelvington, P., Oluwole, O., Bacon, F., Kolb, C.,
+        and Schoendorf, J. 2010. Global Sensitivity Analysis for Systems with
+        Independent and/or Correlated Inputs. The Journal of Physical Chemistry A,
         114(19), p.6022-6032.
-    .. [2] Li, G., Rabitz, H. General formulation of HDMR component functions with 
-        independent and correlated variables. J Math Chem 50, 99–130 (2012). 
+    .. [2] Li, G., Rabitz, H. General formulation of HDMR component functions with
+        independent and correlated variables. J Math Chem 50, 99–130 (2012).
         https://doi.org/10.1007/s10910-011-9898-0
     """
     for t in range(bootstrap):
@@ -852,7 +854,9 @@ def _fanova(b_m, hdmr, Si, Y, bootstrap, max_iter, l2_penalty, alpha):
 
         if hdmr.ext_base:
             cost = _cost_matrix(b_m[hdmr.idx[:, t], :], hdmr)
-            hdmr.x[:, t] = _d_morph(b_m[hdmr.idx[:, t], :], cost, Y_idx, bootstrap, hdmr)
+            hdmr.x[:, t] = _d_morph(
+                b_m[hdmr.idx[:, t], :], cost, Y_idx, bootstrap, hdmr
+            )
         else:
             Y_res = _first_order(
                 b_m[hdmr.idx[:, t], : hdmr.tnt1], Y_idx, max_iter, l2_penalty, hdmr, t
@@ -864,11 +868,14 @@ def _fanova(b_m, hdmr, Si, Y, bootstrap, max_iter, l2_penalty, alpha):
                     max_iter,
                     l2_penalty,
                     hdmr,
-                    t
+                    t,
                 )
             if hdmr.max_order == 3:
                 _third_order(
-                    b_m[hdmr.idx[:, t], hdmr.tnt1 + hdmr.tnt2 :], Y_res, l2_penalty, hdmr
+                    b_m[hdmr.idx[:, t], hdmr.tnt1 + hdmr.tnt2 :],
+                    Y_res,
+                    l2_penalty,
+                    hdmr,
                 )
 
         # Calculate component functions
@@ -882,8 +889,8 @@ def _fanova(b_m, hdmr, Si, Y, bootstrap, max_iter, l2_penalty, alpha):
 
 
 def _cost_matrix(b_m, hdmr):
-    """The cost matrix stores information about hierarchical orthogonality. 
-    It is structured in a way that ensures orthogonality between component 
+    """The cost matrix stores information about hierarchical orthogonality.
+    It is structured in a way that ensures orthogonality between component
     functions that are hierarchically related.
 
     Parameters
@@ -1047,9 +1054,13 @@ def _first_order(b_m1, Y_idx, max_iter, l2_penalty, hdmr, t):
             # Solution
             hdmr.x[i * n1 : n1 * (i + 1), t] = solve(a, b)
             # Component functions
-            Y_i[:, i] = b_m1[:, i * n1 : n1 * (i + 1)] @ hdmr.x[i * n1 : n1 * (i + 1), t]
+            Y_i[:, i] = (
+                b_m1[:, i * n1 : n1 * (i + 1)] @ hdmr.x[i * n1 : n1 * (i + 1), t]
+            )
         except LinAlgError:
-            raise LinAlgError("First Order: Least-square regression did not converge. Try increasing L2 penalty term")
+            raise LinAlgError(
+                "First Order: Least-square regression did not converge. Try increasing L2 penalty term"
+            )
 
     # Backfitting method
     var_old = np.square(hdmr.x[: hdmr.tnt1, t])
@@ -1068,7 +1079,9 @@ def _first_order(b_m1, Y_idx, max_iter, l2_penalty, hdmr, t):
             # Solution
             hdmr.x[i * n1 : n1 * (i + 1), t] = solve(a, b)
             # Component functions
-            Y_i[:, i] = b_m1[:, i * n1 : n1 * (i + 1)] @ hdmr.x[i * n1 : n1 * (i + 1), t]
+            Y_i[:, i] = (
+                b_m1[:, i * n1 : n1 * (i + 1)] @ hdmr.x[i * n1 : n1 * (i + 1), t]
+            )
 
         var_max = np.absolute(var_old - np.square(hdmr.x[: hdmr.tnt1, t])).max()
         iter += 1
@@ -1136,7 +1149,9 @@ def _second_order(b_m2, Y_res, max_iter, l2_penalty, hdmr, t):
                 @ hdmr.x[hdmr.tnt1 + i * n2 : hdmr.tnt1 + n2 * (i + 1), t]
             )
         except LinAlgError:
-            raise LinAlgError("Second Order: Least-square regression did not converge. Try increasing L2 penalty term")
+            raise LinAlgError(
+                "Second Order: Least-square regression did not converge. Try increasing L2 penalty term"
+            )
 
     var_old = np.square(hdmr.x[hdmr.tnt1 : hdmr.tnt1 + hdmr.tnt2, t])
     # Backfitting method
@@ -1192,7 +1207,7 @@ def _third_order(b_m3, Y_res, l2_penalty, hdmr, t):
 
     Notes
     -----
-    Backfitting algorithm is not used here because it may be 
+    Backfitting algorithm is not used here because it may be
     unstable when residual model, Y_res, is close to arrays of zero.
     """
     # To increase readibility
@@ -1211,11 +1226,12 @@ def _third_order(b_m3, Y_res, l2_penalty, hdmr, t):
             b = (b_m3[:, i * n3 : n3 * (i + 1)].T @ Y_res) / hdmr.subset
             # Solution
             hdmr.x[
-                hdmr.tnt1 + hdmr.tnt2 + i * n3 : hdmr.tnt1 + hdmr.tnt2 + n3 * (i + 1),
-                t
+                hdmr.tnt1 + hdmr.tnt2 + i * n3 : hdmr.tnt1 + hdmr.tnt2 + n3 * (i + 1), t
             ] = solve(a, b)
         except LinAlgError:
-            raise LinAlgError("Third Order: Least-square regression did not converge. Try increasing L2 penalty term")
+            raise LinAlgError(
+                "Third Order: Least-square regression did not converge. Try increasing L2 penalty term"
+            )
 
 
 def _comp_func(b_m, hdmr, t=None, emulator=None):
@@ -1338,8 +1354,8 @@ def _ancova(Y_idx, Y_e, hdmr):
 
 
 def _f_test(Y_idx, Y_e, alpha, hdmr):
-    """Finds component functions that make significant contribution to the 
-    model output. This statistical analysis is done by F-test which uses 
+    """Finds component functions that make significant contribution to the
+    model output. This statistical analysis is done by F-test which uses
     F-distribution.
 
     Parameters
@@ -1373,7 +1389,7 @@ def _f_test(Y_idx, Y_e, alpha, hdmr):
             p1 = hdmr.nt2  # 2nd order
         else:
             p1 = hdmr.nt3  # 3rd order
-        # Sum of squared residuals of bigger model 
+        # Sum of squared residuals of bigger model
         SSR1 = (Y_res**2).sum()
         # Now calculate the F_stat (F_stat > 0 -> SSR1 < SSR0 )
         F_stat = ((SSR0 - SSR1) / p1) / (SSR1 / (hdmr.subset - p1))
@@ -1389,23 +1405,23 @@ def _f_test(Y_idx, Y_e, alpha, hdmr):
 
 def _finalize(hdmr, Si, alpha, return_emulator):
     """Final processing of sensivity analysis. Calculates confidence interval
-    using statistical analysis. 
-    
+    using statistical analysis.
+
     Parameters
     ----------
     hdmr : namedtuple
         Core parameters of hdmr expansion
     Si : ResultDict
-        Sensitivity Indices 
+        Sensitivity Indices
     alpha : float
         Significance level
     return_emulator : bool
         Whether to attach emulator to the Si ResultDict
-    
+
     Returns
     -------
     Si : ResultDict
-        Sensitivity Indices 
+        Sensitivity Indices
     """
 
     # Z score
@@ -1479,9 +1495,9 @@ def to_df(self):
 def emulate(self, X):
     """Emulates model output with new input data.
 
-    Constructs orthonormal polynomials with new input matrix, X, 
+    Constructs orthonormal polynomials with new input matrix, X,
     and multiplies it with solution array, hdmr.x
-    
+
     Compares emulated results with observed vector, Y.
 
     Returns
@@ -1570,7 +1586,7 @@ def cli_parse(parser):
         type=str,
         required=True,
         default=None,
-        help="Model input file"
+        help="Model input file",
     )
     parser.add_argument(
         "-mor",
@@ -1578,7 +1594,7 @@ def cli_parse(parser):
         type=int,
         required=True,
         default=2,
-        help="Order of HDMR expansion 1-3"
+        help="Order of HDMR expansion 1-3",
     )
     parser.add_argument(
         "-por",
@@ -1586,7 +1602,7 @@ def cli_parse(parser):
         type=int,
         required=True,
         default=2,
-        help="Maximum polynomial order 1-10"
+        help="Maximum polynomial order 1-10",
     )
     parser.add_argument(
         "-K",
@@ -1594,7 +1610,7 @@ def cli_parse(parser):
         type=int,
         required=False,
         default=20,
-        help="Number of bootstrap iteration 1-100"
+        help="Number of bootstrap iteration 1-100",
     )
     parser.add_argument(
         "-R",
@@ -1602,7 +1618,7 @@ def cli_parse(parser):
         type=int,
         required=False,
         default=None,
-        help="Number of bootstrap samples 300-N"
+        help="Number of bootstrap samples 300-N",
     )
     parser.add_argument(
         "-mit",
@@ -1610,15 +1626,15 @@ def cli_parse(parser):
         type=int,
         required=False,
         default=100,
-        help="Maximum iteration for backfitting method 1-1000"
+        help="Maximum iteration for backfitting method 1-1000",
     )
     parser.add_argument(
-        "-l2", 
+        "-l2",
         "--l2-penalty",
-        type=float, 
-        required=False, 
-        default=0.01, 
-        help="Regularization term"
+        type=float,
+        required=False,
+        default=0.01,
+        help="Regularization term",
     )
     parser.add_argument(
         "-a",
@@ -1626,31 +1642,31 @@ def cli_parse(parser):
         type=float,
         required=False,
         default=0.95,
-        help="Confidence interval for F-Test"
+        help="Confidence interval for F-Test",
     )
     parser.add_argument(
         "-ext",
         "--extended-base",
-        type=lambda x: (str(x).lower() == 'true'),
+        type=lambda x: (str(x).lower() == "true"),
         required=True,
         default=True,
-        help="Whether to use extended base matrix"
+        help="Whether to use extended base matrix",
     )
     parser.add_argument(
         "-print",
         "--print-to-console",
-        type=lambda x: (str(x).lower() == 'true'),
+        type=lambda x: (str(x).lower() == "true"),
         required=False,
         default=False,
-        help="Whether to print out result to the console"
+        help="Whether to print out result to the console",
     )
     parser.add_argument(
         "-emul",
         "--return-emulator",
-        type=lambda x: (str(x).lower() == 'true'),
+        type=lambda x: (str(x).lower() == "true"),
         required=False,
         default=False,
-        help="Whether to attach emulate() method to the ResultDict"
+        help="Whether to attach emulate() method to the ResultDict",
     )
     return parser
 
@@ -1672,7 +1688,7 @@ def cli_action(args):
         "alpha": args.alpha,
         "extended_base": args.extended_base,
         "print_to_console": args.print_to_console,
-        "return_emulator": args.return_emulator
+        "return_emulator": args.return_emulator,
     }
 
     if len(X.shape) == 1:
