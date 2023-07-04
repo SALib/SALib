@@ -53,9 +53,11 @@ def analyze(
         The confidence interval level (default 0.95)
     print_to_console : bool
         Print results directly to console (default False)
-    y_resamples : int
+    y_resamples : int, optional
+
         Number of samples to use when resampling (bootstrap) (default None)
-    method : str
+    method : {"all", "delta", "sobol"}, optional
+
         Whether to compute "delta", "sobol" or both ("all") indices (default "all")
 
 
@@ -99,7 +101,8 @@ def analyze(
                 S["delta"][i], S["delta_conf"][i] = bias_reduced_delta(
                     Y, Ygrid, X_i, m, num_resamples, conf_level, y_resamples
                 )
-            if method in ["all","sobol"]:
+            if method in ["all", "sobol"]:
+
                 ind = np.random.randint(Y.size, size=y_resamples)
                 S["S1"][i] = sobol_first(Y[ind], X_i[ind], m)
                 S["S1_conf"][i] = sobol_first_conf(Y, X_i, m, num_resamples, conf_level, y_resamples)
@@ -144,16 +147,16 @@ def calc_delta(Y, Ygrid, X, m):
     return d_hat
 
 
-def bias_reduced_delta(Y, Ygrid, X, m, num_resamples, conf_level, Nr):
+def bias_reduced_delta(Y, Ygrid, X, m, num_resamples, conf_level, y_resamples):
+
     """Plischke et al. 2013 bias reduction technique (eqn 30)"""
     d = np.empty(num_resamples)
 
     N = len(Y)
-    if Nr is None: 
-        Nr = N
-    ind = np.random.randint(N, size=Nr)
+    ind = np.random.randint(N, size= y_resamples)
     d_hat = calc_delta(Y[ind], Ygrid, X[ind], m)
-    r = np.random.randint(N, size=(num_resamples, Nr))
+    r = np.random.randint(N, size=(num_resamples, y_resamples))
+
     for i in range(num_resamples):
         r_i = r[i, :]
         d[i] = calc_delta(Y[r_i], Ygrid, X[r_i], m)
@@ -182,13 +185,13 @@ def sobol_first(Y, X, m):
     return Vi / np.var(Y)
 
 
-def sobol_first_conf(Y, X, m, num_resamples, conf_level, Nr):
+def sobol_first_conf(Y, X, m, num_resamples, conf_level, y_resamples):
+
     s = np.zeros(num_resamples)
 
     N = len(Y)
-    if Nr is None: 
-        Nr = N
-    r = np.random.randint(N, size=(num_resamples, Nr))
+    r = np.random.randint(N, size=(num_resamples, y_resamples))
+
     for i in range(num_resamples):
         r_i = r[i, :]
         s[i] = sobol_first(Y[r_i], X[r_i], m)
