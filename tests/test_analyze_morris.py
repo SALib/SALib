@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from pytest import raises
+from pytest import raises, fixture
 
 import numpy as np
 from numpy.testing import assert_allclose, assert_equal
@@ -123,6 +123,13 @@ def test_analysis_of_morris_results():
     assert_equal(
         Si["names"], desired_names, err_msg="The values for names are incorrect"
     )
+    desired_scaled_ee = [0.968042, 0.212761]
+    assert_allclose(
+        Si["mu_star_scaled"],
+        desired_scaled_ee,
+        rtol=1e-2,
+        err_msg="The values for scaled_ee are incorrect",
+    )
 
 
 def test_conf_level_within_zero_one_bounds():
@@ -137,13 +144,9 @@ def test_conf_level_within_zero_one_bounds():
         _compute_mu_star_confidence(ee, num_vars, num_resamples, conf_level_too_high)
 
 
-def test_compute_elementary_effects():
-    """
-    Inputs for elementary effects taken from Exercise 5 from Saltelli (2008).
-    See page 140-145.
-    `model_inputs` are from trajectory t_1 from table 3.10 on page 141.
-    `desired` is equivalent to column t_1 in table 3.12 on page 145.
-    """
+@fixture()
+def morris_data() -> tuple:
+    """Model inputs and outputs for calculating elementary effects"""
     model_inputs = np.array(
         [
             [
@@ -442,6 +445,19 @@ def test_compute_elementary_effects():
         ],
         dtype=float,
     )
+
+    return model_inputs, model_outputs
+
+
+def test_compute_elementary_effects(morris_data):
+    """
+    Inputs for elementary effects taken from Exercise 5 from Saltelli (2008).
+    See page 140-145.
+    `model_inputs` are from trajectory t_1 from table 3.10 on page 141.
+    `desired` is equivalent to column t_1 in table 3.12 on page 145.
+    """
+    model_inputs, model_outputs = morris_data
+
     delta = 2.0 / 3
 
     actual = _compute_elementary_effects(model_inputs, model_outputs, 16, delta)
@@ -466,6 +482,43 @@ def test_compute_elementary_effects():
         dtype=float,
     )
     assert_allclose(actual, desired, atol=1e-1)
+
+
+def test_compute_elementary_effects_scaled(morris_data):
+    """
+    Inputs for elementary effects taken from Exercise 5 from Saltelli (2008).
+    See page 140-145.
+    `model_inputs` are from trajectory t_1 from table 3.10 on page 141.
+    `desired` is equivalent to column t_1 in table 3.12 on page 145.
+    """
+    model_inputs, model_outputs = morris_data
+
+    delta = 2.0 / 3
+
+    actual = _compute_elementary_effects(
+        model_inputs, model_outputs, 16, delta, scaling=True
+    )
+    desired = np.array(
+        [
+            [-0.181634813],
+            [0.345250299],
+            [0.071454753],
+            [0.352948837],
+            [0.137866888],
+            [0.076670871],
+            [-0.152252439],
+            [-0.285251912],
+            [-0.080726583],
+            [0.240017431],
+            [0.419563468],
+            [0.024244438],
+            [0.12731585],
+            [0.101289958],
+            [0.63202974],
+        ],
+        dtype=float,
+    )
+    assert_allclose(actual, desired, atol=1e-2)
 
 
 def test_compute_grouped_elementary_effects():

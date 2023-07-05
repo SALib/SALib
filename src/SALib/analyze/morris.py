@@ -32,7 +32,9 @@ def analyze(
 
     - ``mu`` metric indicates the mean of the distribution
     - ``mu_star`` metric indicates the mean of the distribution of absolute
-        values
+      values
+    - ``mu_star_scaled`` metric indices the mean of the distribution of absolute
+      values scaled by the ratio of standard deviation of inputs and outputs [3]
     - ``sigma`` is the standard deviation of the distribution
 
     Notes
@@ -51,6 +53,10 @@ def analyze(
     Compatible with:
         `morris` : :func:`SALib.sample.morris.sample`
 
+    If ``SX`` is not provided, ``X`` will be used to calculate scaled elementary
+    effects. Use ``SX`` if the actual parameter ranges differ from those
+    provided by ``SALib.Morris.sample``, for example if the values undergo
+    post-processing before being used to calculate ``Y``.
 
     Examples
     --------
@@ -69,12 +75,8 @@ def analyze(
     Y : numpy.array
         The NumPy array containing the model outputs of dtype=float
     SX: numpy.array
-        The NumPy matrix containing the model nominal inputs of dtype=float
-    Notes
-    -----
-        If SX is not provided, X will be used to calculate the scaled elementary effects. 
-        Use SX if the actual parameter ranges differ from those provided by ``SALib.Morris.sample``, for example 
-        if the values undergo post-processing before being used to calculate Y.
+        The NumPy matrix containing the model inputs of dtype=float used for
+        calculating scaled elementary effects
     num_resamples : int
         The number of resamples used to compute the confidence
         intervals (default 1000)
@@ -95,6 +97,8 @@ def analyze(
 
         - `mu` - the mean elementary effect
         - `mu_star` - the absolute of the mean elementary effect
+        - `mu_star_scaled` - the absolute of the mean elementary effect scaled
+          by the ratio of standard deviation of inputs and outputs
         - `sigma` - the standard deviation of the elementary effect
         - `mu_star_conf` - the bootstrapped confidence interval
         - `names` - the names of the parameters
@@ -114,7 +118,7 @@ def analyze(
        doi:10.1016/j.envsoft.2006.10.004.
 
     3. Sin and Gearney (2009)
-       Improving the Morris Method for Sensitivity Analysis 
+       Improving the Morris Method for Sensitivity Analysis
        by Scaling the Elementary Effects.
        19th European Symposium on Computer Aided Process Engineering ESCAPE19:925-930
     """
@@ -145,9 +149,18 @@ def analyze(
     trajectory_size = int(Y.size / num_trajectories)
 
     delta = _compute_delta(num_levels)
-    elementary_effects = _compute_elementary_effects(X, Y, trajectory_size, delta, scaling=False)
-    
-    scaled_elementary_effects = _compute_elementary_effects(SX, Y, trajectory_size, delta, scaling=True)
+    elementary_effects = _compute_elementary_effects(
+        X, Y, trajectory_size, delta, scaling=False
+    )
+
+    if SX is None:
+        scaled_elementary_effects = _compute_elementary_effects(
+            X, Y, trajectory_size, delta, scaling=True
+        )
+    else:
+        scaled_elementary_effects = _compute_elementary_effects(
+            SX, Y, trajectory_size, delta, scaling=True
+        )
 
     Si = _compute_statistical_outputs(
         elementary_effects,
@@ -155,8 +168,8 @@ def analyze(
         num_resamples,
         conf_level,
         groups,
-        unique_group_names, 
-        scaled_elementary_effects
+        unique_group_names,
+        scaled_elementary_effects,
     )
 
     if print_to_console:
@@ -172,7 +185,7 @@ def _compute_statistical_outputs(
     conf_level: float,
     groups: np.ndarray,
     unique_group_names: List,
-    scaled_elementary_effects: np.ndarray
+    scaled_elementary_effects: np.ndarray,
 ) -> ResultDict:
     """Computes the statistical parameters related to Morris method.
 
@@ -191,7 +204,8 @@ def _compute_statistical_outputs(
     unique_group_names: List
         Names of the groups
      scaled_elementary_effects: np.ndarray
-       the mean of the absolute elementary effect scaled by the ratio of the standard deviation of the input over the output
+       the mean of the absolute elementary effect scaled by the ratio of the
+       standard deviation of the input over the output
 
     Returns
     -------
@@ -199,24 +213,28 @@ def _compute_statistical_outputs(
         Morris statistical parameters.
     """
     Si = ResultDict(
-    (k, [None] * num_vars)
-    for k in ["names", "mu", "mu_star", "sigma", "mu_star_conf", "scaled_EE"]
+        (k, [None] * num_vars)
+        for k in ["names", "mu", "mu_star", "sigma", "mu_star_conf", "scaled_EE"]
     )
-
 
     mu = np.average(elementary_effects, 1)
     mu_star = np.average(np.abs(elementary_effects), 1)
     sigma = np.std(elementary_effects, axis=1, ddof=1)
     mu_star_conf = _compute_mu_star_confidence(
-        elementary_effects, num_vars, num_resamples, conf_level)
+        elementary_effects, num_vars, num_resamples, conf_level
+    )
     scaled_EE = np.average(np.abs(scaled_elementary_effects), 1)
-    
+
+    Si = ResultDict(
+        (k, [None] * num_vars)
+        for k in ["names", "mu", "mu_star", "sigma", "mu_star_conf", "scaled_EE"]
+    )
     Si["names"] = unique_group_names
     Si["mu"] = _compute_grouped_sigma(mu, groups)
     Si["mu_star"] = _compute_grouped_metric(mu_star, groups)
     Si["sigma"] = _compute_grouped_sigma(sigma, groups)
     Si["mu_star_conf"] = _compute_grouped_metric(mu_star_conf, groups)
-    Si["scaled_EE"] = scaled_EE
+    Si["mu_star_scaled"] = scaled_EE
 
     return Si
 
@@ -305,9 +323,10 @@ def _reorganize_output_matrix(
     increase: bool
         Direction to consider (values that increased or decreased). "Increase"
         is the default value.
+
     Returns
     -------
-
+    numpy.ndarray
     """
     if increase:
         pad_up = (1, 0)
@@ -329,7 +348,7 @@ def _compute_elementary_effects(
     model_outputs: np.ndarray,
     trajectory_size: int,
     delta: float,
-    scaling = False,
+    scaling=False,
 ) -> np.ndarray:
     """Computes the Morris elementary effects.
 
@@ -346,12 +365,19 @@ def _compute_elementary_effects(
     delta: float
         Scaling factor computed from `num_levels`
     scaling: bool
-        True if the elemetary effects should be in scaled based on Sin and Gearney (2009)
+        True if the elementary effects should be in scaled as in [1]
 
     Returns
     ---------
     elementary_effects : np.array
         Elementary effects for each parameter
+
+    References
+    ----------
+    1. Sin and Gearney (2009)
+       Improving the Morris Method for Sensitivity Analysis
+       by Scaling the Elementary Effects.
+       19th European Symposium on Computer Aided Process Engineering ESCAPE19:925-930
     """
     num_trajectories = _calculate_number_trajectories(model_inputs, trajectory_size)
 
@@ -373,23 +399,35 @@ def _compute_elementary_effects(
         output_matrix, value_increased, value_decreased, increase=False
     )
 
-    elementary_effects = _calc_results_difference(result_increased, result_decreased)
-    np.divide(elementary_effects, delta, out=elementary_effects)
-    
-    if scaling==True:
-        see_dy = _calc_results_difference(result_increased, result_decreased)
+    difference = _calc_results_difference(result_increased, result_decreased)
 
+    if scaling is True:
+
+        # calculate the scaled value of delta (step size)
         dx_trajectory = _calculate_step_size_x(input_matrix)
-        
-        see_dy_dx = np.divide(see_dy, dx_trajectory.T)
 
-        sigma_x_pertrajectory = np.std(input_matrix, axis=1)
-        sigma_y_pertrajectory = np.std(output_matrix, axis=1)
+        see_dy_dx = np.divide(difference, dx_trajectory.T)
 
-        adjustment_trajectory = np.divide(sigma_x_pertrajectory, sigma_y_pertrajectory[:, np.newaxis], out=np.zeros_like(sigma_x_pertrajectory), where=sigma_y_pertrajectory[:, np.newaxis]!=0)
-        elementary_effects = see_dy_dx*adjustment_trajectory.T
+        sigma_x_per_trajectory = np.std(input_matrix, axis=1)
+        sigma_y_per_trajectory = np.std(output_matrix, axis=1)
+
+        # Create a mask to avoid division by zero
+        mask = sigma_y_per_trajectory[:, np.newaxis] != 0
+
+        adjustment_trajectory = np.divide(
+            sigma_x_per_trajectory,
+            sigma_y_per_trajectory[:, np.newaxis],
+            out=np.zeros_like(sigma_x_per_trajectory),
+            where=mask,
+        )
+        elementary_effects = see_dy_dx * adjustment_trajectory.T
+
+    else:
+
+        elementary_effects = np.divide(difference, delta)
 
     return elementary_effects
+
 
 def _calc_results_difference(
     result_up: np.ndarray, result_lo: np.ndarray
@@ -547,15 +585,17 @@ def _compute_mu_star_confidence(
 
     return mu_star_conf
 
+
 def _calculate_step_size_x(input_matrix):
     """
-    This function calculates the step of the dx at nominal values (for scaled elementary effects)
+    This function calculates the step of dx for scaled elementary effects
     """
     max_y = np.max(input_matrix, axis=1)
     min_y = np.min(input_matrix, axis=1)
 
     delta = max_y - min_y
     return delta
+
 
 def _check_if_array_of_floats(array_x: np.ndarray):
     """Checks if an arrays is made of floats. If not, raises an error.
