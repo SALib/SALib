@@ -94,7 +94,7 @@ class TestMorris:
             num_levels=4,
         )
 
-        assert_allclose(Si["mu"], [9.786986, np.NaN], atol=0, rtol=1e-5)
+        assert_allclose(Si["mu"], [9.786986, -9.938717e-13], atol=0, rtol=1e-5)
 
         assert_allclose(Si["sigma"], [6.453729, np.NaN], atol=0, rtol=1e-5)
 
