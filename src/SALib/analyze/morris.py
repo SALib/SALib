@@ -636,15 +636,11 @@ def cli_action(args):
     X = np.loadtxt(args.model_input_file, delimiter=args.delimiter, ndmin=2)
     if len(X.shape) == 1:
         X = X.reshape((len(X), 1))
-    NOMX = np.loadtxt(args.model_input_file, delimiter=args.delimiter, ndmin=2)
-    if len(NOMX.shape) == 1:
-        NOMX = NOMX.reshape((len(NOMX), 1))
 
     analyze(
         problem,
         X,
         Y,
-        NOMX,
         num_resamples=args.resamples,
         print_to_console=True,
         num_levels=args.levels,
