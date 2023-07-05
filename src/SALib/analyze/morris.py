@@ -38,8 +38,9 @@ def analyze(
     When ``scaled`` is True, the elementary effects are scaled by the ratio of
     standard deviation of ``X`` and ``Y`` according to [3]. When using this
     option it is important to ensure that ``X`` contains the actual values
-    passed into the model, if those differ from those produced by the
-    ``SALib.sample.morris.sample`` function. This could be the case if you
+    passed into the model, as the elementary effects are divided by the
+    step calculated from ``X`` rather than using `delta` which is calculated from
+    the number of levels used in the sample. This could be the case if you
     perform post-processing on the values before passing them to the model.
 
     Notes
