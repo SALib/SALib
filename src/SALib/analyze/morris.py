@@ -118,6 +118,10 @@ def analyze(
        by Scaling the Elementary Effects.
        19th European Symposium on Computer Aided Process Engineering ESCAPE19:925-930
     """
+
+    if SX is None:
+        SX = X
+
     if seed:
         np.random.seed(seed)
 
@@ -143,10 +147,7 @@ def analyze(
     delta = _compute_delta(num_levels)
     elementary_effects = _compute_elementary_effects(X, Y, trajectory_size, delta, scaling=False)
     
-    if SX is None:
-        scaled_elementary_effects=None
-    else:
-        scaled_elementary_effects = _compute_elementary_effects(SX, Y, trajectory_size, delta, scaling=True)
+    scaled_elementary_effects = _compute_elementary_effects(SX, Y, trajectory_size, delta, scaling=True)
 
     Si = _compute_statistical_outputs(
         elementary_effects,
@@ -197,31 +198,25 @@ def _compute_statistical_outputs(
     Si: ResultDict
         Morris statistical parameters.
     """
+    Si = ResultDict(
+    (k, [None] * num_vars)
+    for k in ["names", "mu", "mu_star", "sigma", "mu_star_conf", "scaled_EE"]
+    )
+
 
     mu = np.average(elementary_effects, 1)
     mu_star = np.average(np.abs(elementary_effects), 1)
     sigma = np.std(elementary_effects, axis=1, ddof=1)
     mu_star_conf = _compute_mu_star_confidence(
         elementary_effects, num_vars, num_resamples, conf_level)
+    scaled_EE = np.average(np.abs(scaled_elementary_effects), 1)
     
-    if scaled_elementary_effects is None:
-        Si = ResultDict(
-            (k, [None] * num_vars)
-            for k in ["names", "mu", "mu_star", "sigma", "mu_star_conf"]
-        )
-    else:
-        Si = ResultDict(
-            (k, [None] * num_vars)
-            for k in ["names", "mu", "mu_star", "sigma", "mu_star_conf", "scaled_EE"]
-        )
-        scaled_EE = np.average(np.abs(scaled_elementary_effects), 1)
-        Si["scaled_EE"] = scaled_EE
-
     Si["names"] = unique_group_names
     Si["mu"] = _compute_grouped_sigma(mu, groups)
     Si["mu_star"] = _compute_grouped_metric(mu_star, groups)
     Si["sigma"] = _compute_grouped_sigma(sigma, groups)
     Si["mu_star_conf"] = _compute_grouped_metric(mu_star_conf, groups)
+    Si["scaled_EE"] = scaled_EE
 
     return Si
 
@@ -344,11 +339,6 @@ def _compute_elementary_effects(
         matrix of inputs to the model under analysis.
         x-by-r where x is the number of variables and
         r is the number of rows (a function of x and num_trajectories)
-            nominal_model_inputs: np.ndarray
-        if scaling = True: 
-            matrix of nominal inputs to the model under analysis.
-            x-by-r where x is the number of variables and
-            r is the number of rows (a function of x and num_trajectories)
     model_outputs: np.ndarray
         r-length vector of model outputs
     trajectory_size: int
@@ -389,15 +379,11 @@ def _compute_elementary_effects(
     if scaling==True:
         see_dy = _calc_results_difference(result_increased, result_decreased)
 
-        input_matrix_nominal = _reshape_model_inputs(
-        model_inputs, num_trajectories, trajectory_size
-        )
-
-        dx_trajectory = _calculate_step_size_x(input_matrix_nominal)
+        dx_trajectory = _calculate_step_size_x(input_matrix)
         
         see_dy_dx = np.divide(see_dy, dx_trajectory.T)
 
-        sigma_x_pertrajectory = np.std(input_matrix_nominal, axis=1)
+        sigma_x_pertrajectory = np.std(input_matrix, axis=1)
         sigma_y_pertrajectory = np.std(output_matrix, axis=1)
 
         adjustment_trajectory = np.divide(sigma_x_pertrajectory, sigma_y_pertrajectory[:, np.newaxis], out=np.zeros_like(sigma_x_pertrajectory), where=sigma_y_pertrajectory[:, np.newaxis]!=0)
