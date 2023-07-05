@@ -17,9 +17,9 @@ def analyze(
     problem: Dict,
     X: np.ndarray,
     Y: np.ndarray,
-    SX: np.ndarray = None,
     num_resamples: int = 100,
     conf_level: float = 0.95,
+    scaled=False,
     print_to_console: bool = False,
     num_levels: int = 4,
     seed=None,
@@ -33,9 +33,14 @@ def analyze(
     - ``mu`` metric indicates the mean of the distribution
     - ``mu_star`` metric indicates the mean of the distribution of absolute
       values
-    - ``mu_star_scaled`` metric indices the mean of the distribution of absolute
-      values scaled by the ratio of standard deviation of inputs and outputs [3]
     - ``sigma`` is the standard deviation of the distribution
+
+    When ``scaled`` is True, the elementary effects are scaled by the ratio of
+    standard deviation of ``X`` and ``Y`` according to [3]. When using this
+    option it is important to ensure that ``X`` contains the actual values
+    passed into the model, if those differ from those produced by the
+    ``SALib.sample.morris.sample`` function. This could be the case if you
+    perform post-processing on the values before passing them to the model.
 
     Notes
     -----
@@ -53,11 +58,6 @@ def analyze(
     Compatible with:
         `morris` : :func:`SALib.sample.morris.sample`
 
-    If ``SX`` is not provided, ``X`` will be used to calculate scaled elementary
-    effects. Use ``SX`` if the actual parameter ranges differ from those
-    provided by ``SALib.Morris.sample``, for example if the values undergo
-    post-processing before being used to calculate ``Y``.
-
     Examples
     --------
         >>> X = morris.sample(problem, 1000, num_levels=4)
@@ -74,9 +74,9 @@ def analyze(
         The NumPy matrix containing the model inputs of dtype=float
     Y : numpy.array
         The NumPy array containing the model outputs of dtype=float
-    SX: numpy.array
-        The NumPy matrix containing the model inputs of dtype=float used for
-        calculating scaled elementary effects
+    scaled : bool, default=False
+        If True, the elementary effects are scaled by the ratio of
+        standard deviation of X and Y according to [3]
     num_resamples : int
         The number of resamples used to compute the confidence
         intervals (default 1000)
@@ -97,8 +97,6 @@ def analyze(
 
         - `mu` - the mean elementary effect
         - `mu_star` - the absolute of the mean elementary effect
-        - `mu_star_scaled` - the absolute of the mean elementary effect scaled
-          by the ratio of standard deviation of inputs and outputs
         - `sigma` - the standard deviation of the elementary effect
         - `mu_star_conf` - the bootstrapped confidence interval
         - `names` - the names of the parameters
@@ -123,9 +121,6 @@ def analyze(
        19th European Symposium on Computer Aided Process Engineering ESCAPE19:925-930
     """
 
-    if SX is None:
-        SX = X
-
     if seed:
         np.random.seed(seed)
 
@@ -148,18 +143,14 @@ def analyze(
     num_trajectories = int(Y.size / (number_of_groups + 1))
     trajectory_size = int(Y.size / num_trajectories)
 
-    delta = _compute_delta(num_levels)
-    elementary_effects = _compute_elementary_effects(
-        X, Y, trajectory_size, delta, scaling=False
-    )
-
-    if SX is None:
-        scaled_elementary_effects = _compute_elementary_effects(
+    if scaled is True:
+        elementary_effects = _compute_elementary_effects(
             X, Y, trajectory_size, delta, scaling=True
         )
     else:
-        scaled_elementary_effects = _compute_elementary_effects(
-            SX, Y, trajectory_size, delta, scaling=True
+        delta = _compute_delta(num_levels)
+        elementary_effects = _compute_elementary_effects(
+            X, Y, trajectory_size, delta, scaling=False
         )
 
     Si = _compute_statistical_outputs(
@@ -169,7 +160,6 @@ def analyze(
         conf_level,
         groups,
         unique_group_names,
-        scaled_elementary_effects,
     )
 
     if print_to_console:
@@ -185,7 +175,6 @@ def _compute_statistical_outputs(
     conf_level: float,
     groups: np.ndarray,
     unique_group_names: List,
-    scaled_elementary_effects: np.ndarray,
 ) -> ResultDict:
     """Computes the statistical parameters related to Morris method.
 
@@ -203,19 +192,18 @@ def _compute_statistical_outputs(
         Array defining the distribution of groups
     unique_group_names: List
         Names of the groups
-     scaled_elementary_effects: np.ndarray
-       the mean of the absolute elementary effect scaled by the ratio of the
-       standard deviation of the input over the output
 
     Returns
     -------
     Si: ResultDict
         Morris statistical parameters.
     """
+
     Si = ResultDict(
         (k, [None] * num_vars)
-        for k in ["names", "mu", "mu_star", "sigma", "mu_star_conf", "scaled_EE"]
+        for k in ["names", "mu", "mu_star", "sigma", "mu_star_conf"]
     )
+    Si["names"] = unique_group_names
 
     mu = np.average(elementary_effects, 1)
     mu_star = np.average(np.abs(elementary_effects), 1)
@@ -223,18 +211,11 @@ def _compute_statistical_outputs(
     mu_star_conf = _compute_mu_star_confidence(
         elementary_effects, num_vars, num_resamples, conf_level
     )
-    scaled_EE = np.average(np.abs(scaled_elementary_effects), 1)
 
-    Si = ResultDict(
-        (k, [None] * num_vars)
-        for k in ["names", "mu", "mu_star", "sigma", "mu_star_conf", "scaled_EE"]
-    )
-    Si["names"] = unique_group_names
-    Si["mu"] = _compute_grouped_sigma(mu, groups)
+    Si["mu"] = _compute_grouped_metric(mu, groups)
     Si["mu_star"] = _compute_grouped_metric(mu_star, groups)
     Si["sigma"] = _compute_grouped_sigma(sigma, groups)
     Si["mu_star_conf"] = _compute_grouped_metric(mu_star_conf, groups)
-    Si["mu_star_scaled"] = scaled_EE
 
     return Si
 

@@ -123,12 +123,100 @@ def test_analysis_of_morris_results():
     assert_equal(
         Si["names"], desired_names, err_msg="The values for names are incorrect"
     )
-    desired_scaled_ee = [0.968042, 0.212761]
+
+
+def test_analysis_of_morris_results_scaled():
+    """
+    Tests a one-dimensional vector of results
+
+    Taken from the solution to Exercise 4 (p.138) in Saltelli (2008).
+    """
+    model_input = np.array(
+        [
+            [0, 1.0 / 3],
+            [0, 1],
+            [2.0 / 3, 1],
+            [0, 1.0 / 3],
+            [2.0 / 3, 1.0 / 3],
+            [2.0 / 3, 1],
+            [2.0 / 3, 0],
+            [2.0 / 3, 2.0 / 3],
+            [0, 2.0 / 3],
+            [1.0 / 3, 1],
+            [1, 1],
+            [1, 1.0 / 3],
+            [1.0 / 3, 1],
+            [1.0 / 3, 1.0 / 3],
+            [1, 1.0 / 3],
+            [1.0 / 3, 2.0 / 3],
+            [1.0 / 3, 0],
+            [1, 0],
+        ],
+        dtype=float,
+    )
+
+    model_output = np.array(
+        [
+            0.97,
+            0.71,
+            2.39,
+            0.97,
+            2.30,
+            2.39,
+            1.87,
+            2.40,
+            0.87,
+            2.15,
+            1.71,
+            1.54,
+            2.15,
+            2.17,
+            1.54,
+            2.20,
+            1.87,
+            1.0,
+        ],
+        dtype=float,
+    )
+
+    problem = {
+        "num_vars": 2,
+        "names": ["Test 1", "Test 2"],
+        "groups": None,
+        "bounds": [[0.0, 1.0], [0.0, 1.0]],
+    }
+
+    Si = analyze(
+        problem,
+        model_input,
+        model_output,
+        num_resamples=1000,
+        conf_level=0.95,
+        scaled=True,
+        print_to_console=False,
+    )
+
+    desired_mu = np.array([0.090389, 0.146679])
     assert_allclose(
-        Si["mu_star_scaled"],
-        desired_scaled_ee,
-        rtol=1e-2,
-        err_msg="The values for scaled_ee are incorrect",
+        Si["mu"], desired_mu, rtol=1e-3, err_msg="The values for mu are incorrect"
+    )
+    desired_mu_star = np.array([0.968042, 0.212761])
+    assert_allclose(
+        Si["mu_star"],
+        desired_mu_star,
+        rtol=1e-3,
+        err_msg="The values for mu star are incorrect",
+    )
+    desired_sigma = np.array([1.064536844, 0.223856942])
+    assert_allclose(
+        Si["sigma"],
+        desired_sigma,
+        rtol=1e-3,
+        err_msg="The values for sigma are incorrect",
+    )
+    desired_names = ["Test 1", "Test 2"]
+    assert_equal(
+        Si["names"], desired_names, err_msg="The values for names are incorrect"
     )
 
 
@@ -489,7 +577,8 @@ def test_compute_elementary_effects_scaled(morris_data):
     Inputs for elementary effects taken from Exercise 5 from Saltelli (2008).
     See page 140-145.
     `model_inputs` are from trajectory t_1 from table 3.10 on page 141.
-    `desired` is equivalent to column t_1 in table 3.12 on page 145.
+    `desired` was manual calculated in an Excel spreadsheet after confirming
+    the results from the original paper.
     """
     model_inputs, model_outputs = morris_data
 
