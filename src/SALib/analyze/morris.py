@@ -120,6 +120,12 @@ def analyze(
        Improving the Morris Method for Sensitivity Analysis
        by Scaling the Elementary Effects.
        19th European Symposium on Computer Aided Process Engineering ESCAPE19:925-930
+
+    4. Moret et al. (2017)
+        Characterization of input uncertainties in strategic 
+        energy planning models.
+        Applied Energy, Volume 202, 15 September 2017, Pages 597-617
+        https://doi.org/10.1016/j.apenergy.2017.05.106
     """
 
     if seed:
@@ -360,6 +366,11 @@ def _compute_elementary_effects(
        Improving the Morris Method for Sensitivity Analysis
        by Scaling the Elementary Effects.
        19th European Symposium on Computer Aided Process Engineering ESCAPE19:925-930
+    2. Moret et al. (2017)
+        Characterization of input uncertainties in strategic 
+        energy planning models.
+        Applied Energy, Volume 202, 15 September 2017, Pages 597-617
+        https://doi.org/10.1016/j.apenergy.2017.05.106
     """
     num_trajectories = _calculate_number_trajectories(model_inputs, trajectory_size)
 
