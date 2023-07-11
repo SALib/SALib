@@ -19,7 +19,7 @@ def analyze(
     Y: np.ndarray,
     num_resamples: int = 100,
     conf_level: float = 0.95,
-    scaled=False,
+    scaled: bool = False,
     print_to_console: bool = False,
     num_levels: int = 4,
     seed=None,
