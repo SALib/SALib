@@ -150,15 +150,9 @@ def analyze(
     num_trajectories = int(Y.size / (number_of_groups + 1))
     trajectory_size = int(Y.size / num_trajectories)
 
-    if scaled is True:
-        elementary_effects = _compute_elementary_effects(
-            X, Y, trajectory_size, delta, scaling=True
-        )
-    else:
-        delta = _compute_delta(num_levels)
-        elementary_effects = _compute_elementary_effects(
-            X, Y, trajectory_size, delta, scaling=False
-        )
+    elementary_effects = _compute_elementary_effects(
+        X, Y, trajectory_size, delta, scaling=scaled
+    )
 
     Si = _compute_statistical_outputs(
         elementary_effects,
