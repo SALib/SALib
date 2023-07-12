@@ -416,7 +416,7 @@ def _compute_elementary_effects(
         elementary_effects = see_dy_dx * adjustment_trajectory.T
 
     else:
-        elementary_effects = np.divide(difference, delta)
+        elementary_effects = difference / delta
 
     return elementary_effects
 
