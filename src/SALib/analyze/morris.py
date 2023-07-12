@@ -19,7 +19,7 @@ def analyze(
     Y: np.ndarray,
     num_resamples: int = 100,
     conf_level: float = 0.95,
-    scaled=False,
+    scaled: bool = False,
     print_to_console: bool = False,
     num_levels: int = 4,
     seed=None,
@@ -155,15 +155,9 @@ def analyze(
     num_trajectories = int(Y.size / (number_of_groups + 1))
     trajectory_size = int(Y.size / num_trajectories)
 
-    if scaled is True:
-        elementary_effects = _compute_elementary_effects(
-            X, Y, trajectory_size, delta, scaling=True
-        )
-    else:
-        delta = _compute_delta(num_levels)
-        elementary_effects = _compute_elementary_effects(
-            X, Y, trajectory_size, delta, scaling=False
-        )
+    elementary_effects = _compute_elementary_effects(
+        X, Y, trajectory_size, delta, scaling=scaled
+    )
 
     Si = _compute_statistical_outputs(
         elementary_effects,
@@ -319,7 +313,7 @@ def _reorganize_output_matrix(
 
     Returns
     -------
-    numpy.ndarray
+    np.ndarray
     """
     if increase:
         pad_up = (1, 0)
@@ -585,9 +579,7 @@ def _compute_mu_star_confidence(
 
 
 def _calculate_step_size_x(input_matrix):
-    """
-    This function calculates the step of dx for scaled elementary effects
-    """
+    """This function calculates the step of dx for scaled elementary effects"""
     max_y = np.max(input_matrix, axis=1)
     min_y = np.min(input_matrix, axis=1)
 
