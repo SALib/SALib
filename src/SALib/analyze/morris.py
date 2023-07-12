@@ -45,7 +45,7 @@ def analyze(
 
     Scaled elementary effects are useful when comparing different model outputs 
     with each other when the input and output parameters have different scales. 
-    The ranking between the ordinary elementary effects and the scaled should be 
+    The ranking between the ordinary elementary effects and the scaled should be
     the same.
 
     Notes
