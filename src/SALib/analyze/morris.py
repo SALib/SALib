@@ -43,8 +43,8 @@ def analyze(
     the number of levels used in the sample. This could be the case if you
     perform post-processing on the values before passing them to the model.
 
-    Scaled elementary effects are useful when comparing different model outputs 
-    with each other when the input and output parameters have different scales. 
+    Scaled elementary effects are useful when comparing different model outputs
+    with each other when the input and output parameters have different scales.
     The ranking between the ordinary elementary effects and the scaled should be
     the same.
 
