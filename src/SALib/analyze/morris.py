@@ -308,7 +308,7 @@ def _reorganize_output_matrix(
 
     Returns
     -------
-    numpy.ndarray
+    np.ndarray
     """
     if increase:
         pad_up = (1, 0)
