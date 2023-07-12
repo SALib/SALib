@@ -574,9 +574,7 @@ def _compute_mu_star_confidence(
 
 
 def _calculate_step_size_x(input_matrix):
-    """
-    This function calculates the step of dx for scaled elementary effects
-    """
+    """This function calculates the step of dx for scaled elementary effects"""
     max_y = np.max(input_matrix, axis=1)
     min_y = np.min(input_matrix, axis=1)
 
