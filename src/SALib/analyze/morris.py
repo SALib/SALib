@@ -43,6 +43,11 @@ def analyze(
     the number of levels used in the sample. This could be the case if you
     perform post-processing on the values before passing them to the model.
 
+    Scaled elementary effects are useful when comparing different model outputs 
+    with each other when the input and output parameters have different scales. 
+    The ranking between the ordinary elementary effects and the scaled should be 
+    the same.
+
     Notes
     -----
     When applied with groups, the ``mu`` metric is less reliable as the effect
@@ -336,7 +341,7 @@ def _compute_elementary_effects(
     model_outputs: np.ndarray,
     trajectory_size: int,
     delta: float,
-    scaling=False,
+    scaling: bool = False,
 ) -> np.ndarray:
     """Computes the Morris elementary effects.
 
@@ -366,6 +371,7 @@ def _compute_elementary_effects(
        Improving the Morris Method for Sensitivity Analysis
        by Scaling the Elementary Effects.
        19th European Symposium on Computer Aided Process Engineering ESCAPE19:925-930
+
     2. Moret et al. (2017)
         Characterization of input uncertainties in strategic
         energy planning models.
@@ -394,7 +400,7 @@ def _compute_elementary_effects(
 
     difference = _calc_results_difference(result_increased, result_decreased)
 
-    if scaling is True:
+    if scaling:
 
         # calculate the scaled value of delta (step size)
         dx_trajectory = _calculate_step_size_x(input_matrix)
@@ -416,7 +422,6 @@ def _compute_elementary_effects(
         elementary_effects = see_dy_dx * adjustment_trajectory.T
 
     else:
-
         elementary_effects = np.divide(difference, delta)
 
     return elementary_effects
