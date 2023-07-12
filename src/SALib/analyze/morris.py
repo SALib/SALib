@@ -615,7 +615,7 @@ def cli_parse(parser):
         type=int,
         required=False,
         default=1000,
-        help="Number of bootstrap resamples for Sobol \
+        help="Number of bootstrap resamples for Morris \
                            confidence intervals",
     )
     parser.add_argument(
@@ -628,11 +628,11 @@ def cli_parse(parser):
                            (Morris only)",
     )
     parser.add_argument(
-        "--grid-jump",
-        type=int,
+        "--scaled",
+        type=bool,
         required=False,
-        default=2,
-        help="Grid jump size (Morris only)",
+        default=False,
+        help="Scale the results by ratio of stddev of X and Y (Morris)",
     )
     return parser
 
@@ -651,6 +651,7 @@ def cli_action(args):
         X,
         Y,
         num_resamples=args.resamples,
+        scaled=args.scaled,
         print_to_console=True,
         num_levels=args.levels,
         seed=args.seed,
