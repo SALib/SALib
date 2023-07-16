@@ -253,7 +253,7 @@ def cli_action(args):
         print_to_console=True,
         seed=args.seed,
         method=args.method,
-        y_resamples=arg.y_resamples,
+        y_resamples=args.y_resamples,
     )
 
 
