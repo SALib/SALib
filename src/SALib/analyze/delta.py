@@ -15,15 +15,15 @@ def analyze(
     conf_level: float = 0.95,
     print_to_console: bool = False,
     seed: int = None,
-    y_resamples : int = None,
-    method : str = "all",
+    y_resamples: int = None,
+    method: str = "all",
 ) -> Dict:
     """Perform Delta Moment-Independent Analysis on model outputs.
 
-    Returns a dictionary with keys 'delta', 'delta_conf', 'S1', and 'S1_conf' 
-    (first-order sobol indices), where each entry is a list of size D 
-    (the number of parameters) containing the indices in the same order as the 
-    parameter file. 
+    Returns a dictionary with keys 'delta', 'delta_conf', 'S1', and 'S1_conf'
+    (first-order sobol indices), where each entry is a list of size D
+    (the number of parameters) containing the indices in the same order as the
+    parameter file.
 
 
     Notes
@@ -75,9 +75,11 @@ def analyze(
     D = problem["num_vars"]
     if y_resamples is None:
         y_resamples = Y.size
-    
+
     if not y_resamples <= Y.size:
-        raise ValueError("y_resamples must be less than or equal to the total number of samples")
+        raise ValueError(
+            "y_resamples must be less than or equal to the total number of samples"
+        )
 
     if not 0 < conf_level < 1:
         raise RuntimeError("Confidence level must be between 0-1.")
@@ -102,7 +104,9 @@ def analyze(
             if method in ["all", "sobol"]:
                 ind = np.random.randint(Y.size, size=y_resamples)
                 S["S1"][i] = sobol_first(Y[ind], X_i[ind], m)
-                S["S1_conf"][i] = sobol_first_conf(Y, X_i, m, num_resamples, conf_level, y_resamples)
+                S["S1_conf"][i] = sobol_first_conf(
+                    Y, X_i, m, num_resamples, conf_level, y_resamples
+                )
     except np.linalg.LinAlgError as e:
         msg = "Singular matrix detected\n"
         msg += "This may be due to the sample size ({}) being too small\n".format(
@@ -149,7 +153,7 @@ def bias_reduced_delta(Y, Ygrid, X, m, num_resamples, conf_level, y_resamples):
     d = np.empty(num_resamples)
 
     N = len(Y)
-    ind = np.random.randint(N, size= y_resamples)
+    ind = np.random.randint(N, size=y_resamples)
     d_hat = calc_delta(Y[ind], Ygrid, X[ind], m)
     r = np.random.randint(N, size=(num_resamples, y_resamples))
 
