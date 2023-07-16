@@ -588,7 +588,9 @@ def test_regression_delta_svm():
     num_resamples = 200
     conf_level = 0.95
 
-    test_res = delta.bias_reduced_delta(Y, Ygrid, X, m, num_resamples, conf_level)
+    test_res = delta.bias_reduced_delta(
+        Y, Ygrid, X, m, num_resamples, conf_level, Y.size
+    )
 
     np.testing.assert_allclose(
         test_res, (0.6335098491949687, 0.026640611898969522), atol=0.005
