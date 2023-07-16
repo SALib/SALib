@@ -193,6 +193,32 @@ def test_morris():
     )
 
 
+def test_morris_scaled():
+
+    # Generate inputs
+    cmd = f"salib sample morris -p {ishigami_fp} -o {input_file} -n 100\
+    --precision=8 --levels=10 --seed=100 -lo False".split()
+
+    subprocess.run(cmd)
+
+    # Run model and save output
+    np.savetxt(output_file, Ishigami.evaluate(np.loadtxt(input_file)))
+
+    # run analysis
+    analyze_cmd = f"salib analyze morris -p {ishigami_fp} -X {input_file}\
+    -Y {output_file} -c 0 -r 1000  --scaled=True -l 10 --seed=100".split()
+
+    result = subprocess.check_output(analyze_cmd, universal_newlines=True)
+    result = re.sub(r"[\n\t\s]*", "", result)
+
+    expected_output = "mumu_starsigmamu_star_confx10.7007290.7007290.3970420.076511x2-0.0430890.3630300.5276910.075435x30.0520430.4355690.5624900.071944"  # noqa: E501
+
+    assert len(result) > 0 and result == expected_output, (
+        f"Results did not match expected values:\n\n Expected:"
+        f" \n{expected_output} \n\n Got: \n{result}"
+    )
+
+
 def test_rbd_fast():
     # Generate inputs
     cmd = f"salib sample latin -p {ishigami_fp} -o {input_file} \

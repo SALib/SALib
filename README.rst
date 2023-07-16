@@ -1,3 +1,8 @@
+.. image:: https://raw.githubusercontent.com/SALib/SALib/main/docs/assets/logo.png
+    :width: 232px
+    :align: center
+
+
 Sensitivity Analysis Library (SALib)
 ====================================
 
