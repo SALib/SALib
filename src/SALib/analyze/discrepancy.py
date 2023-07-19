@@ -21,18 +21,16 @@ def analyze(
     ----------
     problem : dict
         The problem definition
-    X : numpy.ndarray
-        A NumPy array containing the model inputs
-    Y : numpy.ndarray
-        A NumPy array containing the model outputs
-    method : str
-        Type of discrepancy, can be 'CD', 'WD', 'MD' or 'L2-star'.
-        Refer to `scipy.stats.qmc.discrepancy` for more details. Default is WD.
-    print_to_console : bool
+    X, Y : numpy.ndarray
+        An array of model inputs and outputs.
+    method : {"WD", "CD", "MD", "L2-star"}
+        Type of discrepancy. Refer to `scipy.stats.qmc.discrepancy` for more
+        details. Default is "WD".
+    print_to_console : bool, optional
         Print results directly to console (default False)
-    seed : int
+    seed : int, optional
         Seed value to ensure deterministic results
-        Unused, but defined to maintain compatibility.
+        Unused, but defined to maintain compatibility with other functions.
 
     Notes
     -----
@@ -41,15 +39,15 @@ def analyze(
 
     Based on 2D sub projections of ``[Xi,Y]``, the discrepancy of each sample
     is calculated which gives a value for all ``Xi``. This information is used
-    as a sensitivity indice.
+    as a measure of sensitivity.
 
-    This measure is very fast and is visually explainable. Considering two
-    variables ``X1`` and ``X2``, ``X1`` is more influential than ``X2`` when
-    the scatterplot of ``X1`` against ``Y`` displays a more discernible shape
-    than the scatterplot of ``X2`` against ``Y``.
+    Discrepancy analysis is very fast and is visually explainable. Considering
+    two variables ``X1`` and ``X2``, ``X1`` is more influential than ``X2``
+    when the scatterplot of ``X1`` against ``Y`` displays a more discernible
+    shape than the scatterplot of ``X2`` against ``Y``.
 
     For the method to work properly, the input parameter space need to be
-    uniformely covered as the quality of the measure depends on the value of
+    uniformly covered as the quality of the measure depends on the value of
     the discrepancy. Taking a 2D sub projection, if the distribution of sample
     along ``Xi`` is not uniform, it will have an impact on the discrepancy,
     the value will increase, i.e. the importance of this parameter would be
@@ -84,7 +82,6 @@ def analyze(
         >>> X = latin.sample(problem, 1000)
         >>> Y = Ishigami.evaluate(X)
         >>> Si = discrepancy.analyze(problem, X, Y, print_to_console=True)
-
     """
     D = problem["num_vars"]
     groups = _check_groups(problem)
