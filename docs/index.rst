@@ -72,6 +72,6 @@ Other Info
 .. toctree::
     :maxdepth: 2
 
-   License <license>
-   Authors <authors>
-   Projects that use SALib <citations>
+    License <license>
+    Authors <authors>
+    Projects that use SALib <citations>
