@@ -165,8 +165,8 @@ class LocalOptimisation(Strategy):
         indices : tuple
         distance_matrix : numpy.ndarray (M,M)
 
-        Example
-        -------
+        Examples
+        --------
         >>> add_indices((1,2), numpy.array((5,5)))
         [(1, 2, 3), (1, 2, 4), (1, 2, 5)]
 

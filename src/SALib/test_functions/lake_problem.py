@@ -73,7 +73,7 @@ def evaluate_lake(values: np.ndarray, seed=101) -> np.ndarray:
     ----------
     .. [1] Hadka, D., Herman, J., Reed, P., Keller, K., (2015).
            "An open source framework for many-objective robust decision
-                making."
+           making."
            Environmental Modelling & Software 74, 114–129.
            doi:10.1016/j.envsoft.2015.07.014
 
@@ -86,15 +86,15 @@ def evaluate_lake(values: np.ndarray, seed=101) -> np.ndarray:
     Parameters
     ----------
     values : np.ndarray,
-             model inputs in the (column) order of
-             a, q, b, mean, stdev
+        model inputs in the (column) order of
+        a, q, b, mean, stdev
 
-             where
-             * `a` is rate of anthropogenic pollution
-             * `q` is exponent controlling recycling rate
-             * `b` is decay rate for phosphorus
-             * `mean` and
-             * `stdev` set the log normal distribution of `eps`, see [2]
+        where
+        * `a` is rate of anthropogenic pollution
+        * `q` is exponent controlling recycling rate
+        * `b` is decay rate for phosphorus
+        * `mean` and
+        * `stdev` set the log normal distribution of `eps`, see [2]
 
     Returns
     -------

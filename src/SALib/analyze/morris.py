@@ -66,10 +66,10 @@ def analyze(
 
     Examples
     --------
-        >>> X = morris.sample(problem, 1000, num_levels=4)
-        >>> Y = Ishigami.evaluate(X)
-        >>> Si = morris.analyze(problem, X, Y, conf_level=0.95,
-        >>>                     print_to_console=True, num_levels=4)
+    >>> X = morris.sample(problem, 1000, num_levels=4)
+    >>> Y = Ishigami.evaluate(X)
+    >>> Si = morris.analyze(problem, X, Y, conf_level=0.95,
+    >>>                     print_to_console=True, num_levels=4)
 
 
     Parameters
