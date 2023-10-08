@@ -45,7 +45,7 @@ def analyze(
 
     The two-sample Cramér-von Mises (CvM) test is used to compare distributions.
     Results of the analysis indicate sensitivity across factor/output space. As the
-    Cramér-von Mises criterion ranges from 0 to :math:`\\infinity`, a value of zero will
+    Cramér-von Mises criterion ranges from 0 to :math:`\\infty`, a value of zero will
     indicates the two distributions being compared are identical, with larger values
     indicating greater differences.
 
@@ -87,20 +87,25 @@ def analyze(
 
     References
     ----------
-    1. Pianosi, F., K. Beven, J. Freer, J. W. Hall, J. Rougier, D. B. Stephenson, and
-    T. Wagener. 2016.
-    Sensitivity analysis of environmental models:
-    A systematic review with practical workflow.
-    Environmental Modelling & Software 79:214-232.
-    https://dx.doi.org/10.1016/j.envsoft.2016.02.008
+    1. Hornberger, G. M., and R. C. Spear. 1981.
+        Approach to the preliminary analysis of environmental systems.
+        Journal of Environmental Management 12:1.
+        https://www.osti.gov/biblio/6396608-approach-preliminary-analysis-environmental-systems
 
-    2. Saltelli, A., M. Ratto, T. Andres, F. Campolongo, J. Cariboni, D. Gatelli,
-    M. Saisana, and S. Tarantola. 2008.
-    Global Sensitivity Analysis: The Primer.
-    Wiley, West Sussex, U.K.
-    https://dx.doi.org/10.1002/9780470725184
-    Accessible at:
-    http://www.andreasaltelli.eu/file/repository/Primer_Corrected_2022.pdf
+    2. Pianosi, F., K. Beven, J. Freer, J. W. Hall, J. Rougier, D. B. Stephenson, and
+        T. Wagener. 2016.
+        Sensitivity analysis of environmental models:
+        A systematic review with practical workflow.
+        Environmental Modelling & Software 79:214-232.
+        https://dx.doi.org/10.1016/j.envsoft.2016.02.008
+
+    3. Saltelli, A., M. Ratto, T. Andres, F. Campolongo, J. Cariboni, D. Gatelli,
+        M. Saisana, and S. Tarantola. 2008.
+        Global Sensitivity Analysis: The Primer.
+        Wiley, West Sussex, U.K.
+        https://dx.doi.org/10.1002/9780470725184
+        Accessible at:
+        http://www.andreasaltelli.eu/file/repository/Primer_Corrected_2022.pdf
     """
     groups = _check_groups(problem)
     if not groups:
