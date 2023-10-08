@@ -4,7 +4,7 @@ import warnings
 
 import numpy as np
 import pandas as pd
-from scipy.stats import anderson_ksamp
+from scipy.stats import cramervonmises_2samp
 
 from . import common_args
 from ..util import read_param_file, ResultDict, extract_group_names, _check_groups
@@ -43,10 +43,11 @@ def analyze(
     (Y|b_{\\sim i})`. This aids in answering the question "where in factor space are
     outputs most sensitive to?"
 
-    The :math:`k`-sample Anderson-Darling test is used to compare distributions.
-    Results of the analysis are normalized so that values will be :math:`\\in [0, 1]`,
-    and indicate relative sensitivity across factor/output space. Larger values
-    indicate greater dissimilarity (thus, sensitivity).
+    The two-sample Cramér-von Mises (CvM) test is used to compare distributions.
+    Results of the analysis indicate sensitivity across factor/output space. As the
+    Cramér-von Mises criterion ranges from 0 to :math:`\\infinity`, a value of zero will
+    indicates the two distributions being compared are identical, with larger values
+    indicating greater differences.
 
     Notes
     -----
@@ -162,16 +163,16 @@ def rsa(X: np.ndarray, y: np.ndarray, bins: int = 10, target="X") -> np.ndarray:
             quants = np.quantile(t_arr, seq)
             b = (quants[0] <= t_arr) & (t_arr <= quants[1])
             if _has_samples(y, b):
-                r_s[0, d_i] = anderson_ksamp((m_arr[b], m_arr[~b])).statistic
+                r_s[0, d_i] = cramervonmises_2samp(m_arr[b], m_arr[~b]).statistic
 
             # Then assess the other bins
             for s in range(1, bins):
                 b = (quants[s] < t_arr) & (t_arr <= quants[s + 1])
 
                 if _has_samples(y, b):
-                    r_s[s, d_i] = anderson_ksamp((m_arr[b], m_arr[~b])).statistic
+                    r_s[s, d_i] = cramervonmises_2samp(m_arr[b], m_arr[~b]).statistic
 
-    return r_s / np.nanmax(r_s)
+    return r_s
 
 
 def _has_samples(y, sel):
@@ -216,7 +217,7 @@ def plot(self, factors=None):
     fig, ax = plt.subplots()
 
     xlabel = f"${self['target']}$ (Percentile)"
-    ylabel = "Relative $S_{i}$"
+    ylabel = "$CvM_{i}$"
 
     if factors is None:
         factors = slice(None)
