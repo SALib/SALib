@@ -56,7 +56,7 @@ Included methods
 
 * PAWN (`Pianosi and Wagener 2018 <https://dx.doi.org/10.1016/j.envsoft.2018.07.019>`__, `Pianosi and Wagener 2015 <https://doi.org/10.1016/j.envsoft.2015.01.004>`__)
 
-* Regional Sensitivity Analysis (based on `Saltelli et al. 2008 <https://dx.doi.org/10.1002/9780470725184>`__, `Pianosi et al., 2016 <https://dx.doi.org/10.1016/j.envsoft.2016.02.008>`__)
+* Regional Sensitivity Analysis (based on `Hornberger and Spear, 1981 <https://www.osti.gov/biblio/6396608-approach-preliminary-analysis-environmental-systems>`__, `Saltelli et al. 2008 <https://dx.doi.org/10.1002/9780470725184>`__, `Pianosi et al., 2016 <https://dx.doi.org/10.1016/j.envsoft.2016.02.008>`__)
 
 
 **Contributing:** see `here <CONTRIBUTING.md>`__

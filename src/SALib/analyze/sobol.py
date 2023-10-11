@@ -49,9 +49,9 @@ def analyze(
 
     Examples
     --------
-        >>> X = saltelli.sample(problem, 512)
-        >>> Y = Ishigami.evaluate(X)
-        >>> Si = sobol.analyze(problem, Y, print_to_console=True)
+    >>> X = saltelli.sample(problem, 512)
+    >>> Y = Ishigami.evaluate(X)
+    >>> Si = sobol.analyze(problem, Y, print_to_console=True)
 
 
     Parameters
@@ -359,10 +359,10 @@ def Si_to_pandas_dict(S_dict):
 
     Examples
     --------
-        >>> X = saltelli.sample(problem, 512)
-        >>> Y = Ishigami.evaluate(X)
-        >>> Si = sobol.analyze(problem, Y, print_to_console=True)
-        >>> T_Si, first_Si, (idx, second_Si) = sobol.Si_to_pandas_dict(Si, problem)
+    >>> X = saltelli.sample(problem, 512)
+    >>> Y = Ishigami.evaluate(X)
+    >>> Si = sobol.analyze(problem, Y, print_to_console=True)
+    >>> T_Si, first_Si, (idx, second_Si) = sobol.Si_to_pandas_dict(Si, problem)
 
 
     Parameters
@@ -418,8 +418,8 @@ def to_df(self):
     -------
     List : of Pandas DataFrames in order of Total, First, Second
 
-    Example
-    -------
+    Examples
+    --------
     >>> Si = sobol.analyze(problem, Y, print_to_console=True)
     >>> total_Si, first_Si, second_Si = Si.to_df()
     """
