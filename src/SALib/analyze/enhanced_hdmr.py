@@ -48,6 +48,7 @@ def analyze(
         \\tilde{y} \\approx \\widehat{y} &= f_0 + \\sum_{i=1}^{d} f_i(x_i) + 
               \\sum_{i=1}^{d-1} \\sum_{j=i+1}^{d} f_{ij} (x_{ij}) + 
               \\sum_{i=1}^{d-2} \\sum_{j=i+1}^{d-1} 
+
               \\sum_{j+1}^{d} f_{ijk} (x_{ijk}) + \\epsilon \\
 
         \\widehat{y} &= f_0 + \\sum_{u \\subseteq \\{1, 2, ..., d \\}}^{2^n - 1}
@@ -221,7 +222,7 @@ def analyze(
         max_order,
         bootstrap,
         subset,
-        extended_base,
+        extended_base
     )
     # Calculate HDMR Basis Matrix
     b_m = _basis_matrix(X, hdmr)
