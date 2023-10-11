@@ -47,6 +47,29 @@ class TestMorris:
 
         assert_allclose(Si["mu_star"], [7.536586, 7.875, 6.308785], atol=0, rtol=1e-5)
 
+    def test_regression_morris_scaled(self, set_seed):
+        """Note that this is a poor estimate of the Ishigami
+        function.
+        """
+        set_seed
+        param_file = "src/SALib/test_functions/params/Ishigami.txt"
+        problem = read_param_file(param_file)
+        param_values = morris_sampler(problem, 10000, 4, optimal_trajectories=None)
+
+        Y = Ishigami.evaluate(param_values)
+
+        Si = morris.analyze(
+            problem,
+            param_values,
+            Y,
+            conf_level=0.95,
+            scaled=True,
+            print_to_console=False,
+            num_levels=4,
+        )
+
+        assert_allclose(Si["mu_star"], [0.532657, 0.658405, 0.43654], atol=0, rtol=1e-5)
+
     def test_regression_morris_groups(self, set_seed):
         set_seed
         param_file = "src/SALib/test_functions/params/Ishigami_groups.txt"
@@ -94,7 +117,7 @@ class TestMorris:
             num_levels=4,
         )
 
-        assert_allclose(Si["mu"], [9.786986, np.NaN], atol=0, rtol=1e-5)
+        assert_allclose(Si["mu"], [9.786986, -9.938717e-13], atol=0, rtol=1e-5)
 
         assert_allclose(Si["sigma"], [6.453729, np.NaN], atol=0, rtol=1e-5)
 
@@ -588,7 +611,9 @@ def test_regression_delta_svm():
     num_resamples = 200
     conf_level = 0.95
 
-    test_res = delta.bias_reduced_delta(Y, Ygrid, X, m, num_resamples, conf_level)
+    test_res = delta.bias_reduced_delta(
+        Y, Ygrid, X, m, num_resamples, conf_level, Y.size
+    )
 
     np.testing.assert_allclose(
         test_res, (0.6335098491949687, 0.026640611898969522), atol=0.005

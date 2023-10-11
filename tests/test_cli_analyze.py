@@ -46,8 +46,8 @@ def test_delta():
 
     result = subprocess.check_output(analyze_cmd, universal_newlines=True)
 
-    delta_expected = [0.210478, 0.354023, 0.160986]
-    sobol_expected = [0.311362, 0.428365, 0.001111]
+    delta_expected = [0.228979, 0.347744, 0.163172]
+    sobol_expected = [0.313794, 0.433776, 0.005120]
 
     test = pd.read_csv(StringIO(result), index_col=0, sep=r"\s+")
     test["expected"] = delta_expected
@@ -186,6 +186,32 @@ def test_morris():
     result = re.sub(r"[\n\t\s]*", "", result)
 
     expected_output = "mumu_starsigmamu_star_confx17.4989307.4989309.3304601.801208x2-0.4703942.2152432.7759250.347972x30.8640155.4238337.8621281.147559"  # noqa: E501
+
+    assert len(result) > 0 and result == expected_output, (
+        f"Results did not match expected values:\n\n Expected:"
+        f" \n{expected_output} \n\n Got: \n{result}"
+    )
+
+
+def test_morris_scaled():
+
+    # Generate inputs
+    cmd = f"salib sample morris -p {ishigami_fp} -o {input_file} -n 100\
+    --precision=8 --levels=10 --seed=100 -lo False".split()
+
+    subprocess.run(cmd)
+
+    # Run model and save output
+    np.savetxt(output_file, Ishigami.evaluate(np.loadtxt(input_file)))
+
+    # run analysis
+    analyze_cmd = f"salib analyze morris -p {ishigami_fp} -X {input_file}\
+    -Y {output_file} -c 0 -r 1000  --scaled=True -l 10 --seed=100".split()
+
+    result = subprocess.check_output(analyze_cmd, universal_newlines=True)
+    result = re.sub(r"[\n\t\s]*", "", result)
+
+    expected_output = "mumu_starsigmamu_star_confx10.7007290.7007290.3970420.076511x2-0.0430890.3630300.5276910.075435x30.0520430.4355690.5624900.071944"  # noqa: E501
 
     assert len(result) > 0 and result == expected_output, (
         f"Results did not match expected values:\n\n Expected:"
