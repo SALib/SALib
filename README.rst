@@ -152,7 +152,7 @@ Chaining calls is supported from SALib v1.4
 
 The above is equivalent to the procedural approach shown previously.
 
-Also check out the `FAQ <https://github.com/SALib/SALib/tree/main/FAQ.MD>`__ and
+Also check out the `FAQ <https://github.com/SALib/SALib/tree/main/FAQ.md>`__ and
 `examples <https://github.com/SALib/SALib/tree/main/examples>`__ for a
 full description of options for each method.
 
