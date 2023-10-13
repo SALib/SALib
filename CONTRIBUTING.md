@@ -132,7 +132,7 @@ Thanks again!
 Following is the process that the development team follows in order to make
 a release:
 
-1. Document overview of changes since last release in `CHANGELOG.MD`
+1. Document overview of changes since last release in `CHANGELOG.md`
 2. Update the version in the main `__init__.py`.
 3. Build locally using `hatch build`, and verify the content of the artifacts
 4. Submit PR, wait for tests to pass, and merge release into `main`
