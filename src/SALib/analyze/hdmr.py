@@ -173,7 +173,7 @@ def analyze(
     warnings.warn(
         "This method will be retired in future, please use enhanced_hdmr instead.",
         DeprecationWarning,
-        stacklevel=2
+        stacklevel=2,
     )
 
     # Random Seed

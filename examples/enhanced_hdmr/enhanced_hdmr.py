@@ -1,4 +1,5 @@
 import sys
+
 sys.path.append("../../src")
 import numpy as np
 from SALib.analyze import enhanced_hdmr
@@ -29,7 +30,7 @@ options = {
     "extended_base": True,
     "print_to_console": True,
     "return_emulator": True,
-    "seed": 101
+    "seed": 101,
 }
 # Run SALib-HDMR
 Si = enhanced_hdmr.analyze(problem, X, Y, **options)
