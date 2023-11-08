@@ -2,6 +2,7 @@ from pytest import raises
 from numpy.testing import assert_equal, assert_allclose
 
 import numpy as np
+from scipy import stats
 import pytest
 
 from SALib.util import (
@@ -203,3 +204,24 @@ def test_nonuniform_scale_samples_truncnorm():
         ]
     )
     np.testing.assert_allclose(actual, expected)
+
+
+def test_nonuniform_scale_samples_logunif():
+    """
+    Test the rescaling of samples for logarithmic uniform  distribution
+    """
+    problem = {
+        "num_vars": 1,
+        "dists": ["logunif"],
+        "bounds": [[1e-22, 1e-18]],
+        "names": ["x1"],
+    }
+    actual = latin.sample(problem, 10000)
+    rng = np.random.default_rng()
+    x = stats.loguniform.rvs(size=100000, a=1e-22, b=1e-18, random_state=rng)
+    res = stats.cramervonmises_2samp(actual[:,0], x)
+    alpha = 0.05
+    zero_hypothesis_rejected = True
+    if res.pvalue > 0.05:
+        zero_hypothesis_rejected = False
+    assert zero_hypothesis_rejected is False
