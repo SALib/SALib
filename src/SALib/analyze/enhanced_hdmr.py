@@ -45,28 +45,28 @@ def analyze(
     splines, etc.). The model decomposition can be expressed as
 
     .. math::
-        \\tilde{y} \\approx \\widehat{y} &= f_0 + \\sum_{i=1}^{d} f_i(x_i) + 
-              \\sum_{i=1}^{d-1} \\sum_{j=i+1}^{d} f_{ij} (x_{ij}) + 
-              \\sum_{i=1}^{d-2} \\sum_{j=i+1}^{d-1} 
+        \\tilde{y} \\approx \\widehat{y} &= f_0 + \\sum_{i=1}^{d} f_i(x_i) +
+              \\sum_{i=1}^{d-1} \\sum_{j=i+1}^{d} f_{ij} (x_{ij}) +
+              \\sum_{i=1}^{d-2} \\sum_{j=i+1}^{d-1}
 
               \\sum_{j+1}^{d} f_{ijk} (x_{ijk}) + \\epsilon \\
 
         \\widehat{y} &= f_0 + \\sum_{u \\subseteq \\{1, 2, ..., d \\}}^{2^n - 1}
           f_u + \\epsilon
-    
-    where :math:`u` represents any subset including an empty set. There is a 
-    unique decomposition regardless of correlation among the input variables 
+
+    where :math:`u` represents any subset including an empty set. There is a
+    unique decomposition regardless of correlation among the input variables
     under the following condition.
 
     .. math::
-        \\forall v \\subseteq u, \\forall g_v: \\int 
+        \\forall v \\subseteq u, \\forall g_v: \\int
         f_u (x_u) g_v (x_v) w(\\bm(x)) d\\bm(x) = 0
 
-    This condition implies that a component function is only required to be 
-    orthogonal to all nested lower order component functions whose variables 
+    This condition implies that a component function is only required to be
+    orthogonal to all nested lower order component functions whose variables
     are a subset of its variables. For example, :math:`f_{ijk} (x_i, x_j, x_k )`
-    is only required to be orthogonal to :math:`f_i(x_i), f_j(x_j), f_k (x_k), 
-    f_{ij}(x_i, x_j), f_{ik}(x_i, x_k),` and :math:`f_{jk} (x_j, x_k)`. 
+    is only required to be orthogonal to :math:`f_i(x_i), f_j(x_j), f_k (x_k),
+    f_{ij}(x_i, x_j), f_{ik}(x_i, x_k),` and :math:`f_{jk} (x_j, x_k)`.
     Please keep in mind that this condition is only satisfied when `extended_base`
     is set to `True`.
 
@@ -76,27 +76,27 @@ def analyze(
     number of samples and thus the number of function (model) evaluations.
     Another advantage of this method is that it can account for correlation
     among the model input. Unlike other variance-based methods, the main
-    effects are the combination of structural (uncorrelated) and correlated 
+    effects are the combination of structural (uncorrelated) and correlated
     contributions.
 
     Covariance Decomposition
     ------------------------
-    Variance-based sensitivity analysis methods employ a decomposition approach 
-    to assess the contributions of input sets towards the variance observed in 
+    Variance-based sensitivity analysis methods employ a decomposition approach
+    to assess the contributions of input sets towards the variance observed in
     the model's output. This method uses the same technique while also considering
-    the influence of correlation in the decomposition of output variance.The 
-    following equation ilustrates how correlation plays a role in variance 
+    the influence of correlation in the decomposition of output variance.The
+    following equation ilustrates how correlation plays a role in variance
     decomposition.
 
     .. math::
-        Var[y] = \\sum_{u=1}^{2^n - 1} Var[f_u] + 
+        Var[y] = \\sum_{u=1}^{2^n - 1} Var[f_u] +
             \\sum_{u=1}^{2^n - 1} Cov \\left[f_u, \\sum_{v \\neq u} f_v \\right]
 
-    The first component on the right hand side of the equation depicts the 
-    uncorrelated contribution to the overall variance, while the subsequent 
-    component signifies the associated contribution of a specific component 
+    The first component on the right hand side of the equation depicts the
+    uncorrelated contribution to the overall variance, while the subsequent
+    component signifies the associated contribution of a specific component
     function in correlation with other component functions. In this method,
-    we used `Sa` and `Sb` to represent uncorrelated contribution and 
+    we used `Sa` and `Sb` to represent uncorrelated contribution and
     correlated contribution.
 
     This method uses as input
@@ -190,9 +190,9 @@ def analyze(
        https://doi.org/10.1021/jp9096919
 
     3. Gao, Y., Sahin, A., & Vrugt, J. A. (2023)
-       Probabilistic sensitivity analysis with dependent variables: 
-       Covariance-based decomposition of hydrologic models. 
-       Water Resources Research, 59, e2022WR032834. 
+       Probabilistic sensitivity analysis with dependent variables:
+       Covariance-based decomposition of hydrologic models.
+       Water Resources Research, 59, e2022WR032834.
        https://doi.org/10.1029/2022WR032834
     """
     # Random Seed
@@ -222,7 +222,7 @@ def analyze(
         max_order,
         bootstrap,
         subset,
-        extended_base
+        extended_base,
     )
     # Calculate HDMR Basis Matrix
     b_m = _basis_matrix(X, hdmr)
