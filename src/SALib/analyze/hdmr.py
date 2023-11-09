@@ -3,6 +3,7 @@ from types import MethodType
 
 import itertools
 import time
+import warnings
 
 import numpy as np
 from numpy.linalg import solve as lin_solve
@@ -169,6 +170,12 @@ def analyze(
        Journal of Physical Chemistry A, Vol. 114 (19), pp. 6022 - 6032, 2010,
        https://doi.org/10.1021/jp9096919
     """
+    warnings.warn(
+        "This method will be retired in future, please use enhanced_hdmr instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+
     # Random Seed
     if seed:
         np.random.seed(seed)
