@@ -220,7 +220,6 @@ def test_nonuniform_scale_samples_logunif():
     rng = np.random.default_rng()
     x = stats.loguniform.rvs(size=100000, a=1e-22, b=1e-18, random_state=rng)
     res = stats.cramervonmises_2samp(actual[:, 0], x)
-    alpha = 0.05
     zero_hypothesis_rejected = True
     if res.pvalue > 0.05:
         zero_hypothesis_rejected = False
