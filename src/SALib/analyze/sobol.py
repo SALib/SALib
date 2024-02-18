@@ -39,6 +39,12 @@ def analyze(
     indices in the same order as the parameter file.  If calc_second_order is
     True, the dictionary also contains keys 'S2' and 'S2_conf'.
 
+    There are several approaches to estimating sensitivity indices.
+    The general approach is described in [1]. The implementation offered here
+    follows [2] for first and total order indices, whereas estimation of
+    second order sensitivities follows [3]. A noteworthy point is the
+    improvement to reduce error rates in sensitivity estimation is introduced
+    in [4].
 
     Notes
     -----
@@ -85,17 +91,24 @@ def analyze(
        Mathematics and Computers in Simulation, 55(1-3):271-280,
        doi:10.1016/S0378-4754(00)00270-6.
 
-    2. Saltelli, A. (2002).
-       Making best use of model evaluations to compute sensitivity indices.
-       Computer Physics Communications, 145(2):280-297
-       doi:10.1016/S0010-4655(02)00280-1.
-
-    3. Saltelli, A., P. Annoni, I. Azzini, F. Campolongo, M. Ratto, and
+    2. Saltelli, A., P. Annoni, I. Azzini, F. Campolongo, M. Ratto, and
        S. Tarantola (2010).
        Variance based sensitivity analysis of model output. Design and
        estimator for the total sensitivity index.
        Computer Physics Communications, 181(2):259-270,
        doi:10.1016/j.cpc.2009.09.018.
+
+    3. Saltelli, A. (2002).
+       Making best use of model evaluations to compute sensitivity indices.
+       Computer Physics Communications, 145(2):280-297
+       doi:10.1016/S0010-4655(02)00280-1.
+
+    4. Sobol', I. M., Tarantola, S., Gatelli, D., Kucherenko, S. S., &
+       Mauntz, W. (2007).
+       Estimating the approximation error when fixing unessential factors in global
+       sensitivity analysis.
+       Reliability Engineering & System Safety, 92(7), 957-960.
+       https://doi.org/10.1016/j.ress.2006.07.001
     """
     if seed:
         # Set seed to ensure CIs are the same

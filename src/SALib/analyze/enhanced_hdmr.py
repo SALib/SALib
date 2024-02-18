@@ -271,22 +271,17 @@ def _check_args(
         problem["num_vars"] = d
 
     # If the length of 'num_vars' in ProblemSpec != Columns in X matrix
+    msg = "Problem definition must be consistent with the number of dimension in `X`"
     if "num_vars" in problem and problem["num_vars"] != d:
-        raise ValueError(
-            "Problem definition must be consistent with the number of dimension in matrix X"
-        )
+        raise ValueError(msg)
 
     # If the length of 'names' in ProblemSpec != Columns in X matrix
     if "names" in problem and len(problem["names"]) != d:
-        raise ValueError(
-            "Problem definition must be consistent with the number of dimension in matrix X"
-        )
+        raise ValueError(msg)
 
     # If the length of 'bounds' in ProblemSpec != Columns in X matrix
     if "bounds" in problem and len(problem["bounds"]) != d:
-        raise ValueError(
-            "Problem definition must be consistent with the number of dimension in matrix X"
-        )
+        raise ValueError(msg)
 
     # Now check input-output mismatch
     if d == 1:
@@ -297,7 +292,8 @@ def _check_args(
 
     if N < 300:
         raise RuntimeError(
-            f"Number of samples in the input matrix X, {N}, is insufficient. Need at least 300."
+            f"Number of samples in the input matrix X, {N}, is insufficient."
+            "Need at least 300."
         )
 
     if N != y_row:
@@ -323,9 +319,7 @@ def _check_args(
         )
 
     if bootstrap not in np.arange(1, 101):
-        raise ValueError(
-            "'bootstrap' key of options should be an integer between 1 to 100."
-        )
+        raise ValueError("'bootstrap' should be an integer between 1 to 100.")
 
     if (bootstrap == 1) and (subset != y_row):
         subset = y_row
@@ -335,21 +329,21 @@ def _check_args(
         subset = y_row // 2
     elif subset not in np.arange(300, N + 1):
         raise ValueError(
-            f"'subset' key of options should be an integer between 300 and {N}, "
+            f"'subset' should be an integer between 300 and {N}, "
             f"the number of rows matrix X."
         )
 
     if alpha < 0.5 or alpha > 1.0:
-        raise ValueError("'alpha' key of options should be a float between 0.5 to 1.0")
+        raise ValueError("'alpha' should be a float between 0.5 to 1.0")
 
     if extended_base:
         max_iter = None
     else:
         if max_iter not in np.arange(100, 1000):
-            raise ValueError("'max_iter' key of options should be between 100 and 1000")
+            raise ValueError("'max_iter' should be between 100 and 1000")
 
     if l2_penalty < 0.0 or l2_penalty > 10:
-        raise ValueError("'l2_penalty' key of options should be in between 0 and 10")
+        raise ValueError("'l2_penalty' should be in between 0 and 10")
 
     return Y, problem, subset, max_iter
 
@@ -908,17 +902,17 @@ def _cost_matrix(b_m, hdmr):
     """
     cost = np.zeros((hdmr.a_tnt, hdmr.a_tnt))
 
-    range_2nd_1 = lambda x: range(
+    range_2nd_1 = lambda x: range(  # noqa: E731
         hdmr.tnt1 + (x) * hdmr.nt2, hdmr.tnt1 + (x + 1) * hdmr.nt2
     )
-    range_2nd_2 = lambda x: range(
+    range_2nd_2 = lambda x: range(  # noqa: E731
         hdmr.tnt1 + (x) * hdmr.nt2, hdmr.tnt1 + (x) * hdmr.nt2 + hdmr.p_o * 2
     )
-    range_3rd_1 = lambda x: range(
+    range_3rd_1 = lambda x: range(  # noqa: E731
         hdmr.tnt1 + hdmr.tnt2 + (x) * hdmr.nt3,
         hdmr.tnt1 + hdmr.tnt2 + (x + 1) * hdmr.nt3,
     )
-    range_3rd_2 = lambda x: range(
+    range_3rd_2 = lambda x: range(  # noqa: E731
         hdmr.tnt1 + hdmr.tnt2 + (x) * hdmr.nt3,
         hdmr.tnt1 + hdmr.tnt2 + (x) * hdmr.nt3 + 3 * hdmr.p_o + 3 * hdmr.p_o**2,
     )
@@ -1060,7 +1054,8 @@ def _first_order(b_m1, Y_idx, max_iter, l2_penalty, hdmr, t):
             )
         except LinAlgError:
             raise LinAlgError(
-                "First Order: Least-square regression did not converge. Try increasing L2 penalty term"
+                "First Order: Least-square regression did not converge."
+                "Try increasing L2 penalty term"
             )
 
     # Backfitting method
@@ -1151,7 +1146,8 @@ def _second_order(b_m2, Y_res, max_iter, l2_penalty, hdmr, t):
             )
         except LinAlgError:
             raise LinAlgError(
-                "Second Order: Least-square regression did not converge. Try increasing L2 penalty term"
+                "Second Order: Least-square regression did not converge."
+                "Try increasing L2 penalty term"
             )
 
     var_old = np.square(hdmr.x[hdmr.tnt1 : hdmr.tnt1 + hdmr.tnt2, t])
@@ -1231,7 +1227,8 @@ def _third_order(b_m3, Y_res, l2_penalty, hdmr, t):
             ] = solve(a, b)
         except LinAlgError:
             raise LinAlgError(
-                "Third Order: Least-square regression did not converge. Try increasing L2 penalty term"
+                "Third Order: Least-square regression did not converge."
+                "Try increasing L2 penalty term"
             )
 
 
@@ -1260,7 +1257,7 @@ def _comp_func(b_m, hdmr, t=None, emulator=None):
     # Temporary matrix
     if emulator:  # Use average of solutions if it is called by emulator
         Y_t = np.multiply(b_m, np.tile(hdmr.x.mean(axis=1), [b_m.shape[0], 1]))
-    else:  #  Use the t-th solution if it is called by fanova
+    else:  # Use the t-th solution if it is called by fanova
         Y_t = np.multiply(b_m, np.tile(hdmr.x[:, t], [b_m.shape[0], 1]))
 
     # First order component functions
@@ -1319,9 +1316,11 @@ def _ancova(Y_idx, Y_e, hdmr):
     -----
     Please see the reference below
 
-    .. [1] Li, G., Rabitz, H., Yelvington, P., Oluwole, O., Bacon, F., Kolb, C., and Schoendorf, J. 2010.
-        Global Sensitivity Analysis for Systems with Independent and/or Correlated Inputs.
-        The Journal of Physical Chemistry A, 114(19), p.6022-6032.
+    .. [1] Li, G., Rabitz, H., Yelvington, P., Oluwole, O., Bacon, F., Kolb, C., and
+           Schoendorf, J. 2010.
+           Global Sensitivity Analysis for Systems with Independent and/or
+           Correlated Inputs.
+           The Journal of Physical Chemistry A, 114(19), p.6022-6032.
     """
     # Initialize sensitivity indices
     S = np.zeros(hdmr.nc_t)
@@ -1519,9 +1518,8 @@ def _print(Si):
     nc_t = len(Si["Sa"])
     d = np.isnan(Si["ST"]).sum()
     print("\n")
-    print(
-        "Term    \t      Sa            Sb             S             ST         Significancy "
-    )
+    cols = "Term    \t      Sa            Sb             S             ST         Significancy "  # noqa: E501
+    print(cols)
     print("-" * 88)  # Header break
 
     format1 = "%-11s   \t %5.2f (\261%.2f) %5.2f (\261%.2f) %5.2f (\261%.2f) %5.2f (\261%.2f)    %-3.2f%%"  # noqa: E501

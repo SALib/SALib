@@ -21,13 +21,17 @@ def sample(
 
     The Sobol' sequence is a popular quasi-random low-discrepancy sequence used
     to generate uniform samples of parameter space.
+    The general approach is described in [1].
 
     Returns a NumPy matrix containing the model inputs using Saltelli's
     sampling scheme.
-    Saltelli's scheme extends the Sobol' sequence in a way to reduce
-    the error rates in the resulting sensitivity index calculations. If
-    `calc_second_order` is False, the resulting matrix has ``N * (D + 2)``
+
+    Saltelli's scheme reduces the number of required model runs from ``N(2D+1)`` to
+    ``N(D+1)`` (see [2]).
+
+    If `calc_second_order` is False, the resulting matrix has ``N * (D + 2)``
     rows, where ``D`` is the number of parameters.
+
     If `calc_second_order` is `True`, the resulting matrix has ``N * (2D + 2)``
     rows.
 
@@ -37,14 +41,14 @@ def sample(
     Notes
     -----
     The initial points of the Sobol' sequence has some repetition (see Table 2
-    in Campolongo [1]__), which can be avoided by scrambling the sequence.
+    in Campolongo [3]__), which can be avoided by scrambling the sequence.
 
     Another option, not recommended and available for educational purposes,
     is to use the `skip_values` parameter.
     Skipping values reportedly improves the uniformity of samples.
     But, it has been shown that naively skipping values may reduce accuracy,
     increasing the number of samples needed to achieve convergence
-    (see Owen [2]__).
+    (see Owen [4]__).
 
     Parameters
     ----------
@@ -72,29 +76,29 @@ def sample(
 
     References
     ----------
-    1. Campolongo, F., Saltelli, A., Cariboni, J., 2011.
-       From screening to quantitative sensitivity analysis.
-       A unified approach.
-       Computer Physics Communications 182, 978-988.
-       https://doi.org/10.1016/j.cpc.2010.12.039
-
-    2. Owen, A. B., 2020.
-       On dropping the first Sobol' point.
-       arXiv:2008.08051 [cs, math, stat].
-       Available at: http://arxiv.org/abs/2008.08051
-       (Accessed: 20 April 2021).
-
-    3. Saltelli, A., 2002.
-       Making best use of model evaluations to compute sensitivity indices.
-       Computer Physics Communications 145, 280-297.
-       https://doi.org/10.1016/S0010-4655(02)00280-1
-
-    4. Sobol', I.M., 2001.
+    1. Sobol', I.M., 2001.
        Global sensitivity indices for nonlinear mathematical models and
        their Monte Carlo estimates.
        Mathematics and Computers in Simulation,
        The Second IMACS Seminar on Monte Carlo Methods 55, 271-280.
        https://doi.org/10.1016/S0378-4754(00)00270-6
+
+    2. Saltelli, A. (2002).
+       Making best use of model evaluations to compute sensitivity indices.
+       Computer Physics Communications, 145(2), 280-297.
+       https://doi.org/10.1016/S0010-4655(02)00280-1
+
+    3. Campolongo, F., Saltelli, A., Cariboni, J., 2011.
+       From screening to quantitative sensitivity analysis.
+       A unified approach.
+       Computer Physics Communications 182, 978-988.
+       https://doi.org/10.1016/j.cpc.2010.12.039
+
+    4. Owen, A. B., 2020.
+       On dropping the first Sobol' point.
+       arXiv:2008.08051 [cs, math, stat].
+       Available at: http://arxiv.org/abs/2008.08051
+       (Accessed: 20 April 2021).
     """
     D = problem["num_vars"]
     groups = _check_groups(problem)
