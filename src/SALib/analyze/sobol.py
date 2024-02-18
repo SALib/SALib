@@ -40,10 +40,11 @@ def analyze(
     True, the dictionary also contains keys 'S2' and 'S2_conf'.
 
     There are several approaches to estimating sensitivity indices.
-    The general approach is described in [1]. The implementation offered here follows [2]
-    for first and total order indices, whereas estimation of second order sensitivities
-    follows [3]. A noteworthy point is the improvement to reduce error rates in sensitivity
-    estimation is introduced in [4].
+    The general approach is described in [1]. The implementation offered here
+    follows [2] for first and total order indices, whereas estimation of
+    second order sensitivities follows [3]. A noteworthy point is the
+    improvement to reduce error rates in sensitivity estimation is introduced
+    in [4].
 
     Notes
     -----
@@ -102,7 +103,8 @@ def analyze(
        Computer Physics Communications, 145(2):280-297
        doi:10.1016/S0010-4655(02)00280-1.
 
-    4. Sobol', I. M., Tarantola, S., Gatelli, D., Kucherenko, S. S., & Mauntz, W. (2007).
+    4. Sobol', I. M., Tarantola, S., Gatelli, D., Kucherenko, S. S., &
+       Mauntz, W. (2007).
        Estimating the approximation error when fixing unessential factors in global
        sensitivity analysis.
        Reliability Engineering & System Safety, 92(7), 957-960.
