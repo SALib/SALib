@@ -682,11 +682,12 @@ def ancova(Y, Y_em, V_Y, n, R):
     """
     # R is currently unused
     # Compute the sum of all Y_em terms
+    m = Y_em.shape[1]
     Y0 = np.sum(Y_em, axis=1)
     Y0_minus_Y_em = Y0[:, None] - Y_em
 
     # Covariance matrix of Y_em terms with actual Y
-    C_all = np.cov(Y_em, Y, rowvar=False)[:n, n]
+    C_all = np.cov(Y_em, Y, rowvar=False)[:m, m]
 
     # Total sensitivity of each term (vectorized computation)
     S = C_all / V_Y
@@ -698,12 +699,12 @@ def ancova(Y, Y_em, V_Y, n, R):
     S_a = np.var(Y_em, axis=0) / V_Y
 
     # Correlative contribution of jth term ( = Eq. 21 of Li et al )
-    cov_matrix = np.empty((n, n))
-    for i in range(n):
+    cov_matrix = np.empty((m, m))
+    for i in range(m):
         cov_matrix[i] = np.cov(Y_em[:, i], Y0_minus_Y_em[:, i])[0, 1]
     S_b = cov_matrix.diagonal() / V_Y
 
-    return S, S_a, S_b
+    return (S, S_a, S_b)
 
 
 def _finalize(problem, SA, Em, d, alpha, maxorder, RT, Y_em, bootstrap_idx, X, Y):
