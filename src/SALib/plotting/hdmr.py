@@ -3,7 +3,7 @@ Created on Dec 20, 2019
 
 @author: @sahin-abdullah
 
-This submodule produces two diffent figures: (1) emulator vs simulator,
+This submodule produces two different figures: (1) emulator vs simulator,
 (2) regression lines of first order component functions
 """
 import matplotlib.pyplot as plt

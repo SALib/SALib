@@ -26,34 +26,38 @@ To contribute new code, submit a pull request. There are two instances in which 
 
 ### Making a development environment
 
-.. note::
-
-    We **strongly** recommend using a virtual environment setup, such as
-    ``venv`` or ``conda``.
+Note: We **strongly** recommend using a virtual environment setup, such as
+`venv` or `conda`.
 
 First, fork a copy of the main SALib repository in GitHub onto your own
-account and then create your local repository via::
+account and then create your local repository via:
 
-    git clone git@github.com:YOURUSERNAME/SALib.git
-    cd SALib
+```sh
+git clone git@github.com:YOURUSERNAME/SALib.git
+cd SALib
+```
 
 Next, set up your development environment.
 
-With ``conda`` installed (through
-`Miniforge or Mambaforge <https://github.com/conda-forge/miniforge>`_,
-`Miniconda <https://docs.conda.io/en/latest/miniconda.html>`_ or
-`Anaconda <https://www.anaconda.com/products/individual>`_), execute the
+With `conda` installed (through
+[Miniforge or Mambaforge](https://github.com/conda-forge/miniforge),
+[Miniconda](https://docs.conda.io/en/latest/miniconda.html) or
+[Anaconda](https://www.anaconda.com/products/individual)), execute the
 following commands at the terminal from the base directory of your
-`SALib <https://github.com/SALib/SALib>`_ clone::
+[SALib](https://github.com/SALib/SALib) clone:
 
-    # Create an environment with all development dependencies
-    conda env create -f environment.yml  # works with `mamba` too
-    # Activate the environment
-    conda activate SALib
+```sh
+# Create an environment with all development dependencies
+conda env create -f environment.yml  # works with `mamba` too
+# Activate the environment
+conda activate SALib
+```
 
-Finally, you can install SALib in editable mode in your environment::
+Finally, you can install SALib in editable mode in your environment:
 
-    pip install -e .
+```sh
+pip install -e .
+```
 
 ### Fixing a Bug
 
@@ -64,7 +68,7 @@ Then, please create a new branch with the name `bug_xxx` where xxx is the number
 If possible, write a test which reproduces the bug. The tests are stored in the `SALib/tests/` folder, and are run using `pytest` from the root folder of the library.
 You can run the tests with the command `pytest` from the root project directory. Individual tests can be run with by specifying a file, or file and test function.
 
-For example::
+For example:
 
 ```bash
 $ pytest  # run all tests
@@ -128,10 +132,10 @@ Thanks again!
 Following is the process that the development team follows in order to make
 a release:
 
-1. Document overview of changes since last release in ``CHANGELOG.MD``
-2. Update the version in the main ``__init__.py``.
-3. Build locally using ``hatch build``, and verify the content of the artifacts
-4. Submit PR, wait for tests to pass, and merge release into ``main``
+1. Document overview of changes since last release in `CHANGELOG.md`
+2. Update the version in the main `__init__.py`.
+3. Build locally using `hatch build`, and verify the content of the artifacts
+4. Submit PR, wait for tests to pass, and merge release into `main`
 5. Tag release with version number and push to SALib repo
 6. Check that release has been deployed to PyPI
 7. Check documentation is built and deployed to readthedocs (http://salib.readthedocs.org)

@@ -19,6 +19,7 @@ def analyze(
     Y: np.ndarray,
     num_resamples: int = 100,
     conf_level: float = 0.95,
+    scaled: bool = False,
     print_to_console: bool = False,
     num_levels: int = 4,
     seed=None,
@@ -31,8 +32,21 @@ def analyze(
 
     - ``mu`` metric indicates the mean of the distribution
     - ``mu_star`` metric indicates the mean of the distribution of absolute
-        values
+      values
     - ``sigma`` is the standard deviation of the distribution
+
+    When ``scaled`` is True, the elementary effects are scaled by the ratio of
+    standard deviation of ``X`` and ``Y`` according to [3]. When using this
+    option it is important to ensure that ``X`` contains the actual values
+    passed into the model, as the elementary effects are divided by the
+    step calculated from ``X`` rather than using `delta` which is calculated from
+    the number of levels used in the sample. This could be the case if you
+    perform post-processing on the values before passing them to the model.
+
+    Scaled elementary effects are useful when comparing different model outputs
+    with each other when the input and output parameters have different scales.
+    The ranking between the ordinary elementary effects and the scaled should be
+    the same.
 
     Notes
     -----
@@ -50,13 +64,12 @@ def analyze(
     Compatible with:
         `morris` : :func:`SALib.sample.morris.sample`
 
-
     Examples
     --------
-        >>> X = morris.sample(problem, 1000, num_levels=4)
-        >>> Y = Ishigami.evaluate(X)
-        >>> Si = morris.analyze(problem, X, Y, conf_level=0.95,
-        >>>                     print_to_console=True, num_levels=4)
+    >>> X = morris.sample(problem, 1000, num_levels=4)
+    >>> Y = Ishigami.evaluate(X)
+    >>> Si = morris.analyze(problem, X, Y, conf_level=0.95,
+    >>>                     print_to_console=True, num_levels=4)
 
 
     Parameters
@@ -67,6 +80,9 @@ def analyze(
         The NumPy matrix containing the model inputs of dtype=float
     Y : numpy.array
         The NumPy array containing the model outputs of dtype=float
+    scaled : bool, default=False
+        If True, the elementary effects are scaled by the ratio of
+        standard deviation of X and Y according to [3]
     num_resamples : int
         The number of resamples used to compute the confidence
         intervals (default 1000)
@@ -104,7 +120,19 @@ def analyze(
        of large models.
        Environmental Modelling & Software, 22(10):1509-1518,
        doi:10.1016/j.envsoft.2006.10.004.
+
+    3. Sin and Gearney (2009)
+       Improving the Morris Method for Sensitivity Analysis
+       by Scaling the Elementary Effects.
+       19th European Symposium on Computer Aided Process Engineering ESCAPE19:925-930
+
+    4. Moret et al. (2017)
+        Characterization of input uncertainties in strategic
+        energy planning models.
+        Applied Energy, Volume 202, 15 September 2017, Pages 597-617
+        https://doi.org/10.1016/j.apenergy.2017.05.106
     """
+
     if seed:
         np.random.seed(seed)
 
@@ -127,7 +155,9 @@ def analyze(
     num_trajectories = int(Y.size / (number_of_groups + 1))
     trajectory_size = int(Y.size / num_trajectories)
 
-    elementary_effects = _compute_elementary_effects(X, Y, trajectory_size, delta)
+    elementary_effects = _compute_elementary_effects(
+        X, Y, trajectory_size, delta, scaling=scaled
+    )
 
     Si = _compute_statistical_outputs(
         elementary_effects,
@@ -179,6 +209,7 @@ def _compute_statistical_outputs(
         (k, [None] * num_vars)
         for k in ["names", "mu", "mu_star", "sigma", "mu_star_conf"]
     )
+    Si["names"] = unique_group_names
 
     mu = np.average(elementary_effects, 1)
     mu_star = np.average(np.abs(elementary_effects), 1)
@@ -187,8 +218,7 @@ def _compute_statistical_outputs(
         elementary_effects, num_vars, num_resamples, conf_level
     )
 
-    Si["names"] = unique_group_names
-    Si["mu"] = _compute_grouped_sigma(mu, groups)
+    Si["mu"] = _compute_grouped_metric(mu, groups)
     Si["mu_star"] = _compute_grouped_metric(mu_star, groups)
     Si["sigma"] = _compute_grouped_sigma(sigma, groups)
     Si["mu_star_conf"] = _compute_grouped_metric(mu_star_conf, groups)
@@ -280,9 +310,10 @@ def _reorganize_output_matrix(
     increase: bool
         Direction to consider (values that increased or decreased). "Increase"
         is the default value.
+
     Returns
     -------
-
+    np.ndarray
     """
     if increase:
         pad_up = (1, 0)
@@ -304,6 +335,7 @@ def _compute_elementary_effects(
     model_outputs: np.ndarray,
     trajectory_size: int,
     delta: float,
+    scaling: bool = False,
 ) -> np.ndarray:
     """Computes the Morris elementary effects.
 
@@ -319,11 +351,26 @@ def _compute_elementary_effects(
         Number of points in a trajectory
     delta: float
         Scaling factor computed from `num_levels`
+    scaling: bool
+        True if the elementary effects should be in scaled as in [1]
 
     Returns
     ---------
     elementary_effects : np.array
         Elementary effects for each parameter
+
+    References
+    ----------
+    1. Sin and Gearney (2009)
+       Improving the Morris Method for Sensitivity Analysis
+       by Scaling the Elementary Effects.
+       19th European Symposium on Computer Aided Process Engineering ESCAPE19:925-930
+
+    2. Moret et al. (2017)
+        Characterization of input uncertainties in strategic
+        energy planning models.
+        Applied Energy, Volume 202, 15 September 2017, Pages 597-617
+        https://doi.org/10.1016/j.apenergy.2017.05.106
     """
     num_trajectories = _calculate_number_trajectories(model_inputs, trajectory_size)
 
@@ -345,8 +392,31 @@ def _compute_elementary_effects(
         output_matrix, value_increased, value_decreased, increase=False
     )
 
-    elementary_effects = _calc_results_difference(result_increased, result_decreased)
-    np.divide(elementary_effects, delta, out=elementary_effects)
+    difference = _calc_results_difference(result_increased, result_decreased)
+
+    if scaling:
+
+        # calculate the scaled value of delta (step size)
+        dx_trajectory = _calculate_step_size_x(input_matrix)
+
+        see_dy_dx = np.divide(difference, dx_trajectory.T)
+
+        sigma_x_per_trajectory = np.std(input_matrix, axis=1)
+        sigma_y_per_trajectory = np.std(output_matrix, axis=1)
+
+        # Create a mask to avoid division by zero
+        mask = sigma_y_per_trajectory[:, np.newaxis] != 0
+
+        adjustment_trajectory = np.divide(
+            sigma_x_per_trajectory,
+            sigma_y_per_trajectory[:, np.newaxis],
+            out=np.zeros_like(sigma_x_per_trajectory),
+            where=mask,
+        )
+        elementary_effects = see_dy_dx * adjustment_trajectory.T
+
+    else:
+        elementary_effects = difference / delta
 
     return elementary_effects
 
@@ -508,6 +578,15 @@ def _compute_mu_star_confidence(
     return mu_star_conf
 
 
+def _calculate_step_size_x(input_matrix):
+    """This function calculates the step of dx for scaled elementary effects"""
+    max_y = np.max(input_matrix, axis=1)
+    min_y = np.min(input_matrix, axis=1)
+
+    delta = max_y - min_y
+    return delta
+
+
 def _check_if_array_of_floats(array_x: np.ndarray):
     """Checks if an arrays is made of floats. If not, raises an error.
 
@@ -536,7 +615,7 @@ def cli_parse(parser):
         type=int,
         required=False,
         default=1000,
-        help="Number of bootstrap resamples for Sobol \
+        help="Number of bootstrap resamples for Morris \
                            confidence intervals",
     )
     parser.add_argument(
@@ -549,11 +628,11 @@ def cli_parse(parser):
                            (Morris only)",
     )
     parser.add_argument(
-        "--grid-jump",
-        type=int,
+        "--scaled",
+        type=bool,
         required=False,
-        default=2,
-        help="Grid jump size (Morris only)",
+        default=False,
+        help="Scale the results by ratio of stddev of X and Y (Morris)",
     )
     return parser
 
@@ -572,6 +651,7 @@ def cli_action(args):
         X,
         Y,
         num_resamples=args.resamples,
+        scaled=args.scaled,
         print_to_console=True,
         num_levels=args.levels,
         seed=args.seed,

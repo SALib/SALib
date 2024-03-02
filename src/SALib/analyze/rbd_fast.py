@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # coding=utf8
 
 import numpy as np
@@ -131,7 +130,7 @@ def compute_first_order(permuted_outputs, M):
 
 def unskew_S1(S1, M, N):
     """
-    Unskew the sensivity indice
+    Unskew the sensitivity indices
     (Jean-Yves Tissot, Clémentine Prieur (2012) "Bias correction for the
     estimation of sensitivity indices based on random balance designs.",
     Reliability Engineering and System Safety, Elsevier, 107, 205-213.

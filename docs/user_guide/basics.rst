@@ -60,7 +60,7 @@ analysis methods because it exhibits strong nonlinearity and nonmonotonicity.
 
 .. math::
 
-    f(x) = sin(x_1) + a sin^2(x_2) + b x_3^4 sin(x_1)
+    f(x) = \sin(x_1) + a \sin^2(x_2) + b x_3^4 \sin(x_1)
 
 Importing SALib
 ~~~~~~~~~~~~~~~
@@ -333,7 +333,7 @@ Now we can extract the first-order Sobol indices for each bin of :math:`x` and p
     :width: 800
     :align: center
 
-With the help of the plots, we interprete the Sobol indices. At
+With the help of the plots, we interpret the Sobol indices. At
 :math:`x=0`, the variation in :math:`y` can be explained to 100 % by
 parameter :math:`a` as the contribution to :math:`y` from :math:`b
 x^2` vanishes. With larger :math:`|x|`, the contribution to the

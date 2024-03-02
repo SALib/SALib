@@ -3,6 +3,7 @@ from types import MethodType
 
 import itertools
 import time
+import warnings
 
 import numpy as np
 from numpy.linalg import solve as lin_solve
@@ -169,6 +170,12 @@ def analyze(
        Journal of Physical Chemistry A, Vol. 114 (19), pp. 6022 - 6032, 2010,
        https://doi.org/10.1021/jp9096919
     """
+    warnings.warn(
+        "This method will be retired in future, please use enhanced_hdmr instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+
     # Random Seed
     if seed:
         np.random.seed(seed)
@@ -177,7 +184,7 @@ def analyze(
     settings = _check_settings(X, Y, maxorder, maxiter, m, K, R, alpha, lambdax)
     init_vars = _init(X, Y, settings)
 
-    # Sensitivity Analysis Computation with/without bootstraping
+    # Sensitivity Analysis Computation with/without bootstrapping
     SA, Em, RT, Y_em, idx = _compute(X, Y, settings, init_vars)
 
     # Finalize results
@@ -228,7 +235,7 @@ def _check_settings(X, Y, maxorder, maxiter, m, K, R, alpha, lambdax):
     # Important next check for maxorder - as maxorder relates to d
     if (d == 2) and (maxorder > 2):
         raise RuntimeError(
-            'SALib-HDMR ERRROR: Field "maxorder" of options has to be 2 as'
+            'SALib-HDMR ERROR: Field "maxorder" of options has to be 2 as'
             " d = 2 (X has two columns)"
         )
 
@@ -373,7 +380,7 @@ def _init(X, Y, settings):
         # No Bootstrap
         idx = np.arange(0, N).reshape(N, 1)
     else:
-        # Now setup the boostrap matrix with selection matrix, idx, for samples
+        # Now setup the bootstrap matrix with selection matrix, idx, for samples
         idx = np.argsort(np.random.rand(N, K), axis=0)[:R]
 
     # Compute normalized X-values
@@ -397,7 +404,7 @@ def _init(X, Y, settings):
         c3 = np.asarray(list(itertools.combinations(np.arange(0, d), 3)))
         n3 = c3.shape[0]
 
-    # calulate total number of coefficients
+    # calculate total number of coefficients
     n = n1 + n2 + n3
 
     # Initialize m1, m2 and m3 - number of coefficients first, second, third

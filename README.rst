@@ -1,3 +1,8 @@
+.. image:: https://raw.githubusercontent.com/SALib/SALib/main/docs/assets/logo.png
+    :width: 232px
+    :align: center
+
+
 Sensitivity Analysis Library (SALib)
 ====================================
 
@@ -51,7 +56,7 @@ Included methods
 
 * PAWN (`Pianosi and Wagener 2018 <https://dx.doi.org/10.1016/j.envsoft.2018.07.019>`__, `Pianosi and Wagener 2015 <https://doi.org/10.1016/j.envsoft.2015.01.004>`__)
 
-* Regional Sensitivity Analysis (based on `Saltelli et al. 2008 <https://dx.doi.org/10.1002/9780470725184>`__, `Pianosi et al., 2016 <https://dx.doi.org/10.1016/j.envsoft.2016.02.008>`__)
+* Regional Sensitivity Analysis (based on `Hornberger and Spear, 1981 <https://www.osti.gov/biblio/6396608-approach-preliminary-analysis-environmental-systems>`__, `Saltelli et al. 2008 <https://dx.doi.org/10.1002/9780470725184>`__, `Pianosi et al., 2016 <https://dx.doi.org/10.1016/j.envsoft.2016.02.008>`__)
 
 
 **Contributing:** see `here <CONTRIBUTING.md>`__
@@ -147,7 +152,7 @@ Chaining calls is supported from SALib v1.4
 
 The above is equivalent to the procedural approach shown previously.
 
-Also check out the `FAQ <https://github.com/SALib/SALib/tree/main/FAQ.MD>`__ and
+Also check out the `FAQ <https://github.com/SALib/SALib/tree/main/FAQ.md>`__ and
 `examples <https://github.com/SALib/SALib/tree/main/examples>`__ for a
 full description of options for each method.
 
@@ -220,7 +225,7 @@ Software
 Blogs
 ~~~~~
 
-* `Sensitivity Analyis in Python <http://www.perrygeo.com/sensitivity-analysis-in-python.html>`_
+* `Sensitivity Analysis in Python <http://www.perrygeo.com/sensitivity-analysis-in-python.html>`_
 * `Sensitivity Analysis with SALib <http://keyboardscientist.weebly.com/blog/sensitivity-analysis-with-salib>`_
 * `Running Sobol using SALib <https://waterprogramming.wordpress.com/2013/08/05/running-sobol-sensitivity-analysis-using-salib/>`_
 * `Extensions of SALib for more complex sensitivity analyses <https://waterprogramming.wordpress.com/2014/02/11/extensions-of-salib-for-more-complex-sensitivity-analyses/>`_

@@ -8,8 +8,8 @@ SALib - Sensitivity Analysis Library in Python
 .. image:: https://img.shields.io/badge/DOI-10.18174%2Fsesmo.18155-blue
   :target: https://sesmo.org/article/view/18155
 
-.. image:: http://joss.theoj.org/papers/431262803744581c1d4b6a95892d3343/status.svg
-  :target: http://joss.theoj.org/papers/431262803744581c1d4b6a95892d3343
+.. image:: https://joss.theoj.org/papers/10.21105/joss.00097/status.svg
+  :target: https://doi.org/10.21105/joss.00097
 
 
 Python implementations of commonly used sensitivity analysis methods, including
@@ -37,7 +37,7 @@ Supported Methods
 * PAWN
   (`Pianosi and Wagener 2018 <https://dx.doi.org/10.1016/j.envsoft.2018.07.019>`__, `Pianosi and Wagener 2015 <https://doi.org/10.1016/j.envsoft.2015.01.004>`__)
 * Regional Sensitivity Analysis
-  (based on `Saltelli et al. 2008 <https://dx.doi.org/10.1002/9780470725184>`__, `Pianosi et al., 2016 <https://dx.doi.org/10.1016/j.envsoft.2016.02.008>`__)
+  (based on `Hornberger and Spear, 1981 <https://www.osti.gov/biblio/6396608-approach-preliminary-analysis-environmental-systems>`__, `Saltelli et al. 2008 <https://dx.doi.org/10.1002/9780470725184>`__, `Pianosi et al., 2016 <https://dx.doi.org/10.1016/j.envsoft.2016.02.008>`__)
 
 
 Getting Started
@@ -72,6 +72,6 @@ Other Info
 .. toctree::
     :maxdepth: 2
 
-   License <license>
-   Authors <authors>
-   Projects that use SALib <citations>
+    License <license>
+    Authors <authors>
+    Projects that use SALib <citations>
