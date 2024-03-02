@@ -66,7 +66,7 @@ Software
 Blogs
 ~~~~~
 
-* `Sensitivity Analyis in Python <http://www.perrygeo.com/sensitivity-analysis-in-python.html>`_
+* `Sensitivity Analysis in Python <http://www.perrygeo.com/sensitivity-analysis-in-python.html>`_
 * `Sensitivity Analysis with SALib <http://keyboardscientist.weebly.com/blog/sensitivity-analysis-with-salib>`_
 * `Running Sobol using SALib <https://waterprogramming.wordpress.com/2013/08/05/running-sobol-sensitivity-analysis-using-salib/>`_
 * `Extensions of SALib for more complex sensitivity analyses <https://waterprogramming.wordpress.com/2014/02/11/extensions-of-salib-for-more-complex-sensitivity-analyses/>`_

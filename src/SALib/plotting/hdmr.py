@@ -3,7 +3,7 @@ Created on Dec 20, 2019
 
 @author: @sahin-abdullah
 
-This submodule produces two diffent figures: (1) emulator vs simulator,
+This submodule produces two different figures: (1) emulator vs simulator,
 (2) regression lines of first order component functions
 """
 import matplotlib.pyplot as plt
@@ -80,7 +80,7 @@ def plot(Si):
         ax.plot(X[last_bootstrap, i], Y[last_bootstrap], "r.")
         ax.plot(X[last_bootstrap, i], np.mean(Em["f0"]) + Y_em[:, i], "k.")
         ax.legend(
-            [r"$\widetilde{Y}$", "$f_" + str(i + 1) + "$"],
+            [r"$\widetilde{Y}$", "$f_{" + str(i + 1) + "}$"],
             loc="upper left",
             bbox_to_anchor=(1.04, 1.0),
         )

@@ -77,7 +77,13 @@ High-Dimensional Model Representation
    :noindex:
 
 Regional Sensitivity Analysis
--------------------------------------
+-----------------------------
 
 .. autofunction:: SALib.analyze.rsa.analyze
+   :noindex:
+
+Discrepancy Sensitivity Indices
+-------------------------------
+
+.. autofunction:: SALib.analyze.discrepancy.analyze
    :noindex:

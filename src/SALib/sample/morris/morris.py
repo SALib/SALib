@@ -224,7 +224,7 @@ def _generate_trajectory(
     # Matrix J - a (g+1)-by-num_params matrix of ones
     J = np.ones((num_groups + 1, num_params))
 
-    # Matrix D* - num_params-by-num_params matrix which decribes whether
+    # Matrix D* - num_params-by-num_params matrix which describes whether
     # factors move up or down
     D_star = np.diag(rd.choice([-1, 1], num_params))
 

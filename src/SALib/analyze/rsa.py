@@ -4,7 +4,7 @@ import warnings
 
 import numpy as np
 import pandas as pd
-from scipy.stats import anderson_ksamp
+from scipy.stats import cramervonmises_2samp
 
 from . import common_args
 from ..util import read_param_file, ResultDict, extract_group_names, _check_groups
@@ -43,10 +43,11 @@ def analyze(
     (Y|b_{\\sim i})`. This aids in answering the question "where in factor space are
     outputs most sensitive to?"
 
-    The $k$-sample Anderson-Darling test is used to compare distributions. Results of
-    the analysis are normalized so that values will be :math:`\\in [0, 1]`, and
-    indicate relative sensitivity across factor/output space. Larger values indicate
-    greater dissimilarity (thus, sensitivity).
+    The two-sample Cramér-von Mises (CvM) test is used to compare distributions.
+    Results of the analysis indicate sensitivity across factor/output space. As the
+    Cramér-von Mises criterion ranges from 0 to :math:`\\infty`, a value of zero will
+    indicates the two distributions being compared are identical, with larger values
+    indicating greater differences.
 
     Notes
     -----
@@ -56,11 +57,14 @@ def analyze(
     When applied to grouped factors, the analysis is conducted on each factor
     individually, and the mean of the results for a group are reported.
 
-    Increasing the value of :math:`S` increases the granularity of the analysis
+    Increasing the value of :code:`bins` increases the granularity of the analysis
     (across factor space), but necessitates larger sample sizes.
 
     This analysis will produce NaNs, indicating areas of factor space that did not have
     any samples, or for which the outputs were constant.
+
+    Analysis results are normalized against the maximum value such that 1.0 indicates
+    the greatest sensitivity.
 
     Parameters
     ----------
@@ -83,20 +87,25 @@ def analyze(
 
     References
     ----------
-    1. Pianosi, F., K. Beven, J. Freer, J. W. Hall, J. Rougier, D. B. Stephenson, and
-    T. Wagener. 2016.
-    Sensitivity analysis of environmental models:
-    A systematic review with practical workflow.
-    Environmental Modelling & Software 79:214-232.
-    https://dx.doi.org/10.1016/j.envsoft.2016.02.008
+    1. Hornberger, G. M., and R. C. Spear. 1981.
+        Approach to the preliminary analysis of environmental systems.
+        Journal of Environmental Management 12:1.
+        https://www.osti.gov/biblio/6396608-approach-preliminary-analysis-environmental-systems
 
-    2. Saltelli, A., M. Ratto, T. Andres, F. Campolongo, J. Cariboni, D. Gatelli,
-    M. Saisana, and S. Tarantola. 2008.
-    Global Sensitivity Analysis: The Primer.
-    Wiley, West Sussex, U.K.
-    https://dx.doi.org/10.1002/9780470725184
-    Accessible at:
-    http://www.andreasaltelli.eu/file/repository/Primer_Corrected_2022.pdf
+    2. Pianosi, F., K. Beven, J. Freer, J. W. Hall, J. Rougier, D. B. Stephenson, and
+        T. Wagener. 2016.
+        Sensitivity analysis of environmental models:
+        A systematic review with practical workflow.
+        Environmental Modelling & Software 79:214-232.
+        https://dx.doi.org/10.1016/j.envsoft.2016.02.008
+
+    3. Saltelli, A., M. Ratto, T. Andres, F. Campolongo, J. Cariboni, D. Gatelli,
+        M. Saisana, and S. Tarantola. 2008.
+        Global Sensitivity Analysis: The Primer.
+        Wiley, West Sussex, U.K.
+        https://dx.doi.org/10.1002/9780470725184
+        Accessible at:
+        http://www.andreasaltelli.eu/file/repository/Primer_Corrected_2022.pdf
     """
     groups = _check_groups(problem)
     if not groups:
@@ -159,17 +168,16 @@ def rsa(X: np.ndarray, y: np.ndarray, bins: int = 10, target="X") -> np.ndarray:
             quants = np.quantile(t_arr, seq)
             b = (quants[0] <= t_arr) & (t_arr <= quants[1])
             if _has_samples(y, b):
-                r_s[0, d_i] = anderson_ksamp((m_arr[b], m_arr[~b])).statistic
+                r_s[0, d_i] = cramervonmises_2samp(m_arr[b], m_arr[~b]).statistic
 
             # Then assess the other bins
             for s in range(1, bins):
                 b = (quants[s] < t_arr) & (t_arr <= quants[s + 1])
 
                 if _has_samples(y, b):
-                    r_s[s, d_i] = anderson_ksamp((m_arr[b], m_arr[~b])).statistic
+                    r_s[s, d_i] = cramervonmises_2samp(m_arr[b], m_arr[~b]).statistic
 
-    min_val = np.nanmin(r_s)
-    return (r_s - min_val) / (np.nanmax(r_s) - min_val)
+    return r_s
 
 
 def _has_samples(y, sel):
@@ -214,7 +222,7 @@ def plot(self, factors=None):
     fig, ax = plt.subplots()
 
     xlabel = f"${self['target']}$ (Percentile)"
-    ylabel = "Relative $S_{i}$"
+    ylabel = "$CvM_{i}$"
 
     if factors is None:
         factors = slice(None)

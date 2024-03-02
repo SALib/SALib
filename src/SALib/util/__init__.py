@@ -134,6 +134,7 @@ def _nonuniform_scale_samples(params, bounds, dists):
     dists : list
         list of distributions, one for each parameter
             unif: uniform with lower and upper bounds
+            logunif: logarithmic uniform with lower and upper bounds
             triang: triangular with lower and upper bounds, as well as
                     location of peak
                     The location of peak is in percentage of width
@@ -205,6 +206,9 @@ def _nonuniform_scale_samples(params, bounds, dists):
             else:
                 conv_params[:, i] = params[:, i] * (b2 - b1) + b1
 
+        elif dists[i] == "logunif":
+            conv_params[:, i] = sp.stats.loguniform.ppf(params[:, i], a=b1, b=b2)
+
         elif dists[i] == "norm":
             if b2 <= 0:
                 raise ValueError("""Normal distribution: stdev must be > 0""")
@@ -232,7 +236,7 @@ def _nonuniform_scale_samples(params, bounds, dists):
                 )
 
         # lognormal distribution (ln-space, not base-10)
-        # paramters are ln-space mean and standard deviation
+        # parameters are ln-space mean and standard deviation
         elif dists[i] == "lognorm":
             # checking for valid parameters
             if b2 <= 0:
