@@ -581,9 +581,11 @@ def _core_params(
         "S_sum_conf",
     )
     Si = ResultDict(
-        (k, np.zeros((hdmr.nc_t, bootstrap)))
-        if k in ("S", "Sa", "Sb", "Signf")
-        else (k, np.zeros(hdmr.nc_t))
+        (
+            (k, np.zeros((hdmr.nc_t, bootstrap)))
+            if k in ("S", "Sa", "Sb", "Signf")
+            else (k, np.zeros(hdmr.nc_t))
+        )
         for k in keys
     )
     Si["Term"] = problem["names"]

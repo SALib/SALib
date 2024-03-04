@@ -60,7 +60,6 @@ def sample(problem, N, seed=None):
     )
 
     for group in range(num_groups):
-
         np.random.shuffle(temp[:, group])
 
         for sample in range(num_samples):

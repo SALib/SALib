@@ -22,7 +22,6 @@ import time
 
 
 if __name__ == "__main__":
-
     # Create the SALib Problem specification
     sp = ProblemSpec(
         {

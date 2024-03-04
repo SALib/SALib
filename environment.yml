@@ -4,11 +4,10 @@ channels:
 dependencies:
   # required
   - numpy>=1.20.3
-  - python>=3.8
-  - pandas>=1.1.2
-  - matplotlib>=3.2.2
-  - scipy>=1.7.3
-  - pathos>=0.2.5
+  - pandas>=2.0
+  - matplotlib>=3.5
+  - scipy>=1.9.3
+  - pathos>=0.3.2
   # tests
   - pytest
   - pytest-cov
@@ -18,7 +17,7 @@ dependencies:
   # doc
   - sphinx
   - numpydoc
-  - pydata-sphinx-theme>=0.10
+  - pydata-sphinx-theme>=0.15.2
   - pip
   - pip:
     - myst_parser

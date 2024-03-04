@@ -1,5 +1,5 @@
-"""
-"""
+""" """
+
 from itertools import combinations
 import numpy as np  # type: ignore
 from typing import List, Tuple, Union

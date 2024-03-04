@@ -1,5 +1,5 @@
-"""
-"""
+""" """
+
 from SALib.sample.morris import SampleMorris, LocalOptimisation, BruteForce
 from SALib.sample.morris.morris import _sample_morris
 
@@ -26,7 +26,6 @@ def setup_input():
 
 @fixture(scope="function")
 def setup_problem(setup_input):
-
     input_sample = setup_input
     num_samples = 6
     problem = {"num_vars": 2, "groups": None}
@@ -150,7 +149,6 @@ class TestSharedMethods:
 
 class TestLocallyOptimalStrategy:
     def test_local(self, setup_problem):
-
         rd.seed(12345)
 
         (
@@ -329,7 +327,6 @@ class TestLocalMethods:
 
 class TestBruteForceStrategy:
     def test_brute_force(self, setup_problem):
-
         (
             input_sample,
             num_samples,

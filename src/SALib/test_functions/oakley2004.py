@@ -29,7 +29,6 @@ def evaluate(X: np.ndarray, A: np.ndarray, M: np.ndarray) -> np.ndarray:
 
 
 if __name__ == "__main__":
-
     # Raw values taken from: http://www.jeremy-oakley.staff.shef.ac.uk/psa_example.txt
     M = np.array(
         [

@@ -395,7 +395,6 @@ def _compute_elementary_effects(
     difference = _calc_results_difference(result_increased, result_decreased)
 
     if scaling:
-
         # calculate the scaled value of delta (step size)
         dx_trajectory = _calculate_step_size_x(input_matrix)
 

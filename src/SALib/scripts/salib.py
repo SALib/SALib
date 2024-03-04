@@ -1,4 +1,5 @@
 """Command-line utility for SALib"""
+
 import importlib
 import argparse
 from SALib import analyze, sample

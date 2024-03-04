@@ -1,5 +1,5 @@
-"""
-"""
+""" """
+
 from SALib.sample.morris.strategy import Strategy
 from scipy.special import comb as nchoosek  # type: ignore
 from itertools import combinations, islice
@@ -136,9 +136,7 @@ class BruteForce(Strategy):
         # Create a list of all pairwise combination for each combo in combos
         combo_list = combos[
             :,
-            pairwise[
-                :,
-            ],
+            pairwise[:,],
         ]
 
         addresses = (combo_list[:, :, 1], combo_list[:, :, 0])
@@ -181,7 +179,7 @@ class BruteForce(Strategy):
             The default value to return
         """
 
-        if type(n) != int:
+        if not isinstance(n, int):
             raise TypeError("n is not an integer")
 
         return next(islice(iterable, n, None), default)

@@ -611,7 +611,6 @@ def test_compute_elementary_effects_scaled(morris_data):
 
 
 def test_compute_grouped_elementary_effects():
-
     model_inputs = np.array(
         [
             [
@@ -966,7 +965,6 @@ def test_check_if_array_of_floats():
 
 
 def test_doesnot_raise_error_if_floats():
-
     inputs = np.array(
         [
             [0, 1.0 / 3],

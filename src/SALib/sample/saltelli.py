@@ -162,7 +162,6 @@ def sample(
     index = 0
 
     for i in range(skip_values, N + skip_values):
-
         # Copy matrix "A"
         for j in range(D):
             saltelli_sequence[index, j] = base_sequence[i, j]
