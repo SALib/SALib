@@ -93,7 +93,6 @@ class TestMorris:
         assert_allclose(Si["mu_star"], [7.610322, 10.197014], atol=0, rtol=1e-5)
 
     def test_regression_morris_groups_brute_optim(self, set_seed):
-
         set_seed
         param_file = "src/SALib/test_functions/params/Ishigami_groups.txt"
         problem = read_param_file(param_file)

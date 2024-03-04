@@ -62,7 +62,6 @@ def test_Sobol_G_raises_error_if_values_not_numpy_array():
 
 
 def test_total_variance():
-
     a = np.array([78, 12, 0.5, 2, 97, 33])
     actual = _total_variance(a)
     expected = 0.19347
@@ -71,7 +70,6 @@ def test_total_variance():
 
 
 def test_partial_first_order_variance():
-
     a = np.array([78, 12, 0.5, 2, 97, 33])
     actual = _partial_first_order_variance(a)
     expected = (len(a),)
@@ -118,7 +116,6 @@ def test_modified_Sobol_G():
 
 
 def test_modified_Sobol_G_error_if_type_wrong():
-
     parameter_values = np.zeros((1, 8))
     delta_values = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8]
     expected_err = "The argument `delta` must be given as a numpy ndarray"
@@ -150,7 +147,6 @@ def test_modified_Sobol_G_error_if_value_beyond_range():
 
 
 def test_modified_partial_first_order_variance():
-
     a = np.array([78, 12, 0.5, 2, 97, 33])
     alpha = np.array([1, 2, 15, 0.6, 8, 48])
     actual = _partial_first_order_variance(a, alpha)

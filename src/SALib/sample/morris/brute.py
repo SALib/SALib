@@ -1,5 +1,4 @@
-"""
-"""
+""" """
 
 from SALib.sample.morris.strategy import Strategy
 from scipy.special import comb as nchoosek  # type: ignore

@@ -18,7 +18,6 @@ def problem_setup():
 
 
 def test_morris_sample_seed():
-
     N, problem = problem_setup()
 
     sample1 = morris_sampler(problem, N, seed=None)
@@ -29,7 +28,6 @@ def test_morris_sample_seed():
 
 @pytest.mark.filterwarnings("ignore::UserWarning")
 def test_saltelli_sample_seed():
-
     N, problem = problem_setup()
 
     sample1 = saltelli.sample(problem, N, calc_second_order=False, skip_values=1024)
@@ -39,7 +37,6 @@ def test_saltelli_sample_seed():
 
 
 def test_fast_sample_seed():
-
     _, problem = problem_setup()
 
     sample1 = fast_sampler.sample(problem, 65, seed=None)

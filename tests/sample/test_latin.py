@@ -5,7 +5,6 @@ import numpy as np
 
 class TestLatinSample:
     def test_latin_sample_trivial(self):
-
         problem = {"num_vars": 1, "bounds": [[0, 1]], "names": ["var1"]}
 
         actual = sample(problem, 10, seed=42)
@@ -26,7 +25,6 @@ class TestLatinSample:
         np.testing.assert_allclose(actual, expected)
 
     def test_latin_sample_trivial_group(self):
-
         problem = {
             "num_vars": 1,
             "bounds": [[0, 1]],
@@ -52,7 +50,6 @@ class TestLatinSample:
         np.testing.assert_allclose(actual, expected)
 
     def test_latin_sample_one_group(self):
-
         problem = {
             "num_vars": 2,
             "bounds": [[0, 1], [0, 1]],
@@ -78,7 +75,6 @@ class TestLatinSample:
         np.testing.assert_allclose(actual, expected)
 
     def test_latin_sample_no_groups(self):
-
         problem = {
             "num_vars": 2,
             "bounds": [[0, 1], [0, 1]],
@@ -104,7 +100,6 @@ class TestLatinSample:
         approx(actual, expected)
 
     def test_latin_sample_two_groups(self):
-
         problem = {
             "num_vars": 2,
             "bounds": [[0, 1], [0, 1]],

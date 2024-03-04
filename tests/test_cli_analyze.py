@@ -168,7 +168,6 @@ def test_ff():
 
 
 def test_morris():
-
     # Generate inputs
     cmd = f"salib sample morris -p {ishigami_fp} -o {input_file} -n 100\
     --precision=8 --levels=10 --seed=100 -lo False".split()
@@ -194,7 +193,6 @@ def test_morris():
 
 
 def test_morris_scaled():
-
     # Generate inputs
     cmd = f"salib sample morris -p {ishigami_fp} -o {input_file} -n 100\
     --precision=8 --levels=10 --seed=100 -lo False".split()
