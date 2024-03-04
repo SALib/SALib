@@ -671,30 +671,38 @@ def f_test(Y, f0, Y_em, R, alpha, m1, m2, m3, n1, n2, n3, n):
     return select
 
 
-def ancova(Y, Y_em, V_Y, R, n):
-    """Analysis of Covariance."""
+def ancova(Y, Y_em, V_Y, n, R):
+    """
+    Perform Analysis of Covariance (ANCOVA) on model and emulator outputs.
+
+    Returns:
+    tuple: A tuple containing sensitivity indices (S),
+            of structural contributions (S_a),
+            and of correlative contributions (S_b).
+    """
+    # R is currently unused
     # Compute the sum of all Y_em terms
+    m = Y_em.shape[1]
     Y0 = np.sum(Y_em, axis=1)
+    Y0_minus_Y_em = Y0[:, None] - Y_em
 
-    # Initialize each variable
-    S, S_a, S_b = np.zeros((3, n))
+    # Covariance matrix of Y_em terms with actual Y
+    C_all = np.cov(Y_em, Y, rowvar=False)[:m, m]
 
-    # Analysis of covariance
-    for j in range(n):
-        # Covariance matrix of jth term of Y_em and actual Y
-        C = np.cov(np.stack((Y_em[:, j], Y), axis=0))
+    # Total sensitivity of each term (vectorized computation)
+    S = C_all / V_Y
 
-        # Total sensitivity of jth term         ( = Eq. 19 of Li et al )
-        S[j] = C[0, 1] / V_Y
+    # For each term, compute covariance with the emulator Y without the current term
+    # See Li et al. (2010)  for more details
 
-        # Covariance matrix of jth term with emulator Y without jth term
-        C = np.cov(np.stack((Y_em[:, j], Y0 - Y_em[:, j]), axis=0))
+    # Structural contribution of jth term ( = Eq. 20 of Li et al )
+    S_a = np.var(Y_em, axis=0) / V_Y
 
-        # Structural contribution of jth term   ( = Eq. 20 of Li et al )
-        S_a[j] = C[0, 0] / V_Y
-
-        # Correlative contribution of jth term  ( = Eq. 21 of Li et al )
-        S_b[j] = C[0, 1] / V_Y
+    # Correlative contribution of jth term ( = Eq. 21 of Li et al )
+    cov_matrix = np.empty((m, m))
+    for i in range(m):
+        cov_matrix[i] = np.cov(Y_em[:, i], Y0_minus_Y_em[:, i])[0, 1]
+    S_b = cov_matrix.diagonal() / V_Y
 
     return (S, S_a, S_b)
 
