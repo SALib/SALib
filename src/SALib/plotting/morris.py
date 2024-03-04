@@ -17,6 +17,7 @@ The procedures should build upon and return an axes instance::
     p = SALib.plotting.morris.horizontal_bar_plot(ax, Si, {'marker':'x'})
     p.show()
 """
+
 import numpy as np
 
 
@@ -53,7 +54,7 @@ def horizontal_bar_plot(ax, Si, opts=None, sortby="mu_star", unit=""):
         xerr=mu_star_conf_sorted,
         align="center",
         ecolor="black",
-        **opts
+        **opts,
     )
 
     ax.set_yticks(y_pos)
@@ -135,7 +136,7 @@ def sample_histograms(fig, input_sample, problem, opts=None):
                 bins=num_levels,
                 density=False,
                 label=None,
-                **opts
+                **opts,
             )
         )
 

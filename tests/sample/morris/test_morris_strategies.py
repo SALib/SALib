@@ -1,5 +1,6 @@
 """
 """
+
 from SALib.sample.morris import SampleMorris, LocalOptimisation, BruteForce
 from SALib.sample.morris.morris import _sample_morris
 

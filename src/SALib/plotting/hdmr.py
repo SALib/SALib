@@ -6,6 +6,7 @@ Created on Dec 20, 2019
 This submodule produces two different figures: (1) emulator vs simulator,
 (2) regression lines of first order component functions
 """
+
 import matplotlib.pyplot as plt
 import numpy as np
 

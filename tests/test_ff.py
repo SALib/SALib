@@ -3,6 +3,7 @@ Created on 30 Jun 2015
 
 @author: @willu47
 """
+
 import numpy as np
 from numpy.testing import assert_equal, assert_allclose
 from SALib.sample.ff import sample, find_smallest, extend_bounds

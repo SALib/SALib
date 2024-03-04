@@ -10,6 +10,7 @@ Example
 >>> context = SampleMorris(localoptimisation)
 >>> context.sample(input_sample, num_samples, num_params, k_choices, groups)
 """
+
 import abc
 
 import numpy as np  # type: ignore

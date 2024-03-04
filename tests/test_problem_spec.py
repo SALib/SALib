@@ -127,7 +127,7 @@ def test_parallel_single_output():
         is None
     ), "Model results not equal!"
 
-    for (col, x) in sp.analysis.items():
+    for col, x in sp.analysis.items():
         assert (
             np.testing.assert_allclose(x, psp.analysis[col]) is None
         ), "Analysis results not equal!"

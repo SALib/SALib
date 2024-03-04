@@ -50,7 +50,9 @@ jobs:
         id: envcache
 
       - name: Update Conda Environment
-        run: mamba env update -n SALib -f environment.yml
+        run: |
+          mamba env update -n SALib -f environment.yml
+          mamba install -n SALib python==${{ matrix.python-version }}
         if: steps.envcache.outputs.cache-hit != 'true'
 
       - name: Install package

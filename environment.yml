@@ -2,7 +2,7 @@ name: SALib
 channels:
   - conda-forge
 dependencies:
-  - python  # no pin for CI
+  - python
   # required
   - numpy>=1.20.3
   - pandas>=2.0
