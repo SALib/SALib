@@ -19,6 +19,7 @@ def sample(
 
     Returns a NumPy matrix containing the model inputs using Saltelli's
     sampling scheme.
+
     Saltelli's scheme extends the Sobol' sequence in a way to reduce
     the error rates in the resulting sensitivity index calculations. If
     `calc_second_order` is False, the resulting matrix has ``N * (D + 2)``
