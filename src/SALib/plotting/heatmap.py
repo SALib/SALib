@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 
 
@@ -69,7 +70,8 @@ def heatmap(sp, metric: str, index: str, title: str = None, ax=None):
         metric = [metric]
 
     # Get unique groups (if defined) while maintaining order of group names
-    disp_names = sp["groups"]
+    # Note: using pandas `unique` here as `numpy` sorts the values
+    disp_names = pd.unique(sp["groups"])
     if disp_names is None:
         disp_names = sp["names"]
 
