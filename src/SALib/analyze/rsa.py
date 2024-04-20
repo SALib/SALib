@@ -7,7 +7,7 @@ import pandas as pd
 from scipy.stats import cramervonmises_2samp
 
 from . import common_args
-from ..util import read_param_file, ResultDict, extract_group_names, _check_groups
+from ..util import read_param_file, ResultDict, extract_group_names
 
 
 def analyze(
@@ -107,11 +107,7 @@ def analyze(
         Accessible at:
         http://www.andreasaltelli.eu/file/repository/Primer_Corrected_2022.pdf
     """
-    groups = _check_groups(problem)
-    if not groups:
-        var_names = problem["names"]
-    else:
-        var_names, _ = extract_group_names(problem.get("groups", []))
+    var_names, _ = extract_group_names(problem)
 
     results = rsa(X, Y, bins, target)
 

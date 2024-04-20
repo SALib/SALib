@@ -5,6 +5,7 @@ from typing import Dict, Tuple
 import warnings
 
 import numpy as np  # type: ignore
+import pandas as pd  # type: ignore
 import scipy as sp  # type: ignore
 from typing import List
 
@@ -252,22 +253,26 @@ def _nonuniform_scale_samples(params, bounds, dists):
     return conv_params
 
 
-def extract_group_names(groups: List) -> Tuple:
+def extract_group_names(p: Dict) -> Tuple:
     """Get a unique set of the group names.
 
-    Reverts to parameter names (and number of parameters) if groups not
-    defined.
+    Maintains specified order of group names.
+    `groups` should be a list of parameter names if groups are not defined.
 
     Parameters
     ----------
-    groups : List
-
+    p : ProblemSpec or Dict
 
     Returns
     -------
     tuple : names, number of groups
     """
-    names = list(OrderedDict.fromkeys(groups))
+    if "groups" not in p or not p["groups"]:
+        groups = p["names"]
+    else:
+        groups = p["groups"]
+
+    names = list(pd.unique(groups))
     number = len(names)
 
     return names, number
@@ -295,7 +300,8 @@ def compute_groups_matrix(groups: List):
         groups and a list of unique group names
     """
     num_vars = len(groups)
-    unique_group_names, number_of_groups = extract_group_names(groups)
+    unique_group_names = pd.unique(groups)
+    number_of_groups = len(unique_group_names)
 
     indices = dict([(x, i) for (i, x) in enumerate(unique_group_names)])
 

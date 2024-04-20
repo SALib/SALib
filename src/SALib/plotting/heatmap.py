@@ -1,6 +1,8 @@
+from typing import Dict
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from ..util import extract_group_names
 
 
 __all__ = ["heatmap"]
@@ -10,7 +12,7 @@ __all__ = ["heatmap"]
 CONF_COLUMN = "_conf"
 
 
-def heatmap(sp, metric: str, index: str, title: str = None, ax=None):
+def heatmap(sp: Dict, metric: str, index: str, title: str = None, ax=None):
     """Plot a heatmap of the target metric.
 
     Parameters
@@ -69,11 +71,7 @@ def heatmap(sp, metric: str, index: str, title: str = None, ax=None):
     if isinstance(metric, str):
         metric = [metric]
 
-    # Get unique groups (if defined) while maintaining order of group names
-    # Note: using pandas `unique` here as `numpy` sorts the values
-    disp_names = pd.unique(sp["groups"])
-    if disp_names is None:
-        disp_names = sp["names"]
+    disp_names, _ = extract_group_names(sp)
 
     ax.xaxis.set_ticks(range(0, len(disp_names)))
     ax.xaxis.set_ticklabels(disp_names, rotation=90)

@@ -1,3 +1,5 @@
+from typing import Dict
+
 import pkgutil
 import csv
 
@@ -120,6 +122,7 @@ def _check_groups(problem):
 
     if len(set(groups)) == 1:
         return False
+
     return groups
 
 
@@ -144,3 +147,32 @@ def _check_bounds(bounds):
         raise ValueError("Bounds are not legal")
 
     return lower_bounds, upper_bounds
+
+
+def _define_problem_with_groups(problem: Dict) -> Dict:
+    """
+    Checks if the user defined the 'groups' key in the problem dictionary.
+    If not, makes the 'groups' key equal to the variables names. In other
+    words, the number of groups will be equal to the number of variables, which
+    is equivalent to no groups.
+
+    Parameters
+    ----------
+    problem : dict
+        The problem definition
+
+    Returns
+    -------
+    problem : dict
+        The problem definition with the 'groups' key, even if the user doesn't
+        define it
+    """
+    # Checks if there isn't a key 'groups' or if it exists and is set to 'None'
+    if "groups" not in problem or not problem["groups"]:
+        problem["groups"] = problem["names"]
+    elif len(problem["groups"]) != problem["num_vars"]:
+        raise ValueError(
+            "Number of entries in 'groups' should be the same " "as in 'names'"
+        )
+
+    return problem

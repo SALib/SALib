@@ -9,8 +9,12 @@ import numpy as np
 import SALib.sample as samplers
 import SALib.analyze as analyzers
 
-from SALib.util import avail_approaches
-from SALib.util.results import ResultDict
+from .util_funcs import (  # noqa: F401, E402
+    avail_approaches,
+    _define_problem_with_groups
+)  # noqa: F401, E402
+
+from .results import ResultDict
 
 
 ptqdm_available = True
@@ -50,8 +54,7 @@ class ProblemSpec(dict):
         self._analysis = None
 
         self["num_vars"] = len(self["names"])
-        if "groups" not in self:
-            self["groups"] = None
+        self = _define_problem_with_groups(self)
 
         self._add_samplers()
         self._add_analyzers()
