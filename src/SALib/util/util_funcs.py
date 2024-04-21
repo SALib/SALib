@@ -119,6 +119,8 @@ def _check_groups(problem):
     groups = problem.get("groups")
     if not groups:
         return False
+    if groups == problem["names"]:
+        return False
 
     if len(set(groups)) == 1:
         return False
