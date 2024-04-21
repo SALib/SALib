@@ -16,7 +16,6 @@ from SALib.util import (
     compute_groups_matrix,
     _define_problem_with_groups,
     _compute_delta,
-    _check_groups,
 )
 
 

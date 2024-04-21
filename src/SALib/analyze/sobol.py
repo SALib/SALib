@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 
 from . import common_args
-from ..util import read_param_file, ResultDict, extract_group_names, _check_groups
+from ..util import read_param_file, ResultDict, extract_group_names
 
 from multiprocessing import Pool, cpu_count
 from functools import partial

@@ -1,6 +1,5 @@
 from typing import Dict
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 from ..util import extract_group_names
 
