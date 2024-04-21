@@ -610,7 +610,7 @@ class ProblemSpec(dict):
             rep += (
                 "Samples:\n"
                 f"\t{nx} parameters: {self['names']}\n"
-                f"\t{nr} evaluations\n"
+                f"\t{nr} samples\n"
             )
         if self._results is not None:
             arr_shape = self._results.shape
