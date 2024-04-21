@@ -95,7 +95,7 @@ def sample(
            https://github.com/scipy/scipy/pull/10844#issuecomment-673029539
     """
     warnings.warn(
-        "`salib.sample.saltelli` will be removed in SALib 1.5. Please use"
+        "`salib.sample.saltelli` will be removed in SALib 1.5.1 Please use"
         " `salib.sample.sobol`",
         category=DeprecationWarning,
         stacklevel=2,

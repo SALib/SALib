@@ -171,7 +171,7 @@ def _nonuniform_scale_samples(params, bounds, dists):
                     "end, and peak (three values) "
                     "instead of the current two-value format "
                     "(distribution end and peak, with start assumed to be 0)\n"
-                    "The two-value format will be deprecated in SALib v1.5"
+                    "The two-value format will be deprecated in SALib v1.5.1"
                 )
                 warnings.warn(msg, DeprecationWarning, stacklevel=2)
 
