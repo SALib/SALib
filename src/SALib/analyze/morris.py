@@ -146,6 +146,7 @@ def analyze(
     num_vars = problem["num_vars"]
     groups = _check_groups(problem)
     if not groups:
+        groups = np.array(problem["names"])
         number_of_groups = num_vars
     else:
         groups, unique_group_names = compute_groups_matrix(groups)
