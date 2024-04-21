@@ -70,7 +70,7 @@ def plot(Si):
     row = 3
     col = 1
     last_bootstrap = idx[:, -1]
-    for i in range(problem["num_vars"]):
+    for i in range(X.shape[1]):
         if (i % (row * col) == 0) or (i == 0):
             fig = plt.figure(frameon=False)
             it = 1

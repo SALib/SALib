@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 
 from . import common_args
-from ..util import read_param_file, ResultDict, extract_group_names, _check_groups
+from ..util import read_param_file, ResultDict, extract_group_names
 
 from multiprocessing import Pool, cpu_count
 from functools import partial
@@ -116,13 +116,9 @@ def analyze(
     else:
         rng = np.random.randint
 
-    # determining if groups are defined and adjusting the number
+    # Determine if groups are defined and adjusting the number
     # of rows in the cross-sampled matrix accordingly
-    groups = _check_groups(problem)
-    if not groups:
-        D = problem["num_vars"]
-    else:
-        _, D = extract_group_names(groups)
+    _, D = extract_group_names(problem)
 
     if calc_second_order and Y.size % (2 * D + 2) == 0:
         N = int(Y.size / (2 * D + 2))
@@ -397,18 +393,13 @@ def Si_to_pandas_dict(S_dict):
             If no second order indices found, then returns tuple of
             (None, None)
     """
-    problem = S_dict.problem
     total_order = {"ST": S_dict["ST"], "ST_conf": S_dict["ST_conf"]}
     first_order = {"S1": S_dict["S1"], "S1_conf": S_dict["S1_conf"]}
 
     idx = None
     second_order = None
     if "S2" in S_dict:
-        groups = _check_groups(problem)
-        if groups:
-            names, _ = extract_group_names(groups)
-        else:
-            names = problem.get("names")
+        names, _ = extract_group_names(S_dict.problem)
 
         if len(names) > 2:
             idx = list(combinations(names, 2))
@@ -438,12 +429,7 @@ def to_df(self):
     """
     total, first, (idx, second) = Si_to_pandas_dict(self)
 
-    problem = self.problem
-    groups = _check_groups(problem)
-    if not groups:
-        names = problem.get("names")
-    else:
-        names, _ = extract_group_names(groups)
+    names, _ = extract_group_names(self.problem)
 
     ret = [pd.DataFrame(total, index=names), pd.DataFrame(first, index=names)]
 

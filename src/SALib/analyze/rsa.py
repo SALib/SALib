@@ -107,21 +107,16 @@ def analyze(
         Accessible at:
         http://www.andreasaltelli.eu/file/repository/Primer_Corrected_2022.pdf
     """
-    groups = _check_groups(problem)
-    if not groups:
-        var_names = problem["names"]
-    else:
-        var_names, _ = extract_group_names(problem.get("groups", []))
-
     results = rsa(X, Y, bins, target)
 
+    groups = _check_groups(problem)
+    var_names, n_groups = extract_group_names(problem)
     if groups:
-        groups = np.array(groups)
-        unique_grps = [*dict.fromkeys(groups)]
-        tmp = np.full((bins, len(unique_grps)), np.nan)
+        groups = np.array(var_names)
+        tmp = np.full((bins, n_groups), np.nan)
 
         # Take the mean of effects from parameters that are grouped together
-        for grp_id, grp in enumerate(unique_grps):
+        for grp_id, grp in enumerate(groups):
             tmp[:, grp_id] = np.nanmean(results[:, groups == grp], axis=1)
 
         results = tmp
