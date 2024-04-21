@@ -11,7 +11,7 @@ import SALib.analyze as analyzers
 
 from .util_funcs import (  # noqa: F401, E402
     avail_approaches,
-    _define_problem_with_groups
+    _define_problem_with_groups,
 )  # noqa: F401, E402
 
 from .results import ResultDict
