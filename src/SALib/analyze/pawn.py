@@ -142,14 +142,15 @@ def analyze(
         cv = np.nanstd(p_ind) / mean
         results[d_i, :] = [mins, mean, med, maxs, cv]
 
+    groups = _check_groups(problem)
     if groups:
-        groups = np.array(groups)
-        unique_grps = [*dict.fromkeys(groups)]
-        tmp = np.full((len(unique_grps), 5), np.nan)
+        unique_grps, n_groups = extract_group_names(problem)
+        tmp = np.full((n_groups, 5), np.nan)
 
         # Take the mean of effects from parameters that are grouped together
+        unique_grps = np.array(unique_grps)
         for grp_id, grp in enumerate(unique_grps):
-            tmp[grp_id, :] = np.mean(results[groups == grp, :], axis=0)
+            tmp[grp_id, :] = np.mean(results[unique_grps == grp, :], axis=0)
 
         results = tmp
         tmp = None

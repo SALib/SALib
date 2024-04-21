@@ -7,7 +7,7 @@ import pandas as pd
 from scipy.stats import cramervonmises_2samp
 
 from . import common_args
-from ..util import read_param_file, ResultDict, extract_group_names
+from ..util import read_param_file, ResultDict, extract_group_names, _check_groups
 
 
 def analyze(
@@ -107,17 +107,16 @@ def analyze(
         Accessible at:
         http://www.andreasaltelli.eu/file/repository/Primer_Corrected_2022.pdf
     """
-    var_names, _ = extract_group_names(problem)
-
     results = rsa(X, Y, bins, target)
 
+    groups = _check_groups(problem)
+    var_names, n_groups = extract_group_names(problem)
     if groups:
-        groups = np.array(groups)
-        unique_grps = [*dict.fromkeys(groups)]
-        tmp = np.full((bins, len(unique_grps)), np.nan)
+        groups = np.array(var_names)
+        tmp = np.full((bins, n_groups), np.nan)
 
         # Take the mean of effects from parameters that are grouped together
-        for grp_id, grp in enumerate(unique_grps):
+        for grp_id, grp in enumerate(groups):
             tmp[:, grp_id] = np.nanmean(results[:, groups == grp], axis=1)
 
         results = tmp
