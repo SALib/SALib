@@ -133,14 +133,12 @@ Following is the process that the development team follows in order to make
 a release:
 
 1. Document overview of changes since last release in `CHANGELOG.md`
-2. Update the version in the main `__init__.py`.
-3. Build locally using `hatch build`, and verify the content of the artifacts
-4. Submit PR, wait for tests to pass, and merge release into `main`
-5. Tag release with version number and push to SALib repo
-6. Check that release has been deployed to PyPI
-7. Check documentation is built and deployed to readthedocs (http://salib.readthedocs.org)
-8. Check that auto-generated PR is auto-merged on the conda-forge feedstock repo (conda-forge/salib-feedstock)
-9. Update development roadmap on GitHub
+2Build locally using `hatch build`, and verify the content of the artifacts
+2. Tag release with version number and push to SALib repo
+3. Check that release has been deployed to PyPI
+4. Check documentation is built and deployed to readthedocs (http://salib.readthedocs.org)
+5. Check that auto-generated PR is auto-merged on the conda-forge feedstock repo (conda-forge/salib-feedstock)
+6. Update development roadmap on GitHub
 
 ## Building a local copy of the documentation
 
