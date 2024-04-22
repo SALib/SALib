@@ -13,3 +13,4 @@ Developers
 * xantares
 * Abdullah Sahin <sahina@uci.edu>
 * Takuya Iwanaga
+* Pamphile T. Roy
