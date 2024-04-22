@@ -133,7 +133,7 @@ Following is the process that the development team follows in order to make
 a release:
 
 1. Document overview of changes since last release in `CHANGELOG.md`
-2Build locally using `hatch build`, and verify the content of the artifacts
+2. Build locally using `hatch build`, and verify the content of the artifacts
 2. Tag release with version number and push to SALib repo
 3. Check that release has been deployed to PyPI
 4. Check documentation is built and deployed to readthedocs (http://salib.readthedocs.org)
