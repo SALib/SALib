@@ -134,11 +134,11 @@ a release:
 
 1. Document overview of changes since last release in `CHANGELOG.md`
 2. Build locally using `hatch build`, and verify the content of the artifacts
-2. Tag release with version number and push to SALib repo
-3. Check that release has been deployed to PyPI
-4. Check documentation is built and deployed to readthedocs (http://salib.readthedocs.org)
-5. Check that auto-generated PR is auto-merged on the conda-forge feedstock repo (conda-forge/salib-feedstock)
-6. Update development roadmap on GitHub
+3. Tag release with version number and push to SALib repo
+4. Check that release has been deployed to PyPI
+5. Check documentation is built and deployed to readthedocs (http://salib.readthedocs.org)
+6. Check that auto-generated PR is auto-merged on the conda-forge feedstock repo (conda-forge/salib-feedstock)
+7. Update development roadmap on GitHub
 
 ## Building a local copy of the documentation
 
