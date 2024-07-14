@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from SALib.sample import (
-    saltelli,
+    sobol as sobol_sample,
     morris as morris_sample,
     finite_diff,
     fast_sampler,
@@ -60,7 +60,7 @@ def test_sobol_to_df():
     params = ["x1", "x2", "x3"]
     problem = {"num_vars": 3, "names": params, "bounds": [[-np.pi, np.pi]] * 3}
 
-    X = saltelli.sample(problem, 512)
+    X = sobol_sample.sample(problem, 512)
     Y = Ishigami.evaluate(X)
     Si = sobol.analyze(problem, Y, print_to_console=False)
     total, first, second = Si.to_df()
