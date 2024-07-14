@@ -245,7 +245,7 @@ def _compute_grouped_sigma(
 
     sigma = np.zeros(groups.shape[1], dtype=float)
     np.copyto(sigma, sigma_agg, where=groups.sum(axis=0) == 1)
-    np.copyto(sigma, np.NAN, where=groups.sum(axis=0) != 1)
+    np.copyto(sigma, np.nan, where=groups.sum(axis=0) != 1)
 
     return sigma
 
