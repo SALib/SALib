@@ -143,7 +143,7 @@ def calc_delta(Y, Ygrid, X, m):
         else:
             fy_ = np.abs(fy)
 
-        d_hat += (nm / (2 * N)) * np.trapz(fy_, Ygrid)
+        d_hat += (nm / (2 * N)) * np.trapezoid(fy_, Ygrid)
 
     return d_hat
 
