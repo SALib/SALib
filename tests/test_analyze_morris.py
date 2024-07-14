@@ -931,7 +931,7 @@ def test_compute_grouped_sigma():
     sigma = np.std(ee, axis=1, ddof=1)
 
     actual = _compute_grouped_sigma(sigma, group_matrix)
-    desired = np.array([1.79352911, np.NAN], dtype=float)
+    desired = np.array([1.79352911, np.nan], dtype=float)
     assert_allclose(actual, desired, rtol=1e-1)
 
 

@@ -137,8 +137,8 @@ class TestLatinSample:
         # Group samples should have the same values
         # Get (max - min) with the `ptp()` method, the result of which should be
         # an array of zeros
-        diff = samples[:, ::2].ptp(axis=1)
+        diff = np.ptp(samples[:, ::2], axis=1)
         assert np.all(diff == 0), "Grouped samples do not have the same values"
 
-        diff = samples[:, 1::2].ptp(axis=1)
+        diff = np.ptp(samples[:, 1::2], axis=1)
         assert np.all(diff == 0), "Grouped samples do not have the same values"

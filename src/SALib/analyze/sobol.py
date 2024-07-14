@@ -154,7 +154,7 @@ def analyze(
             if keep_resamples:
                 S["S1_conf_all"][:, j] = S1_conf_j
 
-            var_diff = np.r_[A[r], B[r]].ptp()
+            var_diff = np.ptp(np.r_[A[r], B[r]])
             if var_diff != 0.0:
                 S["S1_conf"][j] = Z * S1_conf_j.std(ddof=1)
             else:
@@ -212,7 +212,7 @@ def first_order(A, AB, B):
     sample variance
     """
     y = np.r_[A, B]
-    if y.ptp() == 0:
+    if np.ptp(y) == 0:
         warn(CONST_RESULT_MSG)
         return np.array([0.0])
 
@@ -225,7 +225,7 @@ def total_order(A, AB, B):
     sample variance
     """
     y = np.r_[A, B]
-    if y.ptp() == 0:
+    if np.ptp(y) == 0:
         warn(CONST_RESULT_MSG)
         return np.array([0.0])
 
@@ -235,7 +235,7 @@ def total_order(A, AB, B):
 def second_order(A, ABj, ABk, BAj, B):
     """Second order estimator following Saltelli 2002"""
     y = np.r_[A, B]
-    if y.ptp() == 0:
+    if np.ptp(y) == 0:
         warn(CONST_RESULT_MSG)
         return np.array([0.0])
 

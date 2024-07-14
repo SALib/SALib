@@ -299,7 +299,7 @@ def compute_groups_matrix(groups: List):
         groups and a list of unique group names
     """
     num_vars = len(groups)
-    unique_group_names = pd.unique(groups)
+    unique_group_names = pd.unique(np.array(groups))
     number_of_groups = len(unique_group_names)
 
     indices = dict([(x, i) for (i, x) in enumerate(unique_group_names)])

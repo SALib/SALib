@@ -137,13 +137,13 @@ def calc_delta(Y, Ygrid, X, m):
 
         # if not np.all(np.equal(Y_ix, Y_ix[0])):
         Y_ix = Y[ix]
-        if Y_ix.ptp() != 0.0:
+        if np.ptp(Y_ix) != 0.0:
             fyc = gaussian_kde(Y_ix, bw_method="silverman")(Ygrid)
             fy_ = np.abs(fy - fyc)
         else:
             fy_ = np.abs(fy)
 
-        d_hat += (nm / (2 * N)) * np.trapz(fy_, Ygrid)
+        d_hat += (nm / (2 * N)) * np.trapezoid(fy_, Ygrid)
 
     return d_hat
 
@@ -168,7 +168,7 @@ def bias_reduced_delta(Y, Ygrid, X, m, num_resamples, conf_level, y_resamples):
 def sobol_first(Y, X, m):
     # pre-process to catch constant array
     # see: https://github.com/numpy/numpy/issues/9631
-    if Y.ptp() == 0.0:
+    if np.ptp(Y) == 0.0:
         # Catch constant results
         # If Y does not change then it is not sensitive to anything...
         return 0.0
