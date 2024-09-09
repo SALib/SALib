@@ -39,10 +39,10 @@ def analyze(
 
     This implementation reports the PAWN index at the min, mean, median, and
     max across the slides/conditioning intervals as well as the coefficient of
-    variation (``CV``). The median value is the typically reported value. As
-    the ``CV`` is (standard deviation / mean), it indicates the level of
-    variability across the slides, with values closer to zero indicating lower
-    variation.
+    variation (``CV``) and standard deviation (``stdev``). The median value is the
+    typically reported value. As the ``CV`` is (standard deviation / mean), it
+    indicates the level of variability across the slides, with values closer to zero
+    indicating lower variation.
 
 
     Notes
@@ -109,7 +109,7 @@ def analyze(
     D = problem["num_vars"]
     var_names, _ = extract_group_names(problem)
 
-    results = np.full((D, 5), np.nan)
+    results = np.full((D, 6), np.nan)
     temp_pawn = np.full((S, D), np.nan)
 
     step = 1 / S
@@ -139,13 +139,14 @@ def analyze(
         mean = np.nanmean(p_ind)
         med = np.nanmedian(p_ind)
         maxs = np.nanmax(p_ind)
+        stdev = np.nanstd(p_ind)
         cv = np.nanstd(p_ind) / mean
-        results[d_i, :] = [mins, mean, med, maxs, cv]
+        results[d_i, :] = [mins, mean, med, maxs, cv, stdev]
 
     groups = _check_groups(problem)
     if groups:
         unique_grps, n_groups = extract_group_names(problem)
-        tmp = np.full((n_groups, 5), np.nan)
+        tmp = np.full((n_groups, results.shape[1]), np.nan)
 
         # Take the mean of effects from parameters that are grouped together
         unique_grps = np.array(unique_grps)
@@ -163,6 +164,7 @@ def analyze(
             ("median", results[:, 2]),
             ("maximum", results[:, 3]),
             ("CV", results[:, 4]),
+            ("stdev", results[:, 5]),
         ]
     )
     Si["names"] = var_names
