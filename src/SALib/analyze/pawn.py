@@ -149,8 +149,9 @@ def analyze(
 
         # Take the mean of effects from parameters that are grouped together
         unique_grps = np.array(unique_grps)
+        grps = np.array(groups)
         for grp_id, grp in enumerate(unique_grps):
-            tmp[grp_id, :] = np.mean(results[unique_grps == grp, :], axis=0)
+            tmp[grp_id, :] = np.mean(results[grps == grp, :], axis=0)
 
         results = tmp
         tmp = None
