@@ -10,7 +10,7 @@ readme = "README.rst"
 requires-python = ">=3.9"
 license = "MIT"
 authors = [
-  { name = "Jon Herman", email = "jdherman8@gmail.com" },
+  { name = "Jon Herman" },
   { name = "Will Usher" },
   { name = "Takuya Iwanaga" },
 ]
