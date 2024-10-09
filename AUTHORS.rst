@@ -2,8 +2,8 @@
 Developers
 ==========
 
-* Jon Herman <jdherman8@gmail.com>
-* Will Usher <william.usher@ouce.ox.ac.uk>
+* Jon Herman
+* Will Usher
 * Chris Mutel
 * Bernardo Trindade
 * Dave Hadka
