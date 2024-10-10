@@ -675,10 +675,10 @@ def ancova(Y, Y_em, V_Y, n, R):
     """
     Perform Analysis of Covariance (ANCOVA) on model and emulator outputs.
 
-    Returns:
-    tuple: A tuple containing sensitivity indices (S),
-            of structural contributions (S_a),
-            and of correlative contributions (S_b).
+    Returns
+    --------
+    tuple : A tuple containing sensitivity indices (S),
+              of structural contributions (S_a) and of correlative contributions (S_b).
     """
     # R is currently unused
     # Compute the sum of all Y_em terms
@@ -702,6 +702,7 @@ def ancova(Y, Y_em, V_Y, n, R):
     cov_matrix = np.empty((m, m))
     for i in range(m):
         cov_matrix[i] = np.cov(Y_em[:, i], Y0_minus_Y_em[:, i])[0, 1]
+
     S_b = cov_matrix.diagonal() / V_Y
 
     return (S, S_a, S_b)
