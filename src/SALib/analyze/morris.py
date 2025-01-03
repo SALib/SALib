@@ -16,7 +16,7 @@ def analyze(
     problem: Dict,
     X: np.ndarray,
     Y: np.ndarray,
-    num_resamples: int = 1000,
+    num_resamples: int = 100,
     conf_level: float = 0.95,
     scaled: bool = False,
     print_to_console: bool = False,
@@ -84,7 +84,7 @@ def analyze(
         standard deviation of X and Y according to [3]
     num_resamples : int
         The number of resamples used to compute the confidence
-        intervals (default 1000)
+        intervals (default 100)
     conf_level : float
         The confidence interval level (default 0.95)
     print_to_console : bool
