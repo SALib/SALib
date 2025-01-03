@@ -16,7 +16,7 @@ def analyze(
     problem: Dict,
     X: np.ndarray,
     Y: np.ndarray,
-    num_resamples: int = 100,
+    num_resamples: int = 1000,
     conf_level: float = 0.95,
     scaled: bool = False,
     print_to_console: bool = False,
