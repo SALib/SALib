@@ -111,7 +111,7 @@ parameter bounds but sample-specific metadata.
      A soon-to-be deprecated two-value format assumes the lower bound to be 0
      e.g. :code:`[3, 0.5]` assumes 0 to 3, with a peak at 1.5
 * norm: normal distribution with mean and standard deviation
-* truncnorm: truncated normal distribution with upper and lower bounds, mean and standard deviation
+* truncnorm: truncated normal distribution with lower and upper bounds, mean and standard deviation
 * lognorm: lognormal with ln-space mean and standard deviation
 
 
