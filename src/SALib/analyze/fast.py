@@ -130,15 +130,15 @@ def bootstrap(Y: np.ndarray, M: int, resamples: int, conf_level: float):
     res_S1 = np.zeros(resamples)
     res_ST = np.zeros(resamples)
     for i in range(resamples):
-        begin_id = np.random.randint(0,T_data)
-        if begin_id+n_size<=T_data:
-            sample_idx=np.arange(begin_id,begin_id+n_size)
+        begin_id = np.random.randint(0, T_data)
+        if begin_id + n_size <= T_data:
+            sample_idx = np.arange(begin_id, begin_id + n_size)
         else:
-            sample_idx=np.concatenate(
-                (np.arange(begin_id, T_data), np.arange(0, begin_id+n_size-T_data))
+            sample_idx = np.concatenate(
+                (np.arange(begin_id, T_data), np.arange(0, begin_id + n_size - T_data))
             )
 
-        Y_rs = Y[sample_idx]          
+        Y_rs = Y[sample_idx]
         N = len(Y_rs)
         omega = math.floor((N - 1) / (2 * M))
 
