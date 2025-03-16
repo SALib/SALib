@@ -48,24 +48,21 @@ jobs:
 
       - name: Update Conda Environment
         run: |
-          mamba env update -n SALib -f environment.yml
+          micromamba env update -n SALib -f environment.yml
         if: steps.envcache.outputs.cache-hit != 'true'
 
       - name: Install package
         run: |
-          conda activate SALib
           pip install .[test]
 
       - name: Test
         if: matrix.python-version != '3.12'
         run: |
-          conda activate SALib
           pytest
 
       - name: Test with coverage and uploads
         if: matrix.python-version == '3.12'
         run: |
-          conda activate SALib
           python -m pip install coveralls
           pytest --cov SALib --cov-report html --verbose
           coveralls
