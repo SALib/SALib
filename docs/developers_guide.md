@@ -62,6 +62,18 @@ $ uv pip install -e .
 
 # You may also want the ipython and ipykernel
 $ uv pip install ipykernel ipython
+
+# Install pre-commit hook support
+$ uv pip install pre-commit
+$ pre-commit install
+```
+
+## Prior to submitting a PR
+
+Run the below to catch any formatting issues.
+
+```bash
+pre-commit run --all-files
 ```
 
 ## Running tests
@@ -97,14 +109,4 @@ In a command prompt
 ```bash
 > cd docs
 > sphinx-build . ./html
-```
-
-## Prior to submitting a PR
-
-Run the below to catch any formatting issues.
-
-```bash
-# pre-commit install
-
-pre-commit run --all-files
 ```
