@@ -22,16 +22,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up conda
-        uses: conda-incubator/setup-miniconda@v3
+      - name: Set up micromamba
+        uses: mamba-org/setup-micromamba@v2
         with:
-          activate-environment: SALib
+          environment-name: SALib
           python-version: ${{ matrix.python-version }}
           channels: conda-forge
-          miniforge-variant: Mambaforge
-          miniforge-version: latest
-          use-mamba: true
-          channel-priority: true
+          cache-environment: true
 
       - name: Get Date
         id: get-date
