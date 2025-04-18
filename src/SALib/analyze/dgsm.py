@@ -26,7 +26,7 @@ def analyze(
     --------
         >>> X = finite_diff.sample(problem, 1000)
         >>> Y = Ishigami.evaluate(X)
-        >>> Si = dgsm.analyze(problem, Y, print_to_console=False)
+        >>> Si = dgsm.analyze(problem, X, Y, print_to_console=False)
 
 
     Parameters
