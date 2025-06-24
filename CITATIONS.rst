@@ -61,6 +61,7 @@ Software
 * `agentpy <https://github.com/JoelForamitti/agentpy>`_
 * `uncertainpy <https://github.com/simetenn/uncertainpy>`_
 * `CLIMADA <https://github.com/CLIMADA-project/climada_python>`_
+* `parsac <https://github.com/BoldingBruggeman/parsac>`_
 
 
 Blogs
