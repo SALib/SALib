@@ -52,14 +52,14 @@ def test_delta():
     test = pd.read_csv(StringIO(result), index_col=0, sep=r"\s+")
     test["expected"] = delta_expected
 
-    lower = test["delta"] - test["delta_conf"]
-    upper = test["delta"] + test["delta_conf"]
+    lower = test["delta_raw"] - test["delta_raw_conf"]
+    upper = test["delta_raw"] + test["delta_raw_conf"]
     comparison = test["expected"].between(lower, upper)
     assert comparison.all(), (
         "Expected Delta results not within confidence bounds\n"
-        f"+\\-: \n{test['delta_conf']}\n"
+        f"+\\-: \n{test['delta_raw_conf']}\n"
         f"Expected: {delta_expected}\n"
-        f"Got: {test['delta']}\n"
+        f"Got: {test['delta_raw']}\n"
     )
 
     test["expected"] = sobol_expected

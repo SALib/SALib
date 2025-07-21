@@ -55,3 +55,5 @@ docs/html/
 salib-dev/
 *.pyc 
 __pycache__/
+src/SALib/analyze/debugger.ipynb
+/src/SALib/analyze/ritafiles
