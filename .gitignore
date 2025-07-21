@@ -51,3 +51,7 @@ MANIFEST
 playground/
 
 docs/html/
+
+salib-dev/
+*.pyc 
+__pycache__/
