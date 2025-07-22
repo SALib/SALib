@@ -54,6 +54,7 @@ def test_constant_input_column():
 def test_binary_unbalanced():
     """If dataset too small for binning minimum"""
     df = create_base_dataframe()
+    np.random.seed(42)
     n = len(df)
     n_zeroes = max(1, int(n * 0.001))
     zeroes_and_ones = np.array([0] * n_zeroes + [1] * (len(df) - n_zeroes))
@@ -67,6 +68,7 @@ def test_binary_unbalanced():
 def test_binning_adaptation():
     """Data bin modification and adaptation."""
     df = create_base_dataframe()
+    np.random.seed(42)
     n = len(df)
     counts = {
         0: int(0.0004 * n),
@@ -98,6 +100,7 @@ def test_usererror_binspecs_datatype():
     bins, equally distributed across X range. (default 10)
     """
     df = create_base_dataframe()
+    np.random.seed(42)
     n = len(df)
     df["invalid_dtype"] = np.random.randint(35, 500, n)
     bins_specs = {
@@ -117,6 +120,7 @@ def test_usererror_binspecs_notascending():
     of bins equally distributed across X range. (default 10)
     """
     df = create_base_dataframe()
+    np.random.seed(42)
     n = len(df)
     df["order_notascending"] = np.random.randint(35, 500, n)
     bins_specs = {
@@ -137,6 +141,7 @@ def test_usererror_binspecs_outofrange():
     number of bins equally distributed across X range. (default 10)
     """
     df = create_base_dataframe()
+    np.random.seed(42)
     n = len(df)
     df["boundaries_outofXrange"] = np.random.randint(35, 500, n)
     bins_specs = {
@@ -157,6 +162,7 @@ def test_usererror_binspecs_nonnumeric():
     number of bins equally distributed across X range. (default 10)
     """
     df = create_base_dataframe()
+    np.random.seed(42)
     n = len(df)
     df["binvals_nonnumeric"] = np.random.randint(35, 500, n)
     bins_specs = {
@@ -175,6 +181,7 @@ def test_binspecs_correctuse():
     Int, list (numeric, ascending), None, or unspecified.
     """
     df = create_base_dataframe()
+    np.random.seed(42)
     n = len(df)
 
     # Examples of correct cases: integer, list of boundaries, None, or not specified in dict bins_specs
@@ -277,7 +284,7 @@ def test_databias_warning():
     df["col_biased"] = col_biased
     problem, X, Y = create_problemspec(df)
     with pytest.warns(UserWarning, match=r"Potential Bias Notice:"):
-        _ = delta.analyze(problem=problem, X=X, Y=Y, num_resamples=3)
+        _ = delta.analyze(problem=problem, X=X, Y=Y, num_resamples=3, bins_specs={'col_biased': 4})
 
 
 def test_dataset_smallsize():

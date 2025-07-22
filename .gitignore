@@ -57,3 +57,4 @@ salib-dev/
 __pycache__/
 src/SALib/analyze/debugger.ipynb
 /src/SALib/analyze/ritafiles
+src/SALib/analyze/forgit.ipynb
