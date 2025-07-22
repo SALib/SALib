@@ -1,8 +1,6 @@
 from typing import Optional, Dict
 from scipy.stats import norm, gaussian_kde, rankdata
 
-from sklearn.preprocessing import MinMaxScaler
-
 import numpy as np
 import pandas as pd
 
@@ -355,17 +353,12 @@ def check_specified_bininfo(bininfo, Xmin, Xmax, paramname):
         )
 
 
-def calc_delta(Y, Ygrid, X, m, scale_for_kde=True):
+def calc_delta(Y, Ygrid, X, m):
     """Plischke et al. (2013) delta index estimator (eqn 26) for d_hat."""
     N = len(Y)
-    if scale_for_kde:
-        scaler = MinMaxScaler()
-        X_scaled = scaler.fit_transform(X.reshape(-1, 1)).flatten()
-    else:
-        X_scaled = X
 
     fy = gaussian_kde(Y, bw_method="silverman")(Ygrid)
-    xr = rankdata(X_scaled, method="ordinal")
+    xr = rankdata(X, method="ordinal")
 
     d_hat = 0.0
     total_bins = len(m) - 1
