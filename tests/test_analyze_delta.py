@@ -284,7 +284,7 @@ def test_databias_warning():
     df["col_biased"] = col_biased
     problem, X, Y = create_problemspec(df)
     with pytest.warns(UserWarning, match=r"Potential Bias Notice:"):
-        _ = delta.analyze(problem=problem, X=X, Y=Y, num_resamples=3, bins_specs={'col_biased': 4})
+        _ = delta.analyze(problem=problem, X=X, Y=Y, num_resamples=3, bins_specs={'col_biased': 2})
 
 
 def test_dataset_smallsize():
