@@ -102,6 +102,8 @@ def analyze(
             influence over its entire input range)
             - Answers the question: "How important is input feature X, and how prominent is its influence specifically
                 in my dataset?"
+            - Is a valid interpretation for real-world scenario, if the input data is representative of the 
+                real-world sample and variability without inconsistent or incomplete sampling (rare for real-world data capture)
 
         'notes' contains flags, warnings, or error messages.
             - Will raise a flag if 'balanced' and 'raw' delta scores differ by >0.1. This suggests that the input dataset is
