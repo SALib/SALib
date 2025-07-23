@@ -52,11 +52,7 @@ playground/
 
 docs/html/
 
-salib-dev/
 *.pyc 
 __pycache__/
-src/SALib/analyze/debugger.ipynb
-/src/SALib/analyze/ritafiles
-src/SALib/analyze/forgit.ipynb
 tests/data/model_input.txt
 tests/data/model_output.txt
