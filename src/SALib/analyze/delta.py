@@ -403,13 +403,13 @@ def bias_reduced_delta(
     """Plischke et al. 2013 bias reduction technique (eqn 30)"""
     d = np.empty(num_resamples)
 
-    ind = get_bootstrap_indices(
+    ind = obtain_resampled_subset(
         X, y_resamples, mode, bin_edges, paramname, min_class_size, warn_print=True
     )
     d_hat = calc_delta(Y[ind], Ygrid, X[ind], m)
 
     try:
-        r = [get_bootstrap_indices(X, y_resamples, mode, bin_edges, paramname, min_class_size, warn_print=False) for _ in range(num_resamples)]
+        r = [obtain_resampled_subset(X, y_resamples, mode, bin_edges, paramname, min_class_size, warn_print=False) for _ in range(num_resamples)]
     except ValueError as e:
         raise RuntimeError(f"BOOTSTRAP ERROR: [{paramname}][{mode}]: {e}") from e
 
@@ -420,7 +420,7 @@ def bias_reduced_delta(
     return (d.mean(), norm.ppf(0.5 + conf_level / 2) * d.std(ddof=1), ind)
 
 
-def bootstrap_binning(bin_edges, X, min_class_size):
+def obtain_bins_indices(bin_edges, X, min_class_size):
     """
     Returns indices for all specified bins, ensuring 
     that all bins are at least minimum_class_size
@@ -444,10 +444,10 @@ def bootstrap_binning(bin_edges, X, min_class_size):
     return init_indices, final_indices
 
 
-def get_bootstrap_indices(
+def obtain_resampled_subset(
     X, y_resamples, mode, bin_edges, paramname, min_class_size, warn_print=False
 ):
-    """Returns bootstrap subset indices for X"""
+    """Returns subset indices for X"""
     N = len(X)
     X = np.asarray(X)
     if X.max() == X.min():
@@ -477,7 +477,7 @@ def get_bootstrap_indices(
                 bininfo=5, Xmin=X_select.min(), Xmax=X_select.max(), paramname=paramname
             )
 
-        init_indices, final_indices = bootstrap_binning(
+        init_indices, final_indices = obtain_bins_indices(
             bin_edges, X_select, min_class_size
         )
         n_bins = len(final_indices)
