@@ -409,18 +409,7 @@ def bias_reduced_delta(
     d_hat = calc_delta(Y[ind], Ygrid, X[ind], m)
 
     try:
-        r = [
-            get_bootstrap_indices(
-                X,
-                y_resamples,
-                mode,
-                bin_edges,
-                paramname,
-                min_class_size,
-                warn_print=False,
-            )
-            for _ in range(num_resamples)
-        ]
+        r = [get_bootstrap_indices(X, y_resamples, mode, bin_edges, paramname, min_class_size, warn_print=False) for _ in range(num_resamples)]
     except ValueError as e:
         raise RuntimeError(f"BOOTSTRAP ERROR: [{paramname}][{mode}]: {e}") from e
 
