@@ -1,12 +1,15 @@
 import math
 
+from typing import Optional, Union
+
 import numpy as np
 
 from . import common_args
 from ..util import scale_samples, read_param_file
 
+from ._util import handle_seed
 
-def sample(problem, N, M=4, seed=None):
+def sample(problem, N, M=4, seed: Optional[Union[int, np.random.Generator]] = None):
     """Generate model inputs for extended Fourier Amplitude Sensitivity Test.
 
     Returns a NumPy matrix containing the model inputs required by the extended
@@ -25,8 +28,12 @@ def sample(problem, N, M=4, seed=None):
     M : int
         The interference parameter, i.e., the number of harmonics to sum in the
         Fourier series decomposition (default 4)
-    seed : int
-        Seed to generate a random number
+    seed : {None, int, `numpy.random.Generator`}, optional
+        If `seed` is None the `numpy.random.Generator` generator is used.
+        If `seed` is an int, a new ``Generator`` instance is used,
+        seeded with `seed`.
+        If `seed` is already a ``Generator`` instance then that instance is
+        used. Default is None.
 
     References
     ----------
@@ -43,8 +50,7 @@ def sample(problem, N, M=4, seed=None):
        Technometrics, 41(1):39-56,
        doi:10.1080/00401706.1999.10485594.
     """
-    if seed:
-        np.random.seed(seed)
+    rng = handle_seed(seed)
 
     if N <= 4 * M**2:
         raise ValueError(
@@ -78,7 +84,7 @@ def sample(problem, N, M=4, seed=None):
 
         # random phase shift on [0, 2pi) following Saltelli et al.
         # Technometrics 1999
-        phi = 2 * math.pi * np.random.rand()
+        phi = 2 * math.pi * rng.random()
 
         for j in range(D):
             g = 0.5 + (1 / math.pi) * np.arcsin(np.sin(omega2[j] * s + phi))

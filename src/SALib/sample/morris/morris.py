@@ -1,7 +1,6 @@
 import numpy as np
-from typing import Dict
+from typing import Dict, Optional, Union
 
-import numpy.random as rd
 import warnings
 
 from .local import LocalOptimisation
@@ -18,6 +17,7 @@ from SALib.util import (
     _compute_delta,
 )
 
+from .._util import handle_seed
 
 __all__ = ["sample"]
 
@@ -28,7 +28,7 @@ def sample(
     num_levels: int = 4,
     optimal_trajectories: int = None,
     local_optimization: bool = True,
-    seed: int = None,
+    seed: Optional[Union[int, np.random.Generator]] = None
 ) -> np.ndarray:
     """Generate model inputs using the Method of Morris.
 
@@ -90,8 +90,12 @@ def sample(
         Speeds up the process tremendously for bigger N and num_levels.
         If set to ``False`` brute force method is used, unless ``gurobipy`` is
         available
-    seed : int
-        Seed to generate a random number
+    seed : {None, int, `numpy.random.Generator`}, optional
+        If `seed` is None the `numpy.random.Generator` generator is used.
+        If `seed` is an int, a new ``Generator`` instance is used,
+        seeded with `seed`.
+        If `seed` is already a ``Generator`` instance then that instance is
+        used. Default is None.
 
     Returns
     -------
@@ -123,8 +127,7 @@ def sample(
        Environmental Modelling & Software 37, 103-109.
        https://doi.org/10.1016/j.envsoft.2012.03.008
     """
-    if seed:
-        np.random.seed(seed)
+    rng = handle_seed(seed)
 
     _check_if_num_levels_is_even(num_levels)
 
@@ -186,7 +189,7 @@ def _sample_morris(
 
 
 def _generate_trajectory(
-    group_membership: np.ndarray, num_levels: int = 4
+    group_membership: np.ndarray, rng, num_levels: int = 4
 ) -> np.ndarray:
     """Return a single trajectory
 
@@ -199,6 +202,7 @@ def _generate_trajectory(
     ---------
     group_membership : np.ndarray
         a k-by-g matrix which notes factor membership of groups
+    rng : numpy.random.Generator
     num_levels : int, default=4
         The number of levels in the grid
 
@@ -224,7 +228,7 @@ def _generate_trajectory(
 
     # Matrix D* - num_params-by-num_params matrix which describes whether
     # factors move up or down
-    D_star = np.diag(rd.choice([-1, 1], num_params))
+    D_star = np.diag(rng.choice([-1, 1], num_params))
 
     x_star = _generate_x_star(num_params, num_levels)
 
@@ -270,12 +274,13 @@ def _compute_b_star(
     return b_star
 
 
-def _generate_p_star(num_groups: int) -> np.ndarray:
+def _generate_p_star(num_groups: int, rng:np.random.Generator) -> np.ndarray:
     """Describe the order in which groups move
 
     Parameters
     ---------
     num_groups : int
+    rng : numpy.random.Generator
 
     Returns
     -------
@@ -283,11 +288,11 @@ def _generate_p_star(num_groups: int) -> np.ndarray:
         Matrix P* - size (g-by-g)
     """
     p_star = np.eye(num_groups, num_groups)
-    rd.shuffle(p_star)
+    rng.shuffle(p_star)
     return p_star
 
 
-def _generate_x_star(num_params: int, num_levels: int) -> np.ndarray:
+def _generate_x_star(num_params: int, num_levels: int, rng:np.random.Generator) -> np.ndarray:
     """Generate an 1-by-num_params array to represent initial position for EE
 
     This should be a randomly generated array in the p level grid
@@ -299,6 +304,7 @@ def _generate_x_star(num_params: int, num_levels: int) -> np.ndarray:
         The number of parameters (factors)
     num_levels : int
         The number of levels
+    nrg : numpy.random.Generator
 
     Returns
     -------
@@ -310,7 +316,7 @@ def _generate_x_star(num_params: int, num_levels: int) -> np.ndarray:
     bound = 1 - delta
     grid = np.linspace(0, bound, int(num_levels / 2))
 
-    x_star[0, :] = rd.choice(grid, num_params)
+    x_star[0, :] = rng.choice(grid, num_params)
 
     return x_star
 
