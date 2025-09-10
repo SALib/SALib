@@ -133,7 +133,7 @@ def sample(
 
     problem = _define_problem_with_groups(problem)
 
-    sample_morris = _sample_morris(problem, N, num_levels)
+    sample_morris = _sample_morris(problem, N, rng, num_levels=num_levels)
 
     if optimal_trajectories:
         if local_optimization and (
@@ -152,7 +152,7 @@ def sample(
 
 
 def _sample_morris(
-    problem: Dict, number_trajectories: int, num_levels: int = 4
+    problem: Dict, number_trajectories: int, rng:np.random.Generator, num_levels: int = 4
 ) -> np.ndarray:
     """Generate trajectories for groups
 
@@ -166,6 +166,7 @@ def _sample_morris(
         The problem definition
     number_trajectories : int
         The number of trajectories to generate
+    rng : np.random.Generator
     num_levels : int, default=4
         The number of grid levels
 
@@ -180,7 +181,7 @@ def _sample_morris(
     num_groups = group_membership.shape[1]
 
     sample_morris = [
-        _generate_trajectory(group_membership, num_levels)
+        _generate_trajectory(group_membership, rng, num_levels=num_levels)
         for _ in range(number_trajectories)
     ]
     sample_morris = np.array(sample_morris)
@@ -189,7 +190,7 @@ def _sample_morris(
 
 
 def _generate_trajectory(
-    group_membership: np.ndarray, rng, num_levels: int = 4
+    group_membership: np.ndarray, rng:np.random.Generator, num_levels: int = 4
 ) -> np.ndarray:
     """Return a single trajectory
 
@@ -221,7 +222,7 @@ def _generate_trajectory(
     # Matrix B - size (g + 1) * g -  lower triangular matrix
     B = np.tril(np.ones([num_groups + 1, num_groups], dtype=int), -1)
 
-    P_star = _generate_p_star(num_groups)
+    P_star = _generate_p_star(num_groups, rng)
 
     # Matrix J - a (g+1)-by-num_params matrix of ones
     J = np.ones((num_groups + 1, num_params))
@@ -304,7 +305,7 @@ def _generate_x_star(num_params: int, num_levels: int, rng:np.random.Generator) 
         The number of parameters (factors)
     num_levels : int
         The number of levels
-    nrg : numpy.random.Generator
+    rng : numpy.random.Generator
 
     Returns
     -------
@@ -451,11 +452,10 @@ def cli_parse(parser):
 
 
 def cli_action(args):
-    rd.seed(args.seed)
-
     problem = read_param_file(args.paramfile)
     param_values = sample(
-        problem, args.samples, args.levels, args.k_optimal, args.local
+        problem, args.samples, num_levels=args.levels, optimal_trajectories=args.k_optimal,
+        local_optimization=args.local, seed=args.seed
     )
 
     np.savetxt(
