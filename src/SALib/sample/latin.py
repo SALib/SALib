@@ -62,7 +62,7 @@ def sample(problem, N, seed: Optional[Union[int, np.random.Generator]] = None):
     # lower_bound = loc, upper_bound = loc + scale
     temp = np.array(
         [
-            stats.uniform.rvs(loc=sample * d, scale=d, size=num_groups, random_state=rng)
+            rng.uniform(low=sample * d, high=(sample + 1) * d, size=num_groups)
             for sample in range(num_samples)
         ]
     )
