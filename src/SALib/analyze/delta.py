@@ -102,7 +102,7 @@ def analyze(
             influence over its entire input range)
             - Answers the question: "How important is input feature X, and how prominent is its influence specifically
                 in my dataset?"
-            - Is a valid interpretation for real-world scenario, if the input data is representative of the 
+            - Is a valid interpretation for real-world scenario, if the input data is representative of the
                 real-world sample and variability without inconsistent or incomplete sampling (rare for real-world data capture)
 
         'notes' contains flags, warnings, or error messages.
@@ -277,7 +277,9 @@ def analyze(
             note = exception_handler(e, name, Y.size)
             notes.append(note)
             continue
+
         S["notes"] = notes
+
     if print_to_console:
         summary_dict = {"names": problem["names"], "notes": notes}
         if "delta_balanced" in S:
@@ -300,6 +302,7 @@ def analyze(
             )
         df_summary = pd.DataFrame(summary_dict)
         print(df_summary.to_string(index=False))
+
     if bootstrap_savedf is not None:
         df_boot = pd.DataFrame(bootstrap_matrix)
         try:
@@ -308,12 +311,13 @@ def analyze(
             warnings.warn(
                 f"WARNING: Failed to write bootstrap file to {bootstrap_savedf}. Reason: {e}"
             )
+
     return S
 
 
 def check_specified_bininfo(bininfo, Xmin, Xmax, paramname):
     """Validate user-specified bin edges or number of bins; fallback to default if invalid."""
-    defaultbins = 10  # 5% * (1/0.005)
+    defaultbins = 10
     if bininfo is None:
         return np.linspace(Xmin, Xmax, defaultbins + 1), ""
     elif isinstance(bininfo, int):
@@ -369,7 +373,9 @@ def calc_delta(Y, Ygrid, X, m):
         ix = np.where((xr > m[j]) & (xr <= m[j + 1]))[0]
         nm = len(ix)
         if nm == 0:
-            continue  # Skip empty bins. Even if it doesn't throw an error, can't estimate local distribution for gaussian_kde from empty data
+            # Skip empty bins. Even if it doesn't throw an error,
+            # can't estimate local distribution for gaussian_kde from empty data
+            continue
 
         Y_ix = Y[ix]
         if np.ptp(Y_ix) != 0.0:
@@ -411,7 +417,18 @@ def bias_reduced_delta(
     d_hat = calc_delta(Y[ind], Ygrid, X[ind], m)
 
     try:
-        r = [obtain_resampled_subset(X, y_resamples, mode, bin_edges, paramname, min_class_size, warn_print=False) for _ in range(num_resamples)]
+        r = [
+            obtain_resampled_subset(
+                X,
+                y_resamples,
+                mode,
+                bin_edges,
+                paramname,
+                min_class_size,
+                warn_print=False,
+            )
+            for _ in range(num_resamples)
+        ]
     except ValueError as e:
         raise RuntimeError(f"BOOTSTRAP ERROR: [{paramname}][{mode}]: {e}") from e
 
@@ -424,7 +441,7 @@ def bias_reduced_delta(
 
 def obtain_bins_indices(bin_edges, X, min_class_size):
     """
-    Returns indices for all specified bins, ensuring 
+    Returns indices for all specified bins, ensuring
     that all bins are at least minimum_class_size
     """
     init_indices = []
@@ -491,11 +508,7 @@ def obtain_resampled_subset(
                 f"[{paramname}][{mode}] Only one bin remains. Revisit whether processing method is suitable for this parameter, or increase dataset size or spread. Highly biased input.",
                 f"[{mode}] Single valid bin. Insufficient spread in feature, highly biased input; ",
             )
-        # if n_bins != len(init_indices):
-            # if warn_print:
-            #     warnings.warn(
-            #         f"[{paramname}][{mode}] Bin Merge Notice: Final no. bins is {len(final_indices)}. Min samples per bin: {min_class_size}"
-            #     )
+
         if n_per_bin < min_class_size:
             raise SampleSizeError(
                 f"[{paramname}][{mode}] Dataset size error: Dataset is not large enough for number of bins.",
@@ -519,7 +532,7 @@ def obtain_resampled_subset(
 
 
 def sobol_first(Y, X, m):
-    # pre-process to catch constant array
+    # Pre-process to catch constant array
     # see: https://github.com/numpy/numpy/issues/9631
     if np.ptp(Y) == 0.0:
         # Catch constant results
