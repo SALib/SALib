@@ -207,11 +207,11 @@ class TestLocallyOptimalStrategy:
         problem = read_param_file(param_file)
         num_levels = 4
 
-        np.random.seed(12345)
-        expected = _sample_morris(problem, N, num_levels)
-
-        np.random.seed(12345)
-        actual = _sample_morris(problem, N, num_levels)
+        rng = handle_seed(12345)
+        expected = _sample_morris(problem, N, num_levels, rng)
+        
+        rng = handle_seed(12345)
+        actual = _sample_morris(problem, N, num_levels, rng)
 
         assert_equal(actual, expected)
 
@@ -226,7 +226,7 @@ class TestLocallyOptimalStrategy:
         Note that local and brute force methods are not guaranteed to produce
         exact answers, even for small problems.
         """
-        rd.seed(12345)
+        rng = handle_seed(12345)
 
         N = 8
         param_file = setup_param_groups_prime
@@ -238,7 +238,7 @@ class TestLocallyOptimalStrategy:
 
         num_groups = len(set(problem["groups"]))
 
-        input_sample = _sample_morris(problem, N, num_levels)
+        input_sample = _sample_morris(problem, N, num_levels, rng)
 
         local = LocalOptimisation()
 

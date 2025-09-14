@@ -15,9 +15,8 @@ from SALib.util import (
     compute_groups_matrix,
     _define_problem_with_groups,
     _compute_delta,
+    handle_seed
 )
-
-from .._util import handle_seed
 
 __all__ = ["sample"]
 
@@ -231,7 +230,7 @@ def _generate_trajectory(
     # factors move up or down
     D_star = np.diag(rng.choice([-1, 1], num_params))
 
-    x_star = _generate_x_star(num_params, num_levels)
+    x_star = _generate_x_star(num_params, num_levels, rng)
 
     # Matrix B* - size (num_groups + 1) * num_params
     B_star = _compute_b_star(J, x_star, delta, B, group_membership, P_star, D_star)

@@ -1,4 +1,4 @@
-from typing import Dict, Union, Optional, Sequence
+from typing import Dict, Union, Sequence
 
 import pkgutil
 import csv
@@ -190,9 +190,10 @@ def handle_seed(
         # Spawn a Generator that we can own and reset.
         bg = seed._bit_generator
         ss = bg._seed_seq
-        rng = [np.random.Generator(type(bg)(child_ss))
-                     for child_ss in ss.spawn(1)][0]
-    elif isinstance(seed, (np.random.BitGenerator, np.random.SeedSequence, int, type(None))):
+        rng = [np.random.Generator(type(bg)(child_ss)) for child_ss in ss.spawn(1)][0]
+    elif isinstance(
+        seed, (np.random.BitGenerator, np.random.SeedSequence, int, type(None))
+    ):
         rng = np.random.default_rng(seed)
     elif isinstance(seed, (list, tuple, np.ndarray)):
         # Handle sequences of integers

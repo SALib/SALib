@@ -21,6 +21,7 @@ from SALib.util import (
     compute_groups_matrix,
     _define_problem_with_groups,
     _compute_delta,
+    handle_seed
 )
 
 
@@ -176,8 +177,9 @@ class TestGroupSampleGeneration:
         each row contains one element equal to 1, all others are 0
         no two columns have 1s in the same position
         """
+        rng = handle_seed(101)
         for i in range(1, 100):
-            output = _generate_p_star(i)
+            output = _generate_p_star(i, rng)
             if np.any(np.sum(output, 0) != np.ones(i)):
                 raise AssertionError("Not legal P along axis 0")
             elif np.any(np.sum(output, 1) != np.ones(i)):
@@ -230,8 +232,8 @@ class TestGroupSampleGeneration:
         num_params = 4
         num_levels = 4
 
-        np.random.seed(10)
-        actual = _generate_x_star(num_params, num_levels)
+        rng = handle_seed(10)
+        actual = _generate_x_star(num_params, num_levels, rng)
         print(actual)
         expected = np.array([[0.333333, 0.333333, 0.0, 0.333333]])
         assert_allclose(actual, expected, rtol=1e-05)

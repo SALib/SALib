@@ -92,7 +92,7 @@ def analyze(
     num_levels : int
         The number of grid levels, must be identical to the value
         passed to SALib.sample.morris (default 4)
-    seed : int
+    seed : {int, None, np.random.Generator}
         Seed to generate a random number
 
     Returns

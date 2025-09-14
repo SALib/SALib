@@ -20,8 +20,8 @@ def set_seed():
     It is necessary to set seeds for both the numpy.random, and
     the stdlib.random libraries.
     """
-    seed = 123456
-    np.random.seed(seed)
+    rng = handle_seed(12345)
+    return rng
 
 
 class TestMorris:
@@ -29,10 +29,10 @@ class TestMorris:
         """Note that this is a poor estimate of the Ishigami
         function.
         """
-        set_seed
+        rng = set_seed()
         param_file = "src/SALib/test_functions/params/Ishigami.txt"
         problem = read_param_file(param_file)
-        param_values = morris_sampler(problem, 10000, 4, optimal_trajectories=None)
+        param_values = morris_sampler(problem, 10000, 4, optimal_trajectories=None, seed=rng)
 
         Y = Ishigami.evaluate(param_values)
 
@@ -51,10 +51,10 @@ class TestMorris:
         """Note that this is a poor estimate of the Ishigami
         function.
         """
-        set_seed
+        rng = set_seed()
         param_file = "src/SALib/test_functions/params/Ishigami.txt"
         problem = read_param_file(param_file)
-        param_values = morris_sampler(problem, 10000, 4, optimal_trajectories=None)
+        param_values = morris_sampler(problem, 10000, 4, optimal_trajectories=None, seed=rng)
 
         Y = Ishigami.evaluate(param_values)
 
@@ -71,12 +71,12 @@ class TestMorris:
         assert_allclose(Si["mu_star"], [0.532657, 0.658405, 0.43654], atol=0, rtol=1e-5)
 
     def test_regression_morris_groups(self, set_seed):
-        set_seed
+        rng = set_seed()
         param_file = "src/SALib/test_functions/params/Ishigami_groups.txt"
         problem = read_param_file(param_file)
 
         param_values = morris_sampler(
-            problem=problem, N=10000, num_levels=4, optimal_trajectories=None
+            problem=problem, N=10000, num_levels=4, optimal_trajectories=None, seed=rng
         )
 
         Y = Ishigami.evaluate(param_values)
@@ -93,7 +93,7 @@ class TestMorris:
         assert_allclose(Si["mu_star"], [7.610322, 10.197014], atol=0, rtol=1e-5)
 
     def test_regression_morris_groups_brute_optim(self, set_seed):
-        set_seed
+        rng = set_seed()
         param_file = "src/SALib/test_functions/params/Ishigami_groups.txt"
         problem = read_param_file(param_file)
 
@@ -103,6 +103,7 @@ class TestMorris:
             num_levels=4,
             optimal_trajectories=6,
             local_optimization=False,
+            seed=rng
         )
 
         Y = Ishigami.evaluate(param_values)
@@ -133,6 +134,7 @@ class TestMorris:
             num_levels=4,
             optimal_trajectories=20,
             local_optimization=True,
+            seed=rng
         )
 
         Y = Ishigami.evaluate(param_values)
@@ -144,6 +146,7 @@ class TestMorris:
             conf_level=0.95,
             print_to_console=False,
             num_levels=4,
+            seed=rng
         )
 
         assert_allclose(Si["mu_star"], [13.95285, 7.875], rtol=1e-5)
@@ -166,6 +169,7 @@ class TestMorris:
             num_levels=4,
             optimal_trajectories=9,
             local_optimization=True,
+            seed=rng
         )
 
         Y = Ishigami.evaluate(param_values)
@@ -177,6 +181,7 @@ class TestMorris:
             conf_level=0.95,
             print_to_console=False,
             num_levels=4,
+            seed=rng
         )
 
         assert_allclose(
