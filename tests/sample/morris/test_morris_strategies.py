@@ -3,7 +3,7 @@
 from SALib.sample.morris import SampleMorris, LocalOptimisation, BruteForce
 from SALib.sample.morris.morris import _sample_morris
 
-from SALib.util import read_param_file
+from SALib.util import read_param_file, handle_seed
 
 import numpy as np
 from numpy.testing import assert_equal, assert_allclose
@@ -208,10 +208,10 @@ class TestLocallyOptimalStrategy:
         num_levels = 4
 
         rng = handle_seed(12345)
-        expected = _sample_morris(problem, N, num_levels, rng)
+        expected = _sample_morris(problem, N, rng, num_levels=num_levels)
         
         rng = handle_seed(12345)
-        actual = _sample_morris(problem, N, num_levels, rng)
+        actual = _sample_morris(problem, N, rng, num_levels=num_levels)
 
         assert_equal(actual, expected)
 
@@ -238,7 +238,7 @@ class TestLocallyOptimalStrategy:
 
         num_groups = len(set(problem["groups"]))
 
-        input_sample = _sample_morris(problem, N, num_levels, rng)
+        input_sample = _sample_morris(problem, N, rng, num_levels=num_levels)
 
         local = LocalOptimisation()
 

@@ -25,7 +25,7 @@ def sample(
     problem: Dict,
     N: int,
     num_levels: int = 4,
-    optimal_trajectories: int = None,
+    optimal_trajectories: Optional[Union[int, None]] = None,
     local_optimization: bool = True,
     seed: Optional[Union[int, np.random.Generator]] = None
 ) -> np.ndarray:

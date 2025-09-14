@@ -197,8 +197,10 @@ class TestGroupSampleGeneration:
         # Two groups of three factors
         G = np.array([[1, 0], [0, 1], [0, 1]])
         # Four levels
+        rng = handle_seed(101)
+
         num_levels = 4
-        output = _generate_trajectory(G, num_levels)
+        output = _generate_trajectory(G, rng, num_levels=num_levels)
         if np.any((output > 1) | (output < 0)):
             raise AssertionError("Bound not working: %s", output)
         assert_equal(output.shape[0], 3)

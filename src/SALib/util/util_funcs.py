@@ -188,7 +188,7 @@ def handle_seed(
 
     if isinstance(seed, np.random.Generator):
         # Spawn a Generator that we can own and reset.
-        rng = seed.spawn(1)
+        rng = seed.spawn(1)[0]
     elif isinstance(
         seed, (np.random.BitGenerator, np.random.SeedSequence, int, type(None))
     ):
