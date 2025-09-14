@@ -9,9 +9,8 @@ from typing import Optional, Union
 
 import numpy as np
 from . import common_args
-from ..util import scale_samples, read_param_file
+from ..util import scale_samples, read_param_file, handle_seed
 
-from ._util import handle_seed
 
 def find_smallest(num_vars):
     """Find the smallest exponent of two that is greater than the number

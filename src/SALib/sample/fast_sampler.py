@@ -5,9 +5,8 @@ from typing import Optional, Union
 import numpy as np
 
 from . import common_args
-from ..util import scale_samples, read_param_file
+from ..util import scale_samples, read_param_file, handle_seed
 
-from ._util import handle_seed
 
 def sample(problem, N, M=4, seed: Optional[Union[int, np.random.Generator]] = None):
     """Generate model inputs for extended Fourier Amplitude Sensitivity Test.

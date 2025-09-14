@@ -3,9 +3,8 @@ import numpy as np
 
 from . import common_args
 from . import sobol_sequence
-from ..util import scale_samples, read_param_file
+from ..util import scale_samples, read_param_file, handle_seed
 
-from ._util import handle_seed
 
 def sample(
     problem: Dict,

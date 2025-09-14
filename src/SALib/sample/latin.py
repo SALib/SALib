@@ -1,13 +1,11 @@
+from typing import Optional, Union
+
 import numpy as np
 import scipy.stats as stats
 
-
-from typing import Optional, Union
-
-
 from . import common_args
-from ..util import read_param_file, scale_samples, compute_groups_matrix
-from ._util import handle_seed
+from ..util import read_param_file, scale_samples, compute_groups_matrix, handle_seed
+
 
 def sample(problem, N, seed: Optional[Union[int, np.random.Generator]] = None):
     """Generate model inputs using Latin hypercube sampling (LHS).
