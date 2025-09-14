@@ -1,7 +1,6 @@
 from typing import Optional, Union
 
 import numpy as np
-import scipy.stats as stats
 
 from . import common_args
 from ..util import read_param_file, scale_samples, compute_groups_matrix, handle_seed
