@@ -19,19 +19,11 @@ class AnalysisError(Exception):
         warnings.warn(self.cmd)
 
 
-class BootstrapError(AnalysisError):
-    pass
-
-
-class SampleSizeError(AnalysisError):
-    pass
-
-
 def exception_handler(e, name, Ysize):
     if isinstance(e, AnalysisError):
         return e.note
     elif isinstance(e, np.linalg.LinAlgError):
-        raise SampleSizeError(
+        raise ValueError(
             f"ERROR [{name}]: Singular matrix - likely due to degenerate input or small sample size (N={Ysize})"
         ) from e
     else:
@@ -326,7 +318,7 @@ def check_specified_bininfo(bininfo, Xmin, Xmax, paramname):
         bin_edges = np.array(bininfo)
         if not np.issubdtype(bin_edges.dtype, np.number):
             warnings.warn(
-                f"[{paramname}] USER INPUT ERROR: Bin value error: Custom bin list only contain numeric values. Resorting back to default binning ({defaultbins} bins)."
+                f"[{paramname}] Input Error: Bin value error: Custom bin list only contain numeric values. Resorting to default binning ({defaultbins} bins)."
             )
             return (
                 np.linspace(Xmin, Xmax, defaultbins + 1),
@@ -334,7 +326,7 @@ def check_specified_bininfo(bininfo, Xmin, Xmax, paramname):
             )
         elif np.any(bin_edges < Xmin) or np.any(bin_edges > Xmax):
             warnings.warn(
-                f"[{paramname}] USER INPUT ERROR: Bin boundary error: Custom bin boundaries must be within the X range. Resorting back to default binning ({defaultbins} bins)."
+                f"[{paramname}] Input Error: Bin boundary error: Custom bin boundaries must be within the X range. Resorting to default binning ({defaultbins} bins)."
             )
             return (
                 np.linspace(Xmin, Xmax, defaultbins + 1),
@@ -342,7 +334,7 @@ def check_specified_bininfo(bininfo, Xmin, Xmax, paramname):
             )
         elif not np.all(np.diff(bin_edges) > 0):
             warnings.warn(
-                f"[{paramname}] USER INPUT ERROR: Bin edge error: Custom bin edges must be ascending. Resorting back to default binning ({defaultbins} bins)."
+                f"[{paramname}] Input Error: Bin edge error: Custom bin edges must be ascending. Resorting to default binning ({defaultbins} bins)."
             )
             return (
                 np.linspace(Xmin, Xmax, defaultbins + 1),
@@ -351,7 +343,7 @@ def check_specified_bininfo(bininfo, Xmin, Xmax, paramname):
         return np.concatenate(([Xmin - 1e-9], bin_edges, [Xmax + 1e-9])), ""
     else:
         warnings.warn(
-            f"[{paramname}] USER INPUT ERROR: Invalid custom bin dtype: Must be int, list or None. Resorting back to default binning ({defaultbins} bins)."
+            f"[{paramname}] Input Error: Invalid custom bin dtype: Must be int, list or None. Resorting to default binning ({defaultbins} bins)."
         )
         return (
             np.linspace(Xmin, Xmax, defaultbins + 1),
@@ -430,7 +422,7 @@ def bias_reduced_delta(
             for _ in range(num_resamples)
         ]
     except ValueError as e:
-        raise RuntimeError(f"BOOTSTRAP ERROR: [{paramname}][{mode}]: {e}") from e
+        raise RuntimeError(f"Bootstrap error: [{paramname}][{mode}]: {e}") from e
 
     for i, r_i in enumerate(r):
         d[i] = calc_delta(Y[r_i], Ygrid, X[r_i], m)
@@ -470,7 +462,7 @@ def obtain_resampled_subset(
     N = len(X)
     X = np.asarray(X)
     if X.max() == X.min():
-        raise BootstrapError(
+        raise ValueError(
             f"[{paramname}] has constant values, cannot bin or calculate delta.",
             "Cannot bin or calc delta from constants; ",
         )
@@ -510,7 +502,7 @@ def obtain_resampled_subset(
             )
 
         if n_per_bin < min_class_size:
-            raise SampleSizeError(
+            raise ValueError(
                 f"[{paramname}][{mode}] Dataset size error: Dataset is not large enough for number of bins.",
                 f"[{mode}]: Dataset too small for no. bins; ",
             )
@@ -622,9 +614,7 @@ def cli_parse(parser):
 def cli_action(args):
     problem = read_param_file(args.paramfile)
     Y = np.loadtxt(
-        args.model_output_file, 
-        delimiter=args.delimiter, 
-        usecols=(args.column,)
+        args.model_output_file, delimiter=args.delimiter, usecols=(args.column,)
     )
     X = np.loadtxt(args.model_input_file, delimiter=args.delimiter, ndmin=2)
     if len(X.shape) == 1:
