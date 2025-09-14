@@ -116,7 +116,7 @@ def test_usererror_binspecs_datatype():
 def test_usererror_binspecs_notascending():
     """
     Show how delta handles when bininfo is specified as not ascending list.
-    If bin specified is incorrect, then it defaults to the default number 
+    If bin specified is incorrect, then it defaults to the default number
     of bins equally distributed across X range. (default 10)
     """
     df = create_base_dataframe()
@@ -135,9 +135,9 @@ def test_usererror_binspecs_notascending():
 
 def test_usererror_binspecs_outofrange():
     """
-    Show how delta handles when bininfo is specified as list 
+    Show how delta handles when bininfo is specified as list
     with boundaries out of X range.
-    If bin specified is incorrect, then it defaults to the default 
+    If bin specified is incorrect, then it defaults to the default
     number of bins equally distributed across X range. (default 10)
     """
     df = create_base_dataframe()
@@ -156,9 +156,9 @@ def test_usererror_binspecs_outofrange():
 
 def test_usererror_binspecs_nonnumeric():
     """
-    Show how delta handles when bininfo is specified as list 
+    Show how delta handles when bininfo is specified as list
     including non-numeric values.
-    If bin specified is incorrect, then it defaults to the default 
+    If bin specified is incorrect, then it defaults to the default
     number of bins equally distributed across X range. (default 10)
     """
     df = create_base_dataframe()
@@ -177,7 +177,7 @@ def test_usererror_binspecs_nonnumeric():
 
 def test_binspecs_correctuse():
     """
-    Show how delta handles when bininfo is specified correctly. 
+    Show how delta handles when bininfo is specified correctly.
     Int, list (numeric, ascending), None, or unspecified.
     """
     df = create_base_dataframe()
@@ -196,9 +196,7 @@ def test_binspecs_correctuse():
         "correct_none": None,
     }
     problem, X, Y = create_problemspec(df)
-    _ = delta.analyze(
-        problem=problem, X=X, Y=Y, bins_specs=bins_specs, num_resamples=3
-    )
+    _ = delta.analyze(problem=problem, X=X, Y=Y, bins_specs=bins_specs, num_resamples=3)
 
 
 def test_samplesize_mismatch():
@@ -250,7 +248,7 @@ def test_yresamples_error():
 
 def test_invalidcolumnnames_user():
     """
-    If user provides any column name which has a forbidden 
+    If user provides any column name which has a forbidden
     suffix (raw, balanced, step, conf)
     """
     df = create_base_dataframe()
@@ -267,7 +265,7 @@ def test_databias_warning():
     """
     Warns user of potential data input bias,
     if raw and balanced deltas differ by > 0.1
-     """
+    """
     df = create_base_dataframe()
     n = len(df)
     output_col = df["output_col"].to_numpy()
@@ -284,7 +282,9 @@ def test_databias_warning():
     df["col_biased"] = col_biased
     problem, X, Y = create_problemspec(df)
     with pytest.warns(UserWarning, match=r"Potential Bias Notice:"):
-        _ = delta.analyze(problem=problem, X=X, Y=Y, num_resamples=3, bins_specs={'col_biased': 2})
+        _ = delta.analyze(
+            problem=problem, X=X, Y=Y, num_resamples=3, bins_specs={"col_biased": 2}
+        )
 
 
 def test_dataset_smallsize():
@@ -293,7 +293,7 @@ def test_dataset_smallsize():
     n = len(df)
     problem, X, Y = create_problemspec(df)
     with pytest.warns(UserWarning, match=r"Dataset size error:"):
-        Si = delta.analyze(
+        _ = delta.analyze(
             problem=problem,
             X=X,
             Y=Y,

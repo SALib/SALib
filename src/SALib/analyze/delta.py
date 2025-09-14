@@ -19,19 +19,11 @@ class AnalysisError(Exception):
         warnings.warn(self.cmd)
 
 
-class BootstrapError(AnalysisError):
-    pass
-
-
-class SampleSizeError(AnalysisError):
-    pass
-
-
 def exception_handler(e, name, Ysize):
     if isinstance(e, AnalysisError):
         return e.note
     elif isinstance(e, np.linalg.LinAlgError):
-        raise SampleSizeError(
+        raise ValueError(
             f"ERROR [{name}]: Singular matrix - likely due to degenerate input or small sample size (N={Ysize})"
         ) from e
     else:
@@ -102,7 +94,7 @@ def analyze(
             influence over its entire input range)
             - Answers the question: "How important is input feature X, and how prominent is its influence specifically
                 in my dataset?"
-            - Is a valid interpretation for real-world scenario, if the input data is representative of the 
+            - Is a valid interpretation for real-world scenario, if the input data is representative of the
                 real-world sample and variability without inconsistent or incomplete sampling (rare for real-world data capture)
 
         'notes' contains flags, warnings, or error messages.
@@ -277,7 +269,9 @@ def analyze(
             note = exception_handler(e, name, Y.size)
             notes.append(note)
             continue
+
         S["notes"] = notes
+
     if print_to_console:
         summary_dict = {"names": problem["names"], "notes": notes}
         if "delta_balanced" in S:
@@ -300,6 +294,7 @@ def analyze(
             )
         df_summary = pd.DataFrame(summary_dict)
         print(df_summary.to_string(index=False))
+
     if bootstrap_savedf is not None:
         df_boot = pd.DataFrame(bootstrap_matrix)
         try:
@@ -308,12 +303,13 @@ def analyze(
             warnings.warn(
                 f"WARNING: Failed to write bootstrap file to {bootstrap_savedf}. Reason: {e}"
             )
+
     return S
 
 
 def check_specified_bininfo(bininfo, Xmin, Xmax, paramname):
     """Validate user-specified bin edges or number of bins; fallback to default if invalid."""
-    defaultbins = 10  # 5% * (1/0.005)
+    defaultbins = 10
     if bininfo is None:
         return np.linspace(Xmin, Xmax, defaultbins + 1), ""
     elif isinstance(bininfo, int):
@@ -322,7 +318,7 @@ def check_specified_bininfo(bininfo, Xmin, Xmax, paramname):
         bin_edges = np.array(bininfo)
         if not np.issubdtype(bin_edges.dtype, np.number):
             warnings.warn(
-                f"[{paramname}] USER INPUT ERROR: Bin value error: Custom bin list only contain numeric values. Resorting back to default binning ({defaultbins} bins)."
+                f"[{paramname}] Input Error: Bin value error: Custom bin list only contain numeric values. Resorting to default binning ({defaultbins} bins)."
             )
             return (
                 np.linspace(Xmin, Xmax, defaultbins + 1),
@@ -330,7 +326,7 @@ def check_specified_bininfo(bininfo, Xmin, Xmax, paramname):
             )
         elif np.any(bin_edges < Xmin) or np.any(bin_edges > Xmax):
             warnings.warn(
-                f"[{paramname}] USER INPUT ERROR: Bin boundary error: Custom bin boundaries must be within the X range. Resorting back to default binning ({defaultbins} bins)."
+                f"[{paramname}] Input Error: Bin boundary error: Custom bin boundaries must be within the X range. Resorting to default binning ({defaultbins} bins)."
             )
             return (
                 np.linspace(Xmin, Xmax, defaultbins + 1),
@@ -338,7 +334,7 @@ def check_specified_bininfo(bininfo, Xmin, Xmax, paramname):
             )
         elif not np.all(np.diff(bin_edges) > 0):
             warnings.warn(
-                f"[{paramname}] USER INPUT ERROR: Bin edge error: Custom bin edges must be ascending. Resorting back to default binning ({defaultbins} bins)."
+                f"[{paramname}] Input Error: Bin edge error: Custom bin edges must be ascending. Resorting to default binning ({defaultbins} bins)."
             )
             return (
                 np.linspace(Xmin, Xmax, defaultbins + 1),
@@ -347,7 +343,7 @@ def check_specified_bininfo(bininfo, Xmin, Xmax, paramname):
         return np.concatenate(([Xmin - 1e-9], bin_edges, [Xmax + 1e-9])), ""
     else:
         warnings.warn(
-            f"[{paramname}] USER INPUT ERROR: Invalid custom bin dtype: Must be int, list or None. Resorting back to default binning ({defaultbins} bins)."
+            f"[{paramname}] Input Error: Invalid custom bin dtype: Must be int, list or None. Resorting to default binning ({defaultbins} bins)."
         )
         return (
             np.linspace(Xmin, Xmax, defaultbins + 1),
@@ -369,7 +365,9 @@ def calc_delta(Y, Ygrid, X, m):
         ix = np.where((xr > m[j]) & (xr <= m[j + 1]))[0]
         nm = len(ix)
         if nm == 0:
-            continue  # Skip empty bins. Even if it doesn't throw an error, can't estimate local distribution for gaussian_kde from empty data
+            # Skip empty bins. Even if it doesn't throw an error,
+            # can't estimate local distribution for gaussian_kde from empty data
+            continue
 
         Y_ix = Y[ix]
         if np.ptp(Y_ix) != 0.0:
@@ -411,9 +409,20 @@ def bias_reduced_delta(
     d_hat = calc_delta(Y[ind], Ygrid, X[ind], m)
 
     try:
-        r = [obtain_resampled_subset(X, y_resamples, mode, bin_edges, paramname, min_class_size, warn_print=False) for _ in range(num_resamples)]
+        r = [
+            obtain_resampled_subset(
+                X,
+                y_resamples,
+                mode,
+                bin_edges,
+                paramname,
+                min_class_size,
+                warn_print=False,
+            )
+            for _ in range(num_resamples)
+        ]
     except ValueError as e:
-        raise RuntimeError(f"BOOTSTRAP ERROR: [{paramname}][{mode}]: {e}") from e
+        raise RuntimeError(f"Bootstrap error: [{paramname}][{mode}]: {e}") from e
 
     for i, r_i in enumerate(r):
         d[i] = calc_delta(Y[r_i], Ygrid, X[r_i], m)
@@ -424,7 +433,7 @@ def bias_reduced_delta(
 
 def obtain_bins_indices(bin_edges, X, min_class_size):
     """
-    Returns indices for all specified bins, ensuring 
+    Returns indices for all specified bins, ensuring
     that all bins are at least minimum_class_size
     """
     init_indices = []
@@ -453,7 +462,7 @@ def obtain_resampled_subset(
     N = len(X)
     X = np.asarray(X)
     if X.max() == X.min():
-        raise BootstrapError(
+        raise ValueError(
             f"[{paramname}] has constant values, cannot bin or calculate delta.",
             "Cannot bin or calc delta from constants; ",
         )
@@ -491,13 +500,9 @@ def obtain_resampled_subset(
                 f"[{paramname}][{mode}] Only one bin remains. Revisit whether processing method is suitable for this parameter, or increase dataset size or spread. Highly biased input.",
                 f"[{mode}] Single valid bin. Insufficient spread in feature, highly biased input; ",
             )
-        # if n_bins != len(init_indices):
-            # if warn_print:
-            #     warnings.warn(
-            #         f"[{paramname}][{mode}] Bin Merge Notice: Final no. bins is {len(final_indices)}. Min samples per bin: {min_class_size}"
-            #     )
+
         if n_per_bin < min_class_size:
-            raise SampleSizeError(
+            raise ValueError(
                 f"[{paramname}][{mode}] Dataset size error: Dataset is not large enough for number of bins.",
                 f"[{mode}]: Dataset too small for no. bins; ",
             )
@@ -519,7 +524,7 @@ def obtain_resampled_subset(
 
 
 def sobol_first(Y, X, m):
-    # pre-process to catch constant array
+    # Pre-process to catch constant array
     # see: https://github.com/numpy/numpy/issues/9631
     if np.ptp(Y) == 0.0:
         # Catch constant results
@@ -609,9 +614,7 @@ def cli_parse(parser):
 def cli_action(args):
     problem = read_param_file(args.paramfile)
     Y = np.loadtxt(
-        args.model_output_file, 
-        delimiter=args.delimiter, 
-        usecols=(args.column,)
+        args.model_output_file, delimiter=args.delimiter, usecols=(args.column,)
     )
     X = np.loadtxt(args.model_input_file, delimiter=args.delimiter, ndmin=2)
     if len(X.shape) == 1:
