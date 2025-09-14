@@ -2,8 +2,10 @@ import math
 import numpy as np
 from scipy.stats import norm
 
+from typing import Union, Optional
+
 from . import common_args
-from ..util import read_param_file, ResultDict
+from ..util import read_param_file, ResultDict, handle_seed
 
 
 def analyze(
@@ -13,7 +15,7 @@ def analyze(
     num_resamples=100,
     conf_level=0.95,
     print_to_console=False,
-    seed=None,
+    seed: Optional[Union[int, np.random.Generator]] = None
 ):
     """Perform extended Fourier Amplitude Sensitivity Test on model outputs.
 
@@ -65,8 +67,7 @@ def analyze(
        fast99 - R `sensitivity` package
        https://github.com/cran/sensitivity/blob/master/R/fast99.R
     """
-    if seed:
-        np.random.seed(seed)
+    rng = handle_seed(seed)
 
     D = problem["num_vars"]
 
@@ -94,7 +95,7 @@ def analyze(
         Si["S1"][i] = S1
         Si["ST"][i] = ST
 
-        S1_d_conf, ST_d_conf = bootstrap(Y_l, M, num_resamples, conf_level)
+        S1_d_conf, ST_d_conf = bootstrap(Y_l, M, num_resamples, conf_level, rng)
         Si["S1_conf"][i] = S1_d_conf
         Si["ST_conf"][i] = ST_d_conf
 
@@ -117,7 +118,7 @@ def compute_orders(outputs: np.ndarray, N: int, M: int, omega: int):
     return (D1 / V), (1.0 - Dt / V)
 
 
-def bootstrap(Y: np.ndarray, M: int, resamples: int, conf_level: float):
+def bootstrap(Y: np.ndarray, M: int, resamples: int, conf_level: float, rng: np.random.Generator):
     """Compute CIs.
 
     Infers ``N`` from results of sub-sample ``Y`` and re-estimates omega (ω)
@@ -130,7 +131,7 @@ def bootstrap(Y: np.ndarray, M: int, resamples: int, conf_level: float):
     res_S1 = np.zeros(resamples)
     res_ST = np.zeros(resamples)
     for i in range(resamples):
-        sample_idx = np.random.choice(T_data, replace=True, size=n_size)
+        sample_idx = rng.choice(T_data, replace=True, size=n_size)
         Y_rs = Y[sample_idx]
 
         N = len(Y_rs)
