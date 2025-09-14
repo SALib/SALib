@@ -21,6 +21,11 @@ def set_seed():
     the stdlib.random libraries.
     """
     rng = handle_seed(12345)
+
+    # ensure we also keep the old stuff for the analyze functions that have not shifted over to rng yet
+    seed = 123456
+    np.random.seed(seed)
+
     return rng
 
 
@@ -43,6 +48,7 @@ class TestMorris:
             conf_level=0.95,
             print_to_console=False,
             num_levels=4,
+            seed=rng
         )
 
         assert_allclose(Si["mu_star"], [7.536586, 7.875, 6.308785], atol=0, rtol=1e-5)
@@ -66,6 +72,7 @@ class TestMorris:
             scaled=True,
             print_to_console=False,
             num_levels=4,
+            seed=rng
         )
 
         assert_allclose(Si["mu_star"], [0.532657, 0.658405, 0.43654], atol=0, rtol=1e-5)
@@ -88,6 +95,7 @@ class TestMorris:
             conf_level=0.95,
             print_to_console=False,
             num_levels=4,
+            seed=rng
         )
 
         assert_allclose(Si["mu_star"], [7.610322, 10.197014], atol=0, rtol=1e-5)
@@ -115,6 +123,7 @@ class TestMorris:
             conf_level=0.95,
             print_to_console=False,
             num_levels=4,
+            seed=rng
         )
 
         assert_allclose(Si["mu"], [9.786986, -9.938717e-13], atol=0, rtol=1e-5)
@@ -616,7 +625,7 @@ def test_regression_delta_svm():
     conf_level = 0.95
 
     test_res = delta.bias_reduced_delta(
-        Y, Ygrid, X, m, num_resamples, conf_level, Y.size, np.random.default_rng()
+        Y, Ygrid, X, m, num_resamples, conf_level, Y.size
     )
 
     np.testing.assert_allclose(
