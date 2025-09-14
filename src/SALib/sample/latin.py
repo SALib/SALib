@@ -67,7 +67,6 @@ def sample(problem, N, seed: Optional[Union[int, np.random.Generator]] = None):
         ]
     )
 
-
     for group in range(num_groups):
         rng.shuffle(temp[:, group])
 

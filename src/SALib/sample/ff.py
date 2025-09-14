@@ -76,7 +76,10 @@ def generate_contrast(problem):
     return contrast
 
 
-def sample(problem, seed: Optional[Union[int, np.random.Generator]] = None,):
+def sample(
+    problem,
+    seed: Optional[Union[int, np.random.Generator, None]] = None
+):
     """Generates model inputs using a fractional factorial sample.
 
     Returns a NumPy matrix containing the model inputs required for a
