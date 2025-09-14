@@ -58,7 +58,6 @@ def sample(problem, N, seed: Optional[Union[int, np.random.Generator]] = None):
     temp = np.empty([num_samples])
     d = 1.0 / num_samples
 
-    # lower_bound = loc, upper_bound = loc + scale
     temp = np.array(
         [
             rng.uniform(low=sample * d, high=(sample + 1) * d, size=num_groups)
