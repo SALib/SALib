@@ -1,10 +1,10 @@
-from typing import Dict
+from typing import Dict, Optional, Union
 from scipy.stats import norm, gaussian_kde, rankdata
 
 import numpy as np
 
 from . import common_args
-from ..util import read_param_file, ResultDict
+from ..util import read_param_file, ResultDict, handle_seed
 
 
 def analyze(
@@ -14,7 +14,7 @@ def analyze(
     num_resamples: int = 100,
     conf_level: float = 0.95,
     print_to_console: bool = False,
-    seed: int = None,
+    seed: Optional[Union[int, np.random.Generator]] = None,
     y_resamples: int = None,
     method: str = "all",
 ) -> Dict:
@@ -43,8 +43,8 @@ def analyze(
     ----------
     problem : dict
         The problem definition
-    X: numpy.matrix
-        A NumPy matrix containing the model inputs
+    X: numpy.array
+        A NumPy array containing the model inputs
     Y : numpy.array
         A NumPy array containing the model outputs
     num_resamples : int
@@ -53,6 +53,7 @@ def analyze(
         The confidence interval level (default 0.95)
     print_to_console : bool
         Print results directly to console (default False)
+    seed : int or np.random.Generator
     y_resamples : int, optional
         Number of samples to use when resampling (bootstrap) (default None)
     method : {"all", "delta", "sobol"}, optional
@@ -69,8 +70,7 @@ def analyze(
            sensitivity measures from given data." European Journal of
            Operational Research, 226(3):536-550, doi:10.1016/j.ejor.2012.11.047.
     """
-    if seed:
-        np.random.seed(seed)
+    rng = handle_seed(seed)
 
     D = problem["num_vars"]
     if y_resamples is None:
@@ -99,13 +99,13 @@ def analyze(
             X_i = X[:, i]
             if method in ["all", "delta"]:
                 S["delta"][i], S["delta_conf"][i] = bias_reduced_delta(
-                    Y, Ygrid, X_i, m, num_resamples, conf_level, y_resamples
+                    Y, Ygrid, X_i, m, num_resamples, conf_level, y_resamples, rng
                 )
             if method in ["all", "sobol"]:
-                ind = np.random.randint(Y.size, size=y_resamples)
+                ind = rng.integers(Y.size, size=y_resamples)
                 S["S1"][i] = sobol_first(Y[ind], X_i[ind], m)
                 S["S1_conf"][i] = sobol_first_conf(
-                    Y, X_i, m, num_resamples, conf_level, y_resamples
+                    Y, X_i, m, num_resamples, conf_level, y_resamples, rng
                 )
     except np.linalg.LinAlgError as e:
         msg = "Singular matrix detected\n"
@@ -148,14 +148,14 @@ def calc_delta(Y, Ygrid, X, m):
     return d_hat
 
 
-def bias_reduced_delta(Y, Ygrid, X, m, num_resamples, conf_level, y_resamples):
+def bias_reduced_delta(Y, Ygrid, X, m, num_resamples, conf_level, y_resamples, rng):
     """Plischke et al. 2013 bias reduction technique (eqn 30)"""
     d = np.empty(num_resamples)
 
     N = len(Y)
-    ind = np.random.randint(N, size=y_resamples)
+    ind = rng.integers(N, size=y_resamples)
     d_hat = calc_delta(Y[ind], Ygrid, X[ind], m)
-    r = np.random.randint(N, size=(num_resamples, y_resamples))
+    r = rng.integers(N, size=(num_resamples, y_resamples))
 
     for i in range(num_resamples):
         r_i = r[i, :]
@@ -185,11 +185,11 @@ def sobol_first(Y, X, m):
     return Vi / np.var(Y)
 
 
-def sobol_first_conf(Y, X, m, num_resamples, conf_level, y_resamples):
+def sobol_first_conf(Y, X, m, num_resamples, conf_level, y_resamples, rng):
     s = np.zeros(num_resamples)
 
     N = len(Y)
-    r = np.random.randint(N, size=(num_resamples, y_resamples))
+    r = rng.integers(N, size=(num_resamples, y_resamples))
 
     for i in range(num_resamples):
         r_i = r[i, :]
