@@ -13,6 +13,7 @@ from .util_funcs import (  # noqa: F401, E402
     read_param_file,
     _check_bounds,
     _check_groups,
+    handle_seed,
 )  # noqa: F401, E402
 from .problem import ProblemSpec  # noqa: F401, E402
 from .results import ResultDict  # noqa: F401, E402
