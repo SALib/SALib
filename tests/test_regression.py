@@ -37,7 +37,9 @@ class TestMorris:
         rng = set_seed
         param_file = "src/SALib/test_functions/params/Ishigami.txt"
         problem = read_param_file(param_file)
-        param_values = morris_sampler(problem, 10000, num_levels=4, optimal_trajectories=None, seed=rng)
+        param_values = morris_sampler(
+            problem, 10000, num_levels=4, optimal_trajectories=None, seed=rng
+        )
 
         Y = Ishigami.evaluate(param_values)
 
@@ -48,7 +50,7 @@ class TestMorris:
             conf_level=0.95,
             print_to_console=False,
             num_levels=4,
-            seed=rng
+            seed=rng,
         )
 
         assert_allclose(Si["mu_star"], [7.682808, 7.875, 6.256295], atol=0, rtol=1e-5)
@@ -60,7 +62,9 @@ class TestMorris:
         rng = set_seed
         param_file = "src/SALib/test_functions/params/Ishigami.txt"
         problem = read_param_file(param_file)
-        param_values = morris_sampler(problem, 10000, 4, optimal_trajectories=None, seed=rng)
+        param_values = morris_sampler(
+            problem, 10000, 4, optimal_trajectories=None, seed=rng
+        )
 
         Y = Ishigami.evaluate(param_values)
 
@@ -72,10 +76,12 @@ class TestMorris:
             scaled=True,
             print_to_console=False,
             num_levels=4,
-            seed=rng
+            seed=rng,
         )
 
-        assert_allclose(Si["mu_star"], [0.540244, 0.657467, 0.433446], atol=0, rtol=1e-5)
+        assert_allclose(
+            Si["mu_star"], [0.540244, 0.657467, 0.433446], atol=0, rtol=1e-5
+        )
 
     def test_regression_morris_groups(self, set_seed):
         rng = set_seed
@@ -95,7 +101,7 @@ class TestMorris:
             conf_level=0.95,
             print_to_console=False,
             num_levels=4,
-            seed=rng
+            seed=rng,
         )
 
         assert_allclose(Si["mu_star"], [7.771541, 10.188284], atol=0, rtol=1e-5)
@@ -111,7 +117,7 @@ class TestMorris:
             num_levels=4,
             optimal_trajectories=6,
             local_optimization=False,
-            seed=rng
+            seed=rng,
         )
 
         Y = Ishigami.evaluate(param_values)
@@ -123,10 +129,10 @@ class TestMorris:
             conf_level=0.95,
             print_to_console=False,
             num_levels=4,
-            seed=rng
+            seed=rng,
         )
 
-        assert_allclose(Si["mu"], [9.786986e+00, 1.776357e-15], atol=0, rtol=1e-5)
+        assert_allclose(Si["mu"], [9.786986e00, 1.776357e-15], atol=0, rtol=1e-5)
 
         assert_allclose(Si["sigma"], [6.453729, np.nan], atol=0, rtol=1e-5)
 
@@ -143,7 +149,7 @@ class TestMorris:
             num_levels=4,
             optimal_trajectories=20,
             local_optimization=True,
-            seed=rng
+            seed=rng,
         )
 
         Y = Ishigami.evaluate(param_values)
@@ -155,7 +161,7 @@ class TestMorris:
             conf_level=0.95,
             print_to_console=False,
             num_levels=4,
-            seed=rng
+            seed=rng,
         )
 
         assert_allclose(Si["mu_star"], [13.95285, 7.875], rtol=1e-5)
@@ -178,7 +184,7 @@ class TestMorris:
             num_levels=4,
             optimal_trajectories=9,
             local_optimization=True,
-            seed=rng
+            seed=rng,
         )
 
         Y = Ishigami.evaluate(param_values)
@@ -190,12 +196,10 @@ class TestMorris:
             conf_level=0.95,
             print_to_console=False,
             num_levels=4,
-            seed=rng
+            seed=rng,
         )
 
-        assert_allclose(
-            Si["mu_star"], [11.175608,  7.875   ,  4.165864], atol=0, rtol=1e-5
-        )
+        assert_allclose(Si["mu_star"], [11.175608, 7.875, 4.165864], atol=0, rtol=1e-5)
 
 
 @mark.filterwarnings("ignore::UserWarning")
