@@ -9,7 +9,7 @@ from ..util import (
     ResultDict,
     _define_problem_with_groups,
     _compute_delta,
-    handle_seed
+    handle_seed,
 )
 
 
@@ -160,7 +160,7 @@ def analyze(
         conf_level,
         groups,
         unique_group_names,
-        rng
+        rng,
     )
 
     if print_to_console:
@@ -529,7 +529,11 @@ def _reshape_model_outputs(
 
 
 def _compute_mu_star_confidence(
-    elementary_effects: np.ndarray, num_vars: int, num_resamples: int, conf_level: float, rng: np.random.Generator,
+    elementary_effects: np.ndarray,
+    num_vars: int,
+    num_resamples: int,
+    conf_level: float,
+    rng: np.random.Generator,
 ) -> np.ndarray:
     """Computes the confidence intervals for the mu_star variable.
 

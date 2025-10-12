@@ -229,10 +229,14 @@ def test_conf_level_within_zero_one_bounds():
     conf_level_too_low = -1
     num_vars = 1
     with raises(ValueError):
-        _compute_mu_star_confidence(ee, num_vars, num_resamples, conf_level_too_low, rng)
+        _compute_mu_star_confidence(
+            ee, num_vars, num_resamples, conf_level_too_low, rng
+        )
     conf_level_too_high = 2
     with raises(ValueError):
-        _compute_mu_star_confidence(ee, num_vars, num_resamples, conf_level_too_high, rng)
+        _compute_mu_star_confidence(
+            ee, num_vars, num_resamples, conf_level_too_high, rng
+        )
 
 
 @fixture()

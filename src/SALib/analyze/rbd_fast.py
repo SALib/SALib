@@ -18,7 +18,7 @@ def analyze(
     num_resamples=100,
     conf_level=0.95,
     print_to_console=False,
-    seed: Optional[Union[int, np.random.Generator]] = None
+    seed: Optional[Union[int, np.random.Generator]] = None,
 ):
     """Performs the Random Balanced Design - Fourier Amplitude Sensitivity Test
     (RBD-FAST) on model outputs.

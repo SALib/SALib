@@ -209,7 +209,7 @@ class TestLocallyOptimalStrategy:
 
         rng = handle_seed(12345)
         expected = _sample_morris(problem, N, rng, num_levels=num_levels)
-        
+
         rng = handle_seed(12345)
         actual = _sample_morris(problem, N, rng, num_levels=num_levels)
 
