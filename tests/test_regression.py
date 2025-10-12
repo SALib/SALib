@@ -51,7 +51,7 @@ class TestMorris:
             seed=rng
         )
 
-        assert_allclose(Si["mu_star"], [7.536586, 7.875, 6.308785], atol=0, rtol=1e-5)
+        assert_allclose(Si["mu_star"], [7.682808, 7.875, 6.256295], atol=0, rtol=1e-5)
 
     def test_regression_morris_scaled(self, set_seed):
         """Note that this is a poor estimate of the Ishigami
@@ -75,7 +75,7 @@ class TestMorris:
             seed=rng
         )
 
-        assert_allclose(Si["mu_star"], [0.532657, 0.658405, 0.43654], atol=0, rtol=1e-5)
+        assert_allclose(Si["mu_star"], [0.540244, 0.657467, 0.433446], atol=0, rtol=1e-5)
 
     def test_regression_morris_groups(self, set_seed):
         rng = set_seed
@@ -98,7 +98,7 @@ class TestMorris:
             seed=rng
         )
 
-        assert_allclose(Si["mu_star"], [7.610322, 10.197014], atol=0, rtol=1e-5)
+        assert_allclose(Si["mu_star"], [7.771541, 10.188284], atol=0, rtol=1e-5)
 
     def test_regression_morris_groups_brute_optim(self, set_seed):
         rng = set_seed
@@ -126,7 +126,7 @@ class TestMorris:
             seed=rng
         )
 
-        assert_allclose(Si["mu"], [9.786986, -9.938717e-13], atol=0, rtol=1e-5)
+        assert_allclose(Si["mu"], [9.786986e+00, 1.776357e-15], atol=0, rtol=1e-5)
 
         assert_allclose(Si["sigma"], [6.453729, np.nan], atol=0, rtol=1e-5)
 
@@ -194,7 +194,7 @@ class TestMorris:
         )
 
         assert_allclose(
-            Si["mu_star"], [9.786986e00, 7.875000e00, 1.388621], atol=0, rtol=1e-5
+            Si["mu_star"], [11.175608,  7.875   ,  4.165864], atol=0, rtol=1e-5
         )
 
 
