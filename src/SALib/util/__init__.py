@@ -272,7 +272,7 @@ def extract_group_names(p: Dict) -> Tuple:
     else:
         groups = p["groups"]
 
-    names = list(pd.unique(groups))
+    names = list(pd.unique(np.array(groups)))
     number = len(names)
 
     return names, number
