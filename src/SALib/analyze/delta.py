@@ -318,7 +318,7 @@ def check_specified_bininfo(bininfo, Xmin, Xmax, paramname):
         bin_edges = np.array(bininfo)
         if not np.issubdtype(bin_edges.dtype, np.number):
             warnings.warn(
-                f"[{paramname}] Input Error: Bin value error: Custom bin list only contain numeric values. Resorting to default binning ({defaultbins} bins)."
+                f"[{paramname}] Input Error: Bin value error - Custom bin list only contain numeric values. Resorting to default binning ({defaultbins} bins)."
             )
             return (
                 np.linspace(Xmin, Xmax, defaultbins + 1),
@@ -326,7 +326,7 @@ def check_specified_bininfo(bininfo, Xmin, Xmax, paramname):
             )
         elif np.any(bin_edges < Xmin) or np.any(bin_edges > Xmax):
             warnings.warn(
-                f"[{paramname}] Input Error: Bin boundary error: Custom bin boundaries must be within the X range. Resorting to default binning ({defaultbins} bins)."
+                f"[{paramname}] Input Error: Bin boundary error - Custom bin boundaries must be within the X range. Resorting to default binning ({defaultbins} bins)."
             )
             return (
                 np.linspace(Xmin, Xmax, defaultbins + 1),
@@ -334,7 +334,7 @@ def check_specified_bininfo(bininfo, Xmin, Xmax, paramname):
             )
         elif not np.all(np.diff(bin_edges) > 0):
             warnings.warn(
-                f"[{paramname}] Input Error: Bin edge error: Custom bin edges must be ascending. Resorting to default binning ({defaultbins} bins)."
+                f"[{paramname}] Input Error: Bin edge error - Custom bin edges must be ascending. Resorting to default binning ({defaultbins} bins)."
             )
             return (
                 np.linspace(Xmin, Xmax, defaultbins + 1),
@@ -343,7 +343,7 @@ def check_specified_bininfo(bininfo, Xmin, Xmax, paramname):
         return np.concatenate(([Xmin - 1e-9], bin_edges, [Xmax + 1e-9])), ""
     else:
         warnings.warn(
-            f"[{paramname}] Input Error: Invalid custom bin dtype: Must be int, list or None. Resorting to default binning ({defaultbins} bins)."
+            f"[{paramname}] Input Error: Invalid custom bin dtype - Must be int, list or None. Resorting to default binning ({defaultbins} bins)."
         )
         return (
             np.linspace(Xmin, Xmax, defaultbins + 1),
