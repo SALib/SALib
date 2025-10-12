@@ -9,6 +9,7 @@ from ..util import (
     ResultDict,
     _define_problem_with_groups,
     _compute_delta,
+    handle_seed,
 )
 
 
@@ -92,7 +93,7 @@ def analyze(
     num_levels : int
         The number of grid levels, must be identical to the value
         passed to SALib.sample.morris (default 4)
-    seed : int
+    seed : {int, None, np.random.Generator}
         Seed to generate a random number
 
     Returns
@@ -132,8 +133,7 @@ def analyze(
         https://doi.org/10.1016/j.apenergy.2017.05.106
     """
 
-    if seed:
-        np.random.seed(seed)
+    rng = handle_seed(seed)
 
     _define_problem_with_groups(problem)
 
@@ -160,6 +160,7 @@ def analyze(
         conf_level,
         groups,
         unique_group_names,
+        rng,
     )
 
     if print_to_console:
@@ -175,6 +176,7 @@ def _compute_statistical_outputs(
     conf_level: float,
     groups: np.ndarray,
     unique_group_names: List,
+    rng: np.random.Generator,
 ) -> ResultDict:
     """Computes the statistical parameters related to Morris method.
 
@@ -192,6 +194,7 @@ def _compute_statistical_outputs(
         Array defining the distribution of groups
     unique_group_names: List
         Names of the groups
+    rng: np.random.Generator
 
     Returns
     -------
@@ -209,7 +212,7 @@ def _compute_statistical_outputs(
     mu_star = np.average(np.abs(elementary_effects), 1)
     sigma = np.std(elementary_effects, axis=1, ddof=1)
     mu_star_conf = _compute_mu_star_confidence(
-        elementary_effects, num_vars, num_resamples, conf_level
+        elementary_effects, num_vars, num_resamples, conf_level, rng
     )
 
     Si["mu"] = _compute_grouped_metric(mu, groups)
@@ -526,7 +529,11 @@ def _reshape_model_outputs(
 
 
 def _compute_mu_star_confidence(
-    elementary_effects: np.ndarray, num_vars: int, num_resamples: int, conf_level: float
+    elementary_effects: np.ndarray,
+    num_vars: int,
+    num_resamples: int,
+    conf_level: float,
+    rng: np.random.Generator,
 ) -> np.ndarray:
     """Computes the confidence intervals for the mu_star variable.
 
@@ -544,6 +551,7 @@ def _compute_mu_star_confidence(
         Number of resamples
     conf_level: float
         Confidence level
+    rng: np.random.Generator
 
     Returns
     -------
@@ -556,7 +564,7 @@ def _compute_mu_star_confidence(
     mu_star_conf = []
     for j in range(num_vars):
         ee = elementary_effects[j, :]
-        resample_index = np.random.randint(len(ee), size=(num_resamples, len(ee)))
+        resample_index = rng.integers(len(ee), size=(num_resamples, len(ee)))
         ee_resampled = ee[resample_index]
 
         # Compute average of the absolute values over each of the resamples

@@ -1,9 +1,10 @@
-from typing import Dict
+from typing import Dict, Union, Sequence
 
 import pkgutil
 import csv
 
 import numpy as np
+from numpy.random import Generator, BitGenerator, SeedSequence
 
 
 def avail_approaches(pkg):
@@ -178,3 +179,24 @@ def _define_problem_with_groups(problem: Dict) -> Dict:
         )
 
     return problem
+
+
+def handle_seed(
+    seed: Union[Generator, BitGenerator, SeedSequence, int, Sequence[int], None]
+) -> np.random.Generator:
+    """Set (or create) a random number generator."""
+
+    if isinstance(seed, np.random.Generator):
+        # Spawn a Generator that we can own and reset.
+        rng = seed.spawn(1)[0]
+    elif isinstance(
+        seed, (np.random.BitGenerator, np.random.SeedSequence, int, type(None))
+    ):
+        rng = np.random.default_rng(seed)
+    elif isinstance(seed, (list, tuple, np.ndarray)):
+        # Handle sequences of integers
+        rng = np.random.default_rng(seed)
+    else:
+        raise ValueError(f"Unsupported seed type: {type(seed)}")
+
+    return rng

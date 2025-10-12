@@ -1,5 +1,6 @@
 """High-level tests to ensure grouped analyses convert to Pandas DataFrame."""
 
+import pytest
 import numpy as np
 
 from SALib import ProblemSpec
@@ -10,6 +11,7 @@ def example_func(x):
     return np.sum(x, axis=1)
 
 
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
 def test_sobol_group_analysis():
     """Ensure valid groupings are returned from the Sobol analysis method."""
 

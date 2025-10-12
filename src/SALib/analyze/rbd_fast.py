@@ -4,8 +4,10 @@ import numpy as np
 from scipy.signal import periodogram
 from scipy.stats import norm
 
+from typing import Optional, Union
+
 from . import common_args
-from ..util import read_param_file, ResultDict
+from ..util import read_param_file, ResultDict, handle_seed
 
 
 def analyze(
@@ -16,7 +18,7 @@ def analyze(
     num_resamples=100,
     conf_level=0.95,
     print_to_console=False,
-    seed=None,
+    seed: Optional[Union[int, np.random.Generator]] = None,
 ):
     """Performs the Random Balanced Design - Fourier Amplitude Sensitivity Test
     (RBD-FAST) on model outputs.
@@ -81,8 +83,7 @@ def analyze(
          Journal of Building Performance Simulation.
          doi:10.1080/19401493.2015.1112430
     """
-    if seed:
-        np.random.seed(seed)
+    rng = handle_seed(seed)
 
     D = problem["num_vars"]
     N = Y.size
@@ -95,7 +96,7 @@ def analyze(
         S1 = compute_first_order(permute_outputs(X[:, i], Y), M)
         S1 = unskew_S1(S1, M, N)
         Si["S1"][i] = S1
-        Si["S1_conf"][i] = bootstrap(X[:, i], Y, M, num_resamples, conf_level)
+        Si["S1_conf"][i] = bootstrap(X[:, i], Y, M, num_resamples, conf_level, rng)
 
     if print_to_console:
         print(Si.to_df())
@@ -140,14 +141,14 @@ def unskew_S1(S1, M, N):
     return S1 - lamb / (1 - lamb) * (1 - S1)
 
 
-def bootstrap(X_d, Y, M, resamples, conf_level):
+def bootstrap(X_d, Y, M, resamples, conf_level, rng):
     # Use half of available data each time
     T_data = X_d.shape[0]
     n_size = int(T_data * 0.5)
 
     res = np.zeros(resamples)
     for i in range(resamples):
-        sample_idx = np.random.choice(T_data, replace=True, size=n_size)
+        sample_idx = rng.choice(T_data, replace=True, size=n_size)
         X_rs, Y_rs = X_d[sample_idx], Y[sample_idx]
         S1 = compute_first_order(permute_outputs(X_rs, Y_rs), M)
         S1 = unskew_S1(S1, M, Y_rs.size)

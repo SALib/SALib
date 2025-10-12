@@ -4,13 +4,19 @@ import numpy as np
 from numpy.testing import assert_allclose
 
 from SALib.analyze import delta, dgsm, fast, rbd_fast, sobol, morris, hdmr
-from SALib.sample import fast_sampler, finite_diff, latin, saltelli
+from SALib.sample import (
+    fast_sampler,
+    finite_diff,
+    latin,
+    saltelli,
+    sobol as sobol_sampler,
+)
 from SALib.sample.morris import sample as morris_sampler
 
 from SALib.test_functions import Ishigami
 from SALib.test_functions import linear_model_1
 from SALib.test_functions import linear_model_2
-from SALib.util import read_param_file
+from SALib.util import read_param_file, handle_seed
 
 
 @fixture(scope="function")
@@ -20,8 +26,13 @@ def set_seed():
     It is necessary to set seeds for both the numpy.random, and
     the stdlib.random libraries.
     """
+    rng = handle_seed(12345)
+
+    # ensure we also keep the old stuff for the analyze functions that have not shifted over to rng yet
     seed = 123456
     np.random.seed(seed)
+
+    return rng
 
 
 class TestMorris:
@@ -29,10 +40,12 @@ class TestMorris:
         """Note that this is a poor estimate of the Ishigami
         function.
         """
-        set_seed
+        rng = set_seed
         param_file = "src/SALib/test_functions/params/Ishigami.txt"
         problem = read_param_file(param_file)
-        param_values = morris_sampler(problem, 10000, 4, optimal_trajectories=None)
+        param_values = morris_sampler(
+            problem, 10000, num_levels=4, optimal_trajectories=None, seed=rng
+        )
 
         Y = Ishigami.evaluate(param_values)
 
@@ -43,18 +56,21 @@ class TestMorris:
             conf_level=0.95,
             print_to_console=False,
             num_levels=4,
+            seed=rng,
         )
 
-        assert_allclose(Si["mu_star"], [7.536586, 7.875, 6.308785], atol=0, rtol=1e-5)
+        assert_allclose(Si["mu_star"], [7.682808, 7.875, 6.256295], atol=0, rtol=1e-5)
 
     def test_regression_morris_scaled(self, set_seed):
         """Note that this is a poor estimate of the Ishigami
         function.
         """
-        set_seed
+        rng = set_seed
         param_file = "src/SALib/test_functions/params/Ishigami.txt"
         problem = read_param_file(param_file)
-        param_values = morris_sampler(problem, 10000, 4, optimal_trajectories=None)
+        param_values = morris_sampler(
+            problem, 10000, 4, optimal_trajectories=None, seed=rng
+        )
 
         Y = Ishigami.evaluate(param_values)
 
@@ -66,17 +82,20 @@ class TestMorris:
             scaled=True,
             print_to_console=False,
             num_levels=4,
+            seed=rng,
         )
 
-        assert_allclose(Si["mu_star"], [0.532657, 0.658405, 0.43654], atol=0, rtol=1e-5)
+        assert_allclose(
+            Si["mu_star"], [0.540244, 0.657467, 0.433446], atol=0, rtol=1e-5
+        )
 
     def test_regression_morris_groups(self, set_seed):
-        set_seed
+        rng = set_seed
         param_file = "src/SALib/test_functions/params/Ishigami_groups.txt"
         problem = read_param_file(param_file)
 
         param_values = morris_sampler(
-            problem=problem, N=10000, num_levels=4, optimal_trajectories=None
+            problem=problem, N=10000, num_levels=4, optimal_trajectories=None, seed=rng
         )
 
         Y = Ishigami.evaluate(param_values)
@@ -88,12 +107,13 @@ class TestMorris:
             conf_level=0.95,
             print_to_console=False,
             num_levels=4,
+            seed=rng,
         )
 
-        assert_allclose(Si["mu_star"], [7.610322, 10.197014], atol=0, rtol=1e-5)
+        assert_allclose(Si["mu_star"], [7.771541, 10.188284], atol=0, rtol=1e-5)
 
     def test_regression_morris_groups_brute_optim(self, set_seed):
-        set_seed
+        rng = set_seed
         param_file = "src/SALib/test_functions/params/Ishigami_groups.txt"
         problem = read_param_file(param_file)
 
@@ -103,6 +123,7 @@ class TestMorris:
             num_levels=4,
             optimal_trajectories=6,
             local_optimization=False,
+            seed=rng,
         )
 
         Y = Ishigami.evaluate(param_values)
@@ -114,16 +135,17 @@ class TestMorris:
             conf_level=0.95,
             print_to_console=False,
             num_levels=4,
+            seed=rng,
         )
 
-        assert_allclose(Si["mu"], [9.786986, -9.938717e-13], atol=0, rtol=1e-5)
+        assert_allclose(Si["mu"], [9.786986e00, 1.776357e-15], atol=0, rtol=1e-5)
 
         assert_allclose(Si["sigma"], [6.453729, np.nan], atol=0, rtol=1e-5)
 
         assert_allclose(Si["mu_star"], [9.786986, 7.875], atol=0, rtol=1e-5)
 
     def test_regression_morris_groups_local_optim(self, set_seed):
-        set_seed
+        rng = set_seed
         param_file = "src/SALib/test_functions/params/Ishigami_groups.txt"
         problem = read_param_file(param_file)
 
@@ -133,6 +155,7 @@ class TestMorris:
             num_levels=4,
             optimal_trajectories=20,
             local_optimization=True,
+            seed=rng,
         )
 
         Y = Ishigami.evaluate(param_values)
@@ -144,6 +167,7 @@ class TestMorris:
             conf_level=0.95,
             print_to_console=False,
             num_levels=4,
+            seed=rng,
         )
 
         assert_allclose(Si["mu_star"], [13.95285, 7.875], rtol=1e-5)
@@ -157,7 +181,7 @@ class TestMorris:
         Note that the relative tolerance is set to a very high value
         (default is 1e-05) due to the coarse nature of the num_levels.
         """
-        set_seed
+        rng = set_seed
         param_file = "src/SALib/test_functions/params/Ishigami.txt"
         problem = read_param_file(param_file)
         param_values = morris_sampler(
@@ -166,6 +190,7 @@ class TestMorris:
             num_levels=4,
             optimal_trajectories=9,
             local_optimization=True,
+            seed=rng,
         )
 
         Y = Ishigami.evaluate(param_values)
@@ -177,14 +202,14 @@ class TestMorris:
             conf_level=0.95,
             print_to_console=False,
             num_levels=4,
+            seed=rng,
         )
 
-        assert_allclose(
-            Si["mu_star"], [9.786986e00, 7.875000e00, 1.388621], atol=0, rtol=1e-5
-        )
+        assert_allclose(Si["mu_star"], [11.175608, 7.875, 4.165864], atol=0, rtol=1e-5)
 
 
 @mark.filterwarnings("ignore::UserWarning")
+@mark.filterwarnings("ignore::DeprecationWarning")
 def test_regression_sobol():
     param_file = "src/SALib/test_functions/params/Ishigami.txt"
     problem = read_param_file(param_file)
@@ -210,7 +235,7 @@ def test_regression_sobol():
 def test_regression_sobol_parallel():
     param_file = "src/SALib/test_functions/params/Ishigami.txt"
     problem = read_param_file(param_file)
-    param_values = saltelli.sample(problem, 10000, calc_second_order=True)
+    param_values = sobol_sampler.sample(problem, 10000, calc_second_order=True)
 
     Y = Ishigami.evaluate(param_values)
 
@@ -241,7 +266,7 @@ def test_regression_sobol_groups():
         "bounds": [[-np.pi, np.pi]] * 3,
         "groups": ["G1", "G2", "G1"],
     }
-    param_values = saltelli.sample(problem, 10000, calc_second_order=True)
+    param_values = sobol_sampler.sample(problem, 10000, calc_second_order=True)
 
     Y = Ishigami.evaluate(param_values)
     Si = sobol.analyze(
@@ -267,7 +292,7 @@ def test_regression_sobol_groups_dists():
         "groups": ["G1", "G2", "G1"],
         "dists": ["unif", "lognorm", "triang"],
     }
-    param_values = saltelli.sample(problem, 10000, calc_second_order=True)
+    param_values = sobol_sampler.sample(problem, 10000, calc_second_order=True)
 
     Y = Ishigami.evaluate(param_values)
     Si = sobol.analyze(
@@ -296,6 +321,7 @@ def test_regression_fast():
     assert_allclose(Si["ST"], [0.55, 0.44, 0.24], atol=5e-2, rtol=1e-1)
 
 
+@mark.filterwarnings("ignore::DeprecationWarning")
 def test_regression_hdmr_ishigami():
     param_file = "src/SALib/test_functions/params/Ishigami.txt"
     problem = read_param_file(param_file)
@@ -320,6 +346,7 @@ def test_regression_hdmr_ishigami():
     )
 
 
+@mark.filterwarnings("ignore::DeprecationWarning")
 def test_regression_hdmr_case1():
     problem = {
         "num_vars": 5,
@@ -343,6 +370,7 @@ def test_regression_hdmr_case1():
     assert_allclose(Si["ST"][0 : problem["num_vars"]], [0.20] * 5, atol=5e-2, rtol=1e-1)
 
 
+@mark.filterwarnings("ignore::DeprecationWarning")
 def test_regression_hdmr_case2():
     problem = {
         "num_vars": 5,
@@ -380,6 +408,7 @@ def test_regression_hdmr_case2():
     )
 
 
+@mark.filterwarnings("ignore::DeprecationWarning")
 def test_regression_hdmr_case3():
     problem = {
         "num_vars": 5,

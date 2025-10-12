@@ -13,12 +13,13 @@ from .util_funcs import (  # noqa: F401, E402
     read_param_file,
     _check_bounds,
     _check_groups,
+    handle_seed,
 )  # noqa: F401, E402
 from .problem import ProblemSpec  # noqa: F401, E402
 from .results import ResultDict  # noqa: F401, E402
 
 
-__all__ = ["scale_samples", "read_param_file", "avail_approaches"]
+__all__ = ["scale_samples", "read_param_file", "avail_approaches", "handle_seed"]
 
 
 def _scale_samples(params: np.ndarray, bounds: List):
@@ -271,7 +272,7 @@ def extract_group_names(p: Dict) -> Tuple:
     else:
         groups = p["groups"]
 
-    names = list(pd.unique(groups))
+    names = list(pd.unique(np.array(groups)))
     number = len(names)
 
     return names, number
