@@ -15,7 +15,7 @@ from SALib.util import (
     compute_groups_matrix,
     _define_problem_with_groups,
     _compute_delta,
-    handle_seed
+    handle_seed,
 )
 
 __all__ = ["sample"]
@@ -27,7 +27,7 @@ def sample(
     num_levels: int = 4,
     optimal_trajectories: Optional[Union[int, None]] = None,
     local_optimization: bool = True,
-    seed: Optional[Union[int, np.random.Generator]] = None
+    seed: Optional[Union[int, np.random.Generator]] = None,
 ) -> np.ndarray:
     """Generate model inputs using the Method of Morris.
 
@@ -151,7 +151,10 @@ def sample(
 
 
 def _sample_morris(
-    problem: Dict, number_trajectories: int, rng:np.random.Generator, num_levels: int = 4
+    problem: Dict,
+    number_trajectories: int,
+    rng: np.random.Generator,
+    num_levels: int = 4,
 ) -> np.ndarray:
     """Generate trajectories for groups
 
@@ -189,7 +192,7 @@ def _sample_morris(
 
 
 def _generate_trajectory(
-    group_membership: np.ndarray, rng:np.random.Generator, num_levels: int = 4
+    group_membership: np.ndarray, rng: np.random.Generator, num_levels: int = 4
 ) -> np.ndarray:
     """Return a single trajectory
 
@@ -210,7 +213,6 @@ def _generate_trajectory(
     -------
     np.ndarray
     """
-
     delta = _compute_delta(num_levels)
 
     # Infer number of groups `g` and number of params `k` from
@@ -274,7 +276,7 @@ def _compute_b_star(
     return b_star
 
 
-def _generate_p_star(num_groups: int, rng:np.random.Generator) -> np.ndarray:
+def _generate_p_star(num_groups: int, rng: np.random.Generator) -> np.ndarray:
     """Describe the order in which groups move
 
     Parameters
@@ -292,7 +294,9 @@ def _generate_p_star(num_groups: int, rng:np.random.Generator) -> np.ndarray:
     return p_star
 
 
-def _generate_x_star(num_params: int, num_levels: int, rng:np.random.Generator) -> np.ndarray:
+def _generate_x_star(
+    num_params: int, num_levels: int, rng: np.random.Generator
+) -> np.ndarray:
     """Generate an 1-by-num_params array to represent initial position for EE
 
     This should be a randomly generated array in the p level grid
@@ -453,8 +457,12 @@ def cli_parse(parser):
 def cli_action(args):
     problem = read_param_file(args.paramfile)
     param_values = sample(
-        problem, args.samples, num_levels=args.levels, optimal_trajectories=args.k_optimal,
-        local_optimization=args.local, seed=args.seed
+        problem,
+        args.samples,
+        num_levels=args.levels,
+        optimal_trajectories=args.k_optimal,
+        local_optimization=args.local,
+        seed=args.seed,
     )
 
     np.savetxt(
