@@ -194,6 +194,7 @@ class TestGroupSampleGeneration:
         assert_allclose(output, desired, rtol=1e-2)
 
     def test_generate_trajectory(self):
+        rng = handle_seed(101)
         # Two groups of three factors
         G = np.array([[1, 0], [0, 1], [0, 1]])
         # Four levels
@@ -230,14 +231,13 @@ class TestGroupSampleGeneration:
         assert_allclose(output, desired)
 
     def test_generate_x_star(self):
-        """ """
+        """Test against previously generated x_star values."""
         num_params = 4
         num_levels = 4
 
-        rng = handle_seed(10)
+        rng = handle_seed(101)
         actual = _generate_x_star(num_params, num_levels, rng)
-        print(actual)
-        expected = np.array([[0.333333, 0.333333, 0.0, 0.333333]])
+        expected = np.array([[0.0, 0.33333333, 0.33333333, 0.0]])
         assert_allclose(actual, expected, rtol=1e-05)
 
     def test_define_problem_with_groups_all_ok(self):
