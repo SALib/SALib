@@ -254,9 +254,9 @@ def analyze(
                 diff = abs(S["delta_balanced"][i] - S["delta_raw"][i])
                 if diff > delta_warn_threshold:
                     note += f"Raw delta differs from balanced by {diff:.2f}; "
-                    # warnings.warn(
-                    #     f"[{name}] Potential Bias Notice: Raw delta score differs from balanced delta by {diff:.2f}. Potential dataset bias, take care in interpretation."
-                    # )
+                    warnings.warn(
+                        f"[{name}] Potential Bias Notice: Raw delta score differs from balanced delta by {diff:.2f}. Potential dataset bias, take care in interpretation."
+                    )
 
             if "sobol" in methods:
                 ind = np.random.randint(Y.size, size=y_resamples)
@@ -500,6 +500,12 @@ def obtain_resampled_subset(
                 f"[{paramname}][{mode}] Only one bin remains. Revisit whether processing method is suitable for this parameter, or increase dataset size or spread. Highly biased input.",
                 f"[{mode}] Single valid bin. Insufficient spread in feature, highly biased input; ",
             )
+
+        if n_bins != len(init_indices):
+            if warn_print:
+                warnings.warn(
+                    f"[{paramname}][{mode}] Bin Merge Notice: Final no. bins is {len(final_indices)}. Min samples per bin: {min_class_size}"
+                )
 
         if n_per_bin < min_class_size:
             raise ValueError(
