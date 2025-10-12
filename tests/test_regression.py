@@ -4,7 +4,13 @@ import numpy as np
 from numpy.testing import assert_allclose
 
 from SALib.analyze import delta, dgsm, fast, rbd_fast, sobol, morris, hdmr
-from SALib.sample import fast_sampler, finite_diff, latin, saltelli
+from SALib.sample import (
+    fast_sampler,
+    finite_diff,
+    latin,
+    saltelli,
+    sobol as sobol_sampler,
+)
 from SALib.sample.morris import sample as morris_sampler
 
 from SALib.test_functions import Ishigami
@@ -203,6 +209,7 @@ class TestMorris:
 
 
 @mark.filterwarnings("ignore::UserWarning")
+@mark.filterwarnings("ignore::DeprecationWarning")
 def test_regression_sobol():
     param_file = "src/SALib/test_functions/params/Ishigami.txt"
     problem = read_param_file(param_file)
@@ -228,7 +235,7 @@ def test_regression_sobol():
 def test_regression_sobol_parallel():
     param_file = "src/SALib/test_functions/params/Ishigami.txt"
     problem = read_param_file(param_file)
-    param_values = saltelli.sample(problem, 10000, calc_second_order=True)
+    param_values = sobol_sampler.sample(problem, 10000, calc_second_order=True)
 
     Y = Ishigami.evaluate(param_values)
 
@@ -259,7 +266,7 @@ def test_regression_sobol_groups():
         "bounds": [[-np.pi, np.pi]] * 3,
         "groups": ["G1", "G2", "G1"],
     }
-    param_values = saltelli.sample(problem, 10000, calc_second_order=True)
+    param_values = sobol_sampler.sample(problem, 10000, calc_second_order=True)
 
     Y = Ishigami.evaluate(param_values)
     Si = sobol.analyze(
@@ -285,7 +292,7 @@ def test_regression_sobol_groups_dists():
         "groups": ["G1", "G2", "G1"],
         "dists": ["unif", "lognorm", "triang"],
     }
-    param_values = saltelli.sample(problem, 10000, calc_second_order=True)
+    param_values = sobol_sampler.sample(problem, 10000, calc_second_order=True)
 
     Y = Ishigami.evaluate(param_values)
     Si = sobol.analyze(
@@ -314,6 +321,7 @@ def test_regression_fast():
     assert_allclose(Si["ST"], [0.55, 0.44, 0.24], atol=5e-2, rtol=1e-1)
 
 
+@mark.filterwarnings("ignore::DeprecationWarning")
 def test_regression_hdmr_ishigami():
     param_file = "src/SALib/test_functions/params/Ishigami.txt"
     problem = read_param_file(param_file)
@@ -338,6 +346,7 @@ def test_regression_hdmr_ishigami():
     )
 
 
+@mark.filterwarnings("ignore::DeprecationWarning")
 def test_regression_hdmr_case1():
     problem = {
         "num_vars": 5,
@@ -361,6 +370,7 @@ def test_regression_hdmr_case1():
     assert_allclose(Si["ST"][0 : problem["num_vars"]], [0.20] * 5, atol=5e-2, rtol=1e-1)
 
 
+@mark.filterwarnings("ignore::DeprecationWarning")
 def test_regression_hdmr_case2():
     problem = {
         "num_vars": 5,
@@ -398,6 +408,7 @@ def test_regression_hdmr_case2():
     )
 
 
+@mark.filterwarnings("ignore::DeprecationWarning")
 def test_regression_hdmr_case3():
     problem = {
         "num_vars": 5,

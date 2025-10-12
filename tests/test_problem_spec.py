@@ -40,12 +40,13 @@ def test_sp():
     )
 
     (
-        sp.sample_saltelli(128, calc_second_order=True)
+        sp.sample_sobol(128, calc_second_order=True)
         .evaluate(Ishigami.evaluate)
         .analyze_sobol(calc_second_order=True, conf_level=0.95)
     )
 
 
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
 def test_sp_setters():
     """Test sample and result setters."""
 
@@ -60,7 +61,7 @@ def test_sp_setters():
 
     nvars = sp["num_vars"]
     N = 128
-    X1 = sp.sample_saltelli(N, calc_second_order=True).samples
+    X1 = sp.sample_sobol(N, calc_second_order=True).samples
 
     # Saltelli produces `N*(2p+2)` samples when producing samples for 2nd order analysis
     expected_samples = 128 * (2 * nvars + 2)
@@ -68,7 +69,7 @@ def test_sp_setters():
     assert X1.shape[0] == expected_samples, "Number of samples is not as expected"
 
     # Get another 100 samples
-    X2 = sp.sample_saltelli(128, calc_second_order=True).samples
+    X2 = sp.sample_sobol(128, calc_second_order=True).samples
     assert np.all(
         sp.samples == X2
     ), "Stored sample and extracted samples are not identical!"
@@ -96,6 +97,7 @@ def test_sp_setters():
 
 
 @pytest.mark.filterwarnings("ignore::UserWarning")
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
 def test_parallel_single_output():
     # Create the SALib Problem specification
     sp = ProblemSpec(
@@ -134,6 +136,7 @@ def test_parallel_single_output():
 
 
 @pytest.mark.filterwarnings("ignore::UserWarning")
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
 def test_parallel_multi_output():
     from SALib.test_functions import lake_problem
 
