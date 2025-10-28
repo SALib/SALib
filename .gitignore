@@ -52,7 +52,4 @@ playground/
 
 docs/html/
 
-*.pyc
-__pycache__/
-tests/data/model_input.txt
 tests/data/model_output.txt

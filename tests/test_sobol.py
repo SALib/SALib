@@ -4,7 +4,7 @@ import numpy as np
 from scipy.stats import norm
 
 from SALib.analyze import sobol
-from SALib.sample import saltelli, sobol_sequence
+from SALib.sample import sobol_sequence, sobol as sobol_sampler
 from SALib.test_functions import Ishigami, Sobol_G
 from SALib.util import read_param_file
 
@@ -12,7 +12,9 @@ from SALib.util import read_param_file
 def setup_samples(N=512, calc_second_order=True):
     param_file = "src/SALib/test_functions/params/Ishigami.txt"
     problem = read_param_file(param_file)
-    param_values = saltelli.sample(problem, N=N, calc_second_order=calc_second_order)
+    param_values = sobol_sampler.sample(
+        problem, N=N, calc_second_order=calc_second_order
+    )
     return problem, param_values
 
 
@@ -157,7 +159,7 @@ def test_Sobol_G_using_sobol():
     }
     N = 4096
     a = np.array([78, 12, 0.5, 2, 97, 33])
-    param_values = saltelli.sample(problem, N, calc_second_order=False)
+    param_values = sobol_sampler.sample(problem, N, calc_second_order=False)
     model_results = Sobol_G.evaluate(param_values, a)
     Si = sobol.analyze(problem, model_results, calc_second_order=False)
 
@@ -180,7 +182,7 @@ def test_constant_output():
         "bounds": [[0, 1], [0, 1], [0, 1]],
     }
     N = 256
-    param_values = saltelli.sample(problem, N, calc_second_order=False)
+    param_values = sobol_sampler.sample(problem, N, calc_second_order=False)
     model_results = mock_model(param_values)
     Si = sobol.analyze(problem, model_results, calc_second_order=False)
 
@@ -208,7 +210,7 @@ def test_grouped_constant_output():
         "bounds": [[0, 1], [0, 1], [0, 1]],
     }
     N = 256
-    param_values = saltelli.sample(problem, N, calc_second_order=False)
+    param_values = sobol_sampler.sample(problem, N, calc_second_order=False)
     model_results = mock_model(param_values)
     Si = sobol.analyze(problem, model_results, calc_second_order=False)
 

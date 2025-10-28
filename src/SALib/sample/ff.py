@@ -5,9 +5,11 @@ This implementation is based on the formulation put forward in
 """
 
 from scipy.linalg import hadamard
+from typing import Optional, Union
+
 import numpy as np
 from . import common_args
-from ..util import scale_samples, read_param_file
+from ..util import scale_samples, read_param_file, handle_seed
 
 
 def find_smallest(num_vars):
@@ -74,7 +76,7 @@ def generate_contrast(problem):
     return contrast
 
 
-def sample(problem, seed=None):
+def sample(problem, seed: Optional[Union[int, np.random.Generator, None]] = None):
     """Generates model inputs using a fractional factorial sample.
 
     Returns a NumPy matrix containing the model inputs required for a
@@ -95,8 +97,12 @@ def sample(problem, seed=None):
     ----------
     problem : dict
         The problem definition
-    seed : int
-        Seed to generate a random number
+    seed : {None, int, `numpy.random.Generator`}, optional
+        If `seed` is None the `numpy.random.Generator` generator is used.
+        If `seed` is an int, a new ``Generator`` instance is used,
+        seeded with `seed`.
+        If `seed` is already a ``Generator`` instance then that instance is
+        used. Default is None.
 
     Returns
     -------
@@ -110,8 +116,8 @@ def sample(problem, seed=None):
        Wiley, West Sussex, U.K.
        http://doi.org/10.1002/9780470725184
     """
-    if seed:
-        np.random.seed(seed)
+    rng = handle_seed(seed)
+
     contrast = generate_contrast(problem)
     sample = np.array((contrast + 1.0) / 2, dtype=float)
     problem = extend_bounds(problem)

@@ -1,7 +1,6 @@
 import numpy as np
-from typing import Dict
+from typing import Dict, Optional, Union
 
-import numpy.random as rd
 import warnings
 
 from .local import LocalOptimisation
@@ -16,8 +15,8 @@ from SALib.util import (
     compute_groups_matrix,
     _define_problem_with_groups,
     _compute_delta,
+    handle_seed,
 )
-
 
 __all__ = ["sample"]
 
@@ -26,9 +25,9 @@ def sample(
     problem: Dict,
     N: int,
     num_levels: int = 4,
-    optimal_trajectories: int = None,
+    optimal_trajectories: Optional[Union[int, None]] = None,
     local_optimization: bool = True,
-    seed: int = None,
+    seed: Optional[Union[int, np.random.Generator]] = None,
 ) -> np.ndarray:
     """Generate model inputs using the Method of Morris.
 
@@ -90,8 +89,12 @@ def sample(
         Speeds up the process tremendously for bigger N and num_levels.
         If set to ``False`` brute force method is used, unless ``gurobipy`` is
         available
-    seed : int
-        Seed to generate a random number
+    seed : {None, int, `numpy.random.Generator`}, optional
+        If `seed` is None the `numpy.random.Generator` generator is used.
+        If `seed` is an int, a new ``Generator`` instance is used,
+        seeded with `seed`.
+        If `seed` is already a ``Generator`` instance then that instance is
+        used. Default is None.
 
     Returns
     -------
@@ -123,14 +126,13 @@ def sample(
        Environmental Modelling & Software 37, 103-109.
        https://doi.org/10.1016/j.envsoft.2012.03.008
     """
-    if seed:
-        np.random.seed(seed)
+    rng = handle_seed(seed)
 
     _check_if_num_levels_is_even(num_levels)
 
     problem = _define_problem_with_groups(problem)
 
-    sample_morris = _sample_morris(problem, N, num_levels)
+    sample_morris = _sample_morris(problem, N, rng, num_levels=num_levels)
 
     if optimal_trajectories:
         if local_optimization and (
@@ -149,7 +151,10 @@ def sample(
 
 
 def _sample_morris(
-    problem: Dict, number_trajectories: int, num_levels: int = 4
+    problem: Dict,
+    number_trajectories: int,
+    rng: np.random.Generator,
+    num_levels: int = 4,
 ) -> np.ndarray:
     """Generate trajectories for groups
 
@@ -163,6 +168,7 @@ def _sample_morris(
         The problem definition
     number_trajectories : int
         The number of trajectories to generate
+    rng : np.random.Generator
     num_levels : int, default=4
         The number of grid levels
 
@@ -177,7 +183,7 @@ def _sample_morris(
     num_groups = group_membership.shape[1]
 
     sample_morris = [
-        _generate_trajectory(group_membership, num_levels)
+        _generate_trajectory(group_membership, rng, num_levels=num_levels)
         for _ in range(number_trajectories)
     ]
     sample_morris = np.array(sample_morris)
@@ -186,7 +192,7 @@ def _sample_morris(
 
 
 def _generate_trajectory(
-    group_membership: np.ndarray, num_levels: int = 4
+    group_membership: np.ndarray, rng: np.random.Generator, num_levels: int = 4
 ) -> np.ndarray:
     """Return a single trajectory
 
@@ -199,6 +205,7 @@ def _generate_trajectory(
     ---------
     group_membership : np.ndarray
         a k-by-g matrix which notes factor membership of groups
+    rng : numpy.random.Generator
     num_levels : int, default=4
         The number of levels in the grid
 
@@ -206,7 +213,6 @@ def _generate_trajectory(
     -------
     np.ndarray
     """
-
     delta = _compute_delta(num_levels)
 
     # Infer number of groups `g` and number of params `k` from
@@ -217,16 +223,16 @@ def _generate_trajectory(
     # Matrix B - size (g + 1) * g -  lower triangular matrix
     B = np.tril(np.ones([num_groups + 1, num_groups], dtype=int), -1)
 
-    P_star = _generate_p_star(num_groups)
+    P_star = _generate_p_star(num_groups, rng)
 
     # Matrix J - a (g+1)-by-num_params matrix of ones
     J = np.ones((num_groups + 1, num_params))
 
     # Matrix D* - num_params-by-num_params matrix which describes whether
     # factors move up or down
-    D_star = np.diag(rd.choice([-1, 1], num_params))
+    D_star = np.diag(rng.choice([-1, 1], num_params))
 
-    x_star = _generate_x_star(num_params, num_levels)
+    x_star = _generate_x_star(num_params, num_levels, rng)
 
     # Matrix B* - size (num_groups + 1) * num_params
     B_star = _compute_b_star(J, x_star, delta, B, group_membership, P_star, D_star)
@@ -270,12 +276,13 @@ def _compute_b_star(
     return b_star
 
 
-def _generate_p_star(num_groups: int) -> np.ndarray:
+def _generate_p_star(num_groups: int, rng: np.random.Generator) -> np.ndarray:
     """Describe the order in which groups move
 
     Parameters
     ---------
     num_groups : int
+    rng : numpy.random.Generator
 
     Returns
     -------
@@ -283,11 +290,13 @@ def _generate_p_star(num_groups: int) -> np.ndarray:
         Matrix P* - size (g-by-g)
     """
     p_star = np.eye(num_groups, num_groups)
-    rd.shuffle(p_star)
+    rng.shuffle(p_star)
     return p_star
 
 
-def _generate_x_star(num_params: int, num_levels: int) -> np.ndarray:
+def _generate_x_star(
+    num_params: int, num_levels: int, rng: np.random.Generator
+) -> np.ndarray:
     """Generate an 1-by-num_params array to represent initial position for EE
 
     This should be a randomly generated array in the p level grid
@@ -299,6 +308,7 @@ def _generate_x_star(num_params: int, num_levels: int) -> np.ndarray:
         The number of parameters (factors)
     num_levels : int
         The number of levels
+    rng : numpy.random.Generator
 
     Returns
     -------
@@ -310,7 +320,7 @@ def _generate_x_star(num_params: int, num_levels: int) -> np.ndarray:
     bound = 1 - delta
     grid = np.linspace(0, bound, int(num_levels / 2))
 
-    x_star[0, :] = rd.choice(grid, num_params)
+    x_star[0, :] = rng.choice(grid, num_params)
 
     return x_star
 
@@ -445,11 +455,14 @@ def cli_parse(parser):
 
 
 def cli_action(args):
-    rd.seed(args.seed)
-
     problem = read_param_file(args.paramfile)
     param_values = sample(
-        problem, args.samples, args.levels, args.k_optimal, args.local
+        problem,
+        args.samples,
+        num_levels=args.levels,
+        optimal_trajectories=args.k_optimal,
+        local_optimization=args.local,
+        seed=args.seed,
     )
 
     np.savetxt(

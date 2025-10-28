@@ -27,6 +27,7 @@ def test_morris_sample_seed():
 
 
 @pytest.mark.filterwarnings("ignore::UserWarning")
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
 def test_saltelli_sample_seed():
     N, problem = problem_setup()
 

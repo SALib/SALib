@@ -21,6 +21,7 @@ from SALib.util import (
     compute_groups_matrix,
     _define_problem_with_groups,
     _compute_delta,
+    handle_seed,
 )
 
 
@@ -176,8 +177,9 @@ class TestGroupSampleGeneration:
         each row contains one element equal to 1, all others are 0
         no two columns have 1s in the same position
         """
+        rng = handle_seed(101)
         for i in range(1, 100):
-            output = _generate_p_star(i)
+            output = _generate_p_star(i, rng)
             if np.any(np.sum(output, 0) != np.ones(i)):
                 raise AssertionError("Not legal P along axis 0")
             elif np.any(np.sum(output, 1) != np.ones(i)):
@@ -192,11 +194,14 @@ class TestGroupSampleGeneration:
         assert_allclose(output, desired, rtol=1e-2)
 
     def test_generate_trajectory(self):
+        rng = handle_seed(101)
         # Two groups of three factors
         G = np.array([[1, 0], [0, 1], [0, 1]])
         # Four levels
+        rng = handle_seed(101)
+
         num_levels = 4
-        output = _generate_trajectory(G, num_levels)
+        output = _generate_trajectory(G, rng, num_levels=num_levels)
         if np.any((output > 1) | (output < 0)):
             raise AssertionError("Bound not working: %s", output)
         assert_equal(output.shape[0], 3)
@@ -226,14 +231,13 @@ class TestGroupSampleGeneration:
         assert_allclose(output, desired)
 
     def test_generate_x_star(self):
-        """ """
+        """Test against previously generated x_star values."""
         num_params = 4
         num_levels = 4
 
-        np.random.seed(10)
-        actual = _generate_x_star(num_params, num_levels)
-        print(actual)
-        expected = np.array([[0.333333, 0.333333, 0.0, 0.333333]])
+        rng = handle_seed(101)
+        actual = _generate_x_star(num_params, num_levels, rng)
+        expected = np.array([[0.0, 0.33333333, 0.33333333, 0.0]])
         assert_allclose(actual, expected, rtol=1e-05)
 
     def test_define_problem_with_groups_all_ok(self):

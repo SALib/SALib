@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Union
 from types import MethodType
 
 import itertools
@@ -14,7 +14,7 @@ import pandas as pd
 from scipy import stats, special, interpolate
 
 from . import common_args
-from ..util import read_param_file, ResultDict
+from ..util import read_param_file, ResultDict, handle_seed
 
 from SALib.plotting.hdmr import plot as hdmr_plot
 from SALib.util.problem import ProblemSpec
@@ -35,7 +35,7 @@ def analyze(
     alpha: float = 0.95,
     lambdax: float = 0.01,
     print_to_console: bool = False,
-    seed: int = None,
+    seed: Union[int, bool, None] = None,
 ) -> Dict:
     """Compute global sensitivity indices using the meta-modeling technique
     known as High-Dimensional Model Representation (HDMR).
@@ -126,7 +126,7 @@ def analyze(
     print_to_console : bool
         Print results directly to console (default: False)
 
-    seed : bool
+    seed : {int, bool, None}
         Seed to generate a random number
 
     Returns
@@ -178,7 +178,7 @@ def analyze(
 
     # Random Seed
     if seed:
-        np.random.seed(seed)
+        rng = handle_seed(seed)
 
     # Initial part: Check input arguments and define HDMR variables
     settings = _check_settings(X, Y, maxorder, maxiter, m, K, R, alpha, lambdax)

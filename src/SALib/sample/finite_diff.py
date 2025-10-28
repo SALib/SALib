@@ -1,17 +1,16 @@
-from typing import Dict
-
+from typing import Dict, Optional, Union
 import numpy as np
 
 from . import common_args
 from . import sobol_sequence
-from ..util import scale_samples, read_param_file
+from ..util import scale_samples, read_param_file, handle_seed
 
 
 def sample(
     problem: Dict,
     N: int,
     delta: float = 0.01,
-    seed: int = None,
+    seed: Optional[Union[int, np.random.Generator]] = None,
     skip_values: int = 1024,
 ) -> np.ndarray:
     """
@@ -27,8 +26,12 @@ def sample(
         Number of samples
     delta : float
         Finite difference step size (percent)
-    seed : int or None
-        Random seed value
+    seed : {None, int, `numpy.random.Generator`}, optional
+        If `seed` is None the `numpy.random.Generator` generator is used.
+        If `seed` is an int, a new ``Generator`` instance is used,
+        seeded with `seed`.
+        If `seed` is already a ``Generator`` instance then that instance is
+        used. Default is None.
     skip_values : int
         How many values of the Sobol sequence to skip
 
@@ -49,8 +52,7 @@ def sample(
        Procedia - Social and Behavioral Sciences 2, 7745-7746.
        https://doi.org/10.1016/j.sbspro.2010.05.208
     """
-    if seed:
-        np.random.seed(seed)
+    rng = handle_seed(seed)
 
     D = problem["num_vars"]
     bounds = problem["bounds"]
