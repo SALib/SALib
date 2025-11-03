@@ -254,9 +254,9 @@ def analyze(
                 diff = abs(S["delta_balanced"][i] - S["delta_raw"][i])
                 if diff > delta_warn_threshold:
                     note += f"Raw delta differs from balanced by {diff:.2f}; "
-                    # warnings.warn(
-                    #     f"[{name}] Potential Bias Notice: Raw delta score differs from balanced delta by {diff:.2f}. Potential dataset bias, take care in interpretation."
-                    # )
+                    warnings.warn(
+                        f"[{name}] Potential Bias Notice: Raw delta score differs from balanced delta by {diff:.2f}. Potential dataset bias, take care in interpretation."
+                    )
 
             if "sobol" in methods:
                 ind = np.random.randint(Y.size, size=y_resamples)
@@ -318,7 +318,7 @@ def check_specified_bininfo(bininfo, Xmin, Xmax, paramname):
         bin_edges = np.array(bininfo)
         if not np.issubdtype(bin_edges.dtype, np.number):
             warnings.warn(
-                f"[{paramname}] Input Error: Bin value error: Custom bin list only contain numeric values. Resorting to default binning ({defaultbins} bins)."
+                f"[{paramname}] Input Error: Bin value error - Custom bin list only contain numeric values. Resorting to default binning ({defaultbins} bins)."
             )
             return (
                 np.linspace(Xmin, Xmax, defaultbins + 1),
@@ -326,7 +326,7 @@ def check_specified_bininfo(bininfo, Xmin, Xmax, paramname):
             )
         elif np.any(bin_edges < Xmin) or np.any(bin_edges > Xmax):
             warnings.warn(
-                f"[{paramname}] Input Error: Bin boundary error: Custom bin boundaries must be within the X range. Resorting to default binning ({defaultbins} bins)."
+                f"[{paramname}] Input Error: Bin boundary error - Custom bin boundaries must be within the X range. Resorting to default binning ({defaultbins} bins)."
             )
             return (
                 np.linspace(Xmin, Xmax, defaultbins + 1),
@@ -334,7 +334,7 @@ def check_specified_bininfo(bininfo, Xmin, Xmax, paramname):
             )
         elif not np.all(np.diff(bin_edges) > 0):
             warnings.warn(
-                f"[{paramname}] Input Error: Bin edge error: Custom bin edges must be ascending. Resorting to default binning ({defaultbins} bins)."
+                f"[{paramname}] Input Error: Bin edge error - Custom bin edges must be ascending. Resorting to default binning ({defaultbins} bins)."
             )
             return (
                 np.linspace(Xmin, Xmax, defaultbins + 1),
@@ -343,7 +343,7 @@ def check_specified_bininfo(bininfo, Xmin, Xmax, paramname):
         return np.concatenate(([Xmin - 1e-9], bin_edges, [Xmax + 1e-9])), ""
     else:
         warnings.warn(
-            f"[{paramname}] Input Error: Invalid custom bin dtype: Must be int, list or None. Resorting to default binning ({defaultbins} bins)."
+            f"[{paramname}] Input Error: Invalid custom bin dtype - Must be int, list or None. Resorting to default binning ({defaultbins} bins)."
         )
         return (
             np.linspace(Xmin, Xmax, defaultbins + 1),
@@ -500,6 +500,12 @@ def obtain_resampled_subset(
                 f"[{paramname}][{mode}] Only one bin remains. Revisit whether processing method is suitable for this parameter, or increase dataset size or spread. Highly biased input.",
                 f"[{mode}] Single valid bin. Insufficient spread in feature, highly biased input; ",
             )
+
+        if n_bins != len(init_indices):
+            if warn_print:
+                warnings.warn(
+                    f"[{paramname}][{mode}] Bin Merge Notice: Final no. bins is {len(final_indices)}. Min samples per bin: {min_class_size}"
+                )
 
         if n_per_bin < min_class_size:
             raise ValueError(
