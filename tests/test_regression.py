@@ -490,7 +490,7 @@ def test_regression_delta():
         print_to_console=True,
     )
 
-    assert_allclose(Si["delta"], [0.210, 0.358, 0.155], atol=5e-2, rtol=1e-1)
+    assert_allclose(Si["delta_raw"], [0.210, 0.358, 0.155], atol=5e-2, rtol=1e-1)
     assert_allclose(Si["S1"], [0.31, 0.44, 0.00], atol=5e-2, rtol=1e-1)
 
 
@@ -640,8 +640,19 @@ def test_regression_delta_svm():
     conf_level = 0.95
 
     test_res = delta.bias_reduced_delta(
-        Y, Ygrid, X, m, num_resamples, conf_level, Y.size
+        Y,
+        Ygrid,
+        X,
+        m,
+        num_resamples,
+        conf_level,
+        Y.size,
+        "raw",
+        None,
+        "testparam",
+        int(0.005 * (Y.size)),
     )
+    test_res = test_res[:2]
 
     np.testing.assert_allclose(
         test_res, (0.6335098491949687, 0.026640611898969522), atol=0.005
