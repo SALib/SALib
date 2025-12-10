@@ -46,7 +46,7 @@ and FAST.  There are many factors that determine which method is appropriate
 for a specific application, which we will discuss later.  However, for now, just
 remember that regardless of which method you choose, you need to use only two
 functions: :code:`sample` and :code:`analyze`.  To demonstrate the use of SALib,
-we will walk you through a simple example.
+we will walk through a simple example.
 
 An Example
 ----------
@@ -110,10 +110,14 @@ below.
     param_values = saltelli.sample(problem, 1024)
 
 Here, :code:`param_values` is a NumPy matrix.  If we run
-:code:`param_values.shape`, we see that the matrix is 8000 by 3.  The Saltelli
-sampler generated 8000 samples.  The Saltelli sampler generates
+:code:`param_values.shape`, we see that the matrix has shape 8192 by 3.
+The Saltelli sampler generated 8192 samples.  The Saltelli sampler generates
 :math:`N*(2D+2)` samples, where in this example N is 1024 (the argument we
-supplied) and D is 3 (the number of model inputs). The keyword argument :code:`calc_second_order=False` will exclude second-order indices, resulting in a smaller sample matrix with :math:`N*(D+2)` rows instead.
+supplied) and D is 3 (the number of model inputs). 
+
+Had we supplied the keyword argument :code:`calc_second_order=False`,
+second-order indices would have been excluded, resulting in a smaller
+sample matrix with :math:`N*(D+2)` rows instead.
 
 Run Model
 ~~~~~~~~~
@@ -162,10 +166,11 @@ first, second, and total-order indices.
 
     Si = sobol.analyze(problem, Y)
 
-:code:`Si` is a Python :code:`dict` with the keys :code:`"S1"`,
+:code:`Si` is a Python :code:`dict`-like with the keys :code:`"S1"`,
 :code:`"S2"`, :code:`"ST"`, :code:`"S1_conf"`, :code:`"S2_conf"`, and
 :code:`"ST_conf"`.  The :code:`_conf` keys store the corresponding confidence
-intervals, typically with a confidence level of 95%. Use the keyword argument :code:`print_to_console=True` to print all indices. Or, we can print the individual values from :code:`Si` as shown below.
+intervals, typically with a confidence level of 95%. Use the keyword argument :code:`print_to_console=True` to print all indices.
+Alternatively, we can print the individual values from :code:`Si` as shown below.
 
 .. code:: python
 
@@ -221,7 +226,7 @@ Basic plotting facilities are provided for convenience.
 
     Si.plot()
 
-The :code:`plot()` method returns matplotlib axes objects to allow later adjustment.
+The :code:`plot()` method returns matplotlib axes for later adjustment.
 
 
 Another Example

@@ -18,7 +18,7 @@ First, as a fourth column in the parameter file:
     P3 0.0 5.0 Group_2
     ...etc.
 
-Or in the `problem` dictionary:
+Second, as an additional key in the :code:`problem` dictionary:
 
 .. code:: python
 
@@ -29,7 +29,8 @@ Or in the `problem` dictionary:
         'bounds': [[-3.14, 3.14], [-3.14, 3.14], [-3.14, 3.14]]
     }
 
-:code:`groups` is a list of strings specifying the group name to which each variable belongs. The rest of the code stays the same:
+:code:`groups` is a list of strings specifying the group name of each variable.
+The rest of the code stays the same:
 
 .. code:: python
 
@@ -71,7 +72,7 @@ The output can then be converted to a Pandas DataFrame for further analysis.
 Generating alternate distributions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In :ref:`basics`, we generate a uniform sample of parameter space.
+In :ref:`basics`, we generated a uniform sample of parameter space.
 
 .. code:: python
 
@@ -112,6 +113,8 @@ parameter bounds but sample-specific metadata.
      e.g. :code:`[3, 0.5]` assumes 0 to 3, with a peak at 1.5
 * norm: normal distribution with mean and standard deviation
 * truncnorm: truncated normal distribution with lower and upper bounds, mean and standard deviation
+    e.g. :code:`[-3, 3, 0, 1]` indicates a lower bound of -3,
+    upper bound of 3, mean 0 and standard deviation of 1.
 * lognorm: lognormal with ln-space mean and standard deviation
 
 

@@ -7,7 +7,7 @@ Installing SALib
 ----------------
 
 To install the latest stable version of SALib
-via pip from `PyPI <https://pypi.org/project/SALib>`__.
+via pip from `PyPI <https://pypi.org/project/SALib>`__,
 together with all the dependencies, run the following command:
 
 ::
@@ -15,7 +15,7 @@ together with all the dependencies, run the following command:
     pip install SALib
 
 To install the latest development version of SALib, run the following
-commands.  Note that the development version may be unstable and include bugs.
+commands. Note that the development version may be unstable and include bugs.
 We encourage users use the latest stable version.
 
 ::
@@ -53,7 +53,7 @@ To test your installation of SALib, run the following command
 
     pytest
 
-Alternatively, if you’d like also like a taste of what SALib provides,
+Alternatively, if you’d also like a taste of what SALib provides,
 start a new interactive Python session
 and copy/paste the code below.
 
