@@ -18,7 +18,7 @@ First, as a fourth column in the parameter file:
     P3 0.0 5.0 Group_2
     ...etc.
 
-Second, as an additional key in the :code:`problem` dictionary:
+Or, as an additional key in the :code:`problem` dictionary:
 
 .. code:: python
 
