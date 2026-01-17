@@ -116,6 +116,10 @@ parameter bounds but sample-specific metadata.
     e.g. :code:`[-3, 3, 0, 1]` indicates a lower bound of -3,
     upper bound of 3, mean 0 and standard deviation of 1.
 * lognorm: lognormal with ln-space mean and standard deviation
+* weibull: weibull distribution with shape, scale, and optional location parameters.
+    e.g. :code:`[1.5, 1.0, 5.0]` indicates a shape (k) of 1.5, scale (lambda) of 1.0, and a location of 5.0.
+    If only two values are provided, the location is assumed to be 0.
+    e.g. :code:`[1.5, 1.0]` assumes a location of 0.
 
 
 An example specification is shown below:
