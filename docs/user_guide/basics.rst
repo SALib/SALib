@@ -113,7 +113,7 @@ Here, :code:`param_values` is a NumPy matrix.  If we run
 :code:`param_values.shape`, we see that the matrix has shape 8192 by 3.
 The Saltelli sampler generated 8192 samples.  The Saltelli sampler generates
 :math:`N*(2D+2)` samples, where in this example N is 1024 (the argument we
-supplied) and D is 3 (the number of model inputs). 
+supplied) and D is 3 (the number of model inputs).
 
 Had we supplied the keyword argument :code:`calc_second_order=False`,
 second-order indices would have been excluded, resulting in a smaller
