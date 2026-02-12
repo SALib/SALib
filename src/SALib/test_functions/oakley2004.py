@@ -23,8 +23,6 @@ def evaluate(X: np.ndarray, A: np.ndarray, M: np.ndarray) -> np.ndarray:
         x_i = X[i]
         Y[i] = a1 @ x_i + a2 @ np.sin(x_i) + a3 @ np.cos(x_i) + x_i.T @ (M @ x_i)
 
-        a3.T.dot(np.cos(X[0]))
-
     return Y
 
 
