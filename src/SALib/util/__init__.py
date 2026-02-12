@@ -148,6 +148,7 @@ def _nonuniform_scale_samples(params, bounds, dists):
             truncnorm: truncated normal distribution with lower and upper
                     bounds, mean and standard deviation
             lognorm: lognormal with ln-space mean and standard deviation
+            weibull: weibull distribution with shape, scale and optional location
     """
     b = np.array(bounds, dtype=object)
 
@@ -246,8 +247,33 @@ def _nonuniform_scale_samples(params, bounds, dists):
                     sp.stats.norm.ppf(params[:, i], loc=b1, scale=b2)
                 )
 
+        # Weibull distribution
+        # parameters are shape (k), scale (lambda) and optional location
+        elif dists[i] == "weibull":
+            # checking for location parameter
+            if len(b[i]) == 3:
+                b1 = b[i][0]  # shape (k)
+                b2 = b[i][1]  # scale (lambda)
+                loc_start = b[i][2] # location
+            elif len(b[i]) == 2:
+                b1 = b[i][0]
+                b2 = b[i][1]
+                loc_start = 0
+            else:
+                raise ValueError(
+                    "Unknown Weibull distribution specification. Check"
+                    " problem specification."
+                )
+
+            if b1 <= 0 or b2 <= 0:
+                raise ValueError("""Weibull distribution: shape and scale must be > 0""")
+            else:
+                conv_params[:, i] = sp.stats.weibull_min.ppf(
+                    params[:, i], c=b1, scale=b2, loc=loc_start
+                )
+
         else:
-            valid_dists = ["unif", "triang", "norm", "truncnorm", "lognorm"]
+            valid_dists = ["unif", "triang", "norm", "truncnorm", "lognorm", "logunif", "weibull"]
             raise ValueError("Distributions: choose one of %s" % ", ".join(valid_dists))
 
     return conv_params
