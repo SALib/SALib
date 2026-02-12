@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.9', '3.12']
+        python-version: ['3.9', '3.12', '3.14']
     defaults:
       run:
         shell: bash -l {0}
@@ -28,7 +28,6 @@ jobs:
           activate-environment: SALib
           python-version: ${{ matrix.python-version }}
           channels: conda-forge
-          miniforge-variant: Miniforge
           miniforge-version: latest
           use-mamba: true
           channel-priority: true
