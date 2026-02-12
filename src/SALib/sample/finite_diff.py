@@ -52,7 +52,7 @@ def sample(
        Procedia - Social and Behavioral Sciences 2, 7745-7746.
        https://doi.org/10.1016/j.sbspro.2010.05.208
     """
-    rng = handle_seed(seed)
+    rng = handle_seed(seed)  # noqa
 
     D = problem["num_vars"]
     bounds = problem["bounds"]
