@@ -46,7 +46,8 @@ def test_delta():
 
     result = subprocess.check_output(analyze_cmd, universal_newlines=True)
 
-    delta_expected = [0.228979, 0.347744, 0.163172]
+    # Previous expected values, prior to PR#661 = [0.228979, 0.347744, 0.163172]
+    delta_expected = [0.006536, 0.008713, 0.004975]
     sobol_expected = [0.313794, 0.433776, 0.005120]
 
     test = pd.read_csv(StringIO(result), index_col=0, sep=r"\s+")
