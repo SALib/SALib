@@ -22,16 +22,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up conda
-        uses: conda-incubator/setup-miniconda@v2
+      - name: Set up micromamba
+        uses: mamba-org/setup-micromamba@v2
         with:
-          activate-environment: SALib
+          environment-name: SALib
           python-version: ${{ matrix.python-version }}
           channels: conda-forge
-          miniforge-variant: Mambaforge
-          miniforge-version: latest
-          use-mamba: true
-          channel-priority: true
+          cache-environment: true
 
       - name: Get Date
         id: get-date
@@ -51,24 +48,21 @@ jobs:
 
       - name: Update Conda Environment
         run: |
-          mamba env update -n SALib -f environment.yml
+          micromamba env update -n SALib -f environment.yml
         if: steps.envcache.outputs.cache-hit != 'true'
 
       - name: Install package
         run: |
-          conda activate SALib
           pip install .[test]
 
       - name: Test
         if: matrix.python-version != '3.12'
         run: |
-          conda activate SALib
           pytest
 
       - name: Test with coverage and uploads
         if: matrix.python-version == '3.12'
         run: |
-          conda activate SALib
           python -m pip install coveralls
           pytest --cov SALib --cov-report html --verbose
           coveralls
