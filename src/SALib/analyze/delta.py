@@ -194,7 +194,7 @@ def analyze(
     Ygrid = np.linspace(np.min(Y), np.max(Y), 100)
 
     # S
-    keys = ["notes"]
+    keys = []
     if "delta" in methods:
         keys += [
             "delta_balanced",
@@ -216,6 +216,9 @@ def analyze(
         raise ValueError(
             "Forbidden column name suffix: columns may not end with ['_raw', '_balanced', '_step', '_conf'] "
         )
+
+
+    keys += ["notes"]
 
     S["names"] = problem["names"]
     notes = []
