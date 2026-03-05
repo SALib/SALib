@@ -217,7 +217,6 @@ def analyze(
             "Forbidden column name suffix: columns may not end with ['_raw', '_balanced', '_step', '_conf'] "
         )
 
-
     keys += ["notes"]
 
     S["names"] = problem["names"]
