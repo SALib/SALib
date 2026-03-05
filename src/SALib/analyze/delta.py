@@ -50,7 +50,7 @@ def analyze(
 ) -> Dict:
     """Perform Delta Moment-Independent Analysis on model outputs.
 
-    Returns a dictionary with keys: 
+    Returns a dictionary with keys:
     - 'delta_balanced'
     - 'delta_balanced_conf'
     - 'delta_raw'
@@ -61,10 +61,10 @@ def analyze(
     - 'S1_conf'
     - 'names'
 
-    where each entry is a list of size D (the number of parameters) containing the indices 
+    where each entry is a list of size D (the number of parameters) containing the indices
     in the same order as the input file and 'names'.
 
-    The different delta configurations/methods 'balanced', 'step', 'raw', their 
+    The different delta configurations/methods 'balanced', 'step', 'raw', their
     corresponding confidence scores (*_conf), and other keys in returned dictionary:
         - 'names'
             input column/feature names in X
