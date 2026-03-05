@@ -214,7 +214,7 @@ def first_order(A, AB, B):
     y = np.r_[A, B]
     if np.ptp(y) == 0:
         warn(CONST_RESULT_MSG)
-        return np.array([0.0])
+        return np.float64(0.0)
 
     return np.mean(B * (AB - A), axis=0) / np.var(y, axis=0)
 
@@ -227,7 +227,7 @@ def total_order(A, AB, B):
     y = np.r_[A, B]
     if np.ptp(y) == 0:
         warn(CONST_RESULT_MSG)
-        return np.array([0.0])
+        return np.float64(0.0)
 
     return 0.5 * np.mean((A - AB) ** 2, axis=0) / np.var(y, axis=0)
 
@@ -237,7 +237,7 @@ def second_order(A, ABj, ABk, BAj, B):
     y = np.r_[A, B]
     if np.ptp(y) == 0:
         warn(CONST_RESULT_MSG)
-        return np.array([0.0])
+        return np.float64(0.0)
 
     Vjk = np.mean(BAj * ABk - A * B, axis=0) / np.var(y, axis=0)
     Sj = first_order(A, ABj, B)
