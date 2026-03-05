@@ -116,7 +116,7 @@ def sample(problem, seed: Optional[Union[int, np.random.Generator, None]] = None
        Wiley, West Sussex, U.K.
        http://doi.org/10.1002/9780470725184
     """
-    rng = handle_seed(seed)
+    rng = handle_seed(seed)  # noqa
 
     contrast = generate_contrast(problem)
     sample = np.array((contrast + 1.0) / 2, dtype=float)

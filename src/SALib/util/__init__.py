@@ -254,7 +254,7 @@ def _nonuniform_scale_samples(params, bounds, dists):
             if len(b[i]) == 3:
                 b1 = b[i][0]  # shape (k)
                 b2 = b[i][1]  # scale (lambda)
-                loc_start = b[i][2] # location
+                loc_start = b[i][2]  # location
             elif len(b[i]) == 2:
                 b1 = b[i][0]
                 b2 = b[i][1]
@@ -266,14 +266,24 @@ def _nonuniform_scale_samples(params, bounds, dists):
                 )
 
             if b1 <= 0 or b2 <= 0:
-                raise ValueError("""Weibull distribution: shape and scale must be > 0""")
+                raise ValueError(
+                    """Weibull distribution: shape and scale must be > 0"""
+                )
             else:
                 conv_params[:, i] = sp.stats.weibull_min.ppf(
                     params[:, i], c=b1, scale=b2, loc=loc_start
                 )
 
         else:
-            valid_dists = ["unif", "triang", "norm", "truncnorm", "lognorm", "logunif", "weibull"]
+            valid_dists = [
+                "unif",
+                "triang",
+                "norm",
+                "truncnorm",
+                "lognorm",
+                "logunif",
+                "weibull",
+            ]
             raise ValueError("Distributions: choose one of %s" % ", ".join(valid_dists))
 
     return conv_params

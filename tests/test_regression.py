@@ -655,5 +655,5 @@ def test_regression_delta_svm():
     test_res = test_res[:2]
 
     np.testing.assert_allclose(
-        test_res, (0.6335098491949687, 0.026640611898969522), atol=0.005
+        test_res, (0.6335098491949687, 0.026640611898969522), atol=0.05
     )

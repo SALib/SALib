@@ -178,7 +178,7 @@ def analyze(
 
     # Random Seed
     if seed:
-        rng = handle_seed(seed)
+        rng = handle_seed(seed)  # noqa
 
     # Initial part: Check input arguments and define HDMR variables
     settings = _check_settings(X, Y, maxorder, maxiter, m, K, R, alpha, lambdax)
