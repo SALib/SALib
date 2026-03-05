@@ -50,11 +50,22 @@ def analyze(
 ) -> Dict:
     """Perform Delta Moment-Independent Analysis on model outputs.
 
-    Returns a dictionary with keys 'delta_balanced', 'delta_balanced_conf', 'delta_raw', 'delta_raw_conf', 'delta_step', 'delta_step_conf',
-    'S1', 'S1_conf', 'names', where each entry is a list of size D (the number of parameters) containing
-    the indices in the same order as the input file and 'names'
+    Returns a dictionary with keys: 
+    - 'delta_balanced'
+    - 'delta_balanced_conf'
+    - 'delta_raw'
+    - 'delta_raw_conf'
+    - 'delta_step'
+    - 'delta_step_conf'
+    - 'S1'
+    - 'S1_conf'
+    - 'names'
 
-    The different delta configurations/methods 'balanced', 'step', 'raw', their corresponding confidence scores (*_conf), and other keys in returned dictionary:
+    where each entry is a list of size D (the number of parameters) containing the indices 
+    in the same order as the input file and 'names'.
+
+    The different delta configurations/methods 'balanced', 'step', 'raw', their 
+    corresponding confidence scores (*_conf), and other keys in returned dictionary:
         - 'names'
             input column/feature names in X
 
@@ -70,7 +81,7 @@ def analyze(
         - 'raw'
             Bootstraps the input column as is, with random bootstrap sampling with replacement
 
-        - 's1'
+        - 'S1'
             Sobol' first indices, on raw dataset with no bootstrap manipulations (random, with replacement)
 
 
@@ -273,25 +284,9 @@ def analyze(
         S["notes"] = notes
 
     if print_to_console:
-        summary_dict = {"names": problem["names"], "notes": notes}
-        if "delta_balanced" in S:
-            summary_dict.update(
-                {
-                    "delta_balanced": S["delta_balanced"],
-                    "delta_step": S["delta_step"],
-                    "delta_raw": S["delta_raw"],
-                    "delta_balanced_conf": S["delta_balanced_conf"],
-                    "delta_step_conf": S["delta_step_conf"],
-                    "delta_raw_conf": S["delta_raw_conf"],
-                }
-            )
-        if "S1" in S:
-            summary_dict.update(
-                {
-                    "s1": S["S1"],
-                    "s1_conf": S["S1_conf"],
-                }
-            )
+        # Merge dictionaries
+        summary_dict = {"names": problem["names"]} | S
+
         df_summary = pd.DataFrame(summary_dict)
         print(df_summary.to_string(index=False))
 
