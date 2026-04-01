@@ -5,9 +5,10 @@ This document outlines the process for publishing a new release of SALib to PyPI
 ## Automated release process
 
 1. Create a release branch
-2. Make an annotated tag following PyPi rules eg v1.3-alpha
+2. Make an annotated tag following PyPI rules eg v1.3-alpha
 3. Push the tag to the release branch
-4. Check it gets deployed to PyPi
+4. Check it gets deployed to PyPI
+5. Create a GitHub release (must be done manually!)
 
 
 ## Manual release process
@@ -28,7 +29,7 @@ Releases follow this sequence:
 3. Build and verify the distribution
 4. Publish to TestPyPI
 5. Publish to PyPI
-6. Create a GitHub Release
+6. Create a GitHub Release (done manually; see Step 6 below)
 
 ---
 
@@ -53,33 +54,36 @@ Do not proceed until all tests and checks pass.
 
 ## Step 2: Bump the version
 
-SALib uses `hatch` to manage versioning. Version numbers follow
-[Semantic Versioning](https://semver.org/): `MAJOR.MINOR.PATCH`.
+SALib follows [Semantic Versioning](https://semver.org/), which follows a
+`MAJOR.MINOR.PATCH` number format.
 
-| Change type                       | Command               | Example: 1.4.2 → |
-| --------------------------------- | --------------------- | ---------------- |
-| Bug fixes / patches               | `hatch version patch` | `1.4.3`          |
-| New backwards-compatible features | `hatch version minor` | `1.5.0`          |
-| Breaking changes                  | `hatch version major` | `2.0.0`          |
+| Change type                       | Example: 1.4.2 →  |
+| --------------------------------- |  ---------------- |
+| Bug fixes / patches               |  `1.4.3`          |
+| New backwards-compatible features |  `1.5.0`          |
+| Breaking changes                  |  `2.0.0`          |
+
+Create an
+
+```bash
+$ git tag -a <semver-version> -m "<a release message>"
+# Example: git tag -a v1.0.0 -m "Release version 1.0.0"
+
+# Tagging an existing commit is also possible
+$ git tag -a <tag-name> -m "<message>" <commit-hash>
+# Example: git tag -a v1.2 9fceb02 =m "Release version 1.2"
+
+# Push the tag to origin
+$ git push origin <tag-name>
+
+# Sometimes it is handy to know how to push all created tags
+$ git push origin --tags
+```
 
 To inspect the current version without changing it:
 
 ```bash
 $ hatch version
-```
-
-To bump the version:
-
-```bash
-$ hatch version patch    # or: minor, major
-```
-
-This updates the version string in the project source directly. Verify the
-change looks correct before continuing, then commit:
-
-```bash
-$ git add .
-$ git commit -m "Release vX.Y.Z"
 ```
 
 ---

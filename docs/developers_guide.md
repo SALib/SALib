@@ -67,6 +67,9 @@ $ uv sync --extra dev          # equivalent: pip install -e ".[dev]"
 # Install pre-commit as a tool and set up the hook
 $ uv tool install pre-commit   # equivalent: pip install --user pre-commit (but isolated)
 $ pre-commit install
+
+# To run tests:
+$ uv run pytest    # equivalent: pytest (but runs within the uv-managed environment)
 ```
 
 ## Prior to submitting a PR
@@ -74,15 +77,7 @@ $ pre-commit install
 Run the below to catch any formatting issues.
 
 ```bash
-pre-commit run --all-files
-```
-
-## Running tests
-
-To run tests, run the following command from the SALib project directory.
-
-```bash
-$ uv run pytest    # equivalent: pytest (but runs within the uv-managed environment)
+pre-commit run --all
 ```
 
 ## Building documentation locally
