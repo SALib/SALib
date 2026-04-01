@@ -2,13 +2,22 @@
 
 This document outlines the process for publishing a new release of SALib to PyPI.
 
+The general steps are:
+
+1. Verify the main branch is release-ready
+2. Bump the version with git
+3. Follow the automated or manual release process outlined below
+
+The automated process is what is typically followed.
+The manual process is documented in the rare instance the deployment pipeline has issues.
+
 ## Automated release process
 
 1. Create a release branch
 2. Make an annotated tag following PyPI rules eg v1.3-alpha
 3. Push the tag to the release branch
 4. Check it gets deployed to PyPI
-5. Create a GitHub release (must be done manually!)
+5. Create a GitHub release (must be done manually; see Step 6 below)
 
 
 ## Manual release process
@@ -29,7 +38,7 @@ Releases follow this sequence:
 3. Build and verify the distribution
 4. Publish to TestPyPI
 5. Publish to PyPI
-6. Create a GitHub Release (done manually; see Step 6 below)
+6. Create a GitHub Release
 
 ---
 
