@@ -2,14 +2,24 @@
 
 This document outlines the process for publishing a new release of SALib to PyPI.
 
-## Prerequisites
+## Automated release process
+
+1. Create a release branch
+2. Make an annotated tag following PyPi rules eg v1.3-alpha
+3. Push the tag to the release branch
+4. Check it gets deployed to PyPi
+
+
+## Manual release process
+
+### Prerequisites
 
 - Maintainer-level access to the SALib GitHub repository
 - PyPI and TestPyPI accounts with permissions to publish to the `SALib` project
 - A configured API token for both PyPI and TestPyPI (see [PyPI docs](https://pypi.org/help/#apitoken))
 - A complete local development environment (see the [Developers Guide](./developers_guide.md))
 
-## Overview
+### Overview
 
 Releases follow this sequence:
 
