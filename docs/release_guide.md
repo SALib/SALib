@@ -2,39 +2,34 @@
 
 This document outlines the process for publishing a new release of SALib to PyPI.
 
-The general steps are:
-
-1. Verify the main branch is release-ready
-2. Bump the version with git
-3. Follow the automated or manual release process outlined below
-
-The automated process is what is typically followed.
-The manual process is documented in the rare instance the deployment pipeline has issues.
-
-## Automated release process
-
-1. Create a release branch
-2. Make an annotated tag following PyPI rules eg v1.3-alpha
-3. Push the tag to the release branch
-4. Check it gets deployed to PyPI
-5. Create a GitHub release (must be done manually; see Step 6 below)
-
-
-## Manual release process
-
-### Prerequisites
+**Prerequisites:**
 
 - Maintainer-level access to the SALib GitHub repository
 - PyPI and TestPyPI accounts with permissions to publish to the `SALib` project
 - A configured API token for both PyPI and TestPyPI (see [PyPI docs](https://pypi.org/help/#apitoken))
 - A complete local development environment (see the [Developers Guide](./developers_guide.md))
 
+The general steps are:
+
+1. Verify the main branch is release-ready
+2. Bump the version number by making an annotated git tag and push to origin (see Step 2 below)
+3. Check that the new release is deployed to [PyPI](https://pypi.org/project/SALib/)
+4. Create a GitHub release (must be done manually; see Step 6 below)
+
+Version numbers should follow [Semantic Versioning](https://semver.org/) and PyPI rules
+(e.g., v1.3-alpha).
+
+In the rare case that the deployment fails, follow the manual release process outlined
+below.
+
+## Manual release process
+
 ### Overview
 
 Releases follow this sequence:
 
 1. Verify the main branch is release-ready
-2. Bump the version
+2. Bump the version with an annotated git tag
 3. Build and verify the distribution
 4. Publish to TestPyPI
 5. Publish to PyPI
@@ -72,7 +67,7 @@ SALib follows [Semantic Versioning](https://semver.org/), which follows a
 | New backwards-compatible features |  `1.5.0`          |
 | Breaking changes                  |  `2.0.0`          |
 
-Create an
+Create an annotated tag with git:
 
 ```bash
 $ git tag -a <semver-version> -m "<a release message>"
