@@ -208,6 +208,12 @@ def _nonuniform_scale_samples(params, bounds, dists):
                 conv_params[:, i] = params[:, i] * (b2 - b1) + b1
 
         elif dists[i] == "logunif":
+            if b1 <= 0 or b2 <= 0:
+                raise ValueError("Log-uniform distribution: both bounds must be > 0")
+            if b1 >= b2:
+                raise ValueError(
+                    "Log-uniform distribution: lower bound must be less than upper bound"
+                )
             conv_params[:, i] = sp.stats.loguniform.ppf(params[:, i], a=b1, b=b2)
 
         elif dists[i] == "norm":
