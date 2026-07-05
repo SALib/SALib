@@ -1,5 +1,7 @@
 from pytest import raises, mark
 from numpy.testing import assert_equal, assert_allclose
+import warnings
+
 import numpy as np
 from scipy.stats import norm
 
@@ -225,14 +227,15 @@ def test_grouped_constant_output():
 
 
 def test_partial_constant_output():
-    """Sobol analysis with some output columns constant, others varying."""
+    """Sobol inner functions with some output columns constant, others varying."""
     from SALib.analyze.sobol import first_order, total_order
 
     rng = np.random.default_rng(42)
     N = 10
-    A = rng.random((N, 3))
-    B = rng.random((N, 3))
-    AB = rng.random((N, 3))
+    D = 3
+    A = rng.random((N, D))
+    B = rng.random((N, D))
+    AB = rng.random((N, D))
 
     # column 0: strictly constant
     A[:, 0] = 0.5
@@ -242,7 +245,15 @@ def test_partial_constant_output():
     s1 = first_order(A, AB, B)
     st = total_order(A, AB, B)
 
-    assert not np.any(np.isnan(s1)), f"first_order produced NaN: {s1}"
-    assert not np.any(np.isnan(st)), f"total_order produced NaN: {st}"
-    assert s1[0] == 0.0, f"constant column S1 should be 0, got {s1[0]}"
-    assert st[0] == 0.0, f"constant column ST should be 0, got {st[0]}"
+    # No NaN or inf
+    for name, arr in [("S1", s1), ("ST", st)]:
+        assert not np.any(np.isnan(arr)), f"{name} contains NaN: {arr}"
+        assert not np.any(np.isinf(arr)), f"{name} contains inf: {arr}"
+
+    # Constant column returns zero
+    assert s1[0] == 0.0, f"S1 constant col should be 0, got {s1[0]}"
+    assert st[0] == 0.0, f"ST constant col should be 0, got {st[0]}"
+
+    # Non-constant columns should have finite, non-trivial values
+    assert np.all(np.isfinite(s1[1:])), f"S1 non-constant cols not finite: {s1}"
+    assert np.all(np.isfinite(st[1:])), f"ST non-constant cols not finite: {st}"
