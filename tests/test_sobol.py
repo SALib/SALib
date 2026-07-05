@@ -222,3 +222,27 @@ def test_grouped_constant_output():
     ), "Constant outputs should produce 0 total order sensitivity"
     assert np.all(Si["S1_conf"] == 0.0), "Constant outputs should produce 0 CI"
     assert np.all(Si["ST_conf"] == 0.0), "Constant outputs should produce 0 CI"
+
+
+def test_partial_constant_output():
+    """Sobol analysis with some output columns constant, others varying."""
+    from SALib.analyze.sobol import first_order, total_order
+
+    rng = np.random.default_rng(42)
+    N = 10
+    A = rng.random((N, 3))
+    B = rng.random((N, 3))
+    AB = rng.random((N, 3))
+
+    # column 0: strictly constant
+    A[:, 0] = 0.5
+    B[:, 0] = 0.5
+    AB[:, 0] = 0.5
+
+    s1 = first_order(A, AB, B)
+    st = total_order(A, AB, B)
+
+    assert not np.any(np.isnan(s1)), f"first_order produced NaN: {s1}"
+    assert not np.any(np.isnan(st)), f"total_order produced NaN: {st}"
+    assert s1[0] == 0.0, f"constant column S1 should be 0, got {s1[0]}"
+    assert st[0] == 0.0, f"constant column ST should be 0, got {st[0]}"

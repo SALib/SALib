@@ -212,11 +212,17 @@ def first_order(A, AB, B):
     sample variance
     """
     y = np.r_[A, B]
-    if np.ptp(y) == 0:
+    if np.ptp(y) <= np.finfo(float).eps:
         warn(CONST_RESULT_MSG)
-        return np.float64(0.0)
+        return np.zeros_like(np.var(y, axis=0), dtype=np.float64)
 
-    return np.mean(B * (AB - A), axis=0) / np.var(y, axis=0)
+    y_var = np.var(y, axis=0)
+    return np.divide(
+        np.mean(B * (AB - A), axis=0),
+        y_var,
+        out=np.zeros_like(y_var, dtype=np.float64),
+        where=y_var > np.finfo(float).eps,
+    )
 
 
 def total_order(A, AB, B):
@@ -225,19 +231,25 @@ def total_order(A, AB, B):
     sample variance
     """
     y = np.r_[A, B]
-    if np.ptp(y) == 0:
+    if np.ptp(y) <= np.finfo(float).eps:
         warn(CONST_RESULT_MSG)
-        return np.float64(0.0)
+        return np.zeros_like(np.var(y, axis=0), dtype=np.float64)
 
-    return 0.5 * np.mean((A - AB) ** 2, axis=0) / np.var(y, axis=0)
+    y_var = np.var(y, axis=0)
+    return np.divide(
+        0.5 * np.mean((A - AB) ** 2, axis=0),
+        y_var,
+        out=np.zeros_like(y_var, dtype=np.float64),
+        where=y_var > np.finfo(float).eps,
+    )
 
 
 def second_order(A, ABj, ABk, BAj, B):
     """Second order estimator following Saltelli 2002"""
     y = np.r_[A, B]
-    if np.ptp(y) == 0:
+    if np.ptp(y) <= np.finfo(float).eps:
         warn(CONST_RESULT_MSG)
-        return np.float64(0.0)
+        return np.zeros_like(np.var(y, axis=0), dtype=np.float64)
 
     Vjk = np.mean(BAj * ABk - A * B, axis=0) / np.var(y, axis=0)
     Sj = first_order(A, ABj, B)
