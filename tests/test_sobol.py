@@ -1,6 +1,5 @@
 from pytest import raises, mark
 from numpy.testing import assert_equal, assert_allclose
-import warnings
 
 import numpy as np
 from scipy.stats import norm
