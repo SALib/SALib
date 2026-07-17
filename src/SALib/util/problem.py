@@ -235,7 +235,7 @@ class ProblemSpec(dict):
 
         if ptqdm_available:
             # Display progress bar if available
-            res = p_imap(tmp_f, chunks, num_cpus=nprocs)
+            res = list(p_imap(tmp_f, chunks, num_cpus=nprocs))
         else:
             with Pool(nprocs) as pool:
                 res = list(pool.imap(tmp_f, chunks))
