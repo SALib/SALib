@@ -62,6 +62,15 @@ def test_saltelli():
     assert len(result) == 0, "Error occurred!"
 
 
+def test_radial_sobol():
+    """Only Sobol-based radial sample is offered from the CLI for now."""
+    cmd = "{cli} sample radial -p {fn} -o {test_data} -n 100".format(
+        cli=salib_cli, fn=ishigami_fp, test_data=test_data
+    ).split()
+    result = subprocess.check_output(cmd)
+    assert len(result) == 0, "Error occurred!"
+
+
 def test_saltelli_warning():
     # Ensure error is raised when n_samples not a power of 2
     cmd = f"salib sample saltelli -p {ishigami_fp} -o {test_data} -n 511".split()
@@ -92,3 +101,4 @@ if __name__ == "__main__":
     test_finite_diff()
     test_latin()
     test_saltelli()
+    test_radial_sobol()
