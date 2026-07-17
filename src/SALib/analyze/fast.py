@@ -1,4 +1,6 @@
 import math
+import warnings
+
 import numpy as np
 from scipy.stats import norm
 
@@ -64,7 +66,25 @@ def analyze(
     3. Pujol, G. (2006)
        fast99 - R `sensitivity` package
        https://github.com/cran/sensitivity/blob/master/R/fast99.R
+
+    Warnings
+    --------
+    The confidence intervals (``S1_conf``/``ST_conf``) are estimated by
+    bootstrap resampling of the search-curve output. This is known to be
+    statistically unreliable for (e)FAST - see discussion at
+    https://github.com/SALib/SALib/issues/649 - and the CI estimates should
+    be treated as indicative only. This feature may be reworked or removed
+    in a future release.
     """
+    warnings.warn(
+        "FAST confidence intervals are estimated via bootstrap resampling, "
+        "which is known to be unreliable for this method (see "
+        "https://github.com/SALib/SALib/issues/649). Treat S1_conf/ST_conf "
+        "as indicative only. This feature may be reworked or removed in a "
+        "future release.",
+        stacklevel=2,
+    )
+
     if seed:
         np.random.seed(seed)
 

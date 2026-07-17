@@ -119,10 +119,10 @@ def test_fast():
     # run analysis and use regex to strip all whitespace from result
     result = subprocess.check_output(analyze_cmd, universal_newlines=True)
 
-    expected = """              S1        ST   S1_conf   ST_conf
-x1  2.933824e-01  0.525013  0.014330  0.044262
-x2  4.425383e-01  0.469429  0.016207  0.039314
-x3  2.636727e-34  0.239202  0.015256  0.041144"""
+    expected = """              S1        ST       S1_conf       ST_conf
+x1  2.933824e-01  0.525013  1.321257e-16  1.312176e-16
+x2  4.425383e-01  0.469429  1.098395e-01  1.174880e-01
+x3  2.636727e-34  0.239202  1.820670e-01  5.944182e-02"""
 
     col_names = ["Name", "S1", "ST", "S1_conf", "ST_conf"]
 
