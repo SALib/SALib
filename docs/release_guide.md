@@ -83,7 +83,7 @@ $ git push origin <tag-name>
 # Sometimes it is handy to know how to push all created tags
 $ git push origin --tags
 ```
-
+Once the tag is pushed to origin, the GitHub Action `release` will build and deploy the package to [PyPI](https://pypi.org/project/SALib/#history). View the action in progress [here](https://github.com/SALib/SALib/actions/workflows/release.yaml). You can then proceed to Step 6 below.
 To inspect the current version without changing it:
 
 ```bash
