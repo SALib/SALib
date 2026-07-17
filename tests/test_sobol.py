@@ -256,3 +256,31 @@ def test_partial_constant_output():
     # Non-constant columns should have finite, non-trivial values
     assert np.all(np.isfinite(s1[1:])), f"S1 non-constant cols not finite: {s1}"
     assert np.all(np.isfinite(st[1:])), f"ST non-constant cols not finite: {st}"
+
+
+def test_partial_constant_output_second_order():
+    """second_order with some output columns constant, others varying."""
+    from SALib.analyze.sobol import second_order
+
+    rng = np.random.default_rng(42)
+    N = 10
+    D = 3
+    A = rng.random((N, D))
+    B = rng.random((N, D))
+    ABj = rng.random((N, D))
+    ABk = rng.random((N, D))
+    BAj = rng.random((N, D))
+
+    # column 0: strictly constant across all inputs
+    A[:, 0] = 0.5
+    B[:, 0] = 0.5
+    ABj[:, 0] = 0.5
+    ABk[:, 0] = 0.5
+    BAj[:, 0] = 0.5
+
+    s2 = second_order(A, ABj, ABk, BAj, B)
+
+    assert not np.any(np.isnan(s2)), f"S2 contains NaN: {s2}"
+    assert not np.any(np.isinf(s2)), f"S2 contains inf: {s2}"
+    assert s2[0] == 0.0, f"S2 constant col should be 0, got {s2[0]}"
+    assert np.all(np.isfinite(s2[1:])), f"S2 non-constant cols not finite: {s2}"

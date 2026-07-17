@@ -251,7 +251,13 @@ def second_order(A, ABj, ABk, BAj, B):
         warn(CONST_RESULT_MSG)
         return np.zeros(y.shape[1:], dtype=np.float64)
 
-    Vjk = np.mean(BAj * ABk - A * B, axis=0) / np.var(y, axis=0)
+    y_var = np.var(y, axis=0)
+    Vjk = np.divide(
+        np.mean(BAj * ABk - A * B, axis=0),
+        y_var,
+        out=np.zeros_like(y_var, dtype=np.float64),
+        where=y_var > np.finfo(float).eps,
+    )
     Sj = first_order(A, ABj, B)
     Sk = first_order(A, ABk, B)
 
