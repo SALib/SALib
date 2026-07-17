@@ -77,7 +77,7 @@ $ uv run pytest    # equivalent: pytest (but runs within the uv-managed environm
 Run the below to catch any formatting issues.
 
 ```bash
-pre-commit run --all
+pre-commit run --all-files
 ```
 
 ## Building documentation locally
