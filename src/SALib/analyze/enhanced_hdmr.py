@@ -1442,7 +1442,7 @@ def _finalize(hdmr, Si, alpha, return_emulator):
             TS = np.sum(Si["S"][np.append(r, ij), :], axis=0)
         elif hdmr.max_order == 3:
             ij = hdmr.d + np.where(np.sum(hdmr.beta == r, axis=1) == 1)[0]
-            ijk = hdmr.d + hdmr.nc2 + np.where(np.sum(hdmr.nc3 == r, axis=1) == 1)[0]
+            ijk = hdmr.d + hdmr.nc2 + np.where(np.sum(hdmr.gamma == r, axis=1) == 1)[0]
             TS = np.sum(Si["S"][np.append(r, np.append(ij, ijk)), :], axis=0)
         Si["ST"][r] = np.mean(TS)
         Si["ST_conf"][r] = mult * np.std(TS)
