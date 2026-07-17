@@ -62,6 +62,7 @@ For Developers
 
     API <api>
     Developers Guide <developers_guide>
+    Release Guide <release_guide>
     Changes <changelog>
     Complete Module Reference <api/modules>
 
