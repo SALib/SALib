@@ -1,4 +1,6 @@
 import math
+import warnings
+
 import numpy as np
 from scipy.stats import norm
 
@@ -64,7 +66,25 @@ def analyze(
     3. Pujol, G. (2006)
        fast99 - R `sensitivity` package
        https://github.com/cran/sensitivity/blob/master/R/fast99.R
+
+    Warnings
+    --------
+    The confidence intervals (``S1_conf``/``ST_conf``) are estimated by
+    bootstrap resampling of the search-curve output. This is known to be
+    statistically unreliable for (e)FAST - see discussion at
+    https://github.com/SALib/SALib/issues/649 - and the CI estimates should
+    be treated as indicative only. This feature may be reworked or removed
+    in a future release.
     """
+    warnings.warn(
+        "FAST confidence intervals are estimated via bootstrap resampling, "
+        "which is known to be unreliable for this method (see "
+        "https://github.com/SALib/SALib/issues/649). Treat S1_conf/ST_conf "
+        "as indicative only. This feature may be reworked or removed in a "
+        "future release.",
+        stacklevel=2,
+    )
+
     if seed:
         np.random.seed(seed)
 
@@ -130,9 +150,15 @@ def bootstrap(Y: np.ndarray, M: int, resamples: int, conf_level: float):
     res_S1 = np.zeros(resamples)
     res_ST = np.zeros(resamples)
     for i in range(resamples):
-        sample_idx = np.random.choice(T_data, replace=True, size=n_size)
-        Y_rs = Y[sample_idx]
+        begin_id = np.random.randint(0, T_data)
+        if begin_id + n_size <= T_data:
+            sample_idx = np.arange(begin_id, begin_id + n_size)
+        else:
+            sample_idx = np.concatenate(
+                (np.arange(begin_id, T_data), np.arange(0, begin_id + n_size - T_data))
+            )
 
+        Y_rs = Y[sample_idx]
         N = len(Y_rs)
         omega = math.floor((N - 1) / (2 * M))
 
