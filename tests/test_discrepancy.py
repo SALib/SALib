@@ -12,7 +12,7 @@ def test_discrepancy():
         "names": ["x1", "x2", "x3"],
         "bounds": [[-np.pi, np.pi]] * 3,
     }
-    X = latin.sample(problem, 1_000)
+    X = latin.sample(problem, 1_000, seed=42)
     Y = Ishigami.evaluate(X)
     Si = discrepancy.analyze(problem, X, Y)
 
