@@ -5,6 +5,24 @@ from . import common_args
 from ..util import ResultDict, read_param_file
 
 
+class ShapleyResult(ResultDict):
+    """Analysis results with access to normalized Shapley effects."""
+
+    @property
+    def normalized(self) -> np.ndarray:
+        """Return Shapley effects as shares of the estimated output variance.
+
+        The raw ``Shapley`` values remain available in output-variance units.
+        Normalization is undefined when their estimated total is zero.
+        """
+        total = np.sum(self["Shapley"])
+        if total == 0.0:
+            raise ValueError(
+                "Shapley effects cannot be normalized when their sum is zero."
+            )
+        return self["Shapley"] / total
+
+
 def analyze(
     problem: dict,
     X: np.ndarray,
@@ -16,9 +34,10 @@ def analyze(
 
     Returns a result set with keys ``Shapley`` and ``Shapley_conf``. Effects
     are reported in output-variance units; consequently their sum estimates
-    the overall output variance. ``Shapley_conf`` contains normal-approximation
-    confidence interval half-widths computed from Goda's unbiased variance
-    estimator, without bootstrap resampling.
+    the overall output variance. Normalized shares that sum to one are
+    available through the result's ``normalized`` property. ``Shapley_conf``
+    contains normal-approximation confidence interval half-widths computed
+    from Goda's unbiased variance estimator, without bootstrap resampling.
 
     Notes
     -----
@@ -89,7 +108,7 @@ def analyze(
     estimator_variance = contributions.var(axis=0, ddof=1) / num_trajectories
     confidence = norm.ppf(0.5 + conf_level / 2.0) * np.sqrt(estimator_variance)
 
-    result = ResultDict(
+    result = ShapleyResult(
         Shapley=effects,
         Shapley_conf=confidence,
         names=problem["names"],
