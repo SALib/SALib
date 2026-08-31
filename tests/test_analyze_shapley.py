@@ -38,7 +38,26 @@ def test_analyze_matches_goda_update_and_variance_formula(two_factor_problem):
         result["Shapley_conf"],
         norm.ppf(0.975) * np.array([61.0, 5.0]),
     )
+    assert_allclose(result.normalized, [69.0 / 106.0, 37.0 / 106.0])
+    assert_allclose(result.normalized.sum(), 1.0)
     assert result["names"] == ["x1", "x2"]
+
+
+def test_normalized_effects_reject_zero_total(two_factor_problem):
+    X = np.array(
+        [
+            [0.0, 0.0],
+            [1.0, 0.0],
+            [1.0, 1.0],
+            [2.0, 2.0],
+            [3.0, 2.0],
+            [3.0, 3.0],
+        ]
+    )
+    result = shapley.analyze(two_factor_problem, X, np.ones(6))
+
+    with pytest.raises(ValueError, match="sum is zero"):
+        _ = result.normalized
 
 
 def test_ishigami_regression():
