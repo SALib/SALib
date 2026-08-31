@@ -55,6 +55,15 @@ Derivative-based Global Sensitivity Measure (DGSM)
 .. autofunction:: SALib.analyze.dgsm.analyze
    :noindex:
 
+Shapley Effects
+---------------
+
+.. autofunction:: SALib.sample.shapley.sample
+   :noindex:
+
+.. autofunction:: SALib.analyze.shapley.analyze
+   :noindex:
+
 Fractional Factorial
 --------------------
 
