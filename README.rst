@@ -48,6 +48,8 @@ Included methods
 * Derivative-based Global Sensitivity Measure (DGSM) (`Sobol and
   Kucherenko 2009 <http://www.sciencedirect.com/science/article/pii/S0378475409000354>`__)
 
+* Shapley Effects (`Goda 2021 <https://doi.org/10.1016/j.ress.2021.107702>`__)
+
 * Fractional Factorial Sensitivity Analysis
   (`Saltelli et al. 2008 <http://www.wiley.com/WileyCDA/WileyTitle/productCd-0470059974.html>`__)
 
