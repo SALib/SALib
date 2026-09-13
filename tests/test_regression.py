@@ -494,7 +494,8 @@ def test_regression_delta():
     assert_allclose(Si["S1"], [0.31, 0.44, 0.00], atol=5e-2, rtol=1e-1)
 
 
-def test_regression_delta_svm():
+def test_regression_delta_svm(set_seed):
+    # bias_reduced_delta bootstraps using NumPy's legacy global RNG.
     xy_input_fn = "tests/data/delta_svm_regression_data.csv"
     inputs = np.loadtxt(xy_input_fn, delimiter=",", skiprows=1)
 
