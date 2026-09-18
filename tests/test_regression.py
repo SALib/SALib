@@ -640,6 +640,11 @@ def test_regression_delta_svm(set_seed):
     num_resamples = 200
     conf_level = 0.95
 
+    # `bias_reduced_delta` draws from the global `numpy.random` state (it does
+    # not accept a seed/rng), so it must be seeded here to keep this
+    # regression test deterministic (see issue #681 for the same failure mode
+    # in `test_discrepancy`).
+    np.random.seed(42)
     test_res = delta.bias_reduced_delta(
         Y,
         Ygrid,
