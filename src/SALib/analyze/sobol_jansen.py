@@ -18,9 +18,11 @@ def analyze(
 ) -> ResultDict:
     """Estimation of Total Sensitivity Index using the Jansen Sensitivity Estimator.
 
+    Notes
+    -----
     Compatible with:
-    * `radial_sobol`
-    * `radial_mc`
+        - :func:`SALib.sample.radial.radial_sobol.sample`
+        - :func:`SALib.sample.radial.radial_mc.sample`
 
     Arguments
     ---------

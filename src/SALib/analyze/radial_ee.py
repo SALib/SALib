@@ -5,7 +5,6 @@ from scipy.stats import norm
 from . import common_args
 from ..util import read_param_file, ResultDict
 
-
 __all__ = ["analyze"]
 
 
@@ -21,10 +20,17 @@ def analyze(
 ) -> Dict:
     """Radial Elementary Effects Analysis.
 
-    Calculates `mu`, `mu_star`, `sigma` and `mu_star_conf` as with
-    Morris OAT using results from
-    * `radial_sobol`
-    * `radial_mc`
+    Calculates `mu`, `mu_star`, `sigma` and `mu_star_conf` as with Morris OAT.
+
+    - ``mu`` metric indicates the mean of the distribution
+    - ``mu_star`` metric indicates the mean of the distribution of absolute values
+    - ``sigma`` is the standard deviation of the distribution
+
+    Notes
+    -----
+    Compatible with:
+        - :func:`SALib.sample.radial.radial_sobol.sample`
+        - :func:`SALib.sample.radial.radial_mc.sample`
 
     Arguments
     ---------

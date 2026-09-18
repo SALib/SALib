@@ -6,16 +6,18 @@ from .. import sobol_sequence
 from SALib.sample import common_args
 from .radial_funcs import combine_samples
 
-
 __all__ = ["sample"]
 
 
 def sample(problem: Dict, N: int, R=4, skip_num: int = 0, seed: Optional[int] = None):
     """Generates `N` sobol samples for a Radial OAT approach.
 
-    Results can be analyzed using
-    * `sobol_jansen` - the Jansen sensitivity estimator
-    * `radial_ee` - Elementary Effects
+    Notes
+    -----
+    Compatible with:
+        - :func:`SALib.analyze.sobol_jansen.analyze` (the Jansen sensitivity
+          estimator)
+        - :func:`SALib.analyze.radial_ee.analyze` (Elementary Effects)
 
     References
     ----------

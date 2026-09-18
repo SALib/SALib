@@ -5,16 +5,17 @@ from typing import Dict, Optional
 from .. import common_args
 from .radial_funcs import combine_samples
 
-
 __all__ = ["sample"]
 
 
 def sample(problem: Dict, N: int, seed: Optional[int] = None):
     """Generates `N` monte carlo samples for a Radial OAT approach using a uniform distribution.
 
+    Notes
+    -----
     Compatible with:
-    * `radial_ee`
-    * `sobol_jansen`
+        - :func:`SALib.analyze.radial_ee.analyze`
+        - :func:`SALib.analyze.sobol_jansen.analyze`
 
     Arguments
     ---------
