@@ -33,8 +33,11 @@ def test_evaluate_with_ptqdm_returns_consumable_results():
     """
     sp = _make_spec()
 
-    def fake_p_imap(func, chunks):
-        """Mimic p_imap: apply func to each chunk, yield results."""
+    def fake_p_imap(func, chunks, num_cpus=1):
+        """
+        Mimic p_imap: apply func to each chunk, yield results.
+        Note: Unused `num_cpus` is required to match `p_imap` interface.
+        """
         for chunk in chunks:
             yield func(chunk)
 
