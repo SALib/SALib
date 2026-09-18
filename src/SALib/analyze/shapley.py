@@ -78,33 +78,43 @@ def analyze(
     trajectory_size = num_vars + 1
     trajectories = X.reshape(num_trajectories, trajectory_size, num_vars)
     outputs = Y.reshape(num_trajectories, trajectory_size)
-    contributions = np.empty((num_trajectories, num_vars), dtype=float)
 
-    for trajectory_index, (trajectory, values) in enumerate(zip(trajectories, outputs)):
-        changed_factors = []
-        base_output = values[0]
+    # Each trajectory step changes exactly one factor; recover which one by
+    # diffing consecutive rows, then scatter the step-ordered contributions
+    # into factor-ordered columns with a single vectorized reorder instead of
+    # a per-trajectory, per-step Python loop.
+    changed = trajectories[:, 1:, :] != trajectories[:, :-1, :]
+    change_counts = changed.sum(axis=2)
+    mismatched_steps = change_counts != 1
+    if np.any(mismatched_steps):
+        # Identify location of mismatch
+        trajectory_index, step = (
+            int(i)
+            for i in np.unravel_index(np.argmax(mismatched_steps), change_counts.shape)
+        )
 
-        for step in range(num_vars):
-            changed = np.flatnonzero(trajectory[step + 1] != trajectory[step])
-            if changed.size != 1:
-                raise ValueError(
-                    "Each Shapley trajectory step must change exactly one factor; "
-                    f"trajectory {trajectory_index}, step {step + 1} changed "
-                    f"{changed.size}."
-                )
+        raise ValueError(
+            "Each Shapley trajectory step must change exactly one factor; "
+            f"trajectory {trajectory_index}, step {step + 1} changed "
+            f"{int(change_counts[trajectory_index, step])}."
+        )
 
-            factor = int(changed[0])
-            changed_factors.append(factor)
-            before, after = values[step : step + 2]
-            contributions[trajectory_index, factor] = (
-                base_output - (before + after) / 2.0
-            ) * (before - after)
+    factors = changed.argmax(axis=2)
+    incomplete = np.any(np.sort(factors, axis=1) != np.arange(num_vars), axis=1)
+    if np.any(incomplete):
+        trajectory_index = int(np.argmax(incomplete))
+        raise ValueError(
+            "Each Shapley trajectory must change every factor exactly once; "
+            f"trajectory {trajectory_index} does not."
+        )
 
-        if len(set(changed_factors)) != num_vars:
-            raise ValueError(
-                "Each Shapley trajectory must change every factor exactly once; "
-                f"trajectory {trajectory_index} does not."
-            )
+    base_output = outputs[:, :1]
+    before = outputs[:, :-1]
+    after = outputs[:, 1:]
+    step_contributions = (base_output - (before + after) / 2.0) * (before - after)
+
+    contributions = np.empty_like(step_contributions)
+    np.put_along_axis(contributions, factors, step_contributions, axis=1)
 
     effects = contributions.mean(axis=0)
     estimator_variance = contributions.var(axis=0, ddof=1) / num_trajectories
