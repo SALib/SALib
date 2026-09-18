@@ -30,6 +30,8 @@ Supported Methods
   (`Borgonovo 2007 <http://www.sciencedirect.com/science/article/pii/S0951832006000883>`_, `Plischke et al. 2013 <http://www.sciencedirect.com/science/article/pii/S0377221712008995>`_)
 * Derivative-based Global Sensitivity Measure (DGSM)
   (`Sobol and Kucherenko 2009 <http://www.sciencedirect.com/science/article/pii/S0378475409000354>`_)
+* Shapley Effects
+  (`Goda 2021 <https://doi.org/10.1016/j.ress.2021.107702>`_)
 * Fractional Factorial Sensitivity Analysis
   (`Saltelli et al. 2008 <http://www.wiley.com/WileyCDA/WileyTitle/productCd-0470059974.html>`_)
 * High Dimensional Model Representation
