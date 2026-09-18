@@ -6,7 +6,6 @@ TypeError when _collect_results() tries to consume it.
 """
 
 import numpy as np
-import pytest
 from unittest import mock
 
 from SALib import ProblemSpec
@@ -34,13 +33,14 @@ def test_evaluate_with_ptqdm_returns_consumable_results():
     """
     sp = _make_spec()
 
-    def fake_p_imap(func, chunks, num_cpus=1):
+    def fake_p_imap(func, chunks):
         """Mimic p_imap: apply func to each chunk, yield results."""
         for chunk in chunks:
             yield func(chunk)
 
     # Inject p_imap into the module namespace (it may not exist if p_tqdm is not installed)
     import SALib.util.problem as problem_mod
+
     problem_mod.p_imap = fake_p_imap
     problem_mod.ptqdm_available = True
 
@@ -50,8 +50,8 @@ def test_evaluate_with_ptqdm_returns_consumable_results():
     finally:
         # Restore original state
         problem_mod.ptqdm_available = False
-        if hasattr(problem_mod, 'p_imap'):
-            delattr(problem_mod, 'p_imap')
+        if hasattr(problem_mod, "p_imap"):
+            delattr(problem_mod, "p_imap")
 
 
 def test_evaluate_without_ptqdm_still_works():
