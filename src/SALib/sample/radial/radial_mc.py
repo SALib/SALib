@@ -17,8 +17,8 @@ def sample(problem: Dict, N: int, seed: Optional[int] = None):
         - :func:`SALib.analyze.radial_ee.analyze`
         - :func:`SALib.analyze.sobol_jansen.analyze`
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     problem : dict
         SALib problem specification
 
@@ -68,6 +68,11 @@ def sample(problem: Dict, N: int, seed: Optional[int] = None):
            Computer Physics Communications 182, 978–988.
            https://www.sciencedirect.com/science/article/pii/S0010465510005321
            DOI: 10.1016/j.cpc.2010.12.039
+
+    .. [2] Campolongo, F., Cariboni, J., Saltelli, A., 2007.
+           An effective screening design for sensitivity analysis of large models.
+           Environmental Modelling & Software 22, 1509–1518.
+           https://doi.org/10.1016/j.envsoft.2006.10.004
     """
     if seed:
         np.random.seed(seed)

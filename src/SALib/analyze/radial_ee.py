@@ -32,8 +32,21 @@ def analyze(
         - :func:`SALib.sample.radial.radial_sobol.sample`
         - :func:`SALib.sample.radial.radial_mc.sample`
 
-    Arguments
-    ---------
+    References
+    ----------
+    .. [1] Campolongo, F., Saltelli, A., Cariboni, J., 2011.
+           From screening to quantitative sensitivity analysis: A unified approach.
+           Computer Physics Communications 182, 978–988.
+           https://www.sciencedirect.com/science/article/pii/S0010465510005321
+           DOI: 10.1016/j.cpc.2010.12.039
+
+    .. [2] Campolongo, F., Cariboni, J., Saltelli, A., 2007.
+           An effective screening design for sensitivity analysis of large models.
+           Environmental Modelling & Software 22, 1509–1518.
+           https://doi.org/10.1016/j.envsoft.2006.10.004
+
+    Parameters
+    ----------
     problem : dict
         The SALib problem specification
 
