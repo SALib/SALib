@@ -41,8 +41,10 @@ def analyze(
 
     Notes
     -----
-    Compatible with :func:`SALib.sample.shapley.sample`. The estimator assumes
-    mutually independent inputs and does not support grouped parameters.
+    Compatible with:
+        Compatible with :func:`SALib.sample.shapley.sample`.
+        The estimator assumes mutually independent inputs and does not support
+        grouped parameters.
 
     Parameters
     ----------
