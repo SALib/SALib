@@ -515,7 +515,11 @@ class ProblemSpec(dict):
         return axes
 
     def heatmap(
-        self, metric: str = None, index: str = None, title: str = None, ax=None
+        self,
+        metric: str | None = None,
+        index: str | None = None,
+        title: str | None = None,
+        ax=None,
     ):
         """Plot results as a heatmap.
 

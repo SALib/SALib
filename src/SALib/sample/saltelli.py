@@ -10,7 +10,10 @@ from ..util import scale_samples, read_param_file, compute_groups_matrix, _check
 
 
 def sample(
-    problem: Dict, N: int, calc_second_order: bool = True, skip_values: int = None
+    problem: Dict,
+    N: int,
+    calc_second_order: bool = True,
+    skip_values: int | None = None,
 ):
     """Generates model inputs using Saltelli's extension of the Sobol' sequence
 

@@ -11,7 +11,9 @@ __all__ = ["heatmap"]
 CONF_COLUMN = "_conf"
 
 
-def heatmap(sp: Dict, metric: str, index: str, title: str = None, ax=None):
+def heatmap(
+    sp: Dict, metric: str, index: str, title: str | None = None, ax=None
+):
     """Plot a heatmap of the target metric.
 
     Parameters
