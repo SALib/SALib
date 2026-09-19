@@ -61,11 +61,11 @@ Do not proceed until all tests and checks pass.
 SALib follows [Semantic Versioning](https://semver.org/), which follows a
 `MAJOR.MINOR.PATCH` number format.
 
-| Change type                       | Example: 1.4.2 →  |
-| --------------------------------- |  ---------------- |
-| Bug fixes / patches               |  `1.4.3`          |
-| New backwards-compatible features |  `1.5.0`          |
-| Breaking changes                  |  `2.0.0`          |
+| Change type                       | Example: 1.4.2 → |
+| --------------------------------- | ---------------- |
+| Bug fixes / patches               | `1.4.3`          |
+| New backwards-compatible features | `1.5.0`          |
+| Breaking changes                  | `2.0.0`          |
 
 Create an annotated tag with git:
 
@@ -75,7 +75,7 @@ $ git tag -a <semver-version> -m "<a release message>"
 
 # Tagging an existing commit is also possible
 $ git tag -a <tag-name> -m "<message>" <commit-hash>
-# Example: git tag -a v1.2 9fceb02 =m "Release version 1.2"
+# Example: git tag -a v1.2 9fceb02 -m "Release version 1.2"
 
 # Push the tag to origin
 $ git push origin <tag-name>
@@ -83,6 +83,7 @@ $ git push origin <tag-name>
 # Sometimes it is handy to know how to push all created tags
 $ git push origin --tags
 ```
+
 Once the tag is pushed to origin, the GitHub Action `release` will build and deploy the package to [PyPI](https://pypi.org/project/SALib/#history). View the action in progress [here](https://github.com/SALib/SALib/actions/workflows/release.yaml). You can then proceed to Step 6 below.
 To inspect the current version without changing it:
 
