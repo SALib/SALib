@@ -9,10 +9,9 @@ import pandas as pd
 from . import common_args
 from ..util import read_param_file, ResultDict, extract_group_names
 
-from multiprocessing import Pool, cpu_count
+from multiprocess import Pool, cpu_count
 from functools import partial
 from itertools import combinations, zip_longest
-
 
 CONST_RESULT_MSG = (
     "Constant values encountered, indicating model evaluations "
