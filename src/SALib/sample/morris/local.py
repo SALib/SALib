@@ -23,7 +23,7 @@ class LocalOptimisation(Strategy):
         N: int,
         num_params: int,
         k_choices: int,
-        num_groups: int = None,
+        num_groups: int | None = None,
     ) -> List:
         """Find the most different trajectories in the input sample using a
         local approach

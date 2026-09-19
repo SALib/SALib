@@ -17,7 +17,7 @@ def analyze(
     bins: int = 20,
     target: str = "Y",
     print_to_console: bool = False,
-    seed: int = None,
+    seed: int | None = None,
 ):
     """
     Perform Regional Sensitivity Analysis (RSA), also known as Monte Carlo Filtering.

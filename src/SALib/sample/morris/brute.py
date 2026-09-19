@@ -24,7 +24,7 @@ class BruteForce(Strategy):
         num_samples: int,
         num_params: int,
         k_choices: int,
-        num_groups: int = None,
+        num_groups: int | None = None,
     ) -> List:
         """Use brute force method to find most distant trajectories
 
@@ -58,7 +58,7 @@ class BruteForce(Strategy):
         num_samples: int,
         num_params: int,
         k_choices: int,
-        num_groups: int = None,
+        num_groups: int | None = None,
     ) -> np.ndarray:
         """
         Finds the 'k_choices' most distant choices from the

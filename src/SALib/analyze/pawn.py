@@ -13,7 +13,7 @@ def analyze(
     Y: np.ndarray,
     S: int = 10,
     print_to_console: bool = False,
-    seed: int = None,
+    seed: int | None = None,
 ):
     """Performs PAWN sensitivity analysis.
 

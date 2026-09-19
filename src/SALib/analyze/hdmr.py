@@ -31,7 +31,7 @@ def analyze(
     maxiter: int = 100,
     m: int = 2,
     K: int = 20,
-    R: int = None,
+    R: int | None = None,
     alpha: float = 0.95,
     lambdax: float = 0.01,
     print_to_console: bool = False,
