@@ -48,5 +48,5 @@ def test_shapley_cli_round_trip(tmp_path):
         text=True,
     )
 
-    assert "Shapley" in result.stdout
-    assert "Shapley_conf" in result.stdout
+    assert "shapley" in result.stdout
+    assert "shapley_conf" in result.stdout
