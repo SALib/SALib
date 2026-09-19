@@ -1,9 +1,10 @@
 from __future__ import division
 
+import numpy as np
 import pytest
 from pytest import raises
 
-from SALib.analyze import hdmr
+from SALib.analyze import enhanced_hdmr, hdmr
 from SALib.sample import latin
 from SALib.test_functions import Ishigami, linear_model_1
 from SALib.util import read_param_file
@@ -81,3 +82,28 @@ def test_dim_mismatch():
     Y = linear_model_1.evaluate(X)
     with raises(RuntimeError):
         hdmr.analyze(problem, X, Y[:-2])
+
+
+def test_enhanced_hdmr_first_order_total_sensitivity():
+    rng = np.random.default_rng(101)
+    X = rng.random((300, 3))
+    Y = X @ np.array([1.0, -2.0, 0.5])
+    problem = {
+        "num_vars": 3,
+        "names": ["x1", "x2", "x3"],
+        "bounds": [[0, 1]] * 3,
+    }
+    result = enhanced_hdmr.analyze(
+        problem,
+        X,
+        Y,
+        max_order=1,
+        poly_order=1,
+        bootstrap=2,
+        subset=300,
+        max_iter=100,
+        extended_base=False,
+        seed=101,
+    )
+
+    np.testing.assert_allclose(result["ST"], result["S"])

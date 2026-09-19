@@ -1436,7 +1436,7 @@ def _finalize(hdmr, Si, alpha, return_emulator):
     # Compute the total sensitivity of each parameter/coefficient
     for r in range(hdmr.d):
         if hdmr.max_order == 1:
-            TS = hdmr.S[r, :]
+            TS = Si["S"][r, :]
         elif hdmr.max_order == 2:
             ij = hdmr.d + np.where(np.sum(hdmr.beta == r, axis=1) == 1)[0]
             TS = np.sum(Si["S"][np.append(r, ij), :], axis=0)
