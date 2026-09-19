@@ -18,4 +18,9 @@ Y = Ishigami.evaluate(param_values)
 
 # Effects are in output-variance units and their sum estimates Var[Y].
 Si = shapley.analyze(problem, param_values, Y, print_to_console=True)
-print("\nNormalized effects:\n", Si.normalized)
+print(
+    "\nNormalized effects (+/- CI):\n",
+    Si["shapley_normalized"],
+    "\n",
+    Si["shapley_normalized_conf"],
+)

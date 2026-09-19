@@ -1,26 +1,11 @@
+from types import MethodType
+
 import numpy as np
 from scipy.stats import norm
 
 from . import common_args
 from ..util import ResultDict, read_param_file
-
-
-class ShapleyResult(ResultDict):
-    """Analysis results with access to normalized Shapley effects."""
-
-    @property
-    def normalized(self) -> np.ndarray:
-        """Return Shapley effects as shares of the estimated output variance.
-
-        The raw ``Shapley`` values remain available in output-variance units.
-        Normalization is undefined when their estimated total is zero.
-        """
-        total = np.sum(self["Shapley"])
-        if total == 0.0:
-            raise ValueError(
-                "Shapley effects cannot be normalized when their sum is zero."
-            )
-        return self["Shapley"] / total
+from ..plotting.shapley import plot as shapley_plot
 
 
 def analyze(
@@ -32,12 +17,10 @@ def analyze(
 ) -> ResultDict:
     """Estimate Shapley effects with Goda's Monte Carlo algorithm.
 
-    Returns a result set with keys ``Shapley`` and ``Shapley_conf``. Effects
-    are reported in output-variance units; consequently their sum estimates
-    the overall output variance. Normalized shares that sum to one are
-    available through the result's ``normalized`` property. ``Shapley_conf``
-    contains normal-approximation confidence interval half-widths computed
-    from Goda's unbiased variance estimator, without bootstrap resampling.
+    Returns Shapley effects in output-variance units (``shapley``, summing to
+    the overall output variance) alongside normalized shares that sum to one
+    (``shapley_normalized``), each with a normal-approximation confidence
+    interval half-width (``shapley_conf``, ``shapley_normalized_conf``).
 
     Notes
     -----
@@ -62,8 +45,8 @@ def analyze(
     Returns
     -------
     ResultDict
-        Shapley effect estimates, confidence interval half-widths, and factor
-        names.
+        Raw and normalized Shapley effect estimates, their confidence
+        interval half-widths, and factor names.
 
     References
     ----------
@@ -118,18 +101,67 @@ def analyze(
 
     effects = contributions.mean(axis=0)
     estimator_variance = contributions.var(axis=0, ddof=1) / num_trajectories
-    confidence = norm.ppf(0.5 + conf_level / 2.0) * np.sqrt(estimator_variance)
+    z_score = norm.ppf(0.5 + conf_level / 2.0)
+    confidence = z_score * np.sqrt(estimator_variance)
 
-    result = ShapleyResult(
-        Shapley=effects,
-        Shapley_conf=confidence,
+    normalized, normalized_confidence = _normalize_with_confidence(
+        contributions, effects, z_score
+    )
+
+    result = ResultDict(
+        shapley_normalized=normalized,
+        shapley_normalized_conf=normalized_confidence,
+        shapley=effects,
+        shapley_conf=confidence,
         names=problem["names"],
     )
+    result.plot = MethodType(shapley_plot, result)
 
     if print_to_console:
         print(result.to_df())
 
     return result
+
+
+def _normalize_with_confidence(contributions, effects, z_score):
+    """Estimate normalized Shapley shares and their confidence half-widths.
+
+    Each trajectory's per-factor contributions sum to that trajectory's own
+    estimate of ``Var[Y]``, so the normalized share of a factor is a ratio of two
+    correlated trajectory-averaged quantities: the mean contribution to that
+    factor, and the mean row total. Its sampling variance is approximated
+    with the standard delta-method formula for a ratio of means (e.g.
+    Cochran, 1977, on ratio estimators), reusing the per-trajectory
+    contributions already computed for the raw ``shapley_conf`` interval.
+    """
+    num_trajectories = contributions.shape[0]
+    row_sums = contributions.sum(axis=1)
+    total = row_sums.mean()
+
+    if total == 0.0:
+        undefined = np.full_like(effects, np.nan)
+        return undefined, undefined.copy()
+
+    normalized = effects / total
+
+    centered = contributions - effects
+    centered_totals = row_sums - total
+    var_contributions = np.sum(centered**2, axis=0) / (num_trajectories - 1)
+    covar_with_total = np.sum(centered * centered_totals[:, None], axis=0) / (
+        num_trajectories - 1
+    )
+    var_total = np.sum(centered_totals**2) / (num_trajectories - 1)
+
+    ratio_variance = (
+        var_contributions
+        - 2.0 * normalized * covar_with_total
+        + normalized**2 * var_total
+    ) / (num_trajectories * total**2)
+
+    # Guard against tiny negative values from floating-point round-off.
+    ratio_variance = np.clip(ratio_variance, a_min=0.0, a_max=None)
+
+    return normalized, z_score * np.sqrt(ratio_variance)
 
 
 def _validate_inputs(problem, X, Y, conf_level):
