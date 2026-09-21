@@ -4,10 +4,12 @@ from pytest import raises, fixture
 
 import numpy as np
 from numpy.testing import assert_allclose, assert_equal
+from scipy.stats import norm
 
 from SALib.analyze.morris import (
     analyze,
     _compute_mu_star_confidence,
+    _compute_statistical_outputs,
     _compute_elementary_effects,
     _reorganize_output_matrix,
     _compute_grouped_metric,
@@ -99,8 +101,17 @@ def test_analysis_of_morris_results():
         model_output,
         num_resamples=1000,
         conf_level=0.95,
-        print_to_console=False,
+        print_to_console=True,
+        seed=42,
+        keep_resamples=True,
     )
+
+    assert Si["mu_star_conf_all"].shape == (1000, 2)
+    assert_allclose(
+        Si["mu_star_conf"],
+        norm.ppf(0.975) * Si["mu_star_conf_all"].std(axis=0, ddof=1),
+    )
+    assert list(Si.to_df().columns) == ["mu", "mu_star", "sigma", "mu_star_conf"]
 
     desired_mu = np.array([0.66, 0.21])
     assert_allclose(
@@ -123,6 +134,85 @@ def test_analysis_of_morris_results():
     desired_names = ["Test 1", "Test 2"]
     assert_equal(
         Si["names"], desired_names, err_msg="The values for names are incorrect"
+    )
+
+    default_result = analyze(
+        problem,
+        model_input,
+        model_output,
+        num_resamples=10,
+        seed=42,
+    )
+    assert "mu_star_conf_all" not in default_result
+
+
+def test_keep_resamples_are_aggregated_for_groups():
+    elementary_effects = np.array(
+        [
+            [1.0, 2.0, 3.0, 4.0],
+            [2.0, 3.0, 5.0, 7.0],
+            [4.0, 3.0, 2.0, 1.0],
+        ]
+    )
+    groups = np.array([[1, 0], [1, 0], [0, 1]])
+    result = _compute_statistical_outputs(
+        elementary_effects,
+        num_vars=3,
+        num_resamples=20,
+        conf_level=0.95,
+        groups=groups,
+        unique_group_names=["group", "single"],
+        rng=handle_seed(42),
+        keep_resamples=True,
+    )
+    raw_confidence, raw_resamples = _compute_mu_star_confidence(
+        elementary_effects,
+        num_vars=3,
+        num_resamples=20,
+        conf_level=0.95,
+        rng=handle_seed(42),
+        keep_resamples=True,
+    )
+
+    assert result["mu_star_conf_all"].shape == (20, 2)
+    assert_allclose(
+        result["mu_star_conf_all"],
+        np.column_stack([raw_resamples[:, :2].mean(axis=1), raw_resamples[:, 2]]),
+    )
+    assert_allclose(
+        result["mu_star_conf"],
+        [raw_confidence[:2].mean(), raw_confidence[2]],
+    )
+
+
+def test_keep_resamples_preserve_confidence_results_and_trajectory_alignment():
+    elementary_effects = np.array(
+        [
+            [1.0, 2.0, 4.0, 8.0],
+            [1.0, 2.0, 4.0, 8.0],
+        ]
+    )
+    confidence, resamples = _compute_mu_star_confidence(
+        elementary_effects,
+        num_vars=2,
+        num_resamples=20,
+        conf_level=0.95,
+        rng=handle_seed(42),
+        keep_resamples=True,
+    )
+    default_confidence = _compute_mu_star_confidence(
+        elementary_effects,
+        num_vars=2,
+        num_resamples=20,
+        conf_level=0.95,
+        rng=handle_seed(42),
+    )
+
+    assert_equal(confidence, default_confidence)
+    assert_equal(resamples[:, 0], resamples[:, 1])
+    assert_allclose(
+        confidence,
+        norm.ppf(0.975) * resamples.std(axis=0, ddof=1),
     )
 
 

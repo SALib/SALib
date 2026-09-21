@@ -1,3 +1,4 @@
+from types import MethodType
 from typing import Dict, List
 import numpy as np
 from scipy.stats import norm
@@ -23,6 +24,7 @@ def analyze(
     print_to_console: bool = False,
     num_levels: int = 4,
     seed=None,
+    keep_resamples: bool = False,
 ) -> Dict:
     """Perform Morris Analysis on model outputs.
 
@@ -95,6 +97,13 @@ def analyze(
         passed to SALib.sample.morris (default 4)
     seed : {int, None, np.random.Generator}
         Seed to generate a random number
+    keep_resamples : bool
+        Whether to store the bootstrapped ``mu_star`` estimates used to
+        compute the confidence intervals (default False). For grouped
+        analyses, each retained estimate is aggregated across the group's
+        parameters. The existing grouped ``mu_star_conf`` remains the mean of
+        the parameter-level confidence widths, so it is not generally equal
+        to the confidence width calculated from the grouped retained estimates.
 
     Returns
     -------
@@ -105,6 +114,8 @@ def analyze(
         - `mu_star` - the absolute of the mean elementary effect
         - `sigma` - the standard deviation of the elementary effect
         - `mu_star_conf` - the bootstrapped confidence interval
+        - `mu_star_conf_all` - the bootstrapped ``mu_star`` estimates when
+          ``keep_resamples`` is True
         - `names` - the names of the parameters
 
 
@@ -161,12 +172,22 @@ def analyze(
         groups,
         unique_group_names,
         rng,
+        keep_resamples,
     )
+    Si.to_df = MethodType(to_df, Si)
 
     if print_to_console:
         print(Si.to_df())
 
     return Si
+
+
+def to_df(self):
+    """Convert Morris indices to a DataFrame, excluding resample matrices."""
+    result = ResultDict(
+        (key, value) for key, value in self.items() if key != "mu_star_conf_all"
+    )
+    return result.to_df()
 
 
 def _compute_statistical_outputs(
@@ -177,6 +198,7 @@ def _compute_statistical_outputs(
     groups: np.ndarray,
     unique_group_names: List,
     rng: np.random.Generator,
+    keep_resamples: bool = False,
 ) -> ResultDict:
     """Computes the statistical parameters related to Morris method.
 
@@ -195,6 +217,8 @@ def _compute_statistical_outputs(
     unique_group_names: List
         Names of the groups
     rng: np.random.Generator
+    keep_resamples: bool
+        Whether to retain all bootstrapped ``mu_star`` estimates.
 
     Returns
     -------
@@ -202,23 +226,36 @@ def _compute_statistical_outputs(
         Morris statistical parameters.
     """
 
-    Si = ResultDict(
-        (k, [None] * num_vars)
-        for k in ["names", "mu", "mu_star", "sigma", "mu_star_conf"]
-    )
+    keys = ["names", "mu", "mu_star", "sigma", "mu_star_conf"]
+    if keep_resamples:
+        keys.append("mu_star_conf_all")
+    Si = ResultDict((key, [None] * num_vars) for key in keys)
     Si["names"] = unique_group_names
 
     mu = np.average(elementary_effects, 1)
     mu_star = np.average(np.abs(elementary_effects), 1)
     sigma = np.std(elementary_effects, axis=1, ddof=1)
-    mu_star_conf = _compute_mu_star_confidence(
-        elementary_effects, num_vars, num_resamples, conf_level, rng
+    confidence = _compute_mu_star_confidence(
+        elementary_effects,
+        num_vars,
+        num_resamples,
+        conf_level,
+        rng,
+        keep_resamples,
     )
+    if keep_resamples:
+        mu_star_conf, mu_star_resamples = confidence
+    else:
+        mu_star_conf = confidence
 
     Si["mu"] = _compute_grouped_metric(mu, groups)
     Si["mu_star"] = _compute_grouped_metric(mu_star, groups)
     Si["sigma"] = _compute_grouped_sigma(sigma, groups)
     Si["mu_star_conf"] = _compute_grouped_metric(mu_star_conf, groups)
+    if keep_resamples:
+        Si["mu_star_conf_all"] = np.asarray(
+            [_compute_grouped_metric(row, groups) for row in mu_star_resamples]
+        )
 
     return Si
 
@@ -534,7 +571,8 @@ def _compute_mu_star_confidence(
     num_resamples: int,
     conf_level: float,
     rng: np.random.Generator,
-) -> np.ndarray:
+    keep_resamples: bool = False,
+) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
     """Computes the confidence intervals for the mu_star variable.
 
     Uses bootstrapping where the elementary effects are resampled with
@@ -552,23 +590,36 @@ def _compute_mu_star_confidence(
     conf_level: float
         Confidence level
     rng: np.random.Generator
+    keep_resamples: bool
+        Whether to return all bootstrapped ``mu_star`` estimates.
 
     Returns
     -------
     mu_star_conf: np.ndarray
         Confidence intervals for the mu_star variable
+    mu_star_resamples: np.ndarray
+        Bootstrapped ``mu_star`` estimates with shape
+        ``(num_resamples, num_vars)``. Each row uses the same resampled
+        trajectory indices for every variable, preserving row-wise
+        comparisons. Returned only when ``keep_resamples`` is True.
     """
     if not 0 < conf_level < 1:
         raise ValueError("Confidence level must be between 0-1.")
 
     mu_star_conf = []
+    mu_star_resamples = np.empty((num_resamples, num_vars)) if keep_resamples else None
+    num_trajectories = elementary_effects.shape[1]
+    resample_index = rng.integers(
+        num_trajectories, size=(num_resamples, num_trajectories)
+    )
     for j in range(num_vars):
         ee = elementary_effects[j, :]
-        resample_index = rng.integers(len(ee), size=(num_resamples, len(ee)))
         ee_resampled = ee[resample_index]
 
         # Compute average of the absolute values over each of the resamples
         mu_star_resampled = np.average(np.abs(ee_resampled), axis=1)
+        if mu_star_resamples is not None:
+            mu_star_resamples[:, j] = mu_star_resampled
 
         mu_star_conf.append(
             norm.ppf(0.5 + conf_level / 2) * mu_star_resampled.std(ddof=1)
@@ -576,6 +627,8 @@ def _compute_mu_star_confidence(
 
     mu_star_conf = np.asarray(mu_star_conf)
 
+    if mu_star_resamples is not None:
+        return mu_star_conf, mu_star_resamples
     return mu_star_conf
 
 
