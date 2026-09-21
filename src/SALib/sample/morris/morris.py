@@ -147,6 +147,19 @@ def sample(
 
     sample_morris = scale_samples(sample_morris, problem)
 
+    nonfinite_columns = np.flatnonzero(~np.isfinite(sample_morris).all(axis=0))
+    if nonfinite_columns.size:
+        names = problem.get("names", [str(i) for i in range(problem["num_vars"])])
+        dists = problem.get("dists", ["unif"] * problem["num_vars"])
+        affected = ", ".join(f"{names[i]} ({dists[i]})" for i in nonfinite_columns)
+        raise ValueError(
+            "Morris sampling produced non-finite values for: "
+            f"{affected}. The Morris grid includes distribution endpoints, so "
+            "unbounded distributions such as 'norm' and 'lognorm' can map "
+            "those endpoints to infinity. Use finite bounds or a bounded "
+            "distribution such as 'truncnorm'."
+        )
+
     return sample_morris
 
 

@@ -84,6 +84,35 @@ def test_even_num_levels_no_warning(setup_param_file_with_groups):
             ), "Inappropriate num_levels warning raised when all okay"
 
 
+@mark.parametrize(
+    ("dist", "bounds"),
+    [("norm", [0.0, 1.0]), ("lognorm", [0.0, 1.0])],
+)
+def test_unbounded_distributions_raise_for_nonfinite_samples(dist, bounds):
+    problem = {
+        "num_vars": 1,
+        "names": ["x1"],
+        "bounds": [bounds],
+        "dists": [dist],
+    }
+
+    with raises(ValueError, match=r"x1 \(" + dist + r"\).+truncnorm"):
+        sample(problem, 4, num_levels=4, seed=1)
+
+
+def test_bounded_distribution_produces_finite_samples():
+    problem = {
+        "num_vars": 1,
+        "names": ["x1"],
+        "bounds": [[-2.0, 2.0, 0.0, 1.0]],
+        "dists": ["truncnorm"],
+    }
+
+    samples = sample(problem, 4, num_levels=4, seed=1)
+
+    assert np.isfinite(samples).all()
+
+
 def test_group_in_param_file_read(setup_param_file_with_groups):
     """
     Tests that groups in a parameter file are read correctly
