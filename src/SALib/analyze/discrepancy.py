@@ -83,6 +83,8 @@ def analyze(
         >>> Y = Ishigami.evaluate(X)
         >>> Si = discrepancy.analyze(problem, X, Y, print_to_console=True)
     """
+    X = np.asarray(X)
+    Y = np.asarray(Y)
     D = problem["num_vars"]
     groups = _check_groups(problem)
     Y = Y.reshape(-1, 1)

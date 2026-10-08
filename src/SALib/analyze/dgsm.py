@@ -55,6 +55,8 @@ def analyze(
            indices." Mathematics and Computers in Simulation, 79(10):3009-3017,
            doi:10.1016/j.matcom.2009.01.023.
     """
+    X = np.asarray(X)
+    Y = np.asarray(Y)
     if seed:
         np.random.seed(seed)
 

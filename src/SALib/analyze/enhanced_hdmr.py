@@ -195,6 +195,8 @@ def analyze(
        Water Resources Research, 59, e2022WR032834.
        https://doi.org/10.1029/2022WR032834
     """
+    X = np.asarray(X)
+    Y = np.asarray(Y)
     # Random Seed
     if seed:
         np.random.seed(seed)

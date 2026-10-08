@@ -109,6 +109,7 @@ def analyze(
        Reliability Engineering & System Safety, 92(7), 957-960.
        https://doi.org/10.1016/j.ress.2006.07.001
     """
+    Y = np.asarray(Y)
     if seed:
         # Set seed to ensure CIs are the same
         rng = np.random.default_rng(seed).integers

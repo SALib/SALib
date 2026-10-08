@@ -78,6 +78,7 @@ def analyze(
            Kluwer Academic Publishers, Dordrecht, 1994, pp. 334–343
            DOI: 10.1007/978-94-011-0962-8_28
     """
+    Y = np.asarray(Y)
     num_vars = problem["num_vars"]
 
     assert (

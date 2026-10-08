@@ -132,6 +132,8 @@ def analyze(
         Applied Energy, Volume 202, 15 September 2017, Pages 597-617
         https://doi.org/10.1016/j.apenergy.2017.05.106
     """
+    X = np.asarray(X)
+    Y = np.asarray(Y)
 
     rng = handle_seed(seed)
 

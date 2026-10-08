@@ -76,6 +76,7 @@ def analyze(
     be treated as indicative only. This feature may be reworked or removed
     in a future release.
     """
+    Y = np.asarray(Y)
     warnings.warn(
         "FAST confidence intervals are estimated via bootstrap resampling, "
         "which is known to be unreliable for this method (see "

@@ -75,6 +75,8 @@ def analyze(
     --------
     Si : dict
     """
+    X = np.asarray(X)
+    Y = np.asarray(Y)
     num_vars = problem["num_vars"]
 
     # Each `n`th item from 0-position is the baseline for

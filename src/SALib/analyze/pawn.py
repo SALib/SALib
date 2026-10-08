@@ -103,6 +103,8 @@ def analyze(
            Combining variance- and distribution-based global sensitivity analysis
            https://github.com/baronig/GSA-cvd
     """
+    X = np.asarray(X)
+    Y = np.asarray(Y)
     if seed:
         np.random.seed(seed)
 

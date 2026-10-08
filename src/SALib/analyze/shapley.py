@@ -54,6 +54,8 @@ def analyze(
        with Shapley effects. Reliability Engineering & System Safety, 213,
        107702. https://doi.org/10.1016/j.ress.2021.107702
     """
+    X = np.asarray(X)
+    Y = np.asarray(Y)
     _validate_ungrouped(problem)
     X, Y, num_trajectories = _validate_inputs(problem, X, Y, conf_level)
 

@@ -83,6 +83,8 @@ def analyze(
          Journal of Building Performance Simulation.
          doi:10.1080/19401493.2015.1112430
     """
+    X = np.asarray(X)
+    Y = np.asarray(Y)
     rng = handle_seed(seed)
 
     D = problem["num_vars"]

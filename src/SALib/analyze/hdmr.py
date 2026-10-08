@@ -170,6 +170,8 @@ def analyze(
        Journal of Physical Chemistry A, Vol. 114 (19), pp. 6022 - 6032, 2010,
        https://doi.org/10.1021/jp9096919
     """
+    X = np.asarray(X)
+    Y = np.asarray(Y)
     warnings.warn(
         "This method will be retired in future, please use enhanced_hdmr instead.",
         DeprecationWarning,

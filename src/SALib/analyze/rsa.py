@@ -107,6 +107,8 @@ def analyze(
         Accessible at:
         http://www.andreasaltelli.eu/file/repository/Primer_Corrected_2022.pdf
     """
+    X = np.asarray(X)
+    Y = np.asarray(Y)
     results = rsa(X, Y, bins, target)
 
     groups = _check_groups(problem)
