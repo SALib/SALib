@@ -79,7 +79,7 @@ def sample(problem: Dict, N: int, R=4, skip_num: int = 0, seed: Optional[int] = 
     ---------
     numpy.ndarray : An array of samples
     """
-    if seed:
+    if seed is not None:
         np.random.seed(seed)
 
     num_vars = problem["num_vars"]

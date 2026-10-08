@@ -85,7 +85,7 @@ def analyze(
         stacklevel=2,
     )
 
-    if seed:
+    if seed is not None:
         np.random.seed(seed)
 
     D = problem["num_vars"]

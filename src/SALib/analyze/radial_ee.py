@@ -93,7 +93,7 @@ def analyze(
         Y.shape[0] / sample_sets
     ) == nth, "Number of result set groups must match number of parameters + 1"
 
-    if seed:
+    if seed is not None:
         np.random.seed(seed)
 
     ee = np.zeros((sample_sets, num_vars))

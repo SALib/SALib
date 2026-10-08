@@ -196,7 +196,7 @@ def analyze(
        https://doi.org/10.1029/2022WR032834
     """
     # Random Seed
-    if seed:
+    if seed is not None:
         np.random.seed(seed)
 
     # Check arguments

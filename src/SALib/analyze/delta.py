@@ -159,7 +159,7 @@ def analyze(
            sensitivity measures from given data." European Journal of
            Operational Research, 226(3):536-550, doi:10.1016/j.ejor.2012.11.047.
     """
-    if seed:
+    if seed is not None:
         np.random.seed(seed)
 
     valid_methods = {"delta", "sobol", "all"}

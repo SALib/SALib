@@ -55,7 +55,7 @@ def analyze(
            indices." Mathematics and Computers in Simulation, 79(10):3009-3017,
            doi:10.1016/j.matcom.2009.01.023.
     """
-    if seed:
+    if seed is not None:
         np.random.seed(seed)
 
     D = problem["num_vars"]
