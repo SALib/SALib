@@ -24,14 +24,14 @@ def analyze(
     max_order: int = 2,
     poly_order: int = 3,
     bootstrap: int = 20,
-    subset: int = None,
+    subset: int | None = None,
     max_iter: int = 100,
     l2_penalty: float = 0.01,
     alpha: float = 0.95,
     extended_base: bool = True,
     print_to_console: bool = False,
     return_emulator: bool = False,
-    seed: int = None,
+    seed: int | None = None,
 ) -> Dict:
     """Compute global sensitivity indices using the meta-modeling technique
     known as High-Dimensional Model Representation (HDMR).

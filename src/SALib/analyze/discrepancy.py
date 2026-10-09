@@ -13,7 +13,7 @@ def analyze(
     Y: np.ndarray,
     method: str = "WD",
     print_to_console: bool = False,
-    seed: int = None,
+    seed: int | None = None,
 ):
     """Discrepancy indices.
 
