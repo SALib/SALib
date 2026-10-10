@@ -4,6 +4,7 @@ from warnings import warn
 from scipy.stats import norm
 
 import numpy as np
+from numpy.typing import ArrayLike
 import pandas as pd
 
 from . import common_args
@@ -21,7 +22,7 @@ CONST_RESULT_MSG = (
 
 def analyze(
     problem,
-    Y,
+    Y: ArrayLike,
     calc_second_order=True,
     num_resamples=100,
     conf_level=0.95,
@@ -63,8 +64,8 @@ def analyze(
     ----------
     problem : dict
         The problem definition
-    Y : numpy.array
-        A NumPy array containing the model outputs
+    Y : array_like
+        An array or list containing the model outputs
     calc_second_order : bool
         Calculate second-order sensitivities (default True)
     num_resamples : int
@@ -109,6 +110,7 @@ def analyze(
        Reliability Engineering & System Safety, 92(7), 957-960.
        https://doi.org/10.1016/j.ress.2006.07.001
     """
+    Y = np.asarray(Y)
     if seed:
         # Set seed to ensure CIs are the same
         rng = np.random.default_rng(seed).integers

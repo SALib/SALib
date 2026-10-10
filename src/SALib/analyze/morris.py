@@ -1,5 +1,6 @@
 from typing import Dict, List
 import numpy as np
+from numpy.typing import ArrayLike
 from scipy.stats import norm
 
 from . import common_args
@@ -15,8 +16,8 @@ from ..util import (
 
 def analyze(
     problem: Dict,
-    X: np.ndarray,
-    Y: np.ndarray,
+    X: ArrayLike,
+    Y: ArrayLike,
     num_resamples: int = 100,
     conf_level: float = 0.95,
     scaled: bool = False,
@@ -76,10 +77,10 @@ def analyze(
     ----------
     problem : dict
         The problem definition
-    X : numpy.array
-        The NumPy matrix containing the model inputs of dtype=float
-    Y : numpy.array
-        The NumPy array containing the model outputs of dtype=float
+    X : array_like
+        The array or list containing the model inputs of dtype=float
+    Y : array_like
+        The array or list containing the model outputs of dtype=float
     scaled : bool, default=False
         If True, the elementary effects are scaled by the ratio of
         standard deviation of X and Y according to [3]
@@ -132,6 +133,8 @@ def analyze(
         Applied Energy, Volume 202, 15 September 2017, Pages 597-617
         https://doi.org/10.1016/j.apenergy.2017.05.106
     """
+    X = np.asarray(X)
+    Y = np.asarray(Y)
 
     rng = handle_seed(seed)
 

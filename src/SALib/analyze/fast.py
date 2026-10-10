@@ -2,6 +2,7 @@ import math
 import warnings
 
 import numpy as np
+from numpy.typing import ArrayLike
 from scipy.stats import norm
 
 from . import common_args
@@ -10,7 +11,7 @@ from ..util import read_param_file, ResultDict
 
 def analyze(
     problem,
-    Y,
+    Y: ArrayLike,
     M=4,
     num_resamples=100,
     conf_level=0.95,
@@ -38,8 +39,8 @@ def analyze(
     ----------
     problem : dict
         The problem definition
-    Y : numpy.array
-        A NumPy array containing the model outputs
+    Y : array_like
+        An array or list containing the model outputs
     M : int
         The interference parameter, i.e., the number of harmonics to sum in
         the Fourier series decomposition (default 4)
@@ -76,6 +77,7 @@ def analyze(
     be treated as indicative only. This feature may be reworked or removed
     in a future release.
     """
+    Y = np.asarray(Y)
     warnings.warn(
         "FAST confidence intervals are estimated via bootstrap resampling, "
         "which is known to be unreliable for this method (see "

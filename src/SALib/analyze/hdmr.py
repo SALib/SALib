@@ -6,6 +6,7 @@ import time
 import warnings
 
 import numpy as np
+from numpy.typing import ArrayLike
 from numpy.linalg import solve as lin_solve
 from numpy.linalg import svd
 from numpy import identity
@@ -25,8 +26,8 @@ __all__ = ["analyze", "cli_parse", "cli_action"]
 
 def analyze(
     problem: Dict,
-    X: np.ndarray,
-    Y: np.ndarray,
+    X: ArrayLike,
+    Y: ArrayLike,
     maxorder: int = 2,
     maxiter: int = 100,
     m: int = 2,
@@ -96,11 +97,11 @@ def analyze(
     problem : dict
         The problem definition
 
-    X : numpy.matrix
-        The NumPy matrix containing the model inputs, N rows by d columns
+    X : array_like
+        The array or list containing the model inputs, N rows by d columns
 
-    Y : numpy.array
-        The NumPy array containing the model outputs for each row of X
+    Y : array_like
+        The array or list containing the model outputs for each row of X
 
     maxorder : int (1-3, default: 2)
         Maximum HDMR expansion order
@@ -170,6 +171,8 @@ def analyze(
        Journal of Physical Chemistry A, Vol. 114 (19), pp. 6022 - 6032, 2010,
        https://doi.org/10.1021/jp9096919
     """
+    X = np.asarray(X)
+    Y = np.asarray(Y)
     warnings.warn(
         "This method will be retired in future, please use enhanced_hdmr instead.",
         DeprecationWarning,

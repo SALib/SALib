@@ -2,6 +2,7 @@ from typing import Optional, Dict
 from scipy.stats import norm, gaussian_kde, rankdata
 
 import numpy as np
+from numpy.typing import ArrayLike
 import pandas as pd
 
 from . import common_args
@@ -37,8 +38,8 @@ def custom_warning_formatter(message, category, filename, lineno, line=None):
 
 def analyze(
     problem: Dict,
-    X: np.ndarray,
-    Y: np.ndarray,
+    X: ArrayLike,
+    Y: ArrayLike,
     num_resamples: int = 100,
     conf_level: float = 0.95,
     print_to_console: bool = False,
@@ -126,10 +127,10 @@ def analyze(
     ----------
     problem : dict
         The problem definition
-    X: numpy.matrix
-        A NumPy matrix containing the model inputs
-    Y : numpy.array
-        A NumPy array containing the model outputs
+    X : array_like
+        An array or list containing the model inputs
+    Y : array_like
+        An array or list containing the model outputs
     num_resamples : int
         The number of resamples when computing confidence intervals (default 100)
     conf_level : float
@@ -159,6 +160,8 @@ def analyze(
            sensitivity measures from given data." European Journal of
            Operational Research, 226(3):536-550, doi:10.1016/j.ejor.2012.11.047.
     """
+    X = np.asarray(X)
+    Y = np.asarray(Y)
     if seed:
         np.random.seed(seed)
 

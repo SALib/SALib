@@ -6,6 +6,7 @@ from itertools import combinations as comb, product
 from collections import defaultdict, namedtuple
 
 import numpy as np
+from numpy.typing import ArrayLike
 from pandas import DataFrame as df
 from numpy.linalg import det, pinv, matrix_rank
 from scipy.linalg import svd, LinAlgError, solve
@@ -19,8 +20,8 @@ __all__ = ["analyze", "cli_parse", "cli_action"]
 
 def analyze(
     problem: Dict,
-    X: np.ndarray,
-    Y: np.ndarray,
+    X: ArrayLike,
+    Y: ArrayLike,
     max_order: int = 2,
     poly_order: int = 3,
     bootstrap: int = 20,
@@ -133,10 +134,10 @@ def analyze(
     ----------
     problem : dict
         The problem definition
-    X : numpy.matrix
-        The NumPy matrix containing the model inputs, N rows by d columns
-    Y : numpy.array
-        The NumPy array containing the model outputs for each row of X
+    X : array_like
+        The array or list containing the model inputs, N rows by d columns
+    Y : array_like
+        The array or list containing the model outputs for each row of X
     max_order : int (1-3, default: 2)
         Maximum HDMR expansion order
     poly_order : int (1-10, default: 3)
@@ -195,6 +196,8 @@ def analyze(
        Water Resources Research, 59, e2022WR032834.
        https://doi.org/10.1029/2022WR032834
     """
+    X = np.asarray(X)
+    Y = np.asarray(Y)
     # Random Seed
     if seed:
         np.random.seed(seed)
