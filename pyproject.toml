@@ -64,6 +64,7 @@ dev = [
     "pre-commit>=4.3.0",
     "ipython",
     "hatch",
+    "black==24.2.0"
 ]
 
 [project.scripts]
