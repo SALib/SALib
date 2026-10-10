@@ -14,6 +14,7 @@ from SALib.util import (
     read_param_file,
     compute_groups_matrix,
     _define_problem_with_groups,
+    _nonuniform_scale_samples,
     _compute_delta,
     handle_seed,
 )
@@ -132,6 +133,8 @@ def sample(
 
     problem = _define_problem_with_groups(problem)
 
+    _check_endpoints_finite(problem)
+
     sample_morris = _sample_morris(problem, N, rng, num_levels=num_levels)
 
     if optimal_trajectories:
@@ -148,6 +151,43 @@ def sample(
     sample_morris = scale_samples(sample_morris, problem)
 
     return sample_morris
+
+
+def _check_endpoints_finite(problem):
+    """Morris grids can include 0 and 1, so the inverse CDF at those
+    quantiles must be finite for every parameter.
+
+    Raises ValueError if non-finite values detected.
+    Raises ValueError if number of `dists` defined does not match the number of parameters.
+    """
+    dists = problem.get("dists")
+    if dists is None:
+        # Uniform scaling is always finite
+        return
+
+    if len(dists) != problem["num_vars"]:
+        raise ValueError(
+            f"Mismatch in number of parameters ({problem['num_vars']}) "
+            f"and distributions ({len(dists)})."
+        )
+
+    probe = np.tile([[0.0], [1.0]], (1, problem["num_vars"]))
+    scaled = _nonuniform_scale_samples(probe, problem["bounds"], dists)
+
+    bad = np.flatnonzero(~np.isfinite(scaled).all(axis=0))
+    if bad.size:
+        param_names = problem["names"]
+        affected = ", ".join(f"{param_names[i]} ({dists[i]})" for i in bad)
+
+        raise ValueError(
+            "Distributions with unbounded endpoints cannot be used with Morris sampling. "
+            "The following factors would be affected:\n"
+            f"{affected}.\n"
+            "The Morris grid includes distribution endpoints, so "
+            "unbounded distributions such as `norm`, `lognorm`, and `weibull` can map "
+            "those endpoints to infinity. Use a bounded distribution "
+            "such as `truncnorm` with `bounds` [lower, upper, mean, stdev]."
+        )
 
 
 def _sample_morris(
