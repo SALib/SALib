@@ -1,6 +1,7 @@
 from typing import Dict
 
 import numpy as np
+from numpy.typing import ArrayLike
 from scipy.stats import qmc
 
 from SALib.analyze import common_args
@@ -9,8 +10,8 @@ from SALib.util import read_param_file, ResultDict, _check_groups
 
 def analyze(
     problem: Dict,
-    X: np.ndarray,
-    Y: np.ndarray,
+    X: ArrayLike,
+    Y: ArrayLike,
     method: str = "WD",
     print_to_console: bool = False,
     seed: int = None,
@@ -21,8 +22,8 @@ def analyze(
     ----------
     problem : dict
         The problem definition
-    X, Y : numpy.ndarray
-        An array of model inputs and outputs.
+    X, Y : array_like
+        An array or list of model inputs and outputs.
     method : {"WD", "CD", "MD", "L2-star"}
         Type of discrepancy. Refer to `scipy.stats.qmc.discrepancy` for more
         details. Default is "WD".

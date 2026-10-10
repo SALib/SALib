@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.typing import ArrayLike
 from scipy.stats import norm
 from typing import Dict, Optional
 
@@ -10,7 +11,7 @@ __all__ = ["analyze"]
 
 def analyze(
     problem: Dict,
-    Y: np.array,
+    Y: ArrayLike,
     sample_sets: int,
     num_resamples: int = 1000,
     conf_level: float = 0.95,
@@ -29,8 +30,8 @@ def analyze(
     problem : dict
         The SALib problem specification
 
-    Y : np.array
-        An array containing the model outputs of dtype=float
+    Y : array_like
+        An array or list containing the model outputs of dtype=float
 
     sample_sets : int
         The number of sample sets used to create `X`

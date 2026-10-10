@@ -5,6 +5,7 @@ Created on 30 Jun 2015
 """
 
 import numpy as np
+from numpy.typing import ArrayLike
 from . import common_args
 
 import pandas as pd
@@ -14,7 +15,14 @@ from SALib.util import read_param_file, ResultDict
 from SALib.sample.ff import generate_contrast, extend_bounds
 
 
-def analyze(problem, X, Y, second_order=False, print_to_console=False, seed=None):
+def analyze(
+    problem,
+    X: ArrayLike,
+    Y: ArrayLike,
+    second_order=False,
+    print_to_console=False,
+    seed=None,
+):
     """Perform a fractional factorial analysis
 
     Returns a dictionary with keys 'ME' (main effect) and 'IE' (interaction
@@ -40,10 +48,10 @@ def analyze(problem, X, Y, second_order=False, print_to_console=False, seed=None
     ----------
     problem: dict
         The problem definition
-    X: numpy.matrix
-        The NumPy matrix containing the model inputs
-    Y: numpy.array
-        The NumPy array containing the model outputs
+    X : array_like
+        The array or list containing the model inputs
+    Y : array_like
+        The array or list containing the model outputs
     second_order: bool, default=False
         Include interaction effects
     print_to_console: bool, default=False

@@ -3,6 +3,7 @@ from types import MethodType
 import warnings
 
 import numpy as np
+from numpy.typing import ArrayLike
 import pandas as pd
 from scipy.stats import cramervonmises_2samp
 
@@ -12,8 +13,8 @@ from ..util import read_param_file, ResultDict, extract_group_names, _check_grou
 
 def analyze(
     problem: Dict,
-    X: np.ndarray,
-    Y: np.ndarray,
+    X: ArrayLike,
+    Y: ArrayLike,
     bins: int = 20,
     target: str = "Y",
     print_to_console: bool = False,
@@ -70,10 +71,10 @@ def analyze(
     ----------
     problem : dict
         The problem definition
-    X : numpy.array
-        A NumPy array containing the model inputs
-    Y : numpy.array
-        A NumPy array containing the model outputs
+    X : array_like
+        An array or list containing the model inputs
+    Y : array_like
+        An array or list containing the model outputs
     bins : int
         The number of bins to use (default: 20)
     target : str
