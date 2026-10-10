@@ -136,7 +136,8 @@ def calc_dgsm(base, perturbed, x_delta, bounds, num_resamples, conf_level):
     r = np.random.randint(len_base, size=(num_resamples, len_base))
     for i in range(num_resamples):
         r_i = r[i]
-        s[i] = calc_vi_mean(base[r_i], perturbed[r_i], x_delta[r_i])
+        vi_r = calc_vi_mean(base[r_i], perturbed[r_i], x_delta[r_i])
+        s[i] = vi_r * (bounds[1] - bounds[0]) ** 2 / (np.var(base[r_i]) * np.pi**2)
 
     return dgsm, norm.ppf(0.5 + conf_level / 2.0) * s.std(ddof=1)
 
