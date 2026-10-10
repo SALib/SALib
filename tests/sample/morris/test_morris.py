@@ -86,7 +86,12 @@ def test_even_num_levels_no_warning(setup_param_file_with_groups):
 
 @mark.parametrize(
     ("dist", "bounds"),
-    [("norm", [0.0, 1.0]), ("lognorm", [0.0, 1.0])],
+    [
+        ("norm", [0.0, 1.0]),
+        ("lognorm", [0.0, 1.0]),
+        ("weibull", [1.5, 1.0]),
+        ("weibull", [1.5, 1.0, 2.0]),
+    ],
 )
 def test_unbounded_distributions_raise_for_nonfinite_samples(dist, bounds):
     problem = {
@@ -96,8 +101,59 @@ def test_unbounded_distributions_raise_for_nonfinite_samples(dist, bounds):
         "dists": [dist],
     }
 
-    with raises(ValueError, match=r"x1 \(" + dist + r"\).+truncnorm"):
+    with raises(ValueError, match=r"(?s)x1 \(" + dist + r"\).+truncnorm"):
         sample(problem, 4, num_levels=4, seed=1)
+
+    # This seed/level combination never samples the 0/1 endpoints, so the
+    # error must come from the upfront check rather than the sampled values
+    with raises(ValueError, match=r"(?s)x1 \(" + dist + r"\).+truncnorm"):
+        sample(problem, 4, num_levels=8, seed=6)
+
+
+def test_mixed_distributions_report_only_unbounded_factors():
+    problem = {
+        "num_vars": 4,
+        "names": ["x1", "x2", "x3", "x4"],
+        "bounds": [[0.0, 1.0], [0.0, 1.0], [-2.0, 2.0, 0.0, 1.0], [1.5, 1.0]],
+        "dists": ["unif", "norm", "truncnorm", "weibull"],
+    }
+
+    with raises(ValueError) as err:
+        sample(problem, 4, num_levels=4, seed=1)
+
+    msg = str(err.value)
+    assert "x2 (norm), x4 (weibull)" in msg
+    assert "x1 (unif)" not in msg
+    assert "x3 (truncnorm)" not in msg
+
+
+def test_unbounded_distribution_in_group_raises():
+    problem = {
+        "num_vars": 3,
+        "names": ["x1", "x2", "x3"],
+        "groups": ["G1", "G1", "G2"],
+        "bounds": [[0.0, 1.0], [0.0, 1.0], [0.0, 1.0]],
+        "dists": ["unif", "lognorm", "unif"],
+    }
+
+    with raises(ValueError, match=r"x2 \(lognorm\)"):
+        sample(problem, 4, num_levels=4, seed=1)
+
+
+def test_bounded_distributions_with_groups_produce_finite_samples():
+    problem = {
+        "num_vars": 3,
+        "names": ["x1", "x2", "x3"],
+        "groups": ["G1", "G1", "G2"],
+        "bounds": [[0.0, 1.0], [-2.0, 2.0, 0.0, 1.0], [0.0, 1.0]],
+        "dists": ["unif", "truncnorm", "unif"],
+    }
+
+    samples = sample(problem, 4, num_levels=4, seed=1)
+
+    # N * (num_groups + 1) rows, one column per factor
+    assert samples.shape == (4 * 3, 3)
+    assert np.isfinite(samples).all()
 
 
 def test_bounded_distribution_produces_finite_samples():
