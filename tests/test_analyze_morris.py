@@ -1,11 +1,19 @@
 # -*- coding: utf-8 -*-
 
-from pytest import raises, fixture
+import copy
+import multiprocessing
+import pickle
+from concurrent.futures import ProcessPoolExecutor
 
+from pytest import raises, fixture, mark
+
+import matplotlib.pyplot as plt
 import numpy as np
 from numpy.testing import assert_allclose, assert_equal
+from pandas.testing import assert_frame_equal
 from scipy.stats import norm
 
+from SALib import ProblemSpec
 from SALib.analyze.morris import (
     analyze,
     _compute_mu_star_confidence,
@@ -16,7 +24,62 @@ from SALib.analyze.morris import (
     _compute_grouped_sigma,
     _check_if_array_of_floats,
 )
-from SALib.util import handle_seed
+from SALib.test_functions import Ishigami
+from SALib.util import ResultDict, handle_seed
+
+
+def _run_morris_analysis(seed, grouped=False, keep_resamples=True):
+    problem = ProblemSpec(
+        {"names": ["x1", "x2", "x3"], "bounds": [[-np.pi, np.pi]] * 3}
+    )
+    if grouped:
+        problem["groups"] = ["group", "single", "group"]
+    problem.sample_morris(8, seed=seed).evaluate(Ishigami.evaluate)
+    return analyze(
+        problem,
+        problem.samples,
+        problem.results,
+        num_resamples=20,
+        seed=seed,
+        keep_resamples=keep_resamples,
+    )
+
+
+@mark.parametrize("grouped", [False, True])
+@mark.parametrize("keep_resamples", [False, True])
+@mark.parametrize("roundtrip", ["pickle", "deepcopy"])
+def test_morris_result_roundtrip(grouped, keep_resamples, roundtrip):
+    result = _run_morris_analysis(42, grouped, keep_resamples)
+    default_result = _run_morris_analysis(42, grouped, keep_resamples=False)
+    for key in default_result:
+        assert_equal(result[key], default_result[key])
+    if roundtrip == "pickle":
+        restored = pickle.loads(pickle.dumps(result))
+    else:
+        restored = copy.deepcopy(result)
+
+    assert isinstance(restored, ResultDict)
+    assert restored.keys() == result.keys()
+    for key in result:
+        assert_equal(restored[key], result[key])
+    assert_frame_equal(restored.to_df(), result.to_df())
+    assert list(restored.to_df().columns) == ["mu", "mu_star", "sigma", "mu_star_conf"]
+    ax = restored.plot()
+    plt.close(ax.figure)
+
+
+@mark.parametrize("grouped", [False, True])
+def test_morris_result_from_process_pool(grouped):
+    seeds = [1, 2]
+    with ProcessPoolExecutor(
+        2, mp_context=multiprocessing.get_context("spawn")
+    ) as pool:
+        results = list(pool.map(_run_morris_analysis, seeds, [grouped] * 2))
+
+    for seed, result in zip(seeds, results):
+        expected = _run_morris_analysis(seed, grouped)
+        assert_frame_equal(result.to_df(), expected.to_df())
+        assert_equal(result["mu_star_conf_all"], expected["mu_star_conf_all"])
 
 
 def test_compute_mu_star_confidence():
@@ -29,9 +92,12 @@ def test_compute_mu_star_confidence():
     conf_level = 0.95
     num_vars = 1
 
-    actual = _compute_mu_star_confidence(ee, num_vars, num_resamples, conf_level, rng)
+    actual, resamples = _compute_mu_star_confidence(
+        ee, num_vars, num_resamples, conf_level, rng
+    )
     expected = 0.5
     assert_allclose(actual, expected, atol=1e-01)
+    assert resamples.shape == (num_resamples, num_vars)
 
 
 def test_analysis_of_morris_results():
@@ -171,7 +237,6 @@ def test_keep_resamples_are_aggregated_for_groups():
         num_resamples=20,
         conf_level=0.95,
         rng=handle_seed(42),
-        keep_resamples=True,
     )
 
     assert result["mu_star_conf_all"].shape == (20, 2)
@@ -183,6 +248,44 @@ def test_keep_resamples_are_aggregated_for_groups():
         result["mu_star_conf"],
         [raw_confidence[:2].mean(), raw_confidence[2]],
     )
+    default_result = _compute_statistical_outputs(
+        elementary_effects,
+        num_vars=3,
+        num_resamples=20,
+        conf_level=0.95,
+        groups=groups,
+        unique_group_names=["group", "single"],
+        rng=handle_seed(42),
+    )
+    assert set(default_result) == {"names", "mu", "mu_star", "sigma", "mu_star_conf"}
+    for key in default_result:
+        assert_equal(default_result[key], result[key])
+
+
+@mark.parametrize("nonfinite", [np.nan, np.inf])
+def test_keep_resamples_isolate_nonfinite_groups(nonfinite):
+    elementary_effects = np.array([[1.0, 2.0, 3.0], [2.0, 4.0, 6.0], [nonfinite] * 3])
+    groups = np.array([[1, 0], [1, 0], [0, 1]])
+    with np.errstate(invalid="ignore"):
+        result = _compute_statistical_outputs(
+            elementary_effects,
+            num_vars=3,
+            num_resamples=20,
+            conf_level=0.95,
+            groups=groups,
+            unique_group_names=["finite", "nonfinite"],
+            rng=handle_seed(42),
+            keep_resamples=True,
+        )
+        _, raw_resamples = _compute_mu_star_confidence(
+            elementary_effects, 3, 20, 0.95, handle_seed(42)
+        )
+        expected = np.asarray(
+            [_compute_grouped_metric(row, groups) for row in raw_resamples]
+        )
+
+    assert_equal(result["mu_star_conf_all"], expected)
+    assert np.isfinite(result["mu_star_conf_all"][:, 0]).all()
 
 
 def test_keep_resamples_preserve_confidence_results_and_trajectory_alignment():
@@ -198,9 +301,8 @@ def test_keep_resamples_preserve_confidence_results_and_trajectory_alignment():
         num_resamples=20,
         conf_level=0.95,
         rng=handle_seed(42),
-        keep_resamples=True,
     )
-    default_confidence = _compute_mu_star_confidence(
+    repeated_confidence, repeated_resamples = _compute_mu_star_confidence(
         elementary_effects,
         num_vars=2,
         num_resamples=20,
@@ -208,7 +310,8 @@ def test_keep_resamples_preserve_confidence_results_and_trajectory_alignment():
         rng=handle_seed(42),
     )
 
-    assert_equal(confidence, default_confidence)
+    assert_equal(confidence, repeated_confidence)
+    assert_equal(resamples, repeated_resamples)
     assert_equal(resamples[:, 0], resamples[:, 1])
     assert_allclose(
         confidence,
