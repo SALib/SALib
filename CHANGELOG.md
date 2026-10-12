@@ -3,6 +3,17 @@
 This changelog follows the format defined at:
 https://keepachangelog.com/en/1.0.0/
 
+## [Unreleased]
+
+### Changed
+
+- Morris analysis now bootstraps trajectories jointly across parameters instead
+  of independently for each parameter (PR #694). This aligns retained bootstrap
+  replicates across parameters. Upgrading can therefore change exact
+  `mu_star_conf` values for a fixed seed, even with the default
+  `keep_resamples=False`. The confidence-interval estimator is unchanged;
+  `keep_resamples` only controls whether the bootstrap estimates are retained.
+
 ## [1.4.5]
 
 - Adjusted Saltelli sampling to follow recommendation of Owen (2020)
