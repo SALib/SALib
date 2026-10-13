@@ -1,7 +1,23 @@
 import numpy as np
 import pytest
 
-from SALib.analyze import dgsm, discrepancy, fast, morris, pawn, rbd_fast, rsa, sobol
+from SALib.analyze import (
+    delta,
+    dgsm,
+    discrepancy,
+    enhanced_hdmr,
+    fast,
+    ff,
+    hdmr,
+    morris,
+    pawn,
+    radial_ee,
+    rbd_fast,
+    rsa,
+    shapley,
+    sobol,
+    sobol_jansen,
+)
 from SALib.sample import fast_sampler, finite_diff, latin
 from SALib.sample import morris as morris_sample
 from SALib.sample import sobol as sobol_sample
@@ -61,3 +77,47 @@ def test_analyze_accepts_lists(name):
     for key, value in expected.items():
         if isinstance(value, np.ndarray) and value.dtype.kind == "f":
             np.testing.assert_allclose(got[key], value, err_msg=key)
+
+
+Y_ONLY = [fast, sobol, sobol_jansen]
+X_AND_Y = [
+    delta,
+    dgsm,
+    discrepancy,
+    enhanced_hdmr,
+    ff,
+    hdmr,
+    morris,
+    pawn,
+    radial_ee,
+    rbd_fast,
+    rsa,
+    shapley,
+]
+# Required arguments besides problem, X and Y.
+EXTRA_ARGS = {radial_ee: {"sample_sets": 1}, sobol_jansen: {"sample_sets": 1}}
+BAD_INPUTS = {
+    "dict": {"x1": [1.0, 2.0]},
+    "set": {1.0, 2.0},
+    "str": "1.0, 2.0",
+    "None": None,
+    "list of str": ["a", "b"],
+}
+
+
+@pytest.mark.parametrize("bad", BAD_INPUTS.values(), ids=BAD_INPUTS)
+@pytest.mark.parametrize(
+    "method, arg",
+    [(m, "Y") for m in Y_ONLY] + [(m, a) for m in X_AND_Y for a in "XY"],
+    ids=lambda p: p if isinstance(p, str) else p.__name__.rsplit(".", 1)[-1],
+)
+def test_analyze_rejects_non_numeric_input(method, arg, bad):
+    """A dict, string or other non-numeric X or Y raises a TypeError naming it."""
+    X = latin.sample(PROBLEM, 10, seed=1)
+    Y = Ishigami.evaluate(X)
+    args = {"X": X, "Y": Y}
+    args[arg] = bad
+    names = ["Y"] if method in Y_ONLY else ["X", "Y"]
+    msg = f"{arg} must be array_like of numbers .* got {type(bad).__name__}"
+    with pytest.raises(TypeError, match=msg):
+        method.analyze(PROBLEM, *(args[n] for n in names), **EXTRA_ARGS.get(method, {}))

@@ -8,7 +8,7 @@ from scipy.stats import norm
 from typing import Optional, Union
 
 from . import common_args
-from ..util import read_param_file, ResultDict, handle_seed
+from ..util import read_param_file, ResultDict, handle_seed, _as_numeric_array
 
 
 def analyze(
@@ -84,8 +84,8 @@ def analyze(
          Journal of Building Performance Simulation.
          doi:10.1080/19401493.2015.1112430
     """
-    X = np.asarray(X)
-    Y = np.asarray(Y)
+    X = _as_numeric_array(X, "X")
+    Y = _as_numeric_array(Y, "Y")
     rng = handle_seed(seed)
 
     D = problem["num_vars"]

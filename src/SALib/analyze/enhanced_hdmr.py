@@ -13,7 +13,7 @@ from scipy.linalg import svd, LinAlgError, solve
 from scipy import stats, special
 
 from . import common_args
-from ..util import read_param_file, ResultDict
+from ..util import read_param_file, ResultDict, _as_numeric_array
 
 __all__ = ["analyze", "cli_parse", "cli_action"]
 
@@ -196,8 +196,8 @@ def analyze(
        Water Resources Research, 59, e2022WR032834.
        https://doi.org/10.1029/2022WR032834
     """
-    X = np.asarray(X)
-    Y = np.asarray(Y)
+    X = _as_numeric_array(X, "X")
+    Y = _as_numeric_array(Y, "Y")
     # Random Seed
     if seed:
         np.random.seed(seed)

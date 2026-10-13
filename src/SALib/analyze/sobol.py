@@ -8,7 +8,7 @@ from numpy.typing import ArrayLike
 import pandas as pd
 
 from . import common_args
-from ..util import read_param_file, ResultDict, extract_group_names
+from ..util import read_param_file, ResultDict, extract_group_names, _as_numeric_array
 
 from multiprocess import Pool, cpu_count
 from functools import partial
@@ -110,7 +110,7 @@ def analyze(
        Reliability Engineering & System Safety, 92(7), 957-960.
        https://doi.org/10.1016/j.ress.2006.07.001
     """
-    Y = np.asarray(Y)
+    Y = _as_numeric_array(Y, "Y")
     if seed:
         # Set seed to ensure CIs are the same
         rng = np.random.default_rng(seed).integers

@@ -5,7 +5,13 @@ from numpy.typing import ArrayLike
 from scipy.stats import ks_2samp
 
 from . import common_args
-from ..util import read_param_file, ResultDict, extract_group_names, _check_groups
+from ..util import (
+    read_param_file,
+    ResultDict,
+    extract_group_names,
+    _check_groups,
+    _as_numeric_array,
+)
 
 
 def analyze(
@@ -104,8 +110,8 @@ def analyze(
            Combining variance- and distribution-based global sensitivity analysis
            https://github.com/baronig/GSA-cvd
     """
-    X = np.asarray(X)
-    Y = np.asarray(Y)
+    X = _as_numeric_array(X, "X")
+    Y = _as_numeric_array(Y, "Y")
     if seed:
         np.random.seed(seed)
 

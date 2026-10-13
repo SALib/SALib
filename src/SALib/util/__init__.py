@@ -14,6 +14,7 @@ from .util_funcs import (  # noqa: F401, E402
     _check_bounds,
     _check_groups,
     handle_seed,
+    _as_numeric_array,
 )  # noqa: F401, E402
 from .problem import ProblemSpec  # noqa: F401, E402
 from .results import ResultDict  # noqa: F401, E402

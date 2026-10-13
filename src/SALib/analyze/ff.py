@@ -11,7 +11,7 @@ from . import common_args
 import pandas as pd
 from types import MethodType
 
-from SALib.util import read_param_file, ResultDict
+from SALib.util import read_param_file, ResultDict, _as_numeric_array
 from SALib.sample.ff import generate_contrast, extend_bounds
 
 
@@ -76,8 +76,8 @@ def analyze(
            Wiley, West Sussex, U.K.
            http://doi.org/10.1002/9780470725184
     """
-    X = np.asarray(X)
-    Y = np.asarray(Y)
+    X = _as_numeric_array(X, "X")
+    Y = _as_numeric_array(Y, "Y")
     if seed:
         np.random.seed(seed)
 

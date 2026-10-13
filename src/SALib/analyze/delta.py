@@ -6,7 +6,7 @@ from numpy.typing import ArrayLike
 import pandas as pd
 
 from . import common_args
-from ..util import read_param_file, ResultDict
+from ..util import read_param_file, ResultDict, _as_numeric_array
 
 import warnings
 import json
@@ -160,8 +160,8 @@ def analyze(
            sensitivity measures from given data." European Journal of
            Operational Research, 226(3):536-550, doi:10.1016/j.ejor.2012.11.047.
     """
-    X = np.asarray(X)
-    Y = np.asarray(Y)
+    X = _as_numeric_array(X, "X")
+    Y = _as_numeric_array(Y, "Y")
     if seed:
         np.random.seed(seed)
 

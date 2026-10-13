@@ -4,7 +4,7 @@ from scipy.stats import norm
 from typing import Dict, Optional
 
 from SALib.sample import common_args
-from ..util import read_param_file, ResultDict
+from ..util import read_param_file, ResultDict, _as_numeric_array
 
 __all__ = ["analyze"]
 
@@ -79,7 +79,7 @@ def analyze(
            Kluwer Academic Publishers, Dordrecht, 1994, pp. 334–343
            DOI: 10.1007/978-94-011-0962-8_28
     """
-    Y = np.asarray(Y)
+    Y = _as_numeric_array(Y, "Y")
     num_vars = problem["num_vars"]
 
     assert (

@@ -15,7 +15,7 @@ import pandas as pd
 from scipy import stats, special, interpolate
 
 from . import common_args
-from ..util import read_param_file, ResultDict, handle_seed
+from ..util import read_param_file, ResultDict, handle_seed, _as_numeric_array
 
 from SALib.plotting.hdmr import plot as hdmr_plot
 from SALib.util.problem import ProblemSpec
@@ -171,8 +171,8 @@ def analyze(
        Journal of Physical Chemistry A, Vol. 114 (19), pp. 6022 - 6032, 2010,
        https://doi.org/10.1021/jp9096919
     """
-    X = np.asarray(X)
-    Y = np.asarray(Y)
+    X = _as_numeric_array(X, "X")
+    Y = _as_numeric_array(Y, "Y")
     warnings.warn(
         "This method will be retired in future, please use enhanced_hdmr instead.",
         DeprecationWarning,

@@ -4,7 +4,7 @@ from numpy.typing import ArrayLike
 from scipy.stats import norm
 
 from . import common_args
-from ..util import read_param_file, ResultDict
+from ..util import read_param_file, ResultDict, _as_numeric_array
 
 __all__ = ["analyze"]
 
@@ -76,8 +76,8 @@ def analyze(
     --------
     Si : dict
     """
-    X = np.asarray(X)
-    Y = np.asarray(Y)
+    X = _as_numeric_array(X, "X")
+    Y = _as_numeric_array(Y, "Y")
     num_vars = problem["num_vars"]
 
     # Each `n`th item from 0-position is the baseline for

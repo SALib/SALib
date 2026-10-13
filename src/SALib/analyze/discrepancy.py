@@ -5,7 +5,7 @@ from numpy.typing import ArrayLike
 from scipy.stats import qmc
 
 from SALib.analyze import common_args
-from SALib.util import read_param_file, ResultDict, _check_groups
+from SALib.util import read_param_file, ResultDict, _check_groups, _as_numeric_array
 
 
 def analyze(
@@ -84,8 +84,8 @@ def analyze(
         >>> Y = Ishigami.evaluate(X)
         >>> Si = discrepancy.analyze(problem, X, Y, print_to_console=True)
     """
-    X = np.asarray(X)
-    Y = np.asarray(Y)
+    X = _as_numeric_array(X, "X")
+    Y = _as_numeric_array(Y, "Y")
     D = problem["num_vars"]
     groups = _check_groups(problem)
     Y = Y.reshape(-1, 1)

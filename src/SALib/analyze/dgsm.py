@@ -4,7 +4,7 @@ import numpy as np
 from numpy.typing import ArrayLike
 
 from . import common_args
-from ..util import read_param_file, ResultDict
+from ..util import read_param_file, ResultDict, _as_numeric_array
 
 
 def analyze(
@@ -62,8 +62,8 @@ def analyze(
            indices." Mathematics and Computers in Simulation, 79(10):3009-3017,
            doi:10.1016/j.matcom.2009.01.023.
     """
-    X = np.asarray(X)
-    Y = np.asarray(Y)
+    X = _as_numeric_array(X, "X")
+    Y = _as_numeric_array(Y, "Y")
     if seed:
         np.random.seed(seed)
 

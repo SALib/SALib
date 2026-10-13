@@ -8,7 +8,13 @@ import pandas as pd
 from scipy.stats import cramervonmises_2samp
 
 from . import common_args
-from ..util import read_param_file, ResultDict, extract_group_names, _check_groups
+from ..util import (
+    read_param_file,
+    ResultDict,
+    extract_group_names,
+    _check_groups,
+    _as_numeric_array,
+)
 
 
 def analyze(
@@ -108,8 +114,8 @@ def analyze(
         Accessible at:
         http://www.andreasaltelli.eu/file/repository/Primer_Corrected_2022.pdf
     """
-    X = np.asarray(X)
-    Y = np.asarray(Y)
+    X = _as_numeric_array(X, "X")
+    Y = _as_numeric_array(Y, "Y")
     results = rsa(X, Y, bins, target)
 
     groups = _check_groups(problem)

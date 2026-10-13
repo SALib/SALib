@@ -5,6 +5,7 @@ from scipy.stats import norm
 
 from . import common_args
 from ..util import (
+    _as_numeric_array,
     read_param_file,
     compute_groups_matrix,
     ResultDict,
@@ -133,8 +134,8 @@ def analyze(
         Applied Energy, Volume 202, 15 September 2017, Pages 597-617
         https://doi.org/10.1016/j.apenergy.2017.05.106
     """
-    X = np.asarray(X)
-    Y = np.asarray(Y)
+    X = _as_numeric_array(X, "X")
+    Y = _as_numeric_array(Y, "Y")
 
     rng = handle_seed(seed)
 

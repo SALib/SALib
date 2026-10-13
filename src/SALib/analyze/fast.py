@@ -6,7 +6,7 @@ from numpy.typing import ArrayLike
 from scipy.stats import norm
 
 from . import common_args
-from ..util import read_param_file, ResultDict
+from ..util import read_param_file, ResultDict, _as_numeric_array
 
 
 def analyze(
@@ -77,7 +77,7 @@ def analyze(
     be treated as indicative only. This feature may be reworked or removed
     in a future release.
     """
-    Y = np.asarray(Y)
+    Y = _as_numeric_array(Y, "Y")
     warnings.warn(
         "FAST confidence intervals are estimated via bootstrap resampling, "
         "which is known to be unreliable for this method (see "

@@ -5,7 +5,7 @@ from numpy.typing import ArrayLike
 from scipy.stats import norm
 
 from . import common_args
-from ..util import ResultDict, read_param_file
+from ..util import ResultDict, read_param_file, _as_numeric_array
 from ..plotting.shapley import plot as shapley_plot
 
 
@@ -55,8 +55,8 @@ def analyze(
        with Shapley effects. Reliability Engineering & System Safety, 213,
        107702. https://doi.org/10.1016/j.ress.2021.107702
     """
-    X = np.asarray(X)
-    Y = np.asarray(Y)
+    X = _as_numeric_array(X, "X")
+    Y = _as_numeric_array(Y, "Y")
     _validate_ungrouped(problem)
     X, Y, num_trajectories = _validate_inputs(problem, X, Y, conf_level)
 
