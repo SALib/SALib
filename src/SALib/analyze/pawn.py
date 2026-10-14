@@ -1,23 +1,16 @@
 from typing import Dict
 
 import numpy as np
-from numpy.typing import ArrayLike
 from scipy.stats import ks_2samp
 
 from . import common_args
-from ..util import (
-    read_param_file,
-    ResultDict,
-    extract_group_names,
-    _check_groups,
-    _as_numeric_array,
-)
+from ..util import read_param_file, ResultDict, extract_group_names, _check_groups
 
 
 def analyze(
     problem: Dict,
-    X: ArrayLike,
-    Y: ArrayLike,
+    X: np.ndarray,
+    Y: np.ndarray,
     S: int = 10,
     print_to_console: bool = False,
     seed: int = None,
@@ -74,10 +67,10 @@ def analyze(
     ----------
     problem : dict
         The problem definition
-    X : array_like
-        An array or list containing the model inputs
-    Y : array_like
-        An array or list containing the model outputs
+    X : numpy.array
+        A NumPy array containing the model inputs
+    Y : numpy.array
+        A NumPy array containing the model outputs
     S : int
         Number of slides; the conditioning intervals (default 10)
     print_to_console : bool
@@ -110,8 +103,6 @@ def analyze(
            Combining variance- and distribution-based global sensitivity analysis
            https://github.com/baronig/GSA-cvd
     """
-    X = _as_numeric_array(X, "X")
-    Y = _as_numeric_array(Y, "Y")
     if seed:
         np.random.seed(seed)
 

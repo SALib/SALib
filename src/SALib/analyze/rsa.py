@@ -3,24 +3,17 @@ from types import MethodType
 import warnings
 
 import numpy as np
-from numpy.typing import ArrayLike
 import pandas as pd
 from scipy.stats import cramervonmises_2samp
 
 from . import common_args
-from ..util import (
-    read_param_file,
-    ResultDict,
-    extract_group_names,
-    _check_groups,
-    _as_numeric_array,
-)
+from ..util import read_param_file, ResultDict, extract_group_names, _check_groups
 
 
 def analyze(
     problem: Dict,
-    X: ArrayLike,
-    Y: ArrayLike,
+    X: np.ndarray,
+    Y: np.ndarray,
     bins: int = 20,
     target: str = "Y",
     print_to_console: bool = False,
@@ -77,10 +70,10 @@ def analyze(
     ----------
     problem : dict
         The problem definition
-    X : array_like
-        An array or list containing the model inputs
-    Y : array_like
-        An array or list containing the model outputs
+    X : numpy.array
+        A NumPy array containing the model inputs
+    Y : numpy.array
+        A NumPy array containing the model outputs
     bins : int
         The number of bins to use (default: 20)
     target : str
@@ -114,8 +107,6 @@ def analyze(
         Accessible at:
         http://www.andreasaltelli.eu/file/repository/Primer_Corrected_2022.pdf
     """
-    X = _as_numeric_array(X, "X")
-    Y = _as_numeric_array(Y, "Y")
     results = rsa(X, Y, bins, target)
 
     groups = _check_groups(problem)

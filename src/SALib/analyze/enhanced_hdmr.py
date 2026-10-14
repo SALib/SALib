@@ -6,22 +6,21 @@ from itertools import combinations as comb, product
 from collections import defaultdict, namedtuple
 
 import numpy as np
-from numpy.typing import ArrayLike
 from pandas import DataFrame as df
 from numpy.linalg import det, pinv, matrix_rank
 from scipy.linalg import svd, LinAlgError, solve
 from scipy import stats, special
 
 from . import common_args
-from ..util import read_param_file, ResultDict, _as_numeric_array
+from ..util import read_param_file, ResultDict
 
 __all__ = ["analyze", "cli_parse", "cli_action"]
 
 
 def analyze(
     problem: Dict,
-    X: ArrayLike,
-    Y: ArrayLike,
+    X: np.ndarray,
+    Y: np.ndarray,
     max_order: int = 2,
     poly_order: int = 3,
     bootstrap: int = 20,
@@ -134,10 +133,10 @@ def analyze(
     ----------
     problem : dict
         The problem definition
-    X : array_like
-        The array or list containing the model inputs, N rows by d columns
-    Y : array_like
-        The array or list containing the model outputs for each row of X
+    X : numpy.matrix
+        The NumPy matrix containing the model inputs, N rows by d columns
+    Y : numpy.array
+        The NumPy array containing the model outputs for each row of X
     max_order : int (1-3, default: 2)
         Maximum HDMR expansion order
     poly_order : int (1-10, default: 3)
@@ -196,8 +195,6 @@ def analyze(
        Water Resources Research, 59, e2022WR032834.
        https://doi.org/10.1029/2022WR032834
     """
-    X = _as_numeric_array(X, "X")
-    Y = _as_numeric_array(Y, "Y")
     # Random Seed
     if seed:
         np.random.seed(seed)

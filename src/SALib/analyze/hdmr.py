@@ -6,7 +6,6 @@ import time
 import warnings
 
 import numpy as np
-from numpy.typing import ArrayLike
 from numpy.linalg import solve as lin_solve
 from numpy.linalg import svd
 from numpy import identity
@@ -15,7 +14,7 @@ import pandas as pd
 from scipy import stats, special, interpolate
 
 from . import common_args
-from ..util import read_param_file, ResultDict, handle_seed, _as_numeric_array
+from ..util import read_param_file, ResultDict, handle_seed
 
 from SALib.plotting.hdmr import plot as hdmr_plot
 from SALib.util.problem import ProblemSpec
@@ -26,8 +25,8 @@ __all__ = ["analyze", "cli_parse", "cli_action"]
 
 def analyze(
     problem: Dict,
-    X: ArrayLike,
-    Y: ArrayLike,
+    X: np.ndarray,
+    Y: np.ndarray,
     maxorder: int = 2,
     maxiter: int = 100,
     m: int = 2,
@@ -97,11 +96,11 @@ def analyze(
     problem : dict
         The problem definition
 
-    X : array_like
-        The array or list containing the model inputs, N rows by d columns
+    X : numpy.matrix
+        The NumPy matrix containing the model inputs, N rows by d columns
 
-    Y : array_like
-        The array or list containing the model outputs for each row of X
+    Y : numpy.array
+        The NumPy array containing the model outputs for each row of X
 
     maxorder : int (1-3, default: 2)
         Maximum HDMR expansion order
@@ -171,8 +170,6 @@ def analyze(
        Journal of Physical Chemistry A, Vol. 114 (19), pp. 6022 - 6032, 2010,
        https://doi.org/10.1021/jp9096919
     """
-    X = _as_numeric_array(X, "X")
-    Y = _as_numeric_array(Y, "Y")
     warnings.warn(
         "This method will be retired in future, please use enhanced_hdmr instead.",
         DeprecationWarning,

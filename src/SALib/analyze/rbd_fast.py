@@ -1,20 +1,19 @@
 # coding=utf8
 
 import numpy as np
-from numpy.typing import ArrayLike
 from scipy.signal import periodogram
 from scipy.stats import norm
 
 from typing import Optional, Union
 
 from . import common_args
-from ..util import read_param_file, ResultDict, handle_seed, _as_numeric_array
+from ..util import read_param_file, ResultDict, handle_seed
 
 
 def analyze(
     problem,
-    X: ArrayLike,
-    Y: ArrayLike,
+    X,
+    Y,
     M=10,
     num_resamples=100,
     conf_level=0.95,
@@ -45,10 +44,10 @@ def analyze(
     ----------
     problem : dict
         The problem definition
-    X : array_like
-        An array or list containing the model inputs
-    Y : array_like
-        An array or list containing the model outputs
+    X : numpy.array
+        A NumPy array containing the model inputs
+    Y : numpy.array
+        A NumPy array containing the model outputs
     M : int
         The interference parameter, i.e., the number of harmonics to sum in
         the Fourier series decomposition (default 10)
@@ -84,8 +83,6 @@ def analyze(
          Journal of Building Performance Simulation.
          doi:10.1080/19401493.2015.1112430
     """
-    X = _as_numeric_array(X, "X")
-    Y = _as_numeric_array(Y, "Y")
     rng = handle_seed(seed)
 
     D = problem["num_vars"]

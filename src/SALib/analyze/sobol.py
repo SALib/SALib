@@ -4,11 +4,10 @@ from warnings import warn
 from scipy.stats import norm
 
 import numpy as np
-from numpy.typing import ArrayLike
 import pandas as pd
 
 from . import common_args
-from ..util import read_param_file, ResultDict, extract_group_names, _as_numeric_array
+from ..util import read_param_file, ResultDict, extract_group_names
 
 from multiprocess import Pool, cpu_count
 from functools import partial
@@ -22,7 +21,7 @@ CONST_RESULT_MSG = (
 
 def analyze(
     problem,
-    Y: ArrayLike,
+    Y,
     calc_second_order=True,
     num_resamples=100,
     conf_level=0.95,
@@ -64,8 +63,8 @@ def analyze(
     ----------
     problem : dict
         The problem definition
-    Y : array_like
-        An array or list containing the model outputs
+    Y : numpy.array
+        A NumPy array containing the model outputs
     calc_second_order : bool
         Calculate second-order sensitivities (default True)
     num_resamples : int
@@ -110,7 +109,6 @@ def analyze(
        Reliability Engineering & System Safety, 92(7), 957-960.
        https://doi.org/10.1016/j.ress.2006.07.001
     """
-    Y = _as_numeric_array(Y, "Y")
     if seed:
         # Set seed to ensure CIs are the same
         rng = np.random.default_rng(seed).integers

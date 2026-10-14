@@ -1,20 +1,13 @@
 from scipy.stats import norm
 
 import numpy as np
-from numpy.typing import ArrayLike
 
 from . import common_args
-from ..util import read_param_file, ResultDict, _as_numeric_array
+from ..util import read_param_file, ResultDict
 
 
 def analyze(
-    problem,
-    X: ArrayLike,
-    Y: ArrayLike,
-    num_resamples=100,
-    conf_level=0.95,
-    print_to_console=False,
-    seed=None,
+    problem, X, Y, num_resamples=100, conf_level=0.95, print_to_console=False, seed=None
 ):
     """Calculates Derivative-based Global Sensitivity Measure on model outputs.
 
@@ -40,10 +33,10 @@ def analyze(
     ----------
     problem : dict
         The problem definition
-    X : array_like
-        The array or list containing the model inputs
-    Y : array_like
-        The array or list containing the model outputs
+    X : numpy.matrix
+        The NumPy matrix containing the model inputs
+    Y : numpy.array
+        The NumPy array containing the model outputs
     num_resamples : int
         The number of resamples used to compute the confidence
         intervals (default 1000)
@@ -62,8 +55,6 @@ def analyze(
            indices." Mathematics and Computers in Simulation, 79(10):3009-3017,
            doi:10.1016/j.matcom.2009.01.023.
     """
-    X = _as_numeric_array(X, "X")
-    Y = _as_numeric_array(Y, "Y")
     if seed:
         np.random.seed(seed)
 
