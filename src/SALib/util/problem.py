@@ -5,6 +5,7 @@ from functools import partial, wraps
 
 from multiprocess import Pool, cpu_count
 import numpy as np
+from numpy.typing import ArrayLike
 
 import SALib.sample as samplers
 import SALib.analyze as analyzers
@@ -12,6 +13,7 @@ import SALib.analyze as analyzers
 from .util_funcs import (  # noqa: F401, E402
     avail_approaches,
     _define_problem_with_groups,
+    _as_numeric_array,
 )  # noqa: F401, E402
 
 from .results import ResultDict
@@ -65,6 +67,7 @@ class ProblemSpec(dict):
 
     @samples.setter
     def samples(self, vals):
+        vals = _as_numeric_array(vals, "samples")
         cols = vals.shape[1]
         if cols != self["num_vars"]:
             msg = "Mismatched sample size: Expected "
@@ -82,6 +85,7 @@ class ProblemSpec(dict):
 
     @results.setter
     def results(self, vals):
+        vals = _as_numeric_array(vals, "results")
         val_shape = vals.shape
         if len(val_shape) == 1:
             cols = 1
@@ -134,14 +138,15 @@ class ProblemSpec(dict):
 
         return self
 
-    def set_samples(self, samples: np.ndarray):
-        """Set previous samples used."""
+    def set_samples(self, samples: ArrayLike):
+        """Set previous samples used, as a NumPy array or a list."""
         self.samples = samples
 
         return self
 
-    def set_results(self, results: np.ndarray):
-        """Set previously available model results."""
+    def set_results(self, results: ArrayLike):
+        """Set previously available model results, as a NumPy array or a list."""
+        results = _as_numeric_array(results, "results")
         if self.samples is not None:
             assert self.samples.shape[0] == results.shape[0], (
                 "Provided result array does not match existing number of"
