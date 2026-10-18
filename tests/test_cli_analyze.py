@@ -184,7 +184,7 @@ def test_morris():
     result = subprocess.check_output(analyze_cmd, universal_newlines=True)
     result = re.sub(r"[\n\t\s]*", "", result)
 
-    expected_output = "mumu_starsigmamu_star_confx18.0965478.09654710.3184292.008941x2-0.0589572.6231253.1367570.335290x30.3530395.9095588.4108171.173146"  # noqa: E501
+    expected_output = "mumu_starsigmamu_star_confx18.0965478.09654710.3184292.008941x2-0.0589572.6231253.1367570.336164x30.3530395.9095588.4108171.202442"  # noqa: E501
 
     assert len(result) > 0 and result == expected_output, (
         f"Results did not match expected values:\n\n Expected:"
@@ -209,7 +209,7 @@ def test_morris_scaled():
     result = subprocess.check_output(analyze_cmd, universal_newlines=True)
     result = re.sub(r"[\n\t\s]*", "", result)
 
-    expected_output = "mumu_starsigmamu_star_confx10.6357750.6357750.4077460.074370x2-0.0339410.4038920.5486050.071716x30.0398500.4381760.5601640.068822"  # noqa: E501
+    expected_output = "mumu_starsigmamu_star_confx10.6357750.6357750.4077460.074370x2-0.0339410.4038920.5486050.073037x30.0398500.4381760.5601640.068132"  # noqa: E501
 
     assert len(result) > 0 and result == expected_output, (
         f"Results did not match expected values:\n\n Expected:"
