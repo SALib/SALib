@@ -175,3 +175,22 @@ def test_rsa_group(set_seed, test_problem):
 
     assert [str(n) for n in Si["names"]] == expected
     assert Si.to_df().columns.tolist() == expected
+
+
+def test_radial_ee_group(set_seed, test_problem):
+    from SALib.analyze import radial_ee
+    from SALib.sample.radial.radial_sobol import sample as radial_sample
+
+    sample_sets = 50
+    X = radial_sample(test_problem, sample_sets, seed=1)
+    Y = Ishigami.evaluate(X)
+    Si = radial_ee.analyze(test_problem, X, Y, sample_sets, seed=1)
+
+    expected = ["G1", "G2"]
+
+    assert [str(n) for n in Si["names"]] == expected
+    for key in ("mu", "mu_star", "mu_star_conf", "sigma"):
+        assert np.asarray(Si[key]).shape[0] == len(expected)
+    # sigma is NaN for multi-member groups (Morris convention)
+    assert np.isnan(Si["sigma"][0])
+    assert not np.isnan(Si["sigma"][1])
