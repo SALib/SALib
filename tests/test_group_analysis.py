@@ -117,3 +117,17 @@ def test_dgsm_group(set_seed, test_problem):
 
     assert Si.to_df().index.tolist() == expected
     assert np.asarray(Si["dgsm"]).shape[0] == len(expected)
+
+
+def test_pawn_group(set_seed, test_problem):
+    from SALib.analyze import pawn
+
+    X = latin.sample(test_problem, 500, seed=1)
+    Y = Ishigami.evaluate(X)
+    Si = pawn.analyze(test_problem, X, Y, seed=1)
+
+    expected = ["G1", "G2"]
+
+    assert Si.to_df().index.tolist() == expected
+    for key in ("minimum", "mean", "median", "maximum", "CV", "stdev"):
+        assert np.asarray(Si[key]).shape[0] == len(expected)

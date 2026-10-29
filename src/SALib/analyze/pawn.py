@@ -107,7 +107,11 @@ def analyze(
         np.random.seed(seed)
 
     D = problem["num_vars"]
-    var_names, _ = extract_group_names(problem)
+    groups = _check_groups(problem)
+    if groups:
+        var_names, _ = extract_group_names(problem)
+    else:
+        var_names = problem["names"]
 
     results = np.full((D, 6), np.nan)
     temp_pawn = np.full((S, D), np.nan)
