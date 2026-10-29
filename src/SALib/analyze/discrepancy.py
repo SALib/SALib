@@ -99,6 +99,7 @@ def analyze(
 
     s_discrepancy = s_discrepancy / np.sum(s_discrepancy)
 
+    var_names = problem["names"]
     if groups:
         groups = np.array(groups)
         unique_grps = [*dict.fromkeys(groups)]
@@ -109,10 +110,11 @@ def analyze(
             tmp[grp_id, :] = np.mean(s_discrepancy[groups == grp], axis=0)
 
         s_discrepancy = tmp.flatten()
+        var_names = unique_grps
 
     keys = ("s_discrepancy",)
-    Si = ResultDict((k, np.zeros(D)) for k in keys)
-    Si["names"] = problem["names"]
+    Si = ResultDict((k, np.zeros(len(s_discrepancy))) for k in keys)
+    Si["names"] = var_names
 
     Si["s_discrepancy"] = s_discrepancy
 

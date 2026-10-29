@@ -131,3 +131,47 @@ def test_pawn_group(set_seed, test_problem):
     assert Si.to_df().index.tolist() == expected
     for key in ("minimum", "mean", "median", "maximum", "CV", "stdev"):
         assert np.asarray(Si[key]).shape[0] == len(expected)
+
+
+def test_discrepancy_group(set_seed, test_problem):
+    from SALib.analyze import discrepancy
+
+    X = latin.sample(test_problem, 500, seed=1)
+    Y = Ishigami.evaluate(X)
+    Si = discrepancy.analyze(test_problem, X, Y)
+
+    expected = ["G1", "G2"]
+
+    assert Si["names"] == expected
+    assert Si.to_df().index.tolist() == expected
+    assert np.asarray(Si["s_discrepancy"]).shape[0] == len(expected)
+
+
+def test_discrepancy_group_matches_mean_of_ungrouped(set_seed, test_problem):
+    from SALib.analyze import discrepancy
+
+    ungrouped = {
+        "names": test_problem["names"],
+        "num_vars": 3,
+        "bounds": test_problem["bounds"],
+    }
+    X = latin.sample(ungrouped, 500, seed=1)
+    Y = Ishigami.evaluate(X)
+    Si_flat = discrepancy.analyze(ungrouped, X, Y)
+    Si_grp = discrepancy.analyze(test_problem, X, Y)
+
+    assert_allclose(Si_grp["s_discrepancy"][0], np.mean(Si_flat["s_discrepancy"][:2]))
+    assert_allclose(Si_grp["s_discrepancy"][1], Si_flat["s_discrepancy"][2])
+
+
+def test_rsa_group(set_seed, test_problem):
+    from SALib.analyze import rsa
+
+    X = latin.sample(test_problem, 500, seed=1)
+    Y = Ishigami.evaluate(X)
+    Si = rsa.analyze(test_problem, X, Y)
+
+    expected = ["G1", "G2"]
+
+    assert [str(n) for n in Si["names"]] == expected
+    assert Si.to_df().columns.tolist() == expected

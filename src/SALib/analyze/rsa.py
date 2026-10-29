@@ -110,17 +110,19 @@ def analyze(
     results = rsa(X, Y, bins, target)
 
     groups = _check_groups(problem)
-    var_names, n_groups = extract_group_names(problem)
     if groups:
-        groups = np.array(var_names)
+        var_names, n_groups = extract_group_names(problem)
+        group_labels = np.array(problem["groups"])
         tmp = np.full((bins, n_groups), np.nan)
 
         # Take the mean of effects from parameters that are grouped together
-        for grp_id, grp in enumerate(groups):
-            tmp[:, grp_id] = np.nanmean(results[:, groups == grp], axis=1)
+        for grp_id, grp in enumerate(var_names):
+            tmp[:, grp_id] = np.nanmean(results[:, group_labels == grp], axis=1)
 
         results = tmp
         tmp = None
+    else:
+        var_names = problem["names"]
 
     Si = ResultDict([(g, results[:, i]) for i, g in enumerate(var_names)])
     Si["names"] = var_names
