@@ -4,7 +4,13 @@ import numpy as np
 from scipy.stats import qmc
 
 from SALib.analyze import common_args
-from SALib.util import read_param_file, ResultDict, _check_groups
+from SALib.util import (
+    read_param_file,
+    ResultDict,
+    extract_group_names,
+    compute_groups_matrix,
+    _group_metric,
+)
 
 
 def analyze(
@@ -36,6 +42,9 @@ def analyze(
     -----
     Compatible with:
         all samplers
+
+    When applied to grouped factors, the analysis is conducted on each factor
+    individually, and the mean of the results for a group are reported.
 
     Based on 2D sub projections of ``[Xi,Y]``, the discrepancy of each sample
     is calculated which gives a value for all ``Xi``. This information is used
@@ -84,7 +93,7 @@ def analyze(
         >>> Si = discrepancy.analyze(problem, X, Y, print_to_console=True)
     """
     D = problem["num_vars"]
-    groups = _check_groups(problem)
+    var_names, n_groups = extract_group_names(problem)
     Y = Y.reshape(-1, 1)
 
     bounds = np.asarray(problem["bounds"]).T
@@ -99,18 +108,10 @@ def analyze(
 
     s_discrepancy = s_discrepancy / np.sum(s_discrepancy)
 
-    var_names = problem["names"]
-    if groups:
-        groups = np.array(groups)
-        unique_grps = [*dict.fromkeys(groups)]
-        tmp = np.full((len(unique_grps), 1), np.nan)
-
+    if n_groups < D:
         # Take the mean of effects from parameters that are grouped together
-        for grp_id, grp in enumerate(unique_grps):
-            tmp[grp_id, :] = np.mean(s_discrepancy[groups == grp], axis=0)
-
-        s_discrepancy = tmp.flatten()
-        var_names = unique_grps
+        groupings, _ = compute_groups_matrix(problem["groups"])
+        s_discrepancy = _group_metric(groupings, np.asarray(s_discrepancy))
 
     keys = ("s_discrepancy",)
     Si = ResultDict((k, np.zeros(len(s_discrepancy))) for k in keys)

@@ -25,14 +25,17 @@ def analyze(
 ):
     """Perform extended Fourier Amplitude Sensitivity Test on model outputs.
 
-    Returns a dictionary with keys 'S1' and 'ST', where each entry is a list of
-    size D (the number of parameters) containing the indices in the same order
-    as the parameter file.
+    Returns a dictionary with keys 'S1' and 'ST', where each entry is a list
+    containing the indices in the same order as the parameter file. If groups
+    are defined, results are reported per group.
 
     Notes
     -----
     Compatible with:
         `fast_sampler` : :func:`SALib.sample.fast_sampler.sample`
+
+    When applied to grouped factors, the analysis is conducted on each factor
+    individually, and the mean of the results for a group are reported.
 
     Examples
     --------

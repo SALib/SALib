@@ -18,14 +18,17 @@ def analyze(
     """Calculates Derivative-based Global Sensitivity Measure on model outputs.
 
     Returns a dictionary with keys 'vi', 'vi_std', 'dgsm', and 'dgsm_conf',
-    where each entry is a list of size D (the number of parameters) containing
-    the indices in the same order as the parameter file.
+    where each entry is a list containing the indices in the same order as the
+    parameter file. If groups are defined, results are reported per group.
 
 
     Notes
     -----
     Compatible with:
         `finite_diff` : :func:`SALib.sample.finite_diff.sample`
+
+    When applied to grouped factors, the analysis is conducted on each factor
+    individually, and the mean of the results for a group are reported.
 
 
     Examples

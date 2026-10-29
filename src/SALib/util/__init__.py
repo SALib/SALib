@@ -379,6 +379,11 @@ def _group_metric(groups: np.ndarray, ungrouped_metric: np.ndarray) -> np.ndarra
     effects: a group containing one parameter with a strong positive effect
     and another with a strong negative effect may appear to have a
     negligible effect overall.
+
+    Confidence intervals (``*_conf`` metrics) are averaged across group
+    members rather than recomputed from the resampling distribution. The
+    averaged value is indicative only and understates the true uncertainty
+    of the group-level statistic.
     """
     groups = np.array(groups, dtype=bool)
 

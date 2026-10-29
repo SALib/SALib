@@ -67,8 +67,8 @@ def analyze(
     - 'S1_conf'
     - 'names'
 
-    where each entry is a list of size D (the number of parameters) containing the indices
-    in the same order as the input file and 'names'.
+    where each entry is a list containing the indices in the same order as the
+    input file and 'names'. If groups are defined, results are reported per group.
 
     The different delta configurations/methods 'balanced', 'step', 'raw', their
     corresponding confidence scores (*_conf), and other keys in returned dictionary:
@@ -95,6 +95,9 @@ def analyze(
     -----
     Compatible with:
         all samplers
+
+    When applied to grouped factors, the analysis is conducted on each factor
+    individually, and the mean of the results for a group are reported.
 
     Interpretaion:
         'balanced' tells us how important variation in that input feature is on the output feature.

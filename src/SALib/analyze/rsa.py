@@ -7,7 +7,7 @@ import pandas as pd
 from scipy.stats import cramervonmises_2samp
 
 from . import common_args
-from ..util import read_param_file, ResultDict, extract_group_names, _check_groups
+from ..util import read_param_file, ResultDict, extract_group_names
 
 
 def analyze(
@@ -109,9 +109,9 @@ def analyze(
     """
     results = rsa(X, Y, bins, target)
 
-    groups = _check_groups(problem)
-    if groups:
-        var_names, n_groups = extract_group_names(problem)
+    num_vars = problem["num_vars"]
+    var_names, n_groups = extract_group_names(problem)
+    if n_groups < num_vars:
         group_labels = np.array(problem["groups"])
         tmp = np.full((bins, n_groups), np.nan)
 
@@ -121,8 +121,6 @@ def analyze(
 
         results = tmp
         tmp = None
-    else:
-        var_names = problem["names"]
 
     Si = ResultDict([(g, results[:, i]) for i, g in enumerate(var_names)])
     Si["names"] = var_names

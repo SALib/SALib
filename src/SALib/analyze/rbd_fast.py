@@ -30,14 +30,17 @@ def analyze(
     """Performs the Random Balanced Design - Fourier Amplitude Sensitivity Test
     (RBD-FAST) on model outputs.
 
-    Returns a dictionary with keys 'S1', where each entry is a list of
-    size D (the number of parameters) containing the indices in the same order
-    as the parameter file.
+    Returns a dictionary with keys 'S1', where each entry is a list containing
+    the indices in the same order as the parameter file. If groups are defined,
+    results are reported per group.
 
     Notes
     -----
     Compatible with:
         all samplers
+
+    When applied to grouped factors, the analysis is conducted on each factor
+    individually, and the mean of the results for a group are reported.
 
 
     Examples

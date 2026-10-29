@@ -2,11 +2,25 @@
 Advanced Examples
 ==================
 
-Group sampling (Sobol and Morris methods only)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Group sampling
+~~~~~~~~~~~~~~
 It is sometimes useful to perform sensitivity analysis on groups of input variables to reduce the number of model runs required, when variables belong to the same component of a model, or there is some reason to believe that they should behave similarly.
 
-Groups can be specified in two ways for the Sobol and Morris methods.
+The following samplers take group definitions into account when generating samples:
+
+* :func:`SALib.sample.sobol.sample` (Sobol' / Saltelli sampling)
+* :func:`SALib.sample.morris.sample` (Morris sampling)
+* :func:`SALib.sample.latin.sample` (Latin Hypercube sampling)
+
+Group definitions are also used by the analysis methods to report results per
+group: when a ``groups`` entry is defined, the analyses for
+``delta``, ``dgsm``, ``discrepancy``, ``fast``, ``morris``, ``pawn``,
+``radial_ee``, ``rbd_fast``, ``rsa``, and ``sobol`` conduct the analysis on
+each factor individually and report the mean of the results for each group.
+The ``ff``, ``hdmr``, ``enhanced_hdmr``, and ``shapley`` methods do not
+support groups.
+
+Groups can be specified in two ways.
 
 First, as a fourth column in the parameter file:
 

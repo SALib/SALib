@@ -194,3 +194,53 @@ def test_radial_ee_group(set_seed, test_problem):
     # sigma is NaN for multi-member groups (Morris convention)
     assert np.isnan(Si["sigma"][0])
     assert not np.isnan(Si["sigma"][1])
+
+
+def test_single_group_reported_as_one_group(set_seed):
+    """A problem defining a single group reports one aggregated row, not
+    individual factors."""
+    from SALib.analyze import discrepancy, pawn, rsa
+
+    problem = {
+        "names": ["x1", "x2", "x3"],
+        "num_vars": 3,
+        "bounds": [[-np.pi, np.pi]] * 3,
+        "groups": ["G1", "G1", "G1"],
+    }
+
+    X = latin.sample(problem, 500, seed=1)
+    Y = Ishigami.evaluate(X)
+
+    Si = pawn.analyze(problem, X, Y, seed=1)
+    assert [str(n) for n in Si["names"]] == ["G1"]
+    for key in ("minimum", "mean", "median", "maximum", "CV", "stdev"):
+        assert np.asarray(Si[key]).shape[0] == 1
+
+    Si = discrepancy.analyze(problem, X, Y)
+    assert [str(n) for n in Si["names"]] == ["G1"]
+    assert np.asarray(Si["s_discrepancy"]).shape[0] == 1
+
+    Si = rsa.analyze(problem, X, Y)
+    assert [str(n) for n in Si["names"]] == ["G1"]
+
+
+def test_single_group_dgsm_fast_rbd(set_seed):
+    """Ported analyzers also report a single group as one aggregated row."""
+    problem = {
+        "names": ["x1", "x2", "x3"],
+        "num_vars": 3,
+        "bounds": [[-np.pi, np.pi]] * 3,
+        "groups": ["G1", "G1", "G1"],
+    }
+
+    X = finite_diff.sample(problem, 100, seed=1)
+    Y = Ishigami.evaluate(X)
+    Si = dgsm.analyze(problem, X, Y)
+    assert [str(n) for n in Si["names"]] == ["G1"]
+    assert np.asarray(Si["dgsm"]).shape[0] == 1
+
+    X = latin.sample(problem, 300, seed=1)
+    Y = Ishigami.evaluate(X)
+    Si = rbd_fast.analyze(problem, X, Y)
+    assert [str(n) for n in Si["names"]] == ["G1"]
+    assert np.asarray(Si["S1"]).shape[0] == 1

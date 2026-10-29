@@ -109,6 +109,10 @@ def analyze(
     Compatible with:
         all samplers
 
+    Groups are not supported. If a ``groups`` entry is present in the problem
+    definition, the analysis is conducted on each factor individually and the
+    group definitions are ignored.
+
     Sets an `emulate` method allowing re-use of the emulator.
 
     Examples
@@ -198,6 +202,9 @@ def analyze(
     # Random Seed
     if seed:
         np.random.seed(seed)
+
+    if problem.get("groups"):
+        warnings.warn("SALib enhanced HDMR method does not currently support groups.")
 
     # Check arguments
     Y, problem, subset, max_iter = _check_args(
