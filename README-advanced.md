@@ -57,7 +57,8 @@ group: when a `groups` entry is defined, the analyses for `delta`, `dgsm`,
 `discrepancy`, `fast`, `morris`, `pawn`, `radial_ee`, `rbd_fast`, `rsa`, and
 `sobol` conduct the analysis on each factor individually and report the mean
 of the results for each group. The `ff`, `hdmr`, `enhanced_hdmr`, and
-`shapley` methods do not support groups.
+`shapley` methods do not support groups: they warn that the group definitions
+are ignored and report results for each factor individually.
 
 Groups can be specified in two ways. First, as a fourth column in the parameter file:
 ```
