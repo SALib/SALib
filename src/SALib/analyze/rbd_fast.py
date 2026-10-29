@@ -7,7 +7,14 @@ from scipy.stats import norm
 from typing import Optional, Union
 
 from . import common_args
-from ..util import read_param_file, ResultDict, handle_seed
+from ..util import (
+    read_param_file,
+    ResultDict,
+    handle_seed,
+    extract_group_names,
+    compute_groups_matrix,
+    _group_metric,
+)
 
 
 def analyze(
@@ -85,18 +92,25 @@ def analyze(
     """
     rng = handle_seed(seed)
 
-    D = problem["num_vars"]
+    num_vars = problem["num_vars"]
+    group_names, _ = extract_group_names(problem)
     N = Y.size
 
     # Calculate and Output the First Order Value
-    Si = ResultDict((k, [None] * D) for k in ["S1", "S1_conf"])
-    Si["names"] = problem["names"]
+    keys = ["S1", "S1_conf"]
+    Si = ResultDict((k, [None] * num_vars) for k in keys)
+    Si["names"] = group_names
 
-    for i in range(D):
+    for i in range(num_vars):
         S1 = compute_first_order(permute_outputs(X[:, i], Y), M)
         S1 = unskew_S1(S1, M, N)
         Si["S1"][i] = S1
         Si["S1_conf"][i] = bootstrap(X[:, i], Y, M, num_resamples, conf_level, rng)
+
+    if len(group_names) < num_vars:
+        groupings, _ = compute_groups_matrix(problem["groups"])
+        for key in keys:
+            Si[key] = _group_metric(groupings, np.array(Si[key]))
 
     if print_to_console:
         print(Si.to_df())

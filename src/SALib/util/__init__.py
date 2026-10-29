@@ -356,6 +356,38 @@ def compute_groups_matrix(groups: List):
     return output, unique_group_names
 
 
+def _group_metric(groups: np.ndarray, ungrouped_metric: np.ndarray) -> np.ndarray:
+    """Compute the mean value of a metric across group members.
+
+    Parameters
+    ----------
+    groups : np.ndarray
+        Group membership matrix (num_vars x num_groups), as returned by
+        :func:`compute_groups_matrix`
+    ungrouped_metric : np.ndarray
+        Metric calculated for each variable (i.e., without groups)
+
+    Returns
+    -------
+    metric : np.ndarray
+        Mean value of the metric for each group
+
+    Notes
+    -----
+    Note that metrics which are averaged (rather than averaged by their
+    absolute value, like Morris' ``mu_star``) can exhibit cancellation
+    effects: a group containing one parameter with a strong positive effect
+    and another with a strong negative effect may appear to have a
+    negligible effect overall.
+    """
+    groups = np.array(groups, dtype=bool)
+
+    masked = np.ma.masked_array(ungrouped_metric * groups.T, mask=(groups ^ 1).T)
+    metric = np.ma.mean(masked, axis=1)
+
+    return metric
+
+
 def _define_problem_with_groups(problem: Dict) -> Dict:
     """
     Checks if the user defined the 'groups' key in the problem dictionary.

@@ -9,6 +9,7 @@ from ..util import (
     ResultDict,
     _define_problem_with_groups,
     _compute_delta,
+    _group_metric,
     handle_seed,
 )
 
@@ -318,15 +319,7 @@ def _compute_grouped_metric(
     mean_of_mu_star: np.ndarray
          Mean value for the groups of parameter values
     """
-
-    groups = np.array(groups, dtype=bool)
-
-    mu_star_masked = np.ma.masked_array(
-        ungrouped_metric * groups.T, mask=(groups ^ 1).T
-    )
-    mean_of_mu_star = np.ma.mean(mu_star_masked, axis=1)
-
-    return mean_of_mu_star
+    return _group_metric(groups, ungrouped_metric)
 
 
 def _reorganize_output_matrix(

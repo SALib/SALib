@@ -5,7 +5,13 @@ import numpy as np
 import pandas as pd
 
 from . import common_args
-from ..util import read_param_file, ResultDict
+from ..util import (
+    read_param_file,
+    ResultDict,
+    extract_group_names,
+    compute_groups_matrix,
+    _group_metric,
+)
 
 import warnings
 import json
@@ -174,7 +180,8 @@ def analyze(
         raise ValueError(f"Method must be one of {valid_methods}")
 
     delta_warn_threshold = 0.1
-    D = problem["num_vars"]
+    num_vars = problem["num_vars"]
+    group_names, _ = extract_group_names(problem)
     if y_resamples is None:
         y_resamples = Y.size
     methods = ["delta", "sobol"] if method == "all" else [method]
@@ -206,7 +213,7 @@ def analyze(
         ]
     if "sobol" in methods:
         keys += ["S1", "S1_conf"]
-    S = ResultDict((k, np.full(D, np.nan)) for k in keys)
+    S = ResultDict((k, np.full(num_vars, np.nan)) for k in keys)
 
     nameslist = problem["names"]
     if any(
@@ -219,11 +226,11 @@ def analyze(
 
     keys += ["notes"]
 
-    S["names"] = problem["names"]
+    S["names"] = group_names
     notes = []
     bootstrap_matrix = {}
 
-    for i in range(D):
+    for i in range(num_vars):
         name = problem["names"][i]
         X_i = X[:, i]
         min_class_size = max(int(len(X_i) * 0.005), 10)
@@ -285,9 +292,31 @@ def analyze(
 
         S["notes"] = notes
 
+    if len(group_names) < num_vars:
+        groupings, _ = compute_groups_matrix(problem["groups"])
+        for key in keys:
+            if key == "notes":
+                continue
+            S[key] = _group_metric(groupings, S[key])
+        # Merge per-parameter notes into per-group notes
+        merged_notes = []
+        for g_name in group_names:
+            members = [
+                (problem["names"][i], notes[i])
+                for i in range(num_vars)
+                if problem["groups"][i] == g_name
+            ]
+            if all(not note for _, note in members):
+                merged_notes.append("")
+            else:
+                merged_notes.append(
+                    " | ".join(f"{n}: {note}" for n, note in members if note)
+                )
+        S["notes"] = merged_notes
+
     if print_to_console:
         # Merge dictionaries
-        summary_dict = {"names": problem["names"]} | S
+        summary_dict = {"names": group_names} | S
 
         df_summary = pd.DataFrame(summary_dict)
         print(df_summary.to_string(index=False))

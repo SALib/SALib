@@ -180,6 +180,9 @@ def analyze(
     if seed:
         rng = handle_seed(seed)  # noqa
 
+    if problem.get("groups"):
+        warnings.warn("SALib HDMR method does not currently support groups")
+
     # Initial part: Check input arguments and define HDMR variables
     settings = _check_settings(X, Y, maxorder, maxiter, m, K, R, alpha, lambdax)
     init_vars = _init(X, Y, settings)
