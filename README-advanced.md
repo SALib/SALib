@@ -55,8 +55,8 @@ The following samplers take group definitions into account when generating sampl
 Group definitions are also used by the analysis methods to report results per
 group: when a `groups` entry is defined, the analyses for `delta`, `dgsm`,
 `discrepancy`, `fast`, `morris`, `pawn`, `radial_ee`, `rbd_fast`, `rsa`, and
-`sobol` conduct the analysis on each factor individually and report the mean
-of the results for each group. The `ff`, `hdmr`, `enhanced_hdmr`, and
+`sobol` conduct the analysis on each factor individually and report the
+average of the group members. The `ff`, `hdmr`, `enhanced_hdmr`, and
 `shapley` methods do not support groups: they warn that the group definitions
 are ignored and report results for each factor individually.
 

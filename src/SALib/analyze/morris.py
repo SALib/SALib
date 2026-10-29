@@ -123,7 +123,13 @@ def analyze(
         - `mu_star_conf` - the bootstrapped confidence interval
         - `mu_star_conf_all` - the bootstrapped ``mu_star`` estimates when
           ``keep_resamples`` is True
-        - `names` - the names of the parameters
+        - `names` - the names of the parameters, or of the groups if groups
+          are defined
+
+    When applied to grouped factors, the analysis is conducted on each factor
+    individually, and the average of the group members is reported.
+    ``sigma`` is only reported for groups with a single member and set to
+    ``NaN`` otherwise.
 
 
     References
