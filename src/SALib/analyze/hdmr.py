@@ -792,9 +792,9 @@ def _finalize(problem, SA, Em, d, alpha, maxorder, RT, Y_em, bootstrap_idx, X, Y
     Si["Sa_conf"] = mult * np.std(SA["Sa"], axis=1)
     Si["Sb_conf"] = mult * np.std(SA["Sb"], axis=1)
     Si["S_conf"] = mult * np.std(SA["S"], axis=1)
-    Si["Sa_sum_conf"] = mult * np.std(np.sum(SA["Sa"]))
-    Si["Sb_sum_conf"] = mult * np.std(np.sum(SA["Sb"]))
-    Si["S_sum_conf"] = mult * np.std(np.sum(SA["S"]))
+    Si["Sa_sum_conf"] = mult * np.std(np.sum(SA["Sa"], axis=0))
+    Si["Sb_sum_conf"] = mult * np.std(np.sum(SA["Sb"], axis=0))
+    Si["S_sum_conf"] = mult * np.std(np.sum(SA["S"], axis=0))
 
     # F-test # of selection to print out
     Si["select"] = Em["select"].flatten()

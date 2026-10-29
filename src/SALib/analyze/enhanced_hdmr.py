@@ -1451,9 +1451,9 @@ def _finalize(hdmr, Si, alpha, return_emulator):
     Si["Sa_conf"] = mult * np.std(Si["Sa"], axis=1)
     Si["Sb_conf"] = mult * np.std(Si["Sb"], axis=1)
     Si["S_conf"] = mult * np.std(Si["S"], axis=1)
-    Si["Sa_sum_conf"] = mult * np.std(np.sum(Si["Sa"]))
-    Si["Sb_sum_conf"] = mult * np.std(np.sum(Si["Sb"]))
-    Si["S_sum_conf"] = mult * np.std(np.sum(Si["S"]))
+    Si["Sa_sum_conf"] = mult * np.std(np.sum(Si["Sa"], axis=0))
+    Si["Sb_sum_conf"] = mult * np.std(np.sum(Si["Sb"], axis=0))
+    Si["S_sum_conf"] = mult * np.std(np.sum(Si["S"], axis=0))
 
     # Assign Bootstrap Results to Si Dict
     Si["Sa"] = np.mean(Si["Sa"], axis=1)
