@@ -101,7 +101,7 @@ def analyze(
     Confidence intervals are also averaged, which may understate the true
     uncertainty of the group-level estimate.
 
-    Interpretaion:
+    Interpretation:
         'balanced' tells us how important variation in that input feature is on the output feature.
             - Answers the question: "How important is input feature X on output Y?"
 

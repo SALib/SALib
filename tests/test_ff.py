@@ -5,6 +5,7 @@ Created on 30 Jun 2015
 """
 
 import numpy as np
+import pytest
 from numpy.testing import assert_equal, assert_allclose
 from SALib.sample.ff import sample, find_smallest, extend_bounds
 from SALib.analyze.ff import analyze, interactions
@@ -114,6 +115,23 @@ def test_ff_sample_scaled():
         dtype=float,
     )
     assert_equal(actual, expected)
+
+
+def test_ff_analyze_warns_on_groups():
+    problem = {
+        "bounds": [[0.0, 2.5], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0]],
+        "num_vars": 4,
+        "names": ["x1", "x2", "x3", "x4"],
+        "groups": ["A", "A", "B", "B"],
+    }
+    X = sample(problem)
+    Y = np.array([1.5, 1, 1.5, 1, 2, 2.5, 2, 2.5], dtype=float)
+
+    with pytest.warns(UserWarning, match="does not currently support groups"):
+        Si = analyze(problem, X, Y)
+
+    # Group definitions are ignored: results are per individual factor
+    assert Si["names"] == ["x1", "x2", "x3", "x4"]
 
 
 def test_ff_analyze():
