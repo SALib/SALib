@@ -200,3 +200,15 @@ def handle_seed(
         raise ValueError(f"Unsupported seed type: {type(seed)}")
 
     return rng
+
+
+def _as_numeric_array(arr, name: str) -> np.ndarray:
+    """Convert `arr` to a NumPy array, or raise a TypeError naming `name`
+    if it is not array_like of numbers (e.g. a dict, set, string or None)."""
+    out = np.asarray(arr)
+    if out.ndim == 0 or out.dtype.kind not in "biuf":
+        raise TypeError(
+            f"{name} must be array_like of numbers (a list or NumPy array), "
+            f"got {type(arr).__name__}"
+        )
+    return out
