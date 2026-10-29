@@ -33,7 +33,9 @@ def analyze(
     - ``sigma`` is the standard deviation of the distribution
 
     When applied to grouped factors, the analysis is conducted on each factor
-    individually, and the mean of the results for a group are reported.
+    individually, and the average of the group members is reported.
+    Confidence intervals are also averaged, which may understate the true
+    uncertainty of the group-level estimate.
     Following the Morris method, ``sigma`` is only reported for groups with a
     single member and set to ``NaN`` otherwise.
 

@@ -28,7 +28,9 @@ def analyze(
         `finite_diff` : :func:`SALib.sample.finite_diff.sample`
 
     When applied to grouped factors, the analysis is conducted on each factor
-    individually, and the mean of the results for a group are reported.
+    individually, and the average of the group members is reported.
+    Confidence intervals are also averaged, which may understate the true
+    uncertainty of the group-level estimate.
 
 
     Examples
