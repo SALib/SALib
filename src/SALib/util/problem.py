@@ -68,6 +68,12 @@ class ProblemSpec(dict):
     @samples.setter
     def samples(self, vals):
         vals = _as_numeric_array(vals, "samples")
+        if vals.ndim != 2:
+            raise ValueError(
+                f"samples must be a 2D array of shape (n_samples, {self['num_vars']}), "
+                f"got shape {vals.shape}"
+            )
+
         cols = vals.shape[1]
         if cols != self["num_vars"]:
             msg = "Mismatched sample size: Expected "
