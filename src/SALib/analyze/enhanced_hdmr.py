@@ -232,7 +232,7 @@ def analyze(
     Si = _finalize(hdmr, Si, alpha, return_emulator)
     # Print results to console
     if print_to_console:
-        _print(Si)
+        _print(Si, problem["num_vars"])
 
     return Si
 
@@ -1519,9 +1519,10 @@ def emulate(self, X):
     return np.sum(Y_em, axis=1)
 
 
-def _print(Si):
+def _print(Si, d):
+    # Number of first-order terms (factors); rows beyond these are
+    # interaction terms, which have no total sensitivity index.
     nc_t = len(Si["Sa"])
-    d = np.isnan(Si["ST"]).sum()
     print("\n")
     cols = "Term    \t      Sa            Sb             S             ST         Significancy "  # noqa: E501
     print(cols)
