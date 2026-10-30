@@ -103,7 +103,7 @@ def analyze(
            Combining variance- and distribution-based global sensitivity analysis
            https://github.com/baronig/GSA-cvd
     """
-    if seed:
+    if seed is not None:
         np.random.seed(seed)
 
     D = problem["num_vars"]

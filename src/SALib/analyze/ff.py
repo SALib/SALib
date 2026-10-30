@@ -68,7 +68,7 @@ def analyze(problem, X, Y, second_order=False, print_to_console=False, seed=None
            Wiley, West Sussex, U.K.
            http://doi.org/10.1002/9780470725184
     """
-    if seed:
+    if seed is not None:
         np.random.seed(seed)
 
     problem = extend_bounds(problem)

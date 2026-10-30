@@ -74,7 +74,7 @@ def sample(problem: Dict, N: int, seed: Optional[int] = None):
            Environmental Modelling & Software 22, 1509–1518.
            https://doi.org/10.1016/j.envsoft.2006.10.004
     """
-    if seed:
+    if seed is not None:
         np.random.seed(seed)
 
     num_vars = problem["num_vars"]

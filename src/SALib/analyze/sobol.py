@@ -109,7 +109,7 @@ def analyze(
        Reliability Engineering & System Safety, 92(7), 957-960.
        https://doi.org/10.1016/j.ress.2006.07.001
     """
-    if seed:
+    if seed is not None:
         # Set seed to ensure CIs are the same
         rng = np.random.default_rng(seed).integers
     else:

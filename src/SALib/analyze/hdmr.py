@@ -14,7 +14,7 @@ import pandas as pd
 from scipy import stats, special, interpolate
 
 from . import common_args
-from ..util import read_param_file, ResultDict, handle_seed
+from ..util import read_param_file, ResultDict
 
 from SALib.plotting.hdmr import plot as hdmr_plot
 from SALib.util.problem import ProblemSpec
@@ -177,8 +177,8 @@ def analyze(
     )
 
     # Random Seed
-    if seed:
-        rng = handle_seed(seed)  # noqa
+    if seed is not None:
+        np.random.seed(seed)
 
     # Initial part: Check input arguments and define HDMR variables
     settings = _check_settings(X, Y, maxorder, maxiter, m, K, R, alpha, lambdax)
