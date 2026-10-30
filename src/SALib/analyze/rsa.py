@@ -7,7 +7,7 @@ import pandas as pd
 from scipy.stats import cramervonmises_2samp
 
 from . import common_args
-from ..util import read_param_file, ResultDict, extract_group_names, _check_groups
+from ..util import read_param_file, ResultDict, extract_group_names
 
 
 def analyze(
@@ -55,7 +55,9 @@ def analyze(
         all samplers
 
     When applied to grouped factors, the analysis is conducted on each factor
-    individually, and the mean of the results for a group are reported.
+    individually, and the average of the group members is reported.
+    Confidence intervals are also averaged, which may understate the true
+    uncertainty of the group-level estimate.
 
     Increasing the value of :code:`bins` increases the granularity of the analysis
     (across factor space), but necessitates larger sample sizes.
@@ -109,15 +111,15 @@ def analyze(
     """
     results = rsa(X, Y, bins, target)
 
-    groups = _check_groups(problem)
+    num_vars = problem["num_vars"]
     var_names, n_groups = extract_group_names(problem)
-    if groups:
-        groups = np.array(var_names)
+    if n_groups < num_vars:
+        group_labels = np.array(problem["groups"])
         tmp = np.full((bins, n_groups), np.nan)
 
         # Take the mean of effects from parameters that are grouped together
-        for grp_id, grp in enumerate(groups):
-            tmp[:, grp_id] = np.nanmean(results[:, groups == grp], axis=1)
+        for grp_id, grp in enumerate(var_names):
+            tmp[:, grp_id] = np.nanmean(results[:, group_labels == grp], axis=1)
 
         results = tmp
         tmp = None

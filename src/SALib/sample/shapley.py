@@ -1,3 +1,4 @@
+import warnings
 from numbers import Integral
 from typing import Optional, Union
 
@@ -27,7 +28,9 @@ def sample(
     -----
     Goda's estimator assumes mutually independent input variables. SALib
     problem definitions specify marginal distributions, so this sampler draws
-    every input independently. Grouped parameters are not supported.
+    every input independently. Groups are not supported: if a ``groups``
+    entry is present in the problem definition, a warning is raised and the
+    group definitions are ignored.
 
     Parameters
     ----------
@@ -53,7 +56,7 @@ def sample(
     if isinstance(N, bool) or not isinstance(N, Integral) or N <= 0:
         raise ValueError("N must be a positive integer.")
 
-    _validate_ungrouped(problem)
+    _warn_if_grouped(problem)
 
     num_vars = problem["num_vars"]
     if num_vars <= 0:
@@ -78,10 +81,13 @@ def sample(
     return samples
 
 
-def _validate_ungrouped(problem: dict) -> None:
+def _warn_if_grouped(problem: dict) -> None:
     groups = problem.get("groups")
     if groups and list(groups) != list(problem.get("names", [])):
-        raise ValueError("Goda's Shapley estimator does not support groups.")
+        warnings.warn(
+            "SALib Shapley method does not currently support groups."
+            " Group definitions will be ignored."
+        )
 
 
 # No additional CLI options

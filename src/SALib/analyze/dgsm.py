@@ -3,7 +3,13 @@ from scipy.stats import norm
 import numpy as np
 
 from . import common_args
-from ..util import read_param_file, ResultDict
+from ..util import (
+    read_param_file,
+    ResultDict,
+    extract_group_names,
+    compute_groups_matrix,
+    _group_metric,
+)
 
 
 def analyze(
@@ -12,14 +18,19 @@ def analyze(
     """Calculates Derivative-based Global Sensitivity Measure on model outputs.
 
     Returns a dictionary with keys 'vi', 'vi_std', 'dgsm', and 'dgsm_conf',
-    where each entry is a list of size D (the number of parameters) containing
-    the indices in the same order as the parameter file.
+    where each entry is a list containing the indices in the same order as the
+    parameter file. If groups are defined, results are reported per group.
 
 
     Notes
     -----
     Compatible with:
         `finite_diff` : :func:`SALib.sample.finite_diff.sample`
+
+    When applied to grouped factors, the analysis is conducted on each factor
+    individually, and the average of the group members is reported.
+    Confidence intervals are also averaged, which may understate the true
+    uncertainty of the group-level estimate.
 
 
     Examples
@@ -58,34 +69,35 @@ def analyze(
     if seed is not None:
         np.random.seed(seed)
 
-    D = problem["num_vars"]
+    num_vars = problem["num_vars"]
+    group_names, _ = extract_group_names(problem)
     Y_size = Y.size
 
-    if Y_size % (D + 1) == 0:
-        N = int(Y_size / (D + 1))
+    if Y_size % (num_vars + 1) == 0:
+        N = int(Y_size / (num_vars + 1))
     else:
         raise RuntimeError("Incorrect number of samples in model output file.")
 
     if not 0 < conf_level < 1:
         raise RuntimeError("Confidence level must be between 0-1.")
 
-    dims = (N, D)
+    dims = (N, num_vars)
     base = np.empty(N)
     X_base = np.empty(dims)
     perturbed = np.empty(dims)
     X_perturbed = np.empty(dims)
-    step = D + 1
+    step = num_vars + 1
 
     base = Y[0:Y_size:step]
     X_base = X[0:Y_size:step, :]
 
     # First order (+conf.) and Total order (+conf.)
     keys = ("vi", "vi_std", "dgsm", "dgsm_conf")
-    S = ResultDict((k, np.empty(D)) for k in keys)
-    S["names"] = problem["names"]
+    S = ResultDict((k, np.empty(num_vars)) for k in keys)
+    S["names"] = group_names
 
     bounds = problem["bounds"]
-    for j in range(D):
+    for j in range(num_vars):
         perturbed[:, j] = Y[(j + 1) : Y_size : step]
         X_perturbed[:, j] = X[(j + 1) : Y_size : step, j]
 
@@ -95,6 +107,11 @@ def analyze(
         S["dgsm"][j], S["dgsm_conf"][j] = calc_dgsm(
             base, perturbed_j, diff, bounds[j], num_resamples, conf_level
         )
+
+    if len(group_names) < num_vars:
+        groupings, _ = compute_groups_matrix(problem["groups"])
+        for key in keys:
+            S[key] = _group_metric(groupings, S[key])
 
     if print_to_console:
         print(S.to_df())

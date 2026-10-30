@@ -4,7 +4,13 @@ import numpy as np
 from scipy.stats import ks_2samp
 
 from . import common_args
-from ..util import read_param_file, ResultDict, extract_group_names, _check_groups
+from ..util import (
+    read_param_file,
+    ResultDict,
+    extract_group_names,
+    compute_groups_matrix,
+    _group_metric,
+)
 
 
 def analyze(
@@ -107,7 +113,7 @@ def analyze(
         np.random.seed(seed)
 
     D = problem["num_vars"]
-    var_names, _ = extract_group_names(problem)
+    var_names, n_groups = extract_group_names(problem)
 
     results = np.full((D, 6), np.nan)
     temp_pawn = np.full((S, D), np.nan)
@@ -143,19 +149,15 @@ def analyze(
         cv = np.nanstd(p_ind) / mean
         results[d_i, :] = [mins, mean, med, maxs, cv, stdev]
 
-    groups = _check_groups(problem)
-    if groups:
-        unique_grps, n_groups = extract_group_names(problem)
-        tmp = np.full((n_groups, results.shape[1]), np.nan)
-
+    if n_groups < D:
         # Take the mean of effects from parameters that are grouped together
-        unique_grps = np.array(unique_grps)
-        grps = np.array(groups)
-        for grp_id, grp in enumerate(unique_grps):
-            tmp[grp_id, :] = np.mean(results[grps == grp, :], axis=0)
-
-        results = tmp
-        tmp = None
+        groupings, _ = compute_groups_matrix(problem["groups"])
+        results = np.column_stack(
+            [
+                _group_metric(groupings, results[:, col])
+                for col in range(results.shape[1])
+            ]
+        )
 
     Si = ResultDict(
         [
