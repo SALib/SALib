@@ -219,13 +219,7 @@ def cli_parse(parser):
 def cli_action(args):
     """Analyze Shapley trajectories from command-line arguments."""
     problem = read_param_file(args.paramfile)
-    X = np.loadtxt(args.model_input_file, delimiter=args.delimiter, ndmin=2)
-    Y = np.loadtxt(
-        args.model_output_file,
-        delimiter=args.delimiter,
-        usecols=(args.column,),
-        ndmin=1,
-    )
+    X, Y = common_args.load_inputs(args, problem)
     analyze(
         problem,
         X,

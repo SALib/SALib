@@ -1,5 +1,7 @@
 import argparse
 
+import numpy as np
+
 
 def setup(parser):
     parser = argparse.ArgumentParser(
@@ -49,3 +51,32 @@ def run_cli(cli_parser, run_analysis, known_args=None):
     args = parser.parse_args(known_args)
 
     run_analysis(args)
+
+
+def load_inputs(args, problem, check_num_vars=True):
+    """Load the model inputs X and outputs Y named on the command line.
+
+    Applies the checks `ProblemSpec` makes on samples and results: X must
+    have one column per parameter and as many rows as Y. FF samples carry
+    dummy columns, so `ff` passes `check_num_vars=False`.
+    """
+    X = np.loadtxt(args.model_input_file, delimiter=args.delimiter, ndmin=2)
+    Y = np.loadtxt(
+        args.model_output_file,
+        delimiter=args.delimiter,
+        usecols=(args.column,),
+        ndmin=1,
+    )
+
+    if check_num_vars and X.shape[1] != problem["num_vars"]:
+        raise ValueError(
+            f"Mismatched sample size: Expected {problem['num_vars']} cols "
+            f"in {args.model_input_file}, got {X.shape[1]}"
+        )
+    if X.shape[0] != Y.shape[0]:
+        raise ValueError(
+            f"Mismatched number of rows: {args.model_input_file} has "
+            f"{X.shape[0]}, {args.model_output_file} has {Y.shape[0]}"
+        )
+
+    return X, Y
