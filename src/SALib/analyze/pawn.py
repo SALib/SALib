@@ -119,7 +119,11 @@ def analyze(
         X_q = np.nanquantile(X_di, seq)
 
         for s in range(S):
-            Y_sel = Y[(X_di >= X_q[s]) & (X_di < X_q[s + 1])]
+            if s == S - 1:
+                # Include the maximum value in the final interval.
+                Y_sel = Y[(X_di >= X_q[s]) & (X_di <= X_q[s + 1])]
+            else:
+                Y_sel = Y[(X_di >= X_q[s]) & (X_di < X_q[s + 1])]
             if len(Y_sel) == 0:
                 # no available samples
                 continue
