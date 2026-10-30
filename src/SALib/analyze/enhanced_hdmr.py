@@ -559,8 +559,9 @@ def _core_params(
             )
         ),
         idx,
-        np.array(list(comb(range(d), 2))),
-        np.array(list(comb(range(d), 3))),  # Returns empty list when d < 3
+        np.array(list(comb(range(d), 2)), dtype=int).reshape(-1, 2),
+        # Empty when d < 3; reshape keeps it a 2D array of combinations
+        np.array(list(comb(range(d), 3)), dtype=int).reshape(-1, 3),
         f0,
     )
 
@@ -1436,13 +1437,15 @@ def _finalize(hdmr, Si, alpha, return_emulator):
     # Compute the total sensitivity of each parameter/coefficient
     for r in range(hdmr.d):
         if hdmr.max_order == 1:
-            TS = hdmr.S[r, :]
+            # With first-order terms only, the total sensitivity of a factor
+            # is equal to its first-order sensitivity
+            TS = Si["S"][r, :]
         elif hdmr.max_order == 2:
             ij = hdmr.d + np.where(np.sum(hdmr.beta == r, axis=1) == 1)[0]
             TS = np.sum(Si["S"][np.append(r, ij), :], axis=0)
         elif hdmr.max_order == 3:
             ij = hdmr.d + np.where(np.sum(hdmr.beta == r, axis=1) == 1)[0]
-            ijk = hdmr.d + hdmr.nc2 + np.where(np.sum(hdmr.nc3 == r, axis=1) == 1)[0]
+            ijk = hdmr.d + hdmr.nc2 + np.where(np.sum(hdmr.gamma == r, axis=1) == 1)[0]
             TS = np.sum(Si["S"][np.append(r, np.append(ij, ijk)), :], axis=0)
         Si["ST"][r] = np.mean(TS)
         Si["ST_conf"][r] = mult * np.std(TS)
