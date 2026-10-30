@@ -132,10 +132,7 @@ def cli_parse(parser):
 
 def cli_action(args):
     problem = read_param_file(args.paramfile)
-    X = np.loadtxt(args.model_input_file, delimiter=args.delimiter)
-    Y = np.loadtxt(
-        args.model_output_file, delimiter=args.delimiter, usecols=(args.column,)
-    )
+    X, Y = common_args.load_inputs(args, problem)
     analyze(
         problem,
         X,

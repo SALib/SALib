@@ -1674,10 +1674,7 @@ def cli_parse(parser):
 
 def cli_action(args):
     problem = read_param_file(args.paramfile)
-    Y = np.loadtxt(
-        args.model_output_file, delimiter=args.delimiter, usecols=(args.column,)
-    )
-    X = np.loadtxt(args.model_input_file, delimiter=args.delimiter, ndmin=2)
+    X, Y = common_args.load_inputs(args, problem)
 
     options = {
         "max_order": args.max_order,
@@ -1691,9 +1688,6 @@ def cli_action(args):
         "print_to_console": args.print_to_console,
         "return_emulator": args.return_emulator,
     }
-
-    if len(X.shape) == 1:
-        X = X.reshape((len(X), 1))
 
     analyze(problem, X, Y, **options)
 
