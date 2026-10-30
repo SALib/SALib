@@ -320,7 +320,7 @@ def extract_group_names(p: Dict) -> Tuple:
     return names, number
 
 
-def compute_groups_matrix(groups: List):
+def compute_groups_matrix(groups: List[str]) -> Tuple[np.ndarray, List[str]]:
     """Generate matrix which notes factor membership of groups
 
     Computes a k-by-g matrix which notes factor membership of groups
