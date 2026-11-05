@@ -185,7 +185,12 @@ def cli_parse(parser):
     )
 
     parser.add_argument(
-        "-S", "--slices", type=int, required=False, help="Number of slices to take"
+        "-S",
+        "--slices",
+        type=int,
+        required=False,
+        default=10,
+        help="Number of slices to take",
     )
     return parser
 

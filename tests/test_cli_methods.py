@@ -86,14 +86,6 @@ def test_analyze_cli(method, tmp_path):
         text=True,
         timeout=120,
     )
-    known_failures = {
-        "pawn": "TypeError: 'NoneType' object cannot be interpreted as an integer",
-        "rsa": "TypeError: unsupported operand type(s) for /: 'int' and 'NoneType'",
-        "radial_ee": "AttributeError: 'Namespace' object has no attribute 'num_resamples'",
-    }
-    if method in known_failures and result.returncode != 0:
-        assert known_failures[method] in result.stderr
-        pytest.xfail("Known CLI crash reported in #712")
     assert result.returncode == 0, result.stdout + result.stderr
 
 
