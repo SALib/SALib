@@ -1069,10 +1069,7 @@ def cli_parse(parser):
 
 def cli_action(args):
     problem = read_param_file(args.paramfile)
-    Y = np.loadtxt(
-        args.model_output_file, delimiter=args.delimiter, usecols=(args.column,)
-    )
-    X = np.loadtxt(args.model_input_file, delimiter=args.delimiter, ndmin=2)
+    X, Y = common_args.load_inputs(args, problem)
     mor = args.maxorder
     mit = args.maxiter
     m = args.m_int
@@ -1090,9 +1087,6 @@ def cli_action(args):
         "lambdax": lambdax,
         "print_to_console": True,
     }
-
-    if len(X.shape) == 1:
-        X = X.reshape((len(X), 1))
 
     analyze(problem, X, Y, **options)
 
