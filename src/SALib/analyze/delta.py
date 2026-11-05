@@ -400,9 +400,13 @@ def bias_reduced_delta(
     """Plischke et al. 2013 bias reduction technique (eqn 30)"""
     d = np.empty(num_resamples)
 
-    ind = obtain_resampled_subset(
-        X, y_resamples, mode, bin_edges, paramname, min_class_size, warn_print=True
-    )
+    if mode == "raw":
+        # Keep the requested subset without adding the bootstrap sampling bias.
+        ind = np.random.choice(len(X), size=y_resamples, replace=False)
+    else:
+        ind = obtain_resampled_subset(
+            X, y_resamples, mode, bin_edges, paramname, min_class_size, warn_print=True
+        )
     d_hat = calc_delta(Y[ind], Ygrid, X[ind], m)
 
     try:
