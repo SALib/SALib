@@ -5,7 +5,13 @@ import numpy as np
 from scipy.stats import norm
 
 from . import common_args
-from ..util import read_param_file, ResultDict
+from ..util import (
+    read_param_file,
+    ResultDict,
+    extract_group_names,
+    compute_groups_matrix,
+    _group_metric,
+)
 
 
 def analyze(
@@ -19,14 +25,19 @@ def analyze(
 ):
     """Perform extended Fourier Amplitude Sensitivity Test on model outputs.
 
-    Returns a dictionary with keys 'S1' and 'ST', where each entry is a list of
-    size D (the number of parameters) containing the indices in the same order
-    as the parameter file.
+    Returns a dictionary with keys 'S1' and 'ST', where each entry is a list
+    containing the indices in the same order as the parameter file. If groups
+    are defined, results are reported per group.
 
     Notes
     -----
     Compatible with:
         `fast_sampler` : :func:`SALib.sample.fast_sampler.sample`
+
+    When applied to grouped factors, the analysis is conducted on each factor
+    individually, and the average of the group members is reported.
+    Confidence intervals are also averaged, which may understate the true
+    uncertainty of the group-level estimate.
 
     Examples
     --------
@@ -88,10 +99,11 @@ def analyze(
     if seed is not None:
         np.random.seed(seed)
 
-    D = problem["num_vars"]
+    num_vars = problem["num_vars"]
+    group_names, _ = extract_group_names(problem)
 
-    if Y.size % (D) == 0:
-        N = int(Y.size / D)
+    if Y.size % (num_vars) == 0:
+        N = int(Y.size / num_vars)
     else:
         msg = """
         Error: Number of samples in model output file must be a multiple of D,
@@ -103,9 +115,10 @@ def analyze(
     omega_0 = math.floor((N - 1) / (2 * M))
 
     # Calculate and Output the First and Total Order Values
-    Si = ResultDict((k, [None] * D) for k in ["S1", "ST", "S1_conf", "ST_conf"])
-    Si["names"] = problem["names"]
-    for i in range(D):
+    keys = ["S1", "ST", "S1_conf", "ST_conf"]
+    Si = ResultDict((k, [None] * num_vars) for k in keys)
+    Si["names"] = group_names
+    for i in range(num_vars):
         z = np.arange(i * N, (i + 1) * N)
 
         Y_l = Y[z]
@@ -117,6 +130,11 @@ def analyze(
         S1_d_conf, ST_d_conf = bootstrap(Y_l, M, num_resamples, conf_level)
         Si["S1_conf"][i] = S1_d_conf
         Si["ST_conf"][i] = ST_d_conf
+
+    if len(group_names) < num_vars:
+        groupings, _ = compute_groups_matrix(problem["groups"])
+        for key in keys:
+            Si[key] = _group_metric(groupings, np.array(Si[key]))
 
     if print_to_console:
         print(Si.to_df())

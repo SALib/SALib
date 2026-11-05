@@ -320,7 +320,7 @@ def extract_group_names(p: Dict) -> Tuple:
     return names, number
 
 
-def compute_groups_matrix(groups: List):
+def compute_groups_matrix(groups: List[str]) -> Tuple[np.ndarray, List[str]]:
     """Generate matrix which notes factor membership of groups
 
     Computes a k-by-g matrix which notes factor membership of groups
@@ -342,7 +342,7 @@ def compute_groups_matrix(groups: List):
         groups and a list of unique group names
     """
     num_vars = len(groups)
-    unique_group_names = pd.unique(np.array(groups))
+    unique_group_names = list(pd.unique(np.array(groups)))
     number_of_groups = len(unique_group_names)
 
     indices = dict([(x, i) for (i, x) in enumerate(unique_group_names)])
@@ -354,6 +354,43 @@ def compute_groups_matrix(groups: List):
         output[parameter_row, group_index] = 1
 
     return output, unique_group_names
+
+
+def _group_metric(groups: np.ndarray, ungrouped_metric: np.ndarray) -> np.ndarray:
+    """Compute the mean value of a metric across group members.
+
+    Parameters
+    ----------
+    groups : np.ndarray
+        Group membership matrix (num_vars x num_groups), as returned by
+        :func:`compute_groups_matrix`
+    ungrouped_metric : np.ndarray
+        Metric calculated for each variable (i.e., without groups)
+
+    Returns
+    -------
+    metric : np.ndarray
+        Mean value of the metric for each group
+
+    Notes
+    -----
+    Note that metrics which are averaged (rather than averaged by their
+    absolute value, like Morris' ``mu_star``) can exhibit cancellation
+    effects: a group containing one parameter with a strong positive effect
+    and another with a strong negative effect may appear to have a
+    negligible effect overall.
+
+    Confidence intervals (``*_conf`` metrics) are averaged across group
+    members rather than recomputed from the resampling distribution. The
+    averaged value is indicative only and understates the true uncertainty
+    of the group-level statistic.
+    """
+    groups = np.array(groups, dtype=bool)
+
+    masked = np.ma.masked_array(ungrouped_metric * groups.T, mask=(groups ^ 1).T)
+    metric = np.ma.mean(masked, axis=1)
+
+    return metric
 
 
 def _define_problem_with_groups(problem: Dict) -> Dict:

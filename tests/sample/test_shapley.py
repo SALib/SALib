@@ -40,8 +40,11 @@ def test_sample_rejects_invalid_sample_count(problem, N):
         shapley.sample(problem, N, seed=1)
 
 
-def test_sample_rejects_groups(problem):
+def test_sample_warns_and_ignores_groups(problem):
     problem["groups"] = ["A", "A", "B"]
 
-    with pytest.raises(ValueError, match="does not support groups"):
-        shapley.sample(problem, 4, seed=1)
+    with pytest.warns(UserWarning, match="does not currently support groups"):
+        samples = shapley.sample(problem, 4, seed=1)
+
+    # Group definitions are ignored: a full per-factor sample is returned
+    assert samples.shape == (4 * (problem["num_vars"] + 1), problem["num_vars"])
