@@ -249,6 +249,7 @@ def cli_parse(parser):
         "-b",
         "--bins",
         type=int,
+        default=20,
         required=False,
         help="Number of bins to partition target space into",
     )
@@ -257,6 +258,7 @@ def cli_parse(parser):
         "-t",
         "--target",
         type=str,
+        default="Y",
         required=False,
         help="Target input space (X) or output space (Y)",
     )

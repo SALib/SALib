@@ -14,6 +14,11 @@ https://keepachangelog.com/en/1.0.0/
   `keep_resamples=False`. The confidence-interval estimator is unchanged;
   `keep_resamples` only controls whether the bootstrap estimates are retained.
 
+### Fixed
+
+- Method CLIs: PAWN and RSA use their analysis defaults when optional arguments
+  are omitted, and radial elementary effects reads the resample option (#712).
+
 ## [1.4.5]
 
 - Adjusted Saltelli sampling to follow recommendation of Owen (2020)
