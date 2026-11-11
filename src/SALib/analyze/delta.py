@@ -79,7 +79,8 @@ def analyze(
             Generates all entries in the input into 1 (X>0) or 0 (X<=0) and bootstrap subset is approximately 50%
 
         - 'raw'
-            Bootstraps the input column as is, with random bootstrap sampling with replacement
+            Estimates delta on a random subset drawn without replacement (all rows by default);
+            only the bootstrap replicates for the confidence interval sample with replacement
 
         - 'S1'
             Sobol' first indices, on raw dataset with no bootstrap manipulations (random, with replacement)
