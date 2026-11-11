@@ -1674,7 +1674,7 @@ def cli_parse(parser):
 
 def cli_action(args):
     problem = read_param_file(args.paramfile)
-    X, Y = common_args.load_inputs(args, problem)
+    X, Y = common_args.load_inputs(problem, args)
 
     options = {
         "max_order": args.max_order,

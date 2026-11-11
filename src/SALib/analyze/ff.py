@@ -181,7 +181,7 @@ def cli_parse(parser):
 
 def cli_action(args):
     problem = read_param_file(args.paramfile)
-    X, Y = common_args.load_inputs(args, problem, check_num_vars=False)
+    X, Y = common_args.load_inputs(problem, args, check_num_vars=False)
     analyze(problem, X, Y, (args.max_order == 2), print_to_console=True, seed=args.seed)
 
 

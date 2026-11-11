@@ -53,7 +53,7 @@ def run_cli(cli_parser, run_analysis, known_args=None):
     run_analysis(args)
 
 
-def load_inputs(args, problem, check_num_vars=True):
+def load_inputs(problem, args, check_num_vars=True):
     """Load the model inputs X and outputs Y named on the command line.
 
     Applies the checks `ProblemSpec` makes on samples and results: X must
