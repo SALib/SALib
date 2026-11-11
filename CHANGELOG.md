@@ -14,6 +14,11 @@ https://keepachangelog.com/en/1.0.0/
   `keep_resamples=False`. The confidence-interval estimator is unchanged;
   `keep_resamples` only controls whether the bootstrap estimates are retained.
 
+### Fixed
+
+- Delta analysis: the bias reduction for `delta_raw` now lowers the estimate as
+  intended (#711). Exact delta results for a fixed seed change.
+
 ## [1.4.5]
 
 - Adjusted Saltelli sampling to follow recommendation of Owen (2020)

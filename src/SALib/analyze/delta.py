@@ -79,7 +79,8 @@ def analyze(
             Generates all entries in the input into 1 (X>0) or 0 (X<=0) and bootstrap subset is approximately 50%
 
         - 'raw'
-            Bootstraps the input column as is, with random bootstrap sampling with replacement
+            Estimates delta on a random subset drawn without replacement (all rows by default);
+            only the bootstrap replicates for the confidence interval sample with replacement
 
         - 'S1'
             Sobol' first indices, on raw dataset with no bootstrap manipulations (random, with replacement)
@@ -400,9 +401,13 @@ def bias_reduced_delta(
     """Plischke et al. 2013 bias reduction technique (eqn 30)"""
     d = np.empty(num_resamples)
 
-    ind = obtain_resampled_subset(
-        X, y_resamples, mode, bin_edges, paramname, min_class_size, warn_print=True
-    )
+    if mode == "raw":
+        # Keep the requested subset without adding the bootstrap sampling bias.
+        ind = np.random.choice(len(X), size=y_resamples, replace=False)
+    else:
+        ind = obtain_resampled_subset(
+            X, y_resamples, mode, bin_edges, paramname, min_class_size, warn_print=True
+        )
     d_hat = calc_delta(Y[ind], Ygrid, X[ind], m)
 
     try:
