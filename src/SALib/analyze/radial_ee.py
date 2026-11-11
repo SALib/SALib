@@ -221,7 +221,7 @@ def cli_action(args):
         X,
         Y,
         num_samples,
-        num_resamples=args.num_resamples,
+        num_resamples=args.resamples,
         conf_level=args.conf_level,
         print_to_console=True,
         seed=args.seed,
