@@ -1,5 +1,6 @@
 from __future__ import division
 
+import numpy as np
 import pytest
 from pytest import raises
 
@@ -81,3 +82,32 @@ def test_dim_mismatch():
     Y = linear_model_1.evaluate(X)
     with raises(RuntimeError):
         hdmr.analyze(problem, X, Y[:-2])
+
+
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
+def test_hdmr_warns_on_groups():
+    problem, X = setup_samples(N=10000)
+    Y = Ishigami.evaluate(X)
+    problem["groups"] = ["A", "A", "B"]
+
+    with pytest.warns(UserWarning, match="does not currently support groups"):
+        hdmr.analyze(problem, X, Y, maxorder=1, maxiter=2, K=1)
+
+
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
+def test_enhanced_hdmr_warns_on_groups():
+    from SALib.analyze import enhanced_hdmr
+
+    problem = {
+        "num_vars": 3,
+        "names": ["x1", "x2", "x3"],
+        "bounds": [[-np.pi, np.pi]] * 3,
+        "groups": ["A", "A", "B"],
+    }
+    X = latin.sample(problem, 400, seed=1)
+    Y = Ishigami.evaluate(X)
+
+    with pytest.warns(UserWarning, match="does not currently support groups"):
+        enhanced_hdmr.analyze(
+            problem, X, Y, bootstrap=2, subset=300, max_iter=5, seed=1
+        )

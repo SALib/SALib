@@ -4,6 +4,8 @@ Created on 30 Jun 2015
 @author: will2
 """
 
+import warnings
+
 import numpy as np
 from . import common_args
 
@@ -70,6 +72,11 @@ def analyze(problem, X, Y, second_order=False, print_to_console=False, seed=None
     """
     if seed is not None:
         np.random.seed(seed)
+
+    if problem.get("groups"):
+        warnings.warn(
+            "SALib Fractional Factorial analysis does not currently support groups."
+        )
 
     problem = extend_bounds(problem)
     num_vars = problem["num_vars"]

@@ -177,13 +177,16 @@ def test_analyze_rejects_malformed_trajectory(two_factor_problem):
         shapley.analyze(two_factor_problem, X, Y)
 
 
-def test_analyze_rejects_groups(two_factor_problem):
+def test_analyze_warns_and_ignores_groups(two_factor_problem):
     two_factor_problem["groups"] = ["A", "B"]
-    X = np.zeros((6, 2))
-    Y = np.zeros(6)
+    X = shapley_sampler.sample(two_factor_problem, 10, seed=1)
+    Y = X.sum(axis=1)
 
-    with pytest.raises(ValueError, match="does not support groups"):
-        shapley.analyze(two_factor_problem, X, Y)
+    with pytest.warns(UserWarning, match="does not currently support groups"):
+        Si = shapley.analyze(two_factor_problem, X, Y)
+
+    # Group definitions are ignored: results are per individual factor
+    assert list(Si["names"]) == ["x1", "x2"]
 
 
 @pytest.mark.parametrize(

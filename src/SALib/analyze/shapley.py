@@ -1,3 +1,4 @@
+import warnings
 from types import MethodType
 
 import numpy as np
@@ -27,7 +28,9 @@ def analyze(
     Compatible with:
         Compatible with :func:`SALib.sample.shapley.sample`.
         The estimator assumes mutually independent inputs and does not support
-        grouped parameters.
+        groups. If a ``groups`` entry is present in the problem definition, a
+        warning is raised, the group definitions are ignored, and results are
+        reported for each factor individually.
 
     Parameters
     ----------
@@ -54,7 +57,7 @@ def analyze(
        with Shapley effects. Reliability Engineering & System Safety, 213,
        107702. https://doi.org/10.1016/j.ress.2021.107702
     """
-    _validate_ungrouped(problem)
+    _warn_if_grouped(problem)
     X, Y, num_trajectories = _validate_inputs(problem, X, Y, conf_level)
 
     num_vars = problem["num_vars"]
@@ -192,10 +195,13 @@ def _validate_inputs(problem, X, Y, conf_level):
     return X, Y, num_trajectories
 
 
-def _validate_ungrouped(problem: dict) -> None:
+def _warn_if_grouped(problem: dict) -> None:
     groups = problem.get("groups")
     if groups and list(groups) != list(problem.get("names", [])):
-        raise ValueError("Goda's Shapley estimator does not support groups.")
+        warnings.warn(
+            "SALib Shapley method does not currently support groups."
+            " Group definitions will be ignored."
+        )
 
 
 def cli_parse(parser):
