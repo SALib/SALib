@@ -9,6 +9,7 @@ from ..util import (
     ResultDict,
     _define_problem_with_groups,
     _compute_delta,
+    _group_metric,
     handle_seed,
 )
 
@@ -122,7 +123,13 @@ def analyze(
         - `mu_star_conf` - the bootstrapped confidence interval
         - `mu_star_conf_all` - the bootstrapped ``mu_star`` estimates when
           ``keep_resamples`` is True
-        - `names` - the names of the parameters
+        - `names` - the names of the parameters, or of the groups if groups
+          are defined
+
+    When applied to grouped factors, the analysis is conducted on each factor
+    individually, and the average of the group members is reported.
+    ``sigma`` is only reported for groups with a single member and set to
+    ``NaN`` otherwise.
 
 
     References
@@ -318,15 +325,7 @@ def _compute_grouped_metric(
     mean_of_mu_star: np.ndarray
          Mean value for the groups of parameter values
     """
-
-    groups = np.array(groups, dtype=bool)
-
-    mu_star_masked = np.ma.masked_array(
-        ungrouped_metric * groups.T, mask=(groups ^ 1).T
-    )
-    mean_of_mu_star = np.ma.mean(mu_star_masked, axis=1)
-
-    return mean_of_mu_star
+    return _group_metric(groups, ungrouped_metric)
 
 
 def _reorganize_output_matrix(
