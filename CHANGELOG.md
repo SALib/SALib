@@ -18,6 +18,8 @@ https://keepachangelog.com/en/1.0.0/
 
 - Method CLIs: PAWN and RSA use their analysis defaults when optional arguments
   are omitted, and radial elementary effects reads the resample option (#712).
+- Delta analysis: the bias reduction for `delta_raw` now lowers the estimate as
+  intended (#711). Exact delta results for a fixed seed change.
 
 ## [1.4.5]
 

@@ -310,3 +310,50 @@ def test_dataset_small_size():
             num_resamples=3,
             y_resamples=max(1, int(0.01 * n)),
         )
+
+
+def _independent_xy(seed, n=2000):
+    rng = handle_seed(seed)
+    problem = {"num_vars": 1, "names": ["x"], "bounds": [[0, 1]]}
+    return problem, rng.random((n, 1)), rng.normal(size=n)
+
+
+@pytest.mark.parametrize("y_resamples", [500, 2000])
+def test_raw_d_hat_samples_without_replacement(y_resamples):
+    """The raw estimate uses a subset without duplicate rows."""
+    problem, X, Y = _independent_xy(0)
+    np.random.seed(0)
+    *_, ind = delta.bias_reduced_delta(
+        Y,
+        np.linspace(Y.min(), Y.max(), 100),
+        X[:, 0],
+        np.linspace(0, Y.size, 21),
+        2,
+        0.95,
+        y_resamples,
+        "raw",
+        None,
+        "x",
+        10,
+    )
+    assert len(ind) == y_resamples
+    assert len(np.unique(ind)) == y_resamples
+    assert np.all((0 <= ind) & (ind < Y.size))
+
+
+def test_raw_bias_reduction_lowers_estimate():
+    """With X and Y independent the true delta is 0, so the bias-reduced
+    estimate must fall below the plain estimate on the full data."""
+    raw, plain = [], []
+    for seed in range(3):
+        problem, X, Y = _independent_xy(seed)
+        S = delta.analyze(problem, X, Y, num_resamples=20, seed=seed, method="delta")
+        raw.append(S["delta_raw"][0])
+        n = Y.size
+        exp = 2.0 / (7.0 + np.tanh((1500.0 - n) / 500.0))
+        M = int(np.round(min(int(np.ceil(n**exp)), 48)))
+        m = np.linspace(0, n, M + 1)
+        plain.append(
+            delta.calc_delta(Y, np.linspace(Y.min(), Y.max(), 100), X[:, 0], m)
+        )
+    assert np.mean(raw) < np.mean(plain)
