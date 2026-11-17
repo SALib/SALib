@@ -28,9 +28,12 @@ def sample(
     -----
     Goda's estimator assumes mutually independent input variables. SALib
     problem definitions specify marginal distributions, so this sampler draws
-    every input independently. Groups are not supported: if a ``groups``
-    entry is present in the problem definition, a warning is raised and the
-    group definitions are ignored.
+    every input independently. Sampling is always performed per factor: a
+    ``groups`` entry in the problem definition does not change the sample
+    design (there is no group co-sampling), so interactions between members
+    of the same group are not resolved. A warning is raised when groups are
+    defined so that this limitation is not silent; the analyzer aggregates
+    the per-factor trajectories into group effects.
 
     Parameters
     ----------
@@ -85,8 +88,11 @@ def _warn_if_grouped(problem: dict) -> None:
     groups = problem.get("groups")
     if groups and list(groups) != list(problem.get("names", [])):
         warnings.warn(
-            "SALib Shapley method does not currently support groups."
-            " Group definitions will be ignored."
+            "Shapley sampling is performed per factor, so group definitions"
+            " do not change the sample design: there is no group"
+            " co-sampling, and interactions between members of the same"
+            " group are not resolved. The analyzer aggregates the per-factor"
+            " trajectories into group effects."
         )
 
 

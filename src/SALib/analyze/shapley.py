@@ -1,11 +1,15 @@
-import warnings
 from types import MethodType
 
 import numpy as np
 from scipy.stats import norm
 
 from . import common_args
-from ..util import ResultDict, read_param_file
+from ..util import (
+    ResultDict,
+    compute_groups_matrix,
+    extract_group_names,
+    read_param_file,
+)
 from ..plotting.shapley import plot as shapley_plot
 
 
@@ -21,16 +25,29 @@ def analyze(
     Returns Shapley effects in output-variance units (``shapley``, summing to
     the overall output variance) alongside normalized shares that sum to one
     (``shapley_normalized``), each with a normal-approximation confidence
-    interval half-width (``shapley_conf``, ``shapley_normalized_conf``).
+    interval half-width (``shapley_conf``, ``shapley_normalized_conf``). The
+    mean absolute per-trajectory contributions (``shapley_abs``, with
+    ``shapley_abs_conf``) are reported as well.
 
     Notes
     -----
     Compatible with:
         Compatible with :func:`SALib.sample.shapley.sample`.
-        The estimator assumes mutually independent inputs and does not support
-        groups. If a ``groups`` entry is present in the problem definition, a
-        warning is raised, the group definitions are ignored, and results are
-        reported for each factor individually.
+        The estimator assumes mutually independent inputs. If a ``groups``
+        entry is present in the problem definition, results are reported per
+        group rather than per factor: a group's Shapley effect is the sum of
+        its members' effects (the bundle property), computed by summing the
+        members' per-trajectory contributions before averaging, so the
+        total-variance decomposition is preserved and the group confidence
+        intervals account for the covariance between members' contributions
+        within a trajectory. Grouped sampling does not resolve interactions
+        between members of the same group.
+
+        Following the ``mu`` / ``mu_star`` convention of the Morris method,
+        the signed effects are paired with ``shapley_abs``, the mean of the
+        absolute per-trajectory contributions: a signed effect near zero can
+        hide large contributions that cancel across trajectories, which the
+        absolute measure makes visible.
 
     Parameters
     ----------
@@ -49,7 +66,8 @@ def analyze(
     -------
     ResultDict
         Raw and normalized Shapley effect estimates, their confidence
-        interval half-widths, and factor names.
+        interval half-widths, the mean absolute contributions, and factor
+        names (or group names if groups are defined).
 
     References
     ----------
@@ -57,7 +75,6 @@ def analyze(
        with Shapley effects. Reliability Engineering & System Safety, 213,
        107702. https://doi.org/10.1016/j.ress.2021.107702
     """
-    _warn_if_grouped(problem)
     X, Y, num_trajectories = _validate_inputs(problem, X, Y, conf_level)
 
     num_vars = problem["num_vars"]
@@ -102,10 +119,27 @@ def analyze(
     contributions = np.empty_like(step_contributions)
     np.put_along_axis(contributions, factors, step_contributions, axis=1)
 
+    # Aggregate at the contribution level when groups are defined: summing
+    # the members' contributions within each trajectory gives group
+    # contributions whose mean is the sum of the members' effects (the
+    # bundle property), and whose variance -- hence the confidence
+    # intervals below -- accounts for the covariance between members.
+    names = problem["names"]
+    group_names, num_groups = extract_group_names(problem)
+    if num_groups < num_vars:
+        groupings, _ = compute_groups_matrix(problem["groups"])
+        contributions = contributions @ groupings
+        names = group_names
+
     effects = contributions.mean(axis=0)
     estimator_variance = contributions.var(axis=0, ddof=1) / num_trajectories
     z_score = norm.ppf(0.5 + conf_level / 2.0)
     confidence = z_score * np.sqrt(estimator_variance)
+
+    absolute_contributions = np.abs(contributions)
+    absolute_effects = absolute_contributions.mean(axis=0)
+    absolute_variance = absolute_contributions.var(axis=0, ddof=1) / num_trajectories
+    absolute_confidence = z_score * np.sqrt(absolute_variance)
 
     normalized, normalized_confidence = _normalize_with_confidence(
         contributions, effects, z_score
@@ -116,7 +150,9 @@ def analyze(
         shapley_normalized_conf=normalized_confidence,
         shapley=effects,
         shapley_conf=confidence,
-        names=problem["names"],
+        shapley_abs=absolute_effects,
+        shapley_abs_conf=absolute_confidence,
+        names=names,
     )
     result.plot = MethodType(shapley_plot, result)
 
@@ -193,15 +229,6 @@ def _validate_inputs(problem, X, Y, conf_level):
         raise ValueError("X and Y must contain only finite values.")
 
     return X, Y, num_trajectories
-
-
-def _warn_if_grouped(problem: dict) -> None:
-    groups = problem.get("groups")
-    if groups and list(groups) != list(problem.get("names", [])):
-        warnings.warn(
-            "SALib Shapley method does not currently support groups."
-            " Group definitions will be ignored."
-        )
 
 
 def cli_parse(parser):

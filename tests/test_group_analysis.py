@@ -1,10 +1,10 @@
 """Tests to ensure group support in analysis methods (aggregation of indices).
 
 Complements test_groups.py (ProblemSpec-based DataFrame tests) with direct
-method-level checks that per-variable indices are averaged per group.
+method-level checks that per-variable indices are aggregated per group.
 """
 
-from pytest import fixture
+from pytest import fixture, warns
 
 import numpy as np
 from numpy.testing import assert_allclose
@@ -117,6 +117,33 @@ def test_dgsm_group(set_seed, test_problem):
 
     assert Si.to_df().index.tolist() == expected
     assert np.asarray(Si["dgsm"]).shape[0] == len(expected)
+
+
+def test_shapley_group(set_seed, test_problem):
+    from SALib.analyze import shapley
+    from SALib.sample import shapley as shapley_sampler
+
+    with warns(UserWarning, match="group co-sampling"):
+        X = shapley_sampler.sample(test_problem, 200, seed=1)
+    Y = Ishigami.evaluate(X)
+    Si = shapley.analyze(test_problem, X, Y)
+
+    expected = ["G1", "G2"]
+
+    assert Si.to_df().index.tolist() == expected
+    assert np.asarray(Si["shapley"]).shape[0] == len(expected)
+
+    # Unlike the other analyzers in this module, Shapley groups are summed,
+    # not averaged: the group value equals the sum of the members' values
+    # from an ungrouped analysis of the same sample.
+    ungrouped_problem = {
+        key: value for key, value in test_problem.items() if key != "groups"
+    }
+    ungrouped = shapley.analyze(ungrouped_problem, X, Y)
+    assert_allclose(
+        Si["shapley"],
+        [ungrouped["shapley"][0] + ungrouped["shapley"][1], ungrouped["shapley"][2]],
+    )
 
 
 def test_pawn_group(set_seed, test_problem):

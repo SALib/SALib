@@ -40,11 +40,12 @@ def test_sample_rejects_invalid_sample_count(problem, N):
         shapley.sample(problem, N, seed=1)
 
 
-def test_sample_warns_and_ignores_groups(problem):
+def test_sample_warns_groups_do_not_change_design(problem):
     problem["groups"] = ["A", "A", "B"]
 
-    with pytest.warns(UserWarning, match="does not currently support groups"):
+    with pytest.warns(UserWarning, match="group co-sampling"):
         samples = shapley.sample(problem, 4, seed=1)
 
-    # Group definitions are ignored: a full per-factor sample is returned
+    # Sampling is per factor regardless of groups: a full per-factor
+    # sample is returned, and the analyzer applies the group definitions.
     assert samples.shape == (4 * (problem["num_vars"] + 1), problem["num_vars"])

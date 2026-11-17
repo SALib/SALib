@@ -5,6 +5,15 @@ https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Added
+
+- Shapley analysis now supports groups: when a `groups` entry is defined,
+  group effects are reported as the sum of the members' effects (computed by
+  summing the per-trajectory contributions, so confidence intervals account
+  for covariance between members), and a `shapley_abs` measure (mean absolute
+  contribution, with `shapley_abs_conf`) is reported alongside the signed
+  effects.
+
 ### Changed
 
 - Morris analysis now bootstraps trajectories jointly across parameters instead
