@@ -34,6 +34,8 @@ https://keepachangelog.com/en/1.0.0/
 - Triangular distribution: the deprecated two-value bounds format
   (`[end, peak]` with an implied start of 0) is removed; give
   `[start, end, peak]` instead (#720).
+- ProblemSpec.analyze raises for a problem whose parameters all share one group,
+  for every method, as read_param_file already did (#717).
 
 ## [1.4.5]
 
