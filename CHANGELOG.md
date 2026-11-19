@@ -21,7 +21,7 @@ https://keepachangelog.com/en/1.0.0/
 - Delta analysis: the bias reduction for `delta_raw` now lowers the estimate as
   intended (#711). Exact delta results for a fixed seed change.
 - ProblemSpec.analyze raises for a problem whose parameters all share one group,
-  for every method, as read_param_file already did.
+  for every method, as read_param_file already did (#717).
 
 ## [1.4.5]
 
