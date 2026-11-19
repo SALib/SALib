@@ -62,6 +62,10 @@ def sample(
         Ideally a power of 2 and <= `skip_values`.
     calc_second_order : bool
         Calculate second-order sensitivities (default True)
+        A warning is issued when `calc_second_order` is True and the
+        problem has fewer than 3 parameters (or groups), as second-order
+        indices carry no information beyond the first- and total-order
+        indices in that case.
     skip_values : int or None
         Number of points in Sobol' sequence to skip, ideally a value of base 2
         (default: a power of 2 >= N, or 16; whichever is greater)
@@ -155,6 +159,15 @@ def sample(
     else:
         G, group_names = compute_groups_matrix(groups)
         Dg = len(set(group_names))
+
+    if calc_second_order and Dg < 3:
+        warnings.warn(
+            "Second-order indices are not informative with fewer than "
+            f"3 parameters (or groups); got {Dg}. "
+            "Consider setting `calc_second_order=False`.",
+            UserWarning,
+            stacklevel=2,
+        )
 
     # Create base sequence - could be any type of sampling
     base_sequence = sobol_sequence.sample(N + skip_values, 2 * D)

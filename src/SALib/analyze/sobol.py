@@ -67,6 +67,10 @@ def analyze(
         A NumPy array containing the model outputs
     calc_second_order : bool
         Calculate second-order sensitivities (default True)
+        A warning is issued when `calc_second_order` is True and the
+        problem has fewer than 3 parameters (or groups), as second-order
+        indices carry no information beyond the first- and total-order
+        indices in that case.
     num_resamples : int
         The number of resamples (default 100)
     conf_level : float
@@ -128,6 +132,16 @@ def analyze(
             """
         Incorrect number of samples in model output file.
         Confirm that calc_second_order matches option used during sampling."""
+        )
+
+    # D is group-adjusted by extract_group_names above, so grouped problems
+    # are keyed on the number of groups, matching the sampling side (Dg).
+    if calc_second_order and D < 3:
+        warn(
+            "Second-order indices are not informative with fewer than "
+            f"3 parameters (or groups); got {D}. "
+            "Consider setting `calc_second_order=False`.",
+            stacklevel=2,
         )
 
     if not 0 < conf_level < 1:
