@@ -21,7 +21,7 @@ https://keepachangelog.com/en/1.0.0/
 - Delta analysis: the bias reduction for `delta_raw` now lowers the estimate as
   intended (#711). Exact delta results for a fixed seed change.
 - Triangular distribution: bounds with a negative upper value and a peak of
-  exactly 1 are now accepted, and a zero-width range is rejected.
+  exactly 1 are now accepted, and a zero-width range is rejected (#720).
 
 ## [1.4.5]
 
