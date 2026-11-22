@@ -1,4 +1,6 @@
-from pytest import raises, mark
+import warnings
+
+from pytest import raises, mark, warns
 from numpy.testing import assert_equal, assert_allclose
 
 import numpy as np
@@ -284,3 +286,134 @@ def test_partial_constant_output_second_order():
     assert not np.any(np.isinf(s2)), f"S2 contains inf: {s2}"
     assert s2[0] == 0.0, f"S2 constant col should be 0, got {s2[0]}"
     assert np.all(np.isfinite(s2[1:])), f"S2 non-constant cols not finite: {s2}"
+
+
+def _assert_no_second_order_warning(caught):
+    assert not [
+        w
+        for w in caught
+        if "Second-order indices are not informative" in str(w.message)
+    ], "unexpected second-order warning: %s" % [str(w.message) for w in caught]
+
+
+def test_second_order_warns_with_two_params():
+    """Second-order indices with 2 parameters warn on both sides (#623)."""
+    problem = {
+        "num_vars": 2,
+        "names": ["x1", "x2"],
+        "bounds": [[-np.pi, np.pi], [-np.pi, np.pi]],
+    }
+    with warns(UserWarning, match="Second-order indices are not informative"):
+        X = sobol_sampler.sample(problem, N=16, calc_second_order=True)
+    Y = Ishigami.evaluate(np.column_stack([X, np.zeros(len(X))]))
+    with warns(UserWarning, match="Second-order indices are not informative"):
+        sobol.analyze(problem, Y, calc_second_order=True)
+
+
+def test_second_order_warns_with_one_param():
+    """Second-order indices with 1 parameter warn on both sides (#623)."""
+    problem = {"num_vars": 1, "names": ["x1"], "bounds": [[-np.pi, np.pi]]}
+    with warns(UserWarning, match="Second-order indices are not informative"):
+        X = sobol_sampler.sample(problem, N=16, calc_second_order=True)
+    Y = np.sin(X[:, 0]) ** 2
+    with warns(UserWarning, match="Second-order indices are not informative"):
+        sobol.analyze(problem, Y, calc_second_order=True)
+
+
+def test_second_order_warns_with_two_groups():
+    """Grouped problems warn keyed on the number of groups, not vars (#623)."""
+    problem = {
+        "num_vars": 4,
+        "names": ["a", "b", "c", "d"],
+        "groups": ["g1", "g1", "g2", "g2"],
+        "bounds": [[0, 1]] * 4,
+    }
+    with warns(UserWarning, match="Second-order indices are not informative"):
+        X = sobol_sampler.sample(problem, N=16, calc_second_order=True)
+    Y = X.sum(axis=1)
+    with warns(UserWarning, match="Second-order indices are not informative"):
+        sobol.analyze(problem, Y, calc_second_order=True)
+
+
+def test_second_order_warns_legacy_saltelli_sampler():
+    """The deprecated saltelli sampler warns too (#623)."""
+    from SALib.sample import saltelli
+
+    problem = {
+        "num_vars": 2,
+        "names": ["x1", "x2"],
+        "bounds": [[-np.pi, np.pi], [-np.pi, np.pi]],
+    }
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        saltelli.sample(problem, N=16, calc_second_order=True)
+    matching = [
+        w
+        for w in caught
+        if "Second-order indices are not informative" in str(w.message)
+    ]
+    assert len(matching) == 1, (
+        "expected exactly one second-order warning from saltelli.sample, "
+        f"got {len(matching)}"
+    )
+
+
+def test_second_order_no_warning_with_three_params():
+    """Three parameters: second-order indices stay silent (#623)."""
+    problem = {
+        "num_vars": 3,
+        "names": ["x1", "x2", "x3"],
+        "bounds": [[-np.pi, np.pi]] * 3,
+    }
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        X = sobol_sampler.sample(problem, N=16, calc_second_order=True)
+        Y = Ishigami.evaluate(X)
+        sobol.analyze(problem, Y, calc_second_order=True)
+    _assert_no_second_order_warning(caught)
+
+
+def test_second_order_warns_with_three_vars_two_groups():
+    """3 variables in 2 groups: still warns, keyed on groups (#623)."""
+    problem = {
+        "num_vars": 3,
+        "names": ["a", "b", "c"],
+        "groups": ["g1", "g1", "g2"],
+        "bounds": [[0, 1]] * 3,
+    }
+    with warns(UserWarning, match="Second-order indices are not informative"):
+        X = sobol_sampler.sample(problem, N=16, calc_second_order=True)
+    Y = X.sum(axis=1)
+    with warns(UserWarning, match="Second-order indices are not informative"):
+        sobol.analyze(problem, Y, calc_second_order=True)
+
+
+def test_second_order_no_warning_with_four_vars_three_groups():
+    """4 variables in 3 groups: silent, keyed on groups (#623)."""
+    problem = {
+        "num_vars": 4,
+        "names": ["a", "b", "c", "d"],
+        "groups": ["g1", "g2", "g3", "g3"],
+        "bounds": [[0, 1]] * 4,
+    }
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        X = sobol_sampler.sample(problem, N=16, calc_second_order=True)
+        Y = X.sum(axis=1)
+        sobol.analyze(problem, Y, calc_second_order=True)
+    _assert_no_second_order_warning(caught)
+
+
+def test_no_second_order_warning_when_disabled():
+    """No warning when second-order indices are not requested (#623)."""
+    problem = {
+        "num_vars": 2,
+        "names": ["x1", "x2"],
+        "bounds": [[-np.pi, np.pi], [-np.pi, np.pi]],
+    }
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        X = sobol_sampler.sample(problem, N=16, calc_second_order=False)
+        Y = Ishigami.evaluate(np.column_stack([X, np.zeros(len(X))]))
+        sobol.analyze(problem, Y, calc_second_order=False)
+    _assert_no_second_order_warning(caught)
