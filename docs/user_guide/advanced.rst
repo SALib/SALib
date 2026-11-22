@@ -125,9 +125,6 @@ parameter bounds but sample-specific metadata.
      location of peak
      The location of peak is in percentage of width
      e.g. :code:`[1.0, 3.0, 0.5]` indicates 1.0 to 3.0 with a peak at 2.0
-
-     A soon-to-be deprecated two-value format assumes the lower bound to be 0
-     e.g. :code:`[3, 0.5]` assumes 0 to 3, with a peak at 1.5
 * norm: normal distribution with mean and standard deviation
 * truncnorm: truncated normal distribution with lower and upper bounds, mean and standard deviation
     e.g. :code:`[-3, 3, 0, 1]` indicates a lower bound of -3,
@@ -146,7 +143,7 @@ An example specification is shown below:
     problem = {
         'names': ['x1', 'x2', 'x3'],
         'num_vars': 3,
-        'bounds': [[-np.pi, np.pi], [1.0, 0.2], [3, 0.5]],
+        'bounds': [[-np.pi, np.pi], [1.0, 0.2], [0.0, 3, 0.5]],
         'groups': ['G1', 'G2', 'G1'],
         'dists': ['unif', 'lognorm', 'triang']
     }

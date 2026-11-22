@@ -224,3 +224,32 @@ def test_nonuniform_scale_samples_logunif():
     if res.pvalue > 0.05:
         zero_hypothesis_rejected = False
     assert zero_hypothesis_rejected is False
+
+
+@pytest.mark.parametrize(
+    "bounds", [[-3, -1, 0.5], [-1, 3, 0.5], [1, 3, 0.0], [1, 3, 1.0]]
+)
+def test_nonuniform_scale_samples_triang_valid_bounds(bounds):
+    """Negative ranges and peaks at either end of [0, 1] are valid."""
+    problem = {
+        "num_vars": 1,
+        "dists": ["triang"],
+        "bounds": [bounds],
+        "names": ["x1"],
+    }
+    actual = latin.sample(problem, 100, seed=1)
+    assert np.all(actual >= bounds[0]) and np.all(actual <= bounds[1])
+
+
+@pytest.mark.parametrize(
+    "bounds", [[1, 1, 0.5], [3, 1, 0.5], [1, 3, 1.5], [1, 3, -0.5], [3, 0.5]]
+)
+def test_nonuniform_scale_samples_triang_invalid_bounds(bounds):
+    problem = {
+        "num_vars": 1,
+        "dists": ["triang"],
+        "bounds": [bounds],
+        "names": ["x1"],
+    }
+    with raises(ValueError):
+        latin.sample(problem, 10)
