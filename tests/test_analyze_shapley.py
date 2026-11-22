@@ -177,16 +177,108 @@ def test_analyze_rejects_malformed_trajectory(two_factor_problem):
         shapley.analyze(two_factor_problem, X, Y)
 
 
-def test_analyze_warns_and_ignores_groups(two_factor_problem):
-    two_factor_problem["groups"] = ["A", "B"]
-    X = shapley_sampler.sample(two_factor_problem, 10, seed=1)
-    Y = X.sum(axis=1)
+def test_analyze_aggregates_groups_by_summation():
+    problem = {
+        "num_vars": 3,
+        "names": ["x1", "x2", "x3"],
+        "bounds": [[-np.pi, np.pi]] * 3,
+        "groups": ["G1", "G1", "G2"],
+    }
+    with pytest.warns(UserWarning, match="group co-sampling"):
+        X = shapley_sampler.sample(problem, 500, seed=123)
+    Y = Ishigami.evaluate(X)
 
-    with pytest.warns(UserWarning, match="does not currently support groups"):
-        Si = shapley.analyze(two_factor_problem, X, Y)
+    grouped = shapley.analyze(problem, X, Y)
+    ungrouped_problem = {
+        key: value for key, value in problem.items() if key != "groups"
+    }
+    ungrouped = shapley.analyze(ungrouped_problem, X, Y)
 
-    # Group definitions are ignored: results are per individual factor
-    assert list(Si["names"]) == ["x1", "x2"]
+    assert list(grouped["names"]) == ["G1", "G2"]
+    # Bundle property: a group's effect is the sum of its members' effects,
+    # not their average, so the total-variance decomposition is preserved.
+    assert_allclose(
+        grouped["shapley"],
+        [
+            ungrouped["shapley"][0] + ungrouped["shapley"][1],
+            ungrouped["shapley"][2],
+        ],
+    )
+    assert_allclose(grouped["shapley"].sum(), ungrouped["shapley"].sum())
+    assert_allclose(grouped["shapley_normalized"].sum(), 1.0)
+
+
+def test_analyze_single_group_collapses_to_one_row(two_factor_problem):
+    two_factor_problem["groups"] = ["G", "G"]
+    X = np.array(
+        [
+            [1.0, 2.0],
+            [3.0, 2.0],
+            [3.0, 4.0],
+            [2.0, 1.0],
+            [2.0, 5.0],
+            [4.0, 5.0],
+        ]
+    )
+    Y = X[:, 0] * X[:, 1]
+
+    result = shapley.analyze(two_factor_problem, X, Y)
+
+    assert list(result["names"]) == ["G"]
+    assert_allclose(result["shapley"], [106.0])
+    assert_allclose(result["shapley_normalized"], [1.0])
+
+
+def test_analyze_identity_grouping_matches_ungrouped(two_factor_problem):
+    X = np.array(
+        [
+            [1.0, 2.0],
+            [3.0, 2.0],
+            [3.0, 4.0],
+            [2.0, 1.0],
+            [2.0, 5.0],
+            [4.0, 5.0],
+        ]
+    )
+    Y = X[:, 0] * X[:, 1]
+
+    ungrouped = shapley.analyze(two_factor_problem, X, Y)
+    two_factor_problem["groups"] = ["x1", "x2"]
+    grouped = shapley.analyze(two_factor_problem, X, Y)
+
+    for key in (
+        "shapley",
+        "shapley_conf",
+        "shapley_abs",
+        "shapley_abs_conf",
+        "shapley_normalized",
+        "shapley_normalized_conf",
+    ):
+        assert_allclose(grouped[key], ungrouped[key])
+    assert list(grouped["names"]) == list(ungrouped["names"])
+
+
+def test_shapley_abs_reveals_cancelling_contributions(two_factor_problem):
+    # Hand-computed contributions: trajectory 1 gives (0.5, 4.0) and
+    # trajectory 2 gives (-4.0, 4.5), so the signed mean for x1 understates
+    # its per-trajectory contributions, which the absolute mean exposes --
+    # the same signed/absolute pairing as Morris' mu and mu_star.
+    X = np.array(
+        [
+            [0.0, 0.0],
+            [1.0, 0.0],
+            [1.0, 1.0],
+            [0.0, 0.0],
+            [0.0, 1.0],
+            [1.0, 1.0],
+        ]
+    )
+    Y = np.array([0.0, 1.0, 3.0, 0.0, 3.0, 1.0])
+
+    result = shapley.analyze(two_factor_problem, X, Y)
+
+    assert_allclose(result["shapley"], [-1.75, 4.25])
+    assert_allclose(result["shapley_abs"], [2.25, 4.25])
 
 
 @pytest.mark.parametrize(

@@ -49,4 +49,6 @@ def test_shapley_cli_round_trip(tmp_path):
     )
 
     assert "shapley" in result.stdout
-    assert "shapley_conf" in result.stdout
+    # With six result columns pandas elides the middle of the printed
+    # table, so assert on the last column rather than ``shapley_conf``.
+    assert "shapley_abs_conf" in result.stdout
