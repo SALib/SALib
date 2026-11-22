@@ -242,7 +242,7 @@ def test_nonuniform_scale_samples_triang_valid_bounds(bounds):
 
 
 @pytest.mark.parametrize(
-    "bounds", [[1, 1, 0.5], [3, 1, 0.5], [1, 3, 1.5], [1, 3, -0.5]]
+    "bounds", [[1, 1, 0.5], [3, 1, 0.5], [1, 3, 1.5], [1, 3, -0.5], [3, 0.5]]
 )
 def test_nonuniform_scale_samples_triang_invalid_bounds(bounds):
     problem = {
