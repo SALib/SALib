@@ -13,6 +13,13 @@ https://keepachangelog.com/en/1.0.0/
   for covariance between members), and a `shapley_abs` measure (mean absolute
   contribution, with `shapley_abs_conf`) is reported alongside the signed
   effects.
+- Grouped analyses now keep the pre-aggregation per-factor values in
+  `Si["ungrouped"]` (a `ResultDict` keyed by metric name, plus `"names"`
+  with the per-factor names), so the member driving a group mean can still
+  be identified. The per-factor metrics of `delta`, `dgsm`,
+  `discrepancy`, `fast`, `pawn`, `radial_ee`, and `rbd_fast` are now
+  aggregated through a single shared `group_results` helper instead of
+  inline per-analyzer code; grouped results are unchanged.
 
 ### Changed
 

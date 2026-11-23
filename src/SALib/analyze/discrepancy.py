@@ -8,8 +8,7 @@ from SALib.util import (
     read_param_file,
     ResultDict,
     extract_group_names,
-    compute_groups_matrix,
-    _group_metric,
+    group_results,
 )
 
 
@@ -95,7 +94,7 @@ def analyze(
         >>> Si = discrepancy.analyze(problem, X, Y, print_to_console=True)
     """
     D = problem["num_vars"]
-    var_names, n_groups = extract_group_names(problem)
+    var_names, _ = extract_group_names(problem)
     Y = Y.reshape(-1, 1)
 
     bounds = np.asarray(problem["bounds"]).T
@@ -110,16 +109,11 @@ def analyze(
 
     s_discrepancy = s_discrepancy / np.sum(s_discrepancy)
 
-    if n_groups < D:
-        # Take the mean of effects from parameters that are grouped together
-        groupings, _ = compute_groups_matrix(problem["groups"])
-        s_discrepancy = _group_metric(groupings, np.asarray(s_discrepancy))
-
     keys = ("s_discrepancy",)
-    Si = ResultDict((k, np.zeros(len(s_discrepancy))) for k in keys)
+    Si = ResultDict([("s_discrepancy", np.asarray(s_discrepancy))])
     Si["names"] = var_names
 
-    Si["s_discrepancy"] = s_discrepancy
+    group_results(Si, problem, keys)
 
     if print_to_console:
         print(Si.to_df())
