@@ -222,3 +222,50 @@ def test_single_group():
 
     with pytest.raises(ValueError):
         sp.analyze_hdmr()
+
+
+def test_single_group_many_parameters():
+    """Ensures error is raised when all parameters belong to one group."""
+    sp = ProblemSpec(
+        {
+            "names": ["x1", "x2", "x3"],
+            "bounds": [[-1, 1]] * 3,
+            "groups": ["G1", "G1", "G1"],
+        }
+    )
+    sp.sample_sobol(64).evaluate(lambda X: X.sum(axis=1))
+
+    with pytest.raises(ValueError, match="single parameter or group"):
+        sp.analyze_sobol()
+
+
+def test_two_groups_still_analysed():
+    """Ensures a problem with two distinct groups is not rejected."""
+    sp = ProblemSpec(
+        {
+            "names": ["x1", "x2", "x3"],
+            "bounds": [[-1, 1]] * 3,
+            "groups": ["G1", "G1", "G2"],
+        }
+    )
+    sp.sample_sobol(64).evaluate(lambda X: X.sum(axis=1))
+    sp.analyze_sobol()
+
+    assert len(sp.analysis["S1"]) == 2
+
+
+def test_single_group_analyze_parallel():
+    """Ensures analyze_parallel also rejects a problem with one group."""
+    from SALib.analyze import sobol
+
+    sp = ProblemSpec(
+        {
+            "names": ["x1", "x2", "x3"],
+            "bounds": [[-1, 1]] * 3,
+            "groups": ["G1", "G1", "G1"],
+        }
+    )
+    sp.sample_sobol(64).evaluate(lambda X: X.sum(axis=1))
+
+    with pytest.raises(ValueError, match="single parameter or group"):
+        sp.analyze_parallel(sobol.analyze, nprocs=2)

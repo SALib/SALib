@@ -347,13 +347,7 @@ class ProblemSpec(dict):
         -------
         self : ProblemSpec object
         """
-        if self["num_vars"] == 1 or (self["groups"] and len("groups") == 1):
-            msg = (
-                "There is only a single parameter or group defined. There is "
-                "no point in conducting sensitivity analysis as any and all"
-                "effect(s) will be mapped to the single parameter/group."
-            )
-            raise ValueError(msg)
+        self._check_not_single()
 
         if "nprocs" in kwargs:
             # Call parallel method instead
@@ -385,6 +379,15 @@ class ProblemSpec(dict):
 
         return self
 
+    def _check_not_single(self):
+        if self["num_vars"] == 1 or (self["groups"] and len(set(self["groups"])) == 1):
+            msg = (
+                "There is only a single parameter or group defined. There is "
+                "no point in conducting sensitivity analysis as any and all "
+                "effect(s) will be mapped to the single parameter/group."
+            )
+            raise ValueError(msg)
+
     def analyze_parallel(self, func, *args, nprocs=None, **kwargs):
         """Analyze sampled results using the given function in parallel.
 
@@ -409,6 +412,7 @@ class ProblemSpec(dict):
         -------
         self : ProblemSpec object
         """
+        self._check_not_single()
         warnings.warn("Parallel analysis is an experimental feature and may not work.")
 
         if self._results is None:
