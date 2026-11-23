@@ -159,15 +159,18 @@ def analyze(
 
     if not parallel:
         S = create_Si_dict(D, num_resamples, keep_resamples, calc_second_order)
+        boot = _bootstrap_counts(A, B, r)
+        _, _, var_diff = boot
+        S1_resampled = []
 
         for j in range(D):
             S["S1"][j] = first_order(A, AB[:, j], B)
-            S1_conf_j = first_order(A[r], AB[r, j], B[r])
+            S1_conf_j = _first_order_resampled(A, AB[:, j], B, boot)
+            S1_resampled.append(S1_conf_j)
 
             if keep_resamples:
                 S["S1_conf_all"][:, j] = S1_conf_j
 
-            var_diff = np.ptp(np.r_[A[r], B[r]])
             if var_diff != 0.0:
                 S["S1_conf"][j] = Z * S1_conf_j.std(ddof=1)
             else:
@@ -175,7 +178,7 @@ def analyze(
 
             S["ST"][j] = total_order(A, AB[:, j], B)
 
-            ST_conf_j = total_order(A[r], AB[r, j], B[r])
+            ST_conf_j = _total_order_resampled(A, AB[:, j], B, boot)
 
             if keep_resamples:
                 S["ST_conf_all"][:, j] = ST_conf_j
@@ -190,8 +193,8 @@ def analyze(
             for j in range(D):
                 for k in range(j + 1, D):
                     S["S2"][j, k] = second_order(A, AB[:, j], AB[:, k], BA[:, j], B)
-                    S["S2_conf"][j, k] = Z * second_order(
-                        A[r], AB[r, j], AB[r, k], BA[r, j], B[r]
+                    S["S2_conf"][j, k] = Z * _second_order_resampled(
+                        A, AB[:, k], BA[:, j], B, boot, S1_resampled[j], S1_resampled[k]
                     ).std(ddof=1)
     else:
         tasks, n_processors = create_task_list(D, calc_second_order, n_processors)
@@ -310,21 +313,67 @@ def separate_output_values(Y, D, N, calc_second_order):
     return A, B, AB, BA
 
 
+def _bootstrap_counts(A, B, r):
+    """Count matrix C[n, i] of draws of row n in resample i, so the mean of g on
+    resample i is (g @ C)[i] / N; also var and ptp of r_[A[r], B[r]]."""
+    N, R = r.shape
+    C = np.bincount((r * R + np.arange(R)).ravel(), minlength=N * R)
+    C = C.reshape(N, R).astype(np.float64)
+    y_mean = (A + B) @ C / (2 * N)
+    sq_dev = (A[:, None] - y_mean) ** 2 + (B[:, None] - y_mean) ** 2
+    y_var = (sq_dev * C).sum(axis=0) / (2 * N)
+    drawn = C.any(axis=1)
+    return C, y_var, np.ptp(np.r_[A[drawn], B[drawn]])
+
+
+def _resampled_ratio(g, C, y_var, y_ptp):
+    """mean(g) / y_var on each resample, as in first_order on A[r], B[r]."""
+    if y_ptp <= np.finfo(float).eps:
+        warn(CONST_RESULT_MSG)
+        return np.zeros(C.shape[1], dtype=np.float64)
+
+    return np.divide(
+        g @ C / C.shape[0],
+        y_var,
+        out=np.zeros_like(y_var, dtype=np.float64),
+        where=y_var > np.finfo(float).eps,
+    )
+
+
+def _first_order_resampled(A, AB, B, boot):
+    """first_order on each bootstrap resample, from _bootstrap_counts output"""
+    return _resampled_ratio(B * (AB - A), *boot)
+
+
+def _total_order_resampled(A, AB, B, boot):
+    """total_order on each bootstrap resample, from _bootstrap_counts output"""
+    return _resampled_ratio(0.5 * (A - AB) ** 2, *boot)
+
+
+def _second_order_resampled(A, ABk, BAj, B, boot, S1j, S1k):
+    """second_order on each bootstrap resample, given the resampled S1 of j and k"""
+    return _resampled_ratio(BAj * ABk - A * B, *boot) - S1j - S1k
+
+
 def sobol_parallel(Z, A, AB, BA, B, r, tasks):
+    boot = _bootstrap_counts(A, B, r)
     sobol_indices = []
     for d, j, k in tasks:
         if d == "S1":
             s = first_order(A, AB[:, j], B)
         elif d == "S1_conf":
-            s = Z * first_order(A[r], AB[r, j], B[r]).std(ddof=1)
+            s = Z * _first_order_resampled(A, AB[:, j], B, boot).std(ddof=1)
         elif d == "ST":
             s = total_order(A, AB[:, j], B)
         elif d == "ST_conf":
-            s = Z * total_order(A[r], AB[r, j], B[r]).std(ddof=1)
+            s = Z * _total_order_resampled(A, AB[:, j], B, boot).std(ddof=1)
         elif d == "S2":
             s = second_order(A, AB[:, j], AB[:, k], BA[:, j], B)
         elif d == "S2_conf":
-            s = Z * second_order(A[r], AB[r, j], AB[r, k], BA[r, j], B[r]).std(ddof=1)
+            S1j = _first_order_resampled(A, AB[:, j], B, boot)
+            S1k = _first_order_resampled(A, AB[:, k], B, boot)
+            s = Z * _second_order_resampled(A, AB[:, k], BA[:, j], B, boot, S1j, S1k)
+            s = s.std(ddof=1)
         sobol_indices.append([d, j, k, s])
 
     return sobol_indices
