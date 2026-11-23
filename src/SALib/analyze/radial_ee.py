@@ -7,8 +7,8 @@ from ..util import (
     read_param_file,
     ResultDict,
     extract_group_names,
-    compute_groups_matrix,
-    _group_metric,
+    _group_sigma,
+    group_results,
 )
 
 __all__ = ["analyze"]
@@ -129,10 +129,6 @@ def analyze(
 
     group_names, _ = extract_group_names(problem)
 
-    Si = ResultDict(
-        (k, [None] * len(group_names)) for k in ["names", "mu", "mu_star", "sigma"]
-    )
-
     mu = np.average(ee, axis=0)
     mu_star = np.average(np.abs(ee), axis=0)
     mu_star_conf = compute_radial_ee_confidence(
@@ -140,25 +136,23 @@ def analyze(
     )
     sigma = np.std(ee, ddof=1, axis=0)
 
-    if len(group_names) < num_vars:
-        groupings, _ = compute_groups_matrix(problem["groups"])
-
-        Si["mu"] = _group_metric(groupings, mu)
-        Si["mu_star"] = _group_metric(groupings, mu_star)
-        Si["mu_star_conf"] = _group_metric(groupings, mu_star_conf)
-
-        # Morris convention: sigma is meaningless for multi-member groups
-        sigma_agg = _group_metric(groupings, sigma)
-        grouped_sigma = np.full(len(group_names), np.nan, dtype=float)
-        np.copyto(grouped_sigma, sigma_agg, where=groupings.sum(axis=0) == 1)
-        Si["sigma"] = grouped_sigma
-    else:
-        Si["mu"] = mu
-        Si["mu_star"] = mu_star
-        Si["mu_star_conf"] = mu_star_conf
-        Si["sigma"] = sigma
-
-    Si["names"] = group_names
+    Si = ResultDict(
+        [
+            ("names", group_names),
+            ("mu", mu),
+            ("mu_star", mu_star),
+            ("sigma", sigma),
+            ("mu_star_conf", mu_star_conf),
+        ]
+    )
+    # sigma uses the Morris convention (NaN for multi-member groups)
+    # through the per-key override hook instead of the plain group mean.
+    group_results(
+        Si,
+        problem,
+        ["mu", "mu_star", "mu_star_conf", "sigma"],
+        overrides={"sigma": _group_sigma},
+    )
 
     if print_to_console:
         print(Si.to_df())

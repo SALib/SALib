@@ -10,6 +10,7 @@ from ..util import (
     _define_problem_with_groups,
     _compute_delta,
     _group_metric,
+    _group_sigma,
     handle_seed,
 )
 
@@ -264,7 +265,7 @@ def _compute_statistical_outputs(
 
     Si["mu"] = _compute_grouped_metric(mu, groups)
     Si["mu_star"] = _compute_grouped_metric(mu_star, groups)
-    Si["sigma"] = _compute_grouped_sigma(sigma, groups)
+    Si["sigma"] = _group_sigma(groups, sigma)
     Si["mu_star_conf"] = _compute_grouped_metric(mu_star_conf, groups)
     if keep_resamples:
         if np.isfinite(mu_star_resamples).all():
@@ -276,36 +277,6 @@ def _compute_statistical_outputs(
             )
 
     return Si
-
-
-def _compute_grouped_sigma(
-    ungrouped_sigma: np.ndarray, groups: np.ndarray
-) -> np.ndarray:
-    """Sigma values for the groups.
-
-    Returns sigma for the groups of parameter values in the argument
-    ungrouped_metric where the group consists of no more than
-    one parameter
-
-    Parameters
-    ----------
-    ungrouped_sigma: np.ndarray
-        Sigma values calculated without considering the groups
-    groups: np.ndarray
-        Array defining the distribution of groups
-
-    Returns
-    -------
-    sigma: np.ndarray
-        Sigma values for the groups.
-    """
-    sigma_agg = _compute_grouped_metric(ungrouped_sigma, groups)
-
-    sigma = np.zeros(groups.shape[1], dtype=float)
-    np.copyto(sigma, sigma_agg, where=groups.sum(axis=0) == 1)
-    np.copyto(sigma, np.nan, where=groups.sum(axis=0) != 1)
-
-    return sigma
 
 
 def _compute_grouped_metric(

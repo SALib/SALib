@@ -7,8 +7,7 @@ from ..util import (
     read_param_file,
     ResultDict,
     extract_group_names,
-    compute_groups_matrix,
-    _group_metric,
+    group_results,
 )
 
 
@@ -108,10 +107,7 @@ def analyze(
             base, perturbed_j, diff, bounds[j], num_resamples, conf_level
         )
 
-    if len(group_names) < num_vars:
-        groupings, _ = compute_groups_matrix(problem["groups"])
-        for key in keys:
-            S[key] = _group_metric(groupings, S[key])
+    group_results(S, problem, keys)
 
     if print_to_console:
         print(S.to_df())

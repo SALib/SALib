@@ -12,8 +12,7 @@ from ..util import (
     ResultDict,
     handle_seed,
     extract_group_names,
-    compute_groups_matrix,
-    _group_metric,
+    group_results,
 )
 
 
@@ -112,10 +111,7 @@ def analyze(
         Si["S1"][i] = S1
         Si["S1_conf"][i] = bootstrap(X[:, i], Y, M, num_resamples, conf_level, rng)
 
-    if len(group_names) < num_vars:
-        groupings, _ = compute_groups_matrix(problem["groups"])
-        for key in keys:
-            Si[key] = _group_metric(groupings, np.array(Si[key]))
+    group_results(Si, problem, keys)
 
     if print_to_console:
         print(Si.to_df())

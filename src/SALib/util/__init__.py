@@ -365,13 +365,196 @@ def _group_metric(groups: np.ndarray, ungrouped_metric: np.ndarray) -> np.ndarra
     members rather than recomputed from the resampling distribution. The
     averaged value is indicative only and understates the true uncertainty
     of the group-level statistic.
+
+    A ``NaN`` member propagates: if any member of a group is ``NaN``,
+    the group value is ``NaN`` (the remaining members are not averaged
+    on their own). The result is a plain :class:`numpy.ndarray`, so the
+    ``NaN`` is an ordinary value downstream -- a masked-array result
+    would silently drop such groups from further masked operations.
     """
     groups = np.array(groups, dtype=bool)
 
     masked = np.ma.masked_array(ungrouped_metric * groups.T, mask=(groups ^ 1).T)
     metric = np.ma.mean(masked, axis=1)
 
-    return metric
+    # Cast to float first: filling an integer array with NaN would raise.
+    return np.ma.filled(metric.astype(float, copy=False), np.nan)
+
+
+def _group_sum(groups: np.ndarray, ungrouped_metric: np.ndarray) -> np.ndarray:
+    """Compute the sum of a metric across group members.
+
+    Same masked-array construction as :func:`_group_metric`, but summing
+    instead of averaging. Provided for metrics that combine over a group
+    by summation rather than by mean. As with :func:`_group_metric`, a
+    ``NaN`` member makes its group ``NaN``, and the result is a plain
+    :class:`numpy.ndarray` with ``NaN`` in place of any masked entry.
+    The cast to float before filling matters: summing integer metrics
+    keeps an integer dtype, which cannot hold ``NaN``.
+    """
+    groups = np.array(groups, dtype=bool)
+
+    masked = np.ma.masked_array(ungrouped_metric * groups.T, mask=(groups ^ 1).T)
+    metric = np.ma.sum(masked, axis=1)
+
+    return np.ma.filled(metric.astype(float, copy=False), np.nan)
+
+
+def _group_sigma(groups: np.ndarray, ungrouped_metric: np.ndarray) -> np.ndarray:
+    """Compute sigma values for groups following the Morris convention.
+
+    Sigma is meaningless for multi-member groups, so those groups report
+    ``NaN``; single-member groups keep their value. This is the single
+    shared implementation used by both :mod:`SALib.analyze.morris` and
+    :mod:`SALib.analyze.radial_ee` (previously each carried its own copy
+    of the same logic).
+
+    Parameters
+    ----------
+    groups : np.ndarray
+        Group membership matrix (num_vars x num_groups), as returned by
+        :func:`compute_groups_matrix`
+    ungrouped_metric : np.ndarray
+        Sigma calculated for each variable (i.e., without groups)
+
+    Returns
+    -------
+    sigma : np.ndarray
+        Sigma values for the groups.
+
+    Notes
+    -----
+    The column order of the membership matrix and the order of the group
+    names both come from ``pd.unique`` over the same ``groups`` list, so
+    ``groups.sum(axis=0) == 1`` lines up with single-member groups.
+    """
+    sigma_agg = _group_metric(groups, ungrouped_metric)
+    sigma = np.full(groups.shape[1], np.nan, dtype=float)
+    np.copyto(sigma, sigma_agg, where=groups.sum(axis=0) == 1)
+    return sigma
+
+
+def group_results(Si, problem, metric_keys, aggregation="mean", overrides=None):
+    """Aggregate per-factor metrics in ``Si`` to group level, in place.
+
+    This is the single shared entry point for group aggregation in the
+    analyzers. When the problem defines groups, each metric listed in
+    ``metric_keys`` is aggregated across the members of each group, the
+    pre-aggregation per-factor values are kept in ``Si["ungrouped"]``,
+    and ``Si["names"]`` is set to the group names. When the problem does
+    not define groups (or the grouping is the identity, one group per
+    factor), ``Si`` is returned with ``Si["names"]`` set to the group
+    names -- the factor names when no ``groups`` entry is defined, the
+    group labels when an all-unique ``groups`` list is given -- and no
+    ``"ungrouped"`` entry.
+
+    Parameters
+    ----------
+    Si : ResultDict
+        Analysis results holding one entry per factor for each key in
+        ``metric_keys``. Modified in place and returned.
+    problem : dict
+        Problem definition; ``problem["groups"]`` defines the grouping.
+    metric_keys : iterable of str
+        Keys in ``Si`` holding per-factor metric arrays to aggregate.
+        Keys that need something other than the plain group mean (or
+        sum) -- for example ``"sigma"``, which is meaningless for
+        multi-member groups under the Morris convention -- are handled
+        through ``overrides`` instead, and are still snapshotted into
+        ``Si["ungrouped"]``.
+    aggregation : {"mean", "sum"}, optional
+        How metric values combine across group members. ``"mean"`` is
+        the convention for the analyzers that report per-factor metrics
+        (see :func:`_group_metric`); ``"sum"`` is available for metrics
+        that combine by summation. Note that Shapley effects do not use
+        this helper even with ``aggregation="sum"``: their group values
+        are sums of per-trajectory contributions, so that the confidence
+        intervals account for the covariance between members -- a
+        result-level sum of per-factor intervals cannot do that.
+    overrides : dict, optional
+        Per-key aggregation overrides of the form ``{key: callable}``.
+        Each callable takes ``(groups, values)`` -- the group membership
+        matrix from :func:`compute_groups_matrix` and the per-factor
+        values -- and returns the grouped values, i.e. the same
+        signature as :func:`_group_metric`, so a built-in aggregator
+        can be passed as an override. Override keys must be among
+        ``metric_keys``; an unknown key raises ``ValueError`` instead
+        of silently falling back to the group mean. This is the hook
+        for analyzer-specific conventions such as the Morris/radial_ee
+        sigma rule (NaN for multi-member groups; see :func:`_group_sigma`).
+
+    Returns
+    -------
+    Si : ResultDict
+        The same results dict, with grouped values for the requested
+        keys, ``Si["names"]`` set to the group names (overwriting any
+        previous value), and ``Si["ungrouped"]`` holding the
+        pre-aggregation per-factor values as a ``ResultDict`` keyed by
+        metric key (plus ``"names"`` with the per-factor names), so the
+        member driving a group mean can still be identified. Individual
+        analyzers may add further pre-aggregation entries to the
+        snapshot (delta adds its per-factor ``"notes"``). Averaging
+        can dilute a single dominant member -- one strong factor among
+        inert group members reports only about a third of its value --
+        and the snapshot preserves the information the mean discards.
+
+    Notes
+    -----
+    Confidence intervals (``*_conf`` metrics) are averaged across group
+    members rather than recomputed from the resampling distribution
+    (see :func:`_group_metric`); the averaged value is indicative
+    only and understates the true uncertainty of the group-level
+    statistic.
+    """
+    # Normalise once, up front: a generator would be exhausted by the
+    # validation below and a bare string would iterate its characters.
+    if isinstance(metric_keys, str):
+        raise ValueError(
+            "metric_keys must be an iterable of key names, not a bare string"
+        )
+    metric_keys = tuple(metric_keys)
+    if aggregation not in ("mean", "sum"):
+        raise ValueError('aggregation must be "mean" or "sum"')
+    if overrides:
+        unknown = set(overrides) - set(metric_keys)
+        if unknown:
+            raise ValueError(
+                "Unknown override key(s): {}. Overrides must target "
+                "keys listed in metric_keys.".format(sorted(unknown))
+            )
+    missing = [key for key in metric_keys if key not in Si]
+    if missing:
+        raise ValueError(
+            "Unknown metric key(s): {}. All metric_keys must be present "
+            "in Si.".format(missing)
+        )
+
+    group_names, num_groups = extract_group_names(problem)
+    num_vars = problem["num_vars"]
+
+    # Names are set here in both branches, so callers do not need a
+    # separate grouped/ungrouped assignment: with no grouping the group
+    # names are the factor names.
+    Si["names"] = group_names
+    if num_groups >= num_vars:
+        return Si
+
+    aggregate = _group_metric if aggregation == "mean" else _group_sum
+
+    groupings, _ = compute_groups_matrix(problem["groups"])
+
+    ungrouped = ResultDict()
+    ungrouped["names"] = list(problem["names"])
+    for key in metric_keys:
+        values = np.asarray(Si[key])
+        ungrouped[key] = np.array(values, copy=True)
+        if overrides and key in overrides:
+            Si[key] = overrides[key](groupings, values)
+        else:
+            Si[key] = aggregate(groupings, values)
+
+    Si["ungrouped"] = ungrouped
+    return Si
 
 
 def _define_problem_with_groups(problem: Dict) -> Dict:

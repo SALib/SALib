@@ -9,8 +9,7 @@ from ..util import (
     read_param_file,
     ResultDict,
     extract_group_names,
-    compute_groups_matrix,
-    _group_metric,
+    group_results,
 )
 
 import warnings
@@ -298,12 +297,15 @@ def analyze(
 
         S["notes"] = notes
 
+    # Numeric metrics go through the shared group aggregation; the
+    # per-factor "notes" stay analyzer-specific (see below) and are
+    # deliberately not passed to group_results, but the pre-merge
+    # per-factor list is kept in the snapshot so the per-factor
+    # diagnostics stay recoverable after the merge below.
+    group_results(S, problem, [key for key in keys if key != "notes"])
+    if "ungrouped" in S:
+        S["ungrouped"]["notes"] = list(notes)
     if len(group_names) < num_vars:
-        groupings, _ = compute_groups_matrix(problem["groups"])
-        for key in keys:
-            if key == "notes":
-                continue
-            S[key] = _group_metric(groupings, S[key])
         # Merge per-parameter notes into per-group notes
         merged_notes = []
         for g_name in group_names:
@@ -321,8 +323,11 @@ def analyze(
         S["notes"] = merged_notes
 
     if print_to_console:
-        # Merge dictionaries
-        summary_dict = {"names": group_names} | S
+        # Merge dictionaries (excluding the nested "ungrouped" snapshot,
+        # which is not one value per group)
+        summary_dict = {"names": group_names} | {
+            key: value for key, value in S.items() if key != "ungrouped"
+        }
 
         df_summary = pd.DataFrame(summary_dict)
         print(df_summary.to_string(index=False))

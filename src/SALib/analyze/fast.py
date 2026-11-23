@@ -9,8 +9,7 @@ from ..util import (
     read_param_file,
     ResultDict,
     extract_group_names,
-    compute_groups_matrix,
-    _group_metric,
+    group_results,
 )
 
 
@@ -131,10 +130,7 @@ def analyze(
         Si["S1_conf"][i] = S1_d_conf
         Si["ST_conf"][i] = ST_d_conf
 
-    if len(group_names) < num_vars:
-        groupings, _ = compute_groups_matrix(problem["groups"])
-        for key in keys:
-            Si[key] = _group_metric(groupings, np.array(Si[key]))
+    group_results(Si, problem, keys)
 
     if print_to_console:
         print(Si.to_df())

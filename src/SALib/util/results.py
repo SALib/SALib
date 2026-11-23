@@ -13,9 +13,15 @@ class ResultDict(dict):
         super(ResultDict, self).__init__(*args, **kwargs)
 
     def to_df(self):
-        """Convert dict structure into Pandas DataFrame."""
+        """Convert dict structure into Pandas DataFrame.
+
+        The ``"ungrouped"`` entry is excluded: it holds the nested
+        per-factor snapshot added by :func:`SALib.util.group_results`,
+        not one plottable value per group.
+        """
         return pd.DataFrame(
-            {k: v for k, v in self.items() if k != "names"}, index=self["names"]
+            {k: v for k, v in self.items() if k != "names" and k != "ungrouped"},
+            index=self["names"],
         )
 
     def plot(self, ax=None):
