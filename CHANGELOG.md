@@ -22,6 +22,9 @@ https://keepachangelog.com/en/1.0.0/
   `mu_star_conf` values for a fixed seed, even with the default
   `keep_resamples=False`. The confidence-interval estimator is unchanged;
   `keep_resamples` only controls whether the bootstrap estimates are retained.
+- Sobol' analysis computes its bootstrap confidence intervals from per-resample
+  row counts instead of copying the resampled rows, which makes it much faster.
+  Results for a fixed seed are unchanged up to rounding.
 
 ### Fixed
 
