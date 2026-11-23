@@ -20,9 +20,17 @@ https://keepachangelog.com/en/1.0.0/
   `discrepancy`, `fast`, `pawn`, `radial_ee`, and `rbd_fast` are now
   aggregated through a single shared `group_results` helper instead of
   inline per-analyzer code; grouped results are unchanged.
+- The Morris / radial_ee grouped-sigma rule (NaN for multi-member groups,
+  value kept for single-member groups) now lives in a single shared
+  `_group_sigma` helper instead of one copy in each analyzer; grouped
+  sigma values are unchanged.
 
 ### Changed
 
+- Grouped metric values are now plain arrays instead of masked arrays: a
+  NaN member makes its group NaN (as before when converted), rather than
+  a masked entry that downstream masked-array operations could silently
+  drop. Grouped values are unchanged.
 - Morris analysis now bootstraps trajectories jointly across parameters instead
   of independently for each parameter (PR #694). This aligns retained bootstrap
   replicates across parameters. Upgrading can therefore change exact

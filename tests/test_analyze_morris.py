@@ -21,11 +21,10 @@ from SALib.analyze.morris import (
     _compute_elementary_effects,
     _reorganize_output_matrix,
     _compute_grouped_metric,
-    _compute_grouped_sigma,
     _check_if_array_of_floats,
 )
 from SALib.test_functions import Ishigami
-from SALib.util import ResultDict, handle_seed
+from SALib.util import ResultDict, _group_sigma, handle_seed
 
 
 def _run_morris_analysis(seed, grouped=False, keep_resamples=True):
@@ -1105,7 +1104,7 @@ def test_compute_grouped_metric():
     assert_allclose(actual, desired, rtol=1e-1)
 
 
-def test_compute_grouped_sigma():
+def test_group_sigma():
     """
     Tests that a value for sigma is returned when the group contains 1 param
 
@@ -1130,7 +1129,7 @@ def test_compute_grouped_sigma():
     )
     sigma = np.std(ee, axis=1, ddof=1)
 
-    actual = _compute_grouped_sigma(sigma, group_matrix)
+    actual = _group_sigma(group_matrix, sigma)
     desired = np.array([1.79352911, np.nan], dtype=float)
     assert_allclose(actual, desired, rtol=1e-1)
 

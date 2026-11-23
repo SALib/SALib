@@ -11,7 +11,14 @@ from numpy.testing import assert_allclose
 
 from SALib.analyze import delta, dgsm, fast, rbd_fast, sobol
 from SALib.sample import fast_sampler, finite_diff, latin, saltelli
-from SALib.util import compute_groups_matrix, _group_metric
+from SALib.util import (
+    ResultDict,
+    compute_groups_matrix,
+    _group_metric,
+    _group_sigma,
+    _group_sum,
+    group_results,
+)
 
 from SALib.test_functions import Ishigami
 
@@ -44,6 +51,91 @@ def test_group_metric_matches_manual_mean():
     actual = _group_metric(groupings, metric)
     assert_allclose(actual, [2.0, 10.0])
     assert list(names) == ["G1", "G2"]
+
+
+def test_group_metric_propagates_nan_member():
+    """A NaN member makes its group NaN (not the mean of the rest).
+
+    Before this fix the grouped value came back as a masked array entry,
+    which masked-array operations downstream would silently drop instead
+    of propagating as NaN.
+    """
+    groupings, _ = compute_groups_matrix(["G1", "G1", "G2"])
+    metric = np.array([1.0, np.nan, 3.0])
+
+    actual = _group_metric(groupings, metric)
+    assert isinstance(actual, np.ndarray)
+    assert not isinstance(actual, np.ma.MaskedArray)
+    assert_allclose(actual, [np.nan, 3.0], equal_nan=True)
+
+    # A NaN in a variable that is not a member of a group must not
+    # contaminate that group (NaN * 0 is masked out, not averaged in).
+    groupings, _ = compute_groups_matrix(["G1", "G2", "G2"])
+    actual = _group_metric(groupings, np.array([np.nan, 1.0, 3.0]))
+    assert_allclose(actual, [np.nan, 2.0], equal_nan=True)
+
+
+def test_group_sum_propagates_nan_member():
+    """A NaN member makes its group sum NaN, as a plain array."""
+    groupings, _ = compute_groups_matrix(["G1", "G1", "G2"])
+    metric = np.array([1.0, np.nan, 3.0])
+
+    actual = _group_sum(groupings, metric)
+    assert isinstance(actual, np.ndarray)
+    assert not isinstance(actual, np.ma.MaskedArray)
+    assert_allclose(actual, [np.nan, 3.0], equal_nan=True)
+
+
+def test_group_sum_integer_input_with_empty_group():
+    """Summing integer metrics still returns floats with NaN, not an error.
+
+    ``np.ma.sum`` preserves an integer dtype, which cannot hold NaN; the
+    helper casts to float before filling masked entries. (An empty group
+    cannot arise from ``compute_groups_matrix`` -- every group has at
+    least one member -- so the matrix is built by hand here.)
+    """
+    groupings = np.array([[1, 0], [0, 0]])
+    actual = _group_sum(groupings, np.array([1, 2]))
+    assert actual.dtype == float
+    assert_allclose(actual, [1.0, np.nan], equal_nan=True)
+
+
+def test_group_sigma_shared_helper():
+    """Multi-member groups report NaN sigma; single members keep theirs.
+
+    This is the single shared implementation used by both Morris and
+    radial_ee. A NaN sigma value itself propagates: a single-member
+    group keeps the NaN, a multi-member group is NaN either way.
+    """
+    groupings, _ = compute_groups_matrix(["G1", "G1", "G2"])
+
+    actual = _group_sigma(groupings, np.array([1.0, 2.0, 3.0]))
+    assert_allclose(actual, [np.nan, 3.0], equal_nan=True)
+
+    actual = _group_sigma(groupings, np.array([np.nan, 2.0, 3.0]))
+    assert_allclose(actual, [np.nan, 3.0], equal_nan=True)
+
+    actual = _group_sigma(groupings, np.array([1.0, 2.0, np.nan]))
+    assert_allclose(actual, [np.nan, np.nan], equal_nan=True)
+
+
+def test_group_results_nan_member_propagates(test_problem):
+    """Grouped delta-style metrics keep NaN members visible as group NaN.
+
+    The grouped entry is a plain array holding NaN (not a masked entry),
+    and the per-factor snapshot still holds the original values.
+    """
+    Si = ResultDict(
+        [
+            ("names", ["x1", "x2", "x3"]),
+            ("delta", np.array([0.5, np.nan, 0.25])),
+        ]
+    )
+    group_results(Si, test_problem, ["delta"])
+    assert_allclose(Si["delta"], [np.nan, 0.25], equal_nan=True)
+    assert isinstance(Si["delta"], np.ndarray)
+    assert not isinstance(Si["delta"], np.ma.MaskedArray)
+    assert_allclose(Si["ungrouped"]["delta"], [0.5, np.nan, 0.25], equal_nan=True)
 
 
 def test_sobol_group_names(set_seed, test_problem):

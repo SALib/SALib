@@ -365,13 +365,20 @@ def _group_metric(groups: np.ndarray, ungrouped_metric: np.ndarray) -> np.ndarra
     members rather than recomputed from the resampling distribution. The
     averaged value is indicative only and understates the true uncertainty
     of the group-level statistic.
+
+    A ``NaN`` member propagates: if any member of a group is ``NaN``,
+    the group value is ``NaN`` (the remaining members are not averaged
+    on their own). The result is a plain :class:`numpy.ndarray`, so the
+    ``NaN`` is an ordinary value downstream -- a masked-array result
+    would silently drop such groups from further masked operations.
     """
     groups = np.array(groups, dtype=bool)
 
     masked = np.ma.masked_array(ungrouped_metric * groups.T, mask=(groups ^ 1).T)
     metric = np.ma.mean(masked, axis=1)
 
-    return metric
+    # Cast to float first: filling an integer array with NaN would raise.
+    return np.ma.filled(metric.astype(float, copy=False), np.nan)
 
 
 def _group_sum(groups: np.ndarray, ungrouped_metric: np.ndarray) -> np.ndarray:
@@ -379,14 +386,52 @@ def _group_sum(groups: np.ndarray, ungrouped_metric: np.ndarray) -> np.ndarray:
 
     Same masked-array construction as :func:`_group_metric`, but summing
     instead of averaging. Provided for metrics that combine over a group
-    by summation rather than by mean.
+    by summation rather than by mean. As with :func:`_group_metric`, a
+    ``NaN`` member makes its group ``NaN``, and the result is a plain
+    :class:`numpy.ndarray` with ``NaN`` in place of any masked entry.
+    The cast to float before filling matters: summing integer metrics
+    keeps an integer dtype, which cannot hold ``NaN``.
     """
     groups = np.array(groups, dtype=bool)
 
     masked = np.ma.masked_array(ungrouped_metric * groups.T, mask=(groups ^ 1).T)
     metric = np.ma.sum(masked, axis=1)
 
-    return metric
+    return np.ma.filled(metric.astype(float, copy=False), np.nan)
+
+
+def _group_sigma(groups: np.ndarray, ungrouped_metric: np.ndarray) -> np.ndarray:
+    """Compute sigma values for groups following the Morris convention.
+
+    Sigma is meaningless for multi-member groups, so those groups report
+    ``NaN``; single-member groups keep their value. This is the single
+    shared implementation used by both :mod:`SALib.analyze.morris` and
+    :mod:`SALib.analyze.radial_ee` (previously each carried its own copy
+    of the same logic).
+
+    Parameters
+    ----------
+    groups : np.ndarray
+        Group membership matrix (num_vars x num_groups), as returned by
+        :func:`compute_groups_matrix`
+    ungrouped_metric : np.ndarray
+        Sigma calculated for each variable (i.e., without groups)
+
+    Returns
+    -------
+    sigma : np.ndarray
+        Sigma values for the groups.
+
+    Notes
+    -----
+    The column order of the membership matrix and the order of the group
+    names both come from ``pd.unique`` over the same ``groups`` list, so
+    ``groups.sum(axis=0) == 1`` lines up with single-member groups.
+    """
+    sigma_agg = _group_metric(groups, ungrouped_metric)
+    sigma = np.full(groups.shape[1], np.nan, dtype=float)
+    np.copyto(sigma, sigma_agg, where=groups.sum(axis=0) == 1)
+    return sigma
 
 
 def group_results(Si, problem, metric_keys, aggregation="mean", overrides=None):
@@ -436,7 +481,7 @@ def group_results(Si, problem, metric_keys, aggregation="mean", overrides=None):
         ``metric_keys``; an unknown key raises ``ValueError`` instead
         of silently falling back to the group mean. This is the hook
         for analyzer-specific conventions such as the Morris/radial_ee
-        sigma rule (NaN for multi-member groups).
+        sigma rule (NaN for multi-member groups; see :func:`_group_sigma`).
 
     Returns
     -------

@@ -7,27 +7,11 @@ from ..util import (
     read_param_file,
     ResultDict,
     extract_group_names,
-    _group_metric,
+    _group_sigma,
     group_results,
 )
 
 __all__ = ["analyze"]
-
-
-def _grouped_sigma(groups: np.ndarray, values: np.ndarray) -> np.ndarray:
-    """Group sigma values following the Morris convention.
-
-    Sigma is meaningless for multi-member groups, so those groups report
-    NaN; single-member groups keep their value. ``groups`` is the group
-    membership matrix from :func:`SALib.util.compute_groups_matrix`.
-    The column order of that matrix and the order of the group names
-    both come from ``pd.unique`` over the same ``groups`` list, so
-    ``groups.sum(axis=0) == 1`` lines up with single-member groups.
-    """
-    sigma_agg = _group_metric(groups, values)
-    grouped_sigma = np.full(groups.shape[1], np.nan, dtype=float)
-    np.copyto(grouped_sigma, sigma_agg, where=groups.sum(axis=0) == 1)
-    return grouped_sigma
 
 
 def analyze(
@@ -167,7 +151,7 @@ def analyze(
         Si,
         problem,
         ["mu", "mu_star", "mu_star_conf", "sigma"],
-        overrides={"sigma": _grouped_sigma},
+        overrides={"sigma": _group_sigma},
     )
 
     if print_to_console:
