@@ -22,6 +22,11 @@ contributions instead of averaging them, since Shapley values combine over
 a group by summation. The ``ff``, ``hdmr``, and ``enhanced_hdmr`` methods do
 not support groups: they warn that the group definitions are ignored and
 report results for each factor individually.
+For the analyses that average per-factor metrics (``delta``, ``dgsm``,
+``discrepancy``, ``fast``, ``pawn``, ``radial_ee``, and ``rbd_fast``), the
+pre-aggregation per-factor values are also available as ``Si["ungrouped"]``,
+a ``ResultDict`` keyed by metric name (plus ``"names"`` with the per-factor
+names), so the member driving a group mean can still be identified.
 
 Groups can be specified in two ways.
 
