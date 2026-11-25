@@ -134,8 +134,8 @@ def _check_bounds(bounds):
 
     Parameters
     ----------
-    problem : dict
-        The problem definition
+    bounds : list
+        Lower and upper bound for each variable, as ``[[lower, upper], ...]``
 
     Returns
     -------
