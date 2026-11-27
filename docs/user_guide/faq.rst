@@ -41,3 +41,18 @@ See the discussion `here <https://github.com/SALib/SALib/issues/109#issuecomment
 
 In practice, non-normalized model outputs are still usable but requires larger sample sizes for
 the indices to converge.
+
+
+Q. Why is ``sigma`` ``NaN`` when running Morris analysis with groups?
+---------------------------------------------------------------------
+
+In grouped Morris sampling, all parameters belonging to a group are perturbed
+together within each trajectory step using independent ``+delta`` or
+``-delta`` step signs. For groups with two or more parameters, co-perturbed
+effects can reinforce or cancel across trajectories, leaving signed group
+effects (``mu``) and their standard deviation (``sigma``) undefined. SALib
+returns ``NaN`` for multi-member groups so plots (such as
+``SALib.plotting.morris.covariance_plot``) and tables do not mistake an
+undefined value for zero interaction. Single-member groups follow ungrouped
+sampling behavior and still report a numeric ``sigma``. Use ``mu_star`` to
+rank multi-member groups.

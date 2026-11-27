@@ -23,6 +23,15 @@ a group by summation. The ``ff``, ``hdmr``, and ``enhanced_hdmr`` methods do
 not support groups: they warn that the group definitions are ignored and
 report results for each factor individually.
 
+For ``morris``, ``sigma`` is only reported for groups with a single parameter
+and is set to ``NaN`` for multi-member groups (``radial_ee`` follows this same
+convention). In grouped Morris sampling, all parameters in a group are
+perturbed simultaneously with independent ``+delta`` or ``-delta`` step signs,
+so co-perturbed members can reinforce or cancel across trajectories and leave
+grouped ``mu`` and ``sigma`` undefined. Returning ``NaN`` prevents plotting and
+interpretation from treating an undefined value as zero interaction. Use
+``mu_star`` when screening multi-member groups.
+
 Groups can be specified in two ways.
 
 First, as a fourth column in the parameter file:
