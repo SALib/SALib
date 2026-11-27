@@ -60,8 +60,14 @@ def analyze(
     al., [2] suggest comparing ``mu_star`` with ``mu``. If ``mu`` is low
     and ``mu_star`` is high, then the effects are of different signs.
 
-    ``sigma`` is used as an indicator of interactions between parameters, or
-    groups of parameters.
+    ``sigma`` indicates interactions or non-linearity for individual parameters
+    and single-member groups. For multi-member groups, ``sigma`` is returned as
+    ``NaN``. In grouped Morris sampling, all parameters in a group are
+    perturbed simultaneously with independent ``+delta`` or ``-delta`` steps
+    (Campolongo et al., [2]), so co-perturbed members can reinforce or cancel
+    across trajectories and leave a grouped ``mu`` and ``sigma`` undefined.
+    Returning ``NaN`` prevents downstream plots and analyses from treating an
+    undefined value as zero interaction.
 
     Bootstrapping jointly resamples trajectories across all parameters, so each
     retained row is a coherent bootstrap replicate. Previously, trajectories
@@ -128,8 +134,9 @@ def analyze(
 
     When applied to grouped factors, the analysis is conducted on each factor
     individually, and the average of the group members is reported.
-    ``sigma`` is only reported for groups with a single member and set to
-    ``NaN`` otherwise.
+    ``sigma`` is only reported for groups with a single member and is set to
+    ``NaN`` for multi-member groups, because simultaneous perturbations of
+    group members with independent signs leave a grouped ``sigma`` undefined.
 
 
     References
